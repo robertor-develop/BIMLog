@@ -25,9 +25,9 @@ const scenario = normalizeJobIntakeData({
     ],
   },
   scopeItems: [
-    { id: "CI-BASE", name: "Coordination", contractId: "BASE-ONE", responsibleParticipantId: "PROVIDER", plannedHours: "80", billingHourlyRate: "35.47", apuPlanVersion: 3, budgetSnapshotLineId: "BL-BASE", projectCostNodeId: "PCN-BASE", workPackages: [{ id: "WP-L1", packageCode: "WP-L1", title: "Level 1 coordination", dimensionType: "floor", dimensionValue: "Level 1", packageType: "deliverable" }] },
-    { id: "CI-CHANGE", name: "Change modeling", contractId: "CHANGE-ONE", responsibleParticipantId: "PROVIDER", plannedHours: "40", billingHourlyRate: "37.99", apuPlanVersion: 4, budgetSnapshotLineId: "BL-CHANGE", projectCostNodeId: "PCN-CHANGE", workPackages: [{ id: "WP-ZONE-A", packageCode: "WP-ZONE-A", title: "Zone A change", dimensionType: "zone", dimensionValue: "Zone A", packageType: "mixed" }] },
-    { id: "CI-TAM", name: "T&M support", contractId: "TAM-TWO", responsibleParticipantId: "PROVIDER", plannedHours: "60", billingHourlyRate: "42.5", apuPlanVersion: 5, budgetSnapshotLineId: "BL-TAM", projectCostNodeId: "PCN-TAM", workPackages: [{ id: "WP-MILESTONE", packageCode: "WP-MILESTONE", title: "Owner Two milestone", dimensionType: "milestone", dimensionValue: "Issued set", packageType: "deliverable" }] },
+    { id: "CI-BASE", name: "Coordination", deliverableType: "SHOP_DRAWING", contractId: "BASE-ONE", responsibleParticipantId: "PROVIDER", plannedHours: "80", billingHourlyRate: "35.47", apuPlanVersion: 3, budgetSnapshotLineId: "BL-BASE", projectCostNodeId: "PCN-BASE", workPackages: [{ id: "WP-L1", packageCode: "WP-L1", title: "Level 1 coordination", dimensionType: "floor", dimensionValue: "Level 1", packageType: "deliverable", classification: { disciplineId: "trade-1", disciplineCode: "BIM", disciplineName: "BIM" } }] },
+    { id: "CI-CHANGE", name: "Change modeling", deliverableType: "SLEEVE", contractId: "CHANGE-ONE", responsibleParticipantId: "PROVIDER", plannedHours: "40", billingHourlyRate: "37.99", apuPlanVersion: 4, budgetSnapshotLineId: "BL-CHANGE", projectCostNodeId: "PCN-CHANGE", workPackages: [{ id: "WP-ZONE-A", packageCode: "WP-ZONE-A", title: "Zone A change", dimensionType: "zone", dimensionValue: "Zone A", packageType: "mixed", classification: { disciplineId: "trade-1", disciplineCode: "BIM", disciplineName: "BIM" } }] },
+    { id: "CI-TAM", name: "T&M support", deliverableType: "GENERAL", contractId: "TAM-TWO", responsibleParticipantId: "PROVIDER", plannedHours: "60", billingHourlyRate: "42.5", apuPlanVersion: 5, budgetSnapshotLineId: "BL-TAM", projectCostNodeId: "PCN-TAM", workPackages: [{ id: "WP-MILESTONE", packageCode: "WP-MILESTONE", title: "Owner Two milestone", dimensionType: "floor", dimensionValue: "Level 2", packageType: "deliverable", classification: { disciplineId: "trade-1", disciplineCode: "BIM", disciplineName: "BIM" } }] },
   ],
   delivery: { workflowTemplate: "bim-submittal", submittalStrategy: "Controlled review and delivery", milestoneSummary: "Three controlled packages" },
   team: {
@@ -49,7 +49,7 @@ assert.equal(scenario.commercial.contracts.length, 3);
 assert.equal(scenario.commercial.contracts[1].parentContractId, "BASE-ONE");
 assert.deepEqual(scenario.scopeItems.map((item) => item.apuPlanVersion), [3, 4, 5]);
 assert.deepEqual(scenario.scopeItems.map((item) => item.contractId), ["BASE-ONE", "CHANGE-ONE", "TAM-TWO"]);
-assert.deepEqual(scenario.scopeItems.map((item) => item.workPackages[0]?.dimensionType), ["floor", "zone", "milestone"]);
+assert.deepEqual(scenario.scopeItems.map((item) => item.workPackages[0]?.dimensionType), ["floor", "zone", "floor"]);
 assert.deepEqual(scenario.team.assignments.map((item: any) => item.userId), [7001, 7002, 7003]);
 assert.deepEqual(scenario.team.assignments.map((item: any) => item.contractId), ["BASE-ONE", "CHANGE-ONE", "TAM-TWO"]);
 assert.deepEqual(scenario.team.assignments.map((item: any) => item.internalHourlyRate), ["21.25", "18.5", "25"]);

@@ -931,6 +931,16 @@ export function jobIntakeCompletion(
   const scopeReady =
     data.scopeItems.length > 0 &&
     data.scopeItems.every((item) => item.name && positive(item.plannedHours));
+  // Commercial activation promises an EDT-backed Work Item. Its floor/area and
+  // permanent trade identity must therefore exist before Intake says "ready".
+  const edtSourceRequired = capabilities.fullCommercialActivation && jobIntakeBudgetLinkRequested(data);
+  const edtSourceReady = !edtSourceRequired || data.scopeItems.every((item) =>
+    !!item.deliverableType && item.workPackages.length === 1 &&
+    ["floor", "zone"].includes(item.workPackages[0]!.dimensionType) &&
+    !!item.workPackages[0]!.dimensionValue &&
+    !!item.workPackages[0]!.classification.disciplineId &&
+    !!item.workPackages[0]!.classification.disciplineCode,
+  );
   const pricingReady =
     data.scopeItems.length > 0 &&
     data.scopeItems.every((item) => positive(item.billingHourlyRate));
@@ -987,7 +997,7 @@ export function jobIntakeCompletion(
       !!data.identity.clientName,
       !!data.identity.currency,
     ],
-    scope: [data.scopeItems.length > 0, scopeReady, data.review.scopeConfirmed],
+    scope: [data.scopeItems.length > 0, scopeReady, edtSourceReady, data.review.scopeConfirmed],
     pricing: capabilities.costValuePlanner
       ? [pricingReady, data.review.pricingConfirmed]
       : [],
@@ -1079,6 +1089,11 @@ export function jobIntakeCompletion(
       code: "scope",
       en: "Add scope items with planned hours.",
       es: "Agregue partidas de alcance con horas planificadas.",
+    },
+    !edtSourceReady && {
+      code: "edt_source",
+      en: "Give every Contract Item one floor or area Work Package with an approved discipline and deliverable type before activation.",
+      es: "Antes de activar, asigne a cada Partida de Contrato un Paquete de Trabajo de piso o zona con disciplina aprobada y tipo de entregable.",
     },
     capabilities.costValuePlanner &&
       !pricingReady && {

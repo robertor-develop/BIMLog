@@ -43,6 +43,8 @@ const data = normalizeJobIntakeData({
       budgetSnapshotLineId: "budget-line-1",
       projectCostNodeId: "cost-node-1",
       unit: "Hours",
+      deliverableType: "SHOP_DRAWING",
+      workPackages: [{ id: "WP-1", title: "Level 1", dimensionType: "floor", dimensionValue: "Level 1", classification: { disciplineId: "trade-1", disciplineCode: "BIM", disciplineName: "BIM" } }],
     },
   ],
   commercial: {
@@ -128,6 +130,17 @@ assert.equal(completion.totals.unassignedHours, "0");
 assert.equal(completion.percent, 100);
 assert.equal(completion.ready, true);
 assert.match(completion.fingerprint, /^[a-f0-9]{64}$/);
+const missingEdtTrade = normalizeJobIntakeData({
+  ...data,
+  scopeItems: [{
+    ...data.scopeItems[0],
+    workPackages: [{ ...data.scopeItems[0].workPackages[0], classification: {} }],
+  }],
+});
+const missingEdtTradeCompletion = jobIntakeCompletion(missingEdtTrade, []);
+assert.equal(missingEdtTradeCompletion.ready, false, "activation must not offer an EDT that cannot be generated");
+assert.equal(missingEdtTradeCompletion.missingItems.some((item) => item.code === "edt_source"), true);
+assert.equal(jobIntakeCompletion(missingEdtTrade, [], coreCapabilities).missingItems.some((item) => item.code === "edt_source"), false);
 const multiContractData = normalizeJobIntakeData({
   ...data,
   commercial: {
@@ -159,7 +172,7 @@ const multiContractData = normalizeJobIntakeData({
     ],
   },
   scopeItems: [
-    { ...data.scopeItems[0], id: "OWNER-ITEM", contractId: "OWNER", responsibleParticipantId: "PROVIDER-7", workPackages: [{ id: "WP-OWNER", packageCode: "WP-OWNER", title: "Owner deliverable", dimensionType: "deliverable", dimensionValue: "Coordination set", packageType: "deliverable" }] },
+    { ...data.scopeItems[0], id: "OWNER-ITEM", contractId: "OWNER", responsibleParticipantId: "PROVIDER-7", workPackages: [{ id: "WP-OWNER", packageCode: "WP-OWNER", title: "Owner deliverable", dimensionType: "floor", dimensionValue: "Level 1", packageType: "deliverable", classification: { disciplineId: "trade-1", disciplineCode: "BIM", disciplineName: "BIM" } }] },
     { ...data.scopeItems[0], id: "SUPPLIER-ITEM", contractId: "SUPPLIER", responsibleParticipantId: "CUSTOMER-41" },
   ],
   team: {
@@ -384,7 +397,7 @@ assert.match(service, /contract_items_imported/);
 assert.match(service, /mergeMappedContractItems\(\{/);
 assert.match(read("./job-intake-mapped-item-pricing.ts"), /existingById/);
 assert.match(read("./job-intake-mapped-item-pricing.ts"), /provenance: mapped\.provenance/);
-assert.match(financialContractService, /CONTRACT_ITEM_APU_CURRENCY_MISMATCH/);
+assert.match(read("./financial-contract-apu-binding.ts"), /CONTRACT_ITEM_APU_CURRENCY_MISMATCH/);
 assert.match(routes, /mapping-preview/);
 assert.match(routes, /mapping-apply/);
 assert.match(contract, /internalHourlyRate/);
@@ -410,16 +423,16 @@ assert.doesNotMatch(
 assert.doesNotMatch(ui, /financial\/apu`\)\.catch\(\(\) => null\)/);
 assert.doesNotMatch(ui, /financial\/workspace`\)\.catch\(\(\) => null\)/);
 assert.match(ui, /saveState === "error"/);
-assert.match(ui, /bimlog:job-intake-recovery/);
+assert.match(read("../../../bimlog/src/lib/job-intake-workspace-state.ts"), /bimlog:job-intake-recovery/);
 assert.match(ui, /projectIdRef\.current !== projectId/);
-assert.match(ui, /setQuickMode\(readSetupMode\(projectId\) === "quick"\)/);
-assert.match(ui, /setActive\(readActiveStage\(projectId\)\)/);
+assert.match(ui, /setQuickMode\(readJobIntakeSetupMode\(projectId\) === "quick"\)/);
+assert.match(ui, /setActive\(readJobIntakeActiveStage\(projectId\)\)/);
 assert.match(ui, /setMappingDocument\(null\)/);
 assert.match(ui, /setMappingPreview\(null\)/);
-assert.match(ui, /preserveRecovery\(projectId, revisionRef\.current, data\)/);
-assert.match(ui, /clearMatchingRecovery\(projectId, next\)/);
+assert.match(ui, /preserveJobIntakeRecovery\(projectId, revisionRef\.current, data\)/);
+assert.match(ui, /clearMatchingJobIntakeRecovery\(projectId, next\)/);
 assert.match(ui, /aria-live="polite"/);
-assert.match(ui, /formData\.set\("expectedRevision"/);
+assert.match(ui, /expectedRevision: saved\.revision/);
 assert.match(ui, /confirmationFingerprint: saved\.completion\.fingerprint/);
 assert.match(ui, /<fieldset className="ji-workspace" disabled=\{busy\}>/);
 assert.match(ui, /\.xlsm/);
