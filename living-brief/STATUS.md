@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Synthetic Intake activation exposed EDT source gap — correction candidate — 2026-09-24
+
+- Replit Shell built and published exact source `1459696d6a87ab3436b7b0ab1d3ca23304b24c99` with database action `NONE`; production health bound the deployed runtime to that commit. Authenticated BIMCorp Chrome activated synthetic project 57 with two Contract Items, approved budget v1, immutable APU fingerprints, 28 planned hours and USD 3,040 billable value. The earlier APU unit-rate defect is live-fixed.
+- The next live EDT readiness check correctly refused project 57 because its saved Work Packages lacked a verifiable discipline identity, despite Intake having advertised 100% readiness. This is a real activation-readiness mismatch, not a tester error. Project 57 remains a historical synthetic failure fixture; do not rewrite its activated source.
+- Candidate source `d3923550` now requires a floor/zone Work Package and permanent discipline identity for each budget-linked full-commercial Contract Item before Intake can declare activation ready. Focused Intake behavior, combined multi-contract scenario and TypeScript checks passed. Publication and a new clean UI-created project/EDT retest remain pending; no full workflow or external acceptance is claimed.
+- The BIMCorp ordinary test account's Company Catalogs page is correctly read-only and shows zero company entries with BIMLog defaults allowed. The exact catalog selection path and why the earlier Intake Work Package had no discipline must be proven in the fresh project; do not grant a global role to work around this.
+
 ## Synthetic Intake acceptance — budget approved; Contract/APU activation correction pending release — 2026-09-24
 
 - Authenticated Chrome approved synthetic BIMCorp project `QA-AI-0924` budget v1 for USD 3,040 through an effective, exact-project original-budget policy and an independent RRY Super Administrator checker. The approved baseline snapshot was visible in Intake. This is synthetic QA only, not a BIMTECH budget or customer acceptance.

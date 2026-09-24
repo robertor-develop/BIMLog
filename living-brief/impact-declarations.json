@@ -40795,6 +40795,88 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a938596faaa2edaa38ee68cb3198b5e66fd2db833b0081b5e833957bc1af1cce"
+    },
+    {
+      "taskId": "bimlog-intake-edt-source-readiness-20260924",
+      "reviewedThroughCommit": "d3923550b723c15e2a5521f6951272de9ba29295",
+      "reviewedAt": "2026-09-24T22:00:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Authenticated synthetic activation exposed an Intake false-ready state for Work Packages without a permanent discipline identity; EDT then correctly refused to proceed."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, customer boundary, or company ownership change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release and field acceptance gates remain mandatory."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The new negative activation guard strengthens existing fail-closed EDT quality."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-market direction or roadmap changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new route, source inventory, schema, or deployment topology change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, installer, bridge, or plugin changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or PDF design contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, version, applicability, or claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Live activation result and EDT false-ready correction candidate are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Publication and fresh-user positive EDT acceptance remain explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit event schema or evidence-integrity contract changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "bab7562c78b71eabd37e984ed5c42f3f9931ff3f17e24e03cefd4673c74ac0c5"
     }
   ]
 }

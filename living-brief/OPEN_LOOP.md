@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Synthetic Intake / EDT activation acceptance — 2026-09-24
+
+- [x] Publish exact APU correction `1459696d6a87ab3436b7b0ab1d3ca23304b24c99` through Replit Shell with schema action `NONE`; production health and authenticated BIMCorp activation of synthetic project 57 confirmed the price/rate fix.
+- [x] Reproduce the subsequent false-ready defect: Intake showed 100%, activation succeeded, but EDT rejected missing saved Work Package discipline identity. Preserve project 57 as a synthetic historical counterexample.
+- [ ] Push and publish the tested Intake readiness correction from source `d3923550`, then prove a fresh draft with missing discipline cannot be activated and clearly explains the requirement.
+- [ ] From the normal BIMCorp UI, create a new synthetic project with catalog-backed floor/zone Work Packages and distinct Shop Drawing and Sleeve Contract Items; approve the budget with an independent authorized checker, activate, pass EDT readiness, instantiate Work Items, roles/tasks, hours and QC, and reconcile Operations/reporting. Do not call this complete from source tests or project 57 alone.
+- [ ] Only after full deployed fresh-user acceptance, create a verified Spanish user guide and blank Ruben/Lorena external smoke-test DOCX matching the exact deployed UI; send via a verified Telegram destination if available.
+
 ## Synthetic Intake release correction and complete acceptance — 2026-09-24
 
 - [x] Approve the synthetic `QA-AI-0924` USD 3,040 budget with an exact-project original-budget policy, independent Super Administrator checker and immutable approved-baseline snapshot. This did not approve a BIMTECH customer budget.
