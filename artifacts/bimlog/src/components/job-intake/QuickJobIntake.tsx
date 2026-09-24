@@ -3,6 +3,7 @@ import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { ProjectCompanyCreator, type CreatedProjectCompany } from "./ProjectCompanyCreator";
 import { ProjectContactCreator, type CreatedProjectContact } from "./ProjectContactCreator";
 import { MasterClassificationSelectors } from "./MasterClassificationSelectors";
+import { LegacyProjectClassificationNotice } from "./LegacyProjectClassificationNotice";
 
 type Props = {
   data: any;
@@ -113,6 +114,7 @@ export function QuickJobIntake(props: Props) {
             <label>{tt("Location — optional", "Ubicación — opcional")}<input value={data.identity?.location || ""} onChange={(event) => patchIdentity({ location: event.target.value })} /></label>
           </div>
           <MasterClassificationSelectors data={data} setData={setData} projectId={projectId} request={request} tt={tt} />
+          <LegacyProjectClassificationNotice data={data} setData={setData} tt={tt} />
         </>}
         {step === 1 && <>
           <h3>{tt("Who hired you, and what is the first item of work?", "¿Quién lo contrató y cuál es la primera partida?")}</h3>
