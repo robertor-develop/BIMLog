@@ -12,6 +12,7 @@ import { FinancialControlError } from "../lib/financial-control-contract";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
 import { economicCheckerAllowed, workflowTemplateCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
 import { boundedWorkflowRetirementReason } from "../lib/delivery-workflow-retirement";
+import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
 
 const router = Router();
 const templateCode = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -87,6 +88,7 @@ router.get("/company/delivery-workflows", authMiddleware, async (req, res): Prom
 
 router.get("/company/delivery-workflows/options", authMiddleware, async (req, res): Promise<void> => {
   const actor = await prepare(req, res); if (!actor) return;
+  await ensureWorkflowGovernancePolicySchema();
   res.json(await deliveryWorkflowOptions(pool, actor.companyId));
 });
 

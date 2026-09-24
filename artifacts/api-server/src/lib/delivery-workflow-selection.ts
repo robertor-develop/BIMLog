@@ -9,6 +9,7 @@ import {
   deliveryWorkflowFingerprint,
   validateDeliveryWorkflowDefinition,
 } from "./delivery-workflow-template-contract";
+import { applicablePublishedGovernance, validateWorkflowAgainstGovernance } from "./workflow-governance-binding";
 
 type Queryable = {
   query(sql: string, params?: any[]): Promise<{ rows: any[] }>;
@@ -57,13 +58,22 @@ export async function deliveryWorkflowOptions(
       fingerprint,
     };
   });
-  return {
-    mode,
-    options:
-      mode === "approved_only"
-        ? companyOptions
-        : [...companyOptions, ...BIMLOG_DELIVERY_WORKFLOWS],
-  };
+  const publishedPolicies = (await client.query(`SELECT p.id "policyId",p.code,v.id "versionId",v.version,v.definition,v.fingerprint
+    FROM company_workflow_governance_policies p JOIN company_workflow_governance_versions v ON v.policy_id=p.id
+    WHERE p.company_id=$1 AND v.state='published' ORDER BY p.code,v.version DESC`, [companyId])).rows;
+  const available = mode === "approved_only" ? companyOptions : [...companyOptions, ...BIMLOG_DELIVERY_WORKFLOWS];
+  const options: DeliveryWorkflowOption[] = available.map(option => {
+    const policy = applicablePublishedGovernance(publishedPolicies, option.templateId);
+    if (!policy) return { ...option, governancePolicy: null, activationBlock: null };
+    let activationBlock: DeliveryWorkflowOption["activationBlock"] = null;
+    try { validateWorkflowAgainstGovernance(policy.definition, option.definition); }
+    catch (error) {
+      if (!(error instanceof FinancialControlError)) throw error;
+      activationBlock = { code: error.code, message: error.message };
+    }
+    return { ...option, governancePolicy: { versionId: policy.versionId, code: policy.code, version: policy.version }, activationBlock };
+  });
+  return { mode, options };
 }
 
 export function chooseDeliveryWorkflow(
