@@ -185,6 +185,12 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/appro
     if (!await financeChecker(client, actor)) {
       await client.query("ROLLBACK"); res.status(403).json({ code: "WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED" }); return;
     }
+    const overlapping = (await client.query(`SELECT v.definition FROM company_workflow_governance_policies p
+      JOIN company_workflow_governance_versions v ON v.policy_id=p.id
+      WHERE p.company_id=$1 AND p.id<>$2 AND v.state='published'`, [actor.companyId,current.id])).rows;
+    if (overlapping.some(other => policiesOverlap(value, validateWorkflowGovernancePolicy(other.definition)))) {
+      await client.query("ROLLBACK"); res.status(409).json({ code: "WORKFLOW_POLICY_SCOPE_OVERLAP" }); return;
+    }
     await validatePublishedWorkflowsForPolicy(client, actor.companyId, value);
     const fingerprint = workflowGovernancePolicyFingerprint(value);
     await client.query(`UPDATE company_workflow_governance_versions SET state='approved',fingerprint=$2,
