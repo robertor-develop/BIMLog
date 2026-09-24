@@ -3,7 +3,7 @@ import { Router, type Request, type Response } from "express";
 import { pool } from "@workspace/db";
 import { authMiddleware } from "../middlewares/auth";
 import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
-import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, WorkflowGovernancePolicyError, type WorkflowGovernancePolicy } from "../lib/workflow-governance-policy-contract";
+import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, workflowPolicyIndependentCheckerAllowed, WorkflowGovernancePolicyError, type WorkflowGovernancePolicy } from "../lib/workflow-governance-policy-contract";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
 import { ensureDeliveryWorkflowTemplateSchema } from "../lib/delivery-workflow-template-migration";
 import { policiesOverlap } from "../lib/workflow-governance-binding";
@@ -171,7 +171,11 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/appro
     }
     const value = validateWorkflowGovernancePolicy(row.definition);
     if (!await scopeValid(client, actor, value)) { await client.query("ROLLBACK"); res.status(409).json({ code: "WORKFLOW_POLICY_SCOPE_CHANGED" }); return; }
-    if (actor.userId === Number(row.created_by_id) || actor.userId === Number(row.updated_by_id) || !await financeChecker(client, actor)) {
+    if (!workflowPolicyIndependentCheckerAllowed({ actorUserId:actor.userId,
+      createdById:Number(row.created_by_id),updatedById:Number(row.updated_by_id) })) {
+      await client.query("ROLLBACK"); res.status(403).json({ code: "WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED" }); return;
+    }
+    if (!await financeChecker(client, actor)) {
       await client.query("ROLLBACK"); res.status(403).json({ code: "WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED" }); return;
     }
     const fingerprint = workflowGovernancePolicyFingerprint(value);

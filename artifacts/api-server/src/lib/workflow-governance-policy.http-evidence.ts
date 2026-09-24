@@ -54,8 +54,12 @@ try {
   const id = created.body.policyId; const v1 = created.body.versionId;
   assert.equal((await call(member,`/company/workflow-governance-policies/${id}`)).status,404);
   assert.equal((await call(outsider,`/company/workflow-governance-policies/${id}`)).status,404);
-  assert.equal((await call(maker,`/company/workflow-governance-policies/${id}/versions/${v1}/approve`,{ expectedRevision:1 })).status,403);
-  assert.equal((await call(checker,`/company/workflow-governance-policies/${id}/versions/${v1}/approve`,{ expectedRevision:1 })).status,403);
+  const selfApproval = await call(maker,`/company/workflow-governance-policies/${id}/versions/${v1}/approve`,{ expectedRevision:1 });
+  assert.equal(selfApproval.status,403);
+  assert.equal(selfApproval.body.code,"WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED");
+  const noFinance = await call(checker,`/company/workflow-governance-policies/${id}/versions/${v1}/approve`,{ expectedRevision:1 });
+  assert.equal(noFinance.status,403);
+  assert.equal(noFinance.body.code,"WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED");
   await pool.query(`INSERT INTO financial_authority_grants
     (id,user_id,company_id,project_id,scope_type,authority,version,effective_from,reason,granted_by_id)
     VALUES($1,$2,$3,NULL,'company','cost_approver',1,now()-interval '1 day','Governance QA',$4)`,
