@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Synthetic Intake release correction and complete acceptance — 2026-09-24
+
+- [x] Approve the synthetic `QA-AI-0924` USD 3,040 budget with an exact-project original-budget policy, independent Super Administrator checker and immutable approved-baseline snapshot. This did not approve a BIMTECH customer budget.
+- [x] Reproduce Intake activation failure after Shop Drawing and Sleeve budget-line mappings: `Contract Item Unit Rate must equal the selected APU selling price.` The plan-level APU selling price must not overwrite a Contract Item unit rate. Correct the source and add focused negative/currency regression in pushed commit `9c851d53cdcd7ea31c86db4896b1a804f62925b2`.
+- [ ] Reconcile this source with Living Brief release metadata, rerun the complete publish gate, align Replit to exact GitHub master, publish with `schemaAction=NONE`, and rerun the exact failed activation in Chrome. Do not claim the pushed correction is live until deployed commit identity and behavior match.
+- [ ] Complete distinct company-authored Shop Drawing and Sleeve workflow and Governance approval with separate company-scoped checker identities; built-in defaults do not satisfy that requirement. Then prove canonical Contract/APU to EDT, roles, hours, QC, Operations and reports as a fresh user. Keep the external guide and tester DOCX on HOLD until the deployed workflow passes.
+
 ## Super Administrator project-route mismatch — 2026-09-24
 
 - [x] Authenticated Chrome reproduced a Super Administrator opening synthetic BIMCorp project `QA-AI-0924` from Control Total, then being denied by the project page despite the server and outer project route allowing global Super Administrator access. The page's extra membership check was the cause.

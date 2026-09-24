@@ -40712,6 +40712,87 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "648b9cd9116452106deaa379c493c3879ab0f98125efb50a4fc5d4cb06b06b57"
+    },
+    {
+      "taskId": "bimlog-contract-apu-intake-activation-correction-20260924",
+      "reviewedThroughCommit": "9c851d53cdcd7ea31c86db4896b1a804f62925b2",
+      "reviewedAt": "2026-09-24T21:00:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Synthetic Intake activation rejected a valid Contract Item unit rate because it compared that rate to the complete APU plan selling price; the correction is pushed but not yet live-proven."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or customer scope changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release and behavior gates remain mandatory."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The financial correction preserves independent rates and still needs live proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-market direction or roadmap changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No module boundary, API route, or schema authority changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, installer, bridge, or plugin changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or PDF design contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, version, applicability, or claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The approved synthetic budget, activation defect, pushed correction and pending live proof are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replit publication and end-to-end company-template acceptance remain explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit event schema or evidence-integrity contract changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "21ffa1fce9aabf8424a7beb3ff29158736e7432e30acc6cdbc6c21394c3b4582"
     }
   ]
 }
