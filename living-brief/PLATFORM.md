@@ -536,6 +536,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-budget-migration.ts
 - artifacts/api-server/src/lib/financial-budget-service.ts
 - artifacts/api-server/src/lib/financial-budget.behavior.ts
+- artifacts/api-server/src/lib/financial-contract-apu-binding.ts
 - artifacts/api-server/src/lib/financial-contract-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-contract-contract.ts
 - artifacts/api-server/src/lib/financial-contract-db.behavior.ts

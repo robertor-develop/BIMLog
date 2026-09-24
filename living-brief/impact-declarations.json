@@ -40753,8 +40753,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No module boundary, API route, or schema authority changes."
+          "result": "updated",
+          "reason": "The deterministic generator includes the new Contract/APU binding source file in the structural inventory; no route or schema boundary changes."
         },
         {
           "key": "plugin",
@@ -40790,10 +40790,11 @@
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "52a3b92a17da40b99de8fc078dcb5ecec756df1c266085ddd3ef5ffee04099c2"
+      "reviewedChangeSha256": "a938596faaa2edaa38ee68cb3198b5e66fd2db833b0081b5e833957bc1af1cce"
     }
   ]
 }

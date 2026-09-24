@@ -6,6 +6,7 @@
 - Intake preserved the Shop Drawing and Sleeve budget-line mappings after reload. Both currently resolve built-in BIMLog workflows; no published BIMCorp company Governance Policy applies. Distinct company-authored template, review, publication and six-role proof remain open.
 - Live activation then failed with `Contract Item Unit Rate must equal the selected APU selling price.` The selected canonical APU selling price is the plan total, not the per-item unit rate. Source correction `9c851d53cdcd7ea31c86db4896b1a804f62925b2` preserves the independently validated Contract Item rate/value while binding the immutable APU fingerprint and currency. Focused regression, typecheck and frontend build passed locally; the source was pushed to GitHub master. Replit publication and live retest are pending. No schema or production data migration is included.
 - The same source correction fixes the Intake approved-baseline option label that rendered `v ·` when the API returned `budget_version`. The corrected label still requires live confirmation after publication. The complete end-to-end acceptance and external tester package remain on HOLD.
+- The deterministic PLATFORM generator also adds the new financial-contract APU-binding source file to its structural inventory. The generated document and Living Brief state must ship with the fix so the production runtime closure verifies the exact source bundle.
 
 ## Super Administrator project access correction — Analytics published; EDT guidance candidate — 2026-09-24
 
