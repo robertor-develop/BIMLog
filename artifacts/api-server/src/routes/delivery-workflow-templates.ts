@@ -115,8 +115,9 @@ router.get("/company/delivery-workflows/:id", authMiddleware, async (req, res): 
     WHERE t.id=$1 AND t.company_id=$2 AND ($3::boolean OR v.state='published') ORDER BY v.version DESC`,
     [param(req.params.id),actor.companyId,actor.canManage]);
   if (!result.rows.length) { res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }
-  const history = actor.canManage ? (await pool.query(`SELECT e.version_id "versionId",e.action,e.actor_id "actorId",e.details,e.created_at "createdAt"
-    FROM company_delivery_workflow_events e WHERE e.template_id=$1 AND e.company_id=$2 ORDER BY e.created_at,e.id`,
+  const history = actor.canManage ? (await pool.query(`SELECT e.version_id "versionId",e.action,e.actor_id "actorId",u.full_name "actorName",e.details,e.created_at "createdAt"
+    FROM company_delivery_workflow_events e LEFT JOIN users u ON u.id=e.actor_id AND u.company_id=e.company_id
+    WHERE e.template_id=$1 AND e.company_id=$2 ORDER BY e.created_at,e.id`,
     [param(req.params.id),actor.companyId])).rows : [];
   res.json({ versions: result.rows, history });
 });

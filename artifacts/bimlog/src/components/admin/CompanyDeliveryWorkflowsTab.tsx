@@ -157,6 +157,8 @@ export function CompanyDeliveryWorkflowsTab({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [retireTarget, setRetireTarget] = useState<{ templateId: string; versionId: string; revision: number } | null>(null);
+  const [retireReason, setRetireReason] = useState("");
   const request = useCallback(
     async (path: string, init?: RequestInit) => {
       const response = await fetch(`${base}/api/v1${path}`, {
@@ -348,6 +350,7 @@ export function CompanyDeliveryWorkflowsTab({
       if (id) setSelectedId(id);
       await load(id);
       setPreview(null);
+      if (path.endsWith("/retire")) { setRetireTarget(null); setRetireReason(""); }
       setNotice(
         t(
           "Saved. Existing activated Work Items retain their frozen version.",
@@ -530,6 +533,8 @@ export function CompanyDeliveryWorkflowsTab({
             if (draftDirty && !window.confirm(t("Discard unsaved workflow changes?", "¿Descartar los cambios del flujo sin guardar?"))) return;
             setSelectedId(event.target.value);
             setPreview(null);
+            setRetireTarget(null);
+            setRetireReason("");
           }}
         >
           <option value="">
@@ -624,13 +629,7 @@ export function CompanyDeliveryWorkflowsTab({
                 <button
                   type="button"
                   disabled={busy}
-                  onClick={() =>
-                    void action(
-                      `/company/delivery-workflows/${row.templateId}/versions/${row.versionId}/retire`,
-                      "POST",
-                      { expectedRevision: row.revision },
-                    )
-                  }
+                  onClick={() => { setRetireTarget({ templateId: row.templateId, versionId: row.versionId, revision: row.revision }); setRetireReason(""); }}
                 >
                   {t(
                     "Retire for new selections",
@@ -640,6 +639,19 @@ export function CompanyDeliveryWorkflowsTab({
               )}
             </div>
           ))}
+          {retireTarget && <section aria-label={t("Retire workflow version", "Retirar versión del flujo")} style={{ border: "1px solid #cbd5e1", padding: 12, display: "grid", gap: 8 }}>
+            <strong>{t("Retire version", "Retirar versión")} {versions.find(row => row.versionId === retireTarget.versionId)?.version}</strong>
+            <label>{t("Reason for retirement (recorded in audit history)", "Motivo del retiro (registrado en el historial de auditoría)")}
+              <textarea value={retireReason} maxLength={500} onChange={event => setRetireReason(event.target.value)} />
+            </label>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button type="button" disabled={busy || retireReason.trim().length < 5} onClick={() => void action(
+                `/company/delivery-workflows/${retireTarget.templateId}/versions/${retireTarget.versionId}/retire`,
+                "POST", { expectedRevision: retireTarget.revision, reason: retireReason.trim() },
+              )}>{t("Confirm retirement", "Confirmar retiro")}</button>
+              <button type="button" disabled={busy} onClick={() => { setRetireTarget(null); setRetireReason(""); }}>{t("Cancel", "Cancelar")}</button>
+            </div>
+          </section>}
           {canManage &&
             !versions.some((row) =>
               ["draft", "approved"].includes(row.state),
@@ -1200,7 +1212,8 @@ export function CompanyDeliveryWorkflowsTab({
               </summary>
               {history.map((row) => (
                 <p key={`${row.versionId}-${row.createdAt}-${row.action}`}>
-                  {row.createdAt} · {row.action} · {row.versionId}
+                  {row.createdAt} · {row.action} · {row.versionId} · {row.actorName || `#${row.actorId}`}
+                  {typeof row.details?.reason === "string" ? ` · ${row.details.reason}` : ""}
                 </p>
               ))}
             </details>

@@ -105,6 +105,8 @@ try {
   assert.equal((await call(checker,`/company/delivery-workflows/${workflowId}/versions/${versionId}/approve`,
     { expectedRevision:1 })).status,409);
   assert.equal((await call(maker,`/company/delivery-workflows/${workflowId}/versions/${versionId}/approve`,
+    { expectedRevision:2 })).body.code,"DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED");
+  assert.equal((await call(owner,`/company/delivery-workflows/${workflowId}/versions/${versionId}/approve`,
     { expectedRevision:2 })).body.code,"DELIVERY_WORKFLOW_FINANCE_CHECKER_REQUIRED");
   const approved = await call(checker,`/company/delivery-workflows/${workflowId}/versions/${versionId}/approve`,
     { expectedRevision:2 });

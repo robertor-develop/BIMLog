@@ -39723,6 +39723,99 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c94169667c70a3b1518f93d1276fc1684ea49ba395084f7a8d5e70ac01402769"
+    },
+    {
+      "taskId": "bimlog-template-governance-repair-block03-20260924",
+      "reviewedThroughCommit": "f93cc844f00e7e22ddd18dba33d640fcc2ff88ee",
+      "reviewedAt": "2026-09-24T04:54:04Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Non-economic Delivery Workflow versions could be self-approved; the block requires a distinct PMO checker for all versions, Finance authority for economic versions, and an audited retirement reason."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Human approval and append-only evidence remain the governing product laws."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The source and release gates remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing multi-role and field acceptance requirements remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This bounded lifecycle correction does not change product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the two new Delivery Workflow retirement behavior files; route and schema contracts remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Native or installer surface changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Published Intake block and local Workflow lifecycle correction are separated from full acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Remaining Governance enforcement and role-separated field proof stay open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit entries remain append-only; current findings are in Status and Open Loop."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/delivery-workflow-allocation-source-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-allocation-source.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-allocation.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-retirement.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-retirement.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
+        "artifacts/bimlog/src/lib/workflow-approval-error.behavior.ts",
+        "artifacts/bimlog/src/lib/workflow-approval-error.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b03e032f24f032191df24f8a9781600ed4214efcd9140d52f76e420f1a612103"
     }
   ]
 }
