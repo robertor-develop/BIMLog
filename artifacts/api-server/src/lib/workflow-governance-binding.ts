@@ -1,7 +1,7 @@
 import { FinancialControlError } from "./financial-control-contract";
 import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, type WorkflowGovernancePolicy } from "./workflow-governance-policy-contract";
 import { previewGovernedWorkflowAllocation } from "./delivery-workflow-allocation-source";
-import type { DeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
+import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition, type DeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
 
 type Queryable = { query(sql: string, params?: any[]): Promise<{ rows: any[] }> };
 type Workflow = { templateId: string | null; definition: DeliveryWorkflowDefinition };
@@ -39,6 +39,20 @@ export function validateWorkflowAgainstGovernance(definition: WorkflowGovernance
   if (definition.validation.final_approval && !workflow.phases.at(-1)?.approvalRequired) fail("WORKFLOW_POLICY_FINAL_APPROVAL_REQUIRED");
   if (definition.validation.phase_review_role && workflow.phases.some(phase => !phase.qcRequired)) fail("WORKFLOW_POLICY_PHASE_REVIEW_REQUIRED");
   if (definition.validation.required_documents && workflow.phases.some(phase => !phase.tasks.some(task => task.requiredDocuments.length))) fail("WORKFLOW_POLICY_DOCUMENT_REQUIRED");
+}
+
+export async function validatePublishedWorkflowsForPolicy(client: Queryable, companyId: number,
+  policy: WorkflowGovernancePolicy): Promise<void> {
+  const rows = (await client.query(`SELECT t.id "templateId",v.definition,v.fingerprint
+    FROM company_delivery_workflow_templates t JOIN company_delivery_workflow_versions v ON v.template_id=t.id
+    WHERE t.company_id=$1 AND v.state='published' ORDER BY t.id`, [companyId])).rows;
+  for (const row of rows) {
+    if (!policyApplies(policy, String(row.templateId))) continue;
+    const workflow = validateDeliveryWorkflowDefinition(row.definition);
+    if (deliveryWorkflowFingerprint(workflow) !== row.fingerprint)
+      throw new FinancialControlError(409,"DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH","A published Delivery Workflow failed integrity verification.");
+    validateWorkflowAgainstGovernance(policy, workflow);
+  }
 }
 
 export async function resolveWorkflowGovernanceSnapshot(client: Queryable, companyId: number, workflow: Workflow): Promise<GovernanceSnapshot | null> {
