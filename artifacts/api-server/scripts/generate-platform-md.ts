@@ -129,6 +129,9 @@ ${appRoutes()}
   isSuperAdminMiddleware re-checks users.is_super_admin.
 - The Platform project route and project page must honor that Super Administrator membership
   bypass consistently; ordinary accounts still require their own active project membership.
+- Cross-company Super Administrator Analytics and its PDF export require an explicit, bounded
+  audit reason for project-read access; the browser must collect it and bind it to the current
+  account and project rather than silently bypass the coordinator read boundary.
 - Schema changes go in BOTH the drizzle schema file AND the idempotent startup migration block
   in artifacts/api-server/src/app.ts (ALTER TABLE / CREATE TABLE ... IF NOT EXISTS).
 - Declarative schemas preserve established production constraint, foreign-key, unique, check, and index names

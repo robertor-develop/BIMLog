@@ -40540,6 +40540,94 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b41f8e5834290f2a558e170b02942f924d6f0d4556340f7b94514a301b67bf79"
+    },
+    {
+      "taskId": "bimlog-super-admin-project-insights-reason-20260924",
+      "reviewedThroughCommit": "3a8b09cd642f8b15651d21b69557b6b38b43a57b",
+      "reviewedAt": "2026-09-24T18:13:56Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The cross-company Analytics page omitted the explicit reason required by the coordinator read service, while a synthetic original budget remains under review without an effective approval policy. The candidate adds a scoped reason prompt but does not create a policy or weaken maker/checker."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical company boundaries and human financial approval remain intact."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing explicit cross-company project-read and release gates remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Live user behavior and deployed proof remain necessary for acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or market-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated architecture note now specifies account/project-bound Analytics reason entry."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The PDF renderer and design are unchanged; only authorized request headers are forwarded."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Published first correction and local Analytics follow-up are distinguished from full acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Live cross-company Analytics, budget approval, and full Intake/EDT acceptance remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing coordinator audit requirements remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/bimlog/src/pages/project/AnalyticsTab.tsx",
+        "artifacts/bimlog/src/pages/project/project-insights-access.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/test-super-admin-project-insights-access.mjs"
+      ],
+      "reviewedChangeSha256": "e5d962efea67573b2c4e0a27f631f56aac97691626032cb441ee745183d3e549"
     }
   ]
 }

@@ -13,6 +13,7 @@ import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
+import { projectInsightsAccessHeaders, validProjectReadReason, type ConfirmedProjectRead } from "./project-insights-access";
 
 interface AnalyticsTabProps {
   projectId: number;
@@ -122,7 +123,7 @@ function MetricCard({
 }
 
 export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { lang } = useI18n();
   const [, setLocation] = useLocation();
   const tr = (en: string, es: string) => (lang === "es" ? es : en);
@@ -133,6 +134,14 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
   const [data, setData] = useState<InsightSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [requiresReason, setRequiresReason] = useState(false);
+  const [accessReason, setAccessReason] = useState("");
+  const [confirmedAccess, setConfirmedAccess] = useState<ConfirmedProjectRead | null>(null);
+  const confirmedReason = confirmedAccess?.projectId === projectId && confirmedAccess.userId === user?.id ? confirmedAccess.reason : "";
+  const isSuperAdmin = (user as (typeof user & { isSuperAdmin?: boolean; is_super_admin?: boolean }))?.isSuperAdmin === true ||
+    (user as (typeof user & { isSuperAdmin?: boolean; is_super_admin?: boolean }))?.is_super_admin === true;
+  const validReason = validProjectReadReason(accessReason);
+  const explicitAccessHeaders = projectInsightsAccessHeaders(confirmedAccess, projectId, user?.id);
   const [retryKey, setRetryKey] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
@@ -152,16 +161,21 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
     setError("");
     fetch(
       `/api/v1/projects/${projectId}/project-insights?timezone=${encodeURIComponent(timezone)}`,
-      { headers: { Authorization: `Bearer ${token}` } },
+      { headers: { Authorization: `Bearer ${token}`, ...explicitAccessHeaders } },
     )
       .then(async (response) => {
         const body = await response.json().catch(() => ({}));
-        if (!response.ok)
+        if (!response.ok) {
+          if (response.status === 403 && body.error === "PROJECT_ACCESS_DENIED" && isSuperAdmin && !confirmedReason) {
+            if (!cancelled) setRequiresReason(true);
+          }
           throw new Error(
             lang === "es"
-              ? body.messageEs || "No se pudieron cargar los informes."
+              ? body.messageEs || (body.error === "PROJECT_ACCESS_DENIED" ? "Indique un motivo para la lectura excepcional de este proyecto." : "No se pudieron cargar los informes.")
               : body.message || "Project insights could not be loaded.",
           );
+        }
+        if (!cancelled) setRequiresReason(false);
         return body as InsightSummary;
       })
       .then((body) => {
@@ -176,7 +190,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
     return () => {
       cancelled = true;
     };
-  }, [projectId, token, timezone, lang, retryKey]);
+  }, [projectId, token, timezone, lang, retryKey, confirmedReason, isSuperAdmin]);
 
   if (loading) {
     return (
@@ -201,6 +215,29 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
           <div className="section-sub" style={{ margin: "8px 0 14px" }}>
             {error || tr("No response was returned.", "No se recibió respuesta.")}
           </div>
+          {requiresReason && isSuperAdmin && (
+            <div style={{ display: "grid", gap: 8, maxWidth: 480, marginBottom: 14 }}>
+              <label htmlFor="project-insights-super-admin-reason">
+                {tr("Reason for cross-company project read access", "Motivo del acceso de lectura a otro proyecto")}
+              </label>
+              <input
+                id="project-insights-super-admin-reason"
+                className="input"
+                value={accessReason}
+                maxLength={120}
+                onChange={(event) => setAccessReason(event.target.value)}
+                placeholder={tr("Audit purpose (12–120 characters)", "Propósito de auditoría (12–120 caracteres)")}
+              />
+              <button
+                type="button"
+                className="btn btn-sm btn-primary"
+                disabled={!validReason}
+                onClick={() => setConfirmedAccess({ projectId, userId: user!.id, reason: accessReason.trim() })}
+              >
+                {tr("Open with recorded reason", "Abrir con motivo registrado")}
+              </button>
+            </div>
+          )}
           <button className="btn btn-sm btn-outline" onClick={() => setRetryKey((n) => n + 1)}>
             <RefreshCw size={14} /> {tr("Retry", "Reintentar")}
           </button>
@@ -238,7 +275,7 @@ export function AnalyticsTab({ projectId }: AnalyticsTabProps) {
         sections: selectedExportSections.join(","),
       });
       const response = await fetch(`/api/v1/projects/${projectId}/project-insights/export-pdf?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${token}`, ...explicitAccessHeaders },
       });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));

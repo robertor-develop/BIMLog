@@ -4,7 +4,9 @@
 
 - [x] Authenticated Chrome reproduced a Super Administrator opening synthetic BIMCorp project `QA-AI-0924` from Control Total, then being denied by the project page despite the server and outer project route allowing global Super Administrator access. The page's extra membership check was the cause.
 - [x] Align the project page's effective role and membership check with the existing server-authorized Super Administrator contract. Preserve ordinary project-member denial and the independent budget maker/checker rule. Focused context regressions, frontend typecheck and frontend build pass locally.
-- [ ] Complete Living Brief and release gates, push/publish the accepted correction, then retest Super Administrator project access, the submitted synthetic budget's independent review/approval, and the downstream Intake/EDT journey in live Chrome. No production access or financial approval is claimed from the local fix.
+- [x] Complete the first correction's gate, push commit `3a8b09cd642f8b15651d21b69557b6b38b43a57b`, publish through Replit Shell with schema action `NONE`, and confirm exact live source identity and RRY Super Administrator project entry in Chrome.
+- [ ] Release and live-test the Analytics follow-up: explicit cross-company Super Administrator read reason for both screen and PDF export, bound to the current account and project. The ordinary BIMCorp project Analytics screen loaded normally; no cross-company Analytics pass is claimed yet.
+- [ ] Finish the synthetic project's independent budget approval only after a narrowly scoped original-budget policy is authorized, created under the correct Super Administrator identity, and shown effective. The USD 3,040 budget is `under_review`; no policy or approval has been created. Then continue Intake/EDT/hours/QC/Operations live acceptance without weakening maker/checker or ordinary tenant boundaries.
 
 ## Urgent Template / Intake integration gap — 2026-09-23
 

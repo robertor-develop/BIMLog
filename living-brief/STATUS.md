@@ -1,9 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
-## Super Administrator project access correction — local candidate — 2026-09-24
+## Super Administrator project access correction — published with Analytics follow-up candidate — 2026-09-24
 
 - Live Chrome showed the RRY Super Administrator could see synthetic BIMCorp project `QA-AI-0924` in Control Total but ProjectDetail denied entry solely because the administrator was not also listed as a project member. The server-side project membership middleware and outer project route already support global Super Administrator access.
-- The project page now uses the current account's Super Administrator status to derive its effective project administrator role and excludes that account from the redundant membership denial. Ordinary nonmember denial and budget maker/checker checks remain unchanged. Focused context regression, frontend typecheck and frontend build pass locally. The candidate is not pushed, published or live verified; budget approval and full Intake acceptance remain open.
+- The project page now uses the current account's Super Administrator status to derive its effective project administrator role and excludes that account from the redundant membership denial. Ordinary nonmember denial and budget maker/checker checks remain unchanged. Commit `3a8b09cd642f8b15651d21b69557b6b38b43a57b` was pushed to GitHub master, built and published through Replit Shell with `schemaAction=NONE`; live health reports the exact source commit. Authenticated Chrome confirmed the RRY Super Administrator can open synthetic BIMCorp project `QA-AI-0924` through Control Total.
+- Live cross-company Analytics still showed a generic access error because its frontend did not collect the explicit audit reason already required by the coordinator read service. This follow-up source candidate adds a user-entered reason, scoped to the same Super Administrator and project, to Analytics read and PDF export requests. The synthetic budget moved to `under_review` but exact approval was correctly denied because no effective original-budget approval policy exists for USD 3,040. The project policy remains unsubmitted pending action-time confirmation; full Intake/EDT acceptance remains open.
 
 ## Template / Intake field-package rejection and audit candidate — 2026-09-23
 
