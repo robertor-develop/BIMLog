@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a9e1276eec527a64ef7892f3b254330bd45239ead3194318ce08d362fbabd57f",
+  "sourceSha256": "469ddab4aac018d068ba5d7ff2fc73a11fd7fa1a3bc597e73d535e10a25e259f",
   "itemCount": 170,
   "counts": {
     "ACTIVE": 137,
@@ -62,10 +62,10 @@
   ],
   "items": [
     {
-      "id": "869435eb2ca75718",
+      "id": "789388acf809f1ab",
       "sourceLine": 7,
       "heading": "Urgent Template / Intake integration gap — 2026-09-23",
-      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–20 reached GitHub and were published through Build 20 at `5e704afa5a13908698d1a471e7eb44ed5d49dfd6`; authenticated Chrome covered Governance draft/reopen and self-approval denial, not the six-role end-to-end path. Builds 21–25 reached GitHub `master` at `e1ccebbcecb11e25819875b84649be20398dfe36` and remain unpublished until the Build 30 checkpoint. Local Builds 26–30 add a publication-time compatibility guard with isolated positive/negative HTTP proof and bilingual denial guidance. The policy approval/change/role matrices remain intent rather than complete runtime execution authority; activation's canonical validation remains authoritative.",
+      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–30 reached GitHub and were published through Build 30 at `4487fa5d98bf1479eb68e24769113ce45679fe78`; authenticated Chrome covered a limited Governance/Intake regression, not the six-role end-to-end path. Builds 31–35 add scoped published-workflow compatibility before policy publication, policy validation at workflow approval, and the explicit prohibition on governed version retirement. Approval thresholds, company-role rows and other change rules remain intent rather than full execution authority; guarded EDT mutations remain closed. Build 35 is push-only; publication and full authenticated Chrome smoke are due at Build 40.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {

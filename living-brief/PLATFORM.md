@@ -734,6 +734,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/trade-file-submission-review.ts
 - artifacts/api-server/src/lib/unified-action-contract.behavior.ts
 - artifacts/api-server/src/lib/unified-action-contract.ts
+- artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.ts
 - artifacts/api-server/src/lib/workflow-governance-policy-contract.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-policy-contract.ts

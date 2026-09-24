@@ -40084,6 +40084,96 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "372911f9d33c78761552ae4f544699caa30edef260c8794cc84ee46b961d6bea"
+    },
+    {
+      "taskId": "bimlog-template-governance-repair-block07-20260924",
+      "reviewedThroughCommit": "4487fa5d98bf1479eb68e24769113ce45679fe78",
+      "reviewedAt": "2026-09-24T08:53:39Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Published Governance Policies previously could become incompatible with already published Delivery Workflows; approval and retirement also lacked the bounded policy checks added in this block. Approval thresholds and role grants remain unimplemented and are not field accepted."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair keeps the existing company policy and Delivery Workflow as canonical records."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-build push and ten-build publication boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Isolated HTTP proof does not replace the required deployed six-role acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction or customer-template authority changed in this block."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic source inventory includes the new Governance binding behavior proof; routes and schema are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native or installer surface changed in this block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report renderer, export contract, or report layout changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim or jurisdictional rule changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the published Build 30 boundary and accurately limits the local Build 35 enforcement candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps policy role authority and the complete Template-to-EDT six-role journey open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical audit narrative was not edited by this block."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/workflow-governance-policies.ts",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "062424ac63693c5080f49cfeeb15e91c0d9daf1a192a7054380a91268149ecae"
     }
   ]
 }
