@@ -13,6 +13,7 @@ import { waitForFinancialControlMigration } from "../lib/financial-control-migra
 import { economicCheckerAllowed, workflowTemplateCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
 import { boundedWorkflowRetirementReason } from "../lib/delivery-workflow-retirement";
 import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
+import { applicablePublishedGovernance, publishedGovernanceRows, validateWorkflowAgainstGovernance } from "../lib/workflow-governance-binding";
 
 const router = Router();
 const templateCode = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -234,9 +235,11 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/approve", authM
 router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authMiddleware, async (req, res): Promise<void> => {
   const actor = await prepare(req,res,true); if (!actor) return;
   const revision = expectedRevision(req,res); if (revision === null) return;
+  await ensureWorkflowGovernancePolicySchema();
   const connection = await pool.connect();
   try {
     await connection.query("BEGIN");
+    await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const template = await scopedTemplate(connection,param(req.params.id),actor,true);
     if (!template) { await connection.query("ROLLBACK"); res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }
     const version = (await connection.query(`SELECT id,definition,fingerprint,revision,state FROM company_delivery_workflow_versions
@@ -248,6 +251,8 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authM
     if (deliveryWorkflowFingerprint(definition) !== version.fingerprint) {
       await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH" }); return;
     }
+    const governance = applicablePublishedGovernance(await publishedGovernanceRows(connection,actor.companyId),String(template.id));
+    if (governance) validateWorkflowAgainstGovernance(governance.definition,definition);
     const allocation = await economicPreview(connection, actor, definition);
     if (allocation) {
       const receipt = (await connection.query(`SELECT details FROM company_delivery_workflow_events
@@ -264,6 +269,7 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authM
       effective_from=now(),revision=revision+1,updated_by_id=$2,updated_at=now() WHERE id=$1`, [version.id,actor.userId]);
     await event(connection,actor,template.id,version.id,"published",{
       fingerprint: version.fingerprint, ...(allocation ? { economicAllocationFingerprint: allocation.fingerprint } : {}),
+      governancePolicyVersionId: governance?.versionId ?? null, governancePolicyFingerprint: governance?.fingerprint ?? null,
     });
     await connection.query("COMMIT");
     res.json({ versionId: version.id, state: "published", fingerprint: version.fingerprint, revision: revision + 1 });
