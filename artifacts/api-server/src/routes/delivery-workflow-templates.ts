@@ -206,6 +206,8 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/approve", authM
       await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_NOT_DRAFT_OR_STALE" }); return;
     }
     const definition = validateDeliveryWorkflowDefinition(version.definition);
+    const governance = applicablePublishedGovernance(await publishedGovernanceRows(connection,actor.companyId),String(template.id));
+    if (governance) validateWorkflowAgainstGovernance(governance.definition,definition);
     const allocation = await economicPreview(connection, actor, definition);
     if (!workflowTemplateCheckerAllowed({
       creatorId: Number(version.created_by_id), lastEditorId: Number(version.updated_by_id), checkerId: actor.userId,
@@ -223,7 +225,9 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/approve", authM
       approved_at=now(),approved_by_id=$4,revision=revision+1,updated_by_id=$4,updated_at=now() WHERE id=$1`,
       [version.id,JSON.stringify(definition),fingerprint,actor.userId]);
     await event(connection,actor,template.id,version.id,"approved",{
-      fingerprint, ...(allocation ? { economicAllocationFingerprint: allocation.fingerprint,
+      fingerprint, governancePolicyVersionId: governance?.versionId ?? null,
+      governancePolicyFingerprint: governance?.fingerprint ?? null,
+      ...(allocation ? { economicAllocationFingerprint: allocation.fingerprint,
         commercialApuVersionId: allocation.commercialApuVersionId } : {}),
     });
     await connection.query("COMMIT");
@@ -239,6 +243,7 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authM
   const connection = await pool.connect();
   try {
     await connection.query("BEGIN");
+    await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const template = await scopedTemplate(connection,param(req.params.id),actor,true);
     if (!template) { await connection.query("ROLLBACK"); res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }

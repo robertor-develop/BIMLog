@@ -110,15 +110,13 @@ try {
   invalidUnderPolicy.phases[1].approvalRequired = false;
   assert.equal((await call(pmo,`/company/delivery-workflows/${id}/versions/${fourth.body.versionId}`,{
     expectedRevision: 1, definition: invalidUnderPolicy },"PATCH")).status,200);
-  assert.equal((await call(owner,`/company/delivery-workflows/${id}/versions/${fourth.body.versionId}/approve`,{
-    expectedRevision: 2 })).status,200);
-  const deniedPublication = await call(pmo,`/company/delivery-workflows/${id}/versions/${fourth.body.versionId}/publish`,{
-    expectedRevision: 3 });
-  assert.equal(deniedPublication.status,409);
-  assert.equal(deniedPublication.body.code,"WORKFLOW_POLICY_FINAL_APPROVAL_REQUIRED");
+  const deniedApproval = await call(owner,`/company/delivery-workflows/${id}/versions/${fourth.body.versionId}/approve`,{
+    expectedRevision: 2 });
+  assert.equal(deniedApproval.status,409);
+  assert.equal(deniedApproval.body.code,"WORKFLOW_POLICY_FINAL_APPROVAL_REQUIRED");
   const afterDenial = await call(pmo,`/company/delivery-workflows/${id}`);
   assert.equal(afterDenial.body.versions.find((x: any) => x.versionId === third.body.versionId).state,"published");
-  assert.equal(afterDenial.body.versions.find((x: any) => x.versionId === fourth.body.versionId).state,"approved");
+  assert.equal(afterDenial.body.versions.find((x: any) => x.versionId === fourth.body.versionId).state,"draft");
   await assert.rejects(pool.query(`UPDATE company_delivery_workflow_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_events WHERE template_id=$1`,[id]));
   assert.equal((await call(member,"/company/delivery-workflows")).body.versions.length,1);
