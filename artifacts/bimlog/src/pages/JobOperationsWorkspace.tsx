@@ -1332,7 +1332,7 @@ export function JobOperationsWorkspace() {
           </div>
         </header>
         {Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin) &&
-          <EdtDirectorAssignmentPanel projectId={projectId} api={api} tt={tt} />}
+          <EdtDirectorAssignmentPanel projectId={projectId} currentUserId={Number(user?.id)} api={api} tt={tt} />}
         {data.identity?.intakeId && <EdtPlanPreviewPanel
           projectId={projectId}
           intakeId={String(data.identity.intakeId)}
