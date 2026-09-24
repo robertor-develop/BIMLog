@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "55ba1be2591016dd47e6f3b97925c97cda3e3f23034febb7cf2667e5c290fcc6",
+  "sourceSha256": "2e4a3310f466e13ec1f324719a991c78e62a69bbeb16231bad3575740a495cb5",
   "itemCount": 170,
   "counts": {
     "ACTIVE": 137,
@@ -62,10 +62,10 @@
   ],
   "items": [
     {
-      "id": "ccc5e4150a271854",
+      "id": "43a7ddd1c4acec63",
       "sourceLine": 7,
       "heading": "Urgent Template / Intake integration gap — 2026-09-23",
-      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–15 locally require a separate company PMO checker for every Delivery Workflow version (Finance cost-approver authority remains additionally required for economic allocation), explain that denial, and record a bounded retirement reason and actor in audit history. The five-build block still needs the full gate and push; none of this proves the Governance approval/change/role matrices, which remain intent rather than complete runtime execution authority.",
+      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–15 passed the full local gate and reached GitHub `master` at `a632bb3cb69e4d3d588431a7164031299e599624` but await the ten-build publication boundary. Local Builds 16–20 separate PMO maker-checker from Finance denial, expose review actor and version evidence, and improve bilingual Governance lifecycle guidance. The policy approval/change/role matrices remain intent rather than complete runtime execution authority; do not claim end-to-end acceptance from this block.",
       "classification": "ACTIVE",
       "workClass": "PRODUCT_WORK",
       "ownership": {

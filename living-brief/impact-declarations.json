@@ -39816,6 +39816,95 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b03e032f24f032191df24f8a9781600ed4214efcd9140d52f76e420f1a612103"
+    },
+    {
+      "taskId": "bimlog-template-governance-repair-block04-20260924",
+      "reviewedThroughCommit": "a632bb3cb69e4d3d588431a7164031299e599624",
+      "reviewedAt": "2026-09-24T05:44:55Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Governance maker-checker and Finance denials were conflated; audit actor evidence and user guidance were incomplete. Policy matrices remain intent, not runtime grants."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Human review and append-only evidence remain governing product laws."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution and release boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Field and role-separated acceptance remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, schema, or generated platform inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal report artifact change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Separates pushed Workflow block from local Governance candidate and acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps runtime Governance enforcement and end-to-end field proof open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit entries remain append-only."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/workflow-governance-policy-contract.behavior.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy-contract.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts",
+        "artifacts/api-server/src/routes/workflow-governance-policies.ts",
+        "artifacts/bimlog/src/lib/workflow-policy-error.behavior.ts",
+        "artifacts/bimlog/src/lib/workflow-policy-error.ts",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b2af3065205fefecfec2512dae2afe1d199063853cba99ac2c224cba5d138ba4"
     }
   ]
 }

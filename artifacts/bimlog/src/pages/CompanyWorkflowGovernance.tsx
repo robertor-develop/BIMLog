@@ -20,9 +20,10 @@ type Definition = {
   permissions:Array<{ role:string;actions:Array<typeof rights[number]> }>;
   validation:Record<typeof validations[number],boolean>;
 };
-type Version = { policyId:string;code:string;name:string;versionId:string;version:number;revision:number;state:string;definition:Definition;fingerprint:string|null };
+type Version = { policyId:string;code:string;name:string;versionId:string;version:number;revision:number;state:string;definition:Definition;fingerprint:string|null;
+  approvedById:number|null;publishedById:number|null;retiredById:number|null;approvedAt:string|null;publishedAt:string|null;retiredAt:string|null };
 type Summary = Pick<Version,"code"|"name"|"versionId"|"version"|"revision"|"state"> & { id:string };
-type History = { versionId:string;action:string;actorId:number;createdAt:string;details:Record<string,unknown> };
+type History = { versionId:string;action:string;actorId:number;actorName:string|null;createdAt:string;details:Record<string,unknown> };
 const starter = ():Definition => ({
   schemaVersion:1,scope:{ allWorkflows:true,workflowTemplateIds:[] },
   approvalRules:approvals.map(action => ({ action,roles:["PROJECT_MANAGER"],threshold:action === "economic_change" ? { currency:"USD",amountMinor:2500000 } : null })),
@@ -188,17 +189,22 @@ export function CompanyWorkflowGovernance() {
       {confirm && current && <div className="wgp-confirm" role="dialog" aria-modal="true" aria-label={confirm}>
         <p>{confirm==="publish" ? t("Publish this approved version for new Work Items? Existing snapshots will not change.","¿Publicar esta versión aprobada para nuevos elementos? Los registros existentes no cambiarán.") :
           t("Retire this published version? New Work Items will no longer bind to it.","¿Retirar esta versión publicada? Los nuevos elementos ya no se vincularán a ella.")}</p>
-        {confirm==="retire" && <label>{t("Audit reason (at least 5 characters)","Motivo de auditoría (mínimo 5 caracteres)")}<textarea value={reason} onChange={event => setReason(event.target.value)} /></label>}
-        <button type="button" disabled={busy || (confirm==="retire" && reason.trim().length<5)} onClick={() => void act(() =>
+        {confirm==="retire" && <label>{t("Audit reason (5–500 characters)","Motivo de auditoría (5–500 caracteres)")}<textarea value={reason} maxLength={500} onChange={event => setReason(event.target.value)} /></label>}
+        <button type="button" disabled={busy || (confirm==="retire" && (reason.trim().length<5 || reason.trim().length>500))} onClick={() => void act(() =>
           request(`/company/workflow-governance-policies/${selectedId}/versions/${current.versionId}/${confirm}`,"POST",
             {expectedRevision:current.revision,...(confirm==="retire" ? {reason:reason.trim()} : {})}),
           confirm==="publish" ? t("Policy published.","Política publicada.") : t("Policy retired.","Política retirada."))}>{t("Confirm","Confirmar")}</button>
         <button type="button" onClick={() => { setConfirm(null);setReason(""); }}>{t("Cancel","Cancelar")}</button>
       </div>}
       {selectedId && <section className="wgp-card"><h3>{t("Version history","Historial de versiones")}</h3>
-        <ul>{versions.map(version => <li key={version.versionId}>v{version.version} · {version.state} · {version.fingerprint?.slice(0,16) ?? "draft"}</li>)}</ul>
+        <ul>{versions.map(version => <li key={version.versionId}>v{version.version} · {version.state} · {version.fingerprint?.slice(0,16) ?? "draft"}
+          {version.approvedAt && <> · {t("approved","aprobada")} {new Date(version.approvedAt).toLocaleString()}</>}
+          {version.publishedAt && <> · {t("published","publicada")} {new Date(version.publishedAt).toLocaleString()}</>}
+          {version.retiredAt && <> · {t("retired","retirada")} {new Date(version.retiredAt).toLocaleString()}</>}
+        </li>)}</ul>
         {history.length>0 && <div className="wgp-table-wrap"><table><thead><tr><th>{t("Time","Fecha")}</th><th>{t("Action","Acción")}</th><th>{t("Actor","Actor")}</th><th>{t("Details","Detalles")}</th></tr></thead>
-          <tbody>{history.map((entry,index) => <tr key={index}><td>{new Date(entry.createdAt).toLocaleString()}</td><td>{entry.action}</td><td>{entry.actorId}</td><td>{JSON.stringify(entry.details)}</td></tr>)}</tbody></table></div>}
+          <tbody>{history.map((entry,index) => <tr key={index}><td>{new Date(entry.createdAt).toLocaleString()}</td><td>{entry.action}</td>
+            <td>{entry.actorName || `#${entry.actorId}`}</td><td>{typeof entry.details?.reason === "string" ? entry.details.reason : JSON.stringify(entry.details)}</td></tr>)}</tbody></table></div>}
       </section>}
     </section> : <section className="wgp-editor"><p>{list.length
       ? t("Select a policy to inspect its active version and history.","Seleccione una política para ver su versión activa y el historial.")
