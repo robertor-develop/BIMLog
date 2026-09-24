@@ -31,6 +31,22 @@ export function workflowPolicyErrorMessage(
       "The approved source changed. Create and review a new version before publishing.",
       "La fuente aprobada cambió. Cree y revise una nueva versión antes de publicarla.",
     ],
+    WORKFLOW_POLICY_FINAL_APPROVAL_REQUIRED: [
+      "A published Delivery Workflow lacks the final approval this policy requires. Revise that workflow before approving this policy.",
+      "Un flujo de entrega publicado no tiene la aprobación final que exige esta política. Revise ese flujo antes de aprobar la política.",
+    ],
+    WORKFLOW_POLICY_PHASE_REVIEW_REQUIRED: [
+      "A published Delivery Workflow lacks quality review in a phase. Revise that workflow before approving this policy.",
+      "Un flujo de entrega publicado carece de revisión de calidad en una fase. Revise ese flujo antes de aprobar la política.",
+    ],
+    WORKFLOW_POLICY_DOCUMENT_REQUIRED: [
+      "A published Delivery Workflow lacks a required document in a phase. Revise that workflow before approving this policy.",
+      "Un flujo de entrega publicado carece de un documento obligatorio en una fase. Revise ese flujo antes de aprobar la política.",
+    ],
+    DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH: [
+      "A published Delivery Workflow failed its integrity check. Ask a PMO administrator to investigate before approving this policy.",
+      "Un flujo de entrega publicado falló la verificación de integridad. Solicite a PMO que lo revise antes de aprobar esta política.",
+    ],
     WORKFLOW_POLICY_REASON_REQUIRED: [
       "Enter an audit reason of 5 to 500 characters before retiring this version.",
       "Escriba un motivo de auditoría de 5 a 500 caracteres antes de retirar esta versión.",
