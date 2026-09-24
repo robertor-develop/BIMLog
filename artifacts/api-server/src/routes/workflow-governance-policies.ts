@@ -79,13 +79,17 @@ router.get("/company/workflow-governance-policies/:id", authMiddleware, async (r
   const actor = await prepare(req, res); if (!actor) return;
   const id = param(req.params.id);
   const versions = (await pool.query(`SELECT p.id "policyId",p.code,p.name,v.id "versionId",v.version,v.revision,v.state,
-    v.definition,v.fingerprint,v.created_at "createdAt",v.approved_at "approvedAt",v.published_at "publishedAt",v.retired_at "retiredAt"
+    v.definition,v.fingerprint,v.created_by_id "createdById",v.updated_by_id "updatedById",
+    v.approved_by_id "approvedById",v.published_by_id "publishedById",v.retired_by_id "retiredById",
+    v.created_at "createdAt",v.approved_at "approvedAt",v.published_at "publishedAt",v.retired_at "retiredAt"
     FROM company_workflow_governance_policies p JOIN company_workflow_governance_versions v ON v.policy_id=p.id
     WHERE p.id=$1 AND p.company_id=$2 AND ($3::boolean OR v.state='published') ORDER BY v.version DESC`,
     [id, actor.companyId, actor.canManage])).rows;
   if (!versions.length) { res.status(404).json({ code: "WORKFLOW_POLICY_NOT_FOUND" }); return; }
-  const history = actor.canManage ? (await pool.query(`SELECT version_id "versionId",action,actor_id "actorId",details,created_at "createdAt"
-    FROM company_workflow_governance_events WHERE policy_id=$1 AND company_id=$2 ORDER BY created_at,id`, [id, actor.companyId])).rows : [];
+  const history = actor.canManage ? (await pool.query(`SELECT e.version_id "versionId",e.action,e.actor_id "actorId",
+    u.full_name "actorName",e.details,e.created_at "createdAt"
+    FROM company_workflow_governance_events e LEFT JOIN users u ON u.id=e.actor_id AND u.company_id=e.company_id
+    WHERE e.policy_id=$1 AND e.company_id=$2 ORDER BY e.created_at,e.id`, [id, actor.companyId])).rows : [];
   res.json({ versions, history });
 });
 

@@ -89,6 +89,8 @@ try {
   assert.equal(history.body.versions.find((x: any) => x.versionId === v1).state,"superseded");
   assert.equal(history.body.versions.find((x: any) => x.versionId === v2).state,"published");
   assert.ok(history.body.history.some((x: any) => x.action === "superseded"));
+  assert.ok(history.body.history.some((x: any) => x.action === "approved" && x.actorId === checker.id && x.actorName === checker.full_name));
+  assert.equal(history.body.versions.find((x: any) => x.versionId === v2).approvedById,checker.id);
   await assert.rejects(pool.query(`UPDATE company_workflow_governance_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_workflow_governance_events WHERE policy_id=$1`,[id]));
   assert.equal((await call(maker,`/company/workflow-governance-policies/${id}/versions/${v2}/retire`,{ expectedRevision:4,reason:"" })).status,400);
