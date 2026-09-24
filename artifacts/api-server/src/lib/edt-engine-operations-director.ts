@@ -3,6 +3,33 @@ import { EdtEngineConflict, withEdtTransaction, type EdtTransactionHost } from "
 
 export type EdtDirectorGrantAction = "grant" | "revoke";
 
+export async function listEdtOperationsDirectorAssignments(input: {
+  actorUserId: number; actorCompanyId: number; projectId: number;
+}, host?: EdtTransactionHost) {
+  return withEdtTransaction(async client => {
+    const administrator = (await client.query<{ id: number }>(
+      "SELECT id FROM users WHERE id=$1 AND company_id=$2 AND is_super_admin=true",
+      [input.actorUserId, input.actorCompanyId])).rows[0];
+    if (!administrator) throw new EdtEngineConflict("EDT_DIRECTOR_ADMIN_REQUIRED", "A current company Super Administrator must view Operations Director assignments.");
+    const project = (await client.query<{ id: number }>(
+      `SELECT p.id FROM projects p JOIN users owner ON owner.id=p.created_by_id
+       LEFT JOIN LATERAL (SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1) binding ON true
+       WHERE p.id=$1 AND p.status<>'archived' AND COALESCE(binding.company_id,owner.company_id)=$2`,
+      [input.projectId, input.actorCompanyId])).rows[0];
+    if (!project) throw new EdtEngineConflict("PROJECT_COMPANY_MISMATCH", "The project is outside the administrator's company.");
+    const members = (await client.query<{
+      user_id: number; full_name: string; email: string; project_role: string; active: boolean;
+    }>(`SELECT u.id AS user_id,u.full_name,u.email,pm.role AS project_role,
+         EXISTS(SELECT 1 FROM edt_operations_director_grants g WHERE g.company_id=$2 AND g.project_id=$1 AND g.user_id=u.id
+           AND NOT EXISTS(SELECT 1 FROM edt_operations_director_revocations r WHERE r.grant_id=g.id)) AS active
+       FROM project_members pm JOIN users u ON u.id=pm.user_id
+       WHERE pm.project_id=$1 AND pm.status='active' AND u.company_id=$2 ORDER BY u.full_name,u.id`,
+      [input.projectId, input.actorCompanyId])).rows;
+    return members.map(member => ({ userId: member.user_id, fullName: member.full_name, email: member.email,
+      projectRole: member.project_role, active: member.active }));
+  }, host);
+}
+
 function boundedReason(value: string): string {
   const reason = value.trim();
   if (reason.length < 10 || reason.length > 2000)
