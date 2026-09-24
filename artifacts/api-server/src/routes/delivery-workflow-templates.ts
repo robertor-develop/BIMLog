@@ -198,6 +198,7 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/approve", authM
   const connection = await pool.connect();
   try {
     await connection.query("BEGIN");
+    await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const template = await scopedTemplate(connection,param(req.params.id),actor,true);
     if (!template) { await connection.query("ROLLBACK"); res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }
     const version = (await connection.query(`SELECT id,definition,revision,state,created_by_id,updated_by_id FROM company_delivery_workflow_versions
@@ -243,7 +244,6 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authM
   const connection = await pool.connect();
   try {
     await connection.query("BEGIN");
-    await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const template = await scopedTemplate(connection,param(req.params.id),actor,true);
     if (!template) { await connection.query("ROLLBACK"); res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }
