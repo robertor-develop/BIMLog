@@ -41,6 +41,11 @@ export function validateWorkflowAgainstGovernance(definition: WorkflowGovernance
   if (definition.validation.required_documents && workflow.phases.some(phase => !phase.tasks.some(task => task.requiredDocuments.length))) fail("WORKFLOW_POLICY_DOCUMENT_REQUIRED");
 }
 
+export function assertGovernanceChangeAllowed(policy: WorkflowGovernancePolicy, action: WorkflowGovernancePolicy["changeRules"][number]["action"]): void {
+  const rule = policy.changeRules.find(item => item.action === action);
+  if (!rule?.allowed) throw new FinancialControlError(409,"WORKFLOW_POLICY_CHANGE_FORBIDDEN",`The published Governance Policy forbids ${action}.`);
+}
+
 export async function validatePublishedWorkflowsForPolicy(client: Queryable, companyId: number,
   policy: WorkflowGovernancePolicy): Promise<void> {
   const rows = (await client.query(`SELECT t.id "templateId",v.definition,v.fingerprint

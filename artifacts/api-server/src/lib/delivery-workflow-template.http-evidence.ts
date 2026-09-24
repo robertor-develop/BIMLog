@@ -91,6 +91,7 @@ try {
     permissions: [{ role: "PROJECT_MANAGER", actions: ["view", "edit_draft", "approve", "publish", "manage"] }],
     validation: { allocation_total_100: true, task_execute_role: true, phase_review_role: true, final_approval: true, required_documents: true, valid_apu: true, unique_phase_codes: true },
   };
+  policyDefinition.changeRules.find(rule => rule.action === "retire_version")!.allowed = false;
   const policyId = randomUUID(), policyVersionId = randomUUID();
   await pool.query(`INSERT INTO company_workflow_governance_policies(id,company_id,code,name,created_by_id)
     VALUES($1,$2,'POLICY-TEST','Policy test',$3)`, [policyId,a.id,owner.id]);
@@ -117,6 +118,10 @@ try {
   const afterDenial = await call(pmo,`/company/delivery-workflows/${id}`);
   assert.equal(afterDenial.body.versions.find((x: any) => x.versionId === third.body.versionId).state,"published");
   assert.equal(afterDenial.body.versions.find((x: any) => x.versionId === fourth.body.versionId).state,"draft");
+  const deniedRetirement = await call(pmo,`/company/delivery-workflows/${id}/versions/${third.body.versionId}/retire`,{
+    expectedRevision: 3, reason: "Attempted retirement under published company policy" });
+  assert.equal(deniedRetirement.status,409);
+  assert.equal(deniedRetirement.body.code,"WORKFLOW_POLICY_CHANGE_FORBIDDEN");
   await assert.rejects(pool.query(`UPDATE company_delivery_workflow_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_events WHERE template_id=$1`,[id]));
   assert.equal((await call(member,"/company/delivery-workflows")).body.versions.length,1);

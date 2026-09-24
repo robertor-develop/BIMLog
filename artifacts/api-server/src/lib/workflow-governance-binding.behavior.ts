@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { FinancialControlError } from "./financial-control-contract";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
-import { validatePublishedWorkflowsForPolicy } from "./workflow-governance-binding";
+import { assertGovernanceChangeAllowed, validatePublishedWorkflowsForPolicy } from "./workflow-governance-binding";
 import { validateWorkflowGovernancePolicy } from "./workflow-governance-policy-contract";
 
 const workflow = validateDeliveryWorkflowDefinition({
@@ -33,4 +33,9 @@ rows[0].templateId = "target";
 rows[0].fingerprint = "tampered";
 await assert.rejects(validatePublishedWorkflowsForPolicy(client, 7, policy),
   (error: unknown) => error instanceof FinancialControlError && error.code === "DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH");
+assertGovernanceChangeAllowed(policy,"retire_version");
+const noRetirement = validateWorkflowGovernancePolicy({ ...policy,
+  changeRules: policy.changeRules.map(rule => rule.action === "retire_version" ? { ...rule, allowed: false } : rule) });
+assert.throws(() => assertGovernanceChangeAllowed(noRetirement,"retire_version"),
+  (error: unknown) => error instanceof FinancialControlError && error.code === "WORKFLOW_POLICY_CHANGE_FORBIDDEN");
 console.log("Published workflow policy compatibility: scoped, incompatible and integrity denial PASS");

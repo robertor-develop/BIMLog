@@ -13,7 +13,7 @@ import { waitForFinancialControlMigration } from "../lib/financial-control-migra
 import { economicCheckerAllowed, workflowTemplateCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
 import { boundedWorkflowRetirementReason } from "../lib/delivery-workflow-retirement";
 import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
-import { applicablePublishedGovernance, publishedGovernanceRows, validateWorkflowAgainstGovernance } from "../lib/workflow-governance-binding";
+import { applicablePublishedGovernance, assertGovernanceChangeAllowed, publishedGovernanceRows, validateWorkflowAgainstGovernance } from "../lib/workflow-governance-binding";
 
 const router = Router();
 const templateCode = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -289,18 +289,22 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/retire", authMi
   if (!reason) {
     res.status(400).json({ code: "DELIVERY_WORKFLOW_RETIRE_REASON_REQUIRED" }); return;
   }
+  await ensureWorkflowGovernancePolicySchema();
   const connection = await pool.connect();
   try {
     await connection.query("BEGIN");
+    await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const template = await scopedTemplate(connection,param(req.params.id),actor,true);
     if (!template) { await connection.query("ROLLBACK"); res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }
+    const governance = applicablePublishedGovernance(await publishedGovernanceRows(connection,actor.companyId),String(template.id));
+    if (governance) assertGovernanceChangeAllowed(governance.definition,"retire_version");
     const version = (await connection.query(`UPDATE company_delivery_workflow_versions SET state='retired',retired_at=now(),retired_by_id=$4,
       revision=revision+1,updated_by_id=$4,updated_at=now() WHERE id=$1 AND template_id=$2 AND state IN ('published','superseded')
       AND revision=$3 RETURNING id,version,revision`, [param(req.params.versionId),template.id,revision,actor.userId])).rows[0];
     if (!version) { await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_NOT_PUBLISHED_OR_STALE" }); return; }
     await event(connection,actor,template.id,version.id,"retired",{ reason });
     await connection.query("COMMIT"); res.json({ versionId: version.id, state: "retired", revision: version.revision });
-  } catch (error) { await connection.query("ROLLBACK"); throw error; }
+  } catch (error) { await connection.query("ROLLBACK"); if (!invalid(res,error)) throw error; }
   finally { connection.release(); }
 });
 
