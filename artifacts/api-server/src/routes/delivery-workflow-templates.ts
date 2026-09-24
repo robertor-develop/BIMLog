@@ -11,6 +11,7 @@ import { EconomicAllocationError } from "../lib/delivery-workflow-economic-alloc
 import { FinancialControlError } from "../lib/financial-control-contract";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
 import { economicCheckerAllowed, workflowTemplateCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
+import { boundedWorkflowRetirementReason } from "../lib/delivery-workflow-retirement";
 
 const router = Router();
 const templateCode = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -270,6 +271,10 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authM
 router.post("/company/delivery-workflows/:id/versions/:versionId/retire", authMiddleware, async (req, res): Promise<void> => {
   const actor = await prepare(req,res,true); if (!actor) return;
   const revision = expectedRevision(req,res); if (revision === null) return;
+  const reason = boundedWorkflowRetirementReason(req.body?.reason);
+  if (!reason) {
+    res.status(400).json({ code: "DELIVERY_WORKFLOW_RETIRE_REASON_REQUIRED" }); return;
+  }
   const connection = await pool.connect();
   try {
     await connection.query("BEGIN");
@@ -279,7 +284,7 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/retire", authMi
       revision=revision+1,updated_by_id=$4,updated_at=now() WHERE id=$1 AND template_id=$2 AND state IN ('published','superseded')
       AND revision=$3 RETURNING id,version,revision`, [param(req.params.versionId),template.id,revision,actor.userId])).rows[0];
     if (!version) { await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_NOT_PUBLISHED_OR_STALE" }); return; }
-    await event(connection,actor,template.id,version.id,"retired");
+    await event(connection,actor,template.id,version.id,"retired",{ reason });
     await connection.query("COMMIT"); res.json({ versionId: version.id, state: "retired", revision: version.revision });
   } catch (error) { await connection.query("ROLLBACK"); throw error; }
   finally { connection.release(); }
