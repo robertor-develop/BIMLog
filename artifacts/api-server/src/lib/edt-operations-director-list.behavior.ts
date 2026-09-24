@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { listEdtOperationsDirectorAssignments } from "./edt-engine-operations-director";
 import type { EdtTransactionHost } from "./edt-engine-transaction";
+
+const route = readFileSync(new URL("../routes/edt-engine.ts", import.meta.url), "utf8");
+assert.match(route, /router\.get\("\/projects\/:projectId\/edt-engine\/operations-director-grants"/);
+assert.match(route, /listEdtOperationsDirectorAssignments\(/);
 
 let administrator = false;
 let sameCompanyProject = false;
