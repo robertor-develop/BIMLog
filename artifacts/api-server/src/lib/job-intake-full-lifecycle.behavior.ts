@@ -30,5 +30,10 @@ for (const proof of [
   "UPDATE job_intakes SET status='activated'",
 ]) assert.match(service, new RegExp(proof.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 assert.match(service, /status: "activated",[\s\S]{0,160}idempotent: true/);
+const genericTask = service.slice(service.indexOf("if (needsScopeDeliveryTask)"), service.indexOf("workItemByScope.set(item.id"));
+assert.ok(genericTask.length > 0, "generic activation task boundary must exist");
+assert.doesNotMatch(genericTask, /input\.data\.classification\.(?:service|phase)/, "legacy project Service/Phase cannot become a generic task assignment");
+assert.match(service, /const packageClass = workPackage\.classification/, "package-level classification remains authoritative");
+assert.match(service, /const taskClass = taskDefinition\.classification/, "task-level classification remains authoritative");
 
 console.log("Job Intake full lifecycle: exact draft reopen plus contract, APU, budget, EDT/work-package, staffing, workflow, activation, and idempotent replay boundaries PASS");

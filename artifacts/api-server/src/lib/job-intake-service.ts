@@ -1105,12 +1105,14 @@ async function createCoreActivationWithClient(
           input.data.classification.disciplineId || null,
           input.data.classification.disciplineCode || null,
           input.data.classification.disciplineName || null,
-          input.data.classification.serviceId || null,
-          input.data.classification.serviceCode || null,
-          input.data.classification.serviceName || null,
-          input.data.classification.phaseId || null,
-          input.data.classification.phaseCode || null,
-          input.data.classification.phaseName || null,
+          // A project-wide legacy selection is not a Service/Phase assignment.
+          // Only explicit package/task classifications may populate these fields.
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
         ],
         )
       ).rows[0];
