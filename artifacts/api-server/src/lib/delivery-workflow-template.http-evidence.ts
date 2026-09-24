@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
 import express from "express";
 import { pool } from "@workspace/db";
 import router from "../routes/delivery-workflow-templates";
 import { signToken } from "../middlewares/auth";
+import { workflowGovernancePolicyFingerprint } from "./workflow-governance-policy-contract";
 
 const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/invalid");
 if (target.hostname !== "127.0.0.1" || !((target.port === "55439" && target.pathname === "/delivery_workflow_test") || (target.port === "55449" && target.pathname === "/delivery_template_test"))) {
@@ -81,11 +83,47 @@ try {
   assert.equal((await call(pmo,`/company/delivery-workflows/${id}/versions/${v1}/retire`,{ expectedRevision: 4, reason:"Superseded by reviewed version two" })).status,200);
   const retirement = await call(pmo,`/company/delivery-workflows/${id}`);
   assert.ok(retirement.body.history.some((x: any) => x.action === "retired" && x.details?.reason === "Superseded by reviewed version two" && x.actorName));
+  const policyDefinition = {
+    schemaVersion: 1, scope: { allWorkflows: false, workflowTemplateIds: [id] },
+    approvalRules: ["create_work_item", "complete_phase", "complete_deliverable", "economic_change", "template_update", "activate_version"].map(action => ({ action, roles: ["PROJECT_MANAGER"], threshold: null })),
+    changeRules: ["edit_phases", "edit_tasks_roles", "edit_allocation", "change_apu", "edit_approved_work_item", "retire_version"].map(action => ({ action, allowed: true, requiresReapproval: true, requiresNewVersion: action === "edit_phases" || action === "change_apu" })),
+    versioning: { lockActivatedSnapshot: true, structuralChangeCreatesVersion: true, preserveHistory: true },
+    permissions: [{ role: "PROJECT_MANAGER", actions: ["view", "edit_draft", "approve", "publish", "manage"] }],
+    validation: { allocation_total_100: true, task_execute_role: true, phase_review_role: true, final_approval: true, required_documents: true, valid_apu: true, unique_phase_codes: true },
+  };
+  const policyId = randomUUID(), policyVersionId = randomUUID();
+  await pool.query(`INSERT INTO company_workflow_governance_policies(id,company_id,code,name,created_by_id)
+    VALUES($1,$2,'POLICY-TEST','Policy test',$3)`, [policyId,a.id,owner.id]);
+  await pool.query(`INSERT INTO company_workflow_governance_versions(id,policy_id,version,state,definition,fingerprint,
+    approved_by_id,approved_at,published_by_id,published_at,created_by_id,updated_by_id)
+    VALUES($1,$2,1,'published',$3::jsonb,$4,$5,now(),$5,now(),$5,$5)`, [policyVersionId,policyId,JSON.stringify(policyDefinition),workflowGovernancePolicyFingerprint(policyDefinition),owner.id]);
+  const third = await call(pmo,`/company/delivery-workflows/${id}/versions`,{});
+  assert.equal(third.status,201);
+  assert.equal((await call(owner,`/company/delivery-workflows/${id}/versions/${third.body.versionId}/approve`,{
+    expectedRevision: 1 })).status,200);
+  const compatiblePublication = await call(pmo,`/company/delivery-workflows/${id}/versions/${third.body.versionId}/publish`,{
+    expectedRevision: 2 });
+  assert.equal(compatiblePublication.status,200);
+  const fourth = await call(pmo,`/company/delivery-workflows/${id}/versions`,{});
+  assert.equal(fourth.status,201);
+  const invalidUnderPolicy = structuredClone(definition);
+  invalidUnderPolicy.phases[1].approvalRequired = false;
+  assert.equal((await call(pmo,`/company/delivery-workflows/${id}/versions/${fourth.body.versionId}`,{
+    expectedRevision: 1, definition: invalidUnderPolicy },"PATCH")).status,200);
+  assert.equal((await call(owner,`/company/delivery-workflows/${id}/versions/${fourth.body.versionId}/approve`,{
+    expectedRevision: 2 })).status,200);
+  const deniedPublication = await call(pmo,`/company/delivery-workflows/${id}/versions/${fourth.body.versionId}/publish`,{
+    expectedRevision: 3 });
+  assert.equal(deniedPublication.status,409);
+  assert.equal(deniedPublication.body.code,"WORKFLOW_POLICY_FINAL_APPROVAL_REQUIRED");
+  const afterDenial = await call(pmo,`/company/delivery-workflows/${id}`);
+  assert.equal(afterDenial.body.versions.find((x: any) => x.versionId === third.body.versionId).state,"published");
+  assert.equal(afterDenial.body.versions.find((x: any) => x.versionId === fourth.body.versionId).state,"approved");
   await assert.rejects(pool.query(`UPDATE company_delivery_workflow_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_events WHERE template_id=$1`,[id]));
   assert.equal((await call(member,"/company/delivery-workflows")).body.versions.length,1);
   assert.equal((await call(outsider,"/company/delivery-workflows")).body.versions.length,0);
-  console.log("Delivery Workflow isolated HTTP: company boundary, PMO, draft, revision, validation, approval, immutability, publish, supersede, retire, audit PASS");
+  console.log("Delivery Workflow isolated HTTP: tenancy, PMO, independent approval, immutable history, compatible governed publish, incompatible governed denial PASS");
 } finally {
   await new Promise<void>((resolve,reject) => server.close(error => error ? reject(error) : resolve()));
   await pool.end();
