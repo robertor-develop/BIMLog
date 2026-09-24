@@ -6,6 +6,7 @@ import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-en
 import { decideWorkItemQc, previewResultImport, submitWorkItemIssuance } from "../lib/edt-engine-qc-import-service";
 import { previewActivatedEdtPlan } from "../lib/edt-engine-plan-projection";
 import { previewEdtActivationCandidate } from "../lib/edt-engine-activation-candidate";
+import { changeEdtOperationsDirectorGrant } from "../lib/edt-engine-operations-director";
 
 const router: IRouter = Router();
 
@@ -35,6 +36,23 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
   } catch (error) {
     sendEdtRouteError(res, error);
   }
+});
+
+router.post("/projects/:projectId/edt-engine/operations-director-grants", authMiddleware, async (req, res): Promise<void> => {
+  try {
+    const projectId = edtProjectId(req);
+    const actor = await resolveEdtRouteActor(req, projectId);
+    const body = bodyRecord(req.body);
+    const action = requiredText(body, "action");
+    if (action !== "grant" && action !== "revoke")
+      throw new EdtEngineConflict("REQUEST_BODY_INVALID", "Action must be grant or revoke.");
+    const result = await changeEdtOperationsDirectorGrant({
+      actorUserId: actor.actorUserId, actorCompanyId: actor.actorCompanyId, projectId,
+      targetUserId: requiredInteger(body, "targetUserId"), action,
+      reason: requiredText(body, "reason"),
+    });
+    res.status(result.idempotent ? 200 : action === "grant" ? 201 : 200).json(result);
+  } catch (error) { sendEdtRouteError(res, error); }
 });
 
 router.get("/projects/:projectId/edt-engine/intakes/:intakeId/plan-preview", authMiddleware, async (req, res): Promise<void> => {
