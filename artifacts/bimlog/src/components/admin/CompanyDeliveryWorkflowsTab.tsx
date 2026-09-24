@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { workflowApprovalError } from "@/lib/workflow-approval-error";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Task = {
@@ -168,11 +169,11 @@ export function CompanyDeliveryWorkflowsTab({
       const body = await response.json().catch(() => ({}));
       if (!response.ok)
         throw new Error(
-          body?.error?.en ?? body?.code ?? `HTTP ${response.status}`,
+          body?.code ? workflowApprovalError(body.code, spanish) : body?.error?.en ?? `HTTP ${response.status}`,
         );
       return body;
     },
-    [token],
+    [token, spanish],
   );
   const load = useCallback(
     async (id?: string) => {
@@ -558,11 +559,15 @@ export function CompanyDeliveryWorkflowsTab({
             {selected.name} · v{selected.version} · {selected.state}
           </h2>
           <p>
-            {t(
-              "Every published version is immutable. Clone a published version to edit a new draft.",
-              "Cada versión publicada es inmutable. Clone una versión publicada para editar un nuevo borrador.",
-            )}
+          {t(
+            "Every published version is immutable. Clone a published version to edit a new draft.",
+            "Cada versión publicada es inmutable. Clone una versión publicada para editar un nuevo borrador.",
+          )}
           </p>
+          <p>{t(
+            "Approval requires a different company PMO administrator from the creator and last editor. Economic allocation also requires that checker to hold Finance cost-approver authority.",
+            "La aprobación requiere otro administrador PMO distinto del creador y último editor. Si hay asignación económica, ese revisor también necesita autorización financiera para aprobar costos.",
+          )}</p>
           {versions.map((row) => (
             <div
               key={row.versionId}
