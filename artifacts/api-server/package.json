@@ -53,6 +53,8 @@
     "test:edt-engine-build343": "tsx ./src/lib/edt-engine-build343.behavior.ts",
     "test:edt-engine-build344": "tsx ./src/lib/edt-engine-build344.behavior.ts",
     "test:edt-engine-build345": "tsx ./src/lib/edt-engine-build345.behavior.ts",
+    "test:edt-operations-director": "tsx ./src/lib/edt-operations-director-role.behavior.ts && tsx ./src/lib/edt-operations-director-grant.behavior.ts",
+    "test:edt-operations-director-postgres": "tsx ./src/lib/edt-operations-director-postgres.behavior.ts",
     "test:edt-engine-read-sql": "tsx ./src/lib/edt-engine-read-sql.behavior.ts",
     "dev": "NODE_ENV=development tsx ./src/index.ts",
     "build": "tsx ./build.ts",

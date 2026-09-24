@@ -40265,6 +40265,100 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c54751cac0a8d9606f8444548ac6764c5a76cfee273a779106c96d87af342af8"
+    },
+    {
+      "taskId": "bimlog-template-intake-gap-operations-director-block09-20260924",
+      "reviewedThroughCommit": "6aaea1b4c0439198ae72b636566818083a107c23",
+      "reviewedAt": "2026-09-24T11:20:50Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "summary": "EDT approval authority lacked a narrowly assignable current company and project role. Append-only grants and revocations address this without opening guarded activation mutations or claiming six-role acceptance."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The grant does not change canonical company, project, Commercial or template ownership."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The push-only five-build cadence and guarded publish gates remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Isolated role tests do not replace deployed role-separated acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The narrow role repair does not change BIMLog product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated inventory includes the new EDT grant service and tests."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native and installer surfaces were not touched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design or rendering behavior was modified."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or citation was changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Build 40 published truth and the local grant candidate are reported precisely."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Positive EDT activation and six-role customer acceptance remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only grant rows are new, but the general audit doctrine is unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/edt-engine-migration.ts",
+        "artifacts/api-server/src/lib/edt-engine-operations-director.ts",
+        "artifacts/api-server/src/lib/edt-engine-route-context.ts",
+        "artifacts/api-server/src/lib/edt-operations-director-grant.behavior.ts",
+        "artifacts/api-server/src/lib/edt-operations-director-postgres.behavior.ts",
+        "artifacts/api-server/src/lib/edt-operations-director-role.behavior.ts",
+        "artifacts/api-server/src/routes/edt-engine.ts",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/db/src/schema/job-intakes.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ba86dce65efa177bfab2d2e8500e4fd3e4c2da0d152d09e7712196c8cf630b5d"
     }
   ]
 }

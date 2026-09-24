@@ -449,6 +449,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-governed-change-service.ts
 - artifacts/api-server/src/lib/edt-engine-hierarchy.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-migration.ts
+- artifacts/api-server/src/lib/edt-engine-operations-director.ts
 - artifacts/api-server/src/lib/edt-engine-permissions.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-permissions.ts
 - artifacts/api-server/src/lib/edt-engine-plan-projection.ts
@@ -459,6 +460,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-route-context.ts
 - artifacts/api-server/src/lib/edt-engine-source-service.ts
 - artifacts/api-server/src/lib/edt-engine-transaction.ts
+- artifacts/api-server/src/lib/edt-operations-director-grant.behavior.ts
+- artifacts/api-server/src/lib/edt-operations-director-postgres.behavior.ts
+- artifacts/api-server/src/lib/edt-operations-director-role.behavior.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/enterprise-identity-migration.behavior.ts
 - artifacts/api-server/src/lib/enterprise-identity-migration.ts

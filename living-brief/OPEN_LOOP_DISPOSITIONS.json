@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "fc45094bf15db9ae0eab240fcf7fb1c9566703b8a2c161ea98a7ed0076081082",
+  "sourceSha256": "191a82fd83a2b7dab621120dd1e17432405811695b244f111c7f2e5f2bd0e79a",
   "itemCount": 170,
   "counts": {
-    "ACTIVE": 136,
-    "SUPERSEDED": 22,
+    "ACTIVE": 137,
+    "SUPERSEDED": 21,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -62,20 +62,20 @@
   ],
   "items": [
     {
-      "id": "45e4ac73ba4c965a",
+      "id": "ff963b8547aecf5b",
       "sourceLine": 7,
       "heading": "Urgent Template / Intake integration gap — 2026-09-23",
-      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–30 reached GitHub and were published through Build 30 at `4487fa5d98bf1479eb68e24769113ce45679fe78`; authenticated Chrome covered a limited Governance/Intake regression, not the six-role end-to-end path. Builds 31–35 reached GitHub at `c9995eaccf30a19ac8847c8c0141bf83eb774ad7` without publication. Builds 36–40 add approval-time company-lock serialization, reject incompatible or overlapping Governance drafts before approval, explain the denials in the bilingual editor, and reconcile the generated Platform contract; isolated workflow and Governance HTTP suites passed. The Build 40 complete gate, exact push, Replit publication and full authenticated Chrome smoke remain release gates. Approval thresholds, company-role rows and other change rules remain intent rather than full execution authority; guarded EDT mutations remain closed.",
-      "classification": "SUPERSEDED",
-      "workClass": "STALE_CONTRADICTION",
+      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–40 reached GitHub; Build 40 was published at `6aaea1b4c0439198ae72b636566818083a107c23`. Authenticated Chrome proved a synthetic workflow draft save/reopen and correctly blocked self-approval in both workflow and Governance editors, not six-role acceptance. Builds 41–45 are a local candidate for narrowly assignable Operations Director authority; their full gate, push and later ten-build publication remain separate. Approval thresholds, company-role policy rows and other change rules remain intent rather than full execution authority; guarded EDT mutations remain closed.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
-        "owner": "Historical evidence",
+        "owner": "Release engineering",
         "route": null,
-        "module": "living-brief/OPEN_LOOP.md"
+        "module": "docs/deployment"
       },
       "evidence": [
-        "living-brief/STATUS.md current authority",
-        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+        "OPEN_LOOP.md:7",
+        "Urgent Template / Intake integration gap — 2026-09-23"
       ],
       "currentAuthority": false
     },
