@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { clearLegacyProjectClassification, LegacyProjectClassificationNotice } from "./LegacyProjectClassificationNotice";
@@ -18,4 +19,7 @@ assert.equal(cleared.classification.phaseId, "");
 assert.equal(cleared.scopeItems, prior.scopeItems, "package classifications must remain untouched");
 assert.equal(cleared.review.scopeConfirmed, false);
 assert.equal(renderToStaticMarkup(<LegacyProjectClassificationNotice data={cleared} setData={() => undefined} tt={en => en} />), "");
+const advanced = fs.readFileSync(new URL("../../pages/JobIntakeWorkspace.tsx", import.meta.url), "utf8");
+assert.match(advanced, /<LegacyProjectClassificationNotice data=\{data\} setData=\{setData\} tt=\{tt\} \/>/);
+assert.ok(advanced.indexOf("<LegacyProjectClassificationNotice data={data}") < advanced.indexOf("<WorkPackageBuilder items={data.scopeItems"));
 console.log("Legacy project classification notice: visible, explicit clearing, package preservation PASS");
