@@ -10,6 +10,12 @@ export type GovernanceSnapshot = { policyId: string; versionId: string; code: st
 export type PublishedGovernanceRow = { policyId: string; versionId: string; code: string; version: number;
   definition: unknown; fingerprint: string };
 
+export async function publishedGovernanceRows(client: Queryable, companyId: number): Promise<PublishedGovernanceRow[]> {
+  return (await client.query(`SELECT p.id "policyId",p.code,v.id "versionId",v.version,v.definition,v.fingerprint
+    FROM company_workflow_governance_policies p JOIN company_workflow_governance_versions v ON v.policy_id=p.id
+    WHERE p.company_id=$1 AND v.state='published' ORDER BY p.code,v.version DESC`, [companyId])).rows;
+}
+
 export function policyApplies(definition: WorkflowGovernancePolicy, workflowTemplateId: string | null): boolean {
   return definition.scope.allWorkflows || (workflowTemplateId !== null && definition.scope.workflowTemplateIds.includes(workflowTemplateId));
 }
@@ -36,9 +42,7 @@ export function validateWorkflowAgainstGovernance(definition: WorkflowGovernance
 }
 
 export async function resolveWorkflowGovernanceSnapshot(client: Queryable, companyId: number, workflow: Workflow): Promise<GovernanceSnapshot | null> {
-  const rows = (await client.query(`SELECT p.id "policyId",p.code,v.id "versionId",v.version,v.definition,v.fingerprint
-    FROM company_workflow_governance_policies p JOIN company_workflow_governance_versions v ON v.policy_id=p.id
-    WHERE p.company_id=$1 AND v.state='published' ORDER BY p.code,v.version DESC`, [companyId])).rows;
+  const rows = await publishedGovernanceRows(client, companyId);
   const selected = applicablePublishedGovernance(rows, workflow.templateId);
   if (!selected) return null;
   validateWorkflowAgainstGovernance(selected.definition, workflow.definition);

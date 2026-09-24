@@ -9,7 +9,7 @@ import {
   deliveryWorkflowFingerprint,
   validateDeliveryWorkflowDefinition,
 } from "./delivery-workflow-template-contract";
-import { applicablePublishedGovernance, validateWorkflowAgainstGovernance } from "./workflow-governance-binding";
+import { applicablePublishedGovernance, publishedGovernanceRows, validateWorkflowAgainstGovernance } from "./workflow-governance-binding";
 
 type Queryable = {
   query(sql: string, params?: any[]): Promise<{ rows: any[] }>;
@@ -58,9 +58,7 @@ export async function deliveryWorkflowOptions(
       fingerprint,
     };
   });
-  const publishedPolicies = (await client.query(`SELECT p.id "policyId",p.code,v.id "versionId",v.version,v.definition,v.fingerprint
-    FROM company_workflow_governance_policies p JOIN company_workflow_governance_versions v ON v.policy_id=p.id
-    WHERE p.company_id=$1 AND v.state='published' ORDER BY p.code,v.version DESC`, [companyId])).rows;
+  const publishedPolicies = await publishedGovernanceRows(client, companyId);
   const available = mode === "approved_only" ? companyOptions : [...companyOptions, ...BIMLOG_DELIVERY_WORKFLOWS];
   const options: DeliveryWorkflowOption[] = available.map(option => {
     const policy = applicablePublishedGovernance(publishedPolicies, option.templateId);
