@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { validatePricingTemplate } from "./company-pricing-template-contract";
-import { economicCheckerAllowed, sourceFromVerifiedCommercialApu } from "./delivery-workflow-allocation-source-contract";
+import { economicCheckerAllowed, sourceFromVerifiedCommercialApu, workflowTemplateCheckerAllowed } from "./delivery-workflow-allocation-source-contract";
 import { FinancialControlError } from "./financial-control-contract";
 
 const definition = {
@@ -25,6 +25,9 @@ assert.equal(source.phases.length, 2);
 assert.equal(economicCheckerAllowed({ creatorId: 1, lastEditorId: 1, checkerId: 2, hasFinanceGrant: true }), true);
 assert.equal(economicCheckerAllowed({ creatorId: 1, lastEditorId: 2, checkerId: 2, hasFinanceGrant: true }), false);
 assert.equal(economicCheckerAllowed({ creatorId: 1, lastEditorId: 1, checkerId: 2, hasFinanceGrant: false }), false);
+assert.equal(workflowTemplateCheckerAllowed({ creatorId: 1, lastEditorId: 1, checkerId: 2 }), true);
+assert.equal(workflowTemplateCheckerAllowed({ creatorId: 1, lastEditorId: 1, checkerId: 1 }), false);
+assert.equal(workflowTemplateCheckerAllowed({ creatorId: 1, lastEditorId: 2, checkerId: 2 }), false);
 assert.throws(() => sourceFromVerifiedCommercialApu({ definition, versionId: "apu-v2", fingerprint: "0".repeat(64), currency: "USD" }),
   (error: unknown) => error instanceof FinancialControlError && error.code === "WORKFLOW_APU_INTEGRITY");
 assert.throws(() => sourceFromVerifiedCommercialApu({ definition, versionId: "apu-v2", fingerprint, currency: "EUR" }),

@@ -16,7 +16,16 @@ export function economicCheckerAllowed(input: {
   checkerId: number;
   hasFinanceGrant: boolean;
 }): boolean {
-  return input.hasFinanceGrant && input.checkerId !== input.creatorId && input.checkerId !== input.lastEditorId;
+  return input.hasFinanceGrant && workflowTemplateCheckerAllowed(input);
+}
+
+export function workflowTemplateCheckerAllowed(input: {
+  creatorId: number;
+  lastEditorId: number;
+  checkerId: number;
+}): boolean {
+  return Number.isSafeInteger(input.checkerId) && input.checkerId > 0 &&
+    input.checkerId !== input.creatorId && input.checkerId !== input.lastEditorId;
 }
 
 export function sourceFromVerifiedCommercialApu(input: {
