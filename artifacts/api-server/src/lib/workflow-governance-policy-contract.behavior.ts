@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, workflowPolicyIndependentCheckerAllowed, WorkflowGovernancePolicyError } from "./workflow-governance-policy-contract";
+import { applicablePublishedGovernance } from "./workflow-governance-binding";
 
 const actions = ["create_work_item", "complete_phase", "complete_deliverable", "economic_change", "template_update", "activate_version"];
 const changes = ["edit_phases", "edit_tasks_roles", "edit_allocation", "change_apu", "edit_approved_work_item", "retire_version"];
@@ -20,6 +21,14 @@ assert.equal(workflowPolicyIndependentCheckerAllowed({ actorUserId: 4, createdBy
 assert.equal(workflowPolicyIndependentCheckerAllowed({ actorUserId: 5, createdById: 4, updatedById: 5 }), false);
 assert.equal(workflowPolicyIndependentCheckerAllowed({ actorUserId: 6, createdById: 4, updatedById: 5 }), true);
 assert.equal(workflowPolicyIndependentCheckerAllowed({ actorUserId: 0, createdById: 4, updatedById: 5 }), false);
+const published = { policyId: "policy-1", versionId: "version-1", code: "QA-GOV", version: 1,
+  definition: validateWorkflowGovernancePolicy(valid), fingerprint: workflowGovernancePolicyFingerprint(valid) };
+assert.equal(applicablePublishedGovernance([published], null)?.versionId, "version-1");
+assert.equal(applicablePublishedGovernance([], "template-1"), null);
+assert.throws(() => applicablePublishedGovernance([published, { ...published, policyId: "policy-2" }], "template-1"),
+  (error: unknown) => (error as { code?: string }).code === "WORKFLOW_POLICY_AMBIGUOUS");
+assert.throws(() => applicablePublishedGovernance([{ ...published, fingerprint: "0".repeat(64) }], null),
+  (error: unknown) => (error as { code?: string }).code === "WORKFLOW_POLICY_FINGERPRINT_MISMATCH");
 function invalid(change: (value: ReturnType<typeof copy>) => void, field: string) {
   const candidate = copy(); change(candidate);
   assert.throws(() => validateWorkflowGovernancePolicy(candidate), (error: unknown) => error instanceof WorkflowGovernancePolicyError && error.field === field);
