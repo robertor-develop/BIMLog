@@ -16,7 +16,10 @@ type Props = {
   defaultApuVersion: number | null;
   apuVersions: Array<{ version: number; name: string; sellingPrice: string }>;
   defaultWorkflow: string;
-  deliveryWorkflowOptions?: Array<{ versionId: string; name: string; source: string; version: number; definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: unknown[] }> } }>;
+  deliveryWorkflowOptions?: Array<{ versionId: string; name: string; source: string; version: number;
+    governancePolicy?: { code: string; version: number } | null;
+    activationBlock?: { code: string; message: string } | null;
+    definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: unknown[] }> } }>;
   deliveryWorkflowMode?: "approved_only" | "defaults_allowed";
   capabilities: { costValuePlanner: boolean; budget: boolean };
   contracts: any[];
@@ -616,9 +619,13 @@ export function ContractItemBulkEditor(props: Props) {
                 {props.tt("Delivery Workflow version", "Versión del flujo de entrega")}
                 <select value={item.deliveryWorkflowVersionId || ""} onChange={event => update(index, { deliveryWorkflowVersionId: event.target.value })}>
                   <option value="">{props.tt("Auto-select when exactly one is applicable", "Selección automática si solo hay una opción aplicable")}</option>
-                  {(props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")).map(option => <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.source === "company" ? props.tt("Company", "Empresa") : "BIMLog"}</option>)}
+                  {(props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")).map(option => <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.source === "company" ? props.tt("Company", "Empresa") : "BIMLog"}{option.activationBlock ? ` · ${props.tt("Blocked by policy", "Bloqueado por política")}` : ""}</option>)}
                 </select>
-                {(() => { const matches = (props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")); const selected = matches.find(option => option.versionId === item.deliveryWorkflowVersionId) ?? (matches.filter(option => option.source === "company").length === 1 ? matches.find(option => option.source === "company") : matches.filter(option => option.source === "company").length === 0 ? matches.find(option => option.source === "bimlog") : undefined); return selected ? <small>{selected.definition.phases.map(phase => `${phase.name} (${phase.tasks.length})`).join(" → ")}</small> : <small role="alert">{props.deliveryWorkflowMode === "approved_only" && matches.length === 0 ? props.tt("Company PMO must publish a matching workflow before activation.", "PMO debe publicar un flujo compatible antes de activar.") : props.tt("Select one company workflow before activation.", "Seleccione un flujo de empresa antes de activar.")}</small>; })()}
+                {(() => { const matches = (props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")); const selected = matches.find(option => option.versionId === item.deliveryWorkflowVersionId) ?? (matches.filter(option => option.source === "company").length === 1 ? matches.find(option => option.source === "company") : matches.filter(option => option.source === "company").length === 0 ? matches.find(option => option.source === "bimlog") : undefined); return selected ? <>
+                  <small>{selected.definition.phases.map(phase => `${phase.name} (${phase.tasks.length})`).join(" → ")}</small>
+                  <small>{selected.governancePolicy ? `${props.tt("Published company Governance Policy", "Política de gobernanza empresarial publicada")}: ${selected.governancePolicy.code} · v${selected.governancePolicy.version}` : props.tt("No published company Governance Policy applies to this workflow.", "Ninguna política de gobernanza empresarial publicada aplica a este flujo.")}</small>
+                  {selected.activationBlock && <small role="alert">{props.tt("Activation blocked by published Governance Policy", "Activación bloqueada por la política de gobernanza publicada")}: {selected.activationBlock.code}</small>}
+                </> : <small role="alert">{props.deliveryWorkflowMode === "approved_only" && matches.length === 0 ? props.tt("Company PMO must publish a matching workflow before activation.", "PMO debe publicar un flujo compatible antes de activar.") : props.tt("Select one company workflow before activation.", "Seleccione un flujo de empresa antes de activar.")}</small>; })()}
               </label>
               {props.capabilities.budget && props.budgetSnapshotId && props.budgetLines.length > 0 && (
                 <label>
