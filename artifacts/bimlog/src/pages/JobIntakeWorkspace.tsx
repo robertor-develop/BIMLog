@@ -1681,6 +1681,7 @@ export function JobIntakeWorkspace() {
               </section>
               <section className="ji-card" id="ji-identity">
                 <h2>2. {stageLabel("identity")}</h2>
+                <p className="ji-small">{tt("The client is selected for the project and its contracts. Floors belong to work-package and task locations; do not assign a client per floor.", "El cliente se selecciona para el proyecto y sus contratos. Los pisos corresponden a ubicaciones de paquetes y tareas; no se asigna un cliente por piso.")}</p>
                 {guide && (
                   <div className="ji-guide">
                     {tt(

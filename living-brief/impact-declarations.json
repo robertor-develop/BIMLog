@@ -39631,6 +39631,98 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9090df388a4feee4c2eabf917b26cb325b631c5b0b7b93272f3bd5a5a8ca6853"
+    },
+    {
+      "taskId": "bimlog-template-intake-field-repair-block02-20260923",
+      "reviewedThroughCommit": "3ea5803df088a02820580d34b77043363b4a78a9",
+      "reviewedAt": "2026-09-24T03:18:12Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Quick Start global Service/Phase and the client/floor explanation contradicted the correct package/task and project/contract authorities; local source correction is not yet live accepted."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Commercial, project, contract, package and task identities are retained."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation and acceptance rules remain in force; no operating rule changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing UI and end-to-end quality gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This scoped correction does not change product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural route, schema, package or generated-platform map changed; this only corrects classification behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Native or installer surface changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or metadata changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Local Builds 6–10 and their pending release/field gate are distinguished from the published state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Legacy draft resolution and remaining template/governance acceptance remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical entries remain unchanged; the active candidate is recorded in Status and Open Loop."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/block10-controlled-acceptance.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-full-lifecycle.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/bimlog/src/components/job-intake/ClientFloorAuthority.behavior.ts",
+        "artifacts/bimlog/src/components/job-intake/LegacyProjectClassificationNotice.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/LegacyProjectClassificationNotice.tsx",
+        "artifacts/bimlog/src/components/job-intake/MasterClassificationSelectors.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/MasterClassificationSelectors.tsx",
+        "artifacts/bimlog/src/components/job-intake/QuickJobIntake.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c94169667c70a3b1518f93d1276fc1684ea49ba395084f7a8d5e70ac01402769"
     }
   ]
 }
