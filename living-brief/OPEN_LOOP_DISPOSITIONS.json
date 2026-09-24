@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "191a82fd83a2b7dab621120dd1e17432405811695b244f111c7f2e5f2bd0e79a",
+  "sourceSha256": "9d4d44874feff148b00fe1b008fa458f24cde9f334bbe7068b5787a04f949ede",
   "itemCount": 170,
   "counts": {
     "ACTIVE": 137,
@@ -62,10 +62,10 @@
   ],
   "items": [
     {
-      "id": "ff963b8547aecf5b",
+      "id": "d36aa20b614912fc",
       "sourceLine": 7,
       "heading": "Urgent Template / Intake integration gap — 2026-09-23",
-      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–40 reached GitHub; Build 40 was published at `6aaea1b4c0439198ae72b636566818083a107c23`. Authenticated Chrome proved a synthetic workflow draft save/reopen and correctly blocked self-approval in both workflow and Governance editors, not six-role acceptance. Builds 41–45 are a local candidate for narrowly assignable Operations Director authority; their full gate, push and later ten-build publication remain separate. Approval thresholds, company-role policy rows and other change rules remain intent rather than full execution authority; guarded EDT mutations remain closed.",
+      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–45 reached GitHub; Build 40 was published at `6aaea1b4c0439198ae72b636566818083a107c23`, and Builds 41–45 are pushed but not published. Authenticated Chrome proved a synthetic workflow draft save/reopen and correctly blocked self-approval in both workflow and Governance editors, not six-role acceptance. Builds 46–50 are a local candidate for the narrow Operations Director administration screen and real isolated-database grant/revoke proof. Their full gate, push, ten-build publication and live smoke remain separate. Approval thresholds, company-role policy rows and other change rules remain intent rather than full execution authority; guarded EDT mutations remain closed.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {

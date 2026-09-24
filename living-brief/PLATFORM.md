@@ -461,6 +461,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-source-service.ts
 - artifacts/api-server/src/lib/edt-engine-transaction.ts
 - artifacts/api-server/src/lib/edt-operations-director-grant.behavior.ts
+- artifacts/api-server/src/lib/edt-operations-director-list.behavior.ts
+- artifacts/api-server/src/lib/edt-operations-director-live-db.behavior.ts
 - artifacts/api-server/src/lib/edt-operations-director-postgres.behavior.ts
 - artifacts/api-server/src/lib/edt-operations-director-role.behavior.ts
 - artifacts/api-server/src/lib/email.ts
@@ -991,8 +993,10 @@ It changes only when the code structure or curated architectural facts change.
   boundary. Independent approval also rechecks published-policy compatibility and policy scope;
   publication rechecks again before replacing a live version. The governed runtime freezes the
   selected policy and workflow definition by version and fingerprint. Policy threshold and
-  company-role matrices remain recorded intent rather than independent execution grants; the
-  guarded EDT mutations are not represented as a completed six-role production journey.
+  company-role matrices remain recorded intent rather than independent execution grants. A
+  Super Administrator can assign or revoke narrow project-scoped EDT Operations Director
+  authority for an active same-company member with an append-only reason and history. The
+  guarded EDT activation mutations are not represented as a completed six-role production journey.
 - Smart Intake uses the existing project-scoped `job_intakes.data` draft as its only pre-activation
   authority. Preserved XLS/XLSX/XLSM/CSV sources expose bounded multi-sheet previews; the user must
   explicitly choose the sheet, header row, Contract Item Name column, and Quantity column. A
