@@ -70,6 +70,32 @@ CREATE INDEX IF NOT EXISTS job_activation_work_item_alias_lookup_idx ON job_acti
 `;
 
 export const EDT_ENGINE_GOVERNANCE_SQL = String.raw`
+CREATE TABLE IF NOT EXISTS edt_operations_director_grants (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id),
+  project_id integer NOT NULL REFERENCES projects(id), user_id integer NOT NULL REFERENCES users(id),
+  granted_by_id integer NOT NULL REFERENCES users(id), reason text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS edt_operations_director_grant_scope_idx
+  ON edt_operations_director_grants(company_id,project_id,user_id);
+CREATE TABLE IF NOT EXISTS edt_operations_director_revocations (
+  grant_id text PRIMARY KEY REFERENCES edt_operations_director_grants(id),
+  revoked_by_id integer NOT NULL REFERENCES users(id), reason text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE OR REPLACE FUNCTION edt_operations_director_history_guard() RETURNS trigger AS $$
+BEGIN RAISE EXCEPTION 'EDT Operations Director authority history is immutable'; END;
+$$ LANGUAGE plpgsql;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='edt_operations_director_grant_immutable') THEN
+    CREATE TRIGGER edt_operations_director_grant_immutable BEFORE UPDATE OR DELETE ON edt_operations_director_grants
+      FOR EACH ROW EXECUTE FUNCTION edt_operations_director_history_guard();
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='edt_operations_director_revocation_immutable') THEN
+    CREATE TRIGGER edt_operations_director_revocation_immutable BEFORE UPDATE OR DELETE ON edt_operations_director_revocations
+      FOR EACH ROW EXECUTE FUNCTION edt_operations_director_history_guard();
+  END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS job_activation_requests (
   id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), intake_id text NOT NULL REFERENCES job_intakes(id),
   intake_revision integer NOT NULL CHECK (intake_revision > 0), governance_version_id text NOT NULL, pricing_version_id text NOT NULL, workflow_version_ids jsonb NOT NULL,
