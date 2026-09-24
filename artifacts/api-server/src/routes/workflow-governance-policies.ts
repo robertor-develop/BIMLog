@@ -6,7 +6,9 @@ import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance
 import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, workflowPolicyIndependentCheckerAllowed, WorkflowGovernancePolicyError, type WorkflowGovernancePolicy } from "../lib/workflow-governance-policy-contract";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
 import { ensureDeliveryWorkflowTemplateSchema } from "../lib/delivery-workflow-template-migration";
-import { policiesOverlap } from "../lib/workflow-governance-binding";
+import { policiesOverlap, validatePublishedWorkflowsForPolicy } from "../lib/workflow-governance-binding";
+import { FinancialControlError } from "../lib/financial-control-contract";
+import { DeliveryWorkflowDefinitionError } from "../lib/delivery-workflow-template-contract";
 
 const router = Router();
 const codePattern = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -218,6 +220,7 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/publi
     if (others.some(other => policiesOverlap(value, validateWorkflowGovernancePolicy(other.definition)))) {
       await client.query("ROLLBACK"); res.status(409).json({ code: "WORKFLOW_POLICY_SCOPE_OVERLAP" }); return;
     }
+    await validatePublishedWorkflowsForPolicy(client, actor.companyId, value);
     const prior = (await client.query(`UPDATE company_workflow_governance_versions SET state='superseded',updated_by_id=$2,updated_at=now()
       WHERE policy_id=$1 AND state='published' RETURNING id`, [current.id, actor.userId])).rows;
     for (const item of prior) await event(client, actor, current.id, item.id, "superseded", { byVersionId: row.id });
@@ -226,7 +229,13 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/publi
     await event(client, actor, current.id, row.id, "published", { fingerprint: row.fingerprint });
     await client.query("COMMIT");
     res.json({ versionId: row.id, state: "published", fingerprint: row.fingerprint, revision: revision + 1 });
-  } catch (error) { await client.query("ROLLBACK"); if (error instanceof WorkflowGovernancePolicyError) res.status(409).json({ code: error.code, field: error.field }); else throw error; }
+  } catch (error) {
+    await client.query("ROLLBACK");
+    if (error instanceof WorkflowGovernancePolicyError || error instanceof DeliveryWorkflowDefinitionError)
+      res.status(409).json({ code: error.code, field: error.field });
+    else if (error instanceof FinancialControlError) res.status(error.status).json({ code: error.code });
+    else throw error;
+  }
   finally { client.release(); }
 });
 

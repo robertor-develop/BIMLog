@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { pool } from "@workspace/db";
 import router from "../routes/workflow-governance-policies";
 import { signToken } from "../middlewares/auth";
+import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
 
 const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/invalid");
 if (target.hostname !== "127.0.0.1" || target.port !== "55449" || target.pathname !== "/delivery_template_test")
@@ -85,9 +86,31 @@ try {
   assert.equal((await call(maker,`/company/workflow-governance-policies/${id}/versions/${v2}`,{ expectedRevision:1,definition:changed },"PATCH")).status,409);
   assert.equal((await call(checker,`/company/workflow-governance-policies/${id}/versions/${v2}/approve`,{ expectedRevision:2 })).status,200);
   assert.equal((await call(checker,`/company/workflow-governance-policies/${id}/versions/${v2}/publish`,{ expectedRevision:3 })).status,200);
+  const legacyWorkflow = validateDeliveryWorkflowDefinition({ schemaVersion:1,deliverableTypes:["SHOP_DRAWING"],
+    roles:{execute:"DRAFTER",review:"QC_REVIEWER",approve:"PROJECT_MANAGER"},
+    phases:[{id:"only",code:"ONLY",name:"Only",order:1,
+      tasks:[{id:"draft",code:"DRAFT",name:"Draft",order:1,requiredDocuments:[]}],
+      completionRule:"all_tasks_complete",qcRequired:false,approvalRequired:false}],
+    transitions:[],reopen:{role:"approve",reasonRequired:true} });
+  const workflowId = randomUUID(), workflowVersionId = randomUUID();
+  await pool.query(`INSERT INTO company_delivery_workflow_templates(id,company_id,code,name,created_by_id)
+    VALUES($1,$2,'LEGACY','Legacy workflow',$3)`, [workflowId,company.id,owner.id]);
+  await pool.query(`INSERT INTO company_delivery_workflow_versions(id,template_id,version,state,definition,fingerprint,
+    approved_by_id,approved_at,published_by_id,published_at,created_by_id,updated_by_id)
+    VALUES($1,$2,1,'published',$3::jsonb,$4,$5,now(),$5,now(),$5,$5)`,
+    [workflowVersionId,workflowId,JSON.stringify(legacyWorkflow),deliveryWorkflowFingerprint(legacyWorkflow),owner.id]);
+  const incompatiblePolicy = await call(maker,`/company/workflow-governance-policies/${id}/versions`,{});
+  assert.equal(incompatiblePolicy.status,201,JSON.stringify(incompatiblePolicy.body));
+  assert.equal((await call(checker,`/company/workflow-governance-policies/${id}/versions/${incompatiblePolicy.body.versionId}/approve`,
+    {expectedRevision:1})).status,200);
+  const deniedForLegacy = await call(checker,`/company/workflow-governance-policies/${id}/versions/${incompatiblePolicy.body.versionId}/publish`,
+    {expectedRevision:2});
+  assert.equal(deniedForLegacy.status,409,JSON.stringify(deniedForLegacy.body));
+  assert.equal(deniedForLegacy.body.code,"WORKFLOW_POLICY_FINAL_APPROVAL_REQUIRED");
   const history = await call(maker,`/company/workflow-governance-policies/${id}`);
   assert.equal(history.body.versions.find((x: any) => x.versionId === v1).state,"superseded");
   assert.equal(history.body.versions.find((x: any) => x.versionId === v2).state,"published");
+  assert.equal(history.body.versions.find((x: any) => x.versionId === incompatiblePolicy.body.versionId).state,"approved");
   assert.ok(history.body.history.some((x: any) => x.action === "superseded"));
   assert.ok(history.body.history.some((x: any) => x.action === "approved" && x.actorId === checker.id && x.actorName === checker.full_name));
   assert.equal(history.body.versions.find((x: any) => x.versionId === v2).approvedById,checker.id);

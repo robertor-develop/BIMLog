@@ -1,17 +1,17 @@
 import assert from "node:assert/strict";
 import { FinancialControlError } from "./financial-control-contract";
-import { deliveryWorkflowFingerprint } from "./delivery-workflow-template-contract";
+import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
 import { validatePublishedWorkflowsForPolicy } from "./workflow-governance-binding";
 import { validateWorkflowGovernancePolicy } from "./workflow-governance-policy-contract";
 
-const workflow = {
+const workflow = validateDeliveryWorkflowDefinition({
   schemaVersion: 1, deliverableTypes: ["SHOP_DRAWING"],
   roles: { execute: "DRAFTER", review: "QC_REVIEWER", approve: "PROJECT_MANAGER" },
   phases: [{ id: "phase", code: "PHASE", name: "Phase", order: 1,
     tasks: [{ id: "task", code: "TASK", name: "Task", order: 1, requiredDocuments: [] }],
     completionRule: "all_tasks_complete", qcRequired: false, approvalRequired: false }],
   transitions: [], reopen: { role: "approve", reasonRequired: true },
-} as const;
+});
 const policy = validateWorkflowGovernancePolicy({
   schemaVersion: 1, scope: { allWorkflows: false, workflowTemplateIds: ["target"] },
   approvalRules: ["create_work_item", "complete_phase", "complete_deliverable", "economic_change", "template_update", "activate_version"]
