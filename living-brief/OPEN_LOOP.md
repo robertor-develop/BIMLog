@@ -2,6 +2,10 @@
 
 ## Coordination routing and SharePoint publishing — 2026-09-25
 
+- [x] Publish the ten-build source through Replit Shell at `04f2af1cf8c446783e38a826b10649afa59d330b`; exact production health/source identity and the visible authenticated Integrations page passed. Browser-controlled file selection was denied, so the import/save/refresh smoke remains unverified rather than passed.
+- [x] Implement Builds 11–15 destination readiness: no route is publishable without a current Wizard import/routing profile, active scoped credential and project mapping, and exact Graph-verified site/library identity. The view states that SharePoint file publishing is still unavailable.
+- [ ] Complete durable file custody, idempotent provider upload jobs, retry/error audit, explicit user confirmation, and a real tenant/site round-trip. Keep the legacy queue disabled until these pass.
+- [ ] Restore Chrome file selection for the authorized synthetic fixture and repeat published import/save/refresh/reopen acceptance; do not substitute source tests for this live check.
 - [x] Push BT Folder Wizard import foundation block (five commits through `b3d5a065`); source checks passed, publication and live Chrome acceptance remain separate.
 - [ ] Complete company tag-to-tier defaults, project overrides, exact path resolution, site/library authority, durable file custody, governed Graph delivery and visible retry/audit. Fix existing false `queued_sync` result before claiming a file is queued.
 - [x] Source-correct the false `queued_sync` success: reject the action before creating an intake event or deleting staged bytes, and disable the misleading UI button. This is a fail-closed interim correction, not a SharePoint publisher.

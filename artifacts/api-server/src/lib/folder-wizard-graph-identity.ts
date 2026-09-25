@@ -21,7 +21,7 @@ async function boundedJson(response: Response): Promise<unknown> {
       if (size > 32_768) throw new Error("FOLDER_WIZARD_GRAPH_IDENTITY_TOO_LARGE");
       chunks.push(part.value);
     }
-  } finally { await reader.cancel().catch(() => undefined); }
+  } finally { await reader.cancel(); }
   return JSON.parse(Buffer.concat(chunks).toString("utf8"));
 }
 

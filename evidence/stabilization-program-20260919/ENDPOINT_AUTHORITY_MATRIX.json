@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "artifacts/api-server/src/routes",
-  "endpointCount": 667,
+  "endpointCount": 668,
   "counts": {
     "public": 13,
-    "authenticated": 654,
-    "projectScoped": 387,
+    "authenticated": 655,
+    "projectScoped": 388,
     "objectScoped": 308,
     "dynamic": 6
   },
@@ -5194,7 +5194,19 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 21
+      "line": 23
+    },
+    {
+      "file": "folder-wizard-routing.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/integrations/folder-wizard/publishing-readiness",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [],
+      "line": 26
     },
     {
       "file": "folder-wizard-routing.ts",
@@ -5206,7 +5218,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 24
+      "line": 29
     },
     {
       "file": "folder-wizard-routing.ts",
@@ -5218,7 +5230,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 33
+      "line": 38
     },
     {
       "file": "generic-apu-budget-controls.ts",

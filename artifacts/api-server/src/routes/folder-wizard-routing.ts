@@ -3,9 +3,11 @@ import { ZodError } from "zod/v4";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { FolderWizardImportError } from "../lib/folder-wizard-import-service";
 import { createFolderWizardRoutingService } from "../lib/folder-wizard-routing-service";
+import { createFolderWizardPublishReadinessStore } from "../lib/folder-wizard-publish-readiness-store";
 
 const router: IRouter = Router();
 const service = createFolderWizardRoutingService();
+const publishingReadiness = createFolderWizardPublishReadinessStore();
 const getScope = (req: { params: Record<string, unknown>; user?: { userId: number } }) => {
   const projectId = Number(req.params.projectId);
   if (!Number.isSafeInteger(projectId) || projectId <= 0) throw new FolderWizardImportError("FOLDER_WIZARD_INVALID_PROJECT", 400);
@@ -20,6 +22,9 @@ function fail(res: { status(code: number): { json(value: unknown): unknown } }, 
 }
 router.get("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json(await service.current(getScope(req))); } catch (error) { fail(res, error); }
+});
+router.get("/projects/:projectId/integrations/folder-wizard/publishing-readiness", authMiddleware, requireProjectMember(), async (req, res) => {
+  try { res.json(await publishingReadiness.read(getScope(req))); } catch (error) { fail(res, error); }
 });
 router.post("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, requireProjectMember(), async (req, res) => {
   try {

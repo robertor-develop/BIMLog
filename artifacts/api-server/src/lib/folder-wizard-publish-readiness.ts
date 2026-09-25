@@ -23,12 +23,11 @@ export interface FolderWizardPublishReadinessInput {
 }
 
 function canonicalSiteUrl(raw: string): string | null {
-  try {
-    const url = new URL(raw);
-    if (url.protocol !== "https:" || !/\.sharepoint\.(com|us)$/i.test(url.hostname) ||
-        url.username || url.password || url.search || url.hash || url.pathname === "/") return null;
-    return `${url.origin.toLowerCase()}${url.pathname.replace(/\/$/, "").toLowerCase()}`;
-  } catch { return null; }
+  if (!URL.canParse(raw)) return null;
+  const url = new URL(raw);
+  if (url.protocol !== "https:" || !/\.sharepoint\.(com|us)$/i.test(url.hostname) ||
+      url.username || url.password || url.search || url.hash || url.pathname === "/") return null;
+  return `${url.origin.toLowerCase()}${url.pathname.replace(/\/$/, "").toLowerCase()}`;
 }
 
 /** A green routing preview is not proof that a provider destination is authorized. */

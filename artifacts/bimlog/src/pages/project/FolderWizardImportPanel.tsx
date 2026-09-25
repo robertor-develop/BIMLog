@@ -5,6 +5,20 @@ import { FolderWizardRoutingPanel } from "./FolderWizardRoutingPanel";
 type ImportRecord = { id: string; version: number; sha256: string;
   document: { destination: { sharepoint_url: string; base_path: string }; blueprints: { name: string; include: boolean; tiers: { label: string; items: string[] }[] }[] };
   preview: { paths: string[]; totalLeafPaths: string; truncated: boolean } };
+type Readiness = { ready: boolean; blockers: string[]; providerError: string | null };
+
+const readinessLabels: Record<string, [string, string]> = {
+  IMPORT_MISSING: ["Wizard import missing", "Falta la importación del Wizard"],
+  SITE_MISSING: ["SharePoint site missing in export", "Falta el sitio SharePoint en la exportación"],
+  ROUTING_MISSING: ["Routing rules missing", "Faltan reglas de rutas"],
+  ROUTING_STALE: ["Routing rules need a new version", "Las reglas requieren una nueva versión"],
+  ROUTING_INVALID: ["Routing rules do not match the import", "Las reglas no corresponden a la importación"],
+  PROJECT_MAPPING_MISSING: ["Project site and library are not configured", "El sitio y la biblioteca del proyecto no están configurados"],
+  PROJECT_MAPPING_DISABLED: ["Project SharePoint mapping is disabled", "La conexión SharePoint del proyecto está desactivada"],
+  CREDENTIAL_INACTIVE: ["SharePoint credential is not active", "La credencial SharePoint no está activa"],
+  SITE_IDENTITY_UNVERIFIED: ["Site identity has not been verified", "No se ha verificado la identidad del sitio"],
+  LIBRARY_IDENTITY_UNVERIFIED: ["Library identity has not been verified", "No se ha verificado la identidad de la biblioteca"],
+};
 
 export function FolderWizardImportPanel({ projectId, token, lang }: { projectId: number; token: string | null; lang: string }) {
   const tr = (en: string, es: string) => lang === "es" ? es : en;
@@ -15,6 +29,8 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
   const [fileName, setFileName] = useState("");
   const [draft, setDraft] = useState<FolderWizardDraft | null>(null);
   const [saving, setSaving] = useState(false);
+  const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [readinessError, setReadinessError] = useState(false);
   const endpoint = `/api/v1/projects/${projectId}/integrations/folder-wizard`;
 
   async function reload(signal?: AbortSignal) {
@@ -23,6 +39,9 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
     if (!response.ok) throw new Error(`load ${response.status}`);
     const data = await response.json() as { current: ImportRecord | null };
     setCurrent(data.current);
+    const check = await fetch(`${endpoint}/publishing-readiness`, { headers: { Authorization: `Bearer ${token}` }, signal });
+    if (check.ok) { setReadiness(await check.json() as Readiness); setReadinessError(false); }
+    else { setReadiness(null); setReadinessError(true); }
   }
 
   useEffect(() => {
@@ -88,6 +107,13 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
           {current.preview.truncated && <p>{tr("Preview limited to 100 paths.", "Vista previa limitada a 100 rutas.")}</p>}
         </details>
       </div> : <p style={{ fontSize: 12 }}>{tr("No routing export has been imported for this project.", "No se ha importado una configuración de rutas para este proyecto.")}</p>}
+      {readinessError ? <p role="alert">{tr("Destination verification could not be loaded.", "No se pudo cargar la verificación del destino.")}</p>
+        : readiness && <div style={{ fontSize: 12 }}>
+          <strong>{readiness.ready ? tr("Site and library verified", "Sitio y biblioteca verificados") : tr("Destination setup incomplete", "Configuración del destino incompleta")}</strong>
+          {readiness.blockers.length > 0 && <ul>{readiness.blockers.map((code) => <li key={code}>{readinessLabels[code]?.[lang === "es" ? 1 : 0] ?? code}</li>)}</ul>}
+          {readiness.providerError && <p role="alert">{tr("Microsoft Graph verification is unavailable; no publishing is enabled.", "La verificación con Microsoft Graph no está disponible; no se habilita la publicación.")}</p>}
+          <p>{tr("File publishing to SharePoint is not enabled yet.", "La publicación de archivos en SharePoint todavía no está habilitada.")}</p>
+        </div>}
       <label style={{ display: "block", marginTop: 12, fontSize: 12 }}>
         {tr("Choose a Wizard JSON export", "Seleccione un JSON exportado por el Wizard")}
         <input type="file" accept=".json,application/json" onChange={(event) => void choose(event.target.files?.[0])} style={{ display: "block", marginTop: 5, maxWidth: "100%" }} />

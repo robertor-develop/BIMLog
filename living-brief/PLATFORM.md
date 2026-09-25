@@ -570,10 +570,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-statement-mapping.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-export.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-export.ts
+- artifacts/api-server/src/lib/folder-wizard-graph-identity.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-graph-identity.ts
 - artifacts/api-server/src/lib/folder-wizard-import-service.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-import-service.ts
 - artifacts/api-server/src/lib/folder-wizard-paths.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-paths.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-readiness-store.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-readiness-store.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-readiness.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-readiness.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.ts
 - artifacts/api-server/src/lib/folder-wizard-routing-contract.behavior.ts
