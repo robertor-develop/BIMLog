@@ -46,6 +46,7 @@ assert.match(selector, /company_master_catalog_entries WHERE company_id=\$1 AND 
 assert.match(selector, /SELECT id,code,name,aliases,state/);
 assert.match(selector, /if \(governed\).*entries: companyRows/s);
 assert.match(intake, /company_master_catalog_entries WHERE id=\$1 AND company_id=\$2 AND kind=\$3/);
+assert.match(intake, /SELECT id::text AS id FROM \$\{table\} WHERE id::text=\$1\s+UNION ALL SELECT id FROM company_master_catalog_entries/);
 assert.match(intake, /JOB_INTAKE_CLIENT_CATALOG_REQUIRED/);
 assert.match(intake, /JOB_INTAKE_CLASSIFICATION_NOT_APPROVED/);
 assert.match(intake, /company_master_catalog_policies WHERE company_id=\$1 AND mode='approved_only'/);

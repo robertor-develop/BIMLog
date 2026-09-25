@@ -156,7 +156,7 @@ async function validateRelationshipAuthority(data: JobIntakeData, projectId: num
       ["phase", classification.phaseId, "enterprise_phases"],
     ] as const) {
       if (!id) continue;
-      const found = (await client.query(`SELECT id FROM ${table} WHERE id::text=$1
+      const found = (await client.query(`SELECT id::text AS id FROM ${table} WHERE id::text=$1
         UNION ALL SELECT id FROM company_master_catalog_entries WHERE id=$1 AND company_id=$2 AND kind=$3 LIMIT 1`, [id, projectCompanyId, kind])).rows[0];
       if (!found) throw new FinancialControlError(400, "JOB_INTAKE_CLASSIFICATION_INVALID", `The selected ${kind} on ${scopeName} is not an authoritative master-catalog entry.`);
       const previous = previousClassifications.get(scopeName);
