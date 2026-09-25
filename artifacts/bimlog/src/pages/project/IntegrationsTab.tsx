@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
+import { FolderWizardImportPanel } from "./FolderWizardImportPanel";
 
 interface IntegrationsTabProps {
   projectId: number;
@@ -202,6 +203,8 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         </div>
         <div style={{ marginTop: 9, fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>{tr("Visible", "Visibles")}: {catalogLoadFailed ? tr("Unavailable", "No disponible") : `${visibleProviders.length}/${providers.length}`}</div>
       </section>
+
+      <FolderWizardImportPanel projectId={projectId} token={token} lang={lang} />
 
       <div aria-live="polite" aria-atomic="true">
         {loading ? (
