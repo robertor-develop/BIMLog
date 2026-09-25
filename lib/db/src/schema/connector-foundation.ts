@@ -55,3 +55,30 @@ export const sharePointFolderMappingsTable = pgTable("sharepoint_folder_mappings
 export const sharePointSyncStatesTable = pgTable("sharepoint_sync_states", {
   id: text("id").primaryKey(), folderMappingId: text("folder_mapping_id").notNull().references(() => sharePointFolderMappingsTable.id), syncStatus: text("sync_status").notNull().default("never_synced"), cursorCiphertext: text("cursor_ciphertext"), cursorIv: text("cursor_iv"), cursorTag: text("cursor_tag"), wrappedDataKey: text("wrapped_data_key"), wrapIv: text("wrap_iv"), wrapTag: text("wrap_tag"), keyVersion: integer("key_version"), lastSyncAt: utc("last_sync_at"), mismatchCode: text("mismatch_code"), updatedAt: utc("updated_at").defaultNow().notNull(),
 }, (t) => [unique("sharepoint_sync_states_folder_uq").on(t.folderMappingId), check("sharepoint_sync_states_status_chk", sql`${t.syncStatus} IN ('never_synced','queued','syncing','current','retry','mismatch','disabled')`), check("sharepoint_sync_states_cursor_envelope_chk", sql`(${t.cursorCiphertext} IS NULL AND ${t.cursorIv} IS NULL AND ${t.cursorTag} IS NULL AND ${t.wrappedDataKey} IS NULL AND ${t.wrapIv} IS NULL AND ${t.wrapTag} IS NULL AND ${t.keyVersion} IS NULL) OR (${t.cursorCiphertext} IS NOT NULL AND ${t.cursorIv} IS NOT NULL AND ${t.cursorTag} IS NOT NULL AND ${t.wrappedDataKey} IS NOT NULL AND ${t.wrapIv} IS NOT NULL AND ${t.wrapTag} IS NOT NULL AND ${t.keyVersion}>0)`), check("sharepoint_sync_states_mismatch_chk", sql`(${t.syncStatus}='mismatch')=(${t.mismatchCode} IS NOT NULL)`)]);
+
+/** Imported Wizard exports are immutable; re-import creates a new version. */
+export const folderWizardImportsTable = pgTable("folder_wizard_imports", {
+  id: text("id").primaryKey(),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  projectId: integer("project_id").notNull().references(() => projectsTable.id),
+  version: integer("version").notNull(),
+  sourceSha256: text("source_sha256").notNull(),
+  sourceText: text("source_text").notNull(),
+  importedById: integer("imported_by_id").notNull().references(() => usersTable.id),
+  importedAt: utc("imported_at").defaultNow().notNull(),
+}, (t) => [
+  unique("folder_wizard_imports_scope_uq").on(t.id, t.companyId, t.projectId),
+  unique("folder_wizard_imports_version_uq").on(t.companyId, t.projectId, t.version),
+  check("folder_wizard_imports_version_chk", sql`${t.version}>0`),
+  check("folder_wizard_imports_sha_chk", sql`${t.sourceSha256} ~ '^[a-f0-9]{64}$'`),
+]);
+
+export const folderWizardCurrentImportsTable = pgTable("folder_wizard_current_imports", {
+  projectId: integer("project_id").primaryKey().references(() => projectsTable.id),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  importId: text("import_id").notNull(),
+  designatedById: integer("designated_by_id").notNull().references(() => usersTable.id),
+  designatedAt: utc("designated_at").defaultNow().notNull(),
+}, (t) => [
+  foreignKey({ columns: [t.importId, t.companyId, t.projectId], foreignColumns: [folderWizardImportsTable.id, folderWizardImportsTable.companyId, folderWizardImportsTable.projectId], name: "folder_wizard_current_scope_fk" }),
+]);
