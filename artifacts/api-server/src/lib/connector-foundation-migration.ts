@@ -77,8 +77,18 @@ CREATE TABLE IF NOT EXISTS folder_wizard_current_imports(
  project_id integer PRIMARY KEY REFERENCES projects(id),company_id integer NOT NULL REFERENCES companies(id),import_id text NOT NULL,designated_by_id integer NOT NULL REFERENCES users(id),designated_at timestamptz NOT NULL DEFAULT now(),
  CONSTRAINT folder_wizard_current_scope_fk FOREIGN KEY(import_id,company_id,project_id) REFERENCES folder_wizard_imports(id,company_id,project_id));
 
+CREATE TABLE IF NOT EXISTS folder_wizard_routing_profiles(
+ id text PRIMARY KEY,company_id integer NOT NULL REFERENCES companies(id),scope_project_id integer REFERENCES projects(id),import_id text REFERENCES folder_wizard_imports(id),version integer NOT NULL,definition jsonb NOT NULL,fingerprint text NOT NULL,created_by_id integer NOT NULL REFERENCES users(id),created_at timestamptz NOT NULL DEFAULT now(),
+ CONSTRAINT folder_wizard_routing_profile_scope_version_uq UNIQUE NULLS NOT DISTINCT(company_id,scope_project_id,version),
+ CONSTRAINT folder_wizard_routing_profile_scope_chk CHECK((scope_project_id IS NULL AND import_id IS NULL) OR (scope_project_id IS NOT NULL AND import_id IS NOT NULL)),
+ CONSTRAINT folder_wizard_routing_profile_version_chk CHECK(version>0),CONSTRAINT folder_wizard_routing_profile_fingerprint_chk CHECK(fingerprint~'^[a-f0-9]{64}$'),CONSTRAINT folder_wizard_routing_profile_definition_chk CHECK(jsonb_typeof(definition)='object'));
+CREATE TABLE IF NOT EXISTS folder_wizard_current_routing_profiles(
+ id text PRIMARY KEY,company_id integer NOT NULL REFERENCES companies(id),scope_project_id integer REFERENCES projects(id),profile_id text NOT NULL REFERENCES folder_wizard_routing_profiles(id),designated_by_id integer NOT NULL REFERENCES users(id),designated_at timestamptz NOT NULL DEFAULT now(),
+ CONSTRAINT folder_wizard_current_routing_scope_uq UNIQUE NULLS NOT DISTINCT(company_id,scope_project_id));
+
 CREATE OR REPLACE FUNCTION bimlog_reject_immutable_connector_update() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'immutable connector evidence cannot be updated or deleted'; END $$;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='connector_job_events_immutable') THEN CREATE TRIGGER connector_job_events_immutable BEFORE UPDATE OR DELETE ON connector_job_events FOR EACH ROW EXECUTE FUNCTION bimlog_reject_immutable_connector_update(); END IF; END $$;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='coordination_file_revisions_immutable') THEN CREATE TRIGGER coordination_file_revisions_immutable BEFORE UPDATE OR DELETE ON coordination_file_revisions FOR EACH ROW EXECUTE FUNCTION bimlog_reject_immutable_connector_update(); END IF; END $$;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='folder_wizard_imports_immutable') THEN CREATE TRIGGER folder_wizard_imports_immutable BEFORE UPDATE OR DELETE ON folder_wizard_imports FOR EACH ROW EXECUTE FUNCTION bimlog_reject_immutable_connector_update(); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='folder_wizard_routing_profiles_immutable') THEN CREATE TRIGGER folder_wizard_routing_profiles_immutable BEFORE UPDATE OR DELETE ON folder_wizard_routing_profiles FOR EACH ROW EXECUTE FUNCTION bimlog_reject_immutable_connector_update(); END IF; END $$;
 `;

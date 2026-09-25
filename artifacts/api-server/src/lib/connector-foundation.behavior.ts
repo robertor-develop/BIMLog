@@ -4,7 +4,7 @@ import { assertConnectorJobTransition, coordinationRevisionInputSchema, protecte
 import { CLAIM_CONNECTOR_JOB_SQL, CONNECTOR_FOUNDATION_MIGRATION_SQL, ensureConnectorFoundationSchema } from "./connector-foundation-migration";
 
 const ddl = CONNECTOR_FOUNDATION_MIGRATION_SQL;
-for (const table of ["connector_credentials","connector_jobs","connector_job_events","coordination_files","coordination_file_revisions","coordination_file_current_revisions","sharepoint_project_mappings","sharepoint_folder_mappings","sharepoint_sync_states","folder_wizard_imports","folder_wizard_current_imports"]) assert.match(ddl, new RegExp(`CREATE TABLE IF NOT EXISTS ${table}`));
+for (const table of ["connector_credentials","connector_jobs","connector_job_events","coordination_files","coordination_file_revisions","coordination_file_current_revisions","sharepoint_project_mappings","sharepoint_folder_mappings","sharepoint_sync_states","folder_wizard_imports","folder_wizard_current_imports","folder_wizard_routing_profiles","folder_wizard_current_routing_profiles"]) assert.match(ddl, new RegExp(`CREATE TABLE IF NOT EXISTS ${table}`));
 for (const field of ["secret_ciphertext","wrapped_data_key","key_version","lease_token","fencing_token","idempotency_key","request_digest","dead_lettered_at","provider_version_id","content_sha256","cursor_ciphertext","mismatch_code"]) assert.match(ddl, new RegExp(field));
 assert.match(CLAIM_CONNECTOR_JOB_SQL, /FOR UPDATE SKIP LOCKED/);
 assert.match(CLAIM_CONNECTOR_JOB_SQL, /fencing_token=fencing_token\+1/);
@@ -16,6 +16,9 @@ assert.match(connectorSchema, /unique\("sharepoint_folder_mappings_category_trad
 assert.match(ddl, /folder_wizard_imports_immutable BEFORE UPDATE OR DELETE/);
 assert.match(ddl, /folder_wizard_current_scope_fk FOREIGN KEY\(import_id,company_id,project_id\)/);
 assert.match(connectorSchema, /folderWizardImportsTable = pgTable\("folder_wizard_imports"/);
+assert.match(ddl, /folder_wizard_routing_profiles_immutable BEFORE UPDATE OR DELETE/);
+assert.match(ddl, /folder_wizard_current_routing_scope_uq UNIQUE NULLS NOT DISTINCT/);
+assert.match(connectorSchema, /folderWizardRoutingProfilesTable = pgTable\("folder_wizard_routing_profiles"/);
 
 const secret = { secretCiphertext:"c".repeat(32),secretIv:"i".repeat(16),secretTag:"t".repeat(16),wrappedDataKey:"k".repeat(32),wrapIv:"w".repeat(16),wrapTag:"g".repeat(16),keyVersion:2 };
 assert.equal(protectedSecretEnvelopeSchema.parse(secret).keyVersion, 2);

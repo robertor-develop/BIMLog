@@ -82,3 +82,31 @@ export const folderWizardCurrentImportsTable = pgTable("folder_wizard_current_im
 }, (t) => [
   foreignKey({ columns: [t.importId, t.companyId, t.projectId], foreignColumns: [folderWizardImportsTable.id, folderWizardImportsTable.companyId, folderWizardImportsTable.projectId], name: "folder_wizard_current_scope_fk" }),
 ]);
+
+/** Company defaults and project-specific overrides are separate immutable versions. */
+export const folderWizardRoutingProfilesTable = pgTable("folder_wizard_routing_profiles", {
+  id: text("id").primaryKey(),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  scopeProjectId: integer("scope_project_id").references(() => projectsTable.id),
+  importId: text("import_id").references(() => folderWizardImportsTable.id),
+  version: integer("version").notNull(),
+  definition: jsonb("definition").$type<Record<string, unknown>>().notNull(),
+  fingerprint: text("fingerprint").notNull(),
+  createdById: integer("created_by_id").notNull().references(() => usersTable.id),
+  createdAt: utc("created_at").defaultNow().notNull(),
+}, (t) => [
+  unique("folder_wizard_routing_profile_scope_version_uq").on(t.companyId, t.scopeProjectId, t.version).nullsNotDistinct(),
+  check("folder_wizard_routing_profile_scope_chk", sql`(${t.scopeProjectId} IS NULL AND ${t.importId} IS NULL) OR (${t.scopeProjectId} IS NOT NULL AND ${t.importId} IS NOT NULL)`),
+  check("folder_wizard_routing_profile_version_chk", sql`${t.version}>0`),
+  check("folder_wizard_routing_profile_fingerprint_chk", sql`${t.fingerprint} ~ '^[a-f0-9]{64}$'`),
+  check("folder_wizard_routing_profile_definition_chk", sql`jsonb_typeof(${t.definition})='object'`),
+]);
+
+export const folderWizardCurrentRoutingProfilesTable = pgTable("folder_wizard_current_routing_profiles", {
+  id: text("id").primaryKey(),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  scopeProjectId: integer("scope_project_id").references(() => projectsTable.id),
+  profileId: text("profile_id").notNull().references(() => folderWizardRoutingProfilesTable.id),
+  designatedById: integer("designated_by_id").notNull().references(() => usersTable.id),
+  designatedAt: utc("designated_at").defaultNow().notNull(),
+}, (t) => [unique("folder_wizard_current_routing_scope_uq").on(t.companyId, t.scopeProjectId).nullsNotDistinct()]);

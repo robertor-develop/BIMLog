@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Coordination routing candidate — 2026-09-25
+
+- Five BT Folder Wizard import-foundation commits through `b3d5a065` were pushed to GitHub master. They validate Wizard 3.1 JSON, reproduce folder prefixes, retain immutable project import versions and expose a project Integrations import/preview UI. They are **not published or live accepted**; no SharePoint file writer is claimed.
+- Source inspection of the existing Coordination Hub found that `queued_sync` currently records an intake event and then removes its in-memory file buffer without a durable delivery job or file custody. This is a release blocker for SharePoint publishing; a later build must retain bytes, create a governed job and prove retry/result semantics before live acceptance.
+- The next additive source candidate introduces immutable company-default and project-override routing-profile version storage. It must remain unpublished until the routing and custody chain passes its source and live gates. Lens Next is frozen and untouched by this program.
+
 ## Fresh BIMCorp Intake catalog discovery — 2026-09-24
 
 - The exact Intake readiness correction reached GitHub and Replit production at `45a509da6d88ea04d5ca9c55b2ef0da08ff8eabe`; production health reported that source and the database operator reported no pending schema action. Authenticated Chrome showed historical synthetic project 57 at 94% with the new floor/zone Work Package and discipline prerequisite rather than the former false-ready 100%.

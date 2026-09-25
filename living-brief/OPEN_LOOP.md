@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Coordination routing and SharePoint publishing — 2026-09-25
+
+- [x] Push BT Folder Wizard import foundation block (five commits through `b3d5a065`); source checks passed, publication and live Chrome acceptance remain separate.
+- [ ] Complete company tag-to-tier defaults, project overrides, exact path resolution, site/library authority, durable file custody, governed Graph delivery and visible retry/audit. Fix existing false `queued_sync` result before claiming a file is queued.
+- [ ] At the ten-build milestone, run all source/dependency/database gates, publish through Replit Shell, bind exact deployed commit, then perform full authenticated Chrome smoke. Do not label SharePoint delivery complete without a real authorized tenant/site round-trip. Do not change Lens Next.
+
 ## Fresh-project catalog and role acceptance — 2026-09-24
 
 - [x] Push/publish Intake source `45a509da6d88ea04d5ca9c55b2ef0da08ff8eabe` and confirm project 57 now exposes the missing EDT source instead of declaring 100% ready.
