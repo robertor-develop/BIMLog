@@ -41708,8 +41708,8 @@
     },
     {
       "taskId": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
-      "reviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
-      "reviewedAt": "2026-09-25T21:50:24Z",
+      "reviewedThroughCommit": "28d70c96811b2d5150383668c54a677f13620cfa",
+      "reviewedAt": "2026-09-25T21:58:01Z",
       "status": "block06_local_candidate",
       "captureTiming": "immediate_same_task_chain",
       "capabilityPreflight": {
@@ -41796,15 +41796,13 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/scripts/generate-platform-md.ts",
-        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "0d27615098fbe555e6b449b0ad5c2442cb1b478ade4078a7da4a796af4b01479"
+      "reviewedChangeSha256": "d250a9898e05ad7400ebdba9d805d07c94655a3fccbbebd0dcb2dad9c4b93070"
     }
   ]
 }

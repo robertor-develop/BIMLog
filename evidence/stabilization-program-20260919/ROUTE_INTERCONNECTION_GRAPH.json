@@ -6,8 +6,8 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 669,
-    "frontendApiReferences": 247,
+    "apiRoutes": 671,
+    "frontendApiReferences": 249,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -4328,8 +4328,20 @@
       "tables": []
     },
     {
+      "method": "GET",
+      "path": "/projects/:projectId/integrations/folder-wizard/publishing-jobs",
+      "owner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+      "tables": []
+    },
+    {
       "method": "POST",
       "path": "/projects/:projectId/integrations/folder-wizard/publishing-candidate",
+      "owner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/integrations/folder-wizard/publish",
       "owner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
       "tables": []
     },
@@ -9384,6 +9396,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx",
       "apiPath": "/api/v1/projects/${projectId}/integrations/folder-wizard"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/FolderWizardPublishPanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/integrations/folder-wizard"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/FolderWizardPublishPanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/files"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/FolderWizardRoutingPanel.tsx",
