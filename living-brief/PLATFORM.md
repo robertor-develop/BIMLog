@@ -583,12 +583,14 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/folder-wizard-publish-candidate-store.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-candidate.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-candidate.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-execution.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-job.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-job.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-lease.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-lease.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-plan.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-plan.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-postgres.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-queue.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-queue.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness-store.behavior.ts
@@ -599,6 +601,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/folder-wizard-publish-settlement.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-source.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-source.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-status.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-status.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-submission.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-submission.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-worker.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-worker.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.behavior.ts
@@ -918,6 +924,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/DirectoryTab.tsx
 - artifacts/bimlog/src/pages/project/FilesTab.tsx
 - artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx
+- artifacts/bimlog/src/pages/project/FolderWizardPublishPanel.tsx
 - artifacts/bimlog/src/pages/project/FolderWizardRoutingPanel.tsx
 - artifacts/bimlog/src/pages/project/IntegrationsTab.tsx
 - artifacts/bimlog/src/pages/project/LegacyIntegrationsTab.tsx
@@ -1162,6 +1169,12 @@ It changes only when the code structure or curated architectural facts change.
 - A deterministic request can be frozen as a byte-free job. The queue adapter rechecks current project/company membership, Wizard import, routing profile, SharePoint mapping, active credential and durable Files identity inside one transaction before insertion and an immutable event.
 - A separate worker boundary claims only Wizard publish jobs through a finite lease and fencing token, rechecks current source and destination authority, and can settle by exact lease into completed, bounded retry or dead-letter with an immutable audit event.
 - These adapters are not mounted on a production route or scheduled. The visible publishing action stays disabled. Real PostgreSQL/provider round-trip, conflict reconciliation and user confirmation remain open; no SharePoint delivery is claimed.
+
+## BT Folder Wizard confirmed publication candidate — Builds 26–30
+
+- The queue, lease, retry, settlement and immutable event chain has isolated real-PostgreSQL proof. A project administrator previews a verified Files source and exact destination, confirms the digest, and can inspect project-scoped job status.
+- The request-bound executor claims only the confirmed job, revalidates current project authority, source bytes and destination mapping, then uses a Graph upload session with create-only conflict behavior. An uncertain provider result reconciles only an exact drive, name, size and byte match; mismatches never overwrite.
+- This is source and synthetic-provider acceptance, not a claim of real SharePoint delivery. The release still requires full local gate, exact GitHub/Replit identity, authenticated Chrome smoke, and an authorized tenant/site round-trip. No Native or Lens Next source changes are included.
 
 ## Coordination Delivery Release A — Build 1 service boundary
 

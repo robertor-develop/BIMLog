@@ -299,6 +299,12 @@ ${appRoutes()}
 - A separate worker boundary claims only Wizard publish jobs through a finite lease and fencing token, rechecks current source and destination authority, and can settle by exact lease into completed, bounded retry or dead-letter with an immutable audit event.
 - These adapters are not mounted on a production route or scheduled. The visible publishing action stays disabled. Real PostgreSQL/provider round-trip, conflict reconciliation and user confirmation remain open; no SharePoint delivery is claimed.
 
+## BT Folder Wizard confirmed publication candidate — Builds 26–30
+
+- The queue, lease, retry, settlement and immutable event chain has isolated real-PostgreSQL proof. A project administrator previews a verified Files source and exact destination, confirms the digest, and can inspect project-scoped job status.
+- The request-bound executor claims only the confirmed job, revalidates current project authority, source bytes and destination mapping, then uses a Graph upload session with create-only conflict behavior. An uncertain provider result reconciles only an exact drive, name, size and byte match; mismatches never overwrite.
+- This is source and synthetic-provider acceptance, not a claim of real SharePoint delivery. The release still requires full local gate, exact GitHub/Replit identity, authenticated Chrome smoke, and an authorized tenant/site round-trip. No Native or Lens Next source changes are included.
+
 ## Coordination Delivery Release A — Build 1 service boundary
 
 - The first delivery layer is provider-neutral and operates only through an injected transaction/store boundary; it is not connected to application startup, routes, UI or a live provider.

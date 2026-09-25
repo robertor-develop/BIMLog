@@ -41705,6 +41705,106 @@
         "scripts/test-folder-wizard-publish-block05.mjs"
       ],
       "reviewedChangeSha256": "f5d4b64bcffa0a1116925d251781b248a23b340087cdae9d100c22836ff146c9"
+    },
+    {
+      "taskId": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
+      "reviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "reviewedAt": "2026-09-25T21:50:24Z",
+      "status": "block06_local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "run_local_validation",
+          "reconcile_living_brief",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The confirmed publication source is not a deployed or real-tenant SharePoint delivery; the local gate, exact GitHub/Replit alignment, and live Chrome round-trip remain mandatory."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Human-confirmed consequential provider writes and truthful evidence remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established release and publication procedure remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed and external-delivery acceptance gates still apply."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This source block implements the approved routing release, not a new product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated architecture now describes confirmed exact-job publishing and remaining live gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installer and plugin packages remain frozen and untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported-document design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards edition, title or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Current state separates locally committed publish source from deployment and real tenant delivery."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Full gate, push, Replit publication, Chrome smoke and tenant round-trip remain explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production audit rows have yet been written by this local candidate."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0d27615098fbe555e6b449b0ad5c2442cb1b478ade4078a7da4a796af4b01479"
     }
   ]
 }

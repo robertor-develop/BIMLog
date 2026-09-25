@@ -27,7 +27,12 @@
     { "number": 22, "commit": "36c5ec43", "state": "committed" },
     { "number": 23, "commit": "c9eb7a36", "state": "committed" },
     { "number": 24, "commit": "5257b7e1", "state": "committed" },
-    { "number": 25, "commit": "containing_commit", "state": "candidate" }
+    { "number": 25, "commit": "5cf27f11", "state": "pushed" },
+    { "number": 26, "commit": "1ab71140", "state": "committed" },
+    { "number": 27, "commit": "a1f098ae", "state": "committed" },
+    { "number": 28, "commit": "9ee68b2d", "state": "committed" },
+    { "number": 29, "commit": "436e3ee9", "state": "committed" },
+    { "number": 30, "commit": "f33f322d", "state": "committed" }
   ],
   "publication": "build_20_d71ea037c75fb71cf3f2ac11df8f7576943a07a6",
   "liveSmoke": "partial_pass_file_selection_blocked",

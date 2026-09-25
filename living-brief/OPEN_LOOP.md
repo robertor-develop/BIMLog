@@ -2,6 +2,8 @@
 
 ## Coordination routing and SharePoint publishing — 2026-09-25
 
+- [x] Implement Builds 26–30 source: isolated PostgreSQL queue/lease/settlement proof, create-only Graph upload-session conflict reconciliation, explicit project-admin digest confirmation, scoped status, and exact-job request execution. Source proof is not real tenant delivery or publication evidence.
+- [ ] Run full local release gate, push the five-build block, publish exact GitHub master through Replit Shell, and bind live health/source identity. Then run authenticated Chrome smoke, including Wizard import/save/reopen and an authorized synthetic tenant/site file round-trip. Keep delivery acceptance open until those live actions pass.
 - [x] Publish the ten-build source through Replit Shell at `04f2af1cf8c446783e38a826b10649afa59d330b`; exact production health/source identity and the visible authenticated Integrations page passed. Browser-controlled file selection was denied, so the import/save/refresh smoke remains unverified rather than passed.
 - [x] Implement Builds 11–15 destination readiness: no route is publishable without a current Wizard import/routing profile, active scoped credential and project mapping, and exact Graph-verified site/library identity. The view states that SharePoint file publishing is still unavailable.
 - [x] Implement Builds 16–20 read-only publication candidate and isolated source/Graph write contracts. No production route invokes the write transport; this is not SharePoint delivery acceptance.

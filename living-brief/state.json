@@ -1,30 +1,18 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
+  "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "d9978d9bf112d64d4535ebab203553c7fa845cda0d99fe908bcbb8cd74797f72",
+  "bundleSha256": "c2b58acfd26bbca11c1f2f503457c5eda04cd0e4a258e111befa6e5a77717063",
   "impact": {
-    "baselineCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
+    "baselineCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
     "changedPaths": [
       "artifacts/api-server/scripts/generate-platform-md.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-job.behavior.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-job.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-lease.behavior.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-lease.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-plan.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-queue.behavior.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-settlement.behavior.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-worker.behavior.ts",
-      "artifacts/api-server/src/lib/folder-wizard-publish-worker.ts",
-      "evidence/coordination-routing-20260925/BLOCK_05_BUILDS_021_025.md",
       "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json",
-      "package.json",
-      "scripts/test-folder-wizard-publish-block05.mjs"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -40,11 +28,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "claude",
@@ -52,11 +40,11 @@
       "sha256": "90538da58f64a59e860713face1fefeff05dcfb598472fd0b06e4b56f2e590c8",
       "sourceChangedAt": "2026-09-21T03:45:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "quality",
@@ -64,11 +52,11 @@
       "sha256": "b6cced2db201c506cda5eb1ac6f7d03167c8893de71f880eda4ccef3b51d2829",
       "sourceChangedAt": "2026-09-21T09:39:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "vision",
@@ -76,23 +64,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "aa0a856443fdd2d6f864f8bc1d69b358b1b4423920d6426429b13f6ab6cb924d",
-      "sourceChangedAt": "2026-09-25T20:31:16.000Z",
+      "sha256": "9325d0b8ea29057f462bdf28ef8089b308a342bde19935c89b28e4ca4c3fe270",
+      "sourceChangedAt": "2026-09-25T21:50:24.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "plugin",
@@ -100,11 +88,11 @@
       "sha256": "812ec9814ea5bd043051ec97d9c54d468c9c84855ee1136250ce5c8df798b71d",
       "sourceChangedAt": "2026-09-23T11:41:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "report_design_system",
@@ -112,11 +100,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "standards_register",
@@ -124,35 +112,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "de385375c650d4b8087c78304ce523e70911a7313df05d8684fb12301b57ff8c",
-      "sourceChangedAt": "2026-09-25T20:31:16.000Z",
+      "sha256": "8af2b1a8951a7fe1c31e11d23fcf26bf68cd286d2bc99226017810bb5fcba671",
+      "sourceChangedAt": "2026-09-25T21:50:24.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "b105d08d4b9fa009c7ff9f7579b82ea76e52a185c47c4f729ed88e5d96f97eda",
-      "sourceChangedAt": "2026-09-25T20:31:16.000Z",
+      "sha256": "f0e1645cd4beed23f22b8a4bc85ad40eaa6dfe3265eb165738c3e4c2a4ff8ef4",
+      "sourceChangedAt": "2026-09-25T21:50:24.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     },
     {
       "key": "audit",
@@ -160,11 +148,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
-      "semanticReviewTask": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reconciledThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewedThroughCommit": "f33f322d56bed9622b326a96ce0316fe44d4eb4b",
+      "semanticReviewTask": "bimlog-folder-wizard-confirmed-publish-block06-20260925",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-25T20:31:16Z"
+      "semanticReviewedAt": "2026-09-25T21:50:24Z"
     }
   ]
 }
