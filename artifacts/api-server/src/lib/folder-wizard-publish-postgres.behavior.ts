@@ -47,7 +47,7 @@ try {
     VALUES($1,$2,$3,$4,false) RETURNING id`, [`${suffix}@invalid.test`, "synthetic-inert-hash", "Wizard Test", companyId])).rows[0].id);
   projectId = Number((await pool.query(`INSERT INTO projects(name,code,status,created_by_id)
     VALUES($1,$2,'active',$3) RETURNING id`, [id("wizard-project"), id("WIZ"), userId])).rows[0].id);
-  await pool.query("INSERT INTO project_members(project_id,user_id,role) VALUES($1,$2,'admin')", [projectId, userId]);
+  await pool.query("INSERT INTO project_members(project_id,user_id,role) VALUES($1,$2,'project_admin')", [projectId, userId]);
   await pool.query(`INSERT INTO connector_credentials(id,company_id,provider,label,state,secret_ciphertext,secret_iv,
     secret_tag,wrapped_data_key,wrap_iv,wrap_tag,key_version,created_by_id)
     VALUES($1,$2,'sharepoint',$3,'active','synthetic','synthetic','synthetic','synthetic','synthetic','synthetic',1,$4)`,

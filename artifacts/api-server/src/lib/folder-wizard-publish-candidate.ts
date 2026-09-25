@@ -17,7 +17,7 @@ export type FolderWizardCandidateReader = { read(projectId: number, actorUserId:
 export class FolderWizardPublishCandidateService {
   constructor(private readonly reader: FolderWizardCandidateReader, private readonly storage: StorageAdapter) {}
 
-  async preview(input: { projectId: number; actorUserId: number; fileId: number; tags: Record<string, string> }) {
+  async prepare(input: { projectId: number; actorUserId: number; fileId: number; tags: Record<string, string> }) {
     if (![input.projectId, input.actorUserId, input.fileId].every((value) => Number.isSafeInteger(value) && value > 0) ||
         Object.keys(input.tags).length > 64 || Object.entries(input.tags).some(([key, value]) =>
           !/^[a-z][a-z0-9_]{0,63}$/.test(key) || typeof value !== "string" || value.length > 160))
@@ -26,18 +26,24 @@ export class FolderWizardPublishCandidateService {
     const readiness = evaluateFolderWizardPublishReadiness({ sourceText: snapshot.sourceText, importId: snapshot.importId,
       profile: snapshot.profile, projectMapping: snapshot.mapping, verifiedSiteUrl: snapshot.verifiedSiteUrl,
       verifiedLibraryId: snapshot.verifiedLibraryId });
-    if (!readiness.ready) return { ready: false as const, blockers: readiness.blockers };
+    if (!readiness.ready) return { preview: { ready: false as const, blockers: readiness.blockers }, plan: null };
     if (!snapshot.file || snapshot.file.projectId !== input.projectId) throw new Error("FOLDER_WIZARD_SOURCE_FORBIDDEN");
     const bytes = await readVerifiedPublishSource(snapshot.file, this.storage);
-    const document = parseFolderWizardExport(snapshot.sourceText!).document;
-    const plan = planFolderWizardPublish({ document, importId: snapshot.importId!, profile: snapshot.profile!.definition as never,
-      tags: input.tags, filename: snapshot.file.name, sourceFileId: snapshot.file.id,
-      sourceSha256: snapshot.file.sha256, sourceBytes: bytes.length, credentialId: snapshot.mapping!.credentialId,
-      siteId: snapshot.mapping!.siteId, libraryId: snapshot.mapping!.libraryId,
-      verifiedSiteUrl: snapshot.verifiedSiteUrl!, verifiedLibraryId: snapshot.verifiedLibraryId! });
-    return { ready: true as const, blockers: [] as string[], fileId: snapshot.file.id,
-      filename: snapshot.file.name, byteSize: bytes.length, siteUrl: plan.siteUrl,
-      driveRelativePath: plan.driveRelativePath, requestDigest: plan.requestDigest,
-      publicationState: "not_submitted" as const };
+    try {
+      const document = parseFolderWizardExport(snapshot.sourceText!).document;
+      const plan = planFolderWizardPublish({ document, importId: snapshot.importId!, profile: snapshot.profile!.definition as never,
+        tags: input.tags, filename: snapshot.file.name, sourceFileId: snapshot.file.id,
+        sourceSha256: snapshot.file.sha256, sourceBytes: bytes.length, credentialId: snapshot.mapping!.credentialId,
+        siteId: snapshot.mapping!.siteId, libraryId: snapshot.mapping!.libraryId,
+        verifiedSiteUrl: snapshot.verifiedSiteUrl!, verifiedLibraryId: snapshot.verifiedLibraryId! });
+      return { preview: { ready: true as const, blockers: [] as string[], fileId: snapshot.file.id,
+        filename: snapshot.file.name, byteSize: bytes.length, siteUrl: plan.siteUrl,
+        driveRelativePath: plan.driveRelativePath, requestDigest: plan.requestDigest,
+        publicationState: "not_submitted" as const }, plan };
+    } finally { bytes.fill(0); }
+  }
+
+  async preview(input: { projectId: number; actorUserId: number; fileId: number; tags: Record<string, string> }) {
+    return (await this.prepare(input)).preview;
   }
 }

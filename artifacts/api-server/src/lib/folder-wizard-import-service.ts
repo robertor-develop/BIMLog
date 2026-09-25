@@ -10,7 +10,7 @@ type Scope = { projectId: number; actorUserId: number };
 type Client = { query(sql: string, parameters?: unknown[]): Promise<{ rows: Record<string, unknown>[]; rowCount: number | null }>; release(): void };
 type Pool = { connect(): Promise<Client> };
 
-async function authorize(client: Client, scope: Scope, write: boolean): Promise<number> {
+export async function authorizeFolderWizardImport(client: Client, scope: Scope, write: boolean): Promise<number> {
   const result = await client.query(`
     SELECT COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id) AS company_id
     FROM projects p JOIN users creator ON creator.id=p.created_by_id
@@ -31,7 +31,7 @@ export function createFolderWizardImportService(database?: Pool) {
     async current(scope: Scope) {
       const client = await connect();
       try {
-        const companyId = await authorize(client, scope, false);
+        const companyId = await authorizeFolderWizardImport(client, scope, false);
         const result = await client.query(`SELECT i.id,i.version,i.source_sha256,i.source_text,i.imported_by_id,i.imported_at
           FROM folder_wizard_current_imports c JOIN folder_wizard_imports i
             ON i.id=c.import_id AND i.project_id=c.project_id AND i.company_id=c.company_id
@@ -48,7 +48,7 @@ export function createFolderWizardImportService(database?: Pool) {
       const client = await connect();
       try {
         await client.query("BEGIN");
-        const companyId = await authorize(client, scope, true);
+        const companyId = await authorizeFolderWizardImport(client, scope, true);
         // Lock the project row so concurrent imports cannot both claim the same version.
         await client.query("SELECT id FROM projects WHERE id=$1 FOR UPDATE", [scope.projectId]);
         const current = (await client.query(`SELECT i.id,i.version,i.source_sha256 FROM folder_wizard_current_imports c

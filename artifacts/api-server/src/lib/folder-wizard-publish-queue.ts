@@ -27,7 +27,7 @@ export class FolderWizardPublishQueue {
         WHERE p.id=$2 AND p.status<>'archived'
           AND $1=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id)
           AND (actor.is_super_admin OR (actor.company_id=$1 AND EXISTS(SELECT 1 FROM project_members pm
-            WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active')))
+            WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active' AND pm.role='project_admin')))
           AND EXISTS(SELECT 1 FROM folder_wizard_current_routing_profiles r
             JOIN folder_wizard_routing_profiles profile ON profile.id=r.profile_id AND profile.company_id=$1
             WHERE r.company_id=$1 AND r.scope_project_id IS NOT DISTINCT FROM profile.scope_project_id

@@ -14,7 +14,7 @@ const snapshot: FolderWizardCandidateSnapshot = {
   file: { id: 7, projectId: 5, name: "proof.txt", storageKey: "opaque", sha256: createHash("sha256").update(bytes).digest("hex"), byteSize: bytes.length, status: "active" },
 };
 const storage = { health: async () => ({ backendType: "durable-filesystem", capabilities: ["bounded-read"], maxReadBytes: 10_485_760 }),
-  downloadBounded: async () => bytes } as unknown as StorageAdapter;
+  downloadBounded: async () => Buffer.from(bytes) } as unknown as StorageAdapter;
 const service = new FolderWizardPublishCandidateService({ read: async () => snapshot }, storage);
 assert.deepEqual(await service.preview({ projectId: 5, actorUserId: 2, fileId: 7, tags: {} }), {
   ready: true, blockers: [], fileId: 7, filename: "proof.txt", byteSize: bytes.length,
