@@ -1,10 +1,18 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Fresh-project catalog and role acceptance — 2026-09-24
+
+- [x] Push/publish Intake source `45a509da6d88ea04d5ca9c55b2ef0da08ff8eabe` and confirm project 57 now exposes the missing EDT source instead of declaring 100% ready.
+- [x] Create BIMCorp-owned synthetic project 58 through the normal UI; confirm its discipline selector has no active choice and the ordinary account cannot author company catalogs.
+- [ ] Resolve BIMCorp's empty active discipline source through its governed company PMO or BIMLog default authority, then repeat fresh Intake/EDT acceptance. Do not fabricate a discipline ID, weaken tenant scope, or silently mutate activated project 57.
+- [ ] Obtain and test distinct authorized author, checker, executor and QC identities for the full company template-to-Operations journey. RRY Super Administrator and BIMCorp ordinary user alone do not prove the six-role matrix.
+- [ ] Test and release the local bilingual empty-catalog, request-failure and Work Package activation-guidance correction; verify the exact deployed UI after publication.
+
 ## Synthetic Intake / EDT activation acceptance — 2026-09-24
 
 - [x] Publish exact APU correction `1459696d6a87ab3436b7b0ab1d3ca23304b24c99` through Replit Shell with schema action `NONE`; production health and authenticated BIMCorp activation of synthetic project 57 confirmed the price/rate fix.
 - [x] Reproduce the subsequent false-ready defect: Intake showed 100%, activation succeeded, but EDT rejected missing saved Work Package discipline identity. Preserve project 57 as a synthetic historical counterexample.
-- [ ] Push and publish the tested Intake readiness correction from source `d3923550`, then prove a fresh draft with missing discipline cannot be activated and clearly explains the requirement.
+- [x] Push and publish the tested Intake readiness correction as source `45a509da6d88ea04d5ca9c55b2ef0da08ff8eabe`; live project 57 now exposes the missing floor/zone package and approved discipline prerequisite at 94% readiness.
 - [ ] From the normal BIMCorp UI, create a new synthetic project with catalog-backed floor/zone Work Packages and distinct Shop Drawing and Sleeve Contract Items; approve the budget with an independent authorized checker, activate, pass EDT readiness, instantiate Work Items, roles/tasks, hours and QC, and reconcile Operations/reporting. Do not call this complete from source tests or project 57 alone.
 - [ ] Only after full deployed fresh-user acceptance, create a verified Spanish user guide and blank Ruben/Lorena external smoke-test DOCX matching the exact deployed UI; send via a verified Telegram destination if available.
 

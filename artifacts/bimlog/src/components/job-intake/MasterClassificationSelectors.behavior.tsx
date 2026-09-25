@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 const component = fs.readFileSync(new URL("./MasterClassificationSelectors.tsx", import.meta.url), "utf8");
+assert.match(component, /No active disciplines are available for this company/);
 const quick = fs.readFileSync(new URL("./QuickJobIntake.tsx", import.meta.url), "utf8");
 assert.match(component, /\/master-catalogs\/disciplines/);
 assert.doesNotMatch(component, /<select[^>]*service/i);

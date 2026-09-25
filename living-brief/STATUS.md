@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Fresh BIMCorp Intake catalog discovery — 2026-09-24
+
+- The exact Intake readiness correction reached GitHub and Replit production at `45a509da6d88ea04d5ca9c55b2ef0da08ff8eabe`; production health reported that source and the database operator reported no pending schema action. Authenticated Chrome showed historical synthetic project 57 at 94% with the new floor/zone Work Package and discipline prerequisite rather than the former false-ready 100%.
+- A new ordinary-UI BIMCorp synthetic project `QA-INT-B-0924` (project 58) was created. Its project discipline selector has no active options. The existing ordinary account has read-only Company Catalogs and no BIMCorp company entries; this blocks the required catalog-backed Intake/EDT acceptance without granting a company-scoped PMO author or provisioning an active discipline. The exact catalog source still requires positive proof.
+- The RRY Super Administrator signed in through the normal UI and Total Control showed six existing accounts, including only one BIMCorp test account. Separate BIMCorp template author, checker, executor and QC account behavior has not been proven. A local UX correction candidate now explains empty discipline catalogs, makes Work Package catalog request failures visible and reconciles the Work Package guidance with the budget-linked EDT activation prerequisite. This candidate is not pushed or published; external tester documents remain on HOLD.
+
 ## Synthetic Intake activation exposed EDT source gap — correction candidate — 2026-09-24
 
 - Replit Shell built and published exact source `1459696d6a87ab3436b7b0ab1d3ca23304b24c99` with database action `NONE`; production health bound the deployed runtime to that commit. Authenticated BIMCorp Chrome activated synthetic project 57 with two Contract Items, approved budget v1, immutable APU fingerprints, 28 planned hours and USD 3,040 billable value. The earlier APU unit-rate defect is live-fixed.

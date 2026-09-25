@@ -17,8 +17,9 @@ export function WorkPackageBuilder({
   defaultClassification?: Record<string, unknown>;
 }) {
   const [catalogs, setCatalogs] = useState<Record<string, any[]>>({ disciplines: [], services: [], phases: [] });
+  const [catalogError, setCatalogError] = useState("");
   const projectDiscipline = { disciplineId: defaultClassification?.disciplineId ?? "", disciplineCode: defaultClassification?.disciplineCode ?? "", disciplineName: defaultClassification?.disciplineName ?? "" };
-  useEffect(() => { let active = true; Promise.all(["disciplines", "services", "phases"].map(async kind => [kind, (await request(`/master-catalogs/${kind}?projectId=${projectId}`)).entries ?? []] as const)).then(rows => { if (active) setCatalogs(Object.fromEntries(rows)); }); return () => { active = false; }; }, [projectId, request]);
+  useEffect(() => { let active = true; Promise.all(["disciplines", "services", "phases"].map(async kind => [kind, (await request(`/master-catalogs/${kind}?projectId=${projectId}`)).entries ?? []] as const)).then(rows => { if (active) { setCatalogs(Object.fromEntries(rows)); setCatalogError(""); } }).catch(() => { if (active) setCatalogError(tt("Work-package classifications could not be loaded. Refresh and retry before saving.", "No se pudieron cargar las clasificaciones de los paquetes de trabajo. Actualice y vuelva a intentar antes de guardar.")); }); return () => { active = false; }; }, [projectId, request, tt]);
   const classificationFields = (value: any, change: (classification: any) => void) => (
     (["discipline", "service", "phase"] as const).map(kind => <label key={kind}>{tt(kind[0]!.toUpperCase()+kind.slice(1), ({ discipline:"Disciplina", service:"Servicio", phase:"Fase" } as const)[kind])}<select value={value?.[`${kind}Id`] ?? ""} onChange={event => { const entry = catalogs[`${kind}s`].find(candidate => String(candidate.id) === event.target.value); change({ ...projectDiscipline, ...(value ?? {}), [`${kind}Id`]: entry?.id ?? "", [`${kind}Code`]: entry?.code ?? "", [`${kind}Name`]: entry?.name ?? "" }); }}><option value="">{kind === "discipline" ? tt("Use project discipline", "Usar disciplina del proyecto") : tt("Select for this package or task", "Seleccionar para este paquete o tarea")}</option>{catalogs[`${kind}s`].map(entry => <option key={entry.id} value={entry.id}>{entry.code} — {entry.name}</option>)}</select></label>)
   );
@@ -131,10 +132,11 @@ export function WorkPackageBuilder({
       </h3>
       <p>
         {tt(
-          "Work packages are optional. Split a Contract Item only when part of it needs separate scheduling, responsibility, progress, or delivery control. A package may contain several operational tasks when the work needs that detail.",
-          "Los paquetes de trabajo son opcionales. Divida una Partida de Contrato solo cuando una parte necesite control separado de calendario, responsabilidad, avance o entrega. Un paquete puede contener varias tareas operativas cuando el trabajo necesite ese detalle.",
+          "For budget-linked commercial activation, every Contract Item needs a floor or area Work Package with a discipline and deliverable type. Otherwise, packages are optional. A package may contain several operational tasks when the work needs that detail.",
+          "Para activar un trabajo comercial vinculado a un presupuesto, cada Partida de Contrato necesita un Paquete de Trabajo de piso o zona con disciplina y tipo de entregable. En los demás casos, los paquetes son opcionales. Un paquete puede contener varias tareas operativas cuando el trabajo necesite ese detalle.",
         )}
       </p>
+      {catalogError && <p className="ji-error" role="alert">{catalogError}</p>}
       {items.map((item, itemIndex) => (
         <div className="ji-row" key={item.id}>
           <strong>{item.name || item.id}</strong>

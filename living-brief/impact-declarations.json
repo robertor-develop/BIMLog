@@ -40877,6 +40877,92 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "bab7562c78b71eabd37e984ed5c42f3f9931ff3f17e24e03cefd4673c74ac0c5"
+    },
+    {
+      "taskId": "bimlog-fresh-project-catalog-guidance-20260924",
+      "reviewedThroughCommit": "45a509da6d88ea04d5ca9c55b2ef0da08ff8eabe",
+      "reviewedAt": "2026-09-25T00:20:49Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Fresh synthetic BIMCorp Intake had no selectable discipline; Work Package guidance contradicted the now-enforced budget-linked activation prerequisite and catalog request failures were silent."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No company ownership, product identity or ecosystem boundary changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No release or acceptance gate is weakened; fresh-user field proof remains required."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bilingual catalog and Work Package guidance exposes existing failure states without changing validation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or market direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new route, schema, source inventory, or deployment topology."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or PDF design change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or applicability claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Published guard, fresh-project empty catalog and unproven role matrix recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Catalog source, role acceptance, local UX release and external document gates remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit event schema or historical evidence change."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/job-intake/MasterClassificationSelectors.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/MasterClassificationSelectors.tsx",
+        "artifacts/bimlog/src/components/job-intake/WorkPackageBuilder.guidance.behavior.ts",
+        "artifacts/bimlog/src/components/job-intake/WorkPackageBuilder.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "377e7d07a9d6aef304ff886c08f403b0626b178b524e1f51cb826dd6abfba3a1"
     }
   ]
 }
