@@ -41593,6 +41593,118 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b80519a9aac648aa6b3fb79a9013a963072460d0ce7e4dea5408a992f2064b89"
+    },
+    {
+      "taskId": "bimlog-folder-wizard-disconnected-publish-worker-block05-20260925",
+      "reviewedThroughCommit": "5257b7e1676019e7b599949fb93b411950637dc1",
+      "reviewedAt": "2026-09-25T20:31:16Z",
+      "status": "block05_local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "run_local_validation",
+          "reconcile_living_brief",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The publishing worker is disconnected; no production route, provider delivery, or user confirmation is activated by this block."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Human-controlled consequential action and truthful evidence remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established push and publication process remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed and external-delivery acceptance rules remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This block changes implementation foundation, not product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated platform inventory describes the disconnected publishing worker foundation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installer, and plugin packages are untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported-document presentation changes are in scope."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, edition, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Current state distinguishes disconnected source foundation from delivery."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Real database and provider acceptance, confirmation UI, and blocked Chrome upload stay open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production audit records are written by disconnected source work."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-job.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-job.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-lease.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-lease.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-plan.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-queue.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-settlement.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-worker.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-worker.ts",
+        "evidence/coordination-routing-20260925/BLOCK_05_BUILDS_021_025.md",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-folder-wizard-publish-block05.mjs"
+      ],
+      "reviewedChangeSha256": "f5d4b64bcffa0a1116925d251781b248a23b340087cdae9d100c22836ff146c9"
     }
   ]
 }

@@ -293,6 +293,12 @@ ${appRoutes()}
 - The deterministic candidate freezes the current source, routing fingerprint and drive-relative path into one request digest. An isolated Graph adapter can create a small file only with no-overwrite semantics, but no production route invokes that write transport.
 - The authenticated project endpoint previews eligibility only. No delivery job, worker, retry, external file write or user-facing publishing control is activated by this block. A real authorized tenant/site round-trip remains required before delivery acceptance.
 
+## BT Folder Wizard disconnected job foundation — Builds 21–25
+
+- A deterministic request can be frozen as a byte-free job. The queue adapter rechecks current project/company membership, Wizard import, routing profile, SharePoint mapping, active credential and durable Files identity inside one transaction before insertion and an immutable event.
+- A separate worker boundary claims only Wizard publish jobs through a finite lease and fencing token, rechecks current source and destination authority, and can settle by exact lease into completed, bounded retry or dead-letter with an immutable audit event.
+- These adapters are not mounted on a production route or scheduled. The visible publishing action stays disabled. Real PostgreSQL/provider round-trip, conflict reconciliation and user confirmation remain open; no SharePoint delivery is claimed.
+
 ## Coordination Delivery Release A — Build 1 service boundary
 
 - The first delivery layer is provider-neutral and operates only through an injected transaction/store boundary; it is not connected to application startup, routes, UI or a live provider.

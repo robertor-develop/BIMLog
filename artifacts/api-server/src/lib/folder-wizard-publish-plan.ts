@@ -5,6 +5,7 @@ import { resolveFolderWizardDestination } from "./folder-wizard-resolver";
 
 export type FolderWizardPublishPlan = {
   requestDigest: string; idempotencyKey: string; driveRelativePath: string; filename: string;
+  tags: Record<string, string>;
   sourceFileId: number; sourceSha256: string; sourceBytes: number; importId: string; profileFingerprint: string;
   credentialId: string; siteId: string; libraryId: string; siteUrl: string;
 };
@@ -38,12 +39,17 @@ export function planFolderWizardPublish(input: {
   const driveRelativePath = relative.slice(base.length + 1);
   if (!driveRelativePath || driveRelativePath.split("/").some((part) => !part || part === "." || part === ".."))
     throw new Error("FOLDER_WIZARD_LIBRARY_PATH_INVALID");
+  if (Object.keys(input.tags).length > 64 || Object.entries(input.tags).some(([key, value]) =>
+      !/^[a-z][a-z0-9_]{0,63}$/.test(key) || typeof value !== "string" || value.length > 160))
+    throw new Error("FOLDER_WIZARD_PUBLISH_TAGS_INVALID");
+  const tags = Object.fromEntries(Object.entries(input.tags).sort(([left], [right]) => left.localeCompare(right)));
   const identity = JSON.stringify({ importId: input.importId, sourceFileId: input.sourceFileId,
     sourceSha256: input.sourceSha256, sourceBytes: input.sourceBytes, profileFingerprint: resolved.profileFingerprint,
+    tags,
     credentialId: input.credentialId, siteId: input.siteId, libraryId: input.libraryId,
     siteUrl: canonicalSite(input.verifiedSiteUrl), driveRelativePath });
   const requestDigest = createHash("sha256").update(identity).digest("hex");
-  return { requestDigest, idempotencyKey: requestDigest, driveRelativePath, filename: input.filename,
+  return { requestDigest, idempotencyKey: requestDigest, driveRelativePath, filename: input.filename, tags,
     sourceFileId: input.sourceFileId, sourceSha256: input.sourceSha256, sourceBytes: input.sourceBytes,
     importId: input.importId, profileFingerprint: resolved.profileFingerprint,
     credentialId: input.credentialId, siteId: input.siteId, libraryId: input.libraryId,

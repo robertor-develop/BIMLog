@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { createFolderWizardPublishJob } from "./folder-wizard-publish-job";
 
 const plan = { requestDigest: "a".repeat(64), idempotencyKey: "a".repeat(64),
-  driveRelativePath: "SHOP/proof.txt", filename: "proof.txt", sourceFileId: 8,
+  driveRelativePath: "SHOP/proof.txt", filename: "proof.txt", tags: {}, sourceFileId: 8,
   sourceSha256: "b".repeat(64), sourceBytes: 16, importId: "import-1",
   profileFingerprint: "c".repeat(64), credentialId: "credential-1", siteId: "site-1",
   libraryId: "drive-1", siteUrl: "https://bimtech.sharepoint.com/sites/qa" };

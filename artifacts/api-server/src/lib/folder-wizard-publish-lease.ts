@@ -3,7 +3,8 @@ import { randomUUID } from "node:crypto";
 type Client = { query(sql: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[]; rowCount: number | null }>; release(): void };
 type Pool = { connect(): Promise<Client> };
 export type FolderWizardLease = { jobId: string; companyId: number; projectId: number; credentialId: string;
-  leaseOwner: string; leaseToken: string; fencingToken: number; attempts: number; payload: Record<string, unknown> };
+  createdById: number; requestDigest: string; leaseOwner: string; leaseToken: string;
+  fencingToken: number; attempts: number; payload: Record<string, unknown> };
 
 /** Claims only this exact job kind. Expired leases get a new fencing token. */
 export const CLAIM_FOLDER_WIZARD_PUBLISH_SQL = `WITH candidate AS (
@@ -18,7 +19,7 @@ export const CLAIM_FOLDER_WIZARD_PUBLISH_SQL = `WITH candidate AS (
     lease_expires_at=now()+interval '2 minutes',fencing_token=j.fencing_token+1,
     attempts=j.attempts+1,updated_at=now()
   FROM candidate WHERE j.id=candidate.id
-  RETURNING j.id,j.company_id,j.project_id,j.credential_id,j.lease_owner,j.lease_token,
+  RETURNING j.id,j.company_id,j.project_id,j.credential_id,j.created_by_id,j.request_digest,j.lease_owner,j.lease_token,
     j.fencing_token,j.attempts,j.payload,candidate.state AS previous_state
 ) SELECT * FROM updated`;
 
@@ -42,7 +43,8 @@ export class FolderWizardPublishLeaseStore {
       if (event.rowCount !== 1) throw new Error("FOLDER_WIZARD_LEASE_EVENT_FAILED");
       await client.query("COMMIT");
       return { jobId: String(row.id), companyId: Number(row.company_id), projectId: Number(row.project_id),
-        credentialId: String(row.credential_id), leaseOwner, leaseToken: token,
+        credentialId: String(row.credential_id), createdById: Number(row.created_by_id),
+        requestDigest: String(row.request_digest), leaseOwner, leaseToken: token,
         fencingToken: Number(row.fencing_token), attempts: Number(row.attempts),
         payload: row.payload as Record<string, unknown> };
     } catch (error) { await client.query("ROLLBACK"); throw error; }

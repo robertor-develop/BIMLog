@@ -583,14 +583,24 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/folder-wizard-publish-candidate-store.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-candidate.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-candidate.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-job.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-job.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-lease.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-lease.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-plan.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-plan.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-queue.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-queue.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness-store.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness-store.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-settlement.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-settlement.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-source.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-source.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-worker.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-worker.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.ts
 - artifacts/api-server/src/lib/folder-wizard-routing-contract.behavior.ts
@@ -1146,6 +1156,12 @@ It changes only when the code structure or curated architectural facts change.
 - An existing project Files record and durable storage object provide the sole source custody. A read-only candidate verifies exact stored byte count and SHA-256, current Wizard import/routing profile, active mapped credential, and Graph-verified site/library identity.
 - The deterministic candidate freezes the current source, routing fingerprint and drive-relative path into one request digest. An isolated Graph adapter can create a small file only with no-overwrite semantics, but no production route invokes that write transport.
 - The authenticated project endpoint previews eligibility only. No delivery job, worker, retry, external file write or user-facing publishing control is activated by this block. A real authorized tenant/site round-trip remains required before delivery acceptance.
+
+## BT Folder Wizard disconnected job foundation — Builds 21–25
+
+- A deterministic request can be frozen as a byte-free job. The queue adapter rechecks current project/company membership, Wizard import, routing profile, SharePoint mapping, active credential and durable Files identity inside one transaction before insertion and an immutable event.
+- A separate worker boundary claims only Wizard publish jobs through a finite lease and fencing token, rechecks current source and destination authority, and can settle by exact lease into completed, bounded retry or dead-letter with an immutable audit event.
+- These adapters are not mounted on a production route or scheduled. The visible publishing action stays disabled. Real PostgreSQL/provider round-trip, conflict reconciliation and user confirmation remain open; no SharePoint delivery is claimed.
 
 ## Coordination Delivery Release A — Build 1 service boundary
 

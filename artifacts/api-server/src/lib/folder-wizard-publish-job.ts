@@ -6,7 +6,7 @@ export type FolderWizardPublishJob = {
   credentialId: string; provider: "sharepoint"; jobType: "publish";
   idempotencyKey: string; requestDigest: string; maxAttempts: 5;
   payload: {
-    kind: "folder_wizard_file_v1"; importId: string; profileFingerprint: string;
+    kind: "folder_wizard_file_v1"; importId: string; profileFingerprint: string; tags: Record<string, string>;
     sourceFileId: number; sourceSha256: string; sourceBytes: number;
     siteId: string; libraryId: string; siteUrl: string; driveRelativePath: string; filename: string;
   };
@@ -31,7 +31,7 @@ export function createFolderWizardPublishJob(input: {
     id, companyId: input.companyId, projectId: input.projectId, actorUserId: input.actorUserId,
     credentialId: plan.credentialId, provider: "sharepoint", jobType: "publish",
     idempotencyKey: plan.idempotencyKey, requestDigest: plan.requestDigest, maxAttempts: 5,
-    payload: { kind: "folder_wizard_file_v1", importId: plan.importId,
+    payload: { kind: "folder_wizard_file_v1", importId: plan.importId, tags: plan.tags,
       profileFingerprint: plan.profileFingerprint, sourceFileId: plan.sourceFileId,
       sourceSha256: plan.sourceSha256, sourceBytes: plan.sourceBytes, siteId: plan.siteId,
       libraryId: plan.libraryId, siteUrl: plan.siteUrl, driveRelativePath: plan.driveRelativePath,
