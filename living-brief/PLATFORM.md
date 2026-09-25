@@ -194,6 +194,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.ts
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
 - artifacts/api-server/src/lib/bimtech-coordination-starter-library.ts
+- artifacts/api-server/src/lib/bimtech-template-repair-definitions.behavior.ts
+- artifacts/api-server/src/lib/bimtech-template-repair-definitions.ts
 - artifacts/api-server/src/lib/block10-controlled-acceptance.behavior.ts
 - artifacts/api-server/src/lib/block11-financial-acceptance.behavior.ts
 - artifacts/api-server/src/lib/block12-build056-canonical-project-identity.behavior.ts

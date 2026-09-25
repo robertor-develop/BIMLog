@@ -41176,6 +41176,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "51e15480070bc4a2b90aefef8cdd036db611f1a4122c073f5da444f1433aab33"
+    },
+    {
+      "taskId": "bimlog-bimtech-template-runtime-closure-20260925",
+      "reviewedThroughCommit": "06191a1d21f0c96505ecb6be0551d3968b43b108",
+      "reviewedAt": "2026-09-25T04:45:00Z",
+      "status": "runtime_closure_publication_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "run_exact_local_build",
+          "regenerate_platform_inventory",
+          "reconcile_living_brief_state",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The exact production build added the two new BIMTECH repair modules to generated Platform inventory; the sealed runtime document hash must include that deterministic structural delta before publication."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership or company-identity doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established GitHub, Replit Shell, publish, and live-Chrome path is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact production build is the existing quality gate that exposed this generated-document mismatch."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No change to product vision or future capability direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated structural inventory now includes the BIMTECH repair definition and behavior modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Navisworks bridge, installer, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported-document presentation contract change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, edition, applicability, or evidence claim change."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing repair status remains accurate; this correction only seals generated runtime inventory."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product acceptance loop is added or removed by the generated inventory correction."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit-event schema or historical evidence-integrity contract change."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "46a610b4f52a316963c454e60b13e282eb4ef3489e96ed148119edb8ce8eb89e"
     }
   ]
 }
