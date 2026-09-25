@@ -10,6 +10,7 @@ export type FolderWizardLease = { jobId: string; companyId: number; projectId: n
 export const CLAIM_FOLDER_WIZARD_PUBLISH_SQL = `WITH candidate AS (
   SELECT id,state FROM connector_jobs
   WHERE provider='sharepoint' AND job_type='publish' AND payload->>'kind'='folder_wizard_file_v1'
+    AND ($3::text IS NULL OR id=$3)
     AND attempts<max_attempts AND (
       state IN ('queued','retry') AND next_attempt_at<=now() OR
       state='leased' AND lease_expires_at<now())
@@ -25,13 +26,14 @@ export const CLAIM_FOLDER_WIZARD_PUBLISH_SQL = `WITH candidate AS (
 
 export class FolderWizardPublishLeaseStore {
   constructor(private readonly database: Pool) {}
-  async claim(leaseOwner: string): Promise<FolderWizardLease | null> {
+  async claim(leaseOwner: string, jobId: string | null = null): Promise<FolderWizardLease | null> {
     if (!/^[a-zA-Z0-9_-]{1,128}$/.test(leaseOwner)) throw new Error("FOLDER_WIZARD_LEASE_OWNER_INVALID");
+    if (jobId !== null && !/^[a-zA-Z0-9_-]{8,128}$/.test(jobId)) throw new Error("FOLDER_WIZARD_JOB_ID_INVALID");
     const token = randomUUID();
     const client = await this.database.connect();
     try {
       await client.query("BEGIN");
-      const row = (await client.query(CLAIM_FOLDER_WIZARD_PUBLISH_SQL, [leaseOwner, token])).rows[0];
+      const row = (await client.query(CLAIM_FOLDER_WIZARD_PUBLISH_SQL, [leaseOwner, token, jobId])).rows[0];
       if (!row) { await client.query("COMMIT"); return null; }
       const event = await client.query(`INSERT INTO connector_job_events(id,job_id,company_id,project_id,sequence,event_type,
         from_state,to_state,fencing_token,actor_type,actor_id,reason_code,evidence)

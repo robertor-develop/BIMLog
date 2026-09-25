@@ -8,6 +8,7 @@ type Identity = { verify(input: { companyId: number; credentialId: string; siteI
 
 export function createFolderWizardPublishCandidateStore(
   database?: Pool, identity: Identity = createRuntimeFolderWizardGraphIdentity(),
+  requireProjectAdmin = false,
 ): FolderWizardCandidateReader {
   return {
     async read(projectId: number, actorUserId: number, fileId: number): Promise<FolderWizardCandidateSnapshot> {
@@ -18,7 +19,8 @@ export function createFolderWizardPublishCandidateStore(
           FROM projects p JOIN users creator ON creator.id=p.created_by_id JOIN users actor ON actor.id=$2
           WHERE p.id=$1 AND p.status<>'archived'
             AND (actor.is_super_admin OR (actor.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id)
-              AND EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active')))`,
+              AND EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active'
+                ${requireProjectAdmin ? "AND pm.role='project_admin'" : ""})))`,
           [projectId, actorUserId])).rows[0];
         if (!authority) throw new FolderWizardImportError("FOLDER_WIZARD_FORBIDDEN", 403);
         const companyId = Number(authority.company_id);

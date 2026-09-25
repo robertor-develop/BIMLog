@@ -78,13 +78,14 @@ try {
     /FOLDER_WIZARD_JOB_IDEMPOTENCY_CONFLICT/);
   const leaseStore = new FolderWizardPublishLeaseStore(pool as never);
   const settlement = new FolderWizardPublishSettlement(pool as never);
-  const first = await leaseStore.claim("wizard-test-worker");
+  assert.equal(await leaseStore.claim("wizard-test-worker", id("different-job")), null);
+  const first = await leaseStore.claim("wizard-test-worker", jobId);
   assert.equal(first?.jobId, jobId);
   assert.equal(first?.fencingToken, 1);
   assert.equal(await settlement.settle(first!, { kind: "failed", code: "FOLDER_WIZARD_GRAPH_UPLOAD_FAILED", retryable: true }), "retry");
   await assert.rejects(settlement.settle(first!, { kind: "completed", itemId: "stale" }), /FOLDER_WIZARD_LEASE_STALE/);
   await pool.query("UPDATE connector_jobs SET next_attempt_at=now() WHERE id=$1", [jobId]);
-  const second = await leaseStore.claim("wizard-test-worker");
+  const second = await leaseStore.claim("wizard-test-worker", jobId);
   assert.equal(second?.fencingToken, 2);
   assert.equal(await settlement.settle(second!, { kind: "completed", itemId: "synthetic-item" }), "completed");
   assert.equal(await leaseStore.claim("wizard-test-worker"), null);

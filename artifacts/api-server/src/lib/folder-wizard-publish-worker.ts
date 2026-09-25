@@ -22,7 +22,7 @@ type Uploader = { create(input: { companyId: number; credentialId: string; drive
   driveRelativePath: string; filename: string; bytes: Buffer }): Promise<{ itemId: string }> };
 type Settlement = Pick<FolderWizardPublishSettlement, "settle">;
 
-/** Deliberately not scheduled or mounted: provider writes need round-trip acceptance first. */
+/** Executes one explicitly confirmed, fenced publication; no background queue drain. */
 export class FolderWizardPublishWorker {
   constructor(private readonly reader: FolderWizardCandidateReader, private readonly storage: StorageAdapter,
     private readonly uploader: Uploader, private readonly settlement: Settlement) {}

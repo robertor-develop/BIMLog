@@ -7,6 +7,8 @@ import { createFolderWizardPublishReadinessStore } from "../lib/folder-wizard-pu
 import { FolderWizardPublishCandidateService } from "../lib/folder-wizard-publish-candidate";
 import { createFolderWizardPublishCandidateStore } from "../lib/folder-wizard-publish-candidate-store";
 import { createRuntimeFolderWizardPublishStatusStore } from "../lib/folder-wizard-publish-status";
+import { createRuntimeFolderWizardPublishSubmission } from "../lib/folder-wizard-publish-submission";
+import { executeConfirmedFolderWizardPublish } from "../lib/folder-wizard-publish-execution";
 import { storage } from "../lib/storage-adapter";
 
 const router: IRouter = Router();
@@ -43,6 +45,18 @@ router.post("/projects/:projectId/integrations/folder-wizard/publishing-candidat
     if (!Number.isSafeInteger(fileId) || fileId <= 0 || !tags || typeof tags !== "object" || Array.isArray(tags))
       throw new FolderWizardImportError("FOLDER_WIZARD_CANDIDATE_INVALID", 400);
     res.json(await candidate.preview({ ...scope, fileId, tags }));
+  } catch (error) { fail(res, error); }
+});
+router.post("/projects/:projectId/integrations/folder-wizard/publish", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const scope = getScope(req);
+    const { fileId, tags, expectedDigest, confirmation } = req.body ?? {};
+    if (!Number.isSafeInteger(fileId) || fileId <= 0 || !tags || typeof tags !== "object" || Array.isArray(tags))
+      throw new FolderWizardImportError("FOLDER_WIZARD_CANDIDATE_INVALID", 400);
+    const submitted = await (await createRuntimeFolderWizardPublishSubmission()).submit({ ...scope, fileId,
+      tags, expectedDigest, confirmation });
+    const executed = await executeConfirmedFolderWizardPublish(submitted.jobId);
+    res.status(submitted.result === "queued" ? 202 : 200).json({ ...submitted, ...executed });
   } catch (error) { fail(res, error); }
 });
 router.post("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, requireProjectMember(), async (req, res) => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { parseFolderWizardDraft, type FolderWizardDraft } from "./folder-wizard-draft";
 import { FolderWizardRoutingPanel } from "./FolderWizardRoutingPanel";
+import { FolderWizardPublishPanel } from "./FolderWizardPublishPanel";
 
 type ImportRecord = { id: string; version: number; sha256: string;
   document: { destination: { sharepoint_url: string; base_path: string }; blueprints: { name: string; include: boolean; tiers: { label: string; items: string[] }[] }[] };
@@ -9,7 +10,7 @@ type Readiness = { ready: boolean; blockers: string[]; providerError: string | n
 type PublishJob = { jobId: string; state: string; attempts: number; maxAttempts: number;
   errorCode: string | null; filename: string; sourceFileId: number; createdAt: string };
 const publishStateLabels: Record<string, [string, string]> = {
-  queued: ["Queued", "En cola"], leased: ["Publishing", "Publicando"], retry: ["Retry scheduled", "Reintento programado"],
+  queued: ["Queued", "En cola"], leased: ["Publishing", "Publicando"], retry: ["Retry available after delay", "Reintento disponible tras la espera"],
   completed: ["Published", "Publicado"], dead_letter: ["Needs attention", "Requiere atención"],
   cancelled: ["Cancelled", "Cancelado"],
 };
@@ -107,7 +108,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
 
   return <section aria-label={tr("BT Folder Wizard routing", "Rutas de BT Folder Wizard")} style={{ border: "1px solid hsl(var(--border))", borderRadius: 11, padding: 17, marginBottom: 18, background: "hsl(var(--card))" }}>
     <h2 style={{ margin: 0, fontSize: 17 }}>{tr("BT Folder Wizard routing", "Rutas de BT Folder Wizard")}</h2>
-    <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{tr("Import the JSON export to configure project folder rules. This does not publish files to SharePoint yet.", "Importe el JSON para configurar las reglas de carpetas del proyecto. Esto todavía no publica archivos en SharePoint.")}</p>
+    <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{tr("Import the Wizard JSON to configure folder rules. File publication is a separate, explicit step after destination verification.", "Importe el JSON del Wizard para configurar las reglas de carpetas. La publicación de archivos es un paso separado y explícito después de verificar el destino.")}</p>
     {loading ? <p role="status">{tr("Loading routing…", "Cargando rutas…")}</p> : error && !current && !draft ? <p role="alert">{error}</p> : <>
       {current ? <div style={{ fontSize: 12 }}>
         <strong>{tr("Saved version", "Versión guardada")}: {current.version}</strong>
@@ -124,7 +125,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
           <strong>{readiness.ready ? tr("Site and library verified", "Sitio y biblioteca verificados") : tr("Destination setup incomplete", "Configuración del destino incompleta")}</strong>
           {readiness.blockers.length > 0 && <ul>{readiness.blockers.map((code) => <li key={code}>{readinessLabels[code]?.[lang === "es" ? 1 : 0] ?? code}</li>)}</ul>}
           {readiness.providerError && <p role="alert">{tr("Microsoft Graph verification is unavailable; no publishing is enabled.", "La verificación con Microsoft Graph no está disponible; no se habilita la publicación.")}</p>}
-          <p>{tr("File publishing to SharePoint is not enabled yet.", "La publicación de archivos en SharePoint todavía no está habilitada.")}</p>
+          {!readiness.ready && <p>{tr("File publishing remains unavailable until every destination check passes.", "La publicación no está disponible hasta que se aprueben todas las verificaciones del destino.")}</p>}
         </div>}
       <div style={{ fontSize: 12, marginTop: 12 }} aria-label={tr("SharePoint publication status", "Estado de publicación SharePoint")}>
         <strong>{tr("SharePoint publication status", "Estado de publicación SharePoint")}</strong>
@@ -147,6 +148,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
       </div>}
       {error && <p role="alert" style={{ color: "#991B1B" }}>{error}</p>}
       {current && <FolderWizardRoutingPanel projectId={projectId} token={token} lang={lang} blueprints={current.document.blueprints} />}
+      {current && readiness?.ready && <FolderWizardPublishPanel projectId={projectId} token={token} lang={lang} onChanged={() => reload()} />}
     </>}
   </section>;
 }

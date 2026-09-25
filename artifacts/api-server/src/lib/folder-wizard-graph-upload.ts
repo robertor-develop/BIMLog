@@ -33,6 +33,14 @@ function approvedDownloadUrl(raw: string): string {
   return url.toString();
 }
 
+function approvedUploadUrl(raw: string): string {
+  const url = new URL(raw);
+  if (url.protocol !== "https:" || url.username || url.password || url.hash ||
+      !(/\.up\.1drv\.com$/i.test(url.hostname) || /\.sharepoint\.(com|us)$/i.test(url.hostname)))
+    throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_SESSION_INVALID");
+  return url.toString();
+}
+
 /** A create-only Graph write. Never follows a provider redirect or overwrites an existing item. */
 export class FolderWizardGraphUpload {
   constructor(private readonly lease: Lease, private readonly transport: typeof fetch = fetch) {}
@@ -48,17 +56,30 @@ export class FolderWizardGraphUpload {
       throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_INVALID");
     const path = driveRelativePath.split("/").map(encodeURIComponent).join("/");
     return this.lease.withBearerToken({ credentialId, companyId, provider: "sharepoint" }, async (token) => {
-      if (!(token instanceof Uint8Array) || token.byteLength < 16 || token.byteLength > 8_192)
+      if (!(token instanceof Uint8Array) || token.byteLength < 16 || token.byteLength > 8_192) {
+        if (token instanceof Uint8Array) token.fill(0);
         throw new Error("FOLDER_WIZARD_GRAPH_CREDENTIAL_INVALID");
+      }
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30_000);
       try {
-        const response = await this.transport(`https://graph.microsoft.com/v1.0/drives/${encodeURIComponent(driveId)}/root:/${path}:/content`, {
-          method: "PUT", redirect: "error", signal: controller.signal,
-          headers: { authorization: `Bearer ${Buffer.from(token).toString("utf8")}`,
-            "content-type": "application/octet-stream", "if-none-match": "*" },
-          body: new Uint8Array(bytes),
+        const session = await this.transport(`https://graph.microsoft.com/v1.0/drives/${encodeURIComponent(driveId)}/root:/${path}:/createUploadSession`, {
+          method: "POST", redirect: "error", signal: controller.signal,
+          headers: { authorization: `Bearer ${Buffer.from(token).toString("utf8")}`, "content-type": "application/json" },
+          body: JSON.stringify({ item: { name: filename, "@microsoft.graph.conflictBehavior": "fail" } }),
         });
+        if (session.status !== 200 && session.status !== 409 && session.status !== 412)
+          throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_FAILED");
+        let response = session;
+        if (session.status === 200) {
+          const sessionJson = JSON.parse((await boundedBytes(session, 32_768)).toString("utf8")) as { uploadUrl?: unknown };
+          if (typeof sessionJson.uploadUrl !== "string") throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_SESSION_INVALID");
+          response = await this.transport(approvedUploadUrl(sessionJson.uploadUrl), {
+            method: "PUT", redirect: "error", signal: controller.signal,
+            headers: { "content-length": String(bytes.length), "content-range": `bytes 0-${bytes.length - 1}/${bytes.length}` },
+            body: new Uint8Array(bytes),
+          });
+        }
         if (response.status === 409 || response.status === 412) {
           // A prior attempt may have uploaded before its acknowledgement was lost.
           // Never overwrite; accept only the exact same drive, name and bytes.
@@ -93,7 +114,7 @@ export class FolderWizardGraphUpload {
           } finally { existingBytes.fill(0); }
           return { itemId: existing.id, webUrl: existing.webUrl };
         }
-        if (response.status !== 201) throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_FAILED");
+        if (response.status !== 201 && response.status !== 200) throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_FAILED");
         const body = await response.text();
         if (body.length > 32_768) throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_RESPONSE_LARGE");
         const item = itemSchema.parse(JSON.parse(body));

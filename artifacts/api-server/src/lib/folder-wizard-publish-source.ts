@@ -21,7 +21,9 @@ export async function readVerifiedPublishSource(source: PublishSource, storage: 
   if (health.backendType === "local-test" || !health.capabilities.includes("bounded-read") ||
       health.maxReadBytes < source.byteSize) throw new Error("FOLDER_WIZARD_SOURCE_CUSTODY_UNAVAILABLE");
   const bytes = await storage.downloadBounded(source.storageKey, source.byteSize);
-  if (bytes.byteLength !== source.byteSize || createHash("sha256").update(bytes).digest("hex") !== source.sha256)
+  if (bytes.byteLength !== source.byteSize || createHash("sha256").update(bytes).digest("hex") !== source.sha256) {
+    bytes.fill(0);
     throw new Error("FOLDER_WIZARD_SOURCE_CHANGED");
+  }
   return bytes;
 }
