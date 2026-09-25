@@ -41062,6 +41062,120 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "dcd5038c35fe4c69a0e0ef6ac9243c2d23cae705f433e582fa7411e8c288f579"
+    },
+    {
+      "taskId": "bimlog-bimtech-identity-template-repair-20260925",
+      "reviewedThroughCommit": "d5b9deafb4d9e30cc9dd5d91999323b569c73822",
+      "reviewedAt": "2026-09-25T04:31:58Z",
+      "status": "production_repair_applied_publication_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository_and_authority",
+          "implement_idempotent_repair",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "production_backup_and_data_repair",
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Rubén and Lorena are reconciled to canonical BIMTECH company 31 and the required company template drafts now exist in production."
+        },
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The repair is idempotent, preserves append-only binding history, retains company 35 as a historical alias, and leaves lifecycle approval to the authorized Operations Director."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "A verified production backup precedes the applied data repair; the publication candidate changes no schema and remains subject to exact-identity publication and live Chrome verification."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair restores the existing canonical-company authority rather than introducing a new ownership model."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established Replit Shell publication path remains unchanged and Replit Agents remain prohibited."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused behavioral, contract, type, secret, encoding, and database-safety checks satisfy the existing quality contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No change to BIMLog product vision or capability direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, schema, platform dependency, or deployment-topology change is introduced."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Navisworks bridge, installer, or package change is included."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported-document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, edition, applicability, or evidence claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Production backup, identity reconciliation, template drafts, exact commit, and remaining lifecycle acceptance are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Operations Director approval and direct Rubén/Lorena UI acceptance remain explicit without reopening the completed identity repair."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit-event schema or historical evidence-integrity contract changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "51e15480070bc4a2b90aefef8cdd036db611f1a4122c073f5da444f1433aab33"
     }
   ]
 }
