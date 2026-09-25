@@ -4,6 +4,8 @@
 
 - [x] Push BT Folder Wizard import foundation block (five commits through `b3d5a065`); source checks passed, publication and live Chrome acceptance remain separate.
 - [ ] Complete company tag-to-tier defaults, project overrides, exact path resolution, site/library authority, durable file custody, governed Graph delivery and visible retry/audit. Fix existing false `queued_sync` result before claiming a file is queued.
+- [x] Source-correct the false `queued_sync` success: reject the action before creating an intake event or deleting staged bytes, and disable the misleading UI button. This is a fail-closed interim correction, not a SharePoint publisher.
+- [ ] Build and prove site/library resolution, explicit tenant grant, durable file custody, idempotent Graph upload jobs, retry/error audit, and final user-confirmed publishing. Do not re-enable the queue button until this entire chain passes.
 - [ ] At the ten-build milestone, run all source/dependency/database gates, publish through Replit Shell, bind exact deployed commit, then perform full authenticated Chrome smoke. Do not label SharePoint delivery complete without a real authorized tenant/site round-trip. Do not change Lens Next.
 
 ## Fresh-project catalog and role acceptance — 2026-09-24

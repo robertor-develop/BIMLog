@@ -6,8 +6,8 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 662,
-    "frontendApiReferences": 245,
+    "apiRoutes": 667,
+    "frontendApiReferences": 247,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -4301,6 +4301,36 @@
       "method": "POST",
       "path": "/financial-controls/evaluate",
       "owner": "artifacts/api-server/src/routes/financial-controls.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/integrations/folder-wizard",
+      "owner": "artifacts/api-server/src/routes/folder-wizard-imports.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/integrations/folder-wizard",
+      "owner": "artifacts/api-server/src/routes/folder-wizard-imports.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/integrations/folder-wizard/routing",
+      "owner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/integrations/folder-wizard/routing",
+      "owner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/integrations/folder-wizard/routing/preview",
+      "owner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
       "tables": []
     },
     {
@@ -9338,6 +9368,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/files/${cvrModalFile.id}/cvr-proceed"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/integrations/folder-wizard"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/FolderWizardRoutingPanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/integrations/folder-wizard/routing"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",

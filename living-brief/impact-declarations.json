@@ -41271,6 +41271,113 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "46a610b4f52a316963c454e60b13e282eb4ef3489e96ed148119edb8ce8eb89e"
+    },
+    {
+      "taskId": "bimlog-folder-wizard-routing-block02-20260925",
+      "reviewedThroughCommit": "c5c59c32a30fe1207521e69ba564ede3b15a4e6e",
+      "reviewedAt": "2026-09-25T16:19:51Z",
+      "status": "block02_publication_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "source_repair",
+          "run_local_build",
+          "reconcile_living_brief",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The additive Wizard routing schema and UI need publication; the existing coordination queue had no durable SharePoint worker and was changed to fail closed. Actual SharePoint delivery remains open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Company ownership and isolation doctrine remain unchanged by this bounded routing milestone."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established GitHub and Replit Shell publication path remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing verification and release gates still apply to this milestone."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This milestone implements the previously scoped routing foundation without changing product vision."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory includes the new Wizard routing service, resolver, API, and behavior modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native and installers are frozen and untouched in this block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported-document design contract changes in this block."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards titles, editions, or evidence claims change in this block."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records block two as a publication candidate and distinguishes routing configuration from actual SharePoint delivery."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open-loop tracking records the fail-closed queue correction while leaving Graph delivery and custody unresolved."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing audit contract is unchanged; unavailable queue attempts now stop before writing a misleading success event."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/coordination-sync-fail-closed.behavior.ts",
+        "artifacts/api-server/src/routes/coordination.ts",
+        "artifacts/api-server/src/routes/folder-wizard-imports.ts",
+        "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+        "artifacts/bimlog/src/pages/project/CoordinationHub.tsx",
+        "evidence/coordination-routing-20260925/BLOCK_02_BUILDS_006_010.md",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/ENDPOINT_AUTHORITY_MATRIX.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "94dbb07ca6fc18be088de2ae8fe6d5eae99f3fde77cbc7dbf00b31a86f8ac8b8"
     }
   ]
 }

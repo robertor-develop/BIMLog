@@ -18,6 +18,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useI18n } from "@/lib/i18n";
 
 const COORD_API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -519,6 +520,7 @@ function ReviewPanel({
   onReject: () => void;
   confirming: boolean;
 }) {
+  const { lang } = useI18n();
   const a = result.analysis;
   const sep = result.conventionSnapshot.separator;
   const severe = a.severe;
@@ -693,18 +695,22 @@ function ReviewPanel({
         </button>
         <button
           onClick={onConfirmQueue}
-          disabled={confirming}
+          disabled
+          aria-describedby="coordination-sync-unavailable"
           style={{
             display: "inline-flex", alignItems: "center", gap: 6,
             padding: "9px 16px", borderRadius: 6, fontSize: 12, fontWeight: 700,
             background: "white", color: "#1D4ED8", border: "1.5px solid #BFDBFE",
             cursor: "pointer",
-            opacity: confirming ? 0.6 : 1,
+            opacity: 0.5,
           }}
         >
           <CheckCircle2 style={{ width: 13, height: 13 }} />
           Confirm & Queue for Sync
         </button>
+        <span id="coordination-sync-unavailable" style={{ flexBasis: "100%", color: "#6B7280", fontSize: 11 }}>
+          {lang === "es" ? "La sincronización con SharePoint aún no está configurada. Confirme y descargue el archivo." : "SharePoint sync is not configured yet. Confirm and download the file instead."}
+        </span>
         <button
           onClick={onReject}
           disabled={confirming}

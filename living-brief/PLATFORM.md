@@ -81,6 +81,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/financial-budgets.ts
 - artifacts/api-server/src/routes/financial-contracts.ts
 - artifacts/api-server/src/routes/financial-controls.ts
+- artifacts/api-server/src/routes/folder-wizard-imports.ts
+- artifacts/api-server/src/routes/folder-wizard-routing.ts
 - artifacts/api-server/src/routes/generic-apu-budget-controls.ts
 - artifacts/api-server/src/routes/health.ts
 - artifacts/api-server/src/routes/index.ts
@@ -156,6 +158,8 @@ It changes only when the code structure or curated architectural facts change.
 - jobOperationsRouter
 - teamPerformanceRouter
 - coordinationHubRouter
+- folderWizardImportsRouter
+- folderWizardRoutingRouter
 - masterCatalogsRouter
 - companyMasterCatalogsRouter
 - deliveryWorkflowTemplatesRouter
@@ -358,6 +362,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-resolution-record-contract.behavior.ts
 - artifacts/api-server/src/lib/coordination-resolution-record-contract.ts
 - artifacts/api-server/src/lib/coordination-resolution-verification.behavior.ts
+- artifacts/api-server/src/lib/coordination-sync-fail-closed.behavior.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
 - artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts
 - artifacts/api-server/src/lib/coordinator-bulk-actions.ts
@@ -563,6 +568,18 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-revision-ledger.behavior.ts
 - artifacts/api-server/src/lib/financial-revision-ledger.ts
 - artifacts/api-server/src/lib/financial-statement-mapping.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-export.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-export.ts
+- artifacts/api-server/src/lib/folder-wizard-import-service.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-import-service.ts
+- artifacts/api-server/src/lib/folder-wizard-paths.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-paths.ts
+- artifacts/api-server/src/lib/folder-wizard-resolver.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-resolver.ts
+- artifacts/api-server/src/lib/folder-wizard-routing-contract.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-routing-contract.ts
+- artifacts/api-server/src/lib/folder-wizard-routing-service.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-routing-service.ts
 - artifacts/api-server/src/lib/follow-up-accountability.behavior.ts
 - artifacts/api-server/src/lib/follow-up-accountability.ts
 - artifacts/api-server/src/lib/for-record-issuance.behavior.ts
@@ -873,6 +890,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx
 - artifacts/bimlog/src/pages/project/DirectoryTab.tsx
 - artifacts/bimlog/src/pages/project/FilesTab.tsx
+- artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx
+- artifacts/bimlog/src/pages/project/FolderWizardRoutingPanel.tsx
 - artifacts/bimlog/src/pages/project/IntegrationsTab.tsx
 - artifacts/bimlog/src/pages/project/LegacyIntegrationsTab.tsx
 - artifacts/bimlog/src/pages/project/LensViewpointsView.tsx

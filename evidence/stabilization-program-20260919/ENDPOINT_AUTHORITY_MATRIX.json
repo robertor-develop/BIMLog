@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "artifacts/api-server/src/routes",
-  "endpointCount": 660,
+  "endpointCount": 667,
   "counts": {
     "public": 13,
-    "authenticated": 647,
-    "projectScoped": 380,
+    "authenticated": 654,
+    "projectScoped": 387,
     "objectScoped": 308,
     "dynamic": 6
   },
@@ -3254,7 +3254,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 78
+      "line": 81
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3266,7 +3266,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 87
+      "line": 90
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3278,7 +3278,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 92
+      "line": 96
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3292,7 +3292,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 109
+      "line": 113
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3304,7 +3304,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 123
+      "line": 128
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3318,7 +3318,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 147
+      "line": 152
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3333,7 +3333,7 @@
         "id",
         "versionId"
       ],
-      "line": 169
+      "line": 174
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3348,7 +3348,7 @@
         "id",
         "versionId"
       ],
-      "line": 190
+      "line": 195
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3363,7 +3363,7 @@
         "id",
         "versionId"
       ],
-      "line": 225
+      "line": 240
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3378,7 +3378,7 @@
         "id",
         "versionId"
       ],
-      "line": 265
+      "line": 285
     },
     {
       "file": "documents.ts",
@@ -3438,7 +3438,31 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 30
+      "line": 31
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/edt-engine/operations-director-grants",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 41
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/operations-director-grants",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 52
     },
     {
       "file": "edt-engine.ts",
@@ -3452,7 +3476,7 @@
       "objectParams": [
         "intakeId"
       ],
-      "line": 40
+      "line": 69
     },
     {
       "file": "edt-engine.ts",
@@ -3466,7 +3490,7 @@
       "objectParams": [
         "intakeId"
       ],
-      "line": 51
+      "line": 80
     },
     {
       "file": "edt-engine.ts",
@@ -3478,7 +3502,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 62
+      "line": 91
     },
     {
       "file": "edt-engine.ts",
@@ -3492,7 +3516,7 @@
       "objectParams": [
         "requestId"
       ],
-      "line": 70
+      "line": 99
     },
     {
       "file": "edt-engine.ts",
@@ -3504,7 +3528,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 78
+      "line": 107
     },
     {
       "file": "edt-engine.ts",
@@ -3518,7 +3542,7 @@
       "objectParams": [
         "requestId"
       ],
-      "line": 92
+      "line": 121
     },
     {
       "file": "edt-engine.ts",
@@ -3530,7 +3554,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 102
+      "line": 131
     },
     {
       "file": "edt-engine.ts",
@@ -3544,7 +3568,7 @@
       "objectParams": [
         "entryId"
       ],
-      "line": 109
+      "line": 138
     },
     {
       "file": "edt-engine.ts",
@@ -3558,7 +3582,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 116
+      "line": 145
     },
     {
       "file": "edt-engine.ts",
@@ -3572,7 +3596,7 @@
       "objectParams": [
         "issuanceId"
       ],
-      "line": 127
+      "line": 156
     },
     {
       "file": "edt-engine.ts",
@@ -3586,7 +3610,7 @@
       "objectParams": [
         "intakeId"
       ],
-      "line": 139
+      "line": 168
     },
     {
       "file": "feature-policies.ts",
@@ -5135,6 +5159,66 @@
       "projectAuthority": "not_applicable",
       "objectParams": [],
       "line": 172
+    },
+    {
+      "file": "folder-wizard-imports.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/integrations/folder-wizard",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [],
+      "line": 23
+    },
+    {
+      "file": "folder-wizard-imports.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/integrations/folder-wizard",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [],
+      "line": 28
+    },
+    {
+      "file": "folder-wizard-routing.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/integrations/folder-wizard/routing",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [],
+      "line": 21
+    },
+    {
+      "file": "folder-wizard-routing.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/integrations/folder-wizard/routing",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [],
+      "line": 24
+    },
+    {
+      "file": "folder-wizard-routing.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/integrations/folder-wizard/routing/preview",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [],
+      "line": 33
     },
     {
       "file": "generic-apu-budget-controls.ts",
@@ -8498,7 +8582,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 70
+      "line": 72
     },
     {
       "file": "workflow-governance-policies.ts",
@@ -8512,7 +8596,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 78
+      "line": 80
     },
     {
       "file": "workflow-governance-policies.ts",
@@ -8524,7 +8608,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 92
+      "line": 98
     },
     {
       "file": "workflow-governance-policies.ts",
@@ -8538,7 +8622,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 116
+      "line": 122
     },
     {
       "file": "workflow-governance-policies.ts",
@@ -8553,7 +8637,7 @@
         "id",
         "versionId"
       ],
-      "line": 138
+      "line": 144
     },
     {
       "file": "workflow-governance-policies.ts",
@@ -8568,7 +8652,7 @@
         "id",
         "versionId"
       ],
-      "line": 159
+      "line": 165
     },
     {
       "file": "workflow-governance-policies.ts",
@@ -8583,7 +8667,7 @@
         "id",
         "versionId"
       ],
-      "line": 188
+      "line": 212
     },
     {
       "file": "workflow-governance-policies.ts",
@@ -8598,7 +8682,7 @@
         "id",
         "versionId"
       ],
-      "line": 225
+      "line": 256
     }
   ]
 }

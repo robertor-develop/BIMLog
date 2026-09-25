@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "program": "coordination-routing-sharepoint-20260925",
+  "baseCommit": "b3d5a065abd45e2fd0f07db559d489b9612153d5",
+  "buildsPerBlock": 5,
+  "pushEveryBuilds": 5,
+  "publishEveryBuilds": 10,
+  "maxUnpublishedBuilds": 10,
+  "lensNextFrozen": true,
+  "sourceBuilds": [
+    { "number": 6, "commit": "872df14a", "state": "committed" },
+    { "number": 7, "commit": "d8cf74ee", "state": "committed" },
+    { "number": 8, "commit": "e7fcf369", "state": "committed" },
+    { "number": 9, "commit": "c5c59c32", "state": "committed" },
+    { "number": 10, "commit": "containing_commit", "state": "committed_with_report" }
+  ],
+  "publication": "not_attempted",
+  "liveSmoke": "not_attempted",
+  "sharePointDelivery": "not_implemented",
+  "knownSafetyCorrection": "queued_sync_fail_closed_before_event_or_cache_consumption"
+}

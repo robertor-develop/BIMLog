@@ -303,9 +303,22 @@ router.post(
         res.status(400).json({ error: "userAction must be accepted, manually_corrected, or rejected" });
         return;
       }
+      if (userAction !== "rejected" && (destinationAction !== "downloaded" && destinationAction !== "queued_sync" ||
+          typeof finalFilename !== "string" || !finalFilename.trim())) {
+        res.status(400).json({ error: "A confirmed file needs a valid filename and destination action" });
+        return;
+      }
 
       const cached = fileCache.get(cacheKey);
       if (!cached) { res.status(410).json({ error: "Upload session expired — please re-upload the file" }); return; }
+
+      // The legacy queued_sync branch never retained bytes or created a delivery job.
+      // Refuse it before any event or file row is written; keep the cache for Download.
+      if (userAction !== "rejected" && destinationAction === "queued_sync") {
+        res.status(409).json({ error: "COORDINATION_SYNC_NOT_CONFIGURED",
+          message: "SharePoint delivery is not configured. Confirm and download the file instead." });
+        return;
+      }
 
       // Lookup uploader's company
       const userRows = await db.select({ id: usersTable.id, companyId: usersTable.companyId })

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { ZodError } from "zod/v4";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { createFolderWizardImportService, FolderWizardImportError } from "../lib/folder-wizard-import-service";
 
 const router: IRouter = Router();
@@ -20,12 +20,12 @@ function fail(res: { status(code: number): { json(data: unknown): unknown } }, e
   res.status(500).json({ error: "FOLDER_WIZARD_IMPORT_FAILED" });
 }
 
-router.get("/projects/:projectId/integrations/folder-wizard", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/integrations/folder-wizard", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json({ current: await service.current(scope(req)) }); }
   catch (error) { fail(res, error); }
 });
 
-router.post("/projects/:projectId/integrations/folder-wizard", authMiddleware, async (req, res) => {
+router.post("/projects/:projectId/integrations/folder-wizard", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { sourceText, expectedCurrentSha256 } = req.body ?? {};
     if (typeof sourceText !== "string" || !(expectedCurrentSha256 === null || /^[a-f0-9]{64}$/.test(expectedCurrentSha256))) {

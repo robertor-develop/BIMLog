@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { ZodError } from "zod/v4";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { FolderWizardImportError } from "../lib/folder-wizard-import-service";
 import { createFolderWizardRoutingService } from "../lib/folder-wizard-routing-service";
 
@@ -18,10 +18,10 @@ function fail(res: { status(code: number): { json(value: unknown): unknown } }, 
   console.error("folder_wizard_routing_failed", error instanceof Error ? error.name : "UnknownError");
   res.status(500).json({ error: "FOLDER_WIZARD_ROUTING_FAILED" });
 }
-router.get("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json(await service.current(getScope(req))); } catch (error) { fail(res, error); }
 });
-router.post("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, async (req, res) => {
+router.post("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { scopeType, definition, expectedFingerprint } = req.body ?? {};
     if (!(["project", "company"].includes(scopeType)) || !(expectedFingerprint === null || /^[a-f0-9]{64}$/.test(expectedFingerprint))) {
@@ -30,7 +30,7 @@ router.post("/projects/:projectId/integrations/folder-wizard/routing", authMiddl
     res.status(201).json(await service.save(getScope(req), { scopeType, definition, expectedFingerprint }));
   } catch (error) { fail(res, error); }
 });
-router.post("/projects/:projectId/integrations/folder-wizard/routing/preview", authMiddleware, async (req, res) => {
+router.post("/projects/:projectId/integrations/folder-wizard/routing/preview", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { definition, tags, filename } = req.body ?? {};
     if (!tags || typeof tags !== "object" || Array.isArray(tags) || Object.keys(tags).length > 64 ||
