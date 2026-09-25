@@ -17,10 +17,15 @@
     { "number": 12, "commit": "cdd44a61", "state": "committed" },
     { "number": 13, "commit": "43b4c06b", "state": "committed" },
     { "number": 14, "commit": "e43c5752", "state": "committed" },
-    { "number": 15, "commit": "containing_commit", "state": "committed_with_report" }
+    { "number": 15, "commit": "d9605ea3", "state": "pushed" },
+    { "number": 16, "commit": "2e342a8c", "state": "committed" },
+    { "number": 17, "commit": "ab688186", "state": "committed" },
+    { "number": 18, "commit": "fc93006a", "state": "committed" },
+    { "number": 19, "commit": "42f90f8f", "state": "committed" },
+    { "number": 20, "commit": "containing_commit", "state": "candidate" }
   ],
   "publication": "build_10_04f2af1cf8c446783e38a826b10649afa59d330b",
   "liveSmoke": "partial_pass_file_selection_blocked",
-  "sharePointDelivery": "not_implemented",
+  "sharePointDelivery": "not_implemented_read_only_candidate",
   "knownSafetyCorrection": "queued_sync_fail_closed_before_event_or_cache_consumption"
 }

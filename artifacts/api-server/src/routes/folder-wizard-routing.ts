@@ -4,10 +4,14 @@ import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { FolderWizardImportError } from "../lib/folder-wizard-import-service";
 import { createFolderWizardRoutingService } from "../lib/folder-wizard-routing-service";
 import { createFolderWizardPublishReadinessStore } from "../lib/folder-wizard-publish-readiness-store";
+import { FolderWizardPublishCandidateService } from "../lib/folder-wizard-publish-candidate";
+import { createFolderWizardPublishCandidateStore } from "../lib/folder-wizard-publish-candidate-store";
+import { storage } from "../lib/storage-adapter";
 
 const router: IRouter = Router();
 const service = createFolderWizardRoutingService();
 const publishingReadiness = createFolderWizardPublishReadinessStore();
+const candidate = new FolderWizardPublishCandidateService(createFolderWizardPublishCandidateStore(), storage);
 const getScope = (req: { params: Record<string, unknown>; user?: { userId: number } }) => {
   const projectId = Number(req.params.projectId);
   if (!Number.isSafeInteger(projectId) || projectId <= 0) throw new FolderWizardImportError("FOLDER_WIZARD_INVALID_PROJECT", 400);
@@ -25,6 +29,16 @@ router.get("/projects/:projectId/integrations/folder-wizard/routing", authMiddle
 });
 router.get("/projects/:projectId/integrations/folder-wizard/publishing-readiness", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json(await publishingReadiness.read(getScope(req))); } catch (error) { fail(res, error); }
+});
+router.post("/projects/:projectId/integrations/folder-wizard/publishing-candidate", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const scope = getScope(req);
+    const fileId = Number(req.body?.fileId);
+    const tags = req.body?.tags;
+    if (!Number.isSafeInteger(fileId) || fileId <= 0 || !tags || typeof tags !== "object" || Array.isArray(tags))
+      throw new FolderWizardImportError("FOLDER_WIZARD_CANDIDATE_INVALID", 400);
+    res.json(await candidate.preview({ ...scope, fileId, tags }));
+  } catch (error) { fail(res, error); }
 });
 router.post("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, requireProjectMember(), async (req, res) => {
   try {

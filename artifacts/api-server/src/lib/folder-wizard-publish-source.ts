@@ -13,7 +13,7 @@ export async function readVerifiedPublishSource(source: PublishSource, storage: 
       !Number.isSafeInteger(source.projectId) || source.projectId <= 0 ||
       !Number.isSafeInteger(source.byteSize) || source.byteSize <= 0 || source.byteSize > MAX_PUBLISH_BYTES ||
       !/^[a-f0-9]{64}$/.test(source.sha256) || !source.storageKey ||
-      source.status !== "active" || !source.name || source.name !== source.name.trim() ||
+      source.status.toLowerCase() !== "active" || !source.name || source.name !== source.name.trim() ||
       /[<>:"/\\|?*\x00-\x1f]/.test(source.name) || /[. ]$/.test(source.name)) {
     throw new Error("FOLDER_WIZARD_SOURCE_INVALID");
   }

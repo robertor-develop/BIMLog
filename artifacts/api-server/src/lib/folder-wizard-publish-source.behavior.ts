@@ -9,6 +9,7 @@ const source = { id: 9, projectId: 5, name: "proof.txt", storageKey: "opaque", b
 const storage = { health: async () => ({ backendType: "durable-filesystem", capabilities: ["bounded-read"], maxReadBytes: 10_485_760 }),
   downloadBounded: async () => bytes } as unknown as StorageAdapter;
 assert.deepEqual(await readVerifiedPublishSource(source, storage), bytes);
+assert.deepEqual(await readVerifiedPublishSource({ ...source, status: "Active" }, storage), bytes);
 await assert.rejects(readVerifiedPublishSource({ ...source, sha256: "0".repeat(64) }, storage), /SOURCE_CHANGED/);
 await assert.rejects(readVerifiedPublishSource({ ...source, name: "../bad" }, storage), /SOURCE_INVALID/);
 await assert.rejects(readVerifiedPublishSource({ ...source, projectId: 0 }, storage), /SOURCE_INVALID/);

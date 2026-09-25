@@ -4,6 +4,7 @@
 
 - [x] Publish the ten-build source through Replit Shell at `04f2af1cf8c446783e38a826b10649afa59d330b`; exact production health/source identity and the visible authenticated Integrations page passed. Browser-controlled file selection was denied, so the import/save/refresh smoke remains unverified rather than passed.
 - [x] Implement Builds 11–15 destination readiness: no route is publishable without a current Wizard import/routing profile, active scoped credential and project mapping, and exact Graph-verified site/library identity. The view states that SharePoint file publishing is still unavailable.
+- [x] Implement Builds 16–20 read-only publication candidate and isolated source/Graph write contracts. No production route invokes the write transport; this is not SharePoint delivery acceptance.
 - [ ] Complete durable file custody, idempotent provider upload jobs, retry/error audit, explicit user confirmation, and a real tenant/site round-trip. Keep the legacy queue disabled until these pass.
 - [ ] Restore Chrome file selection for the authorized synthetic fixture and repeat published import/save/refresh/reopen acceptance; do not substitute source tests for this live check.
 - [x] Push BT Folder Wizard import foundation block (five commits through `b3d5a065`); source checks passed, publication and live Chrome acceptance remain separate.

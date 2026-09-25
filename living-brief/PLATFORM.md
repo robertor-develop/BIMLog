@@ -572,14 +572,25 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/folder-wizard-export.ts
 - artifacts/api-server/src/lib/folder-wizard-graph-identity.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-graph-identity.ts
+- artifacts/api-server/src/lib/folder-wizard-graph-upload.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-graph-upload.ts
 - artifacts/api-server/src/lib/folder-wizard-import-service.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-import-service.ts
 - artifacts/api-server/src/lib/folder-wizard-paths.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-paths.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-candidate-route.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-candidate-store.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-candidate-store.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-candidate.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-candidate.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-plan.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-plan.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness-store.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness-store.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-readiness.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-source.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-source.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.ts
 - artifacts/api-server/src/lib/folder-wizard-routing-contract.behavior.ts
@@ -1129,6 +1140,12 @@ It changes only when the code structure or curated architectural facts change.
 - A Coordination File is a stable project-scoped logical identity. Every provider revision is immutable and retains provider item/version identity, content SHA-256 and byte size; the current designation is held separately so revision evidence is never rewritten.
 - SharePoint foundation maps each BIMLog project to an approved site/library and each category/optional trade to one folder. Delta cursor material uses the same protected-envelope model, while status, last sync and mismatch remain visible operational state.
 - The forward-only migration is an explicit transactional operator action and is not called by application startup. This checkpoint provides no SharePoint synchronization worker, Outlook add-in, route, UI, deployment or live-database change.
+
+## BT Folder Wizard publication candidate — Builds 16–20
+
+- An existing project Files record and durable storage object provide the sole source custody. A read-only candidate verifies exact stored byte count and SHA-256, current Wizard import/routing profile, active mapped credential, and Graph-verified site/library identity.
+- The deterministic candidate freezes the current source, routing fingerprint and drive-relative path into one request digest. An isolated Graph adapter can create a small file only with no-overwrite semantics, but no production route invokes that write transport.
+- The authenticated project endpoint previews eligibility only. No delivery job, worker, retry, external file write or user-facing publishing control is activated by this block. A real authorized tenant/site round-trip remains required before delivery acceptance.
 
 ## Coordination Delivery Release A — Build 1 service boundary
 

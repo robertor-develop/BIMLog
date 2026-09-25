@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 668,
+    "apiRoutes": 669,
     "frontendApiReferences": 247,
     "routeOwnedTables": 61
   },
@@ -4324,6 +4324,12 @@
     {
       "method": "GET",
       "path": "/projects/:projectId/integrations/folder-wizard/publishing-readiness",
+      "owner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/integrations/folder-wizard/publishing-candidate",
       "owner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
       "tables": []
     },

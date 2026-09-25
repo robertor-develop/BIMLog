@@ -41484,6 +41484,115 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "cbf4e293de229de978775c572e90312fb5accc2273ecf5a54487114174776cba"
+    },
+    {
+      "taskId": "bimlog-folder-wizard-publish-candidate-block04-20260925",
+      "reviewedThroughCommit": "42f90f8f5ebd4c62df68aafc6c8e47956ec6ed72",
+      "reviewedAt": "2026-09-25T19:12:27Z",
+      "status": "block04_local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "source_repair",
+          "run_local_build",
+          "reconcile_living_brief",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The candidate is read-only. Existing Files custody and Graph create-only transport are not a delivery worker or live SharePoint proof."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Human authority and evidence doctrine are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "GitHub, Replit Shell and Chrome release procedure is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality and acceptance rules still apply."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap direction changes in this bounded block."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated platform inventory describes the read-only candidate and disconnected Graph transport."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native and installers are untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report/export layout changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards assertion changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status separates source candidate from published delivery."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Transactional jobs, worker, real tenant round-trip and Chrome import test remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Read-only candidate adds no audit mutation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-candidate-route.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-candidate-store.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-candidate-store.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-source.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-source.ts",
+        "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+        "evidence/coordination-routing-20260925/BLOCK_04_BUILDS_016_020.md",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/ENDPOINT_AUTHORITY_MATRIX.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b80519a9aac648aa6b3fb79a9013a963072460d0ce7e4dea5408a992f2064b89"
     }
   ]
 }
