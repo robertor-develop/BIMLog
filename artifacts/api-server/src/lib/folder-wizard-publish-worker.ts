@@ -62,7 +62,8 @@ export class FolderWizardPublishWorker {
       const code = error instanceof Error && /^FOLDER_WIZARD_[A-Z_]{1,80}$/.test(error.message)
         ? error.message : "FOLDER_WIZARD_PUBLISH_FAILED";
       outcome = { kind: "failed", code, retryable: code === "FOLDER_WIZARD_GRAPH_UPLOAD_FAILED" ||
-        code === "FOLDER_WIZARD_GRAPH_IDENTITY_UNAVAILABLE" };
+        code === "FOLDER_WIZARD_GRAPH_IDENTITY_UNAVAILABLE" ||
+        code === "FOLDER_WIZARD_GRAPH_CONFLICT_UNRESOLVED" };
     } finally { bytes?.fill(0); }
     return this.settlement.settle(lease, outcome);
   }

@@ -1,4 +1,5 @@
 import { z } from "zod/v4";
+import { timingSafeEqual } from "node:crypto";
 import { createRuntimeConnectorCredentialLeaseResolver } from "./connector-credential-lease-resolver";
 
 const itemSchema = z.object({
@@ -6,6 +7,31 @@ const itemSchema = z.object({
   webUrl: z.string().url(), parentReference: z.object({ driveId: z.string().min(1) }).passthrough(),
 }).passthrough();
 type Lease = Pick<ReturnType<typeof createRuntimeConnectorCredentialLeaseResolver>, "withBearerToken">;
+
+async function boundedBytes(response: Response, maximum: number): Promise<Buffer> {
+  if (!response.body) throw new Error("FOLDER_WIZARD_GRAPH_CONFLICT_UNRESOLVED");
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+  try {
+    while (true) {
+      const part = await reader.read();
+      if (part.done) break;
+      size += part.value.byteLength;
+      if (size > maximum) throw new Error("FOLDER_WIZARD_GRAPH_CONFLICT_UNRESOLVED");
+      chunks.push(part.value);
+    }
+    return Buffer.concat(chunks);
+  } finally { await reader.cancel(); }
+}
+
+function approvedDownloadUrl(raw: string): string {
+  const url = new URL(raw);
+  if (url.protocol !== "https:" || url.username || url.password || url.hash ||
+      !(/\.sharepoint\.(com|us)$/i.test(url.hostname) || /\.files\.1drv\.com$/i.test(url.hostname)))
+    throw new Error("FOLDER_WIZARD_GRAPH_CONFLICT_UNRESOLVED");
+  return url.toString();
+}
 
 /** A create-only Graph write. Never follows a provider redirect or overwrites an existing item. */
 export class FolderWizardGraphUpload {
@@ -33,7 +59,40 @@ export class FolderWizardGraphUpload {
             "content-type": "application/octet-stream", "if-none-match": "*" },
           body: new Uint8Array(bytes),
         });
-        if (response.status === 409 || response.status === 412) throw new Error("FOLDER_WIZARD_GRAPH_FILE_EXISTS");
+        if (response.status === 409 || response.status === 412) {
+          // A prior attempt may have uploaded before its acknowledgement was lost.
+          // Never overwrite; accept only the exact same drive, name and bytes.
+          const metadata = await this.transport(`https://graph.microsoft.com/v1.0/drives/${encodeURIComponent(driveId)}/root:/${path}?$select=id,name,size,webUrl,parentReference`, {
+            method: "GET", redirect: "error", signal: controller.signal,
+            headers: { authorization: `Bearer ${Buffer.from(token).toString("utf8")}`, accept: "application/json" },
+          });
+          if (metadata.status !== 200) throw new Error("FOLDER_WIZARD_GRAPH_CONFLICT_UNRESOLVED");
+          const existing = itemSchema.parse(JSON.parse((await boundedBytes(metadata, 32_768)).toString("utf8")));
+          const webUrl = new URL(existing.webUrl);
+          if (existing.parentReference.driveId !== driveId || existing.name !== filename ||
+              existing.size !== bytes.length || webUrl.protocol !== "https:" ||
+              !/\.sharepoint\.(com|us)$/i.test(webUrl.hostname))
+            throw new Error("FOLDER_WIZARD_GRAPH_FILE_CONFLICT");
+          const content = await this.transport(`https://graph.microsoft.com/v1.0/drives/${encodeURIComponent(driveId)}/items/${encodeURIComponent(existing.id)}/content`, {
+            method: "GET", redirect: "manual", signal: controller.signal,
+            headers: { authorization: `Bearer ${Buffer.from(token).toString("utf8")}` },
+          });
+          let download = content;
+          if (content.status === 302) {
+            const location = content.headers.get("location");
+            if (!location) throw new Error("FOLDER_WIZARD_GRAPH_CONFLICT_UNRESOLVED");
+            download = await this.transport(approvedDownloadUrl(location), {
+              method: "GET", redirect: "error", signal: controller.signal,
+            });
+          }
+          if (download.status !== 200) throw new Error("FOLDER_WIZARD_GRAPH_CONFLICT_UNRESOLVED");
+          const existingBytes = await boundedBytes(download, bytes.length);
+          try {
+            if (existingBytes.length !== bytes.length || !timingSafeEqual(existingBytes, bytes))
+              throw new Error("FOLDER_WIZARD_GRAPH_FILE_CONFLICT");
+          } finally { existingBytes.fill(0); }
+          return { itemId: existing.id, webUrl: existing.webUrl };
+        }
         if (response.status !== 201) throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_FAILED");
         const body = await response.text();
         if (body.length > 32_768) throw new Error("FOLDER_WIZARD_GRAPH_UPLOAD_RESPONSE_LARGE");
