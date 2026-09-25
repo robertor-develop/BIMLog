@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { parseFolderWizardExport } from "./folder-wizard-export";
 import { validateFolderWizardRoutingProfile } from "./folder-wizard-routing-contract";
 import { FolderWizardImportError } from "./folder-wizard-import-service";
+import { resolveFolderWizardDestination } from "./folder-wizard-resolver";
 
 type Scope = { projectId: number; actorUserId: number };
 type Client = { query(sql: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[]; rowCount: number | null }>; release(): void };
@@ -52,17 +53,29 @@ export function createFolderWizardRoutingService(database?: Pool) {
         const source = await imported(client, scope, companyId);
         const project = await currentProfile(client, companyId, scope.projectId);
         const company = await currentProfile(client, companyId, null);
-        const profile = project ?? company;
-        if (!profile) return { profile: null, scopeType: null, canEditProject: isProjectAdmin, canEditCompany: isPmo };
-        const scopeType = project ? "project" : "company";
-        const stale = scopeType === "project" && profile.import_id !== source.id;
-        let valid = false;
-        if (!stale) {
-          try { validateFolderWizardRoutingProfile(profile.definition, source.document); valid = true; }
-          catch { /* Existing profile is incompatible with the new import; never silently route. */ }
-        }
-        return { profile: { id: profile.id, version: profile.version, fingerprint: profile.fingerprint,
-          definition: profile.definition, valid, stale }, scopeType, canEditProject: isProjectAdmin, canEditCompany: isPmo };
+        const describe = (row: ProfileRow | null) => {
+          if (!row) return null;
+          const stale = row.scope_project_id !== null && row.import_id !== source.id;
+          let valid = false;
+          if (!stale) {
+            try { validateFolderWizardRoutingProfile(row.definition, source.document); valid = true; }
+            catch { /* A changed import must never silently route against stale vocabulary. */ }
+          }
+          return { id: row.id, version: row.version, fingerprint: row.fingerprint, definition: row.definition, valid, stale };
+        };
+        const projectProfile = describe(project);
+        const companyProfile = describe(company);
+        return { profile: projectProfile ?? companyProfile, scopeType: project ? "project" : company ? "company" : null,
+          projectProfile, companyProfile, canEditProject: isProjectAdmin, canEditCompany: isPmo };
+      } finally { client.release(); }
+    },
+    async preview(scope: Scope, input: { definition: unknown; tags: Record<string, string>; filename: string }) {
+      const client = await connect();
+      try {
+        const { companyId } = await authority(client, scope);
+        const source = await imported(client, scope, companyId);
+        const { definition } = validateFolderWizardRoutingProfile(input.definition, source.document);
+        return resolveFolderWizardDestination({ document: source.document, profile: definition, tags: input.tags, filename: input.filename });
       } finally { client.release(); }
     },
     async save(scope: Scope, input: { scopeType: "company" | "project"; definition: unknown; expectedFingerprint: string | null }) {

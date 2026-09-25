@@ -30,4 +30,13 @@ router.post("/projects/:projectId/integrations/folder-wizard/routing", authMiddl
     res.status(201).json(await service.save(getScope(req), { scopeType, definition, expectedFingerprint }));
   } catch (error) { fail(res, error); }
 });
+router.post("/projects/:projectId/integrations/folder-wizard/routing/preview", authMiddleware, async (req, res) => {
+  try {
+    const { definition, tags, filename } = req.body ?? {};
+    if (!tags || typeof tags !== "object" || Array.isArray(tags) || Object.keys(tags).length > 64 ||
+        Object.entries(tags).some(([key, value]) => !/^[a-z][a-z0-9_]{0,63}$/.test(key) || typeof value !== "string" || value.length > 160) ||
+        typeof filename !== "string" || filename.length > 255) throw new FolderWizardImportError("FOLDER_WIZARD_PREVIEW_INVALID", 400);
+    res.json(await service.preview(getScope(req), { definition, tags, filename }));
+  } catch (error) { fail(res, error); }
+});
 export default router;

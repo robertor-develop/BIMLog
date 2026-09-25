@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { parseFolderWizardDraft, type FolderWizardDraft } from "./folder-wizard-draft";
+import { FolderWizardRoutingPanel } from "./FolderWizardRoutingPanel";
 
 type ImportRecord = { id: string; version: number; sha256: string;
-  document: { destination: { sharepoint_url: string; base_path: string }; blueprints: { name: string; include: boolean }[] };
+  document: { destination: { sharepoint_url: string; base_path: string }; blueprints: { name: string; include: boolean; tiers: { label: string; items: string[] }[] }[] };
   preview: { paths: string[]; totalLeafPaths: string; truncated: boolean } };
 
 export function FolderWizardImportPanel({ projectId, token, lang }: { projectId: number; token: string | null; lang: string }) {
@@ -98,6 +99,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
         <button type="button" disabled={saving} onClick={() => { setDraft(null); setSourceText(""); setFileName(""); }} style={{ marginLeft: 8 }}>{tr("Cancel", "Cancelar")}</button>
       </div>}
       {error && <p role="alert" style={{ color: "#991B1B" }}>{error}</p>}
+      {current && <FolderWizardRoutingPanel projectId={projectId} token={token} lang={lang} blueprints={current.document.blueprints} />}
     </>}
   </section>;
 }
