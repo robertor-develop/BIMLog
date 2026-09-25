@@ -6,6 +6,7 @@ import { createFolderWizardRoutingService } from "../lib/folder-wizard-routing-s
 import { createFolderWizardPublishReadinessStore } from "../lib/folder-wizard-publish-readiness-store";
 import { FolderWizardPublishCandidateService } from "../lib/folder-wizard-publish-candidate";
 import { createFolderWizardPublishCandidateStore } from "../lib/folder-wizard-publish-candidate-store";
+import { createRuntimeFolderWizardPublishStatusStore } from "../lib/folder-wizard-publish-status";
 import { storage } from "../lib/storage-adapter";
 
 const router: IRouter = Router();
@@ -29,6 +30,10 @@ router.get("/projects/:projectId/integrations/folder-wizard/routing", authMiddle
 });
 router.get("/projects/:projectId/integrations/folder-wizard/publishing-readiness", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json(await publishingReadiness.read(getScope(req))); } catch (error) { fail(res, error); }
+});
+router.get("/projects/:projectId/integrations/folder-wizard/publishing-jobs", authMiddleware, requireProjectMember(), async (req, res) => {
+  try { res.json({ jobs: await (await createRuntimeFolderWizardPublishStatusStore()).list(getScope(req)) }); }
+  catch (error) { fail(res, error); }
 });
 router.post("/projects/:projectId/integrations/folder-wizard/publishing-candidate", authMiddleware, requireProjectMember(), async (req, res) => {
   try {

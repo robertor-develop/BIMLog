@@ -6,6 +6,13 @@ type ImportRecord = { id: string; version: number; sha256: string;
   document: { destination: { sharepoint_url: string; base_path: string }; blueprints: { name: string; include: boolean; tiers: { label: string; items: string[] }[] }[] };
   preview: { paths: string[]; totalLeafPaths: string; truncated: boolean } };
 type Readiness = { ready: boolean; blockers: string[]; providerError: string | null };
+type PublishJob = { jobId: string; state: string; attempts: number; maxAttempts: number;
+  errorCode: string | null; filename: string; sourceFileId: number; createdAt: string };
+const publishStateLabels: Record<string, [string, string]> = {
+  queued: ["Queued", "En cola"], leased: ["Publishing", "Publicando"], retry: ["Retry scheduled", "Reintento programado"],
+  completed: ["Published", "Publicado"], dead_letter: ["Needs attention", "Requiere atención"],
+  cancelled: ["Cancelled", "Cancelado"],
+};
 
 const readinessLabels: Record<string, [string, string]> = {
   IMPORT_MISSING: ["Wizard import missing", "Falta la importación del Wizard"],
@@ -31,6 +38,8 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
   const [saving, setSaving] = useState(false);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [readinessError, setReadinessError] = useState(false);
+  const [jobs, setJobs] = useState<PublishJob[]>([]);
+  const [jobsError, setJobsError] = useState(false);
   const endpoint = `/api/v1/projects/${projectId}/integrations/folder-wizard`;
 
   async function reload(signal?: AbortSignal) {
@@ -42,6 +51,9 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
     const check = await fetch(`${endpoint}/publishing-readiness`, { headers: { Authorization: `Bearer ${token}` }, signal });
     if (check.ok) { setReadiness(await check.json() as Readiness); setReadinessError(false); }
     else { setReadiness(null); setReadinessError(true); }
+    const jobResponse = await fetch(`${endpoint}/publishing-jobs`, { headers: { Authorization: `Bearer ${token}` }, signal });
+    if (jobResponse.ok) { setJobs(((await jobResponse.json()) as { jobs: PublishJob[] }).jobs); setJobsError(false); }
+    else { setJobs([]); setJobsError(true); }
   }
 
   useEffect(() => {
@@ -114,6 +126,15 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
           {readiness.providerError && <p role="alert">{tr("Microsoft Graph verification is unavailable; no publishing is enabled.", "La verificación con Microsoft Graph no está disponible; no se habilita la publicación.")}</p>}
           <p>{tr("File publishing to SharePoint is not enabled yet.", "La publicación de archivos en SharePoint todavía no está habilitada.")}</p>
         </div>}
+      <div style={{ fontSize: 12, marginTop: 12 }} aria-label={tr("SharePoint publication status", "Estado de publicación SharePoint")}>
+        <strong>{tr("SharePoint publication status", "Estado de publicación SharePoint")}</strong>
+        {jobsError ? <p role="alert">{tr("Could not load publication history.", "No se pudo cargar el historial de publicación.")}</p>
+          : jobs.length === 0 ? <p>{tr("No files have been submitted for publication.", "No se enviaron archivos para publicación.")}</p>
+          : <ul>{jobs.map((job) => <li key={job.jobId}>
+            {job.filename} · {publishStateLabels[job.state]?.[lang === "es" ? 1 : 0] ?? tr("Unknown status", "Estado desconocido")} · {job.attempts}/{job.maxAttempts}
+            {job.errorCode && <> · {tr("Publication failed; ask a project administrator to review it.", "Falló la publicación; solicite revisión a un administrador del proyecto.")}</>}
+          </li>)}</ul>}
+      </div>
       <label style={{ display: "block", marginTop: 12, fontSize: 12 }}>
         {tr("Choose a Wizard JSON export", "Seleccione un JSON exportado por el Wizard")}
         <input type="file" accept=".json,application/json" onChange={(event) => void choose(event.target.files?.[0])} style={{ display: "block", marginTop: 5, maxWidth: "100%" }} />
