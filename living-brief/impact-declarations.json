@@ -40959,6 +40959,109 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "18f0b5ce57c659faa713e64061727d8193cf4ca0fcef266d54bc1735d957da60"
+    },
+    {
+      "taskId": "bimlog-live-intake-classification-autosave-repair-20260924",
+      "reviewedThroughCommit": "26fcd08011d4bb214cfcb92422acf7aae1ed424c",
+      "reviewedAt": "2026-09-25T02:45:56Z",
+      "status": "source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Fresh-user Intake autosave returns 500 after selecting a company catalog discipline because integer and text identifiers are unioned without casting."
+        },
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Rubén and Lorena belong to two different company tenants with the same BIMTECH CORP display name, so shared template visibility is not established."
+        },
+        {
+          "category": "field_acceptance_contradicts_automation",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Prior source acceptance did not catch the live company-catalog Intake save failure; full deployed template-to-operations acceptance remains on hold."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No change to BIMLog ecosystem ownership or company identity doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No execution or release gate is relaxed; live acceptance remains required."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The source repair restores existing Intake classification validation without changing the quality standard."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No change to product vision or future capability direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new route, schema, platform dependency, or deployment topology is introduced."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Navisworks bridge, or installer modification is included."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, edition, applicability, or evidence claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Live defect, exact candidate repair, tenancy finding, and release hold are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Unproven publication, repeat live test, template authority, and external-document gates are explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit-event schema or historical evidence-integrity contract changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/company-master-catalog.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "evidence/template-intake-acceptance-20260924/LIVE_ACCEPTANCE_HOLD.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dcd5038c35fe4c69a0e0ef6ac9243c2d23cae705f433e582fa7411e8c288f579"
     }
   ]
 }
