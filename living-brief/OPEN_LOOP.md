@@ -6,7 +6,8 @@
 - [x] Create BIMCorp-owned synthetic project 58 through the normal UI; confirm its discipline selector has no active choice and the ordinary account cannot author company catalogs.
 - [ ] Resolve BIMCorp's empty active discipline source through its governed company PMO or BIMLog default authority, then repeat fresh Intake/EDT acceptance. Do not fabricate a discipline ID, weaken tenant scope, or silently mutate activated project 57.
 - [ ] Obtain and test distinct authorized author, checker, executor and QC identities for the full company template-to-Operations journey. RRY Super Administrator and BIMCorp ordinary user alone do not prove the six-role matrix.
-- [ ] Test and release the local bilingual empty-catalog, request-failure and Work Package activation-guidance correction; verify the exact deployed UI after publication.
+- [x] Test, clean-build and push the bilingual empty-catalog, request-failure and Work Package activation-guidance correction as `36adc7aa98d729e029a9f8e0d125a7e4c0940b0e`.
+- [ ] Publish the accepted UX correction through Replit Shell and verify the exact deployed UI in authenticated Chrome.
 
 ## Synthetic Intake / EDT activation acceptance — 2026-09-24
 

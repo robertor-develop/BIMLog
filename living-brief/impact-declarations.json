@@ -40879,10 +40879,10 @@
       "reviewedChangeSha256": "bab7562c78b71eabd37e984ed5c42f3f9931ff3f17e24e03cefd4673c74ac0c5"
     },
     {
-      "taskId": "bimlog-fresh-project-catalog-guidance-20260924",
-      "reviewedThroughCommit": "45a509da6d88ea04d5ca9c55b2ef0da08ff8eabe",
-      "reviewedAt": "2026-09-25T00:20:49Z",
-      "status": "local_candidate",
+      "taskId": "bimlog-fresh-project-catalog-guidance-release-20260924",
+      "reviewedThroughCommit": "36adc7aa98d729e029a9f8e0d125a7e4c0940b0e",
+      "reviewedAt": "2026-09-25T00:35:32Z",
+      "status": "pushed_candidate",
       "captureTiming": "immediate_same_task_chain",
       "immediateFindings": [
         {
@@ -40953,16 +40953,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/bimlog/src/components/job-intake/MasterClassificationSelectors.behavior.tsx",
-        "artifacts/bimlog/src/components/job-intake/MasterClassificationSelectors.tsx",
-        "artifacts/bimlog/src/components/job-intake/WorkPackageBuilder.guidance.behavior.ts",
-        "artifacts/bimlog/src/components/job-intake/WorkPackageBuilder.tsx",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "377e7d07a9d6aef304ff886c08f403b0626b178b524e1f51cb826dd6abfba3a1"
+      "reviewedChangeSha256": "18f0b5ce57c659faa713e64061727d8193cf4ca0fcef266d54bc1735d957da60"
     }
   ]
 }
