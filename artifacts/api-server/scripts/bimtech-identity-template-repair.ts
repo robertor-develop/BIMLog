@@ -18,9 +18,12 @@ const LORENA_USER_ID = 25;
 const OWNER_OPERATOR_ID = 18;
 const expectedMovableTables = new Set([
   "users", "company_master_catalog_administrators", "company_master_catalog_entries",
-  "job_intakes", "project_company_binding_versions",
+  "job_intakes",
 ]);
-const intentionallyPreservedTables = new Set(["company_master_catalog_policies"]);
+const intentionallyPreservedTables = new Set([
+  "company_master_catalog_policies",
+  "project_company_binding_versions",
+]);
 const apply = process.argv.includes("--apply");
 const receiptPath = resolve(process.cwd(), process.env.BIMTECH_REPAIR_RECEIPT ?? "tmp/bimtech-identity-template-repair-receipt.json");
 
