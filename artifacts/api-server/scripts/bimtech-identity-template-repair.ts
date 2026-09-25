@@ -2,10 +2,6 @@ import { createHash, randomUUID } from "node:crypto";
 import { writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { pool } from "@workspace/db";
-import { ensureCompanyMasterCatalogSchema } from "../src/lib/company-master-catalog-migration";
-import { ensureDeliveryWorkflowTemplateSchema } from "../src/lib/delivery-workflow-template-migration";
-import { ensureWorkflowGovernancePolicySchema } from "../src/lib/workflow-governance-policy-migration";
-import { ensureGenericApuPersistenceSchema } from "../src/lib/generic-apu-persistence-migration";
 import {
   bimtechApprovedAllocation,
   bimtechGovernancePolicy,
@@ -100,7 +96,6 @@ async function insertPricing(client: Client) {
 }
 
 async function main(){
-  await Promise.all([ensureCompanyMasterCatalogSchema(),ensureDeliveryWorkflowTemplateSchema(),ensureWorkflowGovernancePolicySchema(),ensureGenericApuPersistenceSchema()]);
   const client=await pool.connect();
   let receipt:Record<string,unknown>={mode:apply?"apply":"dry-run",startedAt:new Date().toISOString()};
   try{
