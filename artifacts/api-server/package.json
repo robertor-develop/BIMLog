@@ -9,6 +9,8 @@
     "dist/index.meta.json"
   ],
   "scripts": {
+    "repair:bimtech-identity-templates": "tsx ./scripts/bimtech-identity-template-repair.ts",
+    "test:bimtech-template-repair": "tsx ./src/lib/bimtech-template-repair-definitions.behavior.ts",
     "test:edt-engine-build296": "tsx ./src/lib/edt-engine-build296.behavior.ts",
     "test:edt-engine-build297": "tsx ./src/lib/edt-engine-build297.behavior.ts",
     "test:edt-engine-build298": "tsx ./src/lib/edt-engine-build298.behavior.ts",
