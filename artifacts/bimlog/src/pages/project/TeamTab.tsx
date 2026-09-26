@@ -9,6 +9,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { distinctInvitationRoles } from "@/lib/invitation-ui";
+import { filterRoleIdentities, selectableTeamRoles } from "@/lib/team-role-options";
 import { Button } from "@/components/ui/button";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
@@ -28,7 +29,7 @@ import {
   Search,
 } from "lucide-react";
 import { format } from "date-fns";
-import { ROLES, ROLE_KEYS, getRole, type RoleKey } from "@/lib/roles";
+import { getRole } from "@/lib/roles";
 import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
 
@@ -127,7 +128,7 @@ export function TeamTab({
   isAdmin?: boolean;
 }) {
   const { t, tt, lang } = useI18n();
-  const { adminRoles } = useConfig();
+  const { adminRoles, getOptions } = useConfig();
   const { user: authUser, token } = useAuthStore();
   const { data: members, isLoading } = useListMembers(projectId);
   const [showAdd, setShowAdd] = useState(false);
@@ -146,8 +147,15 @@ export function TeamTab({
 
   const myMembership = memberRows.find((m) => m.userId === authUser?.id);
   const iAmAdmin = isAdmin && myMembership?.role === "project_admin";
-  const roleLabel = (role: string) =>
-    getRole(role)?.label ?? role.replace(/_/g, " ");
+  const configuredRoles = distinctInvitationRoles(getOptions("member_role"));
+  const roleLabel = (role: string) => {
+    const configured = configuredRoles.find((option) => option.value === role);
+    const historical = getRole(role);
+    return (lang === "es" ? configured?.labelEs || historical?.labelEs : configured?.label || historical?.label)
+      || role.replace(/_/g, " ");
+  };
+  // Keep historical memberships discoverable without offering retired roles for new assignments.
+  const filterRoles = filterRoleIdentities(configuredRoles, memberRows.map((member) => member.role));
   const companies = Array.from(
     new Set(
       memberRows.map(
@@ -472,9 +480,9 @@ export function TeamTab({
             }}
           >
             <option value="all">{tt("All roles", "Todos los roles")}</option>
-            {ROLE_KEYS.map((key) => (
+            {filterRoles.map((key) => (
               <option key={key} value={key}>
-                {ROLES[key].label}
+                {roleLabel(key)}
               </option>
             ))}
           </select>
@@ -758,7 +766,7 @@ export function TeamTab({
                                     alignItems: "center",
                                     gap: 6,
                                   }}
-                                  title={r?.description ?? member.role}
+                                  title={roleLabel(member.role)}
                                 >
                                   {isAdminRole && (
                                     <Shield
@@ -782,7 +790,7 @@ export function TeamTab({
                                       color: r?.badgeText ?? "#374151",
                                     }}
                                   >
-                                    {r?.label ?? member.role}
+                                    {roleLabel(member.role)}
                                   </span>
                                 </div>
                               );
@@ -908,7 +916,7 @@ export function TeamTab({
                           alignItems: "center",
                           gap: 6,
                         }}
-                        title={r?.description ?? member.role}
+                        title={roleLabel(member.role)}
                       >
                         {isAdminRole && (
                           <Shield
@@ -932,7 +940,7 @@ export function TeamTab({
                             color: r?.badgeText ?? "#374151",
                           }}
                         >
-                          {r?.label ?? member.role}
+                          {roleLabel(member.role)}
                         </span>
                       </div>
                     </td>
@@ -1055,17 +1063,18 @@ export function TeamTab({
               marginBottom: 8,
             }}
           >
-            Role permissions
+            {tt("Configured project roles", "Roles configurados del proyecto")}
           </div>
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
               gap: 8,
             }}
           >
-            {ROLE_KEYS.map((key) => {
-              const r = ROLES[key];
+            {configuredRoles.map((option) => {
+              const key = option.value;
+              const r = getRole(key);
               return (
                 <div
                   key={key}
@@ -1089,19 +1098,19 @@ export function TeamTab({
                         width: 8,
                         height: 8,
                         borderRadius: "50%",
-                        background: r.badgeText,
+                        background: r?.badgeText ?? "hsl(var(--muted-foreground))",
                       }}
                     />
                     <span
                       style={{
                         fontSize: 10,
                         fontWeight: 700,
-                        color: r.badgeText,
+                        color: r?.badgeText ?? "hsl(var(--foreground))",
                       }}
                     >
-                      {r.label}
+                      {roleLabel(key)}
                     </span>
-                    {r.canTransfer && (
+                    {key === "project_admin" && (
                       <span
                         style={{
                           fontSize: 8,
@@ -1113,7 +1122,7 @@ export function TeamTab({
                           marginLeft: "auto",
                         }}
                       >
-                        1 PER PROJECT
+                        {tt("1 PER PROJECT", "1 POR PROYECTO")}
                       </span>
                     )}
                   </div>
@@ -1124,7 +1133,7 @@ export function TeamTab({
                       lineHeight: 1.4,
                     }}
                   >
-                    {r.description}
+                    {tt("Actions depend on your project permissions and workflow assignments.", "Las acciones dependen de sus permisos de proyecto y asignaciones de flujo de trabajo.")}
                   </div>
                 </div>
               );
@@ -1460,6 +1469,7 @@ function AddMemberForm({
 function PendingInvitations({ projectId }: { projectId: number }) {
   const { toast } = useToast();
   const { lang } = useI18n();
+  const { getOptions } = useConfig();
   const queryClient = useQueryClient();
   const [invitations, setInvitations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -1611,6 +1621,8 @@ function PendingInvitations({ projectId }: { projectId: number }) {
               }}
             >
               {(() => {
+                const configured = getOptions("member_role").find((option) => option.value === inv.role);
+                if (configured) return lang === "es" ? configured.labelEs : configured.label;
                 const role = getRole(inv.role);
                 return role
                   ? lang === "es"
@@ -1660,19 +1672,21 @@ function RoleSelector({
 }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [role, setRole] = useState(member.role);
+  const { tt, lang } = useI18n();
+  const { getOptions } = useConfig();
+  const options = distinctInvitationRoles(getOptions("member_role"));
 
-  const { mutate } = useUpdateMember({
+  const { mutate, isPending } = useUpdateMember({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({
           queryKey: [`/api/v1/projects/${projectId}/members`],
         });
-        toast({ title: "Role updated" });
+        toast({ title: tt("Role updated", "Rol actualizado") });
       },
       onError: (e: unknown) =>
         toast({
-          title: "Failed to update role",
+          title: tt("Failed to update role", "No se pudo actualizar el rol"),
           description: e instanceof Error ? e.message : "",
           variant: "destructive",
         }),
@@ -1680,29 +1694,31 @@ function RoleSelector({
   });
 
   // Block selecting project_admin from this dropdown - admin transfer happens via the Transfer Admin button.
-  const selectable = ROLE_KEYS.filter(
-    (k) => k !== "project_admin" || member.role === "project_admin",
-  );
+  const selectable = selectableTeamRoles(options, member.role);
 
   return (
     <select
-      value={role}
-      disabled={member.role === "project_admin"}
+      value={member.role}
+      disabled={member.role === "project_admin" || isPending || options.length === 0}
       title={
         member.role === "project_admin"
-          ? "Use Transfer Admin to change the Project Admin."
+          ? tt("Use Transfer Admin to change the Project Admin.", "Use Transferir administrador para cambiar el administrador del proyecto.")
           : undefined
       }
       onChange={(e) => {
         const v = e.target.value;
-        setRole(v);
         mutate({ projectId, memberId: member.id, data: { role: v } });
       }}
       style={{ height: 28, fontSize: 11, minWidth: 130, borderRadius: 5 }}
     >
-      {selectable.map((key) => (
-        <option key={key} value={key}>
-          {ROLES[key].label}
+      {!selectable.some((option) => option.value === member.role) && (
+        <option value={member.role} disabled>
+          {(lang === "es" ? getRole(member.role)?.labelEs : getRole(member.role)?.label) || member.role.replace(/_/g, " ")}
+        </option>
+      )}
+      {selectable.map((option) => (
+        <option key={option.value} value={option.value}>
+          {lang === "es" ? option.labelEs : option.label}
         </option>
       ))}
     </select>

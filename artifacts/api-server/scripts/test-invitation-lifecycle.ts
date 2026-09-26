@@ -1,4 +1,13 @@
 import assert from "node:assert/strict";
+// Exercise the browser's pure helper without extending the API compilation root.
+const roleHelperPath = "../../bimlog/src/lib/team-role-options.ts";
+const { filterRoleIdentities, selectableTeamRoles } = await import(roleHelperPath);
+const configuredRoleFixture = [{value:"project_admin"},{value:"read_only"},{value:"read_only"},{value:""}];
+assert.deepEqual(filterRoleIdentities(configuredRoleFixture,["member","member"]),["project_admin","read_only","member"]);
+assert.deepEqual(selectableTeamRoles(configuredRoleFixture,"member"),[{value:"read_only"}]);
+assert.deepEqual(selectableTeamRoles(configuredRoleFixture,"read_only"),[{value:"read_only"}]);
+assert.deepEqual(selectableTeamRoles(configuredRoleFixture,"project_admin"),[{value:"project_admin"},{value:"read_only"}]);
+assert.deepEqual(selectableTeamRoles([],"member"),[]);
 import {createRequire} from "node:module";
 import {randomUUID} from "node:crypto";
 const {Client}=createRequire(import.meta.url)("pg");

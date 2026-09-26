@@ -43618,6 +43618,105 @@
         "scripts/test-local-release-gate.mjs"
       ],
       "reviewedChangeSha256": "0a60f17112370203f2314f76aec5c44c06098dc55ec68a6bc67c7f6070a4d387"
+    },
+    {
+      "taskId": "identity-i010-configured-team-role-repair",
+      "reviewedThroughCommit": "90519d084c4db7fdd436f46a012f687ae32f8b2e",
+      "reviewedAt": "2026-09-26T18:25:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Configured role identities must agree across invitation and Team UI without inventing permissions or hiding historical memberships; failed saves preserve persisted role."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Display-only role correction preserves server authority, historical identities and existing release controls."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Display-only role correction preserves server authority, historical identities and existing release controls."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Display-only role correction preserves server authority, historical identities and existing release controls."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Display-only role correction preserves server authority, historical identities and existing release controls."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Display-only role correction preserves server authority, historical identities and existing release controls."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens native and installers unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Display-only role correction preserves server authority, historical identities and existing release controls."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Display-only role correction preserves server authority, historical identities and existing release controls."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Local repair and outstanding production/email acceptance recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Local repair and outstanding production/email acceptance recorded."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Display-only role correction preserves server authority, historical identities and existing release controls."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-invitation-lifecycle.ts",
+        "artifacts/bimlog/src/lib/team-role-options.ts",
+        "artifacts/bimlog/src/pages/project/TeamTab.tsx",
+        "evidence/coordination-routing-20260925/IDENTITY_I010_ROLE_REPAIR.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a9173a76defeeb8dcd767ef37008adc36ca9c10200db88c2cbdf223ff053a8b1"
     }
   ]
 }

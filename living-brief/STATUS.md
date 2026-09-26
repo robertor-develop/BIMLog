@@ -2,6 +2,8 @@
 
 ## Identity invitation block I006–I010 — 2026-09-26
 
+- I010 role presentation correction is locally implemented: configured labels/options now agree across Team filters, badges, pending invitations, editing and role guide; historical roles remain discoverable without becoming new grants. Failed role saves no longer leave optimistic false-success selections. Focused local regression and actual-component Chrome checks pass, but visual QA, full release verification, production correction, email delivery and authenticated live acceptance remain pending. Not committed, pushed or published.
+
 - I009 candidate reuses the existing recipient-bound transaction and adds one atomic acceptance notification to the inviter's existing inbox. Real isolated PostgreSQL tests now prove existing-role preservation, complete rollback of membership/status/audit/notification, concurrent resend rotation and conflicting-company denial, in addition to replay/expiry/revocation tests. The five-command clean-head release gate now includes this real transaction suite. No new membership authority, schema or Lens change. I010 live delivery and nine binding corrections remain open.
 - I008-R1 is published at `42d06df0566d37e73cf5edd65f94b002c6f74357`, exact live identity verified. Full local gate and bounded authenticated Chrome role-selection/cancel/reopen/refresh retest PASS. Post-publication schemas match with NONE action. Evidence: `F:/BIMLog/TestProof/identity-i008-r1-release-20260926.md`. Earlier pending repair paragraphs below are historical; full platform/multi-role acceptance remains incomplete.
 
