@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { FolderWizardRequestLifetime } from "./folder-wizard-request-lifetime";
+import { folderWizardPublishOptions, pruneFolderWizardTags, type PublishRoutingDefinition } from "./folder-wizard-publish-options";
 
 type SourceFile = { id: number; fileName: string; fileSize: number; status: string };
-type Routing = { projectProfile: { definition: { selectors: { tagKey: string }[];
-  tierMappings: { tagKey: string }[] } } | null; companyProfile: { definition: { selectors: { tagKey: string }[];
-  tierMappings: { tagKey: string }[] } } | null; canEditProject: boolean };
+type Routing = { projectProfile: { definition: PublishRoutingDefinition } | null;
+  companyProfile: { definition: PublishRoutingDefinition } | null; canEditProject: boolean };
 type Candidate = { ready: boolean; blockers: string[]; filename?: string; byteSize?: number;
   siteUrl?: string; driveRelativePath?: string; requestDigest?: string };
 
@@ -45,8 +45,7 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
     return () => { controller.abort(); lifetime.current.invalidate(); };
   }, [projectId, token, lang]);
   const profile = routing?.projectProfile ?? routing?.companyProfile;
-  const keys = [...new Set([...(profile?.definition.selectors ?? []).map((entry) => entry.tagKey),
-    ...(profile?.definition.tierMappings ?? []).map((entry) => entry.tagKey)])];
+  const options = folderWizardPublishOptions(profile?.definition, tags);
 
   async function request(path: string, body: unknown) {
     const response = await fetch(`${endpoint}${path}`, { method: "POST", headers: {
@@ -100,8 +99,11 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
       </label>
       {files.length === 0 && <p>{tr("No eligible project file is available. Upload and verify one in Files first.",
         "No hay un archivo apto. Cargue y verifique uno en Archivos primero.")}</p>}
-      {keys.map((key) => <label key={key} style={{ display: "block", marginTop: 8 }}>{key}
-        <input disabled={busy} value={tags[key] ?? ""} onChange={(event) => { lifetime.current.invalidate(); setTags((before) => ({ ...before, [key]: event.target.value })); setCandidate(null); setConfirming(false); setResult(""); }} />
+      {options.map(({ key, values }) => <label key={key} style={{ display: "block", marginTop: 8 }}>{key}
+        <select disabled={busy} value={tags[key] ?? ""} onChange={(event) => { lifetime.current.invalidate(); setTags((before) => pruneFolderWizardTags(profile?.definition, { ...before, [key]: event.target.value })); setCandidate(null); setConfirming(false); setResult(""); }}>
+          <option value="">{tr("Select a mapped value", "Seleccione un valor configurado")}</option>
+          {values.map((value) => <option key={value} value={value}>{value}</option>)}
+        </select>
       </label>)}
       <button type="button" disabled={busy || !fileId} onClick={() => void preview()} style={{ display: "block", marginTop: 9 }}>
         {tr("Preview publication", "Vista previa de publicación")}</button>
