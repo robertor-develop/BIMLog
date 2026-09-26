@@ -43828,7 +43828,7 @@
         "scripts/test-local-release-gate.mjs",
         "scripts/update-living-brief-state.mjs"
       ],
-      "reviewedChangeSha256": "cd9b79fbb11a7eab54fb79f33bd3f2d01c4fab91ba707cd5c6055773c2ec7b07"
+      "reviewedChangeSha256": "b0c0965a7bee759c005d21834df30374b2b2a5c885ceca1ea3ce89876de5b50f"
     }
   ]
 }
