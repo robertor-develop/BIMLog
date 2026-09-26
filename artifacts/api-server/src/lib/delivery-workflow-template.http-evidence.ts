@@ -5,6 +5,23 @@ import { pool } from "@workspace/db";
 import router from "../routes/delivery-workflow-templates";
 import { signToken } from "../middlewares/auth";
 import { workflowGovernancePolicyFingerprint } from "./workflow-governance-policy-contract";
+import { workflowReviewEligibility } from "./delivery-workflow-allocation-source-contract";
+
+const eligibilityBase = { state: "draft", canManage: true, creatorId: 1, lastEditorId: 2,
+  checkerId: 3, economic: false, hasFinanceGrant: false };
+for (const [override, code] of [
+  [{}, "DELIVERY_WORKFLOW_REVIEW_ELIGIBLE"],
+  [{ canManage: false }, "DELIVERY_WORKFLOW_PMO_REQUIRED"],
+  [{ state: "published" }, "DELIVERY_WORKFLOW_NOT_DRAFT_OR_STALE"],
+  [{ checkerId: 1 }, "DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED"],
+  [{ checkerId: 2 }, "DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED"],
+  [{ checkerId: 0 }, "DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED"],
+  [{ economic: true }, "DELIVERY_WORKFLOW_FINANCE_CHECKER_REQUIRED"],
+  [{ economic: true, hasFinanceGrant: true }, "DELIVERY_WORKFLOW_REVIEW_ELIGIBLE"],
+] as const) {
+  assert.deepEqual(workflowReviewEligibility({ ...eligibilityBase, ...override }),
+    { eligible: code === "DELIVERY_WORKFLOW_REVIEW_ELIGIBLE", code });
+}
 
 const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/invalid");
 if (target.hostname !== "127.0.0.1" || !((target.port === "55439" && target.pathname === "/delivery_workflow_test") || (target.port === "55449" && target.pathname === "/delivery_template_test"))) {
@@ -175,6 +192,14 @@ try {
   await assert.rejects(pool.query(`UPDATE company_delivery_workflow_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_events WHERE template_id=$1`,[id]));
   assert.equal((await call(member,"/company/delivery-workflows")).body.versions.length,1);
+  const readerDetail = await call(member,`/company/delivery-workflows/${id}`);
+  assert.equal(readerDetail.status,200);
+  assert.equal(readerDetail.body.versions.length,1);
+  assert.equal(readerDetail.body.versions[0].state,"published");
+  assert.deepEqual(readerDetail.body.versions[0].reviewEligibility,
+    {eligible:false,code:"DELIVERY_WORKFLOW_PMO_REQUIRED"});
+  assert.equal("created_by_id" in readerDetail.body.versions[0],false);
+  assert.equal("updated_by_id" in readerDetail.body.versions[0],false);
   assert.equal((await call(outsider,"/company/delivery-workflows")).body.versions.length,0);
   console.log("Delivery Workflow isolated HTTP: tenancy, PMO, independent approval, immutable history, compatible governed publish, incompatible governed denial PASS");
 } finally {

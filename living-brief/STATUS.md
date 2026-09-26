@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Core operating chain Builds 46–50 — 2026-09-26
+
+- Builds 46–49 expose current-actor reviewer eligibility, fail closed in the editor when eligibility is absent, add read-only saved-version inspection, and explain APU/allocation prerequisites in English and Spanish. Approval commands still independently enforce authority; no grants, schema or Lens Next changes.
+- Build 50 tests the eligibility matrix and read-only published definition boundaries. Isolated PostgreSQL HTTP tests pass. Twenty local Chrome fixture scenarios pass; these do not replace authenticated live acceptance.
+- Builds 41–45 were pushed at `3e30238d5aa2609b51852990e9be2b6ba03ea75c`. This candidate reaches ten unpublished builds and must be gated, pushed, published and live-tested before another block. Original planned remainder after Build 50 is 30 builds/six blocks. Full-site and SharePoint provider acceptance remain unverified.
+
 ## Core operating chain Builds 41–45 — 2026-09-26
 
 - Prior release is verified source `29c80f8da35c513d13356e7227db404221bf25c3`, deployment `4fcd87ed`, with external receipt `F:/BIMLog/TestProof/core-block08-builds36-40-release-20260926.md`. This supersedes older pending-publication descriptions, not incomplete full-site acceptance.
