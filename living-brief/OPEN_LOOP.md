@@ -4,6 +4,7 @@
 
 - [x] Reconcile the Build 30 release receipt: exact source `560e463cf997f444c42560b7679d8baf10c6cb28` was published as deployment `afe01b7d`; live identity and partial authenticated smoke passed. Historical publication-pending bullets below do not override this receipt.
 - [x] Implement separate repairs R1–R5 for bounded request validation, stale publication/import responses, duplicate submissions, exact configured tag choices and retry timing. Focused tests pass; browser interaction and real tenant acceptance remain separate.
+- [x] Correct the combined TypeScript test-root failure by moving frontend-helper tests out of the API source root. API typecheck and focused tests passed again. Reconcile this correction here before resuming the release build; no compiler or acceptance gate was relaxed.
 - [ ] Complete combined release gate and push repair block R1–R5. Publish at ten unpublished builds and repeat full authenticated Chrome import/save/reopen/confirmed delivery, conflict/retry and tenant-boundary acceptance. Do not claim real SharePoint delivery until observed in the authorized tenant.
 - [ ] Preserve the remaining 50-build/ten-block non-Lens roadmap: core operating chain (30) then resources/earnings (20), after SharePoint acceptance. Repair IDs are separate and must not silently replace the roadmap.
 
