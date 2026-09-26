@@ -8,7 +8,7 @@ type ImportRecord = { id: string; version: number; sha256: string;
   preview: { paths: string[]; totalLeafPaths: string; truncated: boolean } };
 type Readiness = { ready: boolean; blockers: string[]; providerError: string | null };
 type PublishJob = { jobId: string; state: string; attempts: number; maxAttempts: number;
-  errorCode: string | null; filename: string; sourceFileId: number; createdAt: string };
+  errorCode: string | null; filename: string; sourceFileId: number; createdAt: string; nextAttemptAt?: string | null };
 const publishStateLabels: Record<string, [string, string]> = {
   queued: ["Queued", "En cola"], leased: ["Publishing", "Publicando"], retry: ["Retry available after delay", "Reintento disponible tras la espera"],
   completed: ["Published", "Publicado"], dead_letter: ["Needs attention", "Requiere atención"],
@@ -133,6 +133,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
           : jobs.length === 0 ? <p>{tr("No files have been submitted for publication.", "No se enviaron archivos para publicación.")}</p>
           : <ul>{jobs.map((job) => <li key={job.jobId}>
             {job.filename} · {publishStateLabels[job.state]?.[lang === "es" ? 1 : 0] ?? tr("Unknown status", "Estado desconocido")} · {job.attempts}/{job.maxAttempts}
+            {job.state === "retry" && job.nextAttemptAt && <p>{tr("Retry not before", "Reintentar a partir de")}: <time dateTime={job.nextAttemptAt}>{new Date(job.nextAttemptAt).toLocaleString(lang === "es" ? "es" : "en")}</time>. {tr("Preview and confirm again after this time; retries are not automatic.", "Actualice la vista previa y confirme después de esta hora; los reintentos no son automáticos.")}</p>}
             {job.errorCode && <> · {tr("Publication failed; ask a project administrator to review it.", "Falló la publicación; solicite revisión a un administrador del proyecto.")}</>}
           </li>)}</ul>}
       </div>
