@@ -35,6 +35,17 @@ assert.match(service,/basisFingerprint/);assert.match(service,/TEAM_RESOURCE_SCE
 const applyBegin=service.indexOf('await connection.query("BEGIN");',service.indexOf("export async function applyScenario")),applyLock=service.indexOf("bimlog:team-staffing-apply",applyBegin),applyReplay=service.indexOf('SELECT scenario_version_id "scenarioVersionId",reason,result',applyBegin);assert.ok(applyBegin>=0&&applyLock>applyBegin&&applyReplay>applyLock,"apply must take the project/event transaction lock before replay lookup");assert.match(service,/pg_advisory_xact_lock\(hashtext\('bimlog:team-staffing-apply'\),hashtext\(\$1\)\)/);
 assert.doesNotMatch(migration,/DROP TABLE|TRUNCATE|DELETE FROM/i);
 const missingProfile=evaluateStaffingScenario({startDate:"2026-08-17",endDate:"2026-08-21",assignments:[{taskId:"task-1",assignmentId:null,expectedAssignmentVersion:null,userId:9,plannedHours:8,startDate:"2026-08-17",endDate:"2026-08-21",category:"coordination",reason:"verified planning evidence",expectedTaskVersion:1}],profiles:new Map(),commitments:new Map([[9,4]]),experience:new Map()});
+const windowEvaluation=(startDate:string,endDate:string,plannedHours:number,leave:typeof validProfile.leave|Array<{startDate:string;endDate:string}>=[])=>evaluateStaffingScenario({
+  startDate:"2026-08-17",endDate:"2026-08-23",assignments:[{taskId:"window-task",assignmentId:null,expectedAssignmentVersion:null,userId:9,plannedHours,startDate,endDate,category:"coordination",reason:"synthetic window regression",expectedTaskVersion:1}],
+  profiles:new Map([[9,resourceCapacityProfile({...validProfile,leave})]]),commitments:new Map(),experience:new Map([["9:coordination",1]])});
+assert.deepEqual(windowEvaluation("2026-08-17","2026-08-17",8).warnings,[]);
+const overloadedDay=windowEvaluation("2026-08-17","2026-08-17",16);
+assert.equal(overloadedDay.people[0].capacityHours,40);
+assert.deepEqual(overloadedDay.warnings,["ASSIGNMENT_WINDOW_CAPACITY_EXCEEDED"]);
+assert.equal(overloadedDay.decision,"review_required");assert.equal(overloadedDay.totals.scenarioHours,16);
+assert.deepEqual(windowEvaluation("2026-08-22","2026-08-23",1).warnings,["ASSIGNMENT_NO_AVAILABLE_DAYS"]);
+assert.ok(windowEvaluation("2026-08-17","2026-08-17",1,[{startDate:"2026-08-17",endDate:"2026-08-17"}]).warnings.includes("ASSIGNMENT_NO_AVAILABLE_DAYS"));
+assert.deepEqual(windowEvaluation("2026-08-17","2026-08-18",16).warnings,[]);
 assert.equal(missingProfile.people[0]?.capacityHours,null);assert.equal(missingProfile.people[0]?.availableHours,null);assert.equal(missingProfile.people[0]?.utilization,null);assert.equal(missingProfile.totals.internalCost,null);assert.equal(missingProfile.totals.billingValue,null);assert.ok(missingProfile.warnings.includes("CAPACITY_PROFILE_REQUIRED"));
 const persistedEvaluation={people:[{userId:9,internalCost:800,billingValue:1200}],totals:{scenarioHours:8,internalCost:800,billingValue:1200},warnings:[]};
 const redactedEvaluation=redactScenarioEvaluation(persistedEvaluation,false);assert.equal(redactedEvaluation.people[0].internalCost,null);assert.equal(redactedEvaluation.people[0].billingValue,null);assert.equal(redactedEvaluation.totals.internalCost,null);assert.equal(redactedEvaluation.totals.billingValue,null);assert.deepEqual(redactScenarioEvaluation(persistedEvaluation,true),persistedEvaluation);assert.equal(persistedEvaluation.people[0].internalCost,800);

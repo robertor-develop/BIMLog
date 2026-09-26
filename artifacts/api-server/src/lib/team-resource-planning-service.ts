@@ -78,6 +78,11 @@ export function evaluateStaffingScenario(input:{startDate:string;endDate:string;
     if(p?.internalHourlyRate!=null&&current.internalCost!=null)current.internalCost=money(current.internalCost+assignment.plannedHours*p.internalHourlyRate);
     if(p?.billingHourlyRate!=null&&current.billingValue!=null)current.billingValue=money(current.billingValue+assignment.plannedHours*p.billingHourlyRate);
     if(!p)current.warnings.push("CAPACITY_PROFILE_REQUIRED");
+    if(p){
+      const assignmentCapacity=money(daysBetween(assignment.startDate,assignment.endDate,p.workingDays,p.leave)*(p.weeklyCapacityHours/p.workingDays.length));
+      if(assignmentCapacity===0)current.warnings.push("ASSIGNMENT_NO_AVAILABLE_DAYS");
+      else if(assignment.plannedHours>assignmentCapacity)current.warnings.push("ASSIGNMENT_WINDOW_CAPACITY_EXCEEDED");
+    }
     if(!(input.experience.get(`${assignment.userId}:${assignment.category.trim().toLocaleLowerCase("en-US")}`)??0))current.warnings.push(`NO_VERIFIED_CATEGORY_EVIDENCE:${assignment.category}`);
     people.set(assignment.userId,current);
   }
