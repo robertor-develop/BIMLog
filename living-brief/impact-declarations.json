@@ -44859,6 +44859,106 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "caa4c6ec555f20b949a5d32bc6c71d62d90afefeac658b0257b2c3d54dbe5978"
+    },
+    {
+      "taskId": "consolidation-c012-explicit-workflow-selection",
+      "reviewedThroughCommit": "47583794e8154ebe9658fe5d1100b2b812af04d7",
+      "reviewedAt": "2026-09-26T23:28:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "chrome_component_tests",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "An unavailable explicit workflow must not display another automatically resolved version; preserve draft identity and require replacement."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves current exact version authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release cadence unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Actual component plus resolver and parity regressions; live gate remains separate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing template-to-intake flow."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new API/schema or business engine."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Native or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No export contract change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claims added."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records C011 commit and C012 candidate limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records stale preview defect and remaining builds."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical data rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/job-intake-build04-harness.tsx",
+        "artifacts/bimlog/src/lib/intake-workflow-preview-selection.behavior.ts",
+        "artifacts/bimlog/src/lib/intake-workflow-preview-selection.ts",
+        "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "66c547c1f8c5efc25e11b2b1f3827bc7f1655455398b0fab3433665c2a7110be"
     }
   ]
 }

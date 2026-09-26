@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation C012 selection candidate — 2026-09-26
+
+C011 committed47583794 after frontend typecheck, focused regression and actual-component English/Spanish/narrow/error/recovery checks. C012 repairs an explicit unavailable workflow selection displaying an automatic replacement preview: preserve the saved ID, expose an unavailable option and require explicit replacement. Display resolver mirrors the existing server's one-company/one-default/ambiguous selection rules without changing server authority. Existing Quick/Advanced and saved APU/budget binding regressions pass and are included in the gate. Actual editor fixture shows unavailable warning and explicit current-version replacement; production CSS is reused for390px inspection. No production acceptance inferred; C013-C015 remain pending, C011-C012 not pushed yet.
+
 ## Consolidation C011 readiness candidate — 2026-09-26
 
 C010 presentation repairs are pushed and live at7a3d82ee; full clean eight-command suite passed. Exact health/package/schema identity and focused authenticated Spanish/English/date/filter/390px/register-label retests passed; external consolidation-c010-presentation-repair-20260926.md records limits. Full multi-role/platform smoke is not complete.

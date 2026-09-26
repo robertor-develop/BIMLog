@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C012 closes misleading stale workflow preview while preserving saved selection identity and requiring an explicit replacement; no silent migration to another template. Finish exact C012 checks/commit, then C013-C015 and block push. Cross-path source regressions are not fresh-user live acceptance; full template/APU/budget cycle remains required. Current live7a3d82ee; C011 is local47583794.
+
 C011 readiness candidate follows exact deployed repair7a3d82ee. Finish failed-load/recovery and actual-component checks, commit C011 then implement C012-C015 sequentially. Counts are discovery guidance, not Job activation approval; no draft or blocked published option can be advertised as ready. C010 focused deployed repair checks passed; full configured-policy/multi-role platform acceptance remains open. Preserve real company drafts and Lens Native.
 
 C010 narrow-screen defect reproduced and repaired locally: filters/totals now wrap and table columns are scrollable in a named focusable region. Corrected390px screenshot inspected. Run a new clean exact-head gate; discard the in-flight earlier candidate receipt as acceptance evidence after its source changed. Push/publish and live retest remain required before C011. No customer data or Lens changes.

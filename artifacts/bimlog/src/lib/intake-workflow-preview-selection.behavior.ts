@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import { intakeWorkflowPreview } from "./intake-workflow-preview-selection";
+const option = (versionId: string, source = "company", type = "SHOP_DRAWING") => ({ versionId, source, definition: { deliverableTypes: [type] } });
+const options = [option("current"), option("default", "bimlog"), option("sleeve", "company", "SLEEVE")];
+const old = JSON.stringify(options);
+assert.equal(intakeWorkflowPreview(options, "SHOP_DRAWING", "retired").selected, undefined);
+assert.equal(intakeWorkflowPreview(options, "SHOP_DRAWING", "retired").unavailableSavedVersion, true);
+assert.equal(intakeWorkflowPreview(options, "SHOP_DRAWING", "sleeve").unavailableSavedVersion, true);
+assert.equal(intakeWorkflowPreview(options, "SHOP_DRAWING", "current").selected?.versionId, "current");
+assert.equal(intakeWorkflowPreview(options, "SHOP_DRAWING", "default").selected?.versionId, "default");
+assert.equal(intakeWorkflowPreview(options, "SHOP_DRAWING", "").selected?.versionId, "current");
+assert.equal(intakeWorkflowPreview([option("a"), option("b")], "SHOP_DRAWING", "").selected, undefined);
+assert.equal(intakeWorkflowPreview([option("a", "bimlog"), option("b", "bimlog")], "SHOP_DRAWING", "").selected, undefined);
+assert.equal(intakeWorkflowPreview([option("a", "bimlog")], "SHOP_DRAWING", "").selected?.versionId, "a");
+assert.equal(intakeWorkflowPreview([], "SHOP_DRAWING", "").selected, undefined);
+assert.equal(JSON.stringify(options), old);
+console.log("C012 preview PASS: unavailable explicit selection never falls back, company ambiguity retained, one default only, no draft mutation");

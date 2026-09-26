@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import "./company-workflow-readiness.behavior";
+import "./intake-workflow-preview-selection.behavior";
+import "../components/job-intake/QuickJobIntake.behavior";
+import "../pages/JobIntakeWorkspace.item-bindings.behavior";
 import { readFileSync } from "node:fs";
 import {
   assertVisibleAiCostGate,

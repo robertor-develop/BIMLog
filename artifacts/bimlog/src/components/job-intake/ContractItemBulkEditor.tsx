@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
+import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
 import {
   profileForApuRate,
   rateForApuProfile,
@@ -619,9 +620,10 @@ export function ContractItemBulkEditor(props: Props) {
                 {props.tt("Delivery Workflow version", "Versión del flujo de entrega")}
                 <select value={item.deliveryWorkflowVersionId || ""} onChange={event => update(index, { deliveryWorkflowVersionId: event.target.value })}>
                   <option value="">{props.tt("Auto-select when exactly one is applicable", "Selección automática si solo hay una opción aplicable")}</option>
+                  {item.deliveryWorkflowVersionId && intakeWorkflowPreview(props.deliveryWorkflowOptions ?? [], item.deliverableType || "GENERAL", item.deliveryWorkflowVersionId).unavailableSavedVersion && <option value={item.deliveryWorkflowVersionId}>{props.tt("Saved version unavailable — select a replacement", "Versión guardada no disponible — seleccione un reemplazo")}</option>}
                   {(props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")).map(option => <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.source === "company" ? props.tt("Company", "Empresa") : "BIMLog"}{option.activationBlock ? ` · ${props.tt("Blocked by policy", "Bloqueado por política")}` : ""}</option>)}
                 </select>
-                {(() => { const matches = (props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")); const selected = matches.find(option => option.versionId === item.deliveryWorkflowVersionId) ?? (matches.filter(option => option.source === "company").length === 1 ? matches.find(option => option.source === "company") : matches.filter(option => option.source === "company").length === 0 ? matches.find(option => option.source === "bimlog") : undefined); return selected ? <>
+                {(() => { const { matches, selected, unavailableSavedVersion } = intakeWorkflowPreview(props.deliveryWorkflowOptions ?? [], item.deliverableType || "GENERAL", item.deliveryWorkflowVersionId || ""); if (unavailableSavedVersion) return <small role="alert">{props.tt("The saved workflow version is no longer available for this deliverable. Its saved identity is preserved; explicitly choose a current version before activation. No replacement has been selected automatically.", "La versión guardada del flujo ya no está disponible para este entregable. Se conserva su identidad; elija expresamente una versión vigente antes de activar. No se ha seleccionado ningún reemplazo automáticamente.")}</small>; return selected ? <>
                   <small>{selected.definition.phases.map(phase => `${phase.name} (${phase.tasks.length})`).join(" → ")}</small>
                   <small>{selected.governancePolicy ? `${props.tt("Published company Governance Policy", "Política de gobernanza empresarial publicada")}: ${selected.governancePolicy.code} · v${selected.governancePolicy.version}` : props.tt("No published company Governance Policy applies to this workflow.", "Ninguna política de gobernanza empresarial publicada aplica a este flujo.")}</small>
                   {selected.activationBlock && <small role="alert">{props.tt("Activation blocked by published Governance Policy", "Activación bloqueada por la política de gobernanza publicada")}: {selected.activationBlock.code}</small>}
