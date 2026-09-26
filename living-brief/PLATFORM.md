@@ -588,6 +588,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/folder-wizard-publish-job.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-lease.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-lease.ts
+- artifacts/api-server/src/lib/folder-wizard-publish-options.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-plan.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-plan.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-postgres.behavior.ts
@@ -607,6 +608,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/folder-wizard-publish-submission.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-worker.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-publish-worker.ts
+- artifacts/api-server/src/lib/folder-wizard-request-lifetime.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-request-validation.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-request-validation.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-resolver.ts
 - artifacts/api-server/src/lib/folder-wizard-routing-contract.behavior.ts

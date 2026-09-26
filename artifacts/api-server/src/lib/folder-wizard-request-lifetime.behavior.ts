@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { FolderWizardRequestLifetime } from "../../../bimlog/src/pages/project/folder-wizard-request-lifetime";
 const lifetime = new FolderWizardRequestLifetime();
 const first = lifetime.begin();
@@ -11,4 +12,18 @@ assert.equal(second(), false);
 const third = lifetime.begin();
 assert.equal(first(), false);
 assert.equal(third(), true);
+let complete!: () => void;
+const pending = new Promise<void>((resolve) => { complete = resolve; });
+const applies = lifetime.begin();
+let updates = 0;
+const delayed = pending.then(() => { if (applies()) updates += 1; });
+lifetime.invalidate();
+complete(); await delayed;
+assert.equal(updates, 0);
+// Structural binding checks supplement the helper behavior; these are not browser acceptance.
+const importer = readFileSync(new URL("../../../bimlog/src/pages/project/FolderWizardImportPanel.tsx", import.meta.url), "utf8");
+assert.match(importer, /revision === scopeRevision.current/);
+assert.match(importer, /const text = await file.text\(\);\s+if \(!active\(\)\) return/);
+assert.match(importer, /await reload\(\);\s+if \(!active\(\)\) return/);
+assert.match(importer, /if \(saveInFlight.current \|\| !token \|\| !sourceText\) return/);
 console.log("Folder Wizard async request invalidation: PASS");

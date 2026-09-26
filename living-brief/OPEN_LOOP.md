@@ -2,6 +2,11 @@
 
 ## Coordination routing and SharePoint publishing — 2026-09-25
 
+- [x] Reconcile the Build 30 release receipt: exact source `560e463cf997f444c42560b7679d8baf10c6cb28` was published as deployment `afe01b7d`; live identity and partial authenticated smoke passed. Historical publication-pending bullets below do not override this receipt.
+- [x] Implement separate repairs R1–R5 for bounded request validation, stale publication/import responses, duplicate submissions, exact configured tag choices and retry timing. Focused tests pass; browser interaction and real tenant acceptance remain separate.
+- [ ] Complete combined release gate and push repair block R1–R5. Publish at ten unpublished builds and repeat full authenticated Chrome import/save/reopen/confirmed delivery, conflict/retry and tenant-boundary acceptance. Do not claim real SharePoint delivery until observed in the authorized tenant.
+- [ ] Preserve the remaining 50-build/ten-block non-Lens roadmap: core operating chain (30) then resources/earnings (20), after SharePoint acceptance. Repair IDs are separate and must not silently replace the roadmap.
+
 - [x] Implement Builds 26–30 source: isolated PostgreSQL queue/lease/settlement proof, create-only Graph upload-session conflict reconciliation, explicit project-admin digest confirmation, scoped status, and exact-job request execution. Source proof is not real tenant delivery or publication evidence.
 - [x] Regenerate the tracked route-interconnection graph for the new publish/status routes and confirm its dedicated regression passes; reconcile this gate correction into the Living Brief before rerunning the complete gate.
 - [ ] Run full local release gate, push the five-build block, publish exact GitHub master through Replit Shell, and bind live health/source identity. Then run authenticated Chrome smoke, including Wizard import/save/reopen and an authorized synthetic tenant/site file round-trip. Keep delivery acceptance open until those live actions pass.

@@ -34,8 +34,11 @@
     { "number": 29, "commit": "436e3ee9", "state": "committed" },
     { "number": 30, "commit": "f33f322d", "state": "committed" }
   ],
-  "publication": "build_20_d71ea037c75fb71cf3f2ac11df8f7576943a07a6",
+  "publication": "build_30_560e463cf997f444c42560b7679d8baf10c6cb28",
+  "deploymentId": "afe01b7d",
+  "separateRepairBlock": { "ids": ["R1", "R2", "R3", "R4", "R5"], "state": "source_candidate", "unpublishedBuilds": 5 },
+  "remainingOriginalRoadmap": { "builds": 50, "blocks": 10, "excludesLensNext": true },
   "liveSmoke": "partial_pass_file_selection_blocked",
-  "sharePointDelivery": "not_activated_disconnected_worker_foundation",
+  "sharePointDelivery": "confirmed_exact_job_path_published_real_tenant_roundtrip_unverified",
   "knownSafetyCorrection": "queued_sync_fail_closed_before_event_or_cache_consumption"
 }

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FolderWizardRequestLifetime } from "./folder-wizard-request-lifetime";
 import { parseFolderWizardDraft, type FolderWizardDraft } from "./folder-wizard-draft";
 import { FolderWizardRoutingPanel } from "./FolderWizardRoutingPanel";
 import { FolderWizardPublishPanel } from "./FolderWizardPublishPanel";
@@ -41,24 +42,37 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
   const [readinessError, setReadinessError] = useState(false);
   const [jobs, setJobs] = useState<PublishJob[]>([]);
   const [jobsError, setJobsError] = useState(false);
+  const scopeRevision = useRef(0);
+  const reads = useRef(new FolderWizardRequestLifetime());
+  const selections = useRef(new FolderWizardRequestLifetime());
+  const saveInFlight = useRef(false);
   const endpoint = `/api/v1/projects/${projectId}/integrations/folder-wizard`;
 
   async function reload(signal?: AbortSignal) {
     if (!token) return;
+    const latest = reads.current.begin();
+    const revision = scopeRevision.current;
+    const active = () => !signal?.aborted && latest() && revision === scopeRevision.current;
     const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` }, signal });
     if (!response.ok) throw new Error(`load ${response.status}`);
     const data = await response.json() as { current: ImportRecord | null };
+    if (!active()) return;
     setCurrent(data.current);
     const check = await fetch(`${endpoint}/publishing-readiness`, { headers: { Authorization: `Bearer ${token}` }, signal });
-    if (check.ok) { setReadiness(await check.json() as Readiness); setReadinessError(false); }
+    if (!active()) return;
+    if (check.ok) { const value = await check.json() as Readiness; if (!active()) return; setReadiness(value); setReadinessError(false); }
     else { setReadiness(null); setReadinessError(true); }
     const jobResponse = await fetch(`${endpoint}/publishing-jobs`, { headers: { Authorization: `Bearer ${token}` }, signal });
-    if (jobResponse.ok) { setJobs(((await jobResponse.json()) as { jobs: PublishJob[] }).jobs); setJobsError(false); }
+    if (!active()) return;
+    if (jobResponse.ok) { const value = await jobResponse.json() as { jobs: PublishJob[] }; if (!active()) return; setJobs(value.jobs); setJobsError(false); }
     else { setJobs([]); setJobsError(true); }
   }
 
   useEffect(() => {
     const controller = new AbortController();
+    scopeRevision.current += 1; reads.current.invalidate(); selections.current.invalidate(); saveInFlight.current = false;
+    setCurrent(null); setReadiness(null); setJobs([]); setDraft(null); setSourceText(""); setFileName(""); setSaving(false);
+    setReadinessError(false); setJobsError(false);
     setLoading(true);
     setError("");
     void reload(controller.signal).catch((cause: unknown) => {
@@ -66,10 +80,12 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
         ? tr("Project access is required to view routing.", "Se requiere acceso al proyecto para ver las rutas.")
         : tr("Could not load folder routing. Retry.", "No se pudo cargar la configuración de carpetas. Reintente."));
     }).finally(() => { if (!controller.signal.aborted) setLoading(false); });
-    return () => controller.abort();
+    return () => { controller.abort(); scopeRevision.current += 1; reads.current.invalidate(); selections.current.invalidate(); };
   }, [projectId, token, lang]);
 
   async function choose(file: File | undefined) {
+    if (saveInFlight.current) return;
+    const active = selections.current.begin();
     setDraft(null); setSourceText(""); setFileName(""); setError("");
     if (!file) return;
     if (file.size > 1_048_576 || !file.name.toLowerCase().endsWith(".json")) {
@@ -78,18 +94,24 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
     }
     try {
       const text = await file.text();
+      if (!active()) return;
       setDraft(parseFolderWizardDraft(text)); setSourceText(text); setFileName(file.name);
     } catch {
+      if (!active()) return;
       setError(tr("This is not a BT Folder Wizard 3.1 BIMLog export.", "Este archivo no es una exportación BIMLog de BT Folder Wizard 3.1."));
     }
   }
 
   async function save() {
-    if (!token || !sourceText) return;
+    if (saveInFlight.current || !token || !sourceText) return;
+    saveInFlight.current = true;
+    const revision = scopeRevision.current;
+    const active = () => revision === scopeRevision.current;
     setSaving(true); setError("");
     try {
       const response = await fetch(endpoint, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
         body: JSON.stringify({ sourceText, expectedCurrentSha256: current?.sha256 ?? null }) });
+      if (!active()) return;
       if (!response.ok) {
         const payload = await response.json().catch(() => ({})) as { error?: string };
         if (response.status === 409) throw new Error("stale");
@@ -97,13 +119,15 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
         throw new Error(payload.error ?? "invalid");
       }
       await reload();
+      if (!active()) return;
       setDraft(null); setSourceText(""); setFileName("");
     } catch (cause) {
+      if (!active()) return;
       const reason = cause instanceof Error ? cause.message : "invalid";
       setError(reason === "stale" ? tr("Another import was saved. Reload before trying again.", "Se guardó otra importación. Recargue antes de intentar nuevamente.")
         : reason === "forbidden" ? tr("Only a project administrator may import routing.", "Solo un administrador del proyecto puede importar rutas.")
         : tr("Import failed. Check the Wizard export and try again.", "Falló la importación. Revise el archivo del Wizard e intente nuevamente."));
-    } finally { setSaving(false); }
+    } finally { if (active()) { saveInFlight.current = false; setSaving(false); } }
   }
 
   return <section aria-label={tr("BT Folder Wizard routing", "Rutas de BT Folder Wizard")} style={{ border: "1px solid hsl(var(--border))", borderRadius: 11, padding: 17, marginBottom: 18, background: "hsl(var(--card))" }}>
@@ -139,13 +163,13 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
       </div>
       <label style={{ display: "block", marginTop: 12, fontSize: 12 }}>
         {tr("Choose a Wizard JSON export", "Seleccione un JSON exportado por el Wizard")}
-        <input type="file" accept=".json,application/json" onChange={(event) => void choose(event.target.files?.[0])} style={{ display: "block", marginTop: 5, maxWidth: "100%" }} />
+        <input type="file" disabled={saving} accept=".json,application/json" onChange={(event) => void choose(event.target.files?.[0])} style={{ display: "block", marginTop: 5, maxWidth: "100%" }} />
       </label>
       {draft && <div style={{ fontSize: 12, marginTop: 8 }}>
         <p>{fileName} · {draft.blueprints.filter((item) => item.include).map((item) => item.name).join(", ")}</p>
         <p>{tr("Destination", "Destino")}: {draft.destination.sharepoint_url || tr("Not configured; publishing will remain unavailable", "Sin configurar; la publicación seguirá no disponible")}</p>
         <button type="button" disabled={saving} onClick={() => void save()}>{saving ? tr("Saving…", "Guardando…") : tr("Import as new version", "Importar como nueva versión")}</button>
-        <button type="button" disabled={saving} onClick={() => { setDraft(null); setSourceText(""); setFileName(""); }} style={{ marginLeft: 8 }}>{tr("Cancel", "Cancelar")}</button>
+        <button type="button" disabled={saving} onClick={() => { selections.current.invalidate(); setDraft(null); setSourceText(""); setFileName(""); }} style={{ marginLeft: 8 }}>{tr("Cancel", "Cancelar")}</button>
       </div>}
       {error && <p role="alert" style={{ color: "#991B1B" }}>{error}</p>}
       {current && <FolderWizardRoutingPanel projectId={projectId} token={token} lang={lang} blueprints={current.document.blueprints} />}
