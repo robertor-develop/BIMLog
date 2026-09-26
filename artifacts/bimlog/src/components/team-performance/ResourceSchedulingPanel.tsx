@@ -89,7 +89,25 @@ const completeProfile = (value: CapacityProfile | undefined) => {
   try { new Intl.DateTimeFormat("en", {timeZone:value.timezone.trim()}); return true; } catch { return false; }
 };
 const dateStamp = (offset = 0) => { const date = new Date(); date.setUTCDate(date.getUTCDate() + offset); return date.toISOString().slice(0, 10); };
-const csvCell = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+export const resourceCsvCell = (value: unknown) => {
+  const raw = String(value ?? "");
+  const safe = typeof value === "string" && /^[\s]*[=+@-]/.test(raw) ? "'" + raw : raw;
+  return '"' + safe.replaceAll('"', '""') + '"';
+};
+export function resourceEvaluationCsv(data: ResourcePlanningWorkspace, evaluation: Evaluation, lang: Language) {
+  validateResourceEvaluation(evaluation);
+  const es = lang === "es";
+  const lines: unknown[][] = [
+    ["BIMLog by IgniteSmart", data.project.code, data.project.name ?? ""],
+    [es ? "Evaluación orientativa: no representa horas aprobadas ni pagos." : "Advisory evaluation: not approved hours or payments."],
+    es ? ["Miembro", "Capacidad (h)", "Compromisos existentes (h)", "Escenario (h)", "Utilización (%)", "Códigos de alerta"]
+       : ["Member", "Capacity (h)", "Existing commitments (h)", "Scenario (h)", "Utilization (%)", "Warning codes"],
+    ...evaluation.people.map(person => [data.members.find(member => member.id === person.userId)?.name ?? person.userId,
+      person.capacityHours, person.existingHours, person.scenarioHours,
+      person.utilization === null ? null : Number((person.utilization * 100).toFixed(2)), person.warnings.join(" | ")])
+  ];
+  return "\uFEFF" + lines.map(row => row.map(resourceCsvCell).join(",")).join("\r\n");
+}
 
 type ViewProps = {
   data: ResourcePlanningWorkspace | null; lang: Language; actorUserId: number; loading: boolean; busy: boolean; error: string; notice: string;
@@ -167,7 +185,7 @@ export function ResourceSchedulingPanel({ projectId, token, lang, actorUserId }:
   async function save() { const revision = draftRevision.current; await run(async () => { const saved = await request("/scenarios", { method: "POST", body: JSON.stringify({ ...payload(), expectedVersion: 0 }) }) as Scenario; if (revision === draftRevision.current) setEvaluation(saved.evaluation); setNotice(tt(`Scenario v${saved.version} saved without changing live work.`, `Escenario v${saved.version} guardado sin cambiar trabajo activo.`)); await load(); }); }
   async function saveProfile(member: Member) { await run(async () => { await request(`/profiles/${member.id}`, { method: "PUT", body: JSON.stringify({ expectedVersion: member.profile?.version ?? 0, profile: profileDrafts[member.id] }) }); setNotice(tt("Availability saved as a new auditable version.", "Disponibilidad guardada como nueva versión auditable.")); await load(); }); }
   async function apply(scenario: Scenario) { await run(async () => { await request(`/scenarios/${scenario.id}/apply`, { method: "POST", body: JSON.stringify({ eventKey: crypto.randomUUID(), reason: applicationReason.trim() }) }); setNotice(tt("The eligible reviewed direct task assignees were applied. Scenario hours and financial values were not written.", "Se aplicaron los responsables directos elegibles revisados. No se escribieron horas ni valores financieros del escenario.")); setSelectedScenarioId(""); setApplicationReason(""); setApplicationConfirmed(false); await load(); }); }
-  function exportCsv() { if (!evaluation) return; const lines: unknown[][] = [["member", "capacity", "existing", "scenario", "utilization", "warnings"], ...evaluation.people.map(person => [data?.members.find(member => member.id === person.userId)?.name ?? person.userId, person.capacityHours, person.existingHours, person.scenarioHours, person.utilization, person.warnings.join(" | ")])]; const link = document.createElement("a"), url = URL.createObjectURL(new Blob([lines.map(row => row.map(csvCell).join(",")).join("\r\n")], { type: "text/csv;charset=utf-8" })); link.href = url; link.download = `${data?.project.code ?? "project"}-staffing.csv`; link.click(); URL.revokeObjectURL(url); }
+  function exportCsv() { if (!evaluation || !data) return; const link = document.createElement("a"), url = URL.createObjectURL(new Blob([resourceEvaluationCsv(data, evaluation, lang)], { type: "text/csv;charset=utf-8" })); link.href = url; link.download = `${data.project.code || "project"}-staffing.csv`; link.click(); URL.revokeObjectURL(url); }
   const viewProps: ViewProps = { data, lang, actorUserId, loading, busy, error, notice, rows, name, startDate, endDate, evaluation, profileDrafts, selectedScenarioId, applicationReason, applicationConfirmed, onReload: () => void load(), onAdd: add, onRows: setRows, onName: setName, onStartDate: setStartDate, onEndDate: setEndDate, onStartProfile: member => setProfileDrafts(current => ({ ...current, [member.id]: blankProfile() })), onEvaluate: () => void evaluate(), onSave: () => void save(), onProfileDrafts: setProfileDrafts, onSaveProfile: member => void saveProfile(member), onExport: exportCsv, onSelectScenario: id => { setSelectedScenarioId(id); setApplicationReason(""); setApplicationConfirmed(false); }, onReason: setApplicationReason, onConfirmed: setApplicationConfirmed, onApply: scenario => void apply(scenario) };
   return <ResourceSchedulingWorkspaceView {...viewProps}
     onRows={value => { invalidateEvaluation(); if (hasDuplicateStaffingTasks(value)) { setError(tt("Each task can appear only once. Select another task or remove the duplicate row.", "Cada tarea solo puede aparecer una vez. Seleccione otra tarea o elimine la fila duplicada.")); return; } setError(""); setRows(value); }}

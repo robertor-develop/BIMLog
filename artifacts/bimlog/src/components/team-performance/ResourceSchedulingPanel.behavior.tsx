@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import React from "react";
+import { resourceCsvCell, resourceEvaluationCsv } from "./ResourceSchedulingPanel";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ResourceSchedulingWorkspaceView, validateResourcePlanningWorkspace, validateResourceEvaluation, nextUnselectedDirectTask, hasDuplicateStaffingTasks, type ResourcePlanningWorkspace } from "./ResourceSchedulingPanel";
 
@@ -40,6 +41,15 @@ for (const malformed of [null, {}, { ...data, members: null }, { ...data, tasks:
 }
 
 const english = render();
+assert.equal(resourceCsvCell("=1+1"), '"\'=1+1"');
+assert.equal(resourceCsvCell("-external"), '"\'-external"');
+assert.equal(resourceCsvCell(-2), '"-2"');
+assert.equal(resourceCsvCell('A,"B"'), '"A,""B"""');
+const exportedSpanish = resourceEvaluationCsv(data, evaluation, "es");
+assert.ok(exportedSpanish.startsWith("\uFEFF"));
+assert.match(exportedSpanish, /Capacidad \(h\)/);
+assert.match(exportedSpanish, /no representa horas aprobadas ni pagos/);
+assert.match(resourceEvaluationCsv(data, evaluation, "en"), /Utilization \(%\)/);
 const appliedView = render({data:{...data, scenarios:data.scenarios.map(item=>({...item,applied:true}))}});
 assert.match(appliedView, /Inspect saved evidence/);
 assert.match(appliedView, /Saved scenario review evidence/);
