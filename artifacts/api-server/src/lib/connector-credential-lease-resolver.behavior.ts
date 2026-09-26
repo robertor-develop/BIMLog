@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { encryptLeasedConnectorBearerToken, type ConnectorKekLeaseSource } from "./connector-credential-envelope";
 import { PostgresConnectorCredentialLeaseResolver, type ConnectorCredentialLeasePool } from "./connector-credential-lease-resolver";
 import { ConnectorValidationUnavailableError } from "./coordination-hub-configuration-service";
+import { FolderWizardGraphIdentity } from "./folder-wizard-graph-identity";
 
 const key = randomBytes(32);
 const keySource: ConnectorKekLeaseSource = {
@@ -57,9 +58,9 @@ assert.equal(await resolver.withBearerToken({ credentialId: context.credentialId
 assert.equal(leased?.every((value) => value === 0), true);
 assert.equal(Object.values(row).filter(Buffer.isBuffer).every((value) => value.every((byte) => byte === 0)), true);
 assert.match(calls[0]?.sql ?? "", /BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY/);
-assert.match(calls[1]?.sql ?? "", /id=\$1 AND company_id=\$2 AND provider=\$3 AND state='pending_validation'/);
+assert.match(calls[1]?.sql ?? "", /id=\$1 AND company_id=\$2 AND provider=\$3 AND state=\$4/);
 assert.doesNotMatch(calls[1]?.sql ?? "", /SELECT\s+\*/i);
-assert.deepEqual(calls[1]?.values, [context.credentialId, context.companyId, context.provider]);
+assert.deepEqual(calls[1]?.values, [context.credentialId, context.companyId, context.provider, "pending_validation"]);
 assert.equal(calls[2]?.sql, "COMMIT");
 
 async function rejectingPool(result: { rows: Array<Record<string, unknown>>; rowCount: number }): Promise<ConnectorCredentialLeasePool> {
@@ -103,6 +104,31 @@ const rollbackFailure = new PostgresConnectorCredentialLeaseResolver({
 await assert.rejects(() => rollbackFailure.withBearerToken({ credentialId: context.credentialId, companyId: context.companyId, provider: context.provider }, async () => undefined), ConnectorValidationUnavailableError);
 assert.deepEqual(rollbackEvents, [{ event: "bimlog_operational_failure", code: "CONNECTOR_CREDENTIAL_LEASE_ROLLBACK_FAILED" }]);
 assert.doesNotMatch(JSON.stringify(rollbackEvents), /sensitive|credentialId|companyId|token/i);
+
+for (const state of ["active", "pending_validation", "disabled", "revoked"]) {
+  const operationalRow = selectedRow({ stateBytes: bytes(state) });
+  let used = false;
+  const activeResolver = new PostgresConnectorCredentialLeaseResolver({
+    async connect() { return {
+      async query(sql, values) {
+        if (!sql.startsWith("SELECT")) return { rows: [], rowCount: null };
+        assert.equal(values?.[3], "active", "operational purpose is bound by the server, not request data");
+        return { rows: [operationalRow], rowCount: 1 };
+      }, release() {},
+    }; },
+  }, keySource, undefined, "active");
+  const graphIdentity = new FolderWizardGraphIdentity(activeResolver, async (url) => {
+    used = true;
+    return new Response(JSON.stringify(String(url).includes("/sites/")
+      ? { id: "synthetic-site", webUrl: "https://synthetic.sharepoint.com/sites/QA" }
+      : { id: "synthetic-drive", webUrl: "https://synthetic.sharepoint.com/sites/QA/Documents", driveType: "documentLibrary" }), { status: 200 });
+  });
+  const operation = graphIdentity.verify({ credentialId: context.credentialId, companyId: context.companyId, siteId: "synthetic-site", libraryId: "synthetic-drive" });
+  if (state === "active") assert.equal((await operation).libraryId, "synthetic-drive");
+  else await assert.rejects(() => operation, ConnectorValidationUnavailableError);
+  assert.equal(used, state === "active");
+  assert.equal(Object.values(operationalRow).filter(Buffer.isBuffer).every((value) => value.every((byte) => byte === 0)), true);
+}
 
 key.fill(0);
 console.log("PostgreSQL connector credential lease resolver behavior: PASS");

@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Project access and SharePoint correction — 2026-09-26
+
+- [x] Reconcile published45e22afc from the external resource block15 release receipt; prior pending-publication notes are historical.
+- [ ] Reproduce Rubén's nine-project entry failure at the exact reported screen and repair its verified cause. Existing memberships are active; do not grant global administrator access to mask a navigation problem.
+- [ ] Release the active-versus-pending credential lease correction with connected regression coverage. Source tests are not provider acceptance.
+- [ ] Complete the missing governed SharePoint mapping UI and prove save/refresh/reopen. Canonical BIMTECH company31 currently has no SharePoint connector, mapping or Wizard import; do not seed credentials, guess a destination or fabricate an upload acknowledgement.
+- [ ] Prove exact-byte delivery and readback in the authorized tenant after the company connection and destination are verified. Preserve Lens Next and remaining Resource/Earnings scope; these repairs do not consume the remaining five original planned slots.
+
 ## Resource Planning Builds 71–75 — 2026-09-26
 
 - [x] Publish exact37db4a9b and verify production identity; live save/reopen, duplicate prevention, read-only review/cancel and unchanged Operations totals verified on synthetic project57.

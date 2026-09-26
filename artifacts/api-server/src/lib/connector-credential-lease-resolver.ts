@@ -19,7 +19,7 @@ type QueryResult = { rows: Array<Record<string, unknown>>; rowCount: number | nu
 type LeaseClient = { query(sql: string, values?: unknown[]): Promise<QueryResult>; release(): void };
 export interface ConnectorCredentialLeasePool { connect(): Promise<LeaseClient>; }
 
-const SELECT_PENDING_CREDENTIAL = `SELECT
+const SELECT_CREDENTIAL = `SELECT
  convert_to(id,'UTF8') AS "idBytes",
  company_id AS "companyId",
  convert_to(provider,'UTF8') AS "providerBytes",
@@ -32,7 +32,7 @@ const SELECT_PENDING_CREDENTIAL = `SELECT
  convert_to(wrap_tag,'UTF8') AS "wrapTagBytes",
  key_version AS "keyVersion"
  FROM connector_credentials
- WHERE id=$1 AND company_id=$2 AND provider=$3 AND state='pending_validation'
+ WHERE id=$1 AND company_id=$2 AND provider=$3 AND state=$4
  LIMIT 1`;
 
 function unavailable(): never {
@@ -64,6 +64,7 @@ export class PostgresConnectorCredentialLeaseResolver {
     private readonly database: ConnectorCredentialLeasePool,
     private readonly keySource: ConnectorKekLeaseSource,
     private readonly reportOperationalFailure?: OperationalFailureReporter,
+    private readonly requiredState: "pending_validation" | "active" = "pending_validation",
   ) {}
 
   async withBearerToken<T>(rawInput: unknown, operation: (token: Uint8Array) => Promise<T>): Promise<T> {
@@ -79,14 +80,14 @@ export class PostgresConnectorCredentialLeaseResolver {
       const client = await this.database.connect();
       try {
         await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
-        const result = await client.query(SELECT_PENDING_CREDENTIAL, [input.credentialId, input.companyId, input.provider]);
+        const result = await client.query(SELECT_CREDENTIAL, [input.credentialId, input.companyId, input.provider, this.requiredState]);
         selectedRows = result.rows;
         if (result.rowCount !== 1 || result.rows.length !== 1) unavailable();
         selected = result.rows[0];
         if (!selected) unavailable();
         if (Number(selected.companyId) !== input.companyId || exactAscii(exactBuffer(selected, "idBytes")) !== input.credentialId
           || exactAscii(exactBuffer(selected, "providerBytes")) !== input.provider
-          || exactAscii(exactBuffer(selected, "stateBytes")) !== "pending_validation") unavailable();
+          || exactAscii(exactBuffer(selected, "stateBytes")) !== this.requiredState) unavailable();
         const keyVersion = Number(selected.keyVersion);
         if (!Number.isSafeInteger(keyVersion) || keyVersion <= 0) unavailable();
         envelope = {
@@ -126,6 +127,15 @@ export class PostgresConnectorCredentialLeaseResolver {
 }
 
 export function createRuntimeConnectorCredentialLeaseResolver(): { withBearerToken<T>(input: unknown, operation: (token: Uint8Array) => Promise<T>): Promise<T> } {
+  return runtimeLeaseResolver("pending_validation");
+}
+
+/** Operational reads/writes require an already validated credential, never a pending one. */
+export function createRuntimeActiveConnectorCredentialLeaseResolver(): { withBearerToken<T>(input: unknown, operation: (token: Uint8Array) => Promise<T>): Promise<T> } {
+  return runtimeLeaseResolver("active");
+}
+
+function runtimeLeaseResolver(requiredState: "pending_validation" | "active"): { withBearerToken<T>(input: unknown, operation: (token: Uint8Array) => Promise<T>): Promise<T> } {
   return {
     async withBearerToken<T>(input: unknown, operation: (token: Uint8Array) => Promise<T>): Promise<T> {
       try {
@@ -133,6 +143,8 @@ export function createRuntimeConnectorCredentialLeaseResolver(): { withBearerTok
         return await new PostgresConnectorCredentialLeaseResolver(
           pool as unknown as ConnectorCredentialLeasePool,
           new EnvironmentConnectorKekLeaseSource(),
+          undefined,
+          requiredState,
         ).withBearerToken(input, operation);
       } catch (error) {
         if (error instanceof ConnectorValidationUnavailableError) throw error;

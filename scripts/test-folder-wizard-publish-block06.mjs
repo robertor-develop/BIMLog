@@ -5,6 +5,7 @@ import { dirname, resolve } from "node:path";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = resolve(root, "artifacts/api-server/node_modules/tsx/dist/cli.mjs");
 for (const name of [
+  "connector-credential-lease-resolver",
   "folder-wizard-request-validation",
   "folder-wizard-request-lifetime",
   "folder-wizard-publish-options",

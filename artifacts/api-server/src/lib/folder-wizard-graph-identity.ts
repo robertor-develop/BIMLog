@@ -1,11 +1,11 @@
 import { z } from "zod/v4";
-import { createRuntimeConnectorCredentialLeaseResolver } from "./connector-credential-lease-resolver";
+import { createRuntimeActiveConnectorCredentialLeaseResolver } from "./connector-credential-lease-resolver";
 
 const graph = "https://graph.microsoft.com/v1.0";
 const siteSchema = z.object({ id: z.string().min(1), webUrl: z.string().url() }).passthrough();
 const driveSchema = z.object({ id: z.string().min(1), webUrl: z.string().url(), driveType: z.literal("documentLibrary") }).passthrough();
 
-type LeaseResolver = Pick<ReturnType<typeof createRuntimeConnectorCredentialLeaseResolver>, "withBearerToken">;
+type LeaseResolver = Pick<ReturnType<typeof createRuntimeActiveConnectorCredentialLeaseResolver>, "withBearerToken">;
 type Transport = typeof fetch;
 
 async function boundedJson(response: Response): Promise<unknown> {
@@ -64,5 +64,5 @@ export class FolderWizardGraphIdentity {
 }
 
 export function createRuntimeFolderWizardGraphIdentity(): FolderWizardGraphIdentity {
-  return new FolderWizardGraphIdentity(createRuntimeConnectorCredentialLeaseResolver());
+  return new FolderWizardGraphIdentity(createRuntimeActiveConnectorCredentialLeaseResolver());
 }

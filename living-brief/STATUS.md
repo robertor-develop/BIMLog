@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Project access and SharePoint correction — 2026-09-26
+
+- Baseline45e22afc is published; the external `F:/BIMLog/TestProof/resource-block15-builds71-75-release-20260926.md` receipt supersedes the pending-publication wording below. Full multi-role/site acceptance is not claimed.
+- Rubén's nine production memberships are active (eight project administrators and one drafter). His reported project-entry failure is not yet reproduced under his session. The existing test-account Headquarters card opens its synthetic project; that does not prove Rubén's access.
+- Read-only production diagnostics found no SharePoint connector credential, project mapping or current Wizard import for canonical BIMTECH company31. The frontend has no caller for the existing mapping operation. Real tenant delivery remains incomplete.
+- A source correction separates pending-validation credential leases from active operational leases used by Folder Wizard identity checks and publication. Focused resolver and Graph behavior tests pass using synthetic credentials/transport only. No production credential, membership, mapping, customer file or Lens Next change has been made. Release and live provider proof remain pending.
+
 ## Resource Planning Builds 71–75 — 2026-09-26
 
 - Publication follow-up: exact source37db4a9b passed full gate, push and live health identity. R75-HOURS fixes the observed Spanish invalid-hours technical message; final repaired publication/live retest remain pending. This is a release repair, not the next block.

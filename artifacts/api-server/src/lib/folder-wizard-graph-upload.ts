@@ -1,12 +1,12 @@
 import { z } from "zod/v4";
 import { timingSafeEqual } from "node:crypto";
-import { createRuntimeConnectorCredentialLeaseResolver } from "./connector-credential-lease-resolver";
+import { createRuntimeActiveConnectorCredentialLeaseResolver } from "./connector-credential-lease-resolver";
 
 const itemSchema = z.object({
   id: z.string().min(1), name: z.string().min(1), size: z.number().int().nonnegative(),
   webUrl: z.string().url(), parentReference: z.object({ driveId: z.string().min(1) }).passthrough(),
 }).passthrough();
-type Lease = Pick<ReturnType<typeof createRuntimeConnectorCredentialLeaseResolver>, "withBearerToken">;
+type Lease = Pick<ReturnType<typeof createRuntimeActiveConnectorCredentialLeaseResolver>, "withBearerToken">;
 
 async function boundedBytes(response: Response, maximum: number): Promise<Buffer> {
   if (!response.body) throw new Error("FOLDER_WIZARD_GRAPH_CONFLICT_UNRESOLVED");
@@ -128,5 +128,5 @@ export class FolderWizardGraphUpload {
 }
 
 export function createRuntimeFolderWizardGraphUpload(): FolderWizardGraphUpload {
-  return new FolderWizardGraphUpload(createRuntimeConnectorCredentialLeaseResolver());
+  return new FolderWizardGraphUpload(createRuntimeActiveConnectorCredentialLeaseResolver());
 }
