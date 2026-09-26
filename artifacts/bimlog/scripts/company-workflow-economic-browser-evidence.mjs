@@ -35,7 +35,8 @@ async function scenario(width, language, mode) {
   },{ language });
   let version = { templateId:"workflow-1",code:"SLEEVE",name:"Sleeve Standard",
     versionId:"workflow-v1",version:1,state:mode === "read-only" ? "published" : "draft",
-    revision:1,definition:structuredClone(initialDefinition),fingerprint:null };
+    revision:1,definition:structuredClone(initialDefinition),fingerprint:null,
+    reviewEligibility:{ eligible:false,code:"DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED" } };
   const failures = [];
   const page = await context.newPage();
   page.on("pageerror",error => failures.push(error.message));
@@ -97,6 +98,8 @@ async function scenario(width, language, mode) {
     await page.getByRole("heading",{ name:/Sleeve Standard/ }).waitFor();
     if (mode === "read-only") assert.equal(await page.getByText(es ? "Editar definición borrador" : "Edit draft definition").count(),0);
     else {
+      await page.getByText(es ? /Otro administrador PMO de la empresa debe revisarla/ : /Another company PMO administrator must review it/).waitFor();
+      assert.equal(await page.getByRole("button", { name:es ? "Aprobar borrador guardado y validado" : "Approve validated saved draft" }).isDisabled(),true);
       const economic = page.getByRole("group",{ name:es ? "Asignación económica (opcional)" : "Economic allocation (optional)" });
       if (mode === "no-apu") await economic.getByText(es ? /No hay un APU publicado/ : /No published company APU/).waitFor();
       else {

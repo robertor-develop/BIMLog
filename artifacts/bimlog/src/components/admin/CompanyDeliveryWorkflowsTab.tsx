@@ -55,6 +55,7 @@ type Version = {
   definition: Definition;
   fingerprint?: string;
   createdAt: string;
+  reviewEligibility?: { eligible: boolean; code: string };
 };
 const starter = (type: string): Definition => ({
   schemaVersion: 1,
@@ -621,6 +622,13 @@ export function CompanyDeliveryWorkflowsTab({
             "Approval requires a different company PMO administrator from the creator and last editor. Economic allocation also requires that checker to hold Finance cost-approver authority.",
             "La aprobación requiere otro administrador PMO distinto del creador y último editor. Si hay asignación económica, ese revisor también necesita autorización financiera para aprobar costos.",
           )}</p>
+          {selected.state === "draft" && canManage && <p role="status">
+            {selected.reviewEligibility?.eligible === true
+              ? t("You may review this saved draft. Validate it first; approval rechecks the current policy and your authority.", "Puede revisar este borrador guardado. Valídelo primero; la aprobación verifica nuevamente la política y su autorización.")
+              : selected.reviewEligibility?.code
+                ? workflowApprovalError(selected.reviewEligibility.code, spanish)
+                : t("Reviewer eligibility is unavailable. Reload before approving; no approval is enabled without current eligibility.", "La elegibilidad del revisor no está disponible. Recargue antes de aprobar; no se habilita la aprobación sin elegibilidad vigente.")}
+          </p>}
           {versions.map((row) => (
             <div
               key={row.versionId}
@@ -642,6 +650,7 @@ export function CompanyDeliveryWorkflowsTab({
                     busy ||
                     !preview ||
                     draftDirty ||
+                    row.reviewEligibility?.eligible !== true ||
                     row.versionId !== selected.versionId
                   }
                   onClick={() =>
