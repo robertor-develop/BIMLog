@@ -42541,6 +42541,107 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "85c3ba845139d0d98bd5fcc82714cef089dd33adf58e472cf4e043ce878061f4"
+    },
+    {
+      "taskId": "BIMLOG_RUNTIME_REPAIRS_R11_R15",
+      "reviewedThroughCommit": "800493e73cc46deaa9a1d9d3b761af9f30891208",
+      "reviewedAt": "2026-09-26T07:05:00Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_source",
+          "run_local_validation",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Reproduced closed-work reassignment and stale approval after new evidence. Preserve history, consistent reads and scoped browser state; keep original resource scope separate from repairs."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserve human reopening and attributable decision history."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing five-build push and ten-build publication cadence remains enforced."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Isolated evidence is not deployed acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Repairs do not replace remaining Resource/Earnings scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing files and routes; no structural route or schema change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next, Native and installers remain frozen."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated report or document layout changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claims or implementation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records published baseline, repairs and unresolved acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks repair tests, next publication and unconsumed resource scope."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical append-only audit remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/bimlog/scripts/company-governance-browser-evidence.mjs",
+        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/coordination-routing-20260925/REPAIR_BLOCK_R11_R15.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e275be2f3657195be1d65785227c816bc5769e7e37d886e769233bdc7c4fe240"
     }
   ]
 }

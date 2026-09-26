@@ -100,6 +100,11 @@ await pool.query(`UPDATE company_delivery_workflow_roles SET user_id=$2 WHERE wo
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 const addedFileId = (await pool.query(`INSERT INTO files(project_id,file_name) VALUES($1,'shop-correction.pdf') RETURNING id`,[project.id])).rows[0].id;
+await assert.rejects(linkWorkItemDeliveryEvidence({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,phaseId:"for_record",taskId:"issue",documentCode:"DRAWING",fileId}),/already linked/);
+const afterDuplicateEvidence = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+assert.equal(afterDuplicateEvidence.revision,runtime.revision);
+assert.equal(afterDuplicateEvidence.events.length,runtime.events.length);
+assert.deepEqual(afterDuplicateEvidence.checks,runtime.checks,"Rejected duplicate evidence must not clear approval");
 await linkWorkItemDeliveryEvidence({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,phaseId:"for_record",taskId:"issue",documentCode:"DRAWING",fileId:addedFileId});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 assert.equal(runtime.checks.find(row => row.phaseId === "for_record")?.approvedAt,null,"Changed evidence must be reviewed again");
@@ -127,6 +132,11 @@ await assert.rejects(pool.query(`UPDATE company_delivery_workflow_work_items SET
 await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_work_item_events WHERE work_item_id=$1`,[workItemId]));
 await reopenWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,targetPhaseId:"preliminary",reason:"Rework requested"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId}); assert.equal(runtime.phaseIndex,1); assert.equal(runtime.status,"active"); assert.ok(runtime.events.length > priorEvents);
+await assignWorkItemDeliveryRole({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,role:"execute",userId:owner});
+runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+assert.equal(runtime.roles.find(row => row.role === "execute")?.userId,owner);
+await assignWorkItemDeliveryRole({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,role:"execute",userId:producer});
+runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 const revisionEventOffset = runtime.revision - runtime.events.length;
 await Promise.all([
   (async () => {

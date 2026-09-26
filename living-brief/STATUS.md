@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Runtime repair block R11–R15 — 2026-09-26
+
+- Verified production baseline is Build 60, source `800493e73cc46deaa9a1d9d3b761af9f30891208`, Replit deployment `f04f3322`, schema action NONE. External receipt `F:/BIMLog/TestProof/core-block12-builds56-60-release-20260926.md` supersedes the older publication-pending notes. Full authenticated acceptance is explicitly incomplete.
+- R11 reproduces and fixes role reassignment after completion without reopening. R12 reproduces and fixes approvals surviving newly linked evidence, while preserving history. R13 returns binding, roles, tasks, checks and audit from one repeatable-read snapshot. R14 isolates component state by account/project/Work Item, disables closed-work actions and explains review invalidation in English/Spanish. R15 verifies duplicate-evidence rollback, reopened-role assignment and concurrent snapshot consistency.
+- Disposable PostgreSQL lifecycle/negative/concurrency tests and 28 local Chrome actual-component scenarios pass. Local browser data is synthetic; these results do not close deployed multi-role acceptance. Exact-head full gate and normal push remain required at authoring.
+- This is a separate five-build repair block, not five completed Resource/Earnings builds. Original remaining scope is still 20 planned builds/four blocks, plus unresolved policy/runtime and full template-to-Operations and SharePoint tenant acceptance. Five repairs await the next ten-build publication boundary. Lens Next, Native, installers, credentials, production grants and schema remain unchanged.
+
 ## Core operating chain Builds 56–60 — 2026-09-26
 
 - Build 55 was gated and pushed at `fbaf7ea7f8d1e779211dd1b1cc51bf24c7578752`; external receipt `F:/BIMLog/TestProof/core-block11-builds51-55-push-20260926.md` supersedes its candidate notes. Production remains Build 50 until this release is verified.
