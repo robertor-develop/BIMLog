@@ -1,4 +1,13 @@
 export function workflowApprovalError(code: string, spanish: boolean): string {
+  const changes: Record<string, [string, string]> = {
+    WORKFLOW_POLICY_EDIT_PHASES_FORBIDDEN: ["fases, transiciones o reglas de reapertura", "phases, transitions or reopening rules"],
+    WORKFLOW_POLICY_EDIT_TASKS_ROLES_FORBIDDEN: ["tareas o roles", "tasks or roles"],
+    WORKFLOW_POLICY_CHANGE_APU_FORBIDDEN: ["la versión APU asociada", "the associated APU version"],
+    WORKFLOW_POLICY_EDIT_ALLOCATION_FORBIDDEN: ["la asignación económica", "economic allocation"],
+  };
+  if (changes[code]) return spanish
+    ? `La política de gobernanza publicada no permite cambiar ${changes[code][0]} respecto de la versión anterior. Corrija el borrador o solicite una revisión autorizada de la política. La versión publicada sigue vigente.`
+    : `The published Governance Policy does not allow changes to ${changes[code][1]} relative to the previous version. Correct the draft or request an authorized policy review. The published version remains in effect.`;
   if (code === "DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED") {
     return spanish
       ? "La persona que creó o editó esta versión no puede aprobarla. Otro administrador PMO de la empresa debe revisarla."

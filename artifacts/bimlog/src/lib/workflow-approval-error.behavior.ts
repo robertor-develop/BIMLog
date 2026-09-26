@@ -10,3 +10,7 @@ assert.match(workflowApprovalError("WORKFLOW_POLICY_DOCUMENT_REQUIRED", true), /
 assert.match(workflowApprovalError("WORKFLOW_POLICY_FINGERPRINT_MISMATCH", false), /PMO administrator/);
 assert.equal(workflowApprovalError("OTHER_ERROR", true), "OTHER_ERROR");
 console.log("Workflow approval guidance: pass");
+for (const action of ["EDIT_PHASES", "EDIT_TASKS_ROLES", "CHANGE_APU", "EDIT_ALLOCATION"]) {
+  assert.match(workflowApprovalError(`WORKFLOW_POLICY_${action}_FORBIDDEN`,true), /La versión publicada sigue vigente/);
+  assert.match(workflowApprovalError(`WORKFLOW_POLICY_${action}_FORBIDDEN`,false), /published version remains in effect/);
+}
