@@ -643,6 +643,25 @@ export function CompanyDeliveryWorkflowsTab({
                 v{row.version} · {row.state}
               </strong>
               <small>{row.fingerprint?.slice(0, 16) || "—"}</small>
+              {row.state !== "draft" && <details style={{ flexBasis:"100%", minWidth:0 }}>
+                <summary>{t("View saved definition", "Ver definición guardada")} · v{row.version}</summary>
+                <section aria-label={`${t("Saved workflow definition", "Definición guardada del flujo")} v${row.version}`} style={{ display:"grid",gap:8,padding:12 }}>
+                  <p>{t("Read-only version. This view does not change activated Work Items.", "Versión de solo lectura. Esta vista no modifica las partidas activadas.")}</p>
+                  <p>{t("Deliverable types", "Tipos de entregable")}: {row.definition.deliverableTypes.join(", ")}</p>
+                  <p>{t("Execution / Review / Approval roles", "Roles de ejecución / revisión / aprobación")}: {row.definition.roles.execute} / {row.definition.roles.review} / {row.definition.roles.approve}</p>
+                  {row.definition.phases.map(phase => <section key={phase.id}>
+                    <h3>{phase.order}. {phase.name} ({phase.code})</h3>
+                    <p>{t("QC required", "Control de calidad requerido")}: {phase.qcRequired ? t("Yes", "Sí") : t("No", "No")} · {t("Approval required", "Aprobación requerida")}: {phase.approvalRequired ? t("Yes", "Sí") : t("No", "No")}</p>
+                    <p>{t("Completion", "Finalización")}: {phase.completionRule === "all_tasks_reviewed" ? t("All tasks reviewed", "Todas las tareas revisadas") : t("All tasks complete", "Todas las tareas completas")}</p>
+                    <ol>{phase.tasks.map(task => <li key={task.id}>{task.order}. {task.name} ({task.code}) — {t("Required documents", "Documentos requeridos")}: {task.requiredDocuments.join(", ") || t("None", "Ninguno")}</li>)}</ol>
+                  </section>)}
+                  {row.definition.transitions.map(transition => <p key={`${transition.from}-${transition.to}`}>
+                    {row.definition.phases.find(phase => phase.id === transition.from)?.name} → {row.definition.phases.find(phase => phase.id === transition.to)?.name}: {transition.gate === "qc_approved" ? t("QC approved", "Control de calidad aprobado") : transition.gate === "approval_granted" ? t("Approval granted", "Aprobación otorgada") : t("Tasks complete", "Tareas completas")} · {t("Required documents", "Documentos requeridos")}: {transition.requiredDocuments.join(", ") || t("None", "Ninguno")}
+                  </p>)}
+                  <p>{t("Reopen authority", "Autoridad para reabrir")}: {row.definition.reopen.role === "approve" ? t("Approver", "Aprobador") : t("Reviewer", "Revisor")} · {t("Reason required", "Motivo obligatorio")}</p>
+                  <p style={{ overflowWrap:"anywhere" }}>SHA-256: {row.fingerprint || "—"}</p>
+                </section>
+              </details>}
               {canManage && row.state === "draft" && (
                 <button
                   type="button"

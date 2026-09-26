@@ -96,7 +96,12 @@ async function scenario(width, language, mode) {
   else {
     await page.getByLabel(es ? "Plantilla de empresa" : "Company template").selectOption("workflow-1");
     await page.getByRole("heading",{ name:/Sleeve Standard/ }).waitFor();
-    if (mode === "read-only") assert.equal(await page.getByText(es ? "Editar definición borrador" : "Edit draft definition").count(),0);
+    if (mode === "read-only") {
+      assert.equal(await page.getByText(es ? "Editar definición borrador" : "Edit draft definition").count(),0);
+      await page.getByText(es ? "Ver definición guardada · v1" : "View saved definition · v1",{exact:true}).click();
+      await page.getByRole("region",{name:es ? "Definición guardada del flujo v1" : "Saved workflow definition v1"}).getByText(/Prepare deliverable/).waitFor();
+      assert.equal(await page.getByRole("button",{name:es ? "Guardar borrador" : "Save draft"}).count(),0);
+    }
     else {
       await page.getByText(es ? /Otro administrador PMO de la empresa debe revisarla/ : /Another company PMO administrator must review it/).waitFor();
       assert.equal(await page.getByRole("button", { name:es ? "Aprobar borrador guardado y validado" : "Approve validated saved draft" }).isDisabled(),true);
