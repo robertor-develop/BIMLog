@@ -434,6 +434,53 @@ async function guardApprovedWorkChange(client: Queryable, context: Awaited<Retur
   if (force || checks?.approved_at || checks?.qc_approved_at || (progress?.approved ?? 0) > 0)
     assertWorkflowApprovedWorkChange(validateWorkflowGovernancePolicy(context.binding.policy_definition));
 }
+async function independentPhaseReviewer(client: Queryable, workItemId: string, phaseId: string, actorUserId: number) {
+  const maker = (await client.query(`SELECT 1 FROM company_delivery_workflow_steps
+    WHERE work_item_id=$1 AND phase_id=$2 AND completed_by_id=$3
+    UNION ALL SELECT 1 FROM company_delivery_workflow_evidence
+    WHERE work_item_id=$1 AND phase_id=$2 AND linked_by_id=$3 LIMIT 1`, [workItemId, phaseId, actorUserId])).rows[0];
+  if (maker) throw new FinancialControlError(403, "DELIVERY_WORKFLOW_INDEPENDENT_REVIEW_REQUIRED",
+    "A different eligible reviewer must approve work or evidence submitted by you.");
+}
+async function governanceDecision(client: Queryable, context: Awaited<ReturnType<typeof locked>>, actorUserId: number) {
+  if (context.binding.policy_definition == null) return null;
+  const code = async (check: () => Promise<unknown>) => {
+    try { await check(); return null; } catch (error) {
+      if (error instanceof FinancialControlError) return error.code;
+      throw error;
+    }
+  };
+  let progress: Awaited<ReturnType<typeof policyProgress>> = null;
+  const progressCode = await code(async () => { progress = await policyProgress(client, context); });
+  const approvalCode = progressCode ?? await code(async () => {
+    if (context.binding.status !== "active") throw new FinancialControlError(409,"DELIVERY_WORKFLOW_ALREADY_COMPLETE","Workflow complete.");
+    const currentProgress = await policyProgress(client, context);
+    if (currentProgress?.stages.length) {
+      if (!currentProgress.next) throw new FinancialControlError(409,"DELIVERY_WORKFLOW_ALREADY_APPROVED","Approvals complete.");
+      const actorRoles = await workflowGovernanceActorRoles(client, { actorUserId,workItemId:context.workItemId,
+        projectId:context.projectId,companyId:context.access.companyId });
+      requireWorkflowPolicyRole(validateWorkflowGovernancePolicy(context.binding.policy_definition),actorRoles,currentProgress.next.role,"approve");
+    } else {
+      if (!context.phase.approvalRequired) throw new FinancialControlError(409,"DELIVERY_WORKFLOW_APPROVAL_NOT_REQUIRED","No approval required.");
+      await requireRole(client,context.workItemId,"approve",actorUserId);
+    }
+    await allStepsComplete(client,context.workItemId,context.phase);
+    await independentPhaseReviewer(client,context.workItemId,context.phase.id,actorUserId);
+    await requiredEvidence(client,context.workItemId,context.phase);
+    const checks = await phaseChecks(client,context.workItemId,context.phase.id);
+    if ((context.phase.qcRequired || context.phase.completionRule === "all_tasks_reviewed") && !checks?.qc_approved_at)
+      throw new FinancialControlError(409,"DELIVERY_WORKFLOW_QC_REQUIRED","QC required.");
+    if (checks?.approved_at) throw new FinancialControlError(409,"DELIVERY_WORKFLOW_ALREADY_APPROVED","Already approved.");
+  });
+  return { progress, progressCode, approvalCode,
+    currentChangeCode: await code(() => guardApprovedWorkChange(client,context)),
+    reopenCode: await code(() => guardApprovedWorkChange(client,context,true)),
+    executeCode: await code(() => requireRole(client,context.workItemId,"execute",actorUserId)),
+    reviewCode: await code(async () => { await requireRole(client,context.workItemId,"review",actorUserId);
+      await independentPhaseReviewer(client,context.workItemId,context.phase.id,actorUserId); }),
+    advanceRoleCode: await code(() => requireRole(client,context.workItemId,"approve",actorUserId)),
+  };
+}
 
 async function readWorkItemDeliveryWorkflow(input: {
   actorUserId: number;
@@ -486,6 +533,8 @@ async function readWorkItemDeliveryWorkflow(input: {
       `SELECT id,action,phase_id "phaseId",task_id "taskId",actor_id "actorId",before_state "beforeState",after_state "afterState",reason,evidence,created_at "createdAt" FROM company_delivery_workflow_work_item_events WHERE work_item_id=$1 ORDER BY created_at,id`,
       [workItemId],
     );
+  const decision = await governanceDecision(client, { access,binding,definition,
+    phase:definition.phases[Number(binding.phase_index)-1],projectId,workItemId },input.actorUserId);
   return {
     workItemId,
     projectId,
@@ -503,6 +552,7 @@ async function readWorkItemDeliveryWorkflow(input: {
     selection: binding.selection,
     governancePolicy: governance ? { code:binding.policy_code,version:Number(binding.policy_version),
       versionId:binding.policy_version_id,fingerprint:binding.policy_fingerprint,definition:governance } : null,
+    governanceDecision: decision,
     status: binding.status,
     phaseIndex: Number(binding.phase_index),
     revision: Number(binding.revision),
@@ -796,6 +846,8 @@ export function approveWorkItemDeliveryPhase(input: {
       );
     const policyApprovals = input.kind === "approval" ? await policyProgress(client, context) : null;
     const progress = policyApprovals?.stages.length ? policyApprovals : null;
+    if (input.kind === "approval" && !progress && !phase.approvalRequired)
+      throw new FinancialControlError(409,"DELIVERY_WORKFLOW_APPROVAL_NOT_REQUIRED","This phase does not require that approval.");
     if (progress) {
       if (!progress.next) throw new FinancialControlError(409, "DELIVERY_WORKFLOW_ALREADY_APPROVED", "This phase already has all policy approvals.");
       const actorRoles = await workflowGovernanceActorRoles(client, { actorUserId: input.actorUserId,
@@ -804,14 +856,7 @@ export function approveWorkItemDeliveryPhase(input: {
         progress.next.role, "approve");
     } else await requireRole(client, context.workItemId, input.kind === "qc" ? "review" : "approve", input.actorUserId);
     await allStepsComplete(client, context.workItemId, phase);
-    const selfCompleted = (await client.query(`SELECT 1 FROM company_delivery_workflow_steps
-      WHERE work_item_id=$1 AND phase_id=$2 AND completed_by_id=$3
-      UNION ALL SELECT 1 FROM company_delivery_workflow_evidence
-      WHERE work_item_id=$1 AND phase_id=$2 AND linked_by_id=$3 LIMIT 1`,
-      [context.workItemId,phase.id,input.actorUserId])).rows[0];
-    if (selfCompleted)
-      throw new FinancialControlError(403,"DELIVERY_WORKFLOW_INDEPENDENT_REVIEW_REQUIRED",
-        "A different assigned reviewer must approve work completed by you.");
+    await independentPhaseReviewer(client,context.workItemId,phase.id,input.actorUserId);
     await requiredEvidence(client, context.workItemId, phase);
     const before = await phaseChecks(client, context.workItemId, phase.id);
     if (

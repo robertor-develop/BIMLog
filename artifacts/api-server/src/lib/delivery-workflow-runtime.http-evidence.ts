@@ -56,6 +56,7 @@ catch(error) { await client.query("ROLLBACK"); throw error; } finally { client.r
 let runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 assert.equal(runtime.versionId,versionId); assert.equal(runtime.selection,"single_company"); assert.equal(runtime.phaseIndex,1);
 assert.equal(runtime.governancePolicy?.code,"SHOP_POLICY"); assert.equal(runtime.governancePolicy?.fingerprint,policyFingerprint);
+assert.equal(runtime.governanceDecision?.approvalCode,"DELIVERY_WORKFLOW_TASKS_INCOMPLETE");
 await assert.rejects(pool.query(`UPDATE company_delivery_workflow_work_items SET policy_code='TAMPERED' WHERE work_item_id=$1`,[workItemId]));
 await pool.query(`UPDATE company_workflow_governance_versions SET state='retired',retired_at=now(),retired_by_id=$2 WHERE id=$1`,[policyVersionId,owner]);
 assert.equal((await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId})).governancePolicy?.fingerprint,policyFingerprint);
@@ -85,6 +86,7 @@ await pool.query(`UPDATE project_members SET status='active' WHERE project_id=$1
 assert.equal((await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId})).revision,runtime.revision);
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"qc"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+assert.equal(runtime.governanceDecision?.approvalCode,null,"Server presentation agrees with executable approval");
 await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision}),
   (error:unknown) => (error as {code?:string}).code === "WORKFLOW_POLICY_APPROVAL_REQUIRED");
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"});
@@ -184,6 +186,7 @@ for (const [allowed, requiresNewVersion, code] of [[false,false,"WORKFLOW_POLICY
   await pool.query(`INSERT INTO company_delivery_workflow_roles(work_item_id,role,user_id,assigned_by_id)
     VALUES($1,'approve',$2,$2)`,[deniedItem,owner]);
   const before = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId:deniedItem});
+  assert.equal(before.governanceDecision?.reopenCode,code,"Read decision matches mutation denial");
   await assert.rejects(reopenWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId:deniedItem,
     expectedRevision:before.revision,targetPhaseId:"preliminary",reason:"TEST forbidden reopening"}),
     (error:unknown) => (error as {code?:string}).code === code);

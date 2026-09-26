@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useAuthStore } from "@/store/auth";
+import { governanceDecisionMessage } from "@/lib/workflow-governance-decision-message";
 
 type Translate = (en: string, es: string) => string;
 type Runtime = {
@@ -13,6 +14,11 @@ type Runtime = {
   revision: number;
   canManage: boolean;
   fingerprint: string;
+  governanceDecision?: null | {
+    progress: null | { approved:number;stages:Array<{role:string;level:number;action:string}>;next:null|{role:string;level:number;action:string};complete:boolean };
+    progressCode:string|null;approvalCode:string|null;currentChangeCode:string|null;reopenCode:string|null;
+    executeCode:string|null;reviewCode:string|null;advanceRoleCode:string|null;
+  };
   governancePolicy: null | {
     code: string;
     version: number;
@@ -129,9 +135,13 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
   const role = (name: string) =>
     runtime?.roles.find((entry) => entry.role === name)?.userId;
   const actor = Number(user?.id);
-  const canExecute = actor === role("execute");
-  const canReview = actor === role("review");
-  const canApprove = actor === role("approve");
+  const decision = runtime?.governanceDecision;
+  const canExecute = actor === role("execute") && (!decision || decision.executeCode === null);
+  const canReview = actor === role("review") && (!decision || decision.reviewCode === null);
+  const canApprove = decision ? decision.approvalCode === null : actor === role("approve");
+  const canAdvance = actor === role("approve") && (!decision || (decision.advanceRoleCode === null &&
+    decision.progressCode === null && decision.progress?.complete === true));
+  const changeBlocked = Boolean(decision?.currentChangeCode);
   const completedOwnWork = runtime?.steps.some(step => step.phaseId === current?.id && step.status === "complete" && Number(step.completedById) === actor) === true;
   const canReopen =
     runtime?.definition && actor === role(runtime.definition.reopen.role);
@@ -199,6 +209,13 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                     {" · "}{tt("Immutable snapshot", "Instantánea inmutable")}</span>
                 ) : <span>{tt("BIMLog defaults; no company policy was bound", "Valores BIMLog; no se vinculó una política de empresa")}</span>}
               </div>
+              {decision && <div role="status" style={{overflowWrap:"anywhere"}}>
+                {decision.progress && <p>{tt("Policy approvals", "Aprobaciones de política")}: {decision.progress.approved}/{decision.progress.stages.length}
+                  {decision.progress.next && <> · {tt("Next role", "Próximo rol")}: {decision.progress.next.role} ({decision.progress.next.level})</>}</p>}
+                {decision.approvalCode && <p>{governanceDecisionMessage(decision.approvalCode,tt)}</p>}
+                {decision.currentChangeCode && <p>{governanceDecisionMessage(decision.currentChangeCode,tt)}</p>}
+                {decision.reopenCode && decision.reopenCode !== decision.currentChangeCode && <p>{governanceDecisionMessage(decision.reopenCode,tt)}</p>}
+              </div>}
               <p>
                 {runtime.definition.phases
                   .map((phase, index) => `${index + 1}. ${phase.name}`)
@@ -214,7 +231,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                     <label key={name}>
                       {name === "execute" ? tt("Execute", "Ejecutar") : name === "review" ? tt("Review", "Revisar") : tt("Approve", "Aprobar")}{" "}
                       <select
-                        disabled={busy || loading || runtime.status !== "active"}
+                        disabled={busy || loading || changeBlocked || runtime.status !== "active"}
                         value={role(name) ?? ""}
                         onChange={(event) =>
                           void act(
@@ -303,7 +320,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                                 onChange={(event) =>
                                   setFileId(event.target.value)
                                 }
-                                disabled={busy || loading || !canExecute || runtime.status !== "active"}
+                                disabled={busy || loading || changeBlocked || !canExecute || runtime.status !== "active"}
                               >
                                 <option value="">
                                   {tt(
@@ -319,7 +336,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                               </select>
                               <button
                                 type="button"
-                                disabled={!fileId || busy || loading || !canExecute || runtime.status !== "active"}
+                                disabled={!fileId || busy || loading || changeBlocked || !canExecute || runtime.status !== "active"}
                                 onClick={() =>
                                   void act(
                                     "/evidence",
@@ -395,7 +412,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                               <button
                                 key={task.id}
                                 type="button"
-                                disabled={busy || !checkpointReason.trim()}
+                                disabled={busy || loading || changeBlocked || !checkpointReason.trim()}
                                 onClick={() =>
                                   void act(
                                     `/steps/${current.id}/${task.id}`,
@@ -430,7 +447,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                       <select
                         value={fileId}
                         onChange={(event) => setFileId(event.target.value)}
-                        disabled={busy || loading || !canExecute || runtime.status !== "active"}
+                        disabled={busy || loading || changeBlocked || !canExecute || runtime.status !== "active"}
                       >
                         <option value="">
                           {tt(
@@ -446,7 +463,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                       </select>
                       <button
                         type="button"
-                        disabled={!fileId || busy || loading || !canExecute || runtime.status !== "active"}
+                        disabled={!fileId || busy || loading || changeBlocked || !canExecute || runtime.status !== "active"}
                         onClick={() =>
                           void act(
                             "/evidence",
@@ -498,7 +515,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                         {tt("Approve QC", "Aprobar control de calidad")}
                       </button>
                     )}
-                    {current.approvalRequired && (
+                    {(current.approvalRequired || Boolean(decision?.progress?.stages.length)) && (
                       <button
                         type="button"
                         disabled={busy || loading || completedOwnWork || !canApprove || !!check?.approvedAt || runtime.status !== "active"}
@@ -507,17 +524,17 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                             "/approval",
                             "POST",
                             {},
-                            tt("Phase approved.", "Fase aprobada."),
+                            tt("Approval recorded.", "Aprobación registrada."),
                           )
                         }
                       >
-                        {tt("Approve phase", "Aprobar fase")}
+                        {decision?.progress?.next ? tt("Record next policy approval", "Registrar próxima aprobación de política") : tt("Approve phase", "Aprobar fase")}
                       </button>
                     )}
                     <button
                       type="button"
                       disabled={
-                        busy || !canApprove || runtime.status !== "active"
+                        busy || loading || !canAdvance || runtime.status !== "active"
                       }
                       onClick={() =>
                         void act(
@@ -571,7 +588,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                   />
                   <button
                     type="button"
-                    disabled={busy || !reopenPhase || !reopenReason.trim()}
+                    disabled={busy || loading || Boolean(decision?.reopenCode) || !reopenPhase || !reopenReason.trim()}
                     onClick={() =>
                       void act(
                         "/reopen",

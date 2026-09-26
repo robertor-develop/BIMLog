@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation C010 decision-presentation candidate — 2026-09-26
+
+- C006730aee9a, C0077830804b, C008dae0b181 and C0093bb5a0ba are local bounded commits. C010 exposes server-side policy progress/denial codes in the existing Work Item panel, enables the next eligible hierarchical approval even without the old phase flag, and explains role, economic-baseline and change restrictions in English/Spanish. The Governance screen states the exact enforced and still-unconnected action categories. No broad completed-governance claim.
+- Real PostgreSQL runtime verifies read-decision/mutation agreement. Actual-component Chrome fixture passed two sequential approvals, refresh, wrong-role disable, change-lock disable, failed-read removal of controls, English/Spanish and narrow-container inspection. Screenshot capture stalled then recovered; no fake evidence was substituted. The fixture uses synthetic transport and is not production acceptance.
+- The exact-head release gate now includes real governance PostgreSQL regression. Five bounded source scopes are prepared; full clean release, push, C010 publication and authenticated live smoke are still required. Production remains73a5a7d7. Seven unpublished scopes including C004/C005; no native Lens, installer, production-data or provider-permission changes.
+
 ## Consolidation C009 approved-work guard candidate — 2026-09-26
 
 - C008 committeddae0b181. C009 checks the frozen approved-work change rule before reopening or changing approved checkpoint/evidence/role state. Forbidden changes and changes requiring a new version reject without rewriting the active snapshot. Allowed in-place changes retain existing reapproval behavior and immutable history. Role changes invalidate current checks; unchanged-role submissions reject rather than resetting approval.

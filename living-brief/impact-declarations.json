@@ -44352,6 +44352,113 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "387bd6b239384bd3290369c139a55aa9434ba334b4a4d02b9c16f5871574cd14"
+    },
+    {
+      "taskId": "consolidation-c010-governance-decision-presentation",
+      "reviewedThroughCommit": "3bb5a0bab5aa9af2f5f6a5f63462e5a9266f0d45",
+      "reviewedAt": "2026-09-26T21:12:24Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "chrome_component_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Operations must render the same server policy decision used by mutation checks; source/fixture results are not deployed acceptance."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped UI, immutable policy and truthful acceptance rules without changing this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped UI, immutable policy and truthful acceptance rules without changing this authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped UI, immutable policy and truthful acceptance rules without changing this authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped UI, immutable policy and truthful acceptance rules without changing this authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Generated inventory is unchanged: decision data extends the existing runtime route and UI; no new API, schema or platform module."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No native Lens or installer changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped UI, immutable policy and truthful acceptance rules without changing this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped UI, immutable policy and truthful acceptance rules without changing this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records five bounded local scopes and exact acceptance limitations."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Publication and live role-based acceptance remain pending."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped UI, immutable policy and truthful acceptance rules without changing this authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/bimlog/governance-runtime-harness.html",
+        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
+        "artifacts/bimlog/src/governance-runtime-harness.tsx",
+        "artifacts/bimlog/src/lib/workflow-governance-decision-message.ts",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C010.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/local-release-gate.mjs",
+        "scripts/test-governance-runtime.mjs",
+        "scripts/test-local-release-gate.mjs"
+      ],
+      "reviewedChangeSha256": "ad034350f3fd20670bc8e56fc1144acc15e257162bebb0a1c345a5eb526e3831"
     }
   ]
 }
