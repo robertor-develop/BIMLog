@@ -68,6 +68,16 @@ assert.match(pricedTask, /disabled=""[^>]*>.*Add direct task assignment/s);
 const warning = render({ evaluation: { ...evaluation, people: [{ ...evaluation.people[0], warnings: ["CAPACITY_EXCEEDED", "NO_VERIFIED_CATEGORY_EVIDENCE:MEP coordination"] }] } });
 assert.match(warning, /Capacity exceeded/);
 assert.match(warning, /No verified evidence for MEP coordination/);
+const datedWarnings={...evaluation,people:[{...evaluation.people[0],warnings:["ASSIGNMENT_NO_AVAILABLE_DAYS","ASSIGNMENT_WINDOW_CAPACITY_EXCEEDED"]}]};
+const datedEnglish=render({evaluation:datedWarnings});
+assert.match(datedEnglish,/no working days available/);assert.match(datedEnglish,/within its own dates/);
+const datedSpanish=render({lang:"es",evaluation:datedWarnings});
+assert.match(datedSpanish,/no tiene días laborables disponibles/);assert.match(datedSpanish,/entre sus propias fechas/);
+assert.doesNotMatch(datedSpanish,/no working days available|within its own dates/);
+for(const invalid of [{...profile,timezone:"Unknown/Zone"},{...profile,workingDays:[1]},{...profile,workingDays:[1.5]}]) {
+  const invalidProfile=render({profileDrafts:{5:invalid}});
+  assert.match(invalidProfile,/<button disabled="">[^]*?Save my availability<\/button>/);
+}
 
 for (const contract of ["/resource-planning", "verifiedExperience", "expectedTaskVersion", "expectedAssignmentVersion", "crypto.randomUUID()", "applicationConfirmed", "Review & apply", "CAPACITY_PROFILE_REQUIRED", "No empty or guessed plan was substituted", "@media(max-width:390px)", "PrintPdfButton"]) assert.match(`${source}\n${fs.readFileSync(path.resolve(here, "../../pages/TeamPerformanceWorkspace.tsx"), "utf8")}`, new RegExp(contract.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 assert.doesNotMatch(source, /window\.print|window\.confirm|mock data|defaultProfile/);

@@ -70,7 +70,12 @@ export function validateResourcePlanningWorkspace(value: unknown): ResourcePlann
 }
 
 const blankProfile = (): CapacityProfile => ({ weeklyCapacityHours: Number.NaN, timezone: "", workingDays: [], leave: [], internalHourlyRate: null, billingHourlyRate: null });
-const completeProfile = (value: CapacityProfile | undefined) => Boolean(value && finite(value.weeklyCapacityHours) && value.weeklyCapacityHours > 0 && value.timezone.trim() && value.workingDays.length);
+const completeProfile = (value: CapacityProfile | undefined) => {
+  if(!value || !finite(value.weeklyCapacityHours) || value.weeklyCapacityHours < 1 || !value.workingDays.length
+    || value.workingDays.some(day=>!Number.isInteger(day)||day<0||day>6)
+    || value.weeklyCapacityHours > new Set(value.workingDays).size*24 || !value.timezone.trim()) return false;
+  try { new Intl.DateTimeFormat("en", {timeZone:value.timezone.trim()}); return true; } catch { return false; }
+};
 const dateStamp = (offset = 0) => { const date = new Date(); date.setUTCDate(date.getUTCDate() + offset); return date.toISOString().slice(0, 10); };
 const csvCell = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
 
@@ -89,6 +94,10 @@ export function ResourceSchedulingWorkspaceView(props: ViewProps) {
   const tt = (en: string, es: string) => lang === "es" ? es : en;
   const warning = (code: string) => code === "CAPACITY_EXCEEDED"
     ? tt("Capacity exceeded", "Capacidad excedida")
+    : code === "ASSIGNMENT_NO_AVAILABLE_DAYS"
+      ? tt("An assignment has no working days available; check its dates and leave.", "Una asignación no tiene días laborables disponibles; revise sus fechas y ausencias.")
+    : code === "ASSIGNMENT_WINDOW_CAPACITY_EXCEEDED"
+      ? tt("An assignment exceeds capacity within its own dates, even if the scenario has spare capacity.", "Una asignación excede la capacidad entre sus propias fechas, aunque el escenario tenga capacidad libre.")
     : code === "CAPACITY_PROFILE_REQUIRED"
       ? tt("Capacity profile required", "Se requiere perfil de capacidad")
       : code.startsWith("NO_VERIFIED_CATEGORY_EVIDENCE:")
