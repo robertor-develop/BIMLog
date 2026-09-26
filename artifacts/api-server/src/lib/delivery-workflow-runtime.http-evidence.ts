@@ -127,5 +127,21 @@ await assert.rejects(pool.query(`UPDATE company_delivery_workflow_work_items SET
 await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_work_item_events WHERE work_item_id=$1`,[workItemId]));
 await reopenWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,targetPhaseId:"preliminary",reason:"Rework requested"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId}); assert.equal(runtime.phaseIndex,1); assert.equal(runtime.status,"active"); assert.ok(runtime.events.length > priorEvents);
+const revisionEventOffset = runtime.revision - runtime.events.length;
+await Promise.all([
+  (async () => {
+    for (let index=0; index<8; index++) {
+      const current = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+      await setWorkItemDeliveryStep({actorUserId:index % 2 === 0 ? producer : owner,projectId:project.id,workItemId,expectedRevision:current.revision,
+        phaseId:"preliminary",taskId:"prepare",status:index % 2 === 0 ? "complete" : "pending",reason:"Synthetic concurrency correction"});
+    }
+  })(),
+  (async () => {
+    for (let index=0; index<24; index++) {
+      const observed = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+      assert.equal(observed.revision - observed.events.length,revisionEventOffset,"Binding and history must come from one database snapshot");
+    }
+  })(),
+]);
 console.log("Delivery Workflow isolated runtime: company selection, role and document gates, QC, approval, completion, immutable version, reopening, audit PASS");
 await pool.end();

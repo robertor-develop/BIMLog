@@ -385,11 +385,30 @@ export async function getWorkItemDeliveryWorkflow(input: {
   workItemId: unknown;
 }) {
   await ensureDeliveryWorkflowRuntimeSchema();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
+    const result = await readWorkItemDeliveryWorkflow(input, client);
+    await client.query("COMMIT");
+    return result;
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
+
+async function readWorkItemDeliveryWorkflow(input: {
+  actorUserId: number;
+  projectId: unknown;
+  workItemId: unknown;
+}, client: Queryable) {
   const projectId = int(input.projectId, "projectId"),
     workItemId = identifier(input.workItemId, "workItemId");
-  const access = await jobOperationScope(input.actorUserId, projectId, pool);
+  const access = await jobOperationScope(input.actorUserId, projectId, client);
   const binding = (
-    await pool.query(
+    await client.query(
       `SELECT b.* FROM company_delivery_workflow_work_items b JOIN job_activation_work_items w ON w.id=b.work_item_id
     WHERE b.work_item_id=$1 AND b.project_id=$2 AND b.company_id=$3 AND w.project_id=$2`,
       [workItemId, projectId, access.companyId],
@@ -411,28 +430,26 @@ export async function getWorkItemDeliveryWorkflow(input: {
   const governance = binding.policy_definition == null ? null : validateWorkflowGovernancePolicy(binding.policy_definition);
   if (governance && workflowGovernancePolicyFingerprint(governance) !== binding.policy_fingerprint)
     throw new FinancialControlError(409,"WORKFLOW_POLICY_SNAPSHOT_MISMATCH","The activated Governance Policy snapshot failed integrity verification.");
-  const [steps, roles, evidence, checks, events] = await Promise.all([
-    pool.query(
+  const steps = await client.query(
       `SELECT phase_id "phaseId",task_id "taskId",status,revision,completed_by_id "completedById",completed_at "completedAt" FROM company_delivery_workflow_steps WHERE work_item_id=$1 ORDER BY phase_id,task_id`,
       [workItemId],
-    ),
-    pool.query(
+    );
+  const roles = await client.query(
       `SELECT role,user_id "userId",assigned_at "assignedAt" FROM company_delivery_workflow_roles WHERE work_item_id=$1 ORDER BY role`,
       [workItemId],
-    ),
-    pool.query(
+    );
+  const evidence = await client.query(
       `SELECT id,phase_id "phaseId",task_id "taskId",document_code "documentCode",file_id "fileId",linked_at "linkedAt" FROM company_delivery_workflow_evidence WHERE work_item_id=$1 ORDER BY linked_at,id`,
       [workItemId],
-    ),
-    pool.query(
+    );
+  const checks = await client.query(
       `SELECT phase_id "phaseId",qc_approved_by_id "qcApprovedById",qc_approved_at "qcApprovedAt",approved_by_id "approvedById",approved_at "approvedAt" FROM company_delivery_workflow_phase_checks WHERE work_item_id=$1`,
       [workItemId],
-    ),
-    pool.query(
+    );
+  const events = await client.query(
       `SELECT id,action,phase_id "phaseId",task_id "taskId",actor_id "actorId",before_state "beforeState",after_state "afterState",reason,evidence,created_at "createdAt" FROM company_delivery_workflow_work_item_events WHERE work_item_id=$1 ORDER BY created_at,id`,
       [workItemId],
-    ),
-  ]);
+    );
   return {
     workItemId,
     projectId,
