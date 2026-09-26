@@ -143,6 +143,7 @@ export function CompanyDeliveryWorkflowsTab({
   const [history, setHistory] = useState<any[]>([]);
   const [draft, setDraft] = useState<Definition | null>(null);
   const draftRef = useRef<Definition | null>(null);
+  const previewRequest = useRef(0);
   draftRef.current = draft;
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
@@ -180,6 +181,7 @@ export function CompanyDeliveryWorkflowsTab({
   );
   const load = useCallback(
     async (id?: string) => {
+      setPreview(null);
       const [listing, options] = await Promise.all([
         request("/company/delivery-workflows"),
         request("/company/delivery-workflows/options"),
@@ -224,6 +226,12 @@ export function CompanyDeliveryWorkflowsTab({
       .catch((cause) => setError(String(cause)))
       .finally(() => setLoading(false));
   }, [load]);
+  useEffect(() => {
+    previewRequest.current += 1;
+    setPreview(null);
+    setBusy(false);
+    return () => { previewRequest.current += 1; };
+  }, [selectedId, token, spanish]);
   const selected = versions.find((row) => row.state === "draft") ?? versions[0];
   const draftDirty =
     !!draft &&
@@ -365,7 +373,8 @@ export function CompanyDeliveryWorkflowsTab({
     }
   };
   const previewDraft = async () => {
-    if (!draft) return;
+    if (!draft || busy) return;
+    const requestId = ++previewRequest.current;
     const submitted = JSON.stringify(draft);
     setBusy(true);
     setError("");
@@ -375,11 +384,11 @@ export function CompanyDeliveryWorkflowsTab({
         method: "POST",
         body: JSON.stringify({ definition: draft, ...(selected ? { templateId:selected.templateId, versionId:selected.versionId } : {}) }),
       });
-      if (JSON.stringify(draftRef.current) === submitted) setPreview(result);
+      if (requestId === previewRequest.current && JSON.stringify(draftRef.current) === submitted) setPreview(result);
     } catch (cause) {
-      setError(String(cause));
+      if (requestId === previewRequest.current && JSON.stringify(draftRef.current) === submitted) setError(String(cause));
     } finally {
-      setBusy(false);
+      if (requestId === previewRequest.current) setBusy(false);
     }
   };
   const newPhase = () => {
