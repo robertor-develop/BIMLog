@@ -22,6 +22,7 @@ import {
 import { effectiveCommercialAccessForUser } from "../lib/commercial-entitlement";
 import { waitForProjectInvitationMigration } from "../lib/project-invitation-migration";
 import { resolveAccessProfile } from "../lib/access-profile";
+import { assertNewCompanyName } from "../lib/company-identity";
 import {
   invitationEmailLockKey,
   normalizeInvitationEmail,
@@ -88,18 +89,16 @@ router.post("/auth/register", async (req, res) => {
             .from(companiesTable)
             .where(and(eq(companiesTable.id, boundCompanyId), isNull(companiesTable.retiredIntoCompanyId)))
             .limit(1)
-        : await tx
-            .select()
-            .from(companiesTable)
-            .where(
-              sql`lower(trim(${companiesTable.name})) = lower(trim(${body.companyName}))`,
-            )
-            .limit(1);
+        : [];
       if (!company.length) {
         if (pending.length)
           throw new Error(
             "The company assigned by this invitation no longer exists.",
           );
+        await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bimlog:company-identity'))`);
+        // A name match is never proof that a registrant belongs to that tenant.
+        const existingNames = await tx.select({ name: companiesTable.name }).from(companiesTable);
+        assertNewCompanyName(body.companyName, existingNames.map(row => row.name));
         const [createdCompany] = await tx
           .insert(companiesTable)
           .values({ name: body.companyName.trim() })
@@ -188,9 +187,10 @@ router.post("/auth/register", async (req, res) => {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Registration failed";
+    const companyConflict = message === "COMPANY_JOIN_REQUIRED";
     res
-      .status(error instanceof RegistrationConflictError ? 409 : 400)
-      .json({ error: message });
+      .status(error instanceof RegistrationConflictError || companyConflict ? 409 : 400)
+      .json(companyConflict ? { code: "COMPANY_JOIN_REQUIRED", error: "Use your company invitation or contact the administrator to resolve company identity." } : { error: message });
   }
 });
 

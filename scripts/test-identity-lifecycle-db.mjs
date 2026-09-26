@@ -12,6 +12,9 @@ try {
   await client.query(migration);
   await client.query(migration);
   await client.query("INSERT INTO companies(id,name) VALUES(31,'TEST OWNER'),(35,'TEST ALIAS')");
+  for (const name of ['test owner.', ' TEST OWNER ', 'ＴＥＳＴ ＯＷＮＥＲ', 'TEST-OWNER'])
+    await assert.rejects(client.query('INSERT INTO companies(id,name) VALUES(99,$1)',[name]), e=>e.code==='23505');
+  await assert.rejects(client.query("UPDATE companies SET name='test owner.' WHERE id=35"),e=>e.code==='23505');
   await assert.rejects(client.query('UPDATE companies SET retired_into_company_id=35,retired_at=now() WHERE id=35'), e=>e.code==='23514');
   await assert.rejects(client.query('UPDATE companies SET retired_into_company_id=31 WHERE id=35'), e=>e.code==='23514');
   await assert.rejects(client.query('UPDATE companies SET retired_into_company_id=999,retired_at=now() WHERE id=35'), e=>e.code==='23503');

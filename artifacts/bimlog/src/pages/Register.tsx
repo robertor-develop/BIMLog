@@ -33,7 +33,12 @@ export function Register() {
         login(data.token, data.user);
         setLocation("/dashboard");
       },
-      onError: () => setError(t("auth.registerFailed")),
+      onError: (error) => {
+        const detail = error as { data?: { code?: string }; message?: string };
+        setError(detail.data?.code === "COMPANY_JOIN_REQUIRED" || detail.message?.includes("COMPANY_JOIN_REQUIRED")
+          ? tt("Use your company invitation. If it does not open, contact your company administrator; do not create another company.", "Use la invitación de su empresa. Si no abre, contacte al administrador; no cree otra empresa.")
+          : t("auth.registerFailed"));
+      },
     },
   });
 
