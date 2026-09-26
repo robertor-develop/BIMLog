@@ -255,7 +255,11 @@ async function requireRole(
 ) {
   const row = (
     await client.query(
-      `SELECT user_id FROM company_delivery_workflow_roles WHERE work_item_id=$1 AND role=$2`,
+      `SELECT r.user_id FROM company_delivery_workflow_roles r
+       JOIN company_delivery_workflow_work_items b ON b.work_item_id=r.work_item_id
+       JOIN project_members pm ON pm.project_id=b.project_id AND pm.user_id=r.user_id AND pm.status='active'
+       JOIN users u ON u.id=r.user_id AND u.company_id=b.company_id
+       WHERE r.work_item_id=$1 AND r.role=$2`,
       [workItemId, role],
     )
   ).rows[0];

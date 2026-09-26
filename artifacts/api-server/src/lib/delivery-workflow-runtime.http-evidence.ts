@@ -76,6 +76,11 @@ await assert.rejects(approveWorkItemDeliveryPhase({actorUserId:producer,projectI
   (error:unknown) => (error as {code?:string}).code === "DELIVERY_WORKFLOW_INDEPENDENT_REVIEW_REQUIRED");
 assert.equal((await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId})).revision,runtime.revision);
 await pool.query(`UPDATE company_delivery_workflow_roles SET user_id=$2 WHERE work_item_id=$1 AND role='review'`,[workItemId,owner]);
+// Even a Super Administrator must retain active project membership for an assigned execution role.
+await pool.query(`UPDATE project_members SET status='inactive' WHERE project_id=$1 AND user_id=$2`,[project.id,owner]);
+await assert.rejects(approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"qc"}),/assigned review role/);
+await pool.query(`UPDATE project_members SET status='active' WHERE project_id=$1 AND user_id=$2`,[project.id,owner]);
+assert.equal((await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId})).revision,runtime.revision);
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"qc"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 await advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision});
