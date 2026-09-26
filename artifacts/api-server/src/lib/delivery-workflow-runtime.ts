@@ -683,6 +683,11 @@ export function linkWorkItemDeliveryEvidence(input: {
         "DELIVERY_WORKFLOW_EVIDENCE_EXISTS",
         "This file is already linked to that requirement.",
       );
+    const previousChecks = await phaseChecks(client, context.workItemId, phaseId);
+    await client.query(
+      `UPDATE company_delivery_workflow_phase_checks SET qc_approved_by_id=NULL,qc_approved_at=NULL,approved_by_id=NULL,approved_at=NULL WHERE work_item_id=$1 AND phase_id=$2`,
+      [context.workItemId, phaseId],
+    );
     await runtimeEvent(client, {
       workItemId: context.workItemId,
       projectId: context.projectId,
@@ -690,7 +695,10 @@ export function linkWorkItemDeliveryEvidence(input: {
       action: "evidence_linked",
       phaseId,
       taskId,
-      evidence: { fileId, documentCode },
+      evidence: { fileId, documentCode, invalidatedChecks: {
+        qcApprovedById: previousChecks?.qc_approved_by_id ?? null,
+        approvedById: previousChecks?.approved_by_id ?? null,
+      } },
     });
     return {
       workItemId: context.workItemId,
