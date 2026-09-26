@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import pg from "pg";
+import {createRequire} from "node:module";
+const pg=createRequire(import.meta.url)("pg");
 import {reconcileCompanyBindings} from "./company-identity-reconciliation";
 const c=new pg.Client({host:"127.0.0.1",port:55469,user:"postgres",database:"postgres",connectionTimeoutMillis:3000});
 await c.connect();

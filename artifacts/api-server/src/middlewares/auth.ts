@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { db } from "@workspace/db";
-import { projectMembersTable, usersTable } from "@workspace/db/schema";
+import { projectMembersTable, usersTable, companiesTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getRolesByPermission } from "./config-validator";
 
@@ -51,7 +51,7 @@ export function verifyToken(token: string): AuthPayload {
   return jwt.verify(token, JWT_SECRET) as AuthPayload;
 }
 
-export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+export async function authMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({ error: "Authentication required" });
@@ -59,12 +59,31 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
   }
 
   const token = authHeader.substring(7);
+  let payload: AuthPayload;
   try {
-    const payload = verifyToken(token);
-    req.user = payload;
-    next();
+    payload = verifyToken(token);
+    if (!Number.isSafeInteger(payload.userId) || payload.userId <= 0 || typeof payload.email !== "string" ||
+        (payload as AuthPayload & { scope?: string }).scope !== undefined) throw new Error("Invalid identity");
   } catch {
     res.status(401).json({ error: "Invalid or expired token" });
+    return;
+  }
+  try {
+    // A still-valid token must not retain the old company after a governed move.
+    const [current] = await db.select({ userId: usersTable.id, email: usersTable.email,
+      fullName: usersTable.fullName, companyId: usersTable.companyId, companyName: companiesTable.name,
+      isSuperAdmin: usersTable.isSuperAdmin, retiredIntoCompanyId: companiesTable.retiredIntoCompanyId })
+      .from(usersTable).innerJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+      .where(eq(usersTable.id, payload.userId)).limit(1);
+    if (!current || current.retiredIntoCompanyId !== null) {
+      res.status(401).json({ code: "AUTHORITY_INVALID", error: "Account company requires administrator review" });
+      return;
+    }
+    const { retiredIntoCompanyId: _retirement, ...identity } = current;
+    req.user = { ...identity, sessionIssuedAt: payload.sessionIssuedAt };
+    next();
+  } catch {
+    res.status(503).json({ code: "AUTHORITY_UNAVAILABLE", error: "Unable to verify current access. Please retry." });
   }
 }
 
@@ -88,7 +107,7 @@ export function requireProjectMember(...allowedRoles: string[]) {
     const members = await db
       .select()
       .from(projectMembersTable)
-      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId)))
+      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId), eq(projectMembersTable.status, "active")))
       .limit(1);
 
     if (members.length === 0) {
@@ -154,7 +173,7 @@ export function requirePermission(...permissionLevels: string[]) {
     const members = await db
       .select()
       .from(projectMembersTable)
-      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId)))
+      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId), eq(projectMembersTable.status, "active")))
       .limit(1);
 
     if (members.length === 0) {

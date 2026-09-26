@@ -43163,6 +43163,140 @@
         "scripts/test-post220-block45.mjs"
       ],
       "reviewedChangeSha256": "5fbf6709dd8ac7a7431af240470f4d0a587e7b894a8981c79affa11dd487c771"
+    },
+    {
+      "taskId": "identity-i001-i005-company-authority",
+      "reviewedThroughCommit": "25d6952efa2f7694734d3a8d34e47800ecde30ee",
+      "reviewedAt": "2026-09-26T13:39:36Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "verified_remote_read"
+        ],
+        "operatorOnly": [
+          "microsoft_admin_consent",
+          "ruben_physical_package_confirmation"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "summary": "Production users already belong to31 but nine latest bindings remain35. Prepare guarded append-only correction, retirement, collision prevention and fresh session authority without claiming production repair."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical company identity and historical authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses existing release and reconciliation controls without changing instructions."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Actual PostgreSQL and HTTP fixtures remain distinct from live customer acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Priority identity repair supports approved platform scope without new product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generator records additive schema, deployment order and current identity behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next native, installation or package changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated business report or documentation branding changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No compliance or standards applicability changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records actual local validations and unperformed production correction and release."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps exact production binding, invitation, schema and live acceptance work open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves all historical evidence and original binding versions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/test-company-session-http.ts",
+        "artifacts/api-server/src/lib/company-identity-reconciliation.behavior.ts",
+        "artifacts/api-server/src/lib/company-identity-reconciliation.ts",
+        "artifacts/api-server/src/lib/company-identity.behavior.ts",
+        "artifacts/api-server/src/lib/company-identity.ts",
+        "artifacts/api-server/src/lib/feature-policy-service.ts",
+        "artifacts/api-server/src/middlewares/auth.ts",
+        "artifacts/api-server/src/routes/admin.ts",
+        "artifacts/api-server/src/routes/auth.ts",
+        "artifacts/api-server/src/routes/company-master-catalogs.ts",
+        "artifacts/api-server/src/routes/master-catalogs.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/bimlog/src/pages/Dashboard.tsx",
+        "artifacts/bimlog/src/pages/Register.tsx",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C001.md",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C002.md",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C002_RECOVERY.json",
+        "evidence/coordination-routing-20260925/IDENTITY_I001.md",
+        "evidence/coordination-routing-20260925/IDENTITY_I002.md",
+        "evidence/coordination-routing-20260925/IDENTITY_I003.md",
+        "evidence/coordination-routing-20260925/IDENTITY_I004.md",
+        "evidence/coordination-routing-20260925/IDENTITY_I005.md",
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "lib/db/scripts/company-identity-lifecycle.sql",
+        "lib/db/src/schema/users.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/consolidation-recovery-inventory.mjs",
+        "scripts/current-open-loop-authority.mjs",
+        "scripts/open-loop-dispositions.mjs",
+        "scripts/test-build217-final-reconciliation.mjs",
+        "scripts/test-build223-field-evidence-boundary.mjs",
+        "scripts/test-company-creation-race.mjs",
+        "scripts/test-consolidation-c001.mjs",
+        "scripts/test-identity-lifecycle-db.mjs",
+        "scripts/test-post120-block38.mjs",
+        "scripts/test-post220-block45.mjs"
+      ],
+      "reviewedChangeSha256": "c6eb095f725e07e817af20de50b75e5336a4fbfc6b534bbfddbdca54711cb5bb"
     }
   ]
 }

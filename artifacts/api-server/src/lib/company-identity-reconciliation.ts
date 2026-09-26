@@ -1,5 +1,7 @@
 import { randomUUID } from "node:crypto";
-import type { PoolClient } from "pg";
+type ReconciliationClient = {
+  query(text: string, values?: unknown[]): Promise<{ rows: Record<string, unknown>[] }>;
+};
 
 export type ReconciliationPlan = {
   sourceCompanyId: number;
@@ -10,7 +12,7 @@ export type ReconciliationPlan = {
 };
 
 /** Bounded operator correction; original bindings and all business records are immutable here. */
-export async function reconcileCompanyBindings(client: Pick<PoolClient, "query">, plan: ReconciliationPlan, apply = false) {
+export async function reconcileCompanyBindings(client: ReconciliationClient, plan: ReconciliationPlan, apply = false) {
   if (![plan.sourceCompanyId,plan.targetCompanyId,plan.actorId].every(id=>Number.isSafeInteger(id)&&id>0) ||
       plan.sourceCompanyId===plan.targetCompanyId || !plan.reason.trim() || plan.reason.length>1000 ||
       !plan.bindings.length || plan.bindings.length>100 ||
@@ -33,9 +35,9 @@ export async function reconcileCompanyBindings(client: Pick<PoolClient, "query">
     const references=(await client.query(`SELECT table_name,column_name FROM information_schema.columns
       WHERE table_schema=current_schema() AND column_name IN ('company_id','canonical_company_id') AND data_type='integer'`)).rows;
     for(const ref of references){
-      if(["project_company_binding_versions","company_master_catalog_policies"].includes(ref.table_name)) continue;
+      if(["project_company_binding_versions","company_master_catalog_policies"].includes(String(ref.table_name))) continue;
       const identifier=(value:string)=>'"'+value.replaceAll('"','""')+'"';
-      if((await client.query(`SELECT 1 FROM ${identifier(ref.table_name)} WHERE ${identifier(ref.column_name)}=$1 LIMIT 1`,[plan.sourceCompanyId])).rows.length)
+      if((await client.query(`SELECT 1 FROM ${identifier(String(ref.table_name))} WHERE ${identifier(String(ref.column_name))}=$1 LIMIT 1`,[plan.sourceCompanyId])).rows.length)
         throw new Error("RECONCILIATION_OPERATIONAL_REFERENCES_REMAIN");
     }
     await client.query("LOCK TABLE project_company_binding_versions IN SHARE ROW EXCLUSIVE MODE");
@@ -47,7 +49,8 @@ export async function reconcileCompanyBindings(client: Pick<PoolClient, "query">
     for(const expected of [...plan.bindings].sort((a,b)=>a.projectId-b.projectId)){
       await client.query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))",[`project-company:${expected.projectId}`]);
       const prior=(await client.query("SELECT id,company_id,version,supersedes_binding_id,audit_evidence FROM project_company_binding_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1",[expected.projectId])).rows[0];
-      if(prior?.company_id===plan.targetCompanyId&&prior.version===expected.version+1&&prior.supersedes_binding_id===expected.bindingId&&prior.audit_evidence?.sourceCompanyId===plan.sourceCompanyId) continue;
+      const audit=prior?.audit_evidence as {sourceCompanyId?:number}|undefined;
+      if(prior?.company_id===plan.targetCompanyId&&prior.version===expected.version+1&&prior.supersedes_binding_id===expected.bindingId&&audit?.sourceCompanyId===plan.sourceCompanyId) continue;
       if(!prior||prior.id!==expected.bindingId||prior.version!==expected.version||prior.company_id!==plan.sourceCompanyId)
         throw new Error("RECONCILIATION_BINDING_CHANGED");
       await client.query(`INSERT INTO project_company_binding_versions(id,project_id,company_id,version,bound_by_id,reason_code,explanation_en,explanation_es,supersedes_binding_id,audit_evidence)

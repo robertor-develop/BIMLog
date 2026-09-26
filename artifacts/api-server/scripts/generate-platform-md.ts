@@ -74,6 +74,7 @@ ${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
 - Lens Next is the sole supported Lens product. Original/Legacy Lens exists only as preserved historical migration input and must not appear as a parallel customer-facing product or installed loader.
 
 ## Critical Database Facts — Read Before Every Session
+- Identity candidate I001–I005 adds nullable company retirement identity/time, guarded collision prevention and fresh request authority. Apply and verify \`lib/db/scripts/company-identity-lifecycle.sql\` before deploying consumers; no production migration or nine-project binding repair is implied by local tests. Reconciliation appends versions and preserves historical company rows. Invitation token completion remains separate I006–I010 work.
 - PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.
 - DATABASE_URL = Replit Helium development database. It is used ONLY by guarded drizzle-kit development-schema synchronization and never at runtime. Its structural state can influence Replit's generated production migration at Publish.
 - Database URL and secret values must not be assigned in tracked .replit or recognized configuration files. Replit Secrets/environment injection supplies runtime values; the repository gate permits variable-name references but rejects literal credential material.

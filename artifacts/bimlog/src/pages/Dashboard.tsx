@@ -988,8 +988,8 @@ interface ProjectCardProps {
   onDelete: (id: number, name: string) => void;
 }
 
-function ProjectCard({ project, onDelete }: ProjectCardProps) {
-  const { t } = useI18n();
+export function ProjectCard({ project, onDelete }: ProjectCardProps) {
+  const { t, lang } = useI18n();
   const isActive = project.status === "active";
   const isAdmin = project.userRole === "project_admin";
   const { data: members } = useListMembers(project.id);
@@ -999,8 +999,8 @@ function ProjectCard({ project, onDelete }: ProjectCardProps) {
     : "?";
 
   return (
-    <div style={{ position: "relative" }}>
-      <Link href={`/projects/${project.id}/analytics`} style={{ textDecoration: "none", display: "block" }}>
+    <div style={{ position: "relative", paddingBottom: isAdmin ? 34 : 0 }}>
+      <Link href={`/projects/${project.id}/analytics`} aria-label={`${lang === "es" ? "Abrir proyecto" : "Open project"}: ${project.name} (${project.code})`} className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-lg" style={{ textDecoration: "none", display: "block" }}>
         <div
           className="card"
           style={{
@@ -1104,21 +1104,25 @@ function ProjectCard({ project, onDelete }: ProjectCardProps) {
               </span>
               <span style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
                 <BarChart2 style={{ width: 13, height: 13 }} />
-                Analytics
+                {lang === "es" ? "Analítica" : "Analytics"}
               </span>
             </div>
-            <ArrowRight style={{ width: 14, height: 14, color: "hsl(var(--muted-foreground))", transition: "transform 0.15s" }} />
+            <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "hsl(var(--primary))", marginLeft: 12 }}>
+              {lang === "es" ? "Abrir proyecto" : "Open project"}
+              <ArrowRight aria-hidden="true" style={{ width: 14, height: 14, flexShrink: 0 }} />
+            </span>
           </div>
         </div>
       </Link>
 
-      {/* Delete button — project_admin only, overlaid bottom-right */}
+      {/* Retirement stays outside the project link and away from its entry action. */}
       {isAdmin && (
         <button
           onClick={e => { e.preventDefault(); e.stopPropagation(); onDelete(project.id, project.name); }}
-          title="Retire project"
+          title={lang === "es" ? "Retirar proyecto" : "Retire project"}
+          aria-label={`${lang === "es" ? "Retirar proyecto" : "Retire project"}: ${project.name}`}
           style={{
-            position: "absolute", bottom: 12, right: 48,
+            position: "absolute", bottom: 0, right: 0,
             width: 26, height: 26, borderRadius: 6,
             background: "#FEF2F2", border: "1px solid #FECACA",
             color: "#DC2626", cursor: "pointer",

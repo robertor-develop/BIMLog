@@ -1,0 +1,44 @@
+import assert from "node:assert/strict";
+import {randomUUID} from "node:crypto";
+import {createRequire} from "node:module";
+const pg=createRequire(import.meta.url)("pg");
+import express from "express";
+const schema="identity_session_"+randomUUID().replaceAll("-","");
+const c=new pg.Client({host:"127.0.0.1",port:55469,user:"postgres",database:"postgres",connectionTimeoutMillis:3000});
+await c.connect();
+await c.query(`CREATE SCHEMA ${schema}`);
+await c.query(`SET search_path TO ${schema}`);
+await c.query(`CREATE TABLE companies(id integer PRIMARY KEY,name text,retired_into_company_id integer);
+  CREATE TABLE users(id integer PRIMARY KEY,email text,full_name text,company_id integer,is_super_admin boolean);
+  CREATE TABLE project_members(id integer PRIMARY KEY,project_id integer,user_id integer,role text,status text,joined_at timestamp,permissions_override jsonb);
+  INSERT INTO companies VALUES(31,'TEST owner',NULL),(35,'TEST alias',31);
+  INSERT INTO users VALUES(1,'member@example.test','TEST member',31,false);
+  INSERT INTO project_members(id,project_id,user_id,role,status) VALUES(1,99,1,'read_only','active');`);
+process.env.PROD_DATABASE_URL=`postgresql://postgres@127.0.0.1:55469/postgres?options=${encodeURIComponent('-csearch_path='+schema)}`;
+const {pool}=await import("@workspace/db");
+const {authMiddleware,requireProjectMember,signToken,signOAuthState}=await import("../src/middlewares/auth");
+const app=express();
+app.get('/identity',authMiddleware,(req,res)=>res.json(req.user));
+app.get('/projects/:projectId',authMiddleware,requireProjectMember(),(_req,res)=>res.json({ok:true}));
+const server=app.listen(0,'127.0.0.1');
+await new Promise<void>(resolve=>server.once('listening',resolve));
+const address=server.address();if(!address||typeof address==='string')throw new Error('fixture address');
+const base=`http://127.0.0.1:${address.port}`;
+const token=signToken({userId:1,email:'old@example.test',fullName:'old',companyId:35,companyName:'old',isSuperAdmin:true});
+const headers={Authorization:`Bearer ${token}`};
+try {
+  const identity=await (await fetch(base+'/identity',{headers})).json() as {companyId:number;isSuperAdmin:boolean;email:string};
+  assert.equal(identity.companyId,31);assert.equal(identity.isSuperAdmin,false);assert.equal(identity.email,'member@example.test');
+  assert.equal((await fetch(base+'/projects/99',{headers})).status,200);
+  assert.equal((await fetch(base+'/projects/100',{headers})).status,403);
+  await c.query("UPDATE project_members SET status='inactive' WHERE id=1");
+  assert.equal((await fetch(base+'/projects/99',{headers})).status,403);
+  assert.equal((await fetch(base+'/identity',{headers:{Authorization:`Bearer ${signOAuthState(1,'test')}`}})).status,401);
+  await c.query('UPDATE users SET company_id=35 WHERE id=1');
+  assert.equal((await fetch(base+'/identity',{headers})).status,401);
+  console.log('I005 actual HTTP/PostgreSQL: stale company/privilege ignored, correct project allowed, outsider/inactive denied, OAuth scope denied, retired company denied PASS');
+} finally {
+  await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));
+  await pool.end();
+  await c.query(`DROP SCHEMA ${schema} CASCADE`);await c.end();
+}

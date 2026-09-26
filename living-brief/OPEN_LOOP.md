@@ -11,6 +11,12 @@ The approved corrected report is `F:/BIMLog/TestProof/BIMLog_Consolidation_Ident
 
 Lens Next is protected, not disconnected: necessary integrations are included, unrelated redesign remains deferred. No native/runtime change is made by C001. Five-build push and ten-build publication cadence applies to new unpublished work, not historical ledger arithmetic.
 
+I005 local evidence includes actual HTTP/PostgreSQL fresh-authority and active-membership denial, plus local actual-component bilingual project entry. Alias retirement and nine append-only rebinding corrections are prepared, not production-applied. Before deployment, verify the additive lifecycle SQL, exact binding manifest, recoverable backup and schema correspondence; then repeat authenticated company/project workflows. Seven unpublished commits include two preserved C commits, so the ten-build cap requires publication before adding more than three further builds. Invitation-token completion and full customer acceptance remain open.
+
+The I005 release run detected a stale AI entry-point inventory; regeneration retains 45 entries. Repeat the full repaired-head gate before push; no live acceptance is inferred from regenerated evidence.
+
+Its subsequent database-safety check rejected test schema cleanup in runtime source. Move the disposable HTTP fixture to API test scripts and repeat it and the unmodified safety gate before release.
+
 ## Project access and SharePoint correction — 2026-09-26
 
 - [x] Reconcile published45e22afc from the external resource block15 release receipt; prior pending-publication notes are historical.
