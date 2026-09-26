@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
@@ -7,11 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
+import { readInvitationToken, invitationError } from "@/lib/invitation-ui";
 
 export function Register() {
   const { t, tt } = useI18n();
   const [, setLocation] = useLocation();
-  const { login } = useAuthStore();
+  const { login, token:sessionToken, user, logout } = useAuthStore();
+  const [inviteToken,setInviteToken] = useState(readInvitationToken);
+  const [invitation,setInvitation]=useState<{email:string;companyName:string;purpose:string;projectId:number}|null>(null);
+  const [inviteLoading,setInviteLoading]=useState(Boolean(inviteToken));
+  const [accepting,setAccepting]=useState(false);
+  const [journey,setJourney]=useState("create");
   const invitedEmail =
     new URLSearchParams(window.location.search)
       .get("email")
@@ -22,10 +28,35 @@ export function Register() {
     password: "",
     fullName: "",
     companyName: "",
+    invitationToken: inviteToken || undefined,
   });
   const [error, setError] = useState("");
-  const matchesInvitationEmail =
-    Boolean(invitedEmail) && form.email.trim().toLowerCase() === invitedEmail;
+  const BASE=import.meta.env.BASE_URL?.replace(/\/$/,"")||"";
+  useEffect(()=>{
+    const changed=()=>{
+      const next=readInvitationToken();
+      setInviteToken(next);setInvitation(null);setInviteLoading(Boolean(next));setError("");
+      setForm(current=>({...current,email:"",companyName:"",invitationToken:next||undefined}));
+    };
+    window.addEventListener("hashchange",changed);
+    return()=>window.removeEventListener("hashchange",changed);
+  },[]);
+  useEffect(()=>{
+    if(!inviteToken)return;
+    const controller=new AbortController();
+    fetch(`${BASE}/api/v1/auth/invitations/preview`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token:inviteToken}),signal:controller.signal})
+      .then(async r=>{const data=await r.json();if(!r.ok)throw new Error(data.error);return data;})
+      .then(data=>{setInvitation(data);setForm(current=>({...current,email:data.email,companyName:data.purpose==="company_join"?data.companyName:""}));})
+      .catch(e=>{if(!controller.signal.aborted)setError(invitationError(String(e.message),tt));})
+      .finally(()=>{if(!controller.signal.aborted)setInviteLoading(false);});
+    return()=>controller.abort();
+  },[inviteToken,BASE]);
+  const accept=async()=>{
+    setAccepting(true);setError("");
+    try {const r=await fetch(`${BASE}/api/v1/auth/invitations/accept`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${sessionToken}`},body:JSON.stringify({token:inviteToken})});
+      const data=await r.json();if(!r.ok)throw new Error(data.error);setLocation(`/projects/${data.projectId}`);
+    }catch(e){setError(invitationError(e instanceof Error?e.message:"",tt));}finally{setAccepting(false);}
+  };
 
   const { mutate, isPending } = useRegister({
     mutation: {
@@ -34,10 +65,8 @@ export function Register() {
         setLocation("/dashboard");
       },
       onError: (error) => {
-        const detail = error as { data?: { code?: string }; message?: string };
-        setError(detail.data?.code === "COMPANY_JOIN_REQUIRED" || detail.message?.includes("COMPANY_JOIN_REQUIRED")
-          ? tt("Use your company invitation. If it does not open, contact your company administrator; do not create another company.", "Use la invitación de su empresa. Si no abre, contacte al administrador; no cree otra empresa.")
-          : t("auth.registerFailed"));
+        const detail = error as { data?: { code?: string;error?:string }; message?: string };
+        setError(invitationError(detail.data?.code||detail.data?.error||detail.message||"",tt));
       },
     },
   });
@@ -59,7 +88,7 @@ export function Register() {
         <>
           {t("auth.hasAccount")}{" "}
           <Link
-            href="/login"
+            href={inviteToken?`/login#invite=${encodeURIComponent(inviteToken)}`:"/login"}
             className="text-primary font-medium hover:underline"
           >
             {t("auth.login")}
@@ -74,12 +103,15 @@ export function Register() {
         </div>
       )}
 
+      {inviteLoading && <p role="status">{tt("Checking invitation...","Verificando invitación...")}</p>}
+      {!inviteToken && <div className="mb-4"><label>{tt("What would you like to do?","¿Qué desea hacer?")}<select className="w-full" value={journey} onChange={e=>setJourney(e.target.value)}><option value="create">{tt("Create a new company","Crear una empresa nueva")}</option><option value="join">{tt("Join an existing company","Unirse a una empresa existente")}</option></select></label>{journey==="join"&&<p>{tt("Open the invitation email sent by your company administrator. If it fails, ask for a new invitation; do not create another company.","Abra el correo de invitación enviado por el administrador de su empresa. Si falla, solicite una nueva invitación; no cree otra empresa.")}</p>}</div>}
+      {sessionToken && inviteToken ? <div className="space-y-4"><p>{tt("Signed in as","Sesión iniciada como")} {user?.email}</p><p>{invitation?.companyName}</p><Button disabled={!invitation||accepting||inviteLoading} onClick={accept}>{tt("Accept invitation","Aceptar invitación")}</Button><Button variant="outline" onClick={()=>{logout();setLocation(`/login#invite=${encodeURIComponent(inviteToken)}`);}}>{tt("Use another account","Usar otra cuenta")}</Button></div> : <>
       <div className="space-y-4">
-        {matchesInvitationEmail && (
+        {invitation && (
           <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
             {tt(
-              "If a pending invitation matches this email, registration will connect the account to the inviting company and project automatically. The company field will not create a duplicate company in that case.",
-              "Si una invitación pendiente coincide con este correo, el registro conectará automáticamente la cuenta con la empresa y el proyecto que la enviaron. En ese caso, el campo de empresa no creará una empresa duplicada.",
+              invitation.purpose==="company_join" ? "You are joining the company shown below. No new company will be created." : "You are joining a project as an external collaborator. Enter your own new company or sign in to your existing account.",
+              invitation.purpose==="company_join" ? "Se unirá a la empresa indicada abajo. No se creará otra empresa." : "Se unirá al proyecto como colaborador externo. Indique su empresa nueva o inicie sesión con su cuenta existente.",
             )}
           </div>
         )}
@@ -101,6 +133,7 @@ export function Register() {
           <Input
             placeholder="BIMtech Corp"
             value={form.companyName}
+            disabled={invitation?.purpose==="company_join"}
             onChange={set("companyName")}
             autoComplete="organization"
           />
@@ -113,6 +146,7 @@ export function Register() {
             type="email"
             placeholder="you@company.com"
             value={form.email}
+            disabled={Boolean(inviteToken)}
             onChange={set("email")}
             autoComplete="email"
           />
@@ -135,6 +169,7 @@ export function Register() {
         className="w-full mt-6"
         disabled={
           !form.email ||
+          inviteLoading || (Boolean(inviteToken) && !invitation) || (!inviteToken && journey==="join") ||
           !form.password ||
           !form.fullName ||
           !form.companyName ||
@@ -146,6 +181,7 @@ export function Register() {
           ? tt("Creating account...", "Creando la cuenta...")
           : t("auth.register")}
       </Button>
+      </>}
     </AuthLayout>
   );
 }

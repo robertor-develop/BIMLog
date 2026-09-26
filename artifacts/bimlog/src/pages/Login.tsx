@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
+import { readInvitationToken } from "@/lib/invitation-ui";
 
 export function Login() {
-  const { t } = useI18n();
+  const { t, tt } = useI18n();
   const [, setLocation] = useLocation();
   const { login } = useAuthStore();
+  const [inviteToken]=useState(readInvitationToken);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +23,7 @@ export function Login() {
     mutation: {
       onSuccess: (data) => {
         login(data.token, data.user);
-        setLocation('/dashboard');
+        setLocation(inviteToken?`/register#invite=${encodeURIComponent(inviteToken)}`:'/dashboard');
       },
       onError: () => setError(t('auth.loginFailed'))
     }
@@ -29,9 +31,9 @@ export function Login() {
 
   return (
     <AuthLayout
-      title="Welcome back"
-      subtitle="Sign in to your BIMLog account"
-      footer={<>{t('auth.noAccount')} <Link href="/register" className="text-primary font-medium hover:underline">{t('auth.register')}</Link></>}
+      title={tt("Welcome back","Bienvenido de nuevo")}
+      subtitle={tt("Sign in to your BIMLog account","Inicie sesión en su cuenta BIMLog")}
+      footer={<>{t('auth.noAccount')} <Link href={inviteToken?`/register#invite=${encodeURIComponent(inviteToken)}`:"/register"} className="text-primary font-medium hover:underline">{t('auth.register')}</Link></>}
     >
       {error && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive text-sm mb-4">
@@ -71,7 +73,7 @@ export function Login() {
                 color: "hsl(var(--muted-foreground))", padding: 8, width: 32, height: 32,
                 display: "flex", alignItems: "center", justifyContent: "center"
               }}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showPassword ? tt("Hide password","Ocultar contraseña") : tt("Show password","Mostrar contraseña")}
             >
               {showPassword
                 ? <EyeOff style={{ width: 16, height: 16 }} />
@@ -97,7 +99,7 @@ export function Login() {
         disabled={!email || !password || isPending}
         onClick={() => mutate({ data: { email, password } })}
       >
-        {isPending ? 'Signing in...' : t('auth.login')}
+        {isPending ? tt('Signing in...','Iniciando sesión...') : t('auth.login')}
       </Button>
     </AuthLayout>
   );

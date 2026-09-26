@@ -8,6 +8,7 @@ import {
   activityLogTable,
   projectsTable,
   projectMembersTable,
+  projectInvitations,
   meetingAttendeesTable,
 } from "@workspace/db/schema";
 import { eq, and, sql, asc } from "drizzle-orm";
@@ -1252,9 +1253,10 @@ router.post(
             : `Invited ${fullName} (${result.row.email}) to join BIMLog`,
       });
 
+      let deliveryStatus: "sent" | "skipped" | "failed" = "failed";
       try {
         if (result.kind === "invited") {
-          await sendEmail({
+          deliveryStatus = await sendEmail({
             to: result.row.email,
             subject: `You've been invited to join ${projectName} on BIMLog`,
             html: makeInvitationEmail({
@@ -1295,8 +1297,14 @@ router.post(
         );
       }
 
+      if (result.kind === "invited") {
+        await db.update(projectInvitations).set({deliveryStatus}).where(and(
+          eq(projectInvitations.id,result.row.id),eq(projectInvitations.tokenHash,result.row.tokenHash!),
+        ));
+      }
       res.json({
         ok: true,
+        deliveryStatus: result.kind === "invited" ? deliveryStatus : undefined,
         status:
           result.kind === "existing"
             ? result.alreadyMember

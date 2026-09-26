@@ -6,8 +6,8 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 673,
-    "frontendApiReferences": 250,
+    "apiRoutes": 675,
+    "frontendApiReferences": 252,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -1099,6 +1099,32 @@
     {
       "method": "POST",
       "path": "/auth/register",
+      "owner": "artifacts/api-server/src/routes/auth.ts",
+      "tables": [
+        "usersTable",
+        "companiesTable",
+        "projectMembersTable",
+        "filesTable",
+        "rfisTable",
+        "submittalsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/auth/invitations/preview",
+      "owner": "artifacts/api-server/src/routes/auth.ts",
+      "tables": [
+        "usersTable",
+        "companiesTable",
+        "projectMembersTable",
+        "filesTable",
+        "rfisTable",
+        "submittalsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/auth/invitations/accept",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
         "usersTable",
@@ -9780,6 +9806,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/TransmittalsTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/transmittals/${deleteTarget.id}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/Register.tsx",
+      "apiPath": "${BASE}/api/v1/auth/invitations/preview"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/Register.tsx",
+      "apiPath": "${BASE}/api/v1/auth/invitations/accept"
     },
     {
       "screen": "artifacts/bimlog/src/pages/ResetPassword.tsx",

@@ -1205,7 +1205,7 @@ function AddMemberForm({
       if (!r.ok) throw new Error(await r.text());
       const result = await r.json();
       if (result.deliveryStatus && result.deliveryStatus !== "sent") {
-        toast({title:lang === "es" ? "Invitación guardada, correo no entregado. Reintente desde invitaciones." : "Invitation saved, email not delivered. Retry from invitations.",variant:"destructive"});
+        toast({title:lang === "es" ? "Invitación guardada, correo no entregado. Pulse Enviar invitación para reintentar." : "Invitation saved, email not delivered. Press Send Invitation to retry.",variant:"destructive"});
         return;
       }
       queryClient.invalidateQueries({

@@ -8,6 +8,9 @@ const output = path.join(root, "evidence/stabilization-program-20260919/ENDPOINT
 const write = process.argv.includes("--write");
 
 const publicRules = [
+  // Pre-sign-in preview requires possession of an expiring opaque invitation credential.
+  // Acceptance remains authenticated; this exception does not cover sibling routes.
+  /^auth\.ts\|POST\|\/auth\/invitations\/preview$/,
   /^health\.ts\|GET\|\/(health|ready|version)$/,
   /^health\.ts\|GET\|\/healthz$/,
   /^auth\.ts\|(POST|GET)\|\/(auth\/login|auth\/register|auth\/forgot-password|auth\/reset-password|auth\/verify-reset-token)$/,

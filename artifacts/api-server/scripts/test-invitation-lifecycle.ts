@@ -12,6 +12,20 @@ for(const table of ["companies","users","projects","project_members","project_in
 process.env.PROD_DATABASE_URL=`postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test?options=${encodeURIComponent('-csearch_path='+schema)}`;
 const {pool}=await import("@workspace/db");
 const {inviteOrAddProjectMember}=await import("../src/lib/project-invitation-service");
+const {db}=await import("@workspace/db");
+const {lockInvitation,acceptLockedInvitation}=await import("../src/lib/invitation-acceptance");
+const {usersTable}=await import("@workspace/db/schema");
+const {eq}=await import("drizzle-orm");
+const {default:express}=await import("express");
+const {default:authRouter}=await import("../src/routes/auth");
+const app=express();app.use(express.json());app.use(authRouter);
+const server=app.listen(0,"127.0.0.1");
+await new Promise<void>(resolve=>server.once("listening",resolve));
+const address=server.address();if(!address || typeof address==='string')throw new Error('fixture listener');
+const post=async(path:string,body:unknown)=>{
+  const response=await fetch(`http://127.0.0.1:${address.port}${path}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return {status:response.status,body:await response.json()};
+};
 try {
   await admin.query(`INSERT INTO config_options(category,value,label,label_es,meta) VALUES
     ('member_role','project_admin','Admin','Admin','{"permission":"admin"}'),('member_role','read_only','Read','Lectura','{"permission":"read"}')`);
@@ -27,8 +41,65 @@ try {
   assert.equal(second.row.id,first.row.id);assert.notEqual(second.token,first.token);assert.notEqual(second.row.tokenHash,first.row.tokenHash);
   assert.equal(second.row.purpose,'company_join');assert.equal(second.row.deliveryStatus,'not_sent');
   assert.equal((await admin.query('SELECT count(*)::int n FROM project_members')).rows[0].n,0);
+  const recipient=(await admin.query("INSERT INTO users(email,password_hash,full_name,company_id) VALUES('recipient@example.test','unused','TEST recipient',$1) RETURNING id",[company])).rows[0].id;
+  const accept=async(token:string,userId=recipient)=>db.transaction(async tx=>{
+    const [user]=await tx.select().from(usersTable).where(eq(usersTable.id,userId));
+    return acceptLockedInvitation(tx,await lockInvitation(tx,token,user.email),user);
+  });
+  await assert.rejects(accept(first.token),/INVALID/);
+  await assert.rejects(accept(second.token,ordinary),/WRONG_ACCOUNT/);
+  const [one,two]=await Promise.all([accept(second.token),accept(second.token)]);
+  assert.notEqual(one.replayed,two.replayed);
+  assert.equal((await admin.query('SELECT count(*)::int n FROM project_members')).rows[0].n,1);
+  assert.equal((await admin.query("SELECT count(*)::int n FROM activity_log WHERE action_type='accept_invitation'")).rows[0].n,1);
+  assert.equal((await admin.query('SELECT company_id FROM users WHERE id=$1',[recipient])).rows[0].company_id,company);
+  const newInvite=await inviteOrAddProjectMember({...input,email:'new@example.test'});
+  if(newInvite.kind!=='invited')throw new Error('fixture');
+  const registration={email:'new@example.test',password:'Synthetic-test-only-12345!',fullName:'TEST new recipient',companyName:'Must never create this company'};
+  assert.equal((await post('/auth/invitations/preview',{})).status,400);
+  assert.equal((await post('/auth/invitations/preview',{token:'A'.repeat(43)})).status,400);
+  const preview=await post('/auth/invitations/preview',{token:newInvite.token});
+  assert.equal(preview.status,200);assert.equal(preview.body.email,registration.email);
+  assert.equal(preview.body.tokenHash,undefined);
+  assert.equal((await post('/auth/invitations/accept',{token:newInvite.token})).status,401);
+  assert.equal((await post('/auth/register',registration)).body.error,'INVITATION_LINK_REQUIRED');
+  const created=await post('/auth/register',{...registration,invitationToken:newInvite.token});
+  assert.equal(created.status,201,JSON.stringify(created.body));
+  assert.equal(created.body.user.companyId,company);
+  assert.deepEqual(created.body.user.acceptedProjectIds,[project]);
+  assert.equal((await admin.query('SELECT count(*)::int n FROM companies')).rows[0].n,1);
+  assert.equal((await post('/auth/register',{...registration,invitationToken:newInvite.token})).status,409);
+  const founder=await post('/auth/register',{...registration,email:'founder@example.test',companyName:'TEST genuinely new company'});
+  assert.equal(founder.status,201,JSON.stringify(founder.body));
+  assert.notEqual(founder.body.user.companyId,company);
+  assert.equal((await admin.query("SELECT count(*)::int n FROM company_master_catalog_administrators WHERE user_id=$1 AND state='active'",[founder.body.user.id])).rows[0].n,1);
+  const duplicate=await post('/auth/register',{...registration,email:'duplicate@example.test',companyName:'TEST genuinely new company.'});
+  assert.equal(duplicate.status,409);assert.equal(duplicate.body.code,'COMPANY_JOIN_REQUIRED');
+  const foreignInvite=await inviteOrAddProjectMember({...input,email:'founder@example.test'});
+  if(foreignInvite.kind!=='invited')throw new Error('fixture');
+  await assert.rejects(accept(foreignInvite.token,founder.body.user.id),/TRANSFER_REQUIRES_ADMIN/);
+  const external=await inviteOrAddProjectMember({...input,email:'founder@example.test',purpose:'project_collaboration'});
+  if(external.kind!=='invited')throw new Error('fixture');
+  await accept(external.token,founder.body.user.id);
+  assert.equal((await admin.query('SELECT company_id FROM users WHERE id=$1',[founder.body.user.id])).rows[0].company_id,founder.body.user.companyId);
+  const expiring=await inviteOrAddProjectMember({...input,email:'founder@example.test',purpose:'project_collaboration'});
+  if(expiring.kind!=='invited')throw new Error('fixture');
+  await admin.query("UPDATE project_invitations SET expires_at=now()-interval '1 second' WHERE id=$1",[expiring.row.id]);
+  await assert.rejects(accept(expiring.token,founder.body.user.id),/EXPIRED/);
+  await admin.query("UPDATE project_invitations SET expires_at=now()+interval '1 day',revoked_at=now() WHERE id=$1",[expiring.row.id]);
+  await assert.rejects(accept(expiring.token,founder.body.user.id),/UNAVAILABLE/);
+  await admin.query("UPDATE project_invitations SET revoked_at=NULL WHERE id=$1",[expiring.row.id]);
+  await admin.query('UPDATE users SET is_super_admin=false WHERE id=$1',[owner]);
+  await assert.rejects(accept(expiring.token,founder.body.user.id),/AUTHORITY_DENIED/);
+  await admin.query('UPDATE users SET is_super_admin=true WHERE id=$1',[owner]);
+  await admin.query("UPDATE project_members SET status='inactive' WHERE user_id=$1",[founder.body.user.id]);
+  await assert.rejects(accept(expiring.token,founder.body.user.id),/INACTIVE_MEMBER/);
+  console.log('I008 PostgreSQL expiry, revocation, revoked inviter authority and inactive membership denial PASS');
+  console.log('I008 real HTTP registration: link required, company join without duplicate, repeat denied, genuine founder PMO, punctuation duplicate denied; external collaboration preserves company PASS');
+  console.log('I008 PostgreSQL: rotated-link denial, wrong-account denial, concurrent accept/replay, one membership, one audit, unchanged company PASS');
   console.log('I007 PostgreSQL: current inviter authority, invalid role denial, normalized recipient, resend rotation, no premature membership PASS');
 } finally {
+  await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));
   await pool.end();
   await admin.query(`DROP SCHEMA ${schema} CASCADE`);await admin.end();
 }

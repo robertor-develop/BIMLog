@@ -641,6 +641,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/help-center.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
+- artifacts/api-server/src/lib/invitation-acceptance.ts
+- artifacts/api-server/src/lib/invitation-token.behavior.ts
+- artifacts/api-server/src/lib/invitation-token.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.behavior.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-budget-governance.behavior.ts

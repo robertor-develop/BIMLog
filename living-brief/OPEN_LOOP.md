@@ -2,6 +2,14 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+I008 local registration/acceptance tests pass, including concurrent replay and wrong-tenant refusal. Publish the exact tested I008 checkpoint before I009 because it reaches ten unpublished changes. Directory email failure reporting and cancellation revocation are corrected. Screenshot capture is tool-blocked; local UI evidence is interaction/DOM only. Explicit resend UI, production identity/binding correction, real email receipt and full authenticated live acceptance remain open; no production PASS is inferred.
+
+The I008 release suite caught an obsolete onboarding assertion requiring email-only joining text. Its corrected regression requires token preview, explicit company-join semantics, no duplicate creation and invitation-preserving login navigation. Repeat the full exact-head suite; do not waive the onboarding checks.
+
+The endpoint matrix also requires explicit classification of the pre-sign-in credential-protected preview. Only that exact POST is public; acceptance stays authenticated. HTTP tests reject missing/unknown preview credentials and unauthenticated acceptance. Screenshot capture recovered after bringing the local tab forward; the Spanish registration layout was visually inspected, but full responsive and production QA remain open.
+
+Local Chrome reproduced a stale invitation after a same-tab fragment change. Registration now clears the prior destination and reloads the new credential on hashchange, aborting superseded preview requests. Exact browser retest and corrected-head release suite are mandatory. Replit workspace lacks SENDGRID_API_KEY; production email history shows four skipped events with that reason. Real email acceptance requires verified sender configuration; no secret was inspected or replaced.
+
 I006–I010 is now authorized. The existing email-only invitation link and automatic pending-email acceptance are verified security/onboarding gaps. Token schema/contract I006 does not close them until issuance, recipient-bound transactional acceptance, existing-account flow and UI are integrated and live-tested. Seven unpublished baseline commits require an early publication checkpoint no later than I008.
 
 I007 issuance now carries hashed secret links and explicit purpose with fresh authority checks; integration remains unpublished until I008 recipient-bound acceptance and account UI are proven. Real email delivery, exact schema preview and full live acceptance remain open.

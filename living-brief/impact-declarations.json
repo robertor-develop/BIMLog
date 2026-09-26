@@ -43297,6 +43297,127 @@
         "scripts/test-post220-block45.mjs"
       ],
       "reviewedChangeSha256": "c6eb095f725e07e817af20de50b75e5336a4fbfc6b534bbfddbdca54711cb5bb"
+    },
+    {
+      "taskId": "identity-i006-i008-invitation-checkpoint",
+      "reviewedThroughCommit": "c49ea8a5880227b10c8223787d4cbe9e88cf9e3d",
+      "reviewedAt": "2026-09-26T14:47:06Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "microsoft_admin_consent"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "summary": "Email-only joining is replaced by recipient-bound expiring secret possession; tested local behavior does not imply delivery or production acceptance. Ten unpublished changes require an I008 publication checkpoint before I009."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical company authority; external collaboration does not transfer tenant identity."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Retains existing release controls and secret handling without new operating instructions."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Real HTTP and PostgreSQL test evidence remains separate from deployed and visual acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Repairs authorized company invitation scope without expanding product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated structure includes invitation endpoints and schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next native or installer modifications."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated customer reports changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards applicability claims."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local test evidence and unperformed release and live acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserves release checkpoint, real delivery, production reconciliation and visual QA obligations."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical records remain preserved; acceptance adds an audit event."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-invitation-lifecycle.ts",
+        "artifacts/api-server/src/lib/block21-build102-onboarding.behavior.ts",
+        "artifacts/api-server/src/lib/email.ts",
+        "artifacts/api-server/src/lib/invitation-acceptance.ts",
+        "artifacts/api-server/src/lib/invitation-token.behavior.ts",
+        "artifacts/api-server/src/lib/invitation-token.ts",
+        "artifacts/api-server/src/lib/project-invitation-migration.ts",
+        "artifacts/api-server/src/lib/project-invitation-service.ts",
+        "artifacts/api-server/src/lib/project-invitation.behavior.ts",
+        "artifacts/api-server/src/routes/auth.ts",
+        "artifacts/api-server/src/routes/members.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/bimlog/src/lib/invitation-ui.ts",
+        "artifacts/bimlog/src/pages/Login.tsx",
+        "artifacts/bimlog/src/pages/Register.tsx",
+        "artifacts/bimlog/src/pages/project/DirectoryTab.tsx",
+        "artifacts/bimlog/src/pages/project/TeamTab.tsx",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/coordination-routing-20260925/IDENTITY_I008.md",
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "evidence/stabilization-program-20260919/ENDPOINT_AUTHORITY_MATRIX.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/db/src/schema/invitations.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/endpoint-authority-matrix.mjs",
+        "scripts/test-post120-block42.mjs"
+      ],
+      "reviewedChangeSha256": "c9a705c9df0fe060602b4d522ea642134202526da214ff6adbc962703072969e"
     }
   ]
 }

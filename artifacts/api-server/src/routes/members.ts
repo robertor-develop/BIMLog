@@ -1005,7 +1005,7 @@ router.delete(
         if (current[0].status !== "pending") return "not_pending" as const;
         await tx
           .update(projectInvitations)
-          .set({ status: "cancelled" })
+          .set({ status: "cancelled", revokedAt: new Date() })
           .where(
             and(
               eq(projectInvitations.id, invId),

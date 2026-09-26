@@ -23,10 +23,11 @@ import { effectiveCommercialAccessForUser } from "../lib/commercial-entitlement"
 import { waitForProjectInvitationMigration } from "../lib/project-invitation-migration";
 import { resolveAccessProfile } from "../lib/access-profile";
 import { assertNewCompanyName } from "../lib/company-identity";
+import { lockInvitation, validateInvitationAuthority, acceptLockedInvitation } from "../lib/invitation-acceptance";
+import { invitationTokenHash, validateInvitationState } from "../lib/invitation-token";
 import {
   invitationEmailLockKey,
   normalizeInvitationEmail,
-  resolveInvitationCompanyId,
 } from "../lib/project-invitation-contract";
 
 const router: IRouter = Router();
@@ -36,6 +37,7 @@ class RegistrationConflictError extends Error {}
 router.post("/auth/register", async (req, res) => {
   try {
     const body = RegisterBody.parse(req.body);
+    const invitationToken = req.body?.invitationToken;
     const email = normalizeInvitationEmail(body.email);
     await waitForProjectInvitationMigration();
     const existing = await db
@@ -59,29 +61,12 @@ router.post("/auth/register", async (req, res) => {
         .limit(1);
       if (concurrentExisting.length)
         throw new RegistrationConflictError("Email already exists");
-      const pending = await tx
-        .select()
-        .from(projectInvitations)
-        .where(
-          and(
-            sql`lower(trim(${projectInvitations.email})) = ${email}`,
-            eq(projectInvitations.status, "pending"),
-          ),
-        );
-      const boundCompanyIds = new Set<number>();
-      for (const invitation of pending) {
-        if (invitation.companyId) {
-          boundCompanyIds.add(invitation.companyId);
-          continue;
-        }
-        const inviter = await tx
-          .select({ companyId: usersTable.companyId })
-          .from(usersTable)
-          .where(eq(usersTable.id, invitation.invitedByUserId))
-          .limit(1);
-        if (inviter[0]?.companyId) boundCompanyIds.add(inviter[0].companyId);
-      }
-      const boundCompanyId = resolveInvitationCompanyId([...boundCompanyIds]);
+      const selectedInvitation = invitationToken ? await lockInvitation(tx, invitationToken, email) : null;
+      const pending = await tx.select({id:projectInvitations.id}).from(projectInvitations)
+        .where(and(sql`lower(trim(${projectInvitations.email})) = ${email}`,eq(projectInvitations.status,"pending")));
+      if (!selectedInvitation && pending.length) throw new Error("INVITATION_LINK_REQUIRED");
+      if (selectedInvitation) await validateInvitationAuthority(tx,selectedInvitation,email);
+      const boundCompanyId = selectedInvitation?.purpose === "company_join" ? selectedInvitation.companyId : null;
 
       let company = boundCompanyId
         ? await tx
@@ -91,7 +76,7 @@ router.post("/auth/register", async (req, res) => {
             .limit(1)
         : [];
       if (!company.length) {
-        if (pending.length)
+        if (boundCompanyId)
           throw new Error(
             "The company assigned by this invitation no longer exists.",
           );
@@ -115,45 +100,16 @@ router.post("/auth/register", async (req, res) => {
           companyId: company[0]!.id,
         })
         .returning();
-      for (const invitation of pending) {
-        const alreadyMember = await tx
-          .select({ id: projectMembersTable.id })
-          .from(projectMembersTable)
-          .where(
-            and(
-              eq(projectMembersTable.projectId, invitation.projectId),
-              eq(projectMembersTable.userId, user.id),
-            ),
-          )
-          .limit(1);
-        if (!alreadyMember.length) {
-          await tx.insert(projectMembersTable).values({
-            projectId: invitation.projectId,
-            userId: user.id,
-            role: invitation.role,
-            status: "active",
-          });
-        }
+      if (selectedInvitation) await acceptLockedInvitation(tx,selectedInvitation,user);
+      if (!boundCompanyId) {
+        await tx.execute(sql`INSERT INTO company_master_catalog_administrators(id,company_id,user_id,state,granted_by_id)
+          VALUES(${randomBytes(16).toString("hex")},${company[0]!.id},${user.id},'active',${user.id})`);
       }
-      if (pending.length) {
-        await tx
-          .update(projectInvitations)
-          .set({
-            status: "accepted",
-            acceptedAt: new Date(),
-            companyId: company[0]!.id,
-          })
-          .where(
-            and(
-              sql`lower(trim(${projectInvitations.email})) = ${email}`,
-              eq(projectInvitations.status, "pending"),
-            ),
-          );
-      }
+
       return {
         user,
         company: company[0]!,
-        acceptedProjectIds: pending.map((invitation) => invitation.projectId),
+        acceptedProjectIds: selectedInvitation ? [selectedInvitation.projectId] : [],
       };
     });
 
@@ -190,8 +146,38 @@ router.post("/auth/register", async (req, res) => {
     const companyConflict = message === "COMPANY_JOIN_REQUIRED";
     res
       .status(error instanceof RegistrationConflictError || companyConflict ? 409 : 400)
-      .json(companyConflict ? { code: "COMPANY_JOIN_REQUIRED", error: "Use your company invitation or contact the administrator to resolve company identity." } : { error: message });
+      .json(companyConflict ? { code: "COMPANY_JOIN_REQUIRED", error: "Use your company invitation or contact the administrator to resolve company identity." } : {
+        error: error instanceof RegistrationConflictError || /^INVITATION_[A-Z_]+$/.test(message)
+          ? message : "Registration could not be completed. Check the required fields or contact support.",
+      });
   }
+});
+
+// Tokens travel in POST bodies, not route/query strings or access logs.
+router.post("/auth/invitations/preview",async(req,res)=>{
+  res.setHeader("Cache-Control","no-store");
+  try {
+    await waitForProjectInvitationMigration();
+    const [row]=await db.select().from(projectInvitations).where(eq(projectInvitations.tokenHash,invitationTokenHash(req.body?.token))).limit(1);
+    if(!row)throw new Error("INVITATION_INVALID");
+    validateInvitationState(row);
+    const [company]=await db.select({name:companiesTable.name,retired:companiesTable.retiredIntoCompanyId}).from(companiesTable).where(eq(companiesTable.id,row.companyId!)).limit(1);
+    if(!company || company.retired!==null)throw new Error("INVITATION_REISSUE_REQUIRED");
+    res.json({email:row.email,companyName:company.name,purpose:row.purpose,projectId:row.projectId,expiresAt:row.expiresAt});
+  } catch(error) {res.status(400).json({error:error instanceof Error && error.message.startsWith("INVITATION_")?error.message:"INVITATION_UNAVAILABLE"});}
+});
+router.post("/auth/invitations/accept",authMiddleware,async(req,res)=>{
+  res.setHeader("Cache-Control","no-store");
+  try {
+    await waitForProjectInvitationMigration();
+    const result=await db.transaction(async tx=>{
+      const row=await lockInvitation(tx,req.body?.token,req.user!.email);
+      const [user]=await tx.select().from(usersTable).where(eq(usersTable.id,req.user!.userId)).for("update");
+      if(!user)throw new Error("INVITATION_WRONG_ACCOUNT");
+      return acceptLockedInvitation(tx,row,user);
+    });
+    res.json(result);
+  } catch(error) {res.status(409).json({error:error instanceof Error && error.message.startsWith("INVITATION_")?error.message:"INVITATION_UNAVAILABLE"});}
 });
 
 router.post("/auth/login", async (req, res) => {

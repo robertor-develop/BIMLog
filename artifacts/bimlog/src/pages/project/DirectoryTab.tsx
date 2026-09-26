@@ -191,6 +191,10 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
     try {
       const rInvite = await fetch(`${API}/projects/${projectId}/directory/${id}/invite`, { method: "POST", headers });
       if (!rInvite.ok) { setExportError(t("Invite failed. Please try again.", "La invitacion fallo. Intenta de nuevo.")); return; }
+      const result = await rInvite.json();
+      if (result.deliveryStatus && result.deliveryStatus !== "sent") {
+        setExportError(t("Invitation saved, but email was not delivered. Retry the invitation or contact support.", "Invitación guardada, pero el correo no se entregó. Reintente la invitación o contacte a soporte."));
+      }
       await load();
     } finally { setInviting(null); }
   };

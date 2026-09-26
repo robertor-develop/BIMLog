@@ -67,10 +67,13 @@ assert.match(directory, /makeInvitationEmail/);
 assert.match(directory, /Membership notification email failed/);
 assert.doesNotMatch(directory, /insert\(projectInvitations\)/);
 assert.match(register, /new URLSearchParams\(window\.location\.search\)/);
-assert.match(team, /joins them to your company and this project automatically/);
+assert.match(team, /company_join/);
+assert.match(auth, /lockInvitation\(tx, invitationToken, email\)/);
+assert.match(auth, /INVITATION_LINK_REQUIRED/);
+assert.match(service, /existingUser\[0\] && input\.existingOnly/);
 assert.match(team, /Invitaciones pendientes/);
 assert.match(team, /No se pudo cancelar la invitación/);
-assert.match(members, /set\(\{ status: "cancelled" \}\)/);
+assert.match(members, /set\(\{ status: "cancelled", revokedAt: new Date\(\) \}\)/);
 assert.doesNotMatch(members, /delete\(projectInvitations\)/);
 assert.match(register, /Cree su cuenta/);
 
