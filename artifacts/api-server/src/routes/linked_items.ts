@@ -13,7 +13,7 @@ import {
   lensViewpointsTable,
   scheduleItemPlacementsTable,
 } from "@workspace/db/schema";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, or, ne } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { canonicalCoordinationType } from "../lib/construction-coordination-records";
 
@@ -51,6 +51,7 @@ router.get("/projects/:projectId/links/:entityType/:entityId", authMiddleware, r
     const links = await db.select().from(linkedItemsTable)
       .where(and(
         eq(linkedItemsTable.projectId, projectId),
+        ne(linkedItemsTable.linkType, "register_package"),
         or(
           and(eq(linkedItemsTable.fromType, entityType), eq(linkedItemsTable.fromId, entityId)),
           and(eq(linkedItemsTable.toType, entityType), eq(linkedItemsTable.toId, entityId))
@@ -128,6 +129,10 @@ router.delete("/projects/:projectId/links/:linkId", authMiddleware, requirePermi
   try {
     const [existing] = await db.select().from(linkedItemsTable)
       .where(and(eq(linkedItemsTable.id, linkId), eq(linkedItemsTable.projectId, projectId)));
+    if (existing?.linkType === "register_package") {
+      res.status(409).json({ error: "Manage requirement/package links in Submittal Tracking." });
+      return;
+    }
     await db.delete(linkedItemsTable)
       .where(and(eq(linkedItemsTable.id, linkId), eq(linkedItemsTable.projectId, projectId)));
     if (existing) {

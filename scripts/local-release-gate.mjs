@@ -15,6 +15,7 @@ const commands = [
   { id: "proof-roots", command: process.execPath, args: ["scripts/test-proof-root.mjs"] },
   { id: "workflow-database-fixture", command: process.execPath, args: ["scripts/test-workflow-database-fixture.mjs"] },
   { id: "platform-audit-policy", command: process.execPath, args: ["scripts/test-platform-audit-policy.mjs"] },
+  { id: "submittal-register-coverage", command: process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "pnpm", args: process.platform === "win32" ? ["/d", "/s", "/c", "pnpm --filter @workspace/api-server exec tsx scripts/test-submittal-register-coverage.ts"] : ["--filter", "@workspace/api-server", "exec", "tsx", "scripts/test-submittal-register-coverage.ts"] },
   { id: "invitation-transactions", command: process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "pnpm", args: process.platform === "win32" ? ["/d", "/s", "/c", "pnpm --filter @workspace/api-server exec tsx scripts/test-invitation-lifecycle.ts"] : ["--filter", "@workspace/api-server", "exec", "tsx", "scripts/test-invitation-lifecycle.ts"] },
   { id: "pre-push", command: process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "pnpm", args: process.platform === "win32" ? ["/d", "/s", "/c", "pnpm run gate:pre-push"] : ["run", "gate:pre-push"] },
 ];

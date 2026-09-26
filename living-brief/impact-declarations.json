@@ -43717,6 +43717,116 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a9173a76defeeb8dcd767ef37008adc36ca9c10200db88c2cbdf223ff053a8b1"
+    },
+    {
+      "taskId": "consolidation-c004-submittal-register-coverage",
+      "reviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
+      "reviewedAt": "2026-09-26T19:22:44Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Requirement coverage must use explicit canonical links, not name matching or received-package-only counts; preserve operational acceptance blockers without stalling independent authorized work."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reuses canonical register, package and link authorities without duplicated product entities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Actual-component UI and isolated real-route tests respect the established evidence/release boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Explicit identities, project isolation, atomic audit and honest empty/error states apply existing quality principles."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Completes the approved unified submittal tracking delta."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing submittal tracking surface and database tables remain authoritative; no new module or schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens native, bridge and installers unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing package exports are unchanged; the new coverage panel explicitly disclaims inclusion in those exports."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard edition, certification or compliance claim introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local C004 evidence and supersedes stale release statements with exact published receipt."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Separates independent C004 work from unresolved I010/C003 acceptance and pending C005."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded build evidence records the change; no earlier accepted history is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-submittal-register-coverage.ts",
+        "artifacts/api-server/src/lib/submittal-register-coverage.ts",
+        "artifacts/api-server/src/routes/linked_items.ts",
+        "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
+        "artifacts/bimlog/src/lib/submittal-status-presentation.ts",
+        "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
+        "artifacts/bimlog/src/submittal-coverage-harness.tsx",
+        "artifacts/bimlog/submittal-coverage-harness.html",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C004.md",
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/local-release-gate.mjs",
+        "scripts/test-local-release-gate.mjs"
+      ],
+      "reviewedChangeSha256": "17c64f12610b1c70acbc154953804287290b15a03899217583b34af21efc92ca"
     }
   ]
 }

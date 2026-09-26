@@ -7,6 +7,20 @@
   "publishEveryBuilds": 10,
   "maxUnpublishedBuilds": 10,
   "lensNextFrozen": true,
+  "currentCheckpoint20260926": {
+    "publishedCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
+    "publishedEvidence": "F:/BIMLog/TestProof/identity-i010-role-published-20260926.md",
+    "supersedesHistoricalPendingCounts": true,
+    "block": "C001-C005",
+    "C001": "published_d21e4af3",
+    "C002": "published_7ca6a8a8",
+    "C003": "I005_source_published_operational_access_acceptance_open",
+    "C004": "local_candidate_required_package_coverage",
+    "C005": "pending",
+    "newUnpublishedScopes": 1,
+    "I010Acceptance": "company_binding_confirmation_and_sender_configuration_pending",
+    "fullLiveAcceptance": "NOT_COMPLETE"
+  },
   "identityCheckpoint": { "builds": ["I006","I007","I008"], "state": "published_role_repair_live_pass_I009_candidate", "publishedCommit": "42d06df0566d37e73cf5edd65f94b002c6f74357", "precedingPushedCommit": "c49ea8a5880227b10c8223787d4cbe9e88cf9e3d", "combinedUnpublishedBuilds": 1, "currentCandidate": "I009 atomic notification and transaction regression", "publicationDueAt": "I010", "remainingCurrentBlock": ["I009_release", "I010"], "liveAcceptance": "BOUNDED_ROLE_RETEST_PASS_EMAIL_AND_COMPANY_CORRECTION_OPEN", "visualScreenshotQA": "BOUNDED_DESKTOP_AND_INVALID_LINK_MOBILE_PASS_NOT_FULL_ACCEPTANCE" },
   "historicalProgramScope": "lensNextFrozen describes this original program, not the later approved consolidation integration scope",
   "currentReleaseReconciliation": {

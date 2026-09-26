@@ -6,8 +6,8 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 675,
-    "frontendApiReferences": 252,
+    "apiRoutes": 677,
+    "frontendApiReferences": 255,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -8128,6 +8128,44 @@
     },
     {
       "method": "GET",
+      "path": "/projects/:projectId/submittal-register-coverage",
+      "owner": "artifacts/api-server/src/routes/submittals.ts",
+      "tables": [
+        "submittalsTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "companiesTable",
+        "rfisTable",
+        "submittalRegisterTable",
+        "submittalViewEventsTable",
+        "linkedItemsTable",
+        "agentInsightsTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/projects/:projectId/submittal-register/:itemId/packages/:submittalId",
+      "owner": "artifacts/api-server/src/routes/submittals.ts",
+      "tables": [
+        "submittalsTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "companiesTable",
+        "rfisTable",
+        "submittalRegisterTable",
+        "submittalViewEventsTable",
+        "linkedItemsTable",
+        "agentInsightsTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/projects/:projectId/submittal-register",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
@@ -9008,6 +9046,14 @@
       "apiPath": "/api/v1/projects/${projectId}/reports/current-view/pdf"
     },
     {
+      "screen": "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/submittal-register-coverage"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/submittal-register/${reqId}/packages/${pkgId}"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/projects/${projectId}/commercial/team-performance/resource-planning"
     },
@@ -9842,6 +9888,10 @@
     {
       "screen": "artifacts/bimlog/src/project-26-apu-harness.tsx",
       "apiPath": "/api/v1/projects/26/financial/apu"
+    },
+    {
+      "screen": "artifacts/bimlog/src/submittal-coverage-harness.tsx",
+      "apiPath": "/api/v1/projects/1/submittal-register-coverage"
     }
   ],
   "findings": {

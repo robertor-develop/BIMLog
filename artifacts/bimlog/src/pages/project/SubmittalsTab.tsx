@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
+import { SubmittalRegisterCoverage } from "@/components/SubmittalRegisterCoverage";
+import { SUBMITTAL_STATUS_BADGES as STATUS_BADGE } from "@/lib/submittal-status-presentation";
 import { OptionalSharePanel } from "@/components/OptionalSharePanel";
 import { format, differenceInDays, isValid } from "date-fns";
 import {
@@ -115,16 +117,6 @@ const REVIEW_DECISIONS = [
   { value: "rejected", label: "Rejected", labelEs: "Rechazado" },
   { value: "not_required", label: "Not Required", labelEs: "No Requerido" },
 ];
-
-const STATUS_BADGE: Record<string, { bg: string; color: string; label: string; labelEs: string }> = {
-  pending: { bg: "#F3F4F6", color: "#6B7280", label: "Pending", labelEs: "Pendiente" },
-  submitted: { bg: "#EFF6FF", color: "#1D4ED8", label: "Submitted", labelEs: "Enviado" },
-  under_review: { bg: "#FFFBEB", color: "#B45309", label: "Under Review", labelEs: "En Revisión" },
-  approved: { bg: "#F0FDF4", color: "#15803D", label: "Approved", labelEs: "Aprobado" },
-  approved_as_noted: { bg: "#EFF6FF", color: "#1D4ED8", label: "Approved as Noted", labelEs: "Aprobado con Notas" },
-  rejected: { bg: "#FFF1F2", color: "#DC2626", label: "Rejected", labelEs: "Rechazado" },
-  revise_resubmit: { bg: "#FFF7ED", color: "#EA580C", label: "Revise & Resubmit", labelEs: "Revisar y Reenviar" },
-};
 
 const REGISTER_STATUS_OPTIONS = [
   { value: "pending", label: "Pending", labelEs: "Pendiente" },
@@ -831,7 +823,16 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
       {view === "register" ? (
         <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} />
       ) : view === "tracking" ? (
+        <>
+        <SubmittalRegisterCoverage key={projectId} projectId={projectId} lang={lang} canWrite={canWrite}
+          onGoRegister={() => setView("register")}
+          onOpenPackage={id => {
+            const selected = submittals.find(item => item.id === id);
+            if (selected) { setView("submittals"); setSelectedSubmittal(selected); }
+            else { void submittalsQueryClient.invalidateQueries(); toast({ title: w("Package changed. Refresh and reopen it.", "El paquete cambió. Actualiza y vuelve a abrirlo.", lang), variant: "destructive" }); }
+          }} />
         <SubmittalTrackingList projectId={projectId} submittals={submittals} lang={lang} onGoSubmittals={() => setView("submittals")} />
+        </>
       ) : (
         <SubmittalsList
           onRequestDelete={(s) => setDeleteTarget({ id: s.id, label: s.number })}
@@ -938,9 +939,15 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
   };
 
   const deleteItem = async (id: number) => {
-    await fetch(`/api/v1/projects/${projectId}/submittal-register/${id}`, {
+    const response = await fetch(`/api/v1/projects/${projectId}/submittal-register/${id}`, {
       method: "DELETE", headers: { Authorization: `Bearer ${getToken()}` },
     });
+    if (!response.ok) {
+      toast({ title: response.status === 409
+        ? w("Unlink its packages in Shop Drawing Control before deleting this requirement.", "Desvincula sus paquetes en Control de Shop Drawings antes de eliminar este requisito.", lang)
+        : w("Requirement could not be deleted.", "No se pudo eliminar el requisito.", lang), variant: "destructive" });
+      return;
+    }
     void fetchRegister();
   };
 

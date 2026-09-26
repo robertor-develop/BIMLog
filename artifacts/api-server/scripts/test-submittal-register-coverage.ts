@@ -1,0 +1,94 @@
+import assert from "node:assert/strict";
+import { createRequire } from "node:module";
+import { randomUUID } from "node:crypto";
+const { Client } = createRequire(import.meta.url)("pg");
+const schema = "coverage_test_" + randomUUID().replaceAll("-", "");
+const admin = new Client({ host: "127.0.0.1", port: 55469, user: "postgres", database: "bimlog_rfi_test", connectionTimeoutMillis: 3000 });
+await admin.connect();
+await admin.query(`CREATE SCHEMA ${schema}`);
+await admin.query(`SET search_path TO ${schema}`);
+for (const table of ["companies", "users", "projects", "project_members", "config_options", "activity_log", "submittal_register", "submittals", "linked_items"])
+  await admin.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
+process.env.PROD_DATABASE_URL = `postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test?options=${encodeURIComponent("-csearch_path=" + schema)}`;
+const { pool } = await import("@workspace/db");
+const { readRegisterCoverage, changeRegisterPackageLink, deleteUnlinkedRegisterRequirement } = await import("../src/lib/submittal-register-coverage");
+const { default: express } = await import("express");
+const { default: router } = await import("../src/routes/submittals");
+const { default: linksRouter } = await import("../src/routes/linked_items");
+const { signToken } = await import("../src/middlewares/auth");
+const app = express(); app.use(express.json()); app.use(router); app.use(linksRouter);
+const server = app.listen(0, "127.0.0.1");
+await new Promise<void>(resolve => server.once("listening", resolve));
+const address = server.address(); if (!address || typeof address === "string") throw new Error("fixture listener");
+try {
+  const company = (await admin.query("INSERT INTO companies(name) VALUES('TEST coverage company') RETURNING id")).rows[0].id;
+  const actorId = (await admin.query("INSERT INTO users(email,password_hash,full_name,company_id,is_super_admin) VALUES('coverage@example.test','unused','TEST coverage author',$1,true) RETURNING id", [company])).rows[0].id;
+  const readerId = (await admin.query("INSERT INTO users(email,password_hash,full_name,company_id) VALUES('reader@example.test','unused','TEST reader',$1) RETURNING id", [company])).rows[0].id;
+  const writerId = (await admin.query("INSERT INTO users(email,password_hash,full_name,company_id) VALUES('writer@example.test','unused','TEST writer',$1) RETURNING id", [company])).rows[0].id;
+  const project = (await admin.query("INSERT INTO projects(name,code,status,created_by_id) VALUES('TEST coverage','TEST-COV','active',$1) RETURNING id", [actorId])).rows[0].id;
+  const other = (await admin.query("INSERT INTO projects(name,code,status,created_by_id) VALUES('TEST other','TEST-OTHER','active',$1) RETURNING id", [actorId])).rows[0].id;
+  await admin.query("INSERT INTO config_options(category,value,label,label_es,meta) VALUES('member_role','read_only','Read','Lectura','{\"permission\":\"read\"}'),('member_role','writer','Write','Escritura','{\"permission\":\"write\"}')");
+  await admin.query("INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'read_only','active')", [project, readerId]);
+  await admin.query("INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'writer','active')", [project, writerId]);
+  const requirement = (await admin.query("INSERT INTO submittal_register(project_id,spec_section,description) VALUES($1,'23 00','TEST duct requirement') RETURNING id", [project])).rows[0].id;
+  const missing = (await admin.query("INSERT INTO submittal_register(project_id,spec_section,description) VALUES($1,'23 00','TEST duct requirement') RETURNING id", [project])).rows[0].id;
+  assert.equal((await readRegisterCoverage(project)).requirements.length, 2);
+  assert.equal((await readRegisterCoverage(project)).packages.length, 0);
+  const makePackage = async (p: number, revision: number) => (await admin.query("INSERT INTO submittals(project_id,number,title,status,submittal_type,submitted_by_id,revision_number) VALUES($1,$2,'TEST package','draft','shop_drawing',$3,$4) RETURNING id", [p, `TEST-${p}-${revision}`, actorId, revision])).rows[0].id;
+  const original = await makePackage(project, 0), revision = await makePackage(project, 1), unmatched = await makePackage(project, 2), foreign = await makePackage(other, 0);
+  await admin.query("UPDATE submittals SET parent_submittal_id=$1 WHERE id=$2", [original, revision]);
+  const input = { projectId: project, requirementId: requirement, packageId: original, actor: { userId: actorId }, remove: false };
+  assert.equal((await readRegisterCoverage(project)).links.length, 0);
+  const repeated = await Promise.all([changeRegisterPackageLink(input), changeRegisterPackageLink(input)]);
+  assert.equal(repeated.filter(result => result.changed).length, 1);
+  await changeRegisterPackageLink({ ...input, packageId: revision });
+  const coverage = await readRegisterCoverage(project);
+  assert.equal(coverage.requirements.length, 2); assert.equal(coverage.packages.length, 3); assert.equal(coverage.links.length, 2);
+  assert.equal(coverage.links.some(link => link.requirementId === missing || link.packageId === unmatched), false);
+  assert.equal(coverage.packages.find(pkg => pkg.id === original)?.status, "draft");
+  assert.equal(coverage.packages.find(pkg => pkg.id === revision)?.parentSubmittalId, original);
+  await assert.rejects(changeRegisterPackageLink({ ...input, packageId: foreign }), /must exist in this project/);
+  await assert.rejects(changeRegisterPackageLink({ ...input, requirementId: -1 }), /Valid requirement/);
+  await assert.rejects(deleteUnlinkedRegisterRequirement(project, requirement), /Unlink/);
+  const token = (id: number) => signToken({ userId: id, email: "test@example.test", companyId: company, fullName: "TEST", companyName: "TEST" });
+  const request = async (path: string, id?: number, method = "GET", body?: unknown) => {
+    const result = await fetch(`http://127.0.0.1:${address.port}${path}`, { method,
+      headers: { "Content-Type": "application/json", ...(id ? { Authorization: `Bearer ${token(id)}` } : {}) },
+      body: body === undefined ? undefined : JSON.stringify(body) });
+    return { status: result.status, body: await result.json() };
+  };
+  const path = `/projects/${project}/submittal-register-coverage`;
+  const mutation = `/projects/${project}/submittal-register/${requirement}/packages/${unmatched}`;
+  assert.equal((await request(path)).status, 401);
+  assert.equal((await request(path, readerId)).status, 200);
+  assert.equal((await request(`/projects/${other}/submittal-register-coverage`, readerId)).status, 403);
+  assert.equal((await request(mutation, readerId, "PUT", { linked: true })).status, 403);
+  assert.equal((await request(mutation, actorId, "PUT", {})).status, 400);
+  assert.equal((await request(mutation, writerId, "PUT", { linked: true })).status, 200);
+  const managedLink = (await admin.query("SELECT id FROM linked_items WHERE from_id=$1 AND to_id=$2", [requirement, unmatched])).rows[0].id;
+  assert.equal((await request(`/projects/${project}/links/${managedLink}`, writerId, "DELETE")).status, 409);
+  assert.deepEqual((await request(`/projects/${project}/links/submittal/${unmatched}`, readerId)).body, []);
+  assert.equal((await request(`/projects/${project}/submittal-register/${requirement}`, actorId, "DELETE")).status, 409);
+  assert.equal((await request(mutation, actorId, "PUT", { linked: false })).status, 200);
+  // Audit failure rolls back the link itself, not just the success response.
+  await admin.query("ALTER TABLE activity_log ADD CONSTRAINT test_no_link CHECK(action_type <> 'link') NOT VALID");
+  await assert.rejects(changeRegisterPackageLink({ ...input, packageId: unmatched }));
+  assert.equal((await readRegisterCoverage(project)).links.some(link => link.packageId === unmatched), false);
+  await admin.query("ALTER TABLE activity_log DROP CONSTRAINT test_no_link");
+  await changeRegisterPackageLink({ ...input, remove: true });
+  assert.equal((await changeRegisterPackageLink({ ...input, remove: true })).changed, false);
+  await changeRegisterPackageLink({ ...input, packageId: revision, remove: true });
+  await deleteUnlinkedRegisterRequirement(project, requirement);
+  assert.equal((await readRegisterCoverage(project)).requirements.length, 1);
+  await admin.query("UPDATE submittals SET deleted_at=now() WHERE id=$1", [unmatched]);
+  await assert.rejects(changeRegisterPackageLink({ ...input, requirementId: missing, packageId: unmatched }), /must exist in this project/);
+  const presentationPath = "../../bimlog/src/lib/submittal-status-presentation.ts";
+  const { submittalStatusLabel } = await import(presentationPath);
+  assert.equal(submittalStatusLabel("approved", "es"), "Aprobado");
+  assert.equal(submittalStatusLabel("draft", "es"), "Borrador");
+  assert.equal(submittalStatusLabel("unknown_historical", "es"), "unknown_historical");
+  console.log("C004 PASS: missing requirements, explicit package/revision identities, unmatched packages, duplicate/concurrent link, unlink replay, atomic audit rollback, soft-delete denial, linked-delete guard, real HTTP authentication/read-only/project isolation.");
+} finally {
+  await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+  await pool.end(); await admin.query(`DROP SCHEMA ${schema} CASCADE`); await admin.end();
+}

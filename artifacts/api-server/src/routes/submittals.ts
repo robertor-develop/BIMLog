@@ -17,6 +17,7 @@ import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeade
 import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import * as XLSX from "xlsx";
+import { changeRegisterPackageLink, deleteUnlinkedRegisterRequirement, readRegisterCoverage, RegisterCoverageError } from "../lib/submittal-register-coverage";
 
 const router: IRouter = Router();
 
@@ -1857,6 +1858,27 @@ router.get("/projects/:projectId/submittals/:submittalId/audit-certificate", aut
   }
 });
 
+// Explicit requirement/package relationships reuse linked_items; names are never identity.
+router.get("/projects/:projectId/submittal-register-coverage", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    res.json(await readRegisterCoverage(Number(req.params.projectId)));
+  } catch {
+    res.status(500).json({ error: "Submittal coverage could not be loaded." });
+  }
+});
+
+router.put("/projects/:projectId/submittal-register/:itemId/packages/:submittalId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  try {
+    if (typeof req.body?.linked !== "boolean") { res.status(400).json({ error: "linked must be true or false." }); return; }
+    res.json(await changeRegisterPackageLink({ projectId: Number(req.params.projectId),
+      requirementId: Number(req.params.itemId), packageId: Number(req.params.submittalId),
+      remove: !req.body.linked, actor: req.user! }));
+  } catch (error) {
+    res.status(error instanceof RegisterCoverageError ? error.status : 500)
+      .json({ error: error instanceof RegisterCoverageError ? error.message : "The requirement/package link could not be saved." });
+  }
+});
+
 // ─── GET /projects/:projectId/submittal-register ──────────────────────────────
 router.get("/projects/:projectId/submittal-register", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
@@ -1923,11 +1945,11 @@ router.delete("/projects/:projectId/submittal-register/:itemId", authMiddleware,
   try {
     const projectId = parseInt(String(req.params.projectId));
     const itemId = parseInt(String(req.params.itemId));
-    await db.delete(submittalRegisterTable)
-      .where(and(eq(submittalRegisterTable.id, itemId), eq(submittalRegisterTable.projectId, projectId)));
+    await deleteUnlinkedRegisterRequirement(projectId, itemId);
     res.json({ success: true });
   } catch (error) {
-    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+    res.status(error instanceof RegisterCoverageError ? error.status : 500)
+      .json({ error: error instanceof RegisterCoverageError ? error.message : "The requirement could not be deleted." });
   }
 });
 
