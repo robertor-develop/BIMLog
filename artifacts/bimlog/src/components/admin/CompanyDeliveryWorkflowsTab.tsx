@@ -159,6 +159,7 @@ export function CompanyDeliveryWorkflowsTab({
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [loadFailed, setLoadFailed] = useState(false);
   const [notice, setNotice] = useState("");
   const [retireTarget, setRetireTarget] = useState<{ templateId: string; versionId: string; revision: number } | null>(null);
   const [retireReason, setRetireReason] = useState("");
@@ -235,8 +236,9 @@ export function CompanyDeliveryWorkflowsTab({
   );
   useEffect(() => {
     setLoading(true);
+    setLoadFailed(false);
     void load()
-      .catch((cause) => setError(String(cause)))
+      .catch((cause) => { setLoadFailed(true); setError(String(cause)); })
       .finally(() => setLoading(false));
   }, [load]);
   useEffect(() => {
@@ -362,6 +364,7 @@ export function CompanyDeliveryWorkflowsTab({
     afterId?: string,
   ) => {
     setBusy(true);
+    setLoadFailed(false);
     setError("");
     setNotice("");
     try {
@@ -391,6 +394,7 @@ export function CompanyDeliveryWorkflowsTab({
     const requestId = ++previewRequest.current;
     const submitted = JSON.stringify(draft);
     setBusy(true);
+    setLoadFailed(false);
     setError("");
     setPreview(null);
     try {
@@ -452,11 +456,12 @@ export function CompanyDeliveryWorkflowsTab({
           {error}{" "}
           <button
             type="button"
-            onClick={() =>
-              void load().catch((cause) => setError(String(cause)))
-            }
+            onClick={() => {
+              if (!loadFailed) { setError(""); return; }
+              void load().then(() => setLoadFailed(false)).catch((cause) => setError(String(cause)));
+            }}
           >
-            {t("Retry", "Reintentar")}
+            {loadFailed ? t("Retry loading", "Reintentar carga") : t("Dismiss message", "Cerrar mensaje")}
           </button>
         </div>
       )}

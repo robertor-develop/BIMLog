@@ -3,7 +3,7 @@
 ## Core Builds 41–45 correction chain — 2026-09-26
 
 - [x] Reconcile the prior release from external receipt `F:/BIMLog/TestProof/core-block08-builds36-40-release-20260926.md`: final source `29c80f8da35c513d13356e7227db404221bf25c3`, deployment `4fcd87ed`. Earlier publication-pending notes are historical. Full-site acceptance remains incomplete.
-- [ ] Repair and verify workflow editor validation guidance, unsaved-change cancellation, destructive APU phase replacement confirmation and field readability. Live observation showed raw validation codes, borderless fields and unverified native-confirm cancellation. Keep Lens Next frozen; no permission, economic or approval-rule weakening.
+- [x] Repair workflow editor validation guidance, unsaved-change cancellation, destructive APU phase replacement confirmation and field readability. Local installed-Chrome synthetic-response scenarios pass at desktop/390px in English/Spanish, including dismissing validation errors without losing edits. This corrects the source defects observed live; deployed retest is due at Build 50. Lens Next and server-side permissions/economic/approval authority remain unchanged.
 - [ ] Gate and push Builds 41–45; publish at Build 50. Carry full independent-approval/activation/EDT/hours/QC and actual SharePoint tenant acceptance forward explicitly.
 
 ## Core Build 40 publication boundary — 2026-09-26

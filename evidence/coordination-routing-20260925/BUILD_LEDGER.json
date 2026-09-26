@@ -38,8 +38,9 @@
   "deploymentId": "afe01b7d",
   "separateRepairBlock": { "ids": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"], "state": "R1_R5_pushed_R6_R10_source_candidate", "unpublishedBuilds": 10, "lastPushedCommit": "66c140197dac2c4e619d4c073618f376039570c7" },
   "repairReleaseReceipt": { "commit": "152cbe34f6553c50f4be30ad1fceccccc845cde2", "deployment": "78af273c", "unpublishedRepairs": 0, "supersedesRepairCandidateState": true },
-  "coreContinuation": { "builds": [31,32,33,34,35,36,37,38,39,40], "state": "31_35_pushed_36_40_source_candidate", "lastPushedCommit": "620c225f6e9bcde5b62e0a87c1d8fa5d745cc74a", "unpublishedBuilds": 10, "publicationDueAt": 40 },
-  "remainingOriginalRoadmap": { "builds": 40, "blocks": 8, "excludesLensNext": true },
+  "coreReleaseReceipt": { "commit": "29c80f8da35c513d13356e7227db404221bf25c3", "deployment": "4fcd87ed", "buildsThrough": 40, "fullSiteSmoke": "NOT_COMPLETE" },
+  "coreContinuation": { "builds": [31,32,33,34,35,36,37,38,39,40,41,42,43,44,45], "state": "31_40_published_41_45_source_candidate", "lastPushedCommit": "29c80f8da35c513d13356e7227db404221bf25c3", "unpublishedBuilds": 5, "publicationDueAt": 50 },
+  "remainingOriginalRoadmap": { "builds": 35, "blocks": 7, "excludesLensNext": true },
   "liveSmoke": "partial_pass_file_selection_blocked",
   "sharePointDelivery": "confirmed_exact_job_path_published_real_tenant_roundtrip_unverified",
   "knownSafetyCorrection": "queued_sync_fail_closed_before_event_or_cache_consumption"

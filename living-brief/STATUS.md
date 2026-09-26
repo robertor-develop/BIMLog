@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Core operating chain Builds 41–45 — 2026-09-26
+
+- Prior release is verified source `29c80f8da35c513d13356e7227db404221bf25c3`, deployment `4fcd87ed`, with external receipt `F:/BIMLog/TestProof/core-block08-builds36-40-release-20260926.md`. This supersedes older pending-publication descriptions, not incomplete full-site acceptance.
+- Builds 41–44 add contextual bilingual validation guidance, accessible cancel/discard workflow switching, explicit APU phase replacement confirmation, visible form controls and translated role labels. Twenty local installed-Chrome synthetic-response scenarios passed across desktop/390px and English/Spanish; actual production components are used. These are not authenticated production or server-authority evidence.
+- Build 45 preserves unsaved edits when dismissing validation/action failures instead of reloading the draft. Loading failures retain a separate retry. Final browser regression, full exact-head gate and push are required. Five builds are unpublished; publication is due at Build 50. Original planned remainder after this block is 35 builds/seven blocks, excluding Lens Next, which remains frozen. Full independent approval, activation, EDT, hours/QC and actual SharePoint tenant acceptance remain open.
+
 ## Core operating chain Builds 36–40 — 2026-09-26
 
 - Release-preparation inspection found Governance's enforcement notice still described the newly implemented replacement rules as recorded intent. The bilingual notice and regression assertion are corrected as a Build 40 repair, not a new numbered build. Exact-head retest and corrected deployment remain required.

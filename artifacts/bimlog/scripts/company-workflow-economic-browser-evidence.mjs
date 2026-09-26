@@ -62,6 +62,7 @@ async function scenario(width, language, mode) {
       return respond({ versions:[version],history:[] });
     if (pathname === "/api/v1/company/delivery-workflows/preview" && method === "POST") {
       const definition = request.postDataJSON().definition;
+      if (!definition.phases[0].code.trim()) return respond({ code:"WORKFLOW_TEXT_INVALID",field:"phases[0].code" },400);
       if (definition.economicAllocation && (definition.phases.length !== 2 ||
         definition.phases[0].id !== "pre" || definition.phases[1].id !== "record"))
         return respond({ code:"WORKFLOW_ALLOCATION_PHASE_MISMATCH" },409);
@@ -114,12 +115,21 @@ async function scenario(width, language, mode) {
         await template.selectOption("workflow-1");
         await page.getByRole("heading",{ name:/Sleeve Standard/ }).waitFor();
         assert.equal(await phaseName.inputValue(), "Production");
+        const phaseCode = page.getByLabel(es ? "Código de fase" : "Phase code", { exact:true }).first();
+        await phaseCode.fill("");
+        await page.getByRole("button", { name:es ? "Validar y previsualizar" : "Validate and preview" }).click();
+        await page.getByRole("alert").filter({ hasText:es ? "Fase 1 · Código: Complete" : "Phase 1 · Code: Complete" }).waitFor();
+        assert.equal(await page.getByRole("button", { name:es ? "Guardar borrador" : "Save draft" }).isDisabled(), true);
+        await page.getByRole("button", { name:es ? "Cerrar mensaje" : "Dismiss message" }).click();
+        assert.equal(await phaseCode.inputValue(), "");
+        await phaseCode.fill("PRODUCTION");
         await economic.getByLabel(es ? "APU Comercial publicado" : "Published Commercial APU").selectOption("apu-v1");
         await economic.getByRole("button",{ name:es ? "Aplicar fases predeterminadas del APU al borrador" : "Apply APU default phases to draft" }).click();
         await page.getByRole("alertdialog").getByRole("button", { name:es ? "Conservar fases actuales" : "Keep current phases" }).click();
         assert.equal(await page.getByLabel(es ? "Código de fase" : "Phase code", { exact:true }).first().inputValue(), "PRODUCTION");
         await economic.getByRole("button",{ name:es ? "Aplicar fases predeterminadas del APU al borrador" : "Apply APU default phases to draft" }).click();
         await page.getByRole("alertdialog").getByRole("button", { name:es ? "Aplicar fases del APU" : "Apply APU phases", exact:true }).click();
+        await page.getByRole("alertdialog").waitFor({ state:"hidden" });
         await page.screenshot({ path:path.join(output,`${width}-${language}-after-alignment.png`), fullPage:true });
         fs.writeFileSync(path.join(output,`${width}-${language}-after-alignment.txt`), await page.locator("body").innerText());
         await economic.getByText(/Preliminary 45.00%/).waitFor();
