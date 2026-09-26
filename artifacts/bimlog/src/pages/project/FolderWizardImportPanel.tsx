@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FolderWizardRequestLifetime } from "./folder-wizard-request-lifetime";
 import { refreshAfterConfirmedFolderWizardMutation } from "./folder-wizard-confirmed-refresh";
+import { readFolderWizardSection } from "./folder-wizard-read-section";
 import { parseFolderWizardDraft, type FolderWizardDraft } from "./folder-wizard-draft";
 import { FolderWizardRoutingPanel } from "./FolderWizardRoutingPanel";
 import { FolderWizardPublishPanel } from "./FolderWizardPublishPanel";
@@ -44,6 +45,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
   const [jobs, setJobs] = useState<PublishJob[]>([]);
   const [jobsError, setJobsError] = useState(false);
   const [routingRevision, setRoutingRevision] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
   const scopeRevision = useRef(0);
   const reads = useRef(new FolderWizardRequestLifetime());
   const selections = useRef(new FolderWizardRequestLifetime());
@@ -60,14 +62,22 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
     const data = await response.json() as { current: ImportRecord | null };
     if (!active()) return;
     setCurrent(data.current);
-    const check = await fetch(`${endpoint}/publishing-readiness`, { headers: { Authorization: `Bearer ${token}` }, signal });
+    const [check, jobResponse] = await Promise.all([
+      readFolderWizardSection<Readiness>(() => fetch(`${endpoint}/publishing-readiness`, { headers: { Authorization: `Bearer ${token}` }, signal })),
+      readFolderWizardSection<{ jobs: PublishJob[] }>(() => fetch(`${endpoint}/publishing-jobs`, { headers: { Authorization: `Bearer ${token}` }, signal })),
+    ]);
     if (!active()) return;
-    if (check.ok) { const value = await check.json() as Readiness; if (!active()) return; setReadiness(value); setReadinessError(false); }
-    else { setReadiness(null); setReadinessError(true); }
-    const jobResponse = await fetch(`${endpoint}/publishing-jobs`, { headers: { Authorization: `Bearer ${token}` }, signal });
-    if (!active()) return;
-    if (jobResponse.ok) { const value = await jobResponse.json() as { jobs: PublishJob[] }; if (!active()) return; setJobs(value.jobs); setJobsError(false); }
-    else { setJobs([]); setJobsError(true); }
+    setReadiness(check.ok ? check.data : null); setReadinessError(!check.ok);
+    setJobs(jobResponse.ok ? jobResponse.data.jobs : []); setJobsError(!jobResponse.ok);
+  }
+
+  async function refreshStatus() {
+    if (refreshing || saveInFlight.current) return;
+    const revision = scopeRevision.current;
+    setRefreshing(true); setError(""); setReadiness(null);
+    try { await reload(); }
+    catch { if (revision === scopeRevision.current) setError(tr("Could not refresh routing. Try again.", "No se pudieron actualizar las rutas. Reintente.")); }
+    finally { if (revision === scopeRevision.current) setRefreshing(false); }
   }
 
   useEffect(() => {
@@ -75,6 +85,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
     scopeRevision.current += 1; reads.current.invalidate(); selections.current.invalidate(); saveInFlight.current = false;
     setCurrent(null); setReadiness(null); setJobs([]); setDraft(null); setSourceText(""); setFileName(""); setSaving(false);
     setReadinessError(false); setJobsError(false);
+    setRefreshing(false);
     setLoading(true);
     setError("");
     void reload(controller.signal).catch((cause: unknown) => {
@@ -136,6 +147,9 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
 
   return <section aria-label={tr("BT Folder Wizard routing", "Rutas de BT Folder Wizard")} style={{ border: "1px solid hsl(var(--border))", borderRadius: 11, padding: 17, marginBottom: 18, background: "hsl(var(--card))" }}>
     <h2 style={{ margin: 0, fontSize: 17 }}>{tr("BT Folder Wizard routing", "Rutas de BT Folder Wizard")}</h2>
+    <button type="button" disabled={loading || saving || refreshing} onClick={() => void refreshStatus()}>
+      {refreshing ? tr("Refreshing…", "Actualizando…") : tr("Refresh routing and publication status", "Actualizar rutas y estado de publicación")}
+    </button>
     <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{tr("Import the Wizard JSON to configure folder rules. File publication is a separate, explicit step after destination verification.", "Importe el JSON del Wizard para configurar las reglas de carpetas. La publicación de archivos es un paso separado y explícito después de verificar el destino.")}</p>
     {loading ? <p role="status">{tr("Loading routing…", "Cargando rutas…")}</p> : error && !current && !draft ? <p role="alert">{error}</p> : <>
       {current ? <div style={{ fontSize: 12 }}>
