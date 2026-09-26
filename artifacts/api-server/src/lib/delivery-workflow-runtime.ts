@@ -355,6 +355,9 @@ async function mutate<T>(
     context: Awaited<ReturnType<typeof locked>>,
   ) => Promise<T>,
 ) {
+  // Mutations always require the revision observed by the caller, including first writes.
+  if (!Number.isSafeInteger(input.expectedRevision) || Number(input.expectedRevision) < 1)
+    throw new FinancialControlError(400,"DELIVERY_WORKFLOW_REVISION_REQUIRED","Reload the workflow and submit its current revision.");
   await ensureDeliveryWorkflowRuntimeSchema();
   const client = await pool.connect();
   try {

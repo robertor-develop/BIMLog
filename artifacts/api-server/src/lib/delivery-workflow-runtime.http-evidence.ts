@@ -58,6 +58,13 @@ await assert.rejects(pool.query(`UPDATE company_delivery_workflow_work_items SET
 await pool.query(`UPDATE company_workflow_governance_versions SET state='retired',retired_at=now(),retired_by_id=$2 WHERE id=$1`,[policyVersionId,owner]);
 assert.equal((await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId})).governancePolicy?.fingerprint,policyFingerprint);
 await assert.rejects(getWorkItemDeliveryWorkflow({actorUserId:outsider,projectId:project.id,workItemId}),/membership/i);
+for (const expectedRevision of [undefined,null,0,-1,1.5,"1",true]) {
+  await assert.rejects(setWorkItemDeliveryStep({actorUserId:producer,projectId:project.id,workItemId,expectedRevision,phaseId:"preliminary",taskId:"prepare",status:"complete"}),
+    (error:unknown) => (error as {code?:string}).code === "DELIVERY_WORKFLOW_REVISION_REQUIRED");
+}
+const afterInvalidRevisions = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+assert.equal(afterInvalidRevisions.revision,runtime.revision);
+assert.equal(afterInvalidRevisions.events.length,runtime.events.length);
 await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision}),/assigned approve role/);
 await assert.rejects(setWorkItemDeliveryStep({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision + 1,phaseId:"preliminary",taskId:"prepare",status:"complete"}),/Reload before saving/);
 await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision}),/Complete every workflow checkpoint/);
