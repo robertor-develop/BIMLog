@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Resource Planning Builds 61–65 — 2026-09-26
+
+- R11–R15 passed their exact-head gate and were pushed at `e12ca284f20796135e147d973caf771bf3ae02f6`; external receipt `F:/BIMLog/TestProof/runtime-repairs-R11-R15-push-20260926.md` supersedes their pending-push note. Production baseline remains Build 60 pending this release.
+- Builds 61–64 reject impossible calendar dates, invalid timezones and fractional weekdays, bound capacity to selected days, evaluate each assignment's own working-date/leave window, and explain warnings in English/Spanish. All outputs remain advisory; no approved hours, rates, earnings, permissions or schema changes.
+- Build 65 connects API/UI regression and verifies deterministic warnings, rate redaction and unchanged profile input. Focused tests pass; full exact-head gate, push, publication and authenticated live smoke remain required at authoring.
+- These five builds plus the five prior repairs reach ten unpublished changes. Do not start Build 66 before publication and connected live verification. Original roadmap remainder after Build 65 is 15 planned builds/three blocks; unresolved policy and full multi-role acceptance are not closed by this estimate. Lens Next remains frozen.
+
 ## Runtime repair block R11–R15 — 2026-09-26
 
 - Verified production baseline is Build 60, source `800493e73cc46deaa9a1d9d3b761af9f30891208`, Replit deployment `f04f3322`, schema action NONE. External receipt `F:/BIMLog/TestProof/core-block12-builds56-60-release-20260926.md` supersedes the older publication-pending notes. Full authenticated acceptance is explicitly incomplete.

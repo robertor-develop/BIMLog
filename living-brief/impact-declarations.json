@@ -42642,6 +42642,108 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e275be2f3657195be1d65785227c816bc5769e7e37d886e769233bdc7c4fe240"
+    },
+    {
+      "taskId": "BIMLOG_RESOURCE_BLOCK13_BUILDS61_65",
+      "reviewedThroughCommit": "e12ca284f20796135e147d973caf771bf3ae02f6",
+      "reviewedAt": "2026-09-26T07:32:02Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_source",
+          "run_local_validation",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Calendar normalization, invalid capacity profiles and assignment-date-window blind spots corrected; preserve advisory financial boundaries and publish at combined ten-change limit."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Explicit human-reviewed capacity, no hidden scoring or financial mutation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five-build push and combined ten-change publication retained."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local proof remains distinct from live acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Resource planning remains advisory; remaining earnings scope stays open."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing resource routes and components; no schema or route changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next, Native and installers frozen."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new standard claims."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record baseline push, five resource builds and pending publication."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Record assignment capacity corrections and retain full acceptance gaps."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Immutable scenario history and protected rates preserved."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/team-resource-planning-service.ts",
+        "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
+        "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.behavior.tsx",
+        "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.tsx",
+        "evidence/coordination-routing-20260925/BLOCK_13_BUILDS_061_065.md",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c4210011aea8f691bd0da76f6d1ee0403c66d8da323184069ad7787e6472964c"
     }
   ]
 }

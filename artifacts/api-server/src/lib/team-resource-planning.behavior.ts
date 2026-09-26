@@ -46,6 +46,15 @@ assert.equal(overloadedDay.decision,"review_required");assert.equal(overloadedDa
 assert.deepEqual(windowEvaluation("2026-08-22","2026-08-23",1).warnings,["ASSIGNMENT_NO_AVAILABLE_DAYS"]);
 assert.ok(windowEvaluation("2026-08-17","2026-08-17",1,[{startDate:"2026-08-17",endDate:"2026-08-17"}]).warnings.includes("ASSIGNMENT_NO_AVAILABLE_DAYS"));
 assert.deepEqual(windowEvaluation("2026-08-17","2026-08-18",16).warnings,[]);
+// Capacity warnings are advisory and deterministic; they do not mutate saved profiles or financial authority.
+const beforeProfile=JSON.stringify(validProfile);
+assert.deepEqual(windowEvaluation("2026-08-17","2026-08-17",16),overloadedDay);
+assert.equal(JSON.stringify(validProfile),beforeProfile);
+assert.equal(overloadedDay.totals.internalCost,800);
+assert.equal(redactScenarioEvaluation(overloadedDay,false).totals.internalCost,null);
+assert.deepEqual(redactScenarioEvaluation(overloadedDay,false).warnings,overloadedDay.warnings);
+assert.throws(()=>resourceCapacityProfile({...validProfile,leave:[{startDate:"2026-02-30",endDate:"2026-03-01"}]}),/real calendar date/);
+assert.throws(()=>resourceCapacityProfile({...validProfile,leave:[{startDate:"2026-08-21",endDate:"2026-08-20"}]}),/Leave start/);
 assert.equal(missingProfile.people[0]?.capacityHours,null);assert.equal(missingProfile.people[0]?.availableHours,null);assert.equal(missingProfile.people[0]?.utilization,null);assert.equal(missingProfile.totals.internalCost,null);assert.equal(missingProfile.totals.billingValue,null);assert.ok(missingProfile.warnings.includes("CAPACITY_PROFILE_REQUIRED"));
 const persistedEvaluation={people:[{userId:9,internalCost:800,billingValue:1200}],totals:{scenarioHours:8,internalCost:800,billingValue:1200},warnings:[]};
 const redactedEvaluation=redactScenarioEvaluation(persistedEvaluation,false);assert.equal(redactedEvaluation.people[0].internalCost,null);assert.equal(redactedEvaluation.people[0].billingValue,null);assert.equal(redactedEvaluation.totals.internalCost,null);assert.equal(redactedEvaluation.totals.billingValue,null);assert.deepEqual(redactScenarioEvaluation(persistedEvaluation,true),persistedEvaluation);assert.equal(persistedEvaluation.people[0].internalCost,800);
