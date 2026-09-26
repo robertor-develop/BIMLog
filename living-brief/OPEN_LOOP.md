@@ -1,5 +1,16 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Current open-loop authority — Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+
+The approved corrected report is `F:/BIMLog/TestProof/BIMLog_Consolidation_Vorea_Audit_and_120_Build_Plan_20260926.md`, revision 2. C001–C005 are authorized now; later blocks remain the approved planning scope, not completed work. Historical checkpoint counts below are not current publication counts. OPEN_LOOP_DISPOSITIONS.json retains their classifications; current release evidence is the reconciliation in STATUS.md and the coordination-routing ledger.
+
+- [ ] Complete Workflow/Intake/resource consolidation and the approved C001–C120 module deltas without duplicate authorities; C001–C005 are the current implementation block.
+- [ ] Prove Ruben project entry and full multi-role template-to-Operations acceptance using authenticated production workflows; memberships and fixture tests are insufficient.
+- [ ] Complete SharePoint provider enrollment, authorized destination and exact-byte delivery/readback; Microsoft administrator action and product implementation remain distinct obligations.
+- [ ] Preserve Ruben's deferred physical Navisworks 2025 field evidence and identify his exact installed package before any affected native release; local package evidence cannot substitute for his installation.
+
+Lens Next is protected, not disconnected: necessary integrations are included, unrelated redesign remains deferred. No native/runtime change is made by C001. Five-build push and ten-build publication cadence applies to new unpublished work, not historical ledger arithmetic.
+
 ## Project access and SharePoint correction — 2026-09-26
 
 - [x] Reconcile published45e22afc from the external resource block15 release receipt; prior pending-publication notes are historical.
@@ -273,7 +284,7 @@
 - [ ] Later blocks remain responsible for complete Delivery Workflow, Governance, APU/Pricing, Intake activation, EDT generation, hours/budget, R/V, QC, Change Order, split, import, reporting and final end-to-end acceptance behavior. Schema presence alone is not completion.
 - [x] Block 3 changes no Lens Next Native, Pulse, bridge, installer, package or Autodesk path; focused Navisworks smoke is not required.
 
-## Current open-loop authority — Coordination Knowledge Library Block 10 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Historical open-loop checkpoint — Coordination Knowledge Library Block 10 — 2026-09-22
 
 - [x] Builds 226–230 establish the canonical company-scoped domain, immutable revisions, tenant-bound repositories, additive migration, clean/repeat/rollback coverage, and restored-database preservation proof. This boundary is push-only and does not change the visible Lens Next workspace.
 - [x] Block 1 implementation authority is exact commit `cce77c1d813b16952873a9faa192208276dd7b31`; reconciliation may update evidence metadata but cannot silently change the accepted product scope.

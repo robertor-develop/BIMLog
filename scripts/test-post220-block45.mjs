@@ -1,20 +1,17 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { spawnSync } from "node:child_process";
+import { validateCurrentOpenLoopAuthority } from "./current-open-loop-authority.mjs";
 
 const read = relative => fs.readFileSync(relative, "utf8");
 const json = relative => JSON.parse(read(relative));
 const open = json("living-brief/OPEN_LOOP_DISPOSITIONS.json");
 const field = json("evidence/stabilization-program-20260919/LENS_NEXT_FIELD_EVIDENCE.json");
-const current = open.items.filter(item => item.currentAuthority && item.classification === "ACTIVE");
+const current = validateCurrentOpenLoopAuthority(open);
 const currentField = current.filter(item => item.workClass === "FIELD_EVIDENCE");
 const currentProvider = current.filter(item => item.workClass === "PROVIDER_EVIDENCE");
 
-assert.equal(currentField.length, 1);
-assert.match(currentField[0].statement, /Navisworks 2025/);
-assert.match(currentField[0].statement, /Ruben/);
-assert.equal(currentProvider.length, 1);
-assert.match(currentProvider[0].statement,/Build 275/);
+assert.equal(currentField.filter(item => /Navisworks 2025/.test(item.statement) && /Ruben/.test(item.statement)).length, 1);
 assert.equal(field.installed2021.retiredDirectLoad.state, "REMOVED_WITH_ROLLBACK_EVIDENCE");
 assert.equal(field.installed2021.retiredDirectLoad.activeAfterCutover, false);
 assert.equal(field.rubenPhysical2025.status, "DEFERRED_TO_RUBEN");

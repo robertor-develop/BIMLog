@@ -7,6 +7,19 @@
   "publishEveryBuilds": 10,
   "maxUnpublishedBuilds": 10,
   "lensNextFrozen": true,
+  "historicalProgramScope": "lensNextFrozen describes this original program, not the later approved consolidation integration scope",
+  "currentReleaseReconciliation": {
+    "commit": "25d6952efa2f7694734d3a8d34e47800ecde30ee",
+    "release": "v1.05.N18-P36",
+    "baselineUnpublishedBuilds": 0,
+    "evidence": "F:/BIMLog/TestProof/sharepoint-access-repair-20260926.md#subsequent-direct-repairpublication-request",
+    "supersedesHistoricalPendingPublicationCounts": true,
+    "schemaAction": "NONE",
+    "fullSiteAcceptance": "NOT_COMPLETE",
+    "lensPolicy": "protected_necessary_integrations_only",
+    "nextProgram": "C001-C120",
+    "currentAuthorizedBlock": "C001-C005"
+  },
   "sourceBuilds": [
     { "number": 6, "commit": "872df14a", "state": "committed" },
     { "number": 7, "commit": "d8cf74ee", "state": "committed" },

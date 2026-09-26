@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Current release reconciliation and consolidation C001 — 2026-09-26
+
+- Source baseline and freshly queried GitHub master are `25d6952efa2f7694734d3a8d34e47800ecde30ee`. The subsequent-publication section of `F:/BIMLog/TestProof/sharepoint-access-repair-20260926.md` records that exact live source, `v1.05.N18-P36`, readiness200, identityBound=true and schema action NONE. Earlier pending-publication paragraphs are historical and superseded by that receipt. Baseline unpublished implementation count is zero; this does not claim full-site acceptance.
+- C001 corrects the current open-loop check which had required obsolete Build275 publication and prohibited any current product work. Ownership, evidence classification, unique authority and deferred field evidence remain enforced; a historical build number is no longer a substitute for current state.
+- Approved consolidation revision2 is 120 proposed builds in 24 blocks. C001–C005 are the current authorized block. Existing functions are reused, useful unfinished changes preserved, and actual deltas determine implementation. No product behavior, production data, credentials or native installer changed in this reconciliation.
+- The local 2021 installed manifest reports Lens Next `1.5.18.36`; this identifies this workstation only, not Ruben's installed binary. Lens integration remains protected and backward-compatible; unrelated responsive/native redesign is deferred. Exact binary evidence and preservation are collected without modifying the installation. Connected behavior and Ruben's package remain separate evidence obligations.
+- Full multi-role acceptance, Ruben project-entry reproduction and real SharePoint provider delivery remain open. No new publication or customer acceptance is claimed by C001.
+
 ## Project access and SharePoint correction — 2026-09-26
 
 - Baseline45e22afc is published; the external `F:/BIMLog/TestProof/resource-block15-builds71-75-release-20260926.md` receipt supersedes the pending-publication wording below. Full multi-role/site acceptance is not claimed.

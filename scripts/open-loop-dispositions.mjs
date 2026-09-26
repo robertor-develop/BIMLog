@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { validateCurrentOpenLoopAuthority } from "./current-open-loop-authority.mjs";
 
 const root = process.cwd();
 const sourcePath = path.join(root, "living-brief", "OPEN_LOOP.md");
@@ -157,21 +158,6 @@ if (process.argv.includes("--write")) {
   if (items.some((item) => !result.allowedWorkClasses.includes(item.workClass) || !item.ownership?.owner || !item.ownership?.module))
     throw new Error("Every unchecked open-loop item requires a governed work class and owner binding");
   if (duplicateStatements.length) throw new Error(`Duplicate unchecked open-loop statements: ${JSON.stringify(duplicateStatements)}`);
-  const currentAuthorityItems = items.filter((item) => item.currentAuthority);
-  const currentProductWork = currentAuthorityItems.filter((item) => item.workClass === "PRODUCT_WORK");
-  const currentFieldEvidence = currentAuthorityItems.filter((item) => item.workClass === "FIELD_EVIDENCE");
-  const currentProviderEvidence = currentAuthorityItems.filter((item) => item.workClass === "PROVIDER_EVIDENCE");
-  if (
-    result.currentAuthority.uncheckedItems.length !== currentFieldEvidence.length + currentProviderEvidence.length ||
-    currentFieldEvidence.length !== 1 ||
-    currentProductWork.length !== 0 ||
-    currentProviderEvidence.length !== 1 ||
-    currentProviderEvidence.length > 1 ||
-    currentProviderEvidence.some((item) => !/\bpublish\b|publication/i.test(item.statement)) ||
-    !currentFieldEvidence.some((item) => item.statement.includes("Navisworks 2025")) ||
-    currentProviderEvidence.some((item) => !item.statement.includes("Build 275"))
-  ) {
-    throw new Error("The marked current authority must contain only the active Build 275 publication boundary and Ruben's deferred physical Navisworks 2025 field evidence");
-  }
+  validateCurrentOpenLoopAuthority(result);
   console.log(JSON.stringify({ status: "PASS", itemCount: items.length, counts }));
 }

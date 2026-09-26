@@ -43059,6 +43059,110 @@
         "scripts/test-folder-wizard-publish-block06.mjs"
       ],
       "reviewedChangeSha256": "4a78407f52ce9ab9d2031ee6881b7ad40c6572e246c7e76f7bebd018ad5802c2"
+    },
+    {
+      "taskId": "consolidation-c001-release-truth",
+      "reviewedThroughCommit": "25d6952efa2f7694734d3a8d34e47800ecde30ee",
+      "reviewedAt": "2026-09-26T12:45:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "verified_remote_read"
+        ],
+        "operatorOnly": [
+          "microsoft_admin_consent",
+          "ruben_physical_package_confirmation"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Current open-loop checker required obsolete Build275 publication and forbade actual unfinished product work. Replace historical-number assumptions with typed current ownership validation while preserving history and missing field/provider evidence."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves one authority and truthful evidence; no doctrine change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing current-state and release-truth requirements."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves field and provider evidence boundaries without claiming new acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Approved consolidation scope is recorded without changing strategic doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime route, schema, module or generated platform inventory changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Read-only installed identity capture; no native code, layout, package or installation changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product report output or presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards applicability or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Reconciles exact publication receipt and distinguishes baseline from new candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Moves sole current marker to actual authorized consolidation work and retains field gaps."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence remains preserved without retrospective acceptance claims."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C001.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/current-open-loop-authority.mjs",
+        "scripts/open-loop-dispositions.mjs",
+        "scripts/test-build217-final-reconciliation.mjs",
+        "scripts/test-build223-field-evidence-boundary.mjs",
+        "scripts/test-consolidation-c001.mjs",
+        "scripts/test-post120-block38.mjs",
+        "scripts/test-post220-block45.mjs"
+      ],
+      "reviewedChangeSha256": "5fbf6709dd8ac7a7431af240470f4d0a587e7b894a8981c79affa11dd487c771"
     }
   ]
 }
