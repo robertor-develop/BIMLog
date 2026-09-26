@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Identity invitation block I006–I010 — 2026-09-26
+
+- Baseline c49ea8a5 is pushed, not published. Seven changes remain unpublished. I006 adds hashed opaque invitation credentials, explicit purpose, expiry, revocation, accepted-user identity and delivery state to the existing invitation authority. Legacy invitations remain labeled legacy, not silently authenticated. Contract tests cover invalid, wrong-recipient, expired, revoked and legacy states. Issuance/acceptance/UI wiring and real delivery remain subsequent work; no live repair is claimed.
+
 ## Priority identity block I001–I005 — 2026-09-26
 
 - I005 local candidate: request authorization now reloads the user's company and administrator flag from storage, rejects retired-company sessions and requires active project membership. Actual HTTP/PostgreSQL fixtures prove stale-token authority is not retained. The preserved Dashboard candidate supplies explicit English/Spanish project-entry actions; actual-component Chrome confirms navigation, not Rubén's live session.

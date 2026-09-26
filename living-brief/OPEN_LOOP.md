@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+I006–I010 is now authorized. The existing email-only invitation link and automatic pending-email acceptance are verified security/onboarding gaps. Token schema/contract I006 does not close them until issuance, recipient-bound transactional acceptance, existing-account flow and UI are integrated and live-tested. Seven unpublished baseline commits require an early publication checkpoint no later than I008.
+
 The approved corrected report is `F:/BIMLog/TestProof/BIMLog_Consolidation_Identity_and_130_Build_Plan_20260926.md`, revision3. I001–I005 are authorized now; C001/C002 and the unfinished C003 change are preserved. Later blocks remain planning scope, not completed work. Historical checkpoint counts below are not current publication counts. OPEN_LOOP_DISPOSITIONS.json retains their classifications; current release evidence is the reconciliation in STATUS.md and the coordination-routing ledger.
 
 - [ ] Complete priority identity/invitation I001–I010 then Workflow/Intake/resource consolidation C001–C120 without duplicate authorities; I001–I005 are current. Correct nine stale company35 project bindings append-only, retire its operational alias, protect legitimate company creation and verified joining; do not merge unresolved company38 by name.

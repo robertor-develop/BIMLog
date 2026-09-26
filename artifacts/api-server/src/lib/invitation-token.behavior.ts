@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import { createInvitationCredential, invitationTokenHash, validateInvitationState, invitationLink } from "./invitation-token";
+const now = new Date("2026-09-26T12:00:00Z");
+const credential = createInvitationCredential(now);
+assert.equal(credential.tokenHash.length, 64);
+assert.notEqual(credential.token, credential.tokenHash);
+assert.notEqual(createInvitationCredential(now).tokenHash, credential.tokenHash);
+assert.throws(() => invitationTokenHash("forged"));
+const row = { ...credential, purpose: "company_join", status: "pending", revokedAt: null, email: "person@example.test" };
+validateInvitationState(row, "Person@example.test", now);
+assert.throws(() => validateInvitationState(row, "outsider@example.test", now), /WRONG_ACCOUNT/);
+assert.throws(() => validateInvitationState({...row, expiresAt: now}, row.email, now), /EXPIRED/);
+assert.throws(() => validateInvitationState({...row, revokedAt: now}, row.email, now), /UNAVAILABLE/);
+assert.throws(() => validateInvitationState({...row, purpose: "legacy"}, row.email, now), /REISSUE/);
+assert.match(invitationLink(credential.token), /\/register#invite=/);
+console.log("I006 invitation credentials: entropy/hash, recipient, expiry, revoke, legacy denial and fragment link PASS");
