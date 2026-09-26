@@ -1,4 +1,16 @@
-export function workflowApprovalError(code: string, spanish: boolean): string {
+export function workflowApprovalError(code: string, spanish: boolean, field?: unknown): string {
+  const validation: Record<string, [string, string]> = {
+    WORKFLOW_TEXT_INVALID: ["Complete el texto requerido y respete su longitud máxima.", "Complete the required text and respect its maximum length."],
+    WORKFLOW_CODE_INVALID: ["Use un código sin espacios. Los roles y documentos usan letras mayúsculas, números y guion bajo.", "Use a code without spaces. Roles and documents use uppercase letters, numbers and underscores."],
+    WORKFLOW_DUPLICATE_ID: ["Hay códigos repetidos. Asigne un código único a cada fase, tarea o documento.", "Codes are duplicated. Assign a unique code to each phase, task or document."],
+    WORKFLOW_ARRAY_SIZE_INVALID: ["Revise los elementos requeridos: seleccione un entregable y mantenga al menos una fase con una tarea.", "Check the required entries: select a deliverable and keep at least one phase with one task."],
+  };
+  if (validation[code]) {
+    // Translate only recognized server field paths; never echo arbitrary response content.
+    const match = typeof field === "string" && /^phases\[(\d{1,2})\](?:\.tasks\[(\d{1,2})\])?\.(code|name|requiredDocuments)(?:\[\d{1,2}\])?$/.exec(field);
+    const location = match ? `${spanish ? "Fase" : "Phase"} ${Number(match[1]) + 1}${match[2] === undefined ? "" : ` · ${spanish ? "Tarea" : "Task"} ${Number(match[2]) + 1}`} · ${match[3] === "code" ? (spanish ? "Código" : "Code") : match[3] === "name" ? (spanish ? "Nombre" : "Name") : (spanish ? "Documentos requeridos" : "Required documents")}: ` : "";
+    return location + validation[code][spanish ? 0 : 1];
+  }
   if (code === "WORKFLOW_PREVIEW_CONTEXT_INVALID" || code === "DELIVERY_WORKFLOW_NOT_FOUND") return spanish
     ? "No se pudo verificar la versión seleccionada en esta empresa. Recargue la lista y seleccione nuevamente el flujo."
     : "The selected version could not be verified in this company. Reload the list and select the workflow again.";

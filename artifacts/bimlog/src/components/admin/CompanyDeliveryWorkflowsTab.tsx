@@ -173,7 +173,7 @@ export function CompanyDeliveryWorkflowsTab({
       const body = await response.json().catch(() => ({}));
       if (!response.ok)
         throw new Error(
-          body?.code ? workflowApprovalError(body.code, spanish) : body?.error?.en ?? `HTTP ${response.status}`,
+          body?.code ? workflowApprovalError(body.code, spanish, body.field) : body?.error?.[spanish ? "es" : "en"] ?? `HTTP ${response.status}`,
         );
       return body;
     },

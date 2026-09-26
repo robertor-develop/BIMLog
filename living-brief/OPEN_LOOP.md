@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Core Builds 41–45 correction chain — 2026-09-26
+
+- [x] Reconcile the prior release from external receipt `F:/BIMLog/TestProof/core-block08-builds36-40-release-20260926.md`: final source `29c80f8da35c513d13356e7227db404221bf25c3`, deployment `4fcd87ed`. Earlier publication-pending notes are historical. Full-site acceptance remains incomplete.
+- [ ] Repair and verify workflow editor validation guidance, unsaved-change cancellation, destructive APU phase replacement confirmation and field readability. Live observation showed raw validation codes, borderless fields and unverified native-confirm cancellation. Keep Lens Next frozen; no permission, economic or approval-rule weakening.
+- [ ] Gate and push Builds 41–45; publish at Build 50. Carry full independent-approval/activation/EDT/hours/QC and actual SharePoint tenant acceptance forward explicitly.
+
 ## Core Build 40 publication boundary — 2026-09-26
 
 - [x] Correct the stale bilingual Governance notice discovered during live preparation: distinguish enforced replacement restrictions from still-unenforced thresholds, approved Work Item changes and company-role grants. Add a source regression assertion; verify corrected deployed text before acceptance.
