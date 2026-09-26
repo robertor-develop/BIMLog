@@ -10,6 +10,7 @@ import { createRuntimeFolderWizardPublishStatusStore } from "../lib/folder-wizar
 import { createRuntimeFolderWizardPublishSubmission } from "../lib/folder-wizard-publish-submission";
 import { executeConfirmedFolderWizardPublish } from "../lib/folder-wizard-publish-execution";
 import { storage } from "../lib/storage-adapter";
+import { validFolderWizardTags, validFolderWizardFileId } from "../lib/folder-wizard-request-validation";
 
 const router: IRouter = Router();
 const service = createFolderWizardRoutingService();
@@ -40,9 +41,9 @@ router.get("/projects/:projectId/integrations/folder-wizard/publishing-jobs", au
 router.post("/projects/:projectId/integrations/folder-wizard/publishing-candidate", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const scope = getScope(req);
-    const fileId = Number(req.body?.fileId);
+    const fileId = req.body?.fileId;
     const tags = req.body?.tags;
-    if (!Number.isSafeInteger(fileId) || fileId <= 0 || !tags || typeof tags !== "object" || Array.isArray(tags))
+    if (!validFolderWizardFileId(fileId) || !validFolderWizardTags(tags))
       throw new FolderWizardImportError("FOLDER_WIZARD_CANDIDATE_INVALID", 400);
     res.json(await candidate.preview({ ...scope, fileId, tags }));
   } catch (error) { fail(res, error); }
@@ -51,7 +52,7 @@ router.post("/projects/:projectId/integrations/folder-wizard/publish", authMiddl
   try {
     const scope = getScope(req);
     const { fileId, tags, expectedDigest, confirmation } = req.body ?? {};
-    if (!Number.isSafeInteger(fileId) || fileId <= 0 || !tags || typeof tags !== "object" || Array.isArray(tags))
+    if (!validFolderWizardFileId(fileId) || !validFolderWizardTags(tags))
       throw new FolderWizardImportError("FOLDER_WIZARD_CANDIDATE_INVALID", 400);
     const submitted = await (await createRuntimeFolderWizardPublishSubmission()).submit({ ...scope, fileId,
       tags, expectedDigest, confirmation });
@@ -71,8 +72,7 @@ router.post("/projects/:projectId/integrations/folder-wizard/routing", authMiddl
 router.post("/projects/:projectId/integrations/folder-wizard/routing/preview", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { definition, tags, filename } = req.body ?? {};
-    if (!tags || typeof tags !== "object" || Array.isArray(tags) || Object.keys(tags).length > 64 ||
-        Object.entries(tags).some(([key, value]) => !/^[a-z][a-z0-9_]{0,63}$/.test(key) || typeof value !== "string" || value.length > 160) ||
+    if (!validFolderWizardTags(tags) ||
         typeof filename !== "string" || filename.length > 255) throw new FolderWizardImportError("FOLDER_WIZARD_PREVIEW_INVALID", 400);
     res.json(await service.preview(getScope(req), { definition, tags, filename }));
   } catch (error) { fail(res, error); }
