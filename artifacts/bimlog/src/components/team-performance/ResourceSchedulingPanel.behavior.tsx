@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ResourceSchedulingWorkspaceView, validateResourcePlanningWorkspace, nextUnselectedDirectTask, hasDuplicateStaffingTasks, type ResourcePlanningWorkspace } from "./ResourceSchedulingPanel";
+import { ResourceSchedulingWorkspaceView, validateResourcePlanningWorkspace, validateResourceEvaluation, nextUnselectedDirectTask, hasDuplicateStaffingTasks, type ResourcePlanningWorkspace } from "./ResourceSchedulingPanel";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(here, "ResourceSchedulingPanel.tsx"), "utf8");
@@ -40,6 +40,9 @@ for (const malformed of [null, {}, { ...data, members: null }, { ...data, tasks:
 }
 
 const english = render();
+assert.equal(validateResourceEvaluation(evaluation), evaluation);
+for (const invalid of [null, {}, {...evaluation, people: null}, {...evaluation, totals: {}}, {...evaluation, warnings: [null]}])
+  assert.throws(() => validateResourceEvaluation(invalid), /RESOURCE_PLANNING_RESPONSE_INCOMPLETE/);
 assert.match(source, /revision !== draftRevision.current/);
 for (const edit of ["onRows", "onStartDate", "onEndDate", "onProfileDrafts"])
   assert.match(source, new RegExp(`${edit}=\\{value => \\{ invalidateEvaluation\\(\\)`));
