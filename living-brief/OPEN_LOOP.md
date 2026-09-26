@@ -2,6 +2,8 @@
 
 ## Resource Planning Builds 61–65 — 2026-09-26
 
+- [ ] Live pre-publication check found Team Performance overview unavailable in synthetic project 58. Isolated PostgreSQL reproduces SQLSTATE 42601 at unquoted `month` alias; correct quoting and repeat exact-head gate/publication/live overview. Resource Scheduling itself loads. This is a Build 65 regression repair, not Build 66.
+
 - [x] Locally validate real calendar dates and availability profiles; evaluate assignment-window capacity without treating the whole scenario window as an assignment's availability. Focused tests pass; all outputs advisory and approved hours/rates untouched.
 - [ ] Complete bilingual warnings, connected regression, exact-head push and publication after this block. R11–R15 already contribute five unpublished changes; this block reaches ten.
 - [ ] Full authenticated acceptance, actual SharePoint tenant delivery and remaining Resource/Earnings scope stay open. Lens Next is frozen.

@@ -11,3 +11,7 @@ Baseline: e12ca284f20796135e147d973caf771bf3ae02f6. Lens Next frozen.
 Focused behavior and actual-component static-render tests pass. Static rendering is not Chrome acceptance. Full exact-head release gate, push, publication and live smoke are pending at authoring. R11–R15 plus 61–65 total ten unpublished changes: publication is due now, not at Build 70.
 
 No migration, financial authority, credential, permission, native or installer changes. No real tenant SharePoint round trip or full template-to-Operations acceptance is claimed. Fifteen original planned builds remain, plus unresolved acceptance/policy gaps requiring evidence-based reconciliation.
+
+## Build 65 connected live-defect repair
+
+Before publication, authenticated Chrome at `/projects/58/commercial/team-performance` showed Team Performance temporarily unavailable while Resource Scheduling loaded. Isolated PostgreSQL EXPLAIN reproduced SQLSTATE 42601 at the monthly query's unquoted `month` alias. Quoting the alias and ORDER BY fixes parsing; all eight real PostgreSQL query plans pass in a read-only transaction. This test does not read customer data or bypass UI acceptance. Repeat full gate on corrected HEAD, then exact live reproduction after publication. Earlier gate run is superseded, not exact-head release proof.

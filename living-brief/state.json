@@ -2,11 +2,13 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "e12ca284f20796135e147d973caf771bf3ae02f6",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "e02dcc470a3bc62fd319bb59be23ac4a71ad52e242e6bbf55c54ed6b83125b9c",
+  "bundleSha256": "56e10234fe81797b6ab68afee5dc3fc2b4b1fa420b95f2546c71df124e6b9aaf",
   "impact": {
     "baselineCommit": "e12ca284f20796135e147d973caf771bf3ae02f6",
     "changedPaths": [
       "artifacts/api-server/package.json",
+      "artifacts/api-server/src/lib/team-performance-postgres-query.behavior.ts",
+      "artifacts/api-server/src/lib/team-performance-service.ts",
       "artifacts/api-server/src/lib/team-resource-planning-service.ts",
       "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
       "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.behavior.tsx",
@@ -15,6 +17,7 @@
       "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -77,9 +80,9 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "ca0ebf86a8ea34335198de66de1cbffe1d431848d6e3db9e2a849457920ec223",
-      "sourceChangedAt": "2026-09-25T22:11:10-04:00",
-      "changeState": "accepted",
+      "sha256": "98a8b608bdaba275504702cabc5d46530a84374ee453ba3b7d1d460878e10465",
+      "sourceChangedAt": "2026-09-26T07:32:02.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "e12ca284f20796135e147d973caf771bf3ae02f6",
       "semanticReviewedThroughCommit": "e12ca284f20796135e147d973caf771bf3ae02f6",
       "semanticReviewTask": "BIMLOG_RESOURCE_BLOCK13_BUILDS61_65",
@@ -125,7 +128,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "706b53b1124b44a90eca9d0c4a0d6bc55d3aa5708d7c88f242f64b7647433855",
+      "sha256": "d630ae9439873bb13fb592e56b79e1eb079b8b60d425bc55894178a86ae84c20",
       "sourceChangedAt": "2026-09-26T07:32:02.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e12ca284f20796135e147d973caf771bf3ae02f6",
@@ -137,7 +140,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "a585c6de79201a37e6ad8c41eb93a3d19dabf643cd7d98a0308c4cd279d41061",
+      "sha256": "7197de4246e14586d86886f149c2e32c8f47cc45ba85fe20bcbaa5dd57452903",
       "sourceChangedAt": "2026-09-26T07:32:02.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e12ca284f20796135e147d973caf771bf3ae02f6",

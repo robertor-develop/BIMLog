@@ -62,10 +62,10 @@ export async function getTeamPerformance(input: { actorUserId: unknown; projectI
     FROM job_activation_time_entries e LEFT JOIN job_activation_resource_assignments r ON r.id=e.assignment_id
     WHERE e.project_id=$1 AND ($2::date IS NULL OR e.work_date >= $2::date) AND ($3::date IS NULL OR e.work_date <= $3::date)
     GROUP BY e.user_id,e.task_id`, [projectId, from, to])).rows;
-  const monthlyTime = (await client.query(`SELECT e.user_id "userId",to_char(date_trunc('month',e.work_date),'YYYY-MM') month,SUM(e.hours) hours
+  const monthlyTime = (await client.query(`SELECT e.user_id "userId",to_char(date_trunc('month',e.work_date),'YYYY-MM') "month",SUM(e.hours) hours
     FROM job_activation_time_entries e
     WHERE e.project_id=$1 AND ($2::date IS NULL OR e.work_date >= $2::date) AND ($3::date IS NULL OR e.work_date <= $3::date)
-    GROUP BY e.user_id,date_trunc('month',e.work_date) ORDER BY month`, [projectId, from, to])).rows;
+    GROUP BY e.user_id,date_trunc('month',e.work_date) ORDER BY "month"`, [projectId, from, to])).rows;
   const deliverables = (await client.query(`SELECT COALESCE(r.user_id,t.assignee_user_id) "userId",d.id,d.deliverable_type "deliverableType",
       d.linked_at "linkedAt",t.id "taskId",t.name_en "taskNameEn",t.name_es "taskNameEs",w.name "workItem"
     FROM job_activation_task_deliverables d JOIN job_activation_tasks t ON t.id=d.task_id

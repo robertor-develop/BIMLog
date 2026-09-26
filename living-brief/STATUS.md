@@ -2,6 +2,8 @@
 
 ## Resource Planning Builds 61–65 — 2026-09-26
 
+- Connected live preflight exposed a Team Performance overview failure in synthetic project 58. PostgreSQL reproduced SQLSTATE 42601 on the unquoted monthly summary alias. Build 65 repair quotes the alias and verifies all eight service queries with read-only PostgreSQL EXPLAIN. Full corrected-head release gate and live retest remain required.
+
 - R11–R15 passed their exact-head gate and were pushed at `e12ca284f20796135e147d973caf771bf3ae02f6`; external receipt `F:/BIMLog/TestProof/runtime-repairs-R11-R15-push-20260926.md` supersedes their pending-push note. Production baseline remains Build 60 pending this release.
 - Builds 61–64 reject impossible calendar dates, invalid timezones and fractional weekdays, bound capacity to selected days, evaluate each assignment's own working-date/leave window, and explain warnings in English/Spanish. All outputs remain advisory; no approved hours, rates, earnings, permissions or schema changes.
 - Build 65 connects API/UI regression and verifies deterministic warnings, rate redaction and unchanged profile input. Focused tests pass; full exact-head gate, push, publication and authenticated live smoke remain required at authoring.

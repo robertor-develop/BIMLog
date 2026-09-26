@@ -172,6 +172,7 @@
     "test:project-controls": "tsx ./src/lib/project-controls-dashboard.behavior.ts && tsx ../bimlog/src/components/job-operations/project-controls-filters.behavior.ts && tsc -p tsconfig.json --noEmit && tsc -p ../bimlog/tsconfig.json --noEmit",
     "test:team-performance": "tsx ./src/lib/team-performance.behavior.ts && tsx ./src/lib/team-resource-planning.behavior.ts && tsx ./src/lib/commercial-entitlement.behavior.ts && tsx ./src/lib/help-center.behavior.ts && tsc -p tsconfig.json --noEmit && tsc -p ../bimlog/tsconfig.json --noEmit",
     "test:team-resource-planning": "tsx ./src/lib/team-resource-planning.behavior.ts && tsx ../bimlog/src/components/team-performance/ResourceSchedulingPanel.behavior.tsx && tsc -p tsconfig.json --noEmit && tsc -p ../bimlog/tsconfig.json --noEmit",
+    "test:team-performance-postgres-queries": "tsx ./src/lib/team-performance-postgres-query.behavior.ts",
     "test:pdf-route-authorization": "tsx ./src/lib/pdf-route-authorization.behavior.ts",
     "test:project-retirement": "node ../../scripts/test-project-retirement.mjs",
     "test:enterprise-identity": "tsx ./src/lib/enterprise-identity-migration.behavior.ts",
