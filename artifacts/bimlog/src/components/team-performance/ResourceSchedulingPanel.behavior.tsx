@@ -55,6 +55,10 @@ assert.match(english, /type="checkbox"/);
 assert.match(english, /disabled=""[^>]*>.*Apply reviewed assignees/s);
 
 const spanish = render({ lang: "es" });
+assert.match(spanish, /Evidencia guardada del escenario/);
+assert.doesNotMatch(spanish, /Saved scenario review evidence/);
+assert.match(source, /\}, \[base, token\]\)/);
+assert.match(source, /setNotice\(""\); setError\(""\); \}, \[lang\]/);
 for (const expected of ["Programación de Recursos", "nunca es una calificación inferida", "Evidencia verificada", "Escenarios inmutables guardados", "responsables directos elegibles", "Aplicar responsables revisados"]) assert.match(spanish, new RegExp(expected, "i"));
 assert.match(spanish, /La disponibilidad y las ausencias guardadas definen la capacidad/);
 assert.doesNotMatch(spanish, /Saved availability and leave define capacity/);
