@@ -37,7 +37,9 @@
   "publication": "build_30_560e463cf997f444c42560b7679d8baf10c6cb28",
   "deploymentId": "afe01b7d",
   "separateRepairBlock": { "ids": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"], "state": "R1_R5_pushed_R6_R10_source_candidate", "unpublishedBuilds": 10, "lastPushedCommit": "66c140197dac2c4e619d4c073618f376039570c7" },
-  "remainingOriginalRoadmap": { "builds": 50, "blocks": 10, "excludesLensNext": true },
+  "repairReleaseReceipt": { "commit": "152cbe34f6553c50f4be30ad1fceccccc845cde2", "deployment": "78af273c", "unpublishedRepairs": 0, "supersedesRepairCandidateState": true },
+  "coreContinuation": { "builds": [31,32,33,34,35], "state": "source_candidate", "unpublishedBuilds": 5, "publicationDueAt": 40 },
+  "remainingOriginalRoadmap": { "builds": 45, "blocks": 9, "excludesLensNext": true },
   "liveSmoke": "partial_pass_file_selection_blocked",
   "sharePointDelivery": "confirmed_exact_job_path_published_real_tenant_roundtrip_unverified",
   "knownSafetyCorrection": "queued_sync_fail_closed_before_event_or_cache_consumption"

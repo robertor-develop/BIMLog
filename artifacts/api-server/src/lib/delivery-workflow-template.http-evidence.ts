@@ -122,6 +122,35 @@ try {
     expectedRevision: 3, reason: "Attempted retirement under published company policy" });
   assert.equal(deniedRetirement.status,409);
   assert.equal(deniedRetirement.body.code,"WORKFLOW_POLICY_CHANGE_FORBIDDEN");
+  // A forbidden replacement is denied on approval, with the released baseline intact.
+  const forbidTasks = structuredClone(policyDefinition);
+  forbidTasks.changeRules.find(rule => rule.action === "edit_tasks_roles")!.allowed = false;
+  async function replacePolicy(next: typeof policyDefinition, version: number) {
+    await pool.query(`UPDATE company_workflow_governance_versions SET state='superseded' WHERE policy_id=$1 AND state='published'`,[policyId]);
+    await pool.query(`INSERT INTO company_workflow_governance_versions(id,policy_id,version,state,definition,fingerprint,
+      approved_by_id,approved_at,published_by_id,published_at,created_by_id,updated_by_id)
+      VALUES($1,$2,$3,'published',$4::jsonb,$5,$6,now(),$6,now(),$6,$6)`,
+      [randomUUID(),policyId,version,JSON.stringify(next),workflowGovernancePolicyFingerprint(next),owner.id]);
+  }
+  await replacePolicy(forbidTasks,2);
+  const changedTask = structuredClone(definition);
+  changedTask.phases[0].tasks[0].name = "Changed task";
+  const fourthPath = `/company/delivery-workflows/${id}/versions/${fourth.body.versionId}`;
+  assert.equal((await call(pmo,fourthPath,{expectedRevision:2,definition:changedTask},"PATCH")).status,200);
+  const forbiddenApproval = await call(owner,`${fourthPath}/approve`,{expectedRevision:3});
+  assert.equal(forbiddenApproval.status,409);
+  assert.equal(forbiddenApproval.body.code,"WORKFLOW_POLICY_EDIT_TASKS_ROLES_FORBIDDEN");
+  // Policy can change after approval. Publication must recheck before superseding anything.
+  await replacePolicy(policyDefinition,3);
+  assert.equal((await call(owner,`${fourthPath}/approve`,{expectedRevision:3})).status,200);
+  await replacePolicy(forbidTasks,4);
+  const forbiddenPublish = await call(pmo,`${fourthPath}/publish`,{expectedRevision:4});
+  assert.equal(forbiddenPublish.status,409);
+  assert.equal(forbiddenPublish.body.code,"WORKFLOW_POLICY_EDIT_TASKS_ROLES_FORBIDDEN");
+  const preserved = (await call(pmo,`/company/delivery-workflows/${id}`)).body;
+  assert.equal(preserved.versions.find((x:any)=>x.versionId===fourth.body.versionId).state,"approved");
+  assert.equal(preserved.versions.find((x:any)=>x.versionId===third.body.versionId).state,"published");
+  assert.equal(preserved.history.filter((x:any)=>x.versionId===fourth.body.versionId && x.action==='published').length,0);
   await assert.rejects(pool.query(`UPDATE company_delivery_workflow_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_events WHERE template_id=$1`,[id]));
   assert.equal((await call(member,"/company/delivery-workflows")).body.versions.length,1);

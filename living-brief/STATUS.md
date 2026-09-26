@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Core operating chain Builds 31–35 — 2026-09-26
+
+- Published baseline is exact source `152cbe34f6553c50f4be30ad1fceccccc845cde2`, Replit deployment `78af273c`; external receipt `F:/BIMLog/TestProof/sharepoint-repair-R6-R10-release-20260926.md` supersedes repair publication-pending notes below. SharePoint real tenant delivery and Chrome file-import acceptance remain unverified. Tool permission failure is not a demonstrated product failure and does not block independent authorized core source work.
+- Builds 31–34 classify phase/task-role/APU/allocation replacement changes, enforce the current published Governance change rules at approval and publication against the last released version, preserve retired baseline integrity, and explain denials in English/Spanish. Build 35 adds isolated PostgreSQL/HTTP denial, policy-change-after-approval and published-history preservation proof plus the normal regression binding.
+- Focused behavior, bilingual guidance, API typecheck and isolated HTTP tests pass. Full release gate and five-build push remain pending at this authoring point. This block is not published or live-accepted. Original roadmap source remainder becomes 45 builds/nine blocks after Build 35; five source builds await the Build 40 publication milestone. No Lens Next, schema, production data, credentials or provider changes are included.
+
 ## Coordination routing candidate — 2026-09-25
 
 - R1–R5 and their verification corrections were pushed at exact `66c140197dac2c4e619d4c073618f376039570c7`; the external push receipt records the staged complete local gate. They remain unpublished at this candidate baseline.

@@ -41921,6 +41921,110 @@
         "scripts/test-folder-wizard-publish-block06.mjs"
       ],
       "reviewedChangeSha256": "299ff3b356461ff285a67ef5719319ac25406ab67f8907fe5b02afb8ebf3413e"
+    },
+    {
+      "taskId": "BIMLOG_CORE_BLOCK07_BUILDS31_35",
+      "reviewedThroughCommit": "152cbe34f6553c50f4be30ad1fceccccc845cde2",
+      "reviewedAt": "2026-09-26T03:22:00.000Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_source",
+          "run_local_validation",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Stored workflow change restrictions were not enforced for replacement approval/publication. Current policy now checks the integrity-verified prior released version without changing runtime permissions or historical snapshots."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical authority and historical evidence."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing test, push and publication cadence applies; tool failure is not product failure."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Behavior and isolated HTTP proof remain separate from live acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authorized core operating scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing routes and files; no structural inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and installers frozen and untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or applicability change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records release baseline, bounded implemented correction and pending release/live proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining governance/runtime work and separate SharePoint acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence erased or rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/bimlog/src/lib/workflow-approval-error.behavior.ts",
+        "artifacts/bimlog/src/lib/workflow-approval-error.ts",
+        "evidence/coordination-routing-20260925/BLOCK_07_BUILDS_031_035.md",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d6bfd2184dea38a41242cc4ff81fd8e84225b534da51633a9497f74b01863377"
     }
   ]
 }

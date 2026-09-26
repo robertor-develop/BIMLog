@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Core operating chain continuation — 2026-09-26
+
+- [x] Reconcile R1–R10 publication from the exact external receipt: source `152cbe34f6553c50f4be30ad1fceccccc845cde2`, deployment `78af273c`, zero unpublished repairs. Prior source-candidate bullets are historical, not current release identity.
+- [x] Implement Builds 31–35 replacement-change enforcement at workflow approval and publication, scoped historical baseline integrity, bilingual denial guidance and isolated HTTP rollback/history proof. Draft authoring remains editable; first releases have no replacement baseline; every replacement still follows independent approval and a new version.
+- [ ] Complete the exact-head local gate and normal five-build push. Publish at Build 40 and perform authenticated Chrome workflow smoke; do not label source/isolated proof as live acceptance.
+- [ ] Continue the remaining 45 planned non-Lens source builds after this block. Keep SharePoint file-import and real tenant round-trip acceptance separately open; the Chrome permission/tool limitation is not a product test failure or a new general approval gate.
+- [ ] Complete remaining governance role/hierarchy/threshold and runtime change enforcement plus the full template-to-Intake/EDT/Operations acceptance. This bounded replacement-rule correction does not implement or prove those remaining controls.
+
 ## Coordination routing and SharePoint publishing — 2026-09-25
 
 - [x] Verify R1–R5 pushed source `66c140197dac2c4e619d4c073618f376039570c7` against its external gate/push receipt. This supersedes the earlier push-pending note, not the remaining live acceptance gate.
