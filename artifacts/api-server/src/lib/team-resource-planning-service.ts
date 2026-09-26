@@ -29,18 +29,24 @@ export function resourcePlanningDate(value: unknown, field: string) {
 const date = resourcePlanningDate;
 function finite(value: unknown, field: string, min=0, max=1_000_000) { const n=Number(value); if(!Number.isFinite(n)||n<min||n>max) throw new FinancialControlError(400,"TEAM_RESOURCE_NUMBER_INVALID",`${field} is invalid.`); return n; }
 function nullableRate(value: unknown, field: string) { return value == null || value === "" ? null : finite(value,field,0); }
-function profile(value: any, options: { allowRates: boolean; existingRates?: Pick<Profile, "internalHourlyRate" | "billingHourlyRate"> } = { allowRates: true }): Profile {
+export function resourceCapacityProfile(value: any, options: { allowRates: boolean; existingRates?: Pick<Profile, "internalHourlyRate" | "billingHourlyRate"> } = { allowRates: true }): Profile {
   if(!value||typeof value!=="object"||Array.isArray(value)) throw new FinancialControlError(400,"TEAM_RESOURCE_PROFILE_INVALID","A complete availability profile is required.");
   const weeklyCapacityHours=finite(value?.weeklyCapacityHours,"weeklyCapacityHours",1,168);
   const timezone=text(value?.timezone,"timezone",1,100);
+  try { new Intl.DateTimeFormat("en", { timeZone: timezone }); }
+  catch { throw new FinancialControlError(400,"TEAM_RESOURCE_TIMEZONE_INVALID","A recognized timezone is required."); }
   if(!Array.isArray(value?.workingDays)) throw new FinancialControlError(400,"TEAM_RESOURCE_WORKING_DAYS_REQUIRED","Working days must be explicitly provided.");
+  if(value.workingDays.some((item:unknown)=>typeof item!=="number"||!Number.isInteger(item)||item<0||item>6))
+    throw new FinancialControlError(400,"TEAM_RESOURCE_WORKING_DAY_INVALID","Working days must be whole numbers from 0 to 6.");
   const workingDays:number[]=[...new Set<number>(value.workingDays.map((item:unknown)=>finite(item,"workingDay",0,6)))].sort((a,b)=>a-b);
   if(!workingDays.length) throw new FinancialControlError(400,"TEAM_RESOURCE_WORKING_DAYS_REQUIRED","At least one working day is required.");
+  if(weeklyCapacityHours>workingDays.length*24) throw new FinancialControlError(400,"TEAM_RESOURCE_CAPACITY_INVALID","Weekly capacity cannot exceed 24 hours per selected working day.");
   const leave=(Array.isArray(value?.leave)?value.leave:[]).map((item:any)=>{const startDate=date(item.startDate,"leave.startDate"),endDate=date(item.endDate,"leave.endDate");if(startDate>endDate)throw new FinancialControlError(400,"TEAM_RESOURCE_LEAVE_RANGE_INVALID","Leave start must not be after end.");return{startDate,endDate,label:String(item.label??"").trim().slice(0,120)}});
   const internalHourlyRate = options.allowRates ? nullableRate(value?.internalHourlyRate,"internalHourlyRate") : options.existingRates?.internalHourlyRate ?? null;
   const billingHourlyRate = options.allowRates ? nullableRate(value?.billingHourlyRate,"billingHourlyRate") : options.existingRates?.billingHourlyRate ?? null;
   return {weeklyCapacityHours,timezone,workingDays,leave,internalHourlyRate,billingHourlyRate};
 }
+const profile = resourceCapacityProfile;
 function assignments(value: unknown): Assignment[] { if(!Array.isArray(value)||!value.length) throw new FinancialControlError(400,"TEAM_RESOURCE_ASSIGNMENTS_REQUIRED","At least one assignment is required."); return value.map((item:any)=>{const startDate=date(item.startDate,"assignment.startDate"),endDate=date(item.endDate,"assignment.endDate");if(startDate>endDate)throw new FinancialControlError(400,"TEAM_RESOURCE_ASSIGNMENT_RANGE_INVALID","Assignment start must not be after end.");const assignmentId=item.assignmentId==null||item.assignmentId===""?null:text(item.assignmentId,"assignmentId",1,200),expectedAssignmentVersion=assignmentId?id(item.expectedAssignmentVersion,"expectedAssignmentVersion"):null;return{taskId:text(item.taskId,"taskId",1,200),assignmentId,expectedAssignmentVersion,userId:id(item.userId,"userId"),plannedHours:finite(item.plannedHours,"plannedHours",0.01,100000),startDate,endDate,category:text(item.category,"category",1,120),reason:text(item.reason,"reason",5,500),expectedTaskVersion:id(item.expectedTaskVersion,"expectedTaskVersion")}}); }
 
 async function access(actorUserId: number, projectId: number, client: Queryable) {

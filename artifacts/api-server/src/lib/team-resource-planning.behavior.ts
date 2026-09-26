@@ -2,7 +2,17 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 process.env.PROD_DATABASE_URL ||= "postgresql://source-gate.invalid/bimlog";
-const { evaluateStaffingScenario,redactScenarioEvaluation,resourcePlanningDate } = await import("./team-resource-planning-service");
+const { evaluateStaffingScenario,redactScenarioEvaluation,resourcePlanningDate,resourceCapacityProfile } = await import("./team-resource-planning-service");
+const validProfile={weeklyCapacityHours:40,timezone:"America/New_York",workingDays:[1,2,3,4,5],leave:[],internalHourlyRate:50,billingHourlyRate:80};
+assert.throws(()=>resourceCapacityProfile({...validProfile,timezone:"Not/A_Zone"}),/recognized timezone/);
+for(const workingDays of [[1.5],["1"],[null],[true],[-1],[7]])
+  assert.throws(()=>resourceCapacityProfile({...validProfile,workingDays}),/whole numbers/);
+assert.throws(()=>resourceCapacityProfile({...validProfile,workingDays:[1,1]}),/24 hours/);
+assert.deepEqual(resourceCapacityProfile({...validProfile,workingDays:[5,4,3,2,1,1]}).workingDays,[1,2,3,4,5]);
+assert.equal(resourceCapacityProfile({...validProfile,weeklyCapacityHours:24,workingDays:[1]}).weeklyCapacityHours,24);
+const preservedRates=resourceCapacityProfile(validProfile,{allowRates:false,existingRates:{internalHourlyRate:12,billingHourlyRate:20}});
+assert.equal(preservedRates.internalHourlyRate,12);assert.equal(preservedRates.billingHourlyRate,20);
+assert.equal(resourceCapacityProfile(validProfile,{allowRates:false}).internalHourlyRate,null);
 for(const invalid of ["2026-02-29","2026-02-30","2026-04-31","2026-13-01","2026-1-01",""])
   assert.throws(()=>resourcePlanningDate(invalid,"startDate"),/real calendar date/);
 assert.equal(resourcePlanningDate("2028-02-29","startDate"),"2028-02-29");
