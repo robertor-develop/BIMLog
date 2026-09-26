@@ -80,6 +80,8 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
       setResult(data.execution === "completed"
         ? tr("The exact file was published to SharePoint.", "El archivo exacto se publicó en SharePoint.")
         : data.execution === "retry" ? tr("Retry is available after the delay. Preview and confirm again later.", "El reintento estará disponible tras la espera. Actualice la vista previa y confirme de nuevo más tarde.")
+        : data.execution === "dead_letter" ? tr("Publication needs administrator attention. The attempt limit was reached or the failure is not retryable.", "La publicación requiere revisión del administrador. Se alcanzó el límite de intentos o el fallo no permite reintento.")
+        : data.execution === "cancelled" ? tr("This publication was cancelled. It was not restarted.", "Esta publicación fue cancelada. No se reinició.")
         : tr("Review the publication status below before trying again.", "Revise el estado de publicación antes de volver a intentar."));
       setConfirming(false); setCandidate(null);
       const refreshed = await refreshAfterConfirmedFolderWizardMutation(onChanged);

@@ -24,3 +24,18 @@ assert.doesNotMatch(JSON.stringify(result), /must-not-leak|secret|credential|tok
 assert.match(queries[1] ?? "", /company_id=\$1 AND project_id=\$2/);
 assert.match(queries[1] ?? "", /LIMIT 25/);
 console.log("Folder Wizard scoped publish status: PASS");
+for (const state of ["completed", "retry", "dead_letter", "cancelled", "leased", "queued", undefined]) {
+  let released = false;
+  const scoped = new FolderWizardPublishStatusStore({ connect: async () => ({
+    query: async (sql: string, values?: unknown[]) => {
+      if (sql.includes("FROM projects p")) return { rows: [{ company_id: 3 }] };
+      assert.deepEqual(values, [3, 5, "job-1"]);
+      assert.match(sql, /company_id=\$1 AND project_id=\$2 AND id=\$3/);
+      assert.match(sql, /payload->>'kind'='folder_wizard_file_v1'/);
+      return { rows: state ? [{ state }] : [] };
+    }, release: () => { released = true; },
+  }) });
+  assert.equal(await scoped.executionState({ projectId: 5, actorUserId: 2 }, "job-1"),
+    ["completed", "retry", "dead_letter", "cancelled"].includes(state ?? "") ? state : "not_due_or_already_claimed");
+  assert.equal(released, true);
+}

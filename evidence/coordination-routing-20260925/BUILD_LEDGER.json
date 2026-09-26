@@ -36,7 +36,7 @@
   ],
   "publication": "build_30_560e463cf997f444c42560b7679d8baf10c6cb28",
   "deploymentId": "afe01b7d",
-  "separateRepairBlock": { "ids": ["R1", "R2", "R3", "R4", "R5"], "state": "source_candidate", "unpublishedBuilds": 5 },
+  "separateRepairBlock": { "ids": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8", "R9", "R10"], "state": "R1_R5_pushed_R6_R10_source_candidate", "unpublishedBuilds": 10, "lastPushedCommit": "66c140197dac2c4e619d4c073618f376039570c7" },
   "remainingOriginalRoadmap": { "builds": 50, "blocks": 10, "excludesLensNext": true },
   "liveSmoke": "partial_pass_file_selection_blocked",
   "sharePointDelivery": "confirmed_exact_job_path_published_real_tenant_roundtrip_unverified",

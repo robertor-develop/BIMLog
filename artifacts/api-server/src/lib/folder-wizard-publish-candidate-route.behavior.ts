@@ -6,5 +6,5 @@ assert.match(route, /router\.post\("\/projects\/:projectId\/integrations\/folder
 assert.match(route, /candidate\.preview\(\{ \.\.\.scope, fileId, tags \}\)/);
 assert.match(route, /router\.post\("\/projects\/:projectId\/integrations\/folder-wizard\/publish", authMiddleware, requireProjectMember\(\)/);
 assert.match(route, /createRuntimeFolderWizardPublishSubmission\(\)\)\.submit/);
-assert.match(route, /executeConfirmedFolderWizardPublish\(submitted\.jobId\)/);
+assert.match(route, /executeConfirmedFolderWizardPublish\(submitted\.jobId, scope\)/);
 console.log("Folder Wizard candidate and confirmed publication routes: PASS");

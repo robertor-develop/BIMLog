@@ -2,6 +2,10 @@
 
 ## Coordination routing and SharePoint publishing — 2026-09-25
 
+- [x] Verify R1–R5 pushed source `66c140197dac2c4e619d4c073618f376039570c7` against its external gate/push receipt. This supersedes the earlier push-pending note, not the remaining live acceptance gate.
+- [x] Implement separate R6–R10 corrections for confirmed-write status, routing editor request lifetime, saved-rule downstream invalidation, independent status recovery and exact scoped idempotent execution status. Focused tests pass; these are not live acceptance evidence.
+- [ ] Complete the ten-repair exact-head release gate, push, Replit Shell synchronization/publication and authenticated Chrome smoke. Do not start another block while ten repairs are unpublished. Preserve Lens Next and the 50-build original remainder. Real authorized SharePoint tenant round-trip and JSON import live evidence remain required.
+
 - [x] Reconcile the Build 30 release receipt: exact source `560e463cf997f444c42560b7679d8baf10c6cb28` was published as deployment `afe01b7d`; live identity and partial authenticated smoke passed. Historical publication-pending bullets below do not override this receipt.
 - [x] Implement separate repairs R1–R5 for bounded request validation, stale publication/import responses, duplicate submissions, exact configured tag choices and retry timing. Focused tests pass; browser interaction and real tenant acceptance remain separate.
 - [x] Correct the combined TypeScript test-root failure by moving frontend-helper tests out of the API source root. API typecheck and focused tests passed again. Reconcile this correction here before resuming the release build; no compiler or acceptance gate was relaxed.

@@ -56,7 +56,7 @@ router.post("/projects/:projectId/integrations/folder-wizard/publish", authMiddl
       throw new FolderWizardImportError("FOLDER_WIZARD_CANDIDATE_INVALID", 400);
     const submitted = await (await createRuntimeFolderWizardPublishSubmission()).submit({ ...scope, fileId,
       tags, expectedDigest, confirmation });
-    const executed = await executeConfirmedFolderWizardPublish(submitted.jobId);
+    const executed = await executeConfirmedFolderWizardPublish(submitted.jobId, scope);
     res.status(submitted.result === "queued" ? 202 : 200).json({ ...submitted, ...executed });
   } catch (error) { fail(res, error); }
 });

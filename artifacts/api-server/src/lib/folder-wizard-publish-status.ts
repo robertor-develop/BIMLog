@@ -13,6 +13,20 @@ const timestamp = (value: unknown): string | null => {
 export class FolderWizardPublishStatusStore {
   constructor(private readonly database: Pool) {}
 
+  /** An idempotent confirmation reports persisted truth, not a new upload or a generic failure. */
+  async executionState(scope: { projectId: number; actorUserId: number }, jobId: string) {
+    const client = await this.database.connect();
+    try {
+      const companyId = await authorizeFolderWizardImport(client as never, scope, false);
+      const result = await client.query(`SELECT state FROM connector_jobs
+        WHERE company_id=$1 AND project_id=$2 AND id=$3 AND provider='sharepoint' AND job_type='publish'
+          AND payload->>'kind'='folder_wizard_file_v1'`, [companyId, scope.projectId, jobId]);
+      const state = result.rows[0]?.state;
+      return state === "completed" || state === "retry" || state === "dead_letter" || state === "cancelled"
+        ? state : "not_due_or_already_claimed";
+    } finally { client.release(); }
+  }
+
   async list(scope: { projectId: number; actorUserId: number }) {
     const client = await this.database.connect();
     try {

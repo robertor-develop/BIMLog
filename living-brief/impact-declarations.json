@@ -41805,10 +41805,10 @@
       "reviewedChangeSha256": "d250a9898e05ad7400ebdba9d805d07c94655a3fccbbebd0dcb2dad9c4b93070"
     },
     {
-      "taskId": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "taskId": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "reviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "reviewedAt": "2026-09-26T02:00:00.000Z",
-      "summary": "Separate five-repair block preserves the remaining original 50-build roadmap and frozen Lens Next; no tenant delivery acceptance claimed.",
+      "reviewedAt": "2026-09-26T02:40:00.000Z",
+      "summary": "Ten separate SharePoint repairs preserve the original 50-build remainder and frozen Lens Next. Confirmed writes, scoped async reads, downstream rule invalidation and persisted repeat-confirmation status are corrected; publication and tenant acceptance remain separate.",
       "capabilityPreflight": {
         "agentCapable": [
           "read_source",
@@ -41892,6 +41892,8 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/folder-wizard-publish-candidate-route.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-execution.ts",
         "artifacts/api-server/src/lib/folder-wizard-publish-status.behavior.ts",
         "artifacts/api-server/src/lib/folder-wizard-publish-status.ts",
         "artifacts/api-server/src/lib/folder-wizard-request-validation.behavior.ts",
@@ -41899,12 +41901,18 @@
         "artifacts/api-server/src/routes/folder-wizard-routing.ts",
         "artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx",
         "artifacts/bimlog/src/pages/project/FolderWizardPublishPanel.tsx",
+        "artifacts/bimlog/src/pages/project/FolderWizardRoutingPanel.tsx",
+        "artifacts/bimlog/src/pages/project/folder-wizard-confirmed-refresh.behavior.ts",
+        "artifacts/bimlog/src/pages/project/folder-wizard-confirmed-refresh.ts",
         "artifacts/bimlog/src/pages/project/folder-wizard-publish-options.behavior.ts",
         "artifacts/bimlog/src/pages/project/folder-wizard-publish-options.ts",
+        "artifacts/bimlog/src/pages/project/folder-wizard-read-section.behavior.ts",
+        "artifacts/bimlog/src/pages/project/folder-wizard-read-section.ts",
         "artifacts/bimlog/src/pages/project/folder-wizard-request-lifetime.behavior.ts",
         "artifacts/bimlog/src/pages/project/folder-wizard-request-lifetime.ts",
         "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
         "evidence/coordination-routing-20260925/REPAIR_BLOCK_R1_R5.md",
+        "evidence/coordination-routing-20260925/REPAIR_BLOCK_R6_R10.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
@@ -41912,7 +41920,7 @@
         "living-brief/impact-declarations.json",
         "scripts/test-folder-wizard-publish-block06.mjs"
       ],
-      "reviewedChangeSha256": "84240010e386350c89f6f706aeac8e065fddfafd2b23da55e62ba84446c58985"
+      "reviewedChangeSha256": "299ff3b356461ff285a67ef5719319ac25406ab67f8907fe5b02afb8ebf3413e"
     }
   ]
 }

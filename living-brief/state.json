@@ -2,10 +2,12 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "e34097e668b196ee830af6f369e636e47b868d3b922331fb665c7da8cab66b97",
+  "bundleSha256": "03d599a3e0faafc3fa95d493c48166017eed96426c82db87c4da2327baaa3afe",
   "impact": {
     "baselineCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
     "changedPaths": [
+      "artifacts/api-server/src/lib/folder-wizard-publish-candidate-route.behavior.ts",
+      "artifacts/api-server/src/lib/folder-wizard-publish-execution.ts",
       "artifacts/api-server/src/lib/folder-wizard-publish-status.behavior.ts",
       "artifacts/api-server/src/lib/folder-wizard-publish-status.ts",
       "artifacts/api-server/src/lib/folder-wizard-request-validation.behavior.ts",
@@ -13,12 +15,18 @@
       "artifacts/api-server/src/routes/folder-wizard-routing.ts",
       "artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx",
       "artifacts/bimlog/src/pages/project/FolderWizardPublishPanel.tsx",
+      "artifacts/bimlog/src/pages/project/FolderWizardRoutingPanel.tsx",
+      "artifacts/bimlog/src/pages/project/folder-wizard-confirmed-refresh.behavior.ts",
+      "artifacts/bimlog/src/pages/project/folder-wizard-confirmed-refresh.ts",
       "artifacts/bimlog/src/pages/project/folder-wizard-publish-options.behavior.ts",
       "artifacts/bimlog/src/pages/project/folder-wizard-publish-options.ts",
+      "artifacts/bimlog/src/pages/project/folder-wizard-read-section.behavior.ts",
+      "artifacts/bimlog/src/pages/project/folder-wizard-read-section.ts",
       "artifacts/bimlog/src/pages/project/folder-wizard-request-lifetime.behavior.ts",
       "artifacts/bimlog/src/pages/project/folder-wizard-request-lifetime.ts",
       "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
       "evidence/coordination-routing-20260925/REPAIR_BLOCK_R1_R5.md",
+      "evidence/coordination-routing-20260925/REPAIR_BLOCK_R6_R10.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/PLATFORM.md",
@@ -42,9 +50,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "claude",
@@ -54,9 +62,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "quality",
@@ -66,9 +74,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "vision",
@@ -78,21 +86,21 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "ca0ebf86a8ea34335198de66de1cbffe1d431848d6e3db9e2a849457920ec223",
-      "sourceChangedAt": "2026-09-26T02:16:30.000Z",
+      "sourceChangedAt": "2026-09-26T02:40:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "plugin",
@@ -102,9 +110,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -114,9 +122,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "standards_register",
@@ -126,33 +134,33 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "2948da116b648703862575a88ea544e426ec3e9c243ed02fd5fd67bb848099c9",
-      "sourceChangedAt": "2026-09-26T02:16:30.000Z",
+      "sha256": "7a23e52623b99b49af8b0127290a4fe38e7b96c0c2d6768ad307d290a0369ba5",
+      "sourceChangedAt": "2026-09-26T02:40:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "e969c7075cdc3e9ff75fc9387e4c0a61be7170379d2ae329898ecea7c1b778ac",
-      "sourceChangedAt": "2026-09-26T02:16:30.000Z",
+      "sha256": "91a0f2874f71a0d36e1159ebbbd0caa7c56d32d2ff1b1bf70a740f4b0845db98",
+      "sourceChangedAt": "2026-09-26T02:40:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
       "key": "audit",
@@ -162,9 +170,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
-      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R5",
+      "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T02:00:00.000Z"
+      "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     }
   ]
 }
