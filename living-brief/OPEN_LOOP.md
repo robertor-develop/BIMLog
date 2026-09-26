@@ -5,7 +5,8 @@
 - [x] Reconcile published45e22afc from the external resource block15 release receipt; prior pending-publication notes are historical.
 - [ ] Reproduce Rubén's nine-project entry failure at the exact reported screen and repair its verified cause. Existing memberships are active; do not grant global administrator access to mask a navigation problem.
 - [ ] Release the active-versus-pending credential lease correction with connected regression coverage. Source tests are not provider acceptance.
-- [ ] Complete the missing governed SharePoint mapping UI and prove save/refresh/reopen. Canonical BIMTECH company31 currently has no SharePoint connector, mapping or Wizard import; do not seed credentials, guess a destination or fabricate an upload acknowledgement.
+- [ ] Release and live-verify the new governed SharePoint mapping UI. Isolated PostgreSQL and actual-component synthetic Chrome save/reopen pass, not production acceptance. Canonical BIMTECH company31 currently has no SharePoint connector, mapping or Wizard import; do not seed credentials, guess a destination or fabricate an upload acknowledgement.
+- [ ] Complete R16–R20 exact-head gate and push; publish at the next ten-build boundary. Final visual screenshot QA was tool-blocked. Preserve original remaining Resource/Earnings slots separately.
 - [ ] Prove exact-byte delivery and readback in the authorized tenant after the company connection and destination are verified. Preserve Lens Next and remaining Resource/Earnings scope; these repairs do not consume the remaining five original planned slots.
 
 ## Resource Planning Builds 71–75 — 2026-09-26

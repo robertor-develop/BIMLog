@@ -7,6 +7,7 @@ const cli = resolve(root, "artifacts/api-server/node_modules/tsx/dist/cli.mjs");
 for (const name of [
   "connector-credential-lease-resolver",
   "folder-wizard-destination",
+  "folder-wizard-destination-response",
   "folder-wizard-request-validation",
   "folder-wizard-request-lifetime",
   "folder-wizard-publish-options",
@@ -17,7 +18,7 @@ for (const name of [
   "folder-wizard-publish-status", "folder-wizard-publish-lease",
   "folder-wizard-publish-worker",
 ]) {
-  const directory = ["folder-wizard-request-lifetime", "folder-wizard-publish-options", "folder-wizard-confirmed-refresh", "folder-wizard-read-section"].includes(name)
+  const directory = ["folder-wizard-destination-response", "folder-wizard-request-lifetime", "folder-wizard-publish-options", "folder-wizard-confirmed-refresh", "folder-wizard-read-section"].includes(name)
     ? "artifacts/bimlog/src/pages/project" : "artifacts/api-server/src/lib";
   const file = resolve(root, `${directory}/${name}.behavior.ts`);
   const result = spawnSync(process.execPath, [cli, file], { cwd: root, stdio: "inherit", windowsHide: true });

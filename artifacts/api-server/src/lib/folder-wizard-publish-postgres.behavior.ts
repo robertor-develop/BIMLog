@@ -65,6 +65,16 @@ try {
   await assert.rejects(destinations.create(destinationScope, { ...destinationInput, libraryId: "different-library" }), /CONFLICT/);
   assert.equal((await destinations.read(destinationScope)).current?.libraryId, "library-test");
   assert.equal(Number((await pool.query("SELECT count(*) FROM admin_actions_log WHERE action='sharepoint_destination_configured' AND target_id=$1", [String(projectId)])).rows[0].count), 1);
+  await pool.query("UPDATE project_members SET role='drafter' WHERE project_id=$1 AND user_id=$2", [projectId, userId]);
+  assert.deepEqual((await destinations.read(destinationScope)).credentials, []);
+  await assert.rejects(destinations.create(destinationScope, destinationInput), /FORBIDDEN/);
+  await pool.query("UPDATE project_members SET role='project_admin' WHERE project_id=$1 AND user_id=$2", [projectId, userId]);
+  const otherCompany = Number((await pool.query("INSERT INTO companies(name) VALUES($1) RETURNING id", [id("other-company")])).rows[0].id);
+  const otherUser = Number((await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id,is_super_admin)
+    VALUES($1,'synthetic-inert-hash','Other test user',$2,false) RETURNING id`, [`other-${suffix}@invalid.test`, otherCompany])).rows[0].id);
+  await pool.query("INSERT INTO project_members(project_id,user_id,role) VALUES($1,$2,'project_admin')", [projectId, otherUser]);
+  await assert.rejects(destinations.read({ projectId, actorUserId: otherUser }), /FORBIDDEN/);
+  await assert.rejects(destinations.create({ projectId, actorUserId: otherUser }, destinationInput), /FORBIDDEN/);
   await pool.query(`INSERT INTO folder_wizard_imports(id,company_id,project_id,version,source_sha256,source_text,imported_by_id)
     VALUES($1,$2,$3,1,$4,'{}',$5)`, [id("import"), companyId, projectId, digest, userId]);
   await pool.query(`INSERT INTO folder_wizard_current_imports(project_id,company_id,import_id,designated_by_id)

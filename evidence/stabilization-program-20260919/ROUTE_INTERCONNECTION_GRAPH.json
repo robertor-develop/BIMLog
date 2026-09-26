@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 673,
-    "frontendApiReferences": 249,
+    "frontendApiReferences": 250,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -9404,6 +9404,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/files/${cvrModalFile.id}/cvr-proceed"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/FolderWizardDestinationPanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/integrations/folder-wizard/destination"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx",

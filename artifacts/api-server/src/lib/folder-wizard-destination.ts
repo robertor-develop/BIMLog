@@ -56,6 +56,8 @@ export function createFolderWizardDestinationStore(database?: Pool, identity: Id
         if (verified.libraryId !== input.libraryId) throw new FolderWizardImportError("FOLDER_WIZARD_DESTINATION_UNVERIFIED", 400);
         await client.query("BEGIN"); transaction = true;
         await client.query("SELECT id FROM projects WHERE id=$1 FOR UPDATE", [scope.projectId]);
+        await client.query("SELECT id FROM users WHERE id=$1 FOR SHARE", [scope.actorUserId]);
+        await client.query("SELECT user_id FROM project_members WHERE project_id=$1 AND user_id=$2 FOR SHARE", [scope.projectId, scope.actorUserId]);
         const fresh = await authority(client, scope);
         if (!fresh.canConfigure || fresh.companyId !== access.companyId) throw new FolderWizardImportError("FOLDER_WIZARD_FORBIDDEN", 403);
         const credential = (await client.query(`SELECT id FROM connector_credentials

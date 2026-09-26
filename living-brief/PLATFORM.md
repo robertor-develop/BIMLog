@@ -568,6 +568,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-revision-ledger.behavior.ts
 - artifacts/api-server/src/lib/financial-revision-ledger.ts
 - artifacts/api-server/src/lib/financial-statement-mapping.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-destination.behavior.ts
+- artifacts/api-server/src/lib/folder-wizard-destination.ts
 - artifacts/api-server/src/lib/folder-wizard-export.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-export.ts
 - artifacts/api-server/src/lib/folder-wizard-graph-identity.behavior.ts
@@ -926,6 +928,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx
 - artifacts/bimlog/src/pages/project/DirectoryTab.tsx
 - artifacts/bimlog/src/pages/project/FilesTab.tsx
+- artifacts/bimlog/src/pages/project/FolderWizardDestinationPanel.tsx
 - artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx
 - artifacts/bimlog/src/pages/project/FolderWizardPublishPanel.tsx
 - artifacts/bimlog/src/pages/project/FolderWizardRoutingPanel.tsx

@@ -42945,6 +42945,120 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "79108aa19e6d5ba7ef829c7d3bf8b119057bef4af562f1dae2efcf4dce023fc0"
+    },
+    {
+      "taskId": "BIMLOG_SHAREPOINT_DESTINATION_REPAIRS_R16_R20",
+      "reviewedThroughCommit": "45e22afcce78aef6672671b35cffb82b3cc74625",
+      "reviewedAt": "2026-09-26T10:51:09Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_source",
+          "run_local_validation",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "verified_microsoft_company_connection",
+          "real_tenant_delivery"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Operational SharePoint adapters used pending-only leases; mapping setup lacked frontend controls. Real delivery is unverified with no registered company connection. Ruben project entry remains under investigation, not a missing-membership claim."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing canonical mapping and truthful provider evidence are preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five repair builds follow existing release cadence; no agents, credential mutation or invented acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local PostgreSQL and actual-component synthetic evidence are distinguished from live provider and visual acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded existing SharePoint integration repair; no new roadmap authority."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated route inventory includes destination read and create endpoints."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next, native and installers remain frozen."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or artifact presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or compliance claims."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records published baseline, actual defects, candidate repairs and evidence limitations."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserves Ruben entry, missing connection, real tenant delivery and visual QA gaps."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "New mapping uses existing append-only administrative audit; no historical evidence changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/connector-credential-lease-resolver.behavior.ts",
+        "artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
+        "artifacts/api-server/src/lib/coordination-hub-runtime.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-destination.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-destination.ts",
+        "artifacts/api-server/src/lib/folder-wizard-graph-identity.ts",
+        "artifacts/api-server/src/lib/folder-wizard-graph-upload.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-candidate-route.behavior.ts",
+        "artifacts/api-server/src/lib/folder-wizard-publish-postgres.behavior.ts",
+        "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+        "artifacts/bimlog/src/pages/project/FolderWizardDestinationPanel.tsx",
+        "artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx",
+        "artifacts/bimlog/src/pages/project/folder-wizard-destination-response.behavior.ts",
+        "artifacts/bimlog/src/pages/project/folder-wizard-destination-response.ts",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/coordination-routing-20260925/REPAIRS_R16_R20.md",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/test-folder-wizard-publish-block06.mjs"
+      ],
+      "reviewedChangeSha256": "4a78407f52ce9ab9d2031ee6881b7ad40c6572e246c7e76f7bebd018ad5802c2"
     }
   ]
 }
