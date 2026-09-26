@@ -40,6 +40,11 @@ for (const malformed of [null, {}, { ...data, members: null }, { ...data, tasks:
 }
 
 const english = render();
+const appliedView = render({data:{...data, scenarios:data.scenarios.map(item=>({...item,applied:true}))}});
+assert.match(appliedView, /Inspect saved evidence/);
+assert.match(appliedView, /Saved scenario review evidence/);
+assert.doesNotMatch(appliedView, /Apply reviewed assignees/);
+assert.match(render({lang:"es",data:{...data, scenarios:data.scenarios.map(item=>({...item,applied:true}))}}), /Consultar evidencia guardada/);
 assert.equal(validateResourceEvaluation(evaluation), evaluation);
 for (const invalid of [null, {}, {...evaluation, people: null}, {...evaluation, totals: {}}, {...evaluation, warnings: [null]}])
   assert.throws(() => validateResourceEvaluation(invalid), /RESOURCE_PLANNING_RESPONSE_INCOMPLETE/);
