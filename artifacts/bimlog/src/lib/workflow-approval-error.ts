@@ -1,5 +1,13 @@
 export function workflowApprovalError(code: string, spanish: boolean, field?: unknown): string {
   const validation: Record<string, [string, string]> = {
+    WORKFLOW_APU_NOT_FOUND: ["El APU seleccionado no está publicado o no pertenece a esta empresa. Seleccione un APU publicado vigente.", "The selected APU is not published or does not belong to this company. Select a current published APU."],
+    WORKFLOW_APU_PHASE_DEFAULTS_MISSING: ["El APU no tiene fases de producción directa aprobadas. Publique una nueva versión del APU con esas fases antes de vincularlo.", "The APU has no approved Direct Production phases. Publish a new APU version with those phases before linking it."],
+    WORKFLOW_ALLOCATION_PHASE_MISMATCH: ["Las fases y su orden deben coincidir con la asignación. Aplique las fases predeterminadas del APU o revise las fases nuevas de redistribución.", "Phase identities and order must match the allocation. Apply the APU default phases or review the new redistribution phases."],
+    ALLOCATION_TOTAL_NOT_100: ["Los porcentajes deben sumar exactamente 100 %. Corrija la distribución antes de validar.", "Percentages must total exactly 100%. Correct the allocation before validating."],
+    ALLOCATION_DECIMAL_INVALID: ["Ingrese un número no negativo con un máximo de dos decimales y punto decimal, por ejemplo 10.50.", "Enter a non-negative number with at most two decimal places and a decimal point, for example 10.50."],
+    ALLOCATION_DEDUCTION_MISMATCH: ["El total deducido debe ser igual al porcentaje asignado a las fases nuevas.", "Total deductions must equal the percentage assigned to the new phases."],
+    ALLOCATION_DEDUCTION_EXCEEDS_PHASE: ["No puede deducir más del porcentaje disponible de una fase.", "You cannot deduct more than a phase's available percentage."],
+    ALLOCATION_ADDITION_TOO_LARGE: ["Las fases nuevas deben recibir menos del 100 % para conservar la distribución de las fases originales.", "New phases must receive less than 100% to retain allocation for the original phases."],
     WORKFLOW_TEXT_INVALID: ["Complete el texto requerido y respete su longitud máxima.", "Complete the required text and respect its maximum length."],
     WORKFLOW_CODE_INVALID: ["Use un código sin espacios. Los roles y documentos usan letras mayúsculas, números y guion bajo.", "Use a code without spaces. Roles and documents use uppercase letters, numbers and underscores."],
     WORKFLOW_DUPLICATE_ID: ["Hay códigos repetidos. Asigne un código único a cada fase, tarea o documento.", "Codes are duplicated. Assign a unique code to each phase, task or document."],
