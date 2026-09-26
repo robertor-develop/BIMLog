@@ -21,6 +21,7 @@ type Definition = {
   validation:Record<typeof validations[number],boolean>;
 };
 type Version = { policyId:string;code:string;name:string;versionId:string;version:number;revision:number;state:string;definition:Definition;fingerprint:string|null;
+  reviewEligibility?: { eligible:boolean;code:string|null };
   approvedById:number|null;publishedById:number|null;retiredById:number|null;approvedAt:string|null;publishedAt:string|null;retiredAt:string|null };
 type Summary = Pick<Version,"code"|"name"|"versionId"|"version"|"revision"|"state"> & { id:string };
 type History = { versionId:string;action:string;actorId:number;actorName:string|null;createdAt:string;details:Record<string,unknown> };
@@ -184,12 +185,16 @@ export function CompanyWorkflowGovernance() {
         <p>{t("Activated Work Items keep immutable policy and workflow snapshots. Structural changes create a new version; full history is preserved.","Los elementos activados conservan instantáneas inmutables de política y flujo. Los cambios estructurales crean otra versión y se conserva todo el historial.")}</p>
       </section>
       {canManage && <div className="wgp-actions">
+        {current?.state === "draft" && <p role="status">{current.reviewEligibility?.eligible
+          ? t("You can independently review this saved draft. Approval rechecks current authority and policy compatibility.","Puede revisar independientemente este borrador guardado. La aprobación vuelve a verificar la autoridad y compatibilidad actuales.")
+          : current.reviewEligibility?.code ? workflowPolicyErrorMessage(current.reviewEligibility.code,spanish)
+          : t("Reviewer eligibility is unavailable. Reload before approval.","La elegibilidad del revisor no está disponible. Recargue antes de aprobar.")}</p>}
         {editable && <button type="button" disabled={busy || !dirty || (!selectedId && (!identity.code || !identity.name))} onClick={() => void act(async () => {
           if (!selectedId) { const created=await request("/company/workflow-governance-policies","POST",{code:identity.code,name:identity.name,definition:draft});
             return created.policyId; }
           else if (current) await request(`/company/workflow-governance-policies/${selectedId}/versions/${current.versionId}`,"PATCH",{expectedRevision:current.revision,definition:draft});
         },t("Draft saved.","Borrador guardado."))}>{t("Save draft","Guardar borrador")}</button>}
-        {current?.state==="draft" && <button type="button" disabled={busy || dirty} onClick={() => void act(() => request(`/company/workflow-governance-policies/${selectedId}/versions/${current.versionId}/approve`,"POST",{expectedRevision:current.revision}),t("Policy approved.","Política aprobada."))}>{t("Approve with Finance checker","Aprobar con verificador financiero")}</button>}
+        {current?.state==="draft" && <button type="button" disabled={busy || dirty || current.reviewEligibility?.eligible !== true} onClick={() => void act(() => request(`/company/workflow-governance-policies/${selectedId}/versions/${current.versionId}/approve`,"POST",{expectedRevision:current.revision}),t("Policy approved.","Política aprobada."))}>{t("Approve with Finance checker","Aprobar con verificador financiero")}</button>}
         {current?.state==="approved" && <button type="button" disabled={busy} onClick={() => setConfirm("publish")}>{t("Publish policy","Publicar política")}</button>}
         {current?.state==="published" && <button type="button" disabled={busy} onClick={() => setConfirm("retire")}>{t("Retire policy","Retirar política")}</button>}
         {selectedId && !versions.some(version => version.state==="draft" || version.state==="approved") && <button type="button" disabled={busy || dirty} onClick={() => void act(() => request(`/company/workflow-governance-policies/${selectedId}/versions`,"POST",{}),t("New draft version created.","Nueva versión borrador creada."))}>{t("Clone new version","Clonar nueva versión")}</button>}

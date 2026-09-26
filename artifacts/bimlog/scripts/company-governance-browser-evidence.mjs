@@ -35,7 +35,8 @@ async function scenario(width,language,mode){
   page.on("pageerror",error=>failures.push(error.message));
   page.on("requestfailed",request=>{if(request.url().includes("/api/v1/company/")) failures.push(request.failure()?.errorText ?? "failed request");});
   let version={policyId:"policy-1",code:"SHOP_GOV",name:"Shop Governance",versionId:"policy-v1",
-    version:1,revision:1,state:mode==="read-only"?"published":"draft",definition:definition(),fingerprint:null};
+    version:1,revision:1,state:mode==="read-only"?"published":"draft",definition:definition(),fingerprint:null,
+    reviewEligibility:{eligible:false,code:"WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED"}};
   let history=[];
   let detailReads=0;
   await context.route("**/api/v1/**",async route=>{
@@ -92,6 +93,8 @@ async function scenario(width,language,mode){
       assert.equal(await page.getByRole("button",{name:es?"Guardar borrador":"Save draft"}).count(),0);
       assert.equal(await threshold.isDisabled(),true);
     } else {
+      assert.equal(await page.getByRole("button",{name:es?"Aprobar con verificador financiero":"Approve with Finance checker"}).isDisabled(),true);
+      await page.getByText(es?"Otro administrador PMO de la empresa debe revisar este borrador. Quien lo creó o editó por última vez no puede aprobarlo.":"A different company PMO administrator must review this draft. Its creator and latest editor cannot approve it.").waitFor();
       assert.equal(await threshold.inputValue(),"2500000");
       await threshold.fill("2800000");
       await page.locator(".wgp-dirty").waitFor();
