@@ -72,6 +72,20 @@ export function assertWorkflowReplacementAllowed(policy: WorkflowGovernancePolic
   }
 }
 
+export async function validateWorkflowReplacementForPolicy(client: Queryable, companyId: number,
+  templateId: string, version: number, policy: WorkflowGovernancePolicy,
+  definition: DeliveryWorkflowDefinition): Promise<void> {
+  const prior = (await client.query(`SELECT v.definition,v.fingerprint
+    FROM company_delivery_workflow_versions v JOIN company_delivery_workflow_templates t ON t.id=v.template_id
+    WHERE t.company_id=$1 AND t.id=$2 AND v.version<$3 AND v.state IN ('published','superseded','retired')
+    ORDER BY v.version DESC LIMIT 1`, [companyId,templateId,version])).rows[0];
+  if (!prior) return; // The first release has no historical replacement baseline.
+  const baseline = validateDeliveryWorkflowDefinition(prior.definition);
+  if (deliveryWorkflowFingerprint(baseline) !== prior.fingerprint)
+    throw new FinancialControlError(409,"DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH","The prior released workflow failed integrity verification.");
+  assertWorkflowReplacementAllowed(policy, baseline, definition);
+}
+
 export async function validatePublishedWorkflowsForPolicy(client: Queryable, companyId: number,
   policy: WorkflowGovernancePolicy): Promise<void> {
   const rows = (await client.query(`SELECT t.id "templateId",v.definition,v.fingerprint

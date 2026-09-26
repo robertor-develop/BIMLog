@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { FinancialControlError } from "./financial-control-contract";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
-import { assertGovernanceChangeAllowed, assertWorkflowReplacementAllowed, workflowDefinitionChanges, validatePublishedWorkflowsForPolicy } from "./workflow-governance-binding";
+import { assertGovernanceChangeAllowed, assertWorkflowReplacementAllowed, workflowDefinitionChanges, validatePublishedWorkflowsForPolicy, validateWorkflowReplacementForPolicy } from "./workflow-governance-binding";
 import { validateWorkflowGovernancePolicy } from "./workflow-governance-policy-contract";
 
 const workflow = validateDeliveryWorkflowDefinition({
@@ -56,3 +56,17 @@ for (const action of ["edit_phases", "edit_tasks_roles", "change_apu", "edit_all
   assertWorkflowReplacementAllowed(forbidden, workflow, workflow);
 }
 console.log("Workflow replacement change classification and forbidden/allowed/no-change behavior PASS");
+let priorRows: Array<{definition: unknown; fingerprint: string}> = [];
+const replacementClient = { async query(sql: string, params?: unknown[]) {
+  assert.deepEqual(params, [7,"target",2]);
+  assert.match(sql, /t.company_id=\$1 AND t.id=\$2 AND v.version<\$3/);
+  assert.match(sql, /'published','superseded','retired'/);
+  return { rows: priorRows };
+} };
+await validateWorkflowReplacementForPolicy(replacementClient,7,"target",2,policy,workflow);
+priorRows = [{ definition: workflow, fingerprint: deliveryWorkflowFingerprint(workflow) }];
+await validateWorkflowReplacementForPolicy(replacementClient,7,"target",2,policy,workflow);
+priorRows[0].fingerprint = "invalid";
+await assert.rejects(validateWorkflowReplacementForPolicy(replacementClient,7,"target",2,policy,workflow),
+  (error: unknown) => error instanceof FinancialControlError && error.code === "DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH");
+console.log("Replacement baseline scope, first release, retired history and integrity checks PASS");

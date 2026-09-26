@@ -13,7 +13,7 @@ import { waitForFinancialControlMigration } from "../lib/financial-control-migra
 import { economicCheckerAllowed, workflowTemplateCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
 import { boundedWorkflowRetirementReason } from "../lib/delivery-workflow-retirement";
 import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
-import { applicablePublishedGovernance, assertGovernanceChangeAllowed, publishedGovernanceRows, validateWorkflowAgainstGovernance } from "../lib/workflow-governance-binding";
+import { applicablePublishedGovernance, assertGovernanceChangeAllowed, publishedGovernanceRows, validateWorkflowAgainstGovernance, validateWorkflowReplacementForPolicy } from "../lib/workflow-governance-binding";
 
 const router = Router();
 const templateCode = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -201,14 +201,17 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/approve", authM
     await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const template = await scopedTemplate(connection,param(req.params.id),actor,true);
     if (!template) { await connection.query("ROLLBACK"); res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }
-    const version = (await connection.query(`SELECT id,definition,revision,state,created_by_id,updated_by_id FROM company_delivery_workflow_versions
+    const version = (await connection.query(`SELECT id,version,definition,revision,state,created_by_id,updated_by_id FROM company_delivery_workflow_versions
       WHERE id=$1 AND template_id=$2 FOR UPDATE`, [param(req.params.versionId),template.id])).rows[0];
     if (!version || version.state !== "draft" || Number(version.revision) !== revision) {
       await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_NOT_DRAFT_OR_STALE" }); return;
     }
     const definition = validateDeliveryWorkflowDefinition(version.definition);
     const governance = applicablePublishedGovernance(await publishedGovernanceRows(connection,actor.companyId),String(template.id));
-    if (governance) validateWorkflowAgainstGovernance(governance.definition,definition);
+    if (governance) {
+      validateWorkflowAgainstGovernance(governance.definition,definition);
+      await validateWorkflowReplacementForPolicy(connection,actor.companyId,String(template.id),Number(version.version),governance.definition,definition);
+    }
     const allocation = await economicPreview(connection, actor, definition);
     if (!workflowTemplateCheckerAllowed({
       creatorId: Number(version.created_by_id), lastEditorId: Number(version.updated_by_id), checkerId: actor.userId,
