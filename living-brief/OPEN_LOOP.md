@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Resource Planning Builds 71–75 — 2026-09-26
+
+- [x] Reconcile c2877033 Build70 full gate and clean push from the external resource block14 receipt; historical pending-push notes are superseded.
+- [x] Locally verify fresh evaluation shape rejection, read-only applied scenario evidence, labeled safe CSV output, project-scoped drafts and stale-load rejection. No Lens Next changes.
+- [ ] Complete exact-head gate, push, Replit Shell synchronization, schema correspondence, publication and authenticated Chrome smoke for Builds66–75. Do not exceed ten unpublished builds.
+- [ ] Complete remaining Resource/Earnings scope and full multi-role template-to-Operations/SharePoint acceptance. Five planned slots remain but do not guarantee full scope completion.
+
 ## Resource Planning Builds 66–70 — 2026-09-26
 
 - [x] Reconcile Build65 exact publication `1d8652c6` / `08c2a3cb` and live overview repair from external receipt. Previous pending-publish notes are historical. Synthetic live scenario apply passed without changing budget/financial values; previously unassigned task workload is distinct from project budget.

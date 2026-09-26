@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Resource Planning Builds 71–75 — 2026-09-26
+
+- Baseline c28770333cc902fa3f86a3d1ec31dea23137604a is pushed; external block14 receipt proves its full gate and clean push. Production remains Build65 / 08c2a3cb until the next external publication receipt.
+- 71 validates fresh evaluation payloads; 72 retains inspection of applied immutable scenarios; 73 labels advisory CSV units in English/Spanish and neutralizes formula-like text; 74 scopes drafts by project/user and discards superseded loads; 75 clears previous evaluation before retry, validates saved evaluation and connects regression/release evidence.
+- Local actual-component Chrome proved malformed-response recovery, applied evidence inspection, language draft continuity and project-switch draft reset. Synthetic responses are confined to F-rooted test helpers, not production. Full pre-push gate, push and publication are pending at authoring; ten unpublished builds must be published before more work.
+- Five original planned slots remain after75. Earnings/bonus authority, full multi-role acceptance and actual SharePoint tenant delivery remain unresolved scope, not implicitly completed by consuming planned slots. Lens Next remains unchanged.
+
 ## Resource Planning Builds 66–70 — 2026-09-26
 
 - Published baseline is `1d8652c659f2553d482127347259c7cf2b076d11`, deployment `08c2a3cb`, exact live identity and schema action NONE. External resource block13 receipt supersedes the earlier publication-pending notes. Authenticated profile save/refresh, capacity/leave warnings, scenario save/reopen and apply pass on synthetic project57; full-site multi-role acceptance remains incomplete.

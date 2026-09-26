@@ -42,8 +42,9 @@
   "coreContinuation": { "builds": [31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60], "state": "31_60_published", "lastPushedCommit": "800493e73cc46deaa9a1d9d3b761af9f30891208", "unpublishedBuilds": 0, "publicationDueAt": 65 },
   "runtimeRepairBlock": { "ids": ["R11","R12","R13","R14","R15"], "state": "pushed", "pushedCommit": "e12ca284f20796135e147d973caf771bf3ae02f6", "unpublishedBuilds": 5, "countsTowardPublicationCadence": true, "doesNotConsumeResourceEarningsBuilds": true },
   "resourceBlock13": { "builds": [61,62,63,64,65], "state": "published", "commit": "1d8652c659f2553d482127347259c7cf2b076d11", "deployment": "08c2a3cb", "unpublishedBuilds": 0, "combinedUnpublishedChanges": 0, "publicationDueNow": false, "supersedesRuntimeRepairBlockPendingState": true },
-  "resourceBlock14": { "builds": [66,67,68,69,70], "state": "source_candidate", "unpublishedBuilds": 5, "publicationDueAt": 75 },
-  "remainingOriginalRoadmap": { "builds": 10, "blocks": 2, "excludesLensNext": true, "doesNotCloseUnresolvedAcceptance": true },
+  "resourceBlock14": { "builds": [66,67,68,69,70], "state": "pushed", "commit": "c28770333cc902fa3f86a3d1ec31dea23137604a", "unpublishedBuilds": 5, "publicationDueAt": 75 },
+  "resourceBlock15": { "builds": [71,72,73,74,75], "state": "source_candidate", "unpublishedBuilds": 5, "combinedUnpublishedBuilds": 10, "publicationDueNow": true },
+  "remainingOriginalRoadmap": { "builds": 5, "blocks": 1, "excludesLensNext": true, "doesNotCloseUnresolvedAcceptance": true },
   "liveSmoke": "partial_pass_file_selection_blocked",
   "sharePointDelivery": "confirmed_exact_job_path_published_real_tenant_roundtrip_unverified",
   "knownSafetyCorrection": "queued_sync_fail_closed_before_event_or_cache_consumption"

@@ -41,6 +41,8 @@ for (const malformed of [null, {}, { ...data, members: null }, { ...data, tasks:
 }
 
 const english = render();
+assert.match(source, /async function evaluate\(\).*setEvaluation\(null\)/);
+assert.match(source, /setEvaluation\(validateResourceEvaluation\(saved.evaluation\)\)/);
 assert.match(source, /generation !== loadGeneration.current/);
 assert.match(source, /generation === loadGeneration.current/);
 assert.match(source, /return <ResourceSchedulingSession key=/);
