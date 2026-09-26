@@ -5,7 +5,7 @@ import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-templat
 import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
 import { workflowGovernancePolicyFingerprint } from "./workflow-governance-policy-contract";
-import { advanceWorkItemDeliveryPhase, approveWorkItemDeliveryPhase, bindDeliveryWorkflowWithClient, getWorkItemDeliveryWorkflow, linkWorkItemDeliveryEvidence, reopenWorkItemDeliveryPhase, setWorkItemDeliveryStep } from "./delivery-workflow-runtime";
+import { advanceWorkItemDeliveryPhase, approveWorkItemDeliveryPhase, assignWorkItemDeliveryRole, bindDeliveryWorkflowWithClient, getWorkItemDeliveryWorkflow, linkWorkItemDeliveryEvidence, reopenWorkItemDeliveryPhase, setWorkItemDeliveryStep } from "./delivery-workflow-runtime";
 
 const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/invalid");
 if (target.hostname !== "127.0.0.1" || target.port !== "55449" || target.pathname !== "/delivery_runtime_test") throw new Error("Delivery Workflow runtime proof requires the isolated local PostgreSQL database on port 55449.");
@@ -102,6 +102,12 @@ runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project
 await advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId}); assert.equal(runtime.status,"complete");
 const priorFingerprint = runtime.fingerprint, priorEvents = runtime.events.length;
+await assert.rejects(assignWorkItemDeliveryRole({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,role:"execute",userId:owner}),
+  (error:unknown) => (error as {code?:string}).code === "DELIVERY_WORKFLOW_REOPEN_REQUIRED");
+const afterClosedAssignment = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+assert.equal(afterClosedAssignment.revision,runtime.revision);
+assert.equal(afterClosedAssignment.events.length,priorEvents);
+assert.equal(afterClosedAssignment.roles.find(row => row.role === "execute")?.userId,producer);
 const revised = validateDeliveryWorkflowDefinition({ ...base.definition, phases: base.definition.phases.map((phase,index)=>index===0 ? {...phase,name:"Changed future phase"}:phase) });
 const newVersionId = randomUUID();
 await pool.query(`UPDATE company_delivery_workflow_versions SET state='superseded' WHERE id=$1`,[versionId]);

@@ -477,6 +477,12 @@ export function assignWorkItemDeliveryRole(input: {
         "DELIVERY_WORKFLOW_MANAGER_REQUIRED",
         "Only a project manager may assign Delivery Workflow roles.",
       );
+    if (context.binding.status !== "active")
+      throw new FinancialControlError(
+        409,
+        "DELIVERY_WORKFLOW_REOPEN_REQUIRED",
+        "Reopen the completed workflow before changing role assignments.",
+      );
     const role = String(input.role) as Role,
       userId = int(input.userId, "userId");
     if (!roles.includes(role))

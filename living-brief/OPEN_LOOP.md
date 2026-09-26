@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Runtime correction block R11–R15 — 2026-09-26
+
+- [x] Build 60 is published at source `800493e73cc46deaa9a1d9d3b761af9f30891208`, deployment `f04f3322`; external receipt `F:/BIMLog/TestProof/core-block12-builds56-60-release-20260926.md` supersedes the historical publication-pending entry below. Full live acceptance remains incomplete.
+- [ ] Correct the reproduced closed-work role-assignment failure (isolated PostgreSQL accepted reassignment without reopening). Preserve role/revision/audit on denial; preserve authorized reopening. Review evidence and concurrent display consistency in the same bounded correction chain. Lens Next remains frozen.
+- [ ] These runtime corrections must not silently consume the remaining Resource/Earnings implementation scope. Reconcile the original 20 planned resource builds separately from repair IDs and retain full template-to-Operations/SharePoint live acceptance.
+
 ## Core Builds 56–60 runtime safeguards — 2026-09-26
 
 - [x] Reconcile Build 55 push and passing gate from the external block 11 receipt.
