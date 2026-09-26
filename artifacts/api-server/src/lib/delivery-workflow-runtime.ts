@@ -16,6 +16,7 @@ import { resolveWorkflowGovernanceSnapshot } from "./workflow-governance-binding
 import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint } from "./workflow-governance-policy-contract";
 import { workflowGovernanceActorRoles, requireWorkflowPolicyRole } from "./workflow-governance-role-authority";
 import { workflowPolicyApprovalProgress } from "./workflow-governance-approval-progress";
+import { frozenWorkflowMoney } from "./workflow-governance-threshold";
 
 type Queryable = {
   query(sql: string, params?: any[]): Promise<{ rows: any[] }>;
@@ -413,11 +414,16 @@ export async function getWorkItemDeliveryWorkflow(input: {
 }
 async function policyProgress(client: Queryable, context: Awaited<ReturnType<typeof locked>>) {
   if (context.binding.policy_definition == null) return null;
+  const policy = validateWorkflowGovernancePolicy(context.binding.policy_definition);
+  const finalPhase = Number(context.binding.phase_index) === context.definition.phases.length;
+  const money = policy.approvalRules.some(rule => rule.threshold &&
+    (rule.action === "complete_phase" || (finalPhase && rule.action === "complete_deliverable")))
+    ? await frozenWorkflowMoney(client, context.workItemId, context.access.companyId, context.projectId) : null;
   const events = (await client.query(`SELECT action,phase_id "phaseId",evidence
     FROM company_delivery_workflow_work_item_events WHERE work_item_id=$1`, [context.workItemId])).rows;
-  return workflowPolicyApprovalProgress(validateWorkflowGovernancePolicy(context.binding.policy_definition),
+  return workflowPolicyApprovalProgress(policy,
     context.binding.policy_fingerprint, context.phase.id,
-    Number(context.binding.phase_index) === context.definition.phases.length, events);
+    finalPhase, events, money);
 }
 
 async function readWorkItemDeliveryWorkflow(input: {
@@ -772,7 +778,8 @@ export function approveWorkItemDeliveryPhase(input: {
         "DELIVERY_WORKFLOW_APPROVAL_NOT_REQUIRED",
         "This phase does not require that approval.",
       );
-    const progress = input.kind === "approval" ? await policyProgress(client, context) : null;
+    const policyApprovals = input.kind === "approval" ? await policyProgress(client, context) : null;
+    const progress = policyApprovals?.stages.length ? policyApprovals : null;
     if (progress) {
       if (!progress.next) throw new FinancialControlError(409, "DELIVERY_WORKFLOW_ALREADY_APPROVED", "This phase already has all policy approvals.");
       const actorRoles = await workflowGovernanceActorRoles(client, { actorUserId: input.actorUserId,

@@ -1,13 +1,15 @@
 import type { WorkflowGovernancePolicy } from "./workflow-governance-policy-contract";
+import { governanceThresholdApplies, type GovernanceMoney } from "./workflow-governance-threshold";
 
 export type PolicyApprovalStage = { action: string; role: string; level: number };
 type Event = { action: string; phaseId: string | null; evidence: Record<string, any> };
 
 /** One ordered chain for phase completion, followed by final-deliverable approval. */
 export function workflowPolicyApprovalProgress(policy: WorkflowGovernancePolicy, fingerprint: string,
-  phaseId: string, finalPhase: boolean, events: readonly Event[]) {
+  phaseId: string, finalPhase: boolean, events: readonly Event[], money: GovernanceMoney | null = null) {
   const stages: PolicyApprovalStage[] = policy.approvalRules
     .filter(rule => rule.action === "complete_phase" || (finalPhase && rule.action === "complete_deliverable"))
+    .filter(rule => governanceThresholdApplies(rule.threshold, money))
     .sort((a, b) => Number(a.action === "complete_deliverable") - Number(b.action === "complete_deliverable"))
     .flatMap(rule => rule.roles.map((role, level) => ({ action: rule.action, role, level: level + 1 })));
   const resetActions = new Set(["step_reopened", "evidence_linked", "role_assigned", "phase_reopened"]);

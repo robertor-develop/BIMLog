@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation C008 runtime threshold candidate — 2026-09-26
+
+- C007 committed7830804b. C008 phase/final-deliverable approval thresholds use the fingerprint-verified immutable contract-item baseline and its scoped currency. Exact six-decimal amounts are compared with ISO currency minor units using integers; equal/below do not trigger the additional hierarchy, strictly greater does. Existing workflow approval remains required independently. Missing baseline, mismatched currency or fingerprint fails explicitly.
+- Editor displays a readable bilingual amount beside the explicitly minor-unit input. Exact boundary, JPY/KWD, large-value, foreign-scope and fingerprint tests pass locally. This does not activate unrelated economic-change execution or apply template-authoring action hierarchies; existing Finance/maker-checker controls remain. C009/C010, complete release and live acceptance remain pending.
+
 ## Consolidation C007 local candidate — 2026-09-26
 
 - C006 is committed at730aee9a; C007 enforces ordered phase and final-deliverable approval stages against the frozen policy. Current checkpoint/evidence authors cannot approve their own work. Stage evidence records policy identity and runtime revision; evidence changes, reopening and role reassignment invalidate the applicable approval chain without deleting prior events.

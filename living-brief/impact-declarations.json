@@ -44149,6 +44149,109 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a8e21fb89c8c34bfe65617b5fc4078476d729a1ec9831f17c3c7a0b3e0156c41"
+    },
+    {
+      "taskId": "consolidation-c008-exact-runtime-thresholds",
+      "reviewedThroughCommit": "7830804be993a13cd42eee97b1548640ce4332e8",
+      "reviewedAt": "2026-09-26T20:33:20Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Approval thresholds use immutable contract-item value and exact currency units; missing values cannot silently become zero."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing exact financial, scoped and immutable contracts without changing this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing exact financial, scoped and immutable contracts without changing this authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing exact financial, scoped and immutable contracts without changing this authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing exact financial, scoped and immutable contracts without changing this authority."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated inventory adds exact threshold and baseline resolver."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No native Lens or installer changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing exact financial, scoped and immutable contracts without changing this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing exact financial, scoped and immutable contracts without changing this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records bounded runtime threshold evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserves unconnected policy actions and C009-C010 release work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing exact financial, scoped and immutable contracts without changing this authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-workflow-governance-roles.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/workflow-governance-approval-progress.ts",
+        "artifacts/api-server/src/lib/workflow-governance-threshold.ts",
+        "artifacts/bimlog/src/lib/governance-threshold-presentation.ts",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C008.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c2e26f573f0304df45922daddc30afa48a5bece61e833738c46eaf52d9372663"
     }
   ]
 }

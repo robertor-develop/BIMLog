@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C008 candidate adds exact frozen-contract thresholds for phase/final-deliverable runtime approvals and readable editor values. Missing/mismatched economics deny explicitly; no zero fallback or currency conversion. Other action categories (economic-change execution, create/activate/template action hierarchies) are not thereby connected and remain open. C009/C010 release/live acceptance remain pending. Production unchanged73a5a7d7.
+
 C007 local candidate supersedes C007-unimplemented wording below: ordered frozen-policy phase/final approval stages and checkpoint/evidence maker-checker enforcement pass local runtime regression and typecheck. C006 committed730aee9a. C008 thresholds, C009 changes, C010 presentation/full release and live acceptance remain outstanding; production unchanged73a5a7d7. No Lens Native mutation.
 
 C006 current candidate: existing company/project authority now constrains configured frozen-policy runtime roles; isolated PostgreSQL authority and runtime-cycle tests pass. C004/C005 exact-head suite and push passed at5acb1728 (external release receipt supersedes the historical pending statements below). Production stays73a5a7d7. C007 approval hierarchy/maker-checker, C008 thresholds, C009 governed changes and C010 decision presentation/publication remain next; no full-block or deployed acceptance claim. C003/I010 company binding/recipient-email evidence remain separate unresolved operational work.

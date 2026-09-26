@@ -5,6 +5,21 @@ process.env.PROD_DATABASE_URL = "postgresql://postgres@127.0.0.1:55469/bimlog_rf
 const { workflowGovernanceActorRoles, requireWorkflowPolicyRole } = await import("../src/lib/workflow-governance-role-authority");
 const { pool } = await import("@workspace/db");
 const { workflowPolicyApprovalProgress } = await import("../src/lib/workflow-governance-approval-progress");
+const { governanceThresholdApplies, frozenWorkflowMoney } = await import("../src/lib/workflow-governance-threshold");
+const { activationFingerprint } = await import("../src/lib/job-activation-commercial-baseline");
+const usd = { currency: "USD", amountMinor: 2500000 };
+assert.equal(governanceThresholdApplies(usd, {currency:"USD",amount:"24999.99"}), false);
+assert.equal(governanceThresholdApplies(usd, {currency:"USD",amount:"25000"}), false);
+assert.equal(governanceThresholdApplies(usd, {currency:"USD",amount:"25000.000001"}), true);
+assert.equal(governanceThresholdApplies({currency:"JPY",amountMinor:25}, {currency:"JPY",amount:"25"}), false);
+assert.equal(governanceThresholdApplies({currency:"KWD",amountMinor:25001}, {currency:"KWD",amount:"25.002"}), true);
+assert.throws(() => governanceThresholdApplies(usd, {currency:"EUR",amount:"999999"}), {code:"WORKFLOW_POLICY_CURRENCY_MISMATCH"});
+assert.throws(() => governanceThresholdApplies(usd, null), {code:"WORKFLOW_POLICY_AMOUNT_REQUIRED"});
+assert.equal(governanceThresholdApplies({currency:"USD",amountMinor:Number.MAX_SAFE_INTEGER}, {currency:"USD",amount:"90071992547409.910001"}), true);
+const presentationPath = "../../bimlog/src/lib/governance-threshold-presentation.ts";
+const { governanceThresholdLabel } = await import(presentationPath);
+assert.equal(governanceThresholdLabel(usd,false), "Greater than 25,000.00 USD");
+assert.equal(governanceThresholdLabel(null,true), "Siempre");
 const hierarchy = { approvalRules: [{ action: "complete_deliverable", roles: ["CEO"] },
   { action: "complete_phase", roles: ["QC_REVIEWER", "PROJECT_LEADER"] }] } as any;
 const stage = (role: string, level: number, runtimeRevision: number, action = "complete_phase", policyFingerprint = "frozen") =>
@@ -59,5 +74,22 @@ try {
   await assert.rejects(resolve(2), { code: "WORKFLOW_POLICY_PROJECT_MEMBER_REQUIRED" });
   await client.query("INSERT INTO project_company_binding_versions VALUES(57,35,1)");
   await assert.rejects(resolve(1), { code: "WORKFLOW_POLICY_COMPANY_REQUIRED" });
+  await client.query(`CREATE TEMP TABLE job_intakes(id text,company_id int);
+    CREATE TEMP TABLE job_activation_work_items(id text,intake_id text,project_id int,contract_version_id text,stable_scope_item_id text);
+    CREATE TEMP TABLE job_activation_contract_item_baselines(intake_id text,project_id int,contract_version_id text,stable_line_id text,budget_account_id text,pricing_snapshot jsonb,snapshot_fingerprint text);
+    CREATE TEMP TABLE job_activation_budget_accounts(id text,intake_id text,project_id int,currency text);
+    INSERT INTO job_intakes VALUES('intake',31);
+    INSERT INTO job_activation_work_items VALUES('TEST-WI','intake',57,'contract-v1','scope-1');
+    INSERT INTO job_activation_budget_accounts VALUES('budget','intake',57,'USD');`);
+  const pricing = { contractValue: "25000.01" };
+  await client.query("INSERT INTO job_activation_contract_item_baselines VALUES('intake',57,'contract-v1','scope-1','budget',$1,$2)",
+    [JSON.stringify(pricing),activationFingerprint(pricing)]);
+  const money = await frozenWorkflowMoney(client,"TEST-WI",31,57);
+  assert.deepEqual(money,{amount:"25000.01",currency:"USD"});
+  assert.equal(governanceThresholdApplies(usd,money),true);
+  await assert.rejects(frozenWorkflowMoney(client,"TEST-WI",35,57),{code:"WORKFLOW_POLICY_AMOUNT_REQUIRED"});
+  await assert.rejects(frozenWorkflowMoney(client,"TEST-WI",31,58),{code:"WORKFLOW_POLICY_AMOUNT_REQUIRED"});
+  await client.query("UPDATE job_activation_contract_item_baselines SET snapshot_fingerprint='mismatch'");
+  await assert.rejects(frozenWorkflowMoney(client,"TEST-WI",31,57),{code:"WORKFLOW_POLICY_AMOUNT_MISMATCH"});
   console.log("C006 role authority: PASS (real PostgreSQL, company isolation, inactive membership, unknown role, explicit QC assignment, grant revocation, binding change, no super-admin role substitution).");
 } finally { await client.end(); await pool.end(); }
