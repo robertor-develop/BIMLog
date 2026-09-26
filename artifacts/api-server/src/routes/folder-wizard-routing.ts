@@ -11,10 +11,13 @@ import { createRuntimeFolderWizardPublishSubmission } from "../lib/folder-wizard
 import { executeConfirmedFolderWizardPublish } from "../lib/folder-wizard-publish-execution";
 import { storage } from "../lib/storage-adapter";
 import { validFolderWizardTags, validFolderWizardFileId } from "../lib/folder-wizard-request-validation";
+import { createFolderWizardDestinationStore } from "../lib/folder-wizard-destination";
+import { ConnectorValidationUnavailableError } from "../lib/coordination-hub-configuration-service";
 
 const router: IRouter = Router();
 const service = createFolderWizardRoutingService();
 const publishingReadiness = createFolderWizardPublishReadinessStore();
+const destinations = createFolderWizardDestinationStore();
 const candidate = new FolderWizardPublishCandidateService(createFolderWizardPublishCandidateStore(), storage);
 const getScope = (req: { params: Record<string, unknown>; user?: { userId: number } }) => {
   const projectId = Number(req.params.projectId);
@@ -22,6 +25,7 @@ const getScope = (req: { params: Record<string, unknown>; user?: { userId: numbe
   return { projectId, actorUserId: req.user!.userId };
 };
 function fail(res: { status(code: number): { json(value: unknown): unknown } }, error: unknown) {
+  if (error instanceof ConnectorValidationUnavailableError) { res.status(503).json({ error: "FOLDER_WIZARD_DESTINATION_UNVERIFIED" }); return; }
   if (error instanceof FolderWizardImportError) { res.status(error.status).json({ error: error.code }); return; }
   if (error instanceof ZodError) { res.status(400).json({ error: "FOLDER_WIZARD_ROUTING_INVALID", issues: error.issues.map(({ path, message }) => ({ path, message })) }); return; }
   if (error instanceof Error && /^FOLDER_WIZARD_/.test(error.message)) { res.status(400).json({ error: error.message }); return; }
@@ -30,6 +34,15 @@ function fail(res: { status(code: number): { json(value: unknown): unknown } }, 
 }
 router.get("/projects/:projectId/integrations/folder-wizard/routing", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json(await service.current(getScope(req))); } catch (error) { fail(res, error); }
+});
+router.get("/projects/:projectId/integrations/folder-wizard/destination", authMiddleware, requireProjectMember(), async (req, res) => {
+  try { res.json(await destinations.read(getScope(req))); } catch (error) { fail(res, error); }
+});
+router.post("/projects/:projectId/integrations/folder-wizard/destination", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+  try {
+    const result = await destinations.create(getScope(req), req.body);
+    res.status(result.result === "created" ? 201 : 200).json(result);
+  } catch (error) { fail(res, error); }
 });
 router.get("/projects/:projectId/integrations/folder-wizard/publishing-readiness", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json(await publishingReadiness.read(getScope(req))); } catch (error) { fail(res, error); }
