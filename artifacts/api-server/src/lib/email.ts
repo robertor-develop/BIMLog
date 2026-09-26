@@ -1,6 +1,7 @@
 import sgMail from "@sendgrid/mail";
 import { db } from "@workspace/db";
 import { emailLogTable } from "@workspace/db/schema";
+import { invitationLink } from "./invitation-token";
 import {
   configureSendGridTransport,
   type ConfigurableSendGridMailService,
@@ -147,8 +148,9 @@ export function makeInvitationEmail(opts: {
   invitedByName: string;
   invitedEmail: string;
   projectId: number;
+  invitationToken?: string;
 }): string {
-  const url = `${APP_URL}/register?email=${encodeURIComponent(opts.invitedEmail)}`;
+  const url = opts.invitationToken ? invitationLink(opts.invitationToken) : `${APP_URL}/login`;
   const isEs = opts.lang === "es";
   const body = `
     ${heading(isEs ? `Has sido invitado a unirte a ${opts.projectName} en BIMLog` : `You have been invited to join ${opts.projectName} on BIMLog`)}

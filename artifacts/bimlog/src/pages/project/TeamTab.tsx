@@ -1159,6 +1159,7 @@ function AddMemberForm({
   const [invFullName, setInvFullName] = useState("");
   const [invRole, setInvRole] = useState(roleOptions[0]?.value ?? "");
   const [invPending, setInvPending] = useState(false);
+  const [invPurpose, setInvPurpose] = useState("project_collaboration");
 
   const { mutate, isPending } = useAddMember({
     mutation: {
@@ -1197,11 +1198,16 @@ function AddMemberForm({
             fullName: invFullName || undefined,
             companyName: authUser?.companyName || undefined,
             role: invRole,
+            purpose: invPurpose,
           }),
         },
       );
       if (!r.ok) throw new Error(await r.text());
       const result = await r.json();
+      if (result.deliveryStatus && result.deliveryStatus !== "sent") {
+        toast({title:lang === "es" ? "Invitación guardada, correo no entregado. Reintente desde invitaciones." : "Invitation saved, email not delivered. Retry from invitations.",variant:"destructive"});
+        return;
+      }
       queryClient.invalidateQueries({
         queryKey: [`/api/v1/projects/${projectId}/invitations`],
       });
@@ -1368,10 +1374,16 @@ function AddMemberForm({
             }}
           >
             {lang === "es"
-              ? "Envíe una invitación a una persona sin cuenta BIMLog. Al registrarse con este correo se unirá a su empresa y a este proyecto automáticamente."
-              : "Invite someone who does not have a BIMLog account. Registration with this email joins them to your company and this project automatically."}
+              ? "Invite a una persona con o sin cuenta. Debe aceptar el enlace seguro con el correo destinatario. Unirse a la empresa requiere autoridad PMO de la empresa."
+              : "Invite a person with or without an account. They must accept the secure link with the recipient email. Company joining requires company PMO authority."}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <label>{lang === "es" ? "Tipo de invitación" : "Invitation purpose"}
+              <select value={invPurpose} onChange={e=>setInvPurpose(e.target.value)} style={{width:"100%"}}>
+                <option value="project_collaboration">{lang === "es" ? "Colaborar en este proyecto (conservar empresa)" : "Collaborate on this project (keep company)"}</option>
+                <option value="company_join">{lang === "es" ? "Unirse a mi empresa y a este proyecto" : "Join my company and this project"}</option>
+              </select>
+            </label>
             <div style={{ display: "flex", gap: 8 }}>
               <Input
                 type="email"

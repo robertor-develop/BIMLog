@@ -2,6 +2,8 @@
 
 ## Identity invitation block I006–I010 — 2026-09-26
 
+- I007 issues expiring secret links through the existing invitation service, rotates a pending invitation's hash on resend, distinguishes company joining from external collaboration, rechecks inviter/project/company authority and excludes hashes from invitation responses. Team UI distinguishes provider delivery failure from a sent email. Acceptance wiring remains I008; no production publication yet.
+
 - Baseline c49ea8a5 is pushed, not published. Seven changes remain unpublished. I006 adds hashed opaque invitation credentials, explicit purpose, expiry, revocation, accepted-user identity and delivery state to the existing invitation authority. Legacy invitations remain labeled legacy, not silently authenticated. Contract tests cover invalid, wrong-recipient, expired, revoked and legacy states. Issuance/acceptance/UI wiring and real delivery remain subsequent work; no live repair is claimed.
 
 ## Priority identity block I001–I005 — 2026-09-26

@@ -847,7 +847,7 @@ router.get(
         .where(eq(projectInvitations.projectId, projectId));
       res.json(
         rows.map((r) => ({
-          ...r,
+          ...r, tokenHash: undefined,
           createdAt: r.createdAt.toISOString(),
           acceptedAt: r.acceptedAt?.toISOString() ?? null,
         })),
@@ -867,16 +867,20 @@ router.post(
   async (req, res) => {
     try {
       const projectId = parseInt(req.params["projectId"] as string, 10);
-      const { email, fullName, role } = req.body as {
+      const { email, fullName, role, purpose } = req.body as {
         email: string;
         fullName?: string;
         role?: string;
+        purpose?: "company_join" | "project_collaboration";
       };
       if (!email) {
         res.status(400).json({ error: "email is required" });
         return;
       }
       const roleValue = role || "member";
+      if (purpose !== undefined && !["company_join", "project_collaboration"].includes(purpose)) {
+        res.status(400).json({error:"INVITATION_PURPOSE_INVALID"}); return;
+      }
       if (!(await validateConfigValue("member_role", roleValue))) {
         res.status(422).json({ error: `Invalid role: ${roleValue}` });
         return;
@@ -887,6 +891,7 @@ router.post(
         email,
         fullName,
         role: roleValue,
+        purpose,
       });
       if (result.kind === "existing") {
         if (!result.alreadyMember) {
@@ -912,15 +917,9 @@ router.post(
         throw new Error("Invitation service returned an invalid result");
       const row = result.row;
       const normalizedEmail = row.email;
-      res.status(201).json({
-        ...row,
-        createdAt: row.createdAt.toISOString(),
-        acceptedAt: null,
-        status: "pending",
-      });
-
       // ── T1: Invitation email ──────────────────────────────────────────────────
-      setImmediate(async () => {
+      let deliveryStatus: "sent" | "skipped" | "failed" = "failed";
+      {
         try {
           const project = await db
             .select()
@@ -934,7 +933,7 @@ router.post(
             .where(eq(usersTable.id, req.user!.userId))
             .limit(1);
           const inviterName = inviterUser[0]?.fullName || req.user!.fullName;
-          await sendEmail({
+          deliveryStatus = await sendEmail({
             to: normalizedEmail,
             subject: `You've been invited to join ${projectName} on BIMLog`,
             html: makeInvitationEmail({
@@ -944,6 +943,7 @@ router.post(
               projectName,
               role: roleValue,
               projectId,
+              invitationToken: result.token,
             }),
           });
         } catch (emailError) {
@@ -952,7 +952,9 @@ router.post(
             emailError instanceof Error ? emailError.message : emailError,
           );
         }
-      });
+      }
+      await db.update(projectInvitations).set({deliveryStatus}).where(and(eq(projectInvitations.id,row.id),eq(projectInvitations.tokenHash,row.tokenHash!)));
+      res.status(201).json({ ...row, tokenHash: undefined, deliveryStatus, createdAt:row.createdAt.toISOString(), acceptedAt:null });
     } catch (error) {
       res.status(500).json({
         error: error instanceof Error ? error.message : "Internal server error",

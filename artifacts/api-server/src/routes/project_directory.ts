@@ -1261,6 +1261,7 @@ router.post(
               lang: "en",
               invitedByName: req.user!.fullName,
               invitedEmail: result.row.email,
+              invitationToken: result.token,
               projectName,
               role,
               projectId,
