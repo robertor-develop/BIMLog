@@ -432,7 +432,7 @@ export function CompanyDeliveryWorkflowsTab({
     ]);
   };
   return (
-    <section style={{ display: "grid", gap: 16, minWidth: 0 }}>
+    <section className="company-workflow-editor" style={{ display: "grid", gap: 16, minWidth: 0 }}>
       <div>
         <h1>
           {t("Company Delivery Workflows", "Flujos de entrega de la empresa")}
@@ -748,7 +748,7 @@ export function CompanyDeliveryWorkflowsTab({
               >
                 {(["execute", "review", "approve"] as const).map((role) => (
                   <label key={role}>
-                    {role}
+                    {role === "execute" ? t("Execution role", "Rol de ejecución") : role === "review" ? t("Review role", "Rol de revisión") : t("Approval role", "Rol de aprobación")}
                     <input
                       value={draft.roles[role]}
                       onChange={(event) =>

@@ -1,3 +1,20 @@
+.company-workflow-editor label { display: grid; gap: 6px; min-width: 0; font-weight: 600; align-content: start; }
+.company-workflow-editor label:has(input[type="checkbox"]) { display: flex; align-items: center; gap: 8px; }
+.company-workflow-editor :is(input:not([type="checkbox"]),select,textarea) {
+  display: block; box-sizing: border-box; width: 100%; min-width: 0;
+  min-height: 40px; padding: 8px 10px; border: 1px solid #b8c7dc;
+  border-radius: 8px; background: #fff; color: #17243b; font: inherit; font-weight: 400;
+}
+.company-workflow-editor input[type="checkbox"] { width: 18px; height: 18px; flex-shrink: 0; }
+.company-workflow-editor fieldset { border: 1px solid #cbd5e1; padding: 12px; border-radius: 8px; }
+.company-workflow-editor legend { font-weight: 650; padding: 0 4px; }
+.company-workflow-editor button { min-height: 40px; padding: 8px 12px; border: 1px solid #adc3e2; border-radius: 8px; background: #fff; color: #174280; cursor: pointer; }
+.company-workflow-editor button:disabled { opacity: .55; cursor: not-allowed; }
+.company-workflow-editor :is(input,select,textarea,button):focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.company-workflow-editor h1 { font-size: 1.5rem; font-weight: 700; }
+.company-workflow-editor h2 { font-size: 1.2rem; font-weight: 650; }
+.company-workflow-editor h3 { font-weight: 650; }
+.company-workflow-editor p { line-height: 1.5; }
 .company-workflow-economic {
   background: #f8fbff;
   color: #17243b;
