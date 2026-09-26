@@ -1,4 +1,10 @@
 import { normalizeSubmittalListQuery, type SubmittalListQuery } from "./submittal-list-query-state";
+import { parseISO } from "date-fns";
+
+// Calendar-only values are local calendar days, never UTC-midnight instants.
+export function submittalDisplayDate(value: string): Date {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? parseISO(value) : new Date(value);
+}
 
 export type SubmittalPresentationScope = {
   projectId: number;

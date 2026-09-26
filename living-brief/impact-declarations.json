@@ -44559,6 +44559,105 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8d40fbbc0b1b17b3085cb6ed8d21aef4638cc16bf5ebd10e46db627024cf236e"
+    },
+    {
+      "taskId": "consolidation-c010-live-calendar-date-repair",
+      "reviewedThroughCommit": "08ecb065710f6903f486e22fb0a7c4f855758767",
+      "reviewedAt": "2026-09-26T22:07:42.220Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "chrome_component_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Calendar dates must not be parsed as UTC instants; live tracking showed prior-day drift."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded calendar-date presentation repair; no schema, authority, route or native changes. Live retest remains required."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/lib/post120-block36-submittals.behavior.ts",
+        "artifacts/bimlog/src/lib/submittal-presentation-scope.ts",
+        "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f05927d6a9d095b9f052e27f8e41ab86984ee887720877588f4a12711e9679b6"
     }
   ]
 }

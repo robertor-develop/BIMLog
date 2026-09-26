@@ -13,7 +13,15 @@ import {
   readSubmittalMutationError,
   submittalToEditorForm,
 } from "./submittal-editor-contract";
-import { createSubmittalHistoryScope, createSubmittalPresentationScope } from "./submittal-presentation-scope";
+import { createSubmittalHistoryScope, createSubmittalPresentationScope, submittalDisplayDate } from "./submittal-presentation-scope";
+
+const calendar = submittalDisplayDate("2026-09-26");
+assert.equal(calendar.getFullYear(), 2026);
+assert.equal(calendar.getMonth(), 8);
+assert.equal(calendar.getDate(), 26);
+assert.equal(calendar.getHours(), 0);
+assert.equal(Number.isNaN(submittalDisplayDate("2026-02-30").getTime()), true);
+assert.equal(submittalDisplayDate("2026-09-26T00:00:00Z").getTime(), Date.parse("2026-09-26T00:00:00Z"));
 
 const now = new Date("2026-09-21T12:00:00.000Z");
 const records = [

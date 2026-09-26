@@ -34,7 +34,7 @@ import {
   readSubmittalMutationError,
   submittalToEditorForm,
 } from "@/lib/submittal-editor-contract";
-import { createSubmittalHistoryScope, createSubmittalPresentationScope } from "@/lib/submittal-presentation-scope";
+import { createSubmittalHistoryScope, createSubmittalPresentationScope, submittalDisplayDate } from "@/lib/submittal-presentation-scope";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type AiCheckResult = {
@@ -137,7 +137,7 @@ function w(en: string, es: string, lang: string) { return lang === "es" ? es : e
 function getToken() { return JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token || ""; }
 function fmtDate(d: string | null | undefined) {
   if (!d) return "-";
-  const dt = new Date(d);
+  const dt = submittalDisplayDate(d);
   return isValid(dt) ? format(dt, "MMM d, yyyy") : "-";
 }
 function isAttachmentUrl(value: string) {
@@ -157,7 +157,7 @@ function uniqSorted(values: Array<string | null | undefined>) {
 }
 function daysOut(d: string | null | undefined) {
   if (!d) return null;
-  const dt = new Date(d);
+  const dt = submittalDisplayDate(d);
   if (!isValid(dt)) return null;
   return differenceInDays(new Date(), dt);
 }
@@ -425,7 +425,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 
   function trackerDateLabel(raw: string): string {
     if (!raw) return w("No date", "Sin fecha", lang);
-    const d = new Date(raw);
+    const d = submittalDisplayDate(raw);
     return isValid(d) ? format(d, "MM/dd/yy") : raw;
   }
 
@@ -509,7 +509,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 
   const overdueCount = visibleSubmittals.filter(s => {
     const raw = s.dateRequired || s.dueDate;
-    return raw && new Date(raw).getTime() < Date.now() && !["approved", "approved_as_noted", "closed"].includes((s.status || "").toLowerCase());
+    return raw && submittalDisplayDate(raw).getTime() < Date.now() && !["approved", "approved_as_noted", "closed"].includes((s.status || "").toLowerCase());
   }).length;
   const missingResponsible = visibleSubmittals.filter(s => !s.responsibleCompany && !s.submittedByCompany).length;
   const missingDueDate = visibleSubmittals.filter(s => !s.dateRequired && !s.dueDate).length;
@@ -1146,7 +1146,7 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
                       <td style={{ fontSize: 12 }}>{item.description}</td>
                       <td style={{ fontSize: 11, color: "#6B7280" }}>{item.trade || "-"}</td>
                       <td style={{ fontSize: 11, color: "#6B7280" }}>{item.submittalType ? (CATEGORY_OPTIONS.find(o => o.value === item.submittalType)?.[lang === "es" ? "labelEs" : "label"] || item.submittalType) : "-"}</td>
-                      <td style={{ fontSize: 11 }}>{item.requiredByDate ? format(new Date(item.requiredByDate), "MMM d, yyyy") : "-"}</td>
+                      <td style={{ fontSize: 11 }}>{item.requiredByDate ? fmtDate(item.requiredByDate) : "-"}</td>
                       <td style={{ fontSize: 11 }}>{item.leadTimeDays ? `${item.leadTimeDays}d` : "-"}</td>
                       <td style={{ fontSize: 11 }}>{item.responsibleCompany || "-"}</td>
                       <td>

@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## C010 live calendar-date correction — 2026-09-26
+
+Live synthetic project58 coverage creation, explicit linking, refresh persistence, missing-only filtering and unlinking passed. Package SUB-0001 entered with September26 displayed September25 in tracking: date-only strings were interpreted as UTC instants. The bounded repair parses calendar dates locally while retaining timestamp semantics; regression covers date components, invalid dates and timestamp identity. No stored data, schema or Lens Native changes. C006-C010 and denial-message repair are pushed; date repair requires clean release, push/publication and exact live retest. Full multi-role/platform acceptance remains open; this is not a full PASS.
+
 ## C010 live denial-message correction — 2026-09-26
 
 C006-C010 are pushed and published at17885b4128b259b4fcf145b698eed980697e6628; exact live identity is bound. Full local eight-command gate passed. Live Spanish negative test on synthetic project57 returned409 DELIVERY_WORKFLOW_TASKS_INCOMPLETE but displayed only a generic error. The UI now maps known server denial codes to the existing bilingual explanations for reads and mutations, retaining safe fallback for unknown failures. Regression verifies both languages. This repair still requires exact-head release and live retest; full multi-role acceptance is not complete. Native Lens and production permissions are unchanged.
