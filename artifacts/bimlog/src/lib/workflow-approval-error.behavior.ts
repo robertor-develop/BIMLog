@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { workflowApprovalError } from "./workflow-approval-error";
 
 assert.match(workflowApprovalError("DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED", false), /Another company PMO/);
@@ -12,6 +13,10 @@ assert.equal(workflowApprovalError("OTHER_ERROR", true), "OTHER_ERROR");
 assert.match(workflowApprovalError("WORKFLOW_PREVIEW_CONTEXT_INVALID", true), /seleccione nuevamente/);
 assert.match(workflowApprovalError("DELIVERY_WORKFLOW_NOT_FOUND", false), /Reload the list/);
 console.log("Workflow approval guidance: pass");
+const policyPage = readFileSync(new URL("../pages/CompanyWorkflowGovernance.tsx", import.meta.url), "utf8");
+assert.match(policyPage, /Replacement versions also enforce prohibitions/);
+assert.match(policyPage, /Las versiones de reemplazo también aplican las prohibiciones/);
+assert.doesNotMatch(policyPage, /other change rules|las demás reglas de cambio/);
 for (const action of ["EDIT_PHASES", "EDIT_TASKS_ROLES", "CHANGE_APU", "EDIT_ALLOCATION"]) {
   assert.match(workflowApprovalError(`WORKFLOW_POLICY_${action}_FORBIDDEN`,true), /La versión publicada sigue vigente/);
   assert.match(workflowApprovalError(`WORKFLOW_POLICY_${action}_FORBIDDEN`,false), /published version remains in effect/);

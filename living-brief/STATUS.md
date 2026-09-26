@@ -2,6 +2,8 @@
 
 ## Core operating chain Builds 36–40 — 2026-09-26
 
+- Release-preparation inspection found Governance's enforcement notice still described the newly implemented replacement rules as recorded intent. The bilingual notice and regression assertion are corrected as a Build 40 repair, not a new numbered build. Exact-head retest and corrected deployment remain required.
+
 - Builds 31–35 were gated and pushed at `620c225f6e9bcde5b62e0a87c1d8fa5d745cc74a`; see external `F:/BIMLog/TestProof/core-block07-builds31-35-push-20260926.md`. The five prior builds are not yet published.
 - Builds 36–40 make workflow preview company/version-scoped, evaluate the current Governance Policy and replacement restrictions under the existing company lock, return the checked policy identity, show bilingual preview limitations, and invalidate stale preview results across selection/account/language changes. Isolated HTTP proves wrong-company/identity denial and no version/audit mutation from preview.
 - A fresh-database HTTP test exposed missing Governance schema initialization before preview. Correction `767e65b5` passed the repeated test; it is part of Build 37, not an additional build. No deployed failure is claimed.

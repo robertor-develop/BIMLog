@@ -2,6 +2,8 @@
 
 ## Core Build 40 publication boundary — 2026-09-26
 
+- [x] Correct the stale bilingual Governance notice discovered during live preparation: distinguish enforced replacement restrictions from still-unenforced thresholds, approved Work Item changes and company-role grants. Add a source regression assertion; verify corrected deployed text before acceptance.
+
 - [x] Verify five-build push `620c225f` from the external exact-head receipt. Implement Builds 36–40 governed read-only preview, selected-version identity, bilingual checked-policy guidance, stale-response invalidation and isolated HTTP no-mutation/tenant-denial regression.
 - [x] Fix the observed fresh-database preview initialization failure before continuing; isolated PostgreSQL/HTTP retest passes.
 - [ ] Complete full exact-candidate gate, push and publish the ten-build core candidate through Replit Shell, then verify exact deployed source and authenticated Chrome preview/authoring regression. No further block before this ten-build boundary is released.

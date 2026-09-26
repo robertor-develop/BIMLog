@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "152cbe34f6553c50f4be30ad1fceccccc845cde2",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "5b272b751316ace5c6deba018a8e377f5a54f7fc292321b90665051ec6ecfd17",
+  "bundleSha256": "9a0e5ce56edba495af80aeb473a718b15ee0762fc000226803f3fa05f518fcaa",
   "impact": {
     "baselineCommit": "152cbe34f6553c50f4be30ad1fceccccc845cde2",
     "changedPaths": [
@@ -14,6 +14,7 @@
       "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
       "artifacts/bimlog/src/lib/workflow-approval-error.behavior.ts",
       "artifacts/bimlog/src/lib/workflow-approval-error.ts",
+      "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
       "evidence/coordination-routing-20260925/BLOCK_07_BUILDS_031_035.md",
       "evidence/coordination-routing-20260925/BLOCK_08_BUILDS_036_040.md",
       "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
@@ -129,7 +130,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "46a77da929b79662fcf829b4ddb44cafc42d6e21835356715e3b6d4b72b5f548",
+      "sha256": "fb667811a2b44502c2991999b9e93f7fdb7fec1c8b12fb804f194c38b9cc5f79",
       "sourceChangedAt": "2026-09-26T03:42:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "152cbe34f6553c50f4be30ad1fceccccc845cde2",
@@ -141,7 +142,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "00bfa78883d3009f55f5983141ab4804a2378007a32b942cbc1d7bf39dad1f8f",
+      "sha256": "51baf4cb5204c15e3750ac57cacd52567975505fe4f85e4ba998c176d2fd087c",
       "sourceChangedAt": "2026-09-26T03:42:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "152cbe34f6553c50f4be30ad1fceccccc845cde2",

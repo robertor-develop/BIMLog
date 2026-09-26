@@ -42122,6 +42122,7 @@
         "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
         "artifacts/bimlog/src/lib/workflow-approval-error.behavior.ts",
         "artifacts/bimlog/src/lib/workflow-approval-error.ts",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
         "evidence/coordination-routing-20260925/BLOCK_07_BUILDS_031_035.md",
         "evidence/coordination-routing-20260925/BLOCK_08_BUILDS_036_040.md",
         "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
@@ -42130,7 +42131,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "2b990bb9741ab5294166da65196daa1a277b52b3fe7ebc185186e1eba224e5bb"
+      "reviewedChangeSha256": "04547a5212efa8489a4499bddf98bf7bc59c5de696360f0765bc03b59d72b8de"
     }
   ]
 }
