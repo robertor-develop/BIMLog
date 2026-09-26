@@ -163,6 +163,8 @@ export function CompanyDeliveryWorkflowsTab({
   const [retireTarget, setRetireTarget] = useState<{ templateId: string; versionId: string; revision: number } | null>(null);
   const [retireReason, setRetireReason] = useState("");
   const [pendingTemplate, setPendingTemplate] = useState<string | null>(null);
+  const [confirmApuAlignment, setConfirmApuAlignment] = useState(false);
+  const alignApuButton = useRef<HTMLButtonElement>(null);
   const templateSelect = useRef<HTMLSelectElement>(null);
   const selectTemplate = (id: string) => {
     setSelectedId(id);
@@ -171,7 +173,7 @@ export function CompanyDeliveryWorkflowsTab({
     setRetireReason("");
     setPendingTemplate(null);
   };
-  useEffect(() => { setPendingTemplate(null); }, [token, spanish]);
+  useEffect(() => { setPendingTemplate(null); setConfirmApuAlignment(false); }, [token, spanish, selectedId]);
   const request = useCallback(
     async (path: string, init?: RequestInit) => {
       const response = await fetch(`${base}/api/v1${path}`, {
@@ -340,10 +342,11 @@ export function CompanyDeliveryWorkflowsTab({
     updateAllocationProposal({ ...proposal, phases: proposal.phases.map((row) =>
       row.phaseId === phaseId ? { ...row, percent } : row) });
   };
-  const alignApuPhases = () => {
+  const alignApuPhases = (confirmed = false) => {
     if (!draft || !apuPhases.length) return;
     if (draft.phases.some((phase) => !apuPhases.some((source) => source.phaseId === phase.id)) &&
-      !window.confirm(t("Replace the current phase list with the selected APU defaults? Unsaved phase tasks that do not match will be removed.", "¿Reemplazar las fases actuales por las predeterminadas del APU? Se quitarán las tareas no guardadas de fases sin coincidencia."))) return;
+      !confirmed) { setConfirmApuAlignment(true); return; }
+    setConfirmApuAlignment(false);
     const next = apuPhases.map((source, index): Phase => draft.phases.find((phase) => phase.id === source.phaseId)
       ? { ...draft.phases.find((phase) => phase.id === source.phaseId)!, code: source.code, name: source.name, order: index + 1 }
       : { id: source.phaseId, code: source.code, name: source.name, order: index + 1,
@@ -576,6 +579,16 @@ export function CompanyDeliveryWorkflowsTab({
           <AlertDialogFooter>
             <AlertDialogCancel>{t("Keep editing", "Seguir editando")}</AlertDialogCancel>
             <AlertDialogAction onClick={() => { if (pendingTemplate !== null) selectTemplate(pendingTemplate); }}>{t("Discard and switch", "Descartar y cambiar")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={confirmApuAlignment} onOpenChange={setConfirmApuAlignment}>
+        <AlertDialogContent onCloseAutoFocus={(event) => { event.preventDefault(); alignApuButton.current?.focus(); }}>
+          <AlertDialogTitle>{t("Replace workflow phases?", "¿Reemplazar las fases del flujo?")}</AlertDialogTitle>
+          <AlertDialogDescription>{t("Applying APU defaults removes the draft phases and tasks that do not match the APU. Matching tasks are kept. This changes only the draft; validate and save separately.", "Aplicar los valores del APU elimina las fases y tareas del borrador que no coinciden con el APU. Se conservan las tareas coincidentes. Solo cambia el borrador; valide y guarde por separado.")}</AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("Keep current phases", "Conservar fases actuales")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => alignApuPhases(true)}>{t("Apply APU phases", "Aplicar fases del APU")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1048,7 +1061,7 @@ export function CompanyDeliveryWorkflowsTab({
                   <p>{t("APU default phases", "Fases predeterminadas del APU")}: {apuPhases.map((phase) => `${phase.name} ${phase.percent}%`).join(" · ")}</p>
                   {!allocationAligned && <div role="status" style={{ padding: 10, background: "#fff7ed", border: "1px solid #fdba74", borderRadius: 8 }}>
                     <p>{t("Workflow phase identities/order do not match this allocation. Apply APU defaults, or add matching new phases after those defaults for a redistribution method.", "Las identidades o el orden de fases del flujo no coinciden con la asignación. Aplique los valores del APU o agregue fases nuevas después de las predeterminadas para redistribuir.")}</p>
-                    <button type="button" onClick={alignApuPhases}>{t("Apply APU default phases to draft", "Aplicar fases predeterminadas del APU al borrador")}</button>
+                    <button ref={alignApuButton} type="button" disabled={busy} onClick={() => alignApuPhases()}>{t("Apply APU default phases to draft", "Aplicar fases predeterminadas del APU al borrador")}</button>
                   </div>}
                   <label>{t("Allocation method", "Método de asignación")}
                     <select value={draft.economicAllocation.proposal.method}

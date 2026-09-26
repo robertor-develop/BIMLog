@@ -28,8 +28,9 @@ const source = { versionId:"apu-v1",name:"Sleeve APU",version:1,currency:"USD",
 async function scenario(width, language, mode) {
   const context = await browser.newContext({ viewport:{ width,height:900 } });
   await context.addInitScript(({ language }) => {
-    localStorage.setItem("bimlog-auth",JSON.stringify({ state:{ token:"workflow-browser-fixture",
-      user:{ id:7,firstName:"Test",lastName:"PMO",email:"fixture@example.invalid" } },version:0 }));
+    const token = `fixture.${btoa(JSON.stringify({ exp:Math.floor(Date.now()/1000)+3600, iat:Math.floor(Date.now()/1000) }))}.fixture`;
+    localStorage.setItem("bimlog-auth",JSON.stringify({ state:{ token,
+      user:{ id:7,firstName:"Test",lastName:"PMO",email:"fixture@example.invalid" } },version:1 }));
     localStorage.setItem("bimlog-lang",language);
   },{ language });
   let version = { templateId:"workflow-1",code:"SLEEVE",name:"Sleeve Standard",
@@ -44,6 +45,10 @@ async function scenario(width, language, mode) {
   await context.route("**/api/v1/**", async route => {
     const request = route.request(), pathname = new URL(request.url()).pathname, method = request.method();
     const respond = (body,status=200) => route.fulfill({ status,contentType:"application/json",body:JSON.stringify(body) });
+    if (pathname === "/api/v1/auth/access-profile") return respond({
+      facts:{ authenticated:true,isSuperAdmin:false,canAccessLivingBrief:false,isCompanyPmo:mode !== "read-only",isFinancialAdministrator:false,activeProjectRoles:[],activeProjects:[] },
+      decisions:{ company_workflows:{ allow:true,code:"COMPANY_MEMBER" } },
+    });
     if (pathname === "/api/v1/company/delivery-workflows" && method === "GET") {
       if (mode === "denied") return respond({ code:"FORBIDDEN" },403);
       return respond({ canManage:mode !== "read-only",versions:mode === "empty" ? [] :
@@ -94,10 +99,30 @@ async function scenario(width, language, mode) {
       const economic = page.getByRole("group",{ name:es ? "Asignación económica (opcional)" : "Economic allocation (optional)" });
       if (mode === "no-apu") await economic.getByText(es ? /No hay un APU publicado/ : /No published company APU/).waitFor();
       else {
+        const phaseName = page.getByLabel(es ? "Nombre de fase" : "Phase name", { exact:true }).first();
+        await phaseName.fill("UNSAVED TEST PHASE");
+        const template = page.getByLabel(es ? "Plantilla de empresa" : "Company template");
+        await template.selectOption("");
+        await page.getByRole("alertdialog").getByRole("button", { name:es ? "Seguir editando" : "Keep editing" }).click();
+        assert.equal(await phaseName.inputValue(), "UNSAVED TEST PHASE");
+        assert.equal(await template.inputValue(), "workflow-1");
+        await template.selectOption("");
+        await page.keyboard.press("Escape");
+        assert.equal(await phaseName.inputValue(), "UNSAVED TEST PHASE");
+        await template.selectOption("");
+        await page.getByRole("alertdialog").getByRole("button", { name:es ? "Descartar y cambiar" : "Discard and switch" }).click();
+        await template.selectOption("workflow-1");
+        await page.getByRole("heading",{ name:/Sleeve Standard/ }).waitFor();
+        assert.equal(await phaseName.inputValue(), "Production");
         await economic.getByLabel(es ? "APU Comercial publicado" : "Published Commercial APU").selectOption("apu-v1");
-        page.once("dialog",dialog => dialog.accept());
         await economic.getByRole("button",{ name:es ? "Aplicar fases predeterminadas del APU al borrador" : "Apply APU default phases to draft" }).click();
-        assert.equal(await economic.getByText(/Preliminary 45.00%/).count(),1);
+        await page.getByRole("alertdialog").getByRole("button", { name:es ? "Conservar fases actuales" : "Keep current phases" }).click();
+        assert.equal(await page.getByLabel(es ? "Código de fase" : "Phase code", { exact:true }).first().inputValue(), "PRODUCTION");
+        await economic.getByRole("button",{ name:es ? "Aplicar fases predeterminadas del APU al borrador" : "Apply APU default phases to draft" }).click();
+        await page.getByRole("alertdialog").getByRole("button", { name:es ? "Aplicar fases del APU" : "Apply APU phases", exact:true }).click();
+        await page.screenshot({ path:path.join(output,`${width}-${language}-after-alignment.png`), fullPage:true });
+        fs.writeFileSync(path.join(output,`${width}-${language}-after-alignment.txt`), await page.locator("body").innerText());
+        await economic.getByText(/Preliminary 45.00%/).waitFor();
         await page.getByRole("button",{ name:es ? "Validar y previsualizar" : "Validate and preview" }).click();
         await page.getByText(es ? "Distribucion de produccion directa" : "Direct Production allocation").waitFor();
         await page.getByText(/450.00 USD/).waitFor();
