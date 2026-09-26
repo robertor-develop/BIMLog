@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Resource Planning Builds 66–70 — 2026-09-26
+
+- Published baseline is `1d8652c659f2553d482127347259c7cf2b076d11`, deployment `08c2a3cb`, exact live identity and schema action NONE. External resource block13 receipt supersedes the earlier publication-pending notes. Authenticated profile save/refresh, capacity/leave warnings, scenario save/reopen and apply pass on synthetic project57; full-site multi-role acceptance remains incomplete.
+- Applying the previously unassigned 16-hour synthetic task increases that member's visible workload from 28 to 44 hours while Operations retains 28 budget hours, zero actual hours and unchanged costs. This is distinct task workload, not a financial mutation or duplicate apply.
+- Builds 66–69 expose saved assignment/version/warning evidence, invalidate stale evaluations after edits, discard an in-flight stale result, prevent duplicate task selection and retain unsaved availability when switching language without refetching it. Build70 connects regression and release reconciliation. Local actual-component Chrome uses labeled synthetic responses, not deployed acceptance.
+- Five candidate builds await the normal push; next publication is after Build75 (ten changes since Build65). No schema, permissions, rates, earnings authority or Lens Next changes. Ten planned build slots remain after70; unresolved implementation and live acceptance gaps may require additional repairs and are not closed by that count.
+
 ## Resource Planning Builds 61–65 — 2026-09-26
 
 - Connected live preflight exposed a Team Performance overview failure in synthetic project 58. PostgreSQL reproduced SQLSTATE 42601 on the unquoted monthly summary alias. Build 65 repair quotes the alias and verifies all eight service queries with read-only PostgreSQL EXPLAIN. Full corrected-head release gate and live retest remain required.

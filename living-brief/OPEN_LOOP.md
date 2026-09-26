@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Resource Planning Builds 66–70 — 2026-09-26
+
+- [x] Reconcile Build65 exact publication `1d8652c6` / `08c2a3cb` and live overview repair from external receipt. Previous pending-publish notes are historical. Synthetic live scenario apply passed without changing budget/financial values; previously unassigned task workload is distinct from project budget.
+- [x] Expose saved review evidence and locally test draft evaluation invalidation, delayed-response discard, distinct task selection and language-switch draft preservation. These are actual-component tests with synthetic local responses, not a full-site live PASS.
+- [ ] Complete exact-head gate and block push; publish with Build75 and repeat authenticated review/edit/localization flows. No more than ten unpublished changes. Lens Next remains frozen.
+- [ ] Complete remaining Resource/Earnings implementation, policy/runtime and multi-role end-to-end acceptance, and actual SharePoint tenant round-trip. Ten planned build slots remain, not a guarantee of final completion.
+
 ## Resource Planning Builds 61–65 — 2026-09-26
 
 - [ ] Live pre-publication check found Team Performance overview unavailable in synthetic project 58. Isolated PostgreSQL reproduces SQLSTATE 42601 at unquoted `month` alias; correct quoting and repeat exact-head gate/publication/live overview. Resource Scheduling itself loads. This is a Build 65 regression repair, not Build 66.
