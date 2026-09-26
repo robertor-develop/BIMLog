@@ -2,6 +2,9 @@
 
 ## Resource Planning Builds 71–75 — 2026-09-26
 
+- [x] Publish exact37db4a9b and verify production identity; live save/reopen, duplicate prevention, read-only review/cancel and unchanged Operations totals verified on synthetic project57.
+- [ ] Finish R75-HOURS invalid-hours Spanish guidance repair580ce0db release gate and repaired publication/live retest. Initial repair gate caught missing same-unit OPEN_LOOP reconciliation; this note supplies it without waiving the gate.
+
 - [x] Reconcile c2877033 Build70 full gate and clean push from the external resource block14 receipt; historical pending-push notes are superseded.
 - [x] Locally verify fresh evaluation shape rejection, read-only applied scenario evidence, labeled safe CSV output, project-scoped drafts and stale-load rejection. No Lens Next changes.
 - [ ] Complete exact-head gate, push, Replit Shell synchronization, schema correspondence, publication and authenticated Chrome smoke for Builds66–75. Do not exceed ten unpublished builds.
