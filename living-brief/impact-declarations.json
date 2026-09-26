@@ -43947,6 +43947,107 @@
         "scripts/update-living-brief-state.mjs"
       ],
       "reviewedChangeSha256": "d3e863398fe99d932a6df6a1cf769476e36fc8faea5c119225ed492a93af1a13"
+    },
+    {
+      "taskId": "consolidation-c006-governance-role-authority",
+      "reviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "reviewedAt": "2026-09-26T20:21:33Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Policy labels do not grant authority. Reuse existing active company/project grants and explicit QC assignment; preserve frozen versions and native Lens."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reuses existing company/project and runtime authority without duplicate entities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped authority and release controls."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Adds deterministic denial and real PostgreSQL regression evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Implements approved C006, not a new program."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated inventory includes the bounded runtime role resolver."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No native plugin, installer or bridge changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claims."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local C006 evidence and prior exact-head push truth."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserves remaining C007-C010 and operational acceptance gaps."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing transactional runtime history remains authoritative; bounded evidence added."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-workflow-governance-roles.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/workflow-governance-role-authority.ts",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C006.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "578a1acddfc44a8b48d51e0ca1f9e456811d8daebb09ccbd514cc0884b457f5f"
     }
   ]
 }

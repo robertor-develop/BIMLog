@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C006 current candidate: existing company/project authority now constrains configured frozen-policy runtime roles; isolated PostgreSQL authority and runtime-cycle tests pass. C004/C005 exact-head suite and push passed at5acb1728 (external release receipt supersedes the historical pending statements below). Production stays73a5a7d7. C007 approval hierarchy/maker-checker, C008 thresholds, C009 governed changes and C010 decision presentation/publication remain next; no full-block or deployed acceptance claim. C003/I010 company binding/recipient-email evidence remain separate unresolved operational work.
+
 C005 checkpoint supersedes the local-pending statements immediately below: C004 exact failed packaging check passed at1d604f77; C005 presentation consolidation and focused actual-component Chrome testing are implemented. Full clean final-candidate suite, push and subsequent publication/live smoke remain pending. Two unpublished scopes, not five new builds. C003/I010 operational access and approved email delivery are still unresolved; no production membership/binding or provider-consent changes were made.
 
 C004 release repair checkpoint: `6bb4360a` implements coverage; `8ec988cd` generates PLATFORM.md before hashing. The first gate failed on generated inventory drift and the second on STATUS/OPEN_LOOP freshness. These authority records now reconcile the repair; repeat the clean exact-head gate before claiming push eligibility. Production remains73a5a7d7; no C005 implementation or full-block acceptance is claimed.

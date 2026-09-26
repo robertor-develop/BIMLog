@@ -1,44 +1,26 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
+  "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "8b645d5615c83a3841ec0da0ccab3e9d046a982c0656f070897cba117afb82d7",
+  "bundleSha256": "53cc894ec00b07c3d99db02ef069ad0b6cf91c5d90e2c786be123ddd352d7ef3",
   "impact": {
-    "baselineCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
+    "baselineCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
     "changedPaths": [
-      "artifacts/api-server/scripts/test-submittal-register-coverage.ts",
-      "artifacts/api-server/src/lib/submittal-register-coverage.ts",
-      "artifacts/api-server/src/routes/linked_items.ts",
-      "artifacts/api-server/src/routes/submittals.ts",
-      "artifacts/bimlog/integration-catalog-harness.html",
-      "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
-      "artifacts/bimlog/src/integration-catalog-harness.tsx",
-      "artifacts/bimlog/src/lib/submittal-status-presentation.ts",
-      "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
-      "artifacts/bimlog/src/pages/project/LegacyIntegrationsTab.tsx",
-      "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
-      "artifacts/bimlog/src/submittal-coverage-harness.tsx",
-      "artifacts/bimlog/submittal-coverage-harness.html",
-      "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
-      "evidence/coordination-routing-20260925/CONSOLIDATION_C004.md",
-      "evidence/coordination-routing-20260925/CONSOLIDATION_C005.md",
-      "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
-      "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+      "artifacts/api-server/scripts/test-workflow-governance-roles.ts",
+      "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+      "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+      "artifacts/api-server/src/lib/workflow-governance-role-authority.ts",
+      "evidence/coordination-routing-20260925/CONSOLIDATION_C006.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json",
-      "scripts/local-release-gate.mjs",
-      "scripts/test-integration-presentation.mjs",
-      "scripts/test-local-release-gate.mjs",
-      "scripts/update-living-brief-state.mjs"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
       "PLATFORM.md",
-      "REPORT_DESIGN_SYSTEM.md",
       "STATUS.md"
     ]
   },
@@ -49,11 +31,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "claude",
@@ -61,11 +43,11 @@
       "sha256": "90538da58f64a59e860713face1fefeff05dcfb598472fd0b06e4b56f2e590c8",
       "sourceChangedAt": "2026-09-21T03:45:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "quality",
@@ -73,11 +55,11 @@
       "sha256": "b6cced2db201c506cda5eb1ac6f7d03167c8893de71f880eda4ccef3b51d2829",
       "sourceChangedAt": "2026-09-21T09:39:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "vision",
@@ -85,23 +67,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "2cadd341d3e94fe9f45b9570a82b21b4bdabe00530734bd5f919a2739a4bb991",
-      "sourceChangedAt": "2026-09-26T19:55:30.000Z",
+      "sha256": "692ba4492af114d96b97d28887fcdaf0e96bafeb0840fe93be7af4f34ee13ba1",
+      "sourceChangedAt": "2026-09-26T20:21:33.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "plugin",
@@ -109,11 +91,11 @@
       "sha256": "812ec9814ea5bd043051ec97d9c54d468c9c84855ee1136250ce5c8df798b71d",
       "sourceChangedAt": "2026-09-23T11:41:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "report_design_system",
@@ -121,11 +103,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "standards_register",
@@ -133,35 +115,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "d5e970a45b7fafb46ee20588055bbd0acc4d57d6bf526552bee3a49ee52062c0",
-      "sourceChangedAt": "2026-09-26T19:55:30.000Z",
+      "sha256": "ed50bed0b2ab488b6ad31f1bd3c8e00e8884b34d320e864431a1f3b705313885",
+      "sourceChangedAt": "2026-09-26T20:21:33.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "330355f7827bf99cfc3ae7025dc45298f91f1825f21216c076f0a4729aaae124",
-      "sourceChangedAt": "2026-09-26T19:55:30.000Z",
+      "sha256": "ce6902a0c369a820773f0d38993f6de2edbe05f8330f787e10f44f22408c229d",
+      "sourceChangedAt": "2026-09-26T20:21:33.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     },
     {
       "key": "audit",
@@ -169,11 +151,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c005-integration-presentation",
+      "reconciledThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewedThroughCommit": "5acb1728caeb46087dbaad29c024a94509505d18",
+      "semanticReviewTask": "consolidation-c006-governance-role-authority",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:55:30Z"
+      "semanticReviewedAt": "2026-09-26T20:21:33Z"
     }
   ]
 }

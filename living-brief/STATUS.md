@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation C006 role-authority candidate — 2026-09-26
+
+- Exact-head C004/C005 release suite and normal push completed at `5acb1728`; external `F:/BIMLog/TestProof/consolidation-c005-5acb1728-release-gate-20260926.json` supersedes their pending-local-gate wording below. Production remains `73a5a7d7`; C010 is the next publication checkpoint.
+- C006 resolves governed runtime roles from existing active project/company authority, active PMO/Operations Director grants and explicit Work Item QC assignment. A policy label alone grants nothing; super-admin status is not a substitute for another required business role. Frozen policy permissions and fingerprint are checked at the existing shared runtime role boundary. Unbound legacy workflows retain existing behavior.
+- Real local PostgreSQL role cases and the existing runtime cycle pass, including outsider/inactive/unknown-role denial, revoked grants, independent review, preserved snapshots, audit and concurrent reads. This is local source evidence, not deployed acceptance. C007–C010 remain unimplemented in this block. No production data, native Lens or installer changes.
+
 ## Consolidation C005 local candidate — 2026-09-26
 
 - C004's exact failed API packaging test now passes at `1d604f77`, including deterministic runtime verification. Earlier full-suite failures are preserved, not relabeled PASS. The final combined clean candidate still requires the full suite and push.

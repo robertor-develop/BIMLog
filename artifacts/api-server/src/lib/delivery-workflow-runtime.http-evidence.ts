@@ -19,6 +19,8 @@ await pool.query(`CREATE TABLE IF NOT EXISTS financial_contracts(id text PRIMARY
 await pool.query(`CREATE TABLE IF NOT EXISTS financial_contract_versions(id text PRIMARY KEY)`);
 await pool.query(`CREATE TABLE IF NOT EXISTS project_cost_nodes(id text PRIMARY KEY)`);
 await ensureDeliveryWorkflowRuntimeSchema();
+await pool.query(`CREATE TABLE IF NOT EXISTS edt_operations_director_grants(id text PRIMARY KEY,company_id integer,project_id integer,user_id integer)`);
+await pool.query(`CREATE TABLE IF NOT EXISTS edt_operations_director_revocations(grant_id text)`);
 const company = (await pool.query(`INSERT INTO companies(name) VALUES('Test Company') RETURNING id`)).rows[0];
 const otherCompany = (await pool.query(`INSERT INTO companies(name) VALUES('Other Company') RETURNING id`)).rows[0];
 async function createUser(email: string, companyId: number, admin = false) { return (await pool.query(`INSERT INTO users(email,full_name,company_id,is_super_admin) VALUES($1,$1,$2,$3) RETURNING id`,[email,companyId,admin])).rows[0].id as number; }
@@ -26,7 +28,7 @@ const owner = await createUser("owner@test.invalid",company.id,true);
 const producer = await createUser("producer@test.invalid",company.id);
 const outsider = await createUser("outsider@test.invalid",otherCompany.id);
 const project = (await pool.query(`INSERT INTO projects(name,code,created_by_id) VALUES('Runtime Test','RT-1',$1) RETURNING id`,[owner])).rows[0];
-await pool.query(`INSERT INTO project_members(project_id,user_id,status,role) VALUES($1,$2,'active','project_admin'),($1,$3,'active','member')`,[project.id,owner,producer]);
+await pool.query(`INSERT INTO project_members(project_id,user_id,status,role) VALUES($1,$2,'active','discipline_lead'),($1,$3,'active','member')`,[project.id,owner,producer]);
 const intakeId = randomUUID(), workItemId = randomUUID();
 await pool.query(`INSERT INTO job_intakes(id,company_id,project_id,data,created_by_id,updated_by_id) VALUES($1,$2,$3,$4::jsonb,$5,$5)`,[intakeId,company.id,project.id,JSON.stringify({team:{projectLeaderUserId:owner}}),owner]);
 await pool.query(`INSERT INTO job_activation_work_items(id,intake_id,project_id,stable_scope_item_id,name,unit,planned_hours,workflow_template,created_by_id)
@@ -42,7 +44,7 @@ const policyDefinition={schemaVersion:1,scope:{allWorkflows:false,workflowTempla
   approvalRules:["create_work_item","complete_phase","complete_deliverable","economic_change","template_update","activate_version"].map(action => ({action,roles:["PROJECT_MANAGER"],threshold:null})),
   changeRules:["edit_phases","edit_tasks_roles","edit_allocation","change_apu","edit_approved_work_item","retire_version"].map(action => ({action,allowed:true,requiresReapproval:true,requiresNewVersion:["edit_phases","change_apu"].includes(action)})),
   versioning:{lockActivatedSnapshot:true,structuralChangeCreatesVersion:true,preserveHistory:true},
-  permissions:[{role:"PROJECT_MANAGER",actions:["view","approve","publish"]}],
+  permissions:[{role:"PROJECT_MANAGER",actions:["view","approve","publish"]},{role:"DRAFTER",actions:["view"]},{role:"QC_REVIEWER",actions:["view","approve"]}],
   validation:{allocation_total_100:true,task_execute_role:true,phase_review_role:false,final_approval:false,required_documents:false,valid_apu:true,unique_phase_codes:true}};
 const policyFingerprint=workflowGovernancePolicyFingerprint(policyDefinition);
 await pool.query(`INSERT INTO company_workflow_governance_policies(id,company_id,code,name,created_by_id) VALUES($1,$2,'SHOP_POLICY','Shop Policy',$3)`,[policyId,company.id,owner]);
@@ -92,7 +94,11 @@ await linkWorkItemDeliveryEvidence({actorUserId:producer,projectId:project.id,wo
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 await pool.query(`UPDATE company_delivery_workflow_roles SET user_id=$2 WHERE work_item_id=$1 AND role='approve'`,[workItemId,producer]);
 await assert.rejects(approveWorkItemDeliveryPhase({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"}),
+  (error:unknown) => (error as {code?:string}).code === "WORKFLOW_POLICY_ROLE_REQUIRED");
+await pool.query(`UPDATE project_members SET role='discipline_lead' WHERE project_id=$1 AND user_id=$2`,[project.id,producer]);
+await assert.rejects(approveWorkItemDeliveryPhase({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"}),
   (error:unknown) => (error as {code?:string}).code === "DELIVERY_WORKFLOW_INDEPENDENT_REVIEW_REQUIRED");
+await pool.query(`UPDATE project_members SET role='member' WHERE project_id=$1 AND user_id=$2`,[project.id,producer]);
 const afterSelfApproval = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 assert.equal(afterSelfApproval.revision,runtime.revision);
 assert.equal(afterSelfApproval.events.length,runtime.events.length);

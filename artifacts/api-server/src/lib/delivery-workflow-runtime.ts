@@ -14,6 +14,7 @@ import {
 import { jobOperationScope } from "./job-operations-service";
 import { resolveWorkflowGovernanceSnapshot } from "./workflow-governance-binding";
 import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint } from "./workflow-governance-policy-contract";
+import { workflowGovernanceActorRoles, requireWorkflowPolicyRole } from "./workflow-governance-role-authority";
 
 type Queryable = {
   query(sql: string, params?: any[]): Promise<{ rows: any[] }>;
@@ -255,7 +256,7 @@ async function requireRole(
 ) {
   const row = (
     await client.query(
-      `SELECT r.user_id FROM company_delivery_workflow_roles r
+      `SELECT r.user_id,b.company_id,b.project_id,b.definition,b.policy_definition,b.policy_fingerprint FROM company_delivery_workflow_roles r
        JOIN company_delivery_workflow_work_items b ON b.work_item_id=r.work_item_id
        JOIN project_members pm ON pm.project_id=b.project_id AND pm.user_id=r.user_id AND pm.status='active'
        JOIN users u ON u.id=r.user_id AND u.company_id=b.company_id
@@ -269,6 +270,16 @@ async function requireRole(
       "DELIVERY_WORKFLOW_ROLE_REQUIRED",
       `The assigned ${role} role is required for this action.`,
     );
+  if (row.policy_definition != null) {
+    const policy = validateWorkflowGovernancePolicy(row.policy_definition);
+    if (workflowGovernancePolicyFingerprint(policy) !== row.policy_fingerprint)
+      throw new FinancialControlError(409, "WORKFLOW_POLICY_SNAPSHOT_MISMATCH", "The activated Governance Policy snapshot failed integrity verification.");
+    const definition = validateDeliveryWorkflowDefinition(row.definition);
+    const actorRoles = await workflowGovernanceActorRoles(client, {
+      actorUserId, workItemId, companyId: Number(row.company_id), projectId: Number(row.project_id),
+    });
+    requireWorkflowPolicyRole(policy, actorRoles, definition.roles[role], role === "execute" ? "view" : "approve");
+  }
 }
 async function allStepsComplete(
   client: Queryable,
