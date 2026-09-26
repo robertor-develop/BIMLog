@@ -19,4 +19,6 @@ Real server middleware enforces project membership for reading and configured wr
 
 ## Remaining release truth
 
+The first exact-head gate for 6bb4360a failed during API packaging: generatePlatformMd added the new coverage library after the Living Brief had been hashed. State preparation now runs that same deterministic generator before calculating review and document hashes. The generated inventory is preserved and included in the repair. A clean exact-head rerun remains required; the failed run is not acceptance evidence.
+
 No C004 production smoke or publication yet. Full exact-head release gate and commit/push remain required. C001/C002 are previously completed source work; C003 is not accepted, C005 remains independent next scope. Do not count this as five new builds. The user’s publication cadence remains every ten unpublished builds maximum. No new credential or company-binding decision is inferred.

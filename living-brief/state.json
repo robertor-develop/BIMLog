@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "8275e1261bf481eb2d7e39395f86998f2e8ec6f7ef80554de872a3532b15b14c",
+  "bundleSha256": "2fae30480dab0c16aa81dd53b01f95855ceb9c17eb5f3c7bb3b374493bd941e9",
   "impact": {
     "baselineCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
     "changedPaths": [
@@ -21,10 +21,12 @@
       "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
       "scripts/local-release-gate.mjs",
-      "scripts/test-local-release-gate.mjs"
+      "scripts/test-local-release-gate.mjs",
+      "scripts/update-living-brief-state.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -86,9 +88,9 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "94595a6acb55d304b6799b6857b40777e687e8f7f148afa999dac5886ce6a72e",
-      "sourceChangedAt": "2026-09-26T12:35:47-04:00",
-      "changeState": "accepted",
+      "sha256": "2cadd341d3e94fe9f45b9570a82b21b4bdabe00530734bd5f919a2739a4bb991",
+      "sourceChangedAt": "2026-09-26T19:22:44.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewTask": "consolidation-c004-submittal-register-coverage",

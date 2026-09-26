@@ -41,6 +41,13 @@ if (!semanticReview || semanticReview.reviewedThroughCommit !== reconciledThroug
   throw new Error("The latest semantic review must cover the reconciled-through commit");
 }
 const authorityReviews = new Map(semanticReview.authorities.map((entry) => [entry.key, entry]));
+// The API build regenerates this inventory. Freeze its final content before
+// hashing the Living Brief, otherwise a new source file invalidates the bundle.
+execFileSync(process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "pnpm",
+  process.platform === "win32"
+    ? ["/d", "/s", "/c", "pnpm --filter @workspace/api-server run generate:platform"]
+    : ["--filter", "@workspace/api-server", "run", "generate:platform"],
+  { cwd: root, stdio: "inherit", windowsHide: true });
 const changedPaths = git("diff", "--name-only", reconciledThroughCommit, "--", ".")
   .split(/\r?\n/).filter(Boolean).map((value) => value.replaceAll("\\", "/"))
   .filter((value) => value !== "living-brief/state.json").sort();
@@ -88,4 +95,4 @@ const state = {
   documents,
 };
 fs.writeFileSync(path.join(briefRoot, "state.json"), `${JSON.stringify(state, null, 2)}\n`, "utf8");
-console.log(`Updated living-brief/state.json for ${documents.length} documents; narrative documents were not modified.`);
+console.log(`Updated living-brief/state.json for ${documents.length} documents after refreshing the deterministic platform inventory; narrative documents were not modified.`);

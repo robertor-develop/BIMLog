@@ -786,6 +786,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/sharepoint-reconciliation.ts
 - artifacts/api-server/src/lib/storage-adapter.behavior.ts
 - artifacts/api-server/src/lib/storage-adapter.ts
+- artifacts/api-server/src/lib/submittal-register-coverage.ts
 - artifacts/api-server/src/lib/team-performance-postgres-query.behavior.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
 - artifacts/api-server/src/lib/team-performance.behavior.ts

@@ -43772,7 +43772,7 @@
         {
           "key": "platform",
           "result": "reviewed_no_semantic_change",
-          "reason": "Existing submittal tracking surface and database tables remain authoritative; no new module or schema."
+          "reason": "Generated platform inventory now includes the coverage library. State preparation regenerates this inventory before hashing to prevent build-time hash drift; no new module or schema."
         },
         {
           "key": "plugin",
@@ -43821,12 +43821,14 @@
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
         "scripts/local-release-gate.mjs",
-        "scripts/test-local-release-gate.mjs"
+        "scripts/test-local-release-gate.mjs",
+        "scripts/update-living-brief-state.mjs"
       ],
-      "reviewedChangeSha256": "17c64f12610b1c70acbc154953804287290b15a03899217583b34af21efc92ca"
+      "reviewedChangeSha256": "cd9b79fbb11a7eab54fb79f33bd3f2d01c4fab91ba707cd5c6055773c2ec7b07"
     }
   ]
 }
