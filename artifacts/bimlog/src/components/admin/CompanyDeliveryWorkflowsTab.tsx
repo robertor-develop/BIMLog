@@ -152,6 +152,7 @@ export function CompanyDeliveryWorkflowsTab({
     phaseCount: number;
     taskCount: number;
     allocation: AllocationPreview | null;
+    governance: { code: string; version: number; versionId: string; fingerprint: string } | null;
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -372,7 +373,7 @@ export function CompanyDeliveryWorkflowsTab({
     try {
       const result = await request("/company/delivery-workflows/preview", {
         method: "POST",
-        body: JSON.stringify({ definition: draft }),
+        body: JSON.stringify({ definition: draft, ...(selected ? { templateId:selected.templateId, versionId:selected.versionId } : {}) }),
       });
       if (JSON.stringify(draftRef.current) === submitted) setPreview(result);
     } catch (cause) {
@@ -1175,6 +1176,10 @@ export function CompanyDeliveryWorkflowsTab({
               style={{ background: "#eff6ff", padding: 12 }}
             >
               <h3>{t("Validated preview", "Vista previa validada")}</h3>
+              <p>{preview.governance
+                ? `${t("Governance Policy checked", "Política de gobernanza verificada")}: ${preview.governance.code} · v${preview.governance.version}`
+                : t("No published company Governance Policy applies to this preview.", "Ninguna política de gobernanza publicada de la empresa aplica a esta vista previa.")}</p>
+              <p>{t("Preview is not approval. The current policy and permissions are checked again when approving and publishing.", "La vista previa no es una aprobación. La política vigente y los permisos se verifican nuevamente al aprobar y publicar.")}</p>
               <p>
                 {preview.phaseCount} {t("phases", "fases")} ·{" "}
                 {preview.taskCount} {t("tasks", "tareas")} · SHA-256{" "}
