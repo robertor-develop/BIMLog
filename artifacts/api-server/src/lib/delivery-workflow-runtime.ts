@@ -15,6 +15,7 @@ import { jobOperationScope } from "./job-operations-service";
 import { resolveWorkflowGovernanceSnapshot } from "./workflow-governance-binding";
 import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint } from "./workflow-governance-policy-contract";
 import { workflowGovernanceActorRoles, requireWorkflowPolicyRole } from "./workflow-governance-role-authority";
+import { workflowPolicyApprovalProgress } from "./workflow-governance-approval-progress";
 
 type Queryable = {
   query(sql: string, params?: any[]): Promise<{ rows: any[] }>;
@@ -178,7 +179,8 @@ async function runtimeEvent(
 ) {
   await client.query(
     `INSERT INTO company_delivery_workflow_work_item_events(id,work_item_id,project_id,action,phase_id,task_id,actor_id,before_state,after_state,reason,evidence)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb)`,
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb || jsonb_build_object('runtimeRevision',
+      (SELECT revision FROM company_delivery_workflow_work_items WHERE work_item_id=$2)))`,
     [
       randomUUID(),
       value.workItemId,
@@ -408,6 +410,14 @@ export async function getWorkItemDeliveryWorkflow(input: {
   } finally {
     client.release();
   }
+}
+async function policyProgress(client: Queryable, context: Awaited<ReturnType<typeof locked>>) {
+  if (context.binding.policy_definition == null) return null;
+  const events = (await client.query(`SELECT action,phase_id "phaseId",evidence
+    FROM company_delivery_workflow_work_item_events WHERE work_item_id=$1`, [context.workItemId])).rows;
+  return workflowPolicyApprovalProgress(validateWorkflowGovernancePolicy(context.binding.policy_definition),
+    context.binding.policy_fingerprint, context.phase.id,
+    Number(context.binding.phase_index) === context.definition.phases.length, events);
 }
 
 async function readWorkItemDeliveryWorkflow(input: {
@@ -755,22 +765,26 @@ export function approveWorkItemDeliveryPhase(input: {
     if (
       (input.kind === "qc" &&
         !(phase.qcRequired || phase.completionRule === "all_tasks_reviewed")) ||
-      (input.kind === "approval" && !phase.approvalRequired)
+      (input.kind === "approval" && !phase.approvalRequired && context.binding.policy_definition == null)
     )
       throw new FinancialControlError(
         409,
         "DELIVERY_WORKFLOW_APPROVAL_NOT_REQUIRED",
         "This phase does not require that approval.",
       );
-    await requireRole(
-      client,
-      context.workItemId,
-      input.kind === "qc" ? "review" : "approve",
-      input.actorUserId,
-    );
+    const progress = input.kind === "approval" ? await policyProgress(client, context) : null;
+    if (progress) {
+      if (!progress.next) throw new FinancialControlError(409, "DELIVERY_WORKFLOW_ALREADY_APPROVED", "This phase already has all policy approvals.");
+      const actorRoles = await workflowGovernanceActorRoles(client, { actorUserId: input.actorUserId,
+        companyId: context.access.companyId, projectId: context.projectId, workItemId: context.workItemId });
+      requireWorkflowPolicyRole(validateWorkflowGovernancePolicy(context.binding.policy_definition), actorRoles,
+        progress.next.role, "approve");
+    } else await requireRole(client, context.workItemId, input.kind === "qc" ? "review" : "approve", input.actorUserId);
     await allStepsComplete(client, context.workItemId, phase);
     const selfCompleted = (await client.query(`SELECT 1 FROM company_delivery_workflow_steps
-      WHERE work_item_id=$1 AND phase_id=$2 AND completed_by_id=$3 LIMIT 1`,
+      WHERE work_item_id=$1 AND phase_id=$2 AND completed_by_id=$3
+      UNION ALL SELECT 1 FROM company_delivery_workflow_evidence
+      WHERE work_item_id=$1 AND phase_id=$2 AND linked_by_id=$3 LIMIT 1`,
       [context.workItemId,phase.id,input.actorUserId])).rows[0];
     if (selfCompleted)
       throw new FinancialControlError(403,"DELIVERY_WORKFLOW_INDEPENDENT_REVIEW_REQUIRED",
@@ -801,7 +815,7 @@ export function approveWorkItemDeliveryPhase(input: {
         `UPDATE company_delivery_workflow_phase_checks SET qc_approved_by_id=$3,qc_approved_at=now() WHERE work_item_id=$1 AND phase_id=$2`,
         [context.workItemId, phase.id, input.actorUserId],
       );
-    else
+    else if (!progress || progress.approved + 1 === progress.stages.length)
       await client.query(
         `UPDATE company_delivery_workflow_phase_checks SET approved_by_id=$3,approved_at=now() WHERE work_item_id=$1 AND phase_id=$2`,
         [context.workItemId, phase.id, input.actorUserId],
@@ -810,9 +824,11 @@ export function approveWorkItemDeliveryPhase(input: {
       workItemId: context.workItemId,
       projectId: context.projectId,
       actorId: input.actorUserId,
-      action: input.kind === "qc" ? "qc_approved" : "phase_approved",
+      action: input.kind === "qc" ? "qc_approved" : progress ? "policy_stage_approved" : "phase_approved",
       phaseId: phase.id,
       afterState: "approved",
+      evidence: progress ? { ...progress.next, policyFingerprint: context.binding.policy_fingerprint,
+        policyVersionId: context.binding.policy_version_id } : {},
     });
     return {
       workItemId: context.workItemId,
@@ -871,6 +887,10 @@ export function advanceWorkItemDeliveryPhase(input: {
         "DELIVERY_WORKFLOW_APPROVAL_REQUIRED",
         "Approval is required before leaving this phase.",
       );
+    const progress = await policyProgress(client, context);
+    if (progress && !progress.complete)
+      throw new FinancialControlError(409, "WORKFLOW_POLICY_APPROVAL_REQUIRED",
+        `Governance approval ${progress.next!.level} (${progress.next!.role}) is required before leaving this phase.`);
     const next = context.definition.phases[index + 1];
     if (next)
       await client.query(

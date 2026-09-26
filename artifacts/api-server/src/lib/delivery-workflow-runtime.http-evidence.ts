@@ -85,6 +85,10 @@ await pool.query(`UPDATE project_members SET status='active' WHERE project_id=$1
 assert.equal((await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId})).revision,runtime.revision);
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"qc"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision}),
+  (error:unknown) => (error as {code?:string}).code === "WORKFLOW_POLICY_APPROVAL_REQUIRED");
+await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"});
+runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 await advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId}); assert.equal(runtime.phaseIndex,2);
 await setWorkItemDeliveryStep({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,phaseId:"for_record",taskId:"issue",status:"complete"});
@@ -105,6 +109,9 @@ assert.equal(afterSelfApproval.events.length,runtime.events.length);
 await pool.query(`UPDATE company_delivery_workflow_roles SET user_id=$2 WHERE work_item_id=$1 AND role='approve'`,[workItemId,owner]);
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+assert.equal(runtime.checks.find(row => row.phaseId === "for_record")?.approvedAt,null,"Final deliverable stage is still required");
+await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"});
+runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 const addedFileId = (await pool.query(`INSERT INTO files(project_id,file_name) VALUES($1,'shop-correction.pdf') RETURNING id`,[project.id])).rows[0].id;
 await assert.rejects(linkWorkItemDeliveryEvidence({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,phaseId:"for_record",taskId:"issue",documentCode:"DRAWING",fileId}),/already linked/);
 const afterDuplicateEvidence = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
@@ -115,7 +122,9 @@ await linkWorkItemDeliveryEvidence({actorUserId:producer,projectId:project.id,wo
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 assert.equal(runtime.checks.find(row => row.phaseId === "for_record")?.approvedAt,null,"Changed evidence must be reviewed again");
 await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision}),/approval/i);
-assert.ok(runtime.events.some(row => row.action === "phase_approved"),"Historical approval must remain recorded");
+assert.ok(runtime.events.some(row => row.action === "policy_stage_approved"),"Historical approval must remain recorded");
+await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"});
+runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 await advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision});

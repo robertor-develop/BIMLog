@@ -4,6 +4,20 @@ const { Client } = createRequire(import.meta.url)("pg");
 process.env.PROD_DATABASE_URL = "postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test";
 const { workflowGovernanceActorRoles, requireWorkflowPolicyRole } = await import("../src/lib/workflow-governance-role-authority");
 const { pool } = await import("@workspace/db");
+const { workflowPolicyApprovalProgress } = await import("../src/lib/workflow-governance-approval-progress");
+const hierarchy = { approvalRules: [{ action: "complete_deliverable", roles: ["CEO"] },
+  { action: "complete_phase", roles: ["QC_REVIEWER", "PROJECT_LEADER"] }] } as any;
+const stage = (role: string, level: number, runtimeRevision: number, action = "complete_phase", policyFingerprint = "frozen") =>
+  ({ action: "policy_stage_approved", phaseId: "phase", evidence: { role, level, runtimeRevision, action, policyFingerprint } });
+assert.equal(workflowPolicyApprovalProgress(hierarchy, "frozen", "phase", true, []).next?.role, "QC_REVIEWER");
+assert.equal(workflowPolicyApprovalProgress(hierarchy, "frozen", "phase", true, [stage("PROJECT_LEADER",2,1)]).approved, 0);
+const chain = [stage("QC_REVIEWER",1,2),stage("PROJECT_LEADER",2,3),stage("CEO",1,4,"complete_deliverable")];
+assert.equal(workflowPolicyApprovalProgress(hierarchy, "frozen", "phase", true, chain).complete, true);
+assert.equal(workflowPolicyApprovalProgress(hierarchy, "other-version", "phase", true, chain).approved, 0);
+assert.equal(workflowPolicyApprovalProgress(hierarchy, "frozen", "phase", true,
+  [...chain,{action:"evidence_linked",phaseId:"phase",evidence:{runtimeRevision:5}}]).approved, 0);
+assert.equal(workflowPolicyApprovalProgress(hierarchy, "frozen", "phase", true,
+  [...chain,{action:"phase_reopened",phaseId:"prior",evidence:{runtimeRevision:5,resetPhases:["phase"]}}]).approved, 0);
 const client = new Client({ host: "127.0.0.1", port: 55469, user: "postgres", database: "bimlog_rfi_test", connectionTimeoutMillis: 3000 });
 await client.connect();
 try {

@@ -44048,6 +44048,107 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "578a1acddfc44a8b48d51e0ca1f9e456811d8daebb09ccbd514cc0884b457f5f"
+    },
+    {
+      "taskId": "consolidation-c007-ordered-runtime-approvals",
+      "reviewedThroughCommit": "730aee9a5640b069f221feb6af65c213e1bc11fe",
+      "reviewedAt": "2026-09-26T20:27:29Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Phase completion requires ordered frozen-policy approvals. Changed evidence invalidates current approvals without deleting history."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped, immutable and evidence-based governance without changing this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped, immutable and evidence-based governance without changing this authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped, immutable and evidence-based governance without changing this authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped, immutable and evidence-based governance without changing this authority."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated inventory reflects the approval-progress helper."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native Lens and installers are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped, immutable and evidence-based governance without changing this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped, immutable and evidence-based governance without changing this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local ordered approval and maker/checker evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserves C008-C010 and release acceptance as pending."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Applies existing scoped, immutable and evidence-based governance without changing this authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-workflow-governance-roles.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/workflow-governance-approval-progress.ts",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C007.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a8e21fb89c8c34bfe65617b5fc4078476d729a1ec9831f17c3c7a0b3e0156c41"
     }
   ]
 }

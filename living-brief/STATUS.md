@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation C007 local candidate — 2026-09-26
+
+- C006 is committed at730aee9a; C007 enforces ordered phase and final-deliverable approval stages against the frozen policy. Current checkpoint/evidence authors cannot approve their own work. Stage evidence records policy identity and runtime revision; evidence changes, reopening and role reassignment invalidate the applicable approval chain without deleting prior events.
+- PostgreSQL runtime cycle, ordered-stage/stale-policy/reset tests and API typecheck PASS locally. Existing template creator/last-editor separation is retained. C008 thresholds, C009 change controls and C010 UI/release remain pending. No push/publication/full-live acceptance claim; production remains73a5a7d7.
+
 ## Consolidation C006 role-authority candidate — 2026-09-26
 
 - Exact-head C004/C005 release suite and normal push completed at `5acb1728`; external `F:/BIMLog/TestProof/consolidation-c005-5acb1728-release-gate-20260926.json` supersedes their pending-local-gate wording below. Production remains `73a5a7d7`; C010 is the next publication checkpoint.
