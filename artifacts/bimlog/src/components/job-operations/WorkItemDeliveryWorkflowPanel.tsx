@@ -36,7 +36,7 @@ type Runtime = {
     reopen: { role: "review" | "approve" };
   };
   roles: Array<{ role: string; userId: number }>;
-  steps: Array<{ phaseId: string; taskId: string; status: string }>;
+  steps: Array<{ phaseId: string; taskId: string; status: string; completedById: number | null }>;
   evidence: Array<{
     id: string;
     phaseId: string;
@@ -89,10 +89,14 @@ export function WorkItemDeliveryWorkflowPanel({
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
+    setNotice("");
     try {
       setRuntime(await api(path));
+      return true;
     } catch (cause) {
+      setRuntime(null);
       setError(String(cause));
+      return false;
     } finally {
       setLoading(false);
     }
@@ -103,7 +107,7 @@ export function WorkItemDeliveryWorkflowPanel({
     data: object,
     label: string,
   ) => {
-    if (!runtime) return;
+    if (!runtime || busy || loading) return;
     setBusy(true);
     setError("");
     setNotice("");
@@ -113,8 +117,8 @@ export function WorkItemDeliveryWorkflowPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...data, expectedRevision: runtime.revision }),
       });
-      await load();
-      setNotice(label);
+      const refreshed = await load();
+      setNotice(refreshed ? label : tt("The change was saved, but the refreshed workflow could not be loaded. Refresh before making another change.","El cambio se guardó, pero no se pudo cargar el flujo actualizado. Actualice antes de realizar otro cambio."));
     } catch (cause) {
       setError(String(cause));
     } finally {
@@ -128,6 +132,7 @@ export function WorkItemDeliveryWorkflowPanel({
   const canExecute = actor === role("execute");
   const canReview = actor === role("review");
   const canApprove = actor === role("approve");
+  const completedOwnWork = runtime?.steps.some(step => step.phaseId === current?.id && step.status === "complete" && Number(step.completedById) === actor) === true;
   const canReopen =
     runtime?.definition && actor === role(runtime.definition.reopen.role);
   const check = runtime?.checks.find((entry) => entry.phaseId === current?.id);
@@ -473,11 +478,12 @@ export function WorkItemDeliveryWorkflowPanel({
                     </label>
                   ))}
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {completedOwnWork && (canReview || canApprove) && <p role="status">{tt("Work you completed requires approval by a different assigned reviewer.","El trabajo que completó requiere aprobación de otro revisor asignado.")}</p>}
                     {(current.qcRequired ||
                       current.completionRule === "all_tasks_reviewed") && (
                       <button
                         type="button"
-                        disabled={busy || !canReview || !!check?.qcApprovedAt}
+                        disabled={busy || loading || completedOwnWork || !canReview || !!check?.qcApprovedAt || runtime.status !== "active"}
                         onClick={() =>
                           void act(
                             "/qc",
@@ -493,7 +499,7 @@ export function WorkItemDeliveryWorkflowPanel({
                     {current.approvalRequired && (
                       <button
                         type="button"
-                        disabled={busy || !canApprove || !!check?.approvedAt}
+                        disabled={busy || loading || completedOwnWork || !canApprove || !!check?.approvedAt || runtime.status !== "active"}
                         onClick={() =>
                           void act(
                             "/approval",

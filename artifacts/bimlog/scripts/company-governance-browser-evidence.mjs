@@ -133,9 +133,48 @@ async function scenario(width,language,mode){
   results.push({width,language,mode,overflow,mainOverflow});
   await context.close();
 }
+async function runtimeScenario(width,language) {
+  const context=await browser.newContext({viewport:{width,height:900}});
+  const page=await context.newPage();
+  const failures=[]; page.on("pageerror",error=>failures.push(error.message));
+  await context.route("**/api/v1/**",route=>route.fulfill({status:200,contentType:"application/json",body:"{}"}));
+  await page.goto(origin,{waitUntil:"domcontentloaded"});
+  await page.evaluate(async ({language})=>{
+    const {default:React}=await import("/node_modules/.vite/deps/react.js");
+    const {default:{createRoot}}=await import("/node_modules/.vite/deps/react-dom_client.js");
+    const {useAuthStore}=await import("/src/store/auth.ts");
+    const {WorkItemDeliveryWorkflowPanel}=await import("/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx");
+    useAuthStore.setState({user:{id:7}});
+    const target=document.createElement("div");document.body.replaceChildren(target);
+    let saved=false,failRefresh=true;
+    const runtime={workItemId:"qa",templateCode:"TEST_RUNTIME",templateVersion:1,source:"company",selection:"explicit",status:"active",phaseIndex:1,revision:1,canManage:false,fingerprint:"a".repeat(64),governancePolicy:null,
+      definition:{phases:[{id:"phase",name:"TEST Phase",tasks:[{id:"task",name:"TEST Task",requiredDocuments:[]}],completionRule:"all_tasks_complete",qcRequired:true,approvalRequired:true}],transitions:[],reopen:{role:"approve"}},
+      roles:[{role:"execute",userId:7},{role:"review",userId:7},{role:"approve",userId:7}],steps:[{phaseId:"phase",taskId:"task",status:"pending",completedById:null}],evidence:[],checks:[],events:[]};
+    const api=async (_path,init)=>{
+      if(init){const body=JSON.parse(init.body);if(body.expectedRevision!==runtime.revision)throw Error("stale fixture revision");saved=true;runtime.revision++;runtime.steps[0].status="complete";runtime.steps[0].completedById=7;return {};}
+      if(saved&&failRefresh){failRefresh=false;throw Error("TEST_REFRESH_FAILURE");}
+      return structuredClone(runtime);
+    };
+    createRoot(target).render(React.createElement(WorkItemDeliveryWorkflowPanel,{projectId:1,workItemId:"qa",members:[],files:[],api,tt:(en,es)=>language==="es"?es:en}));
+  },{language});
+  const es=language==="es";
+  await page.getByRole("button",{name:es?"Abrir flujo de entrega":"Open Delivery Workflow"}).click();
+  await page.getByRole("button",{name:es?"Completar punto de control":"Complete checkpoint"}).click();
+  await page.getByText(es?"El cambio se guardó, pero no se pudo cargar el flujo actualizado. Actualice antes de realizar otro cambio.":"The change was saved, but the refreshed workflow could not be loaded. Refresh before making another change.").waitFor();
+  assert.equal(await page.getByRole("button",{name:es?"Completar punto de control":"Complete checkpoint"}).count(),0,"failed refresh hides stale mutation controls");
+  await page.getByRole("button",{name:es?"Actualizar flujo":"Refresh workflow"}).click();
+  await page.getByText(es?"El trabajo que completó requiere aprobación de otro revisor asignado.":"Work you completed requires approval by a different assigned reviewer.").waitFor();
+  assert.equal(await page.getByRole("button",{name:es?"Aprobar control de calidad":"Approve QC",exact:true}).isDisabled(),true);
+  assert.equal(await page.getByRole("button",{name:es?"Aprobar fase":"Approve phase",exact:true}).isDisabled(),true);
+  assert.deepEqual(failures,[]);
+  await page.screenshot({path:path.join(output,`${width}-${language}-runtime.png`),fullPage:true});
+  results.push({width,language,mode:"runtime-saved-refresh-failure-independent-review"});
+  await context.close();
+}
 try{
   for(const width of [1280,390]) for(const language of ["en","es"])
     for(const mode of ["pmo","read-only","empty","denied","error","loading"]) await scenario(width,language,mode);
+  for(const width of [1280,390]) for(const language of ["en","es"]) await runtimeScenario(width,language);
   fs.writeFileSync(path.join(output,"results.json"),JSON.stringify({status:"PASS",fixture:true,scenarios:results},null,2));
   console.log(JSON.stringify({status:"PASS",scenarios:results.length,output},null,2));
 } finally { await browser.close(); }
