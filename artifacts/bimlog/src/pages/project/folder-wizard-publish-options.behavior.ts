@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { folderWizardPublishOptions, pruneFolderWizardTags } from "../../../bimlog/src/pages/project/folder-wizard-publish-options";
+import { folderWizardPublishOptions, pruneFolderWizardTags } from "./folder-wizard-publish-options";
 const definition = {
   selectors: [{ tagKey: "type", tagValue: "SHOP", blueprintName: "Shop" }, { tagKey: "type", tagValue: "MODEL", blueprintName: "Model" }],
   tierMappings: [

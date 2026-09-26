@@ -41892,16 +41892,16 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/folder-wizard-publish-options.behavior.ts",
         "artifacts/api-server/src/lib/folder-wizard-publish-status.behavior.ts",
         "artifacts/api-server/src/lib/folder-wizard-publish-status.ts",
-        "artifacts/api-server/src/lib/folder-wizard-request-lifetime.behavior.ts",
         "artifacts/api-server/src/lib/folder-wizard-request-validation.behavior.ts",
         "artifacts/api-server/src/lib/folder-wizard-request-validation.ts",
         "artifacts/api-server/src/routes/folder-wizard-routing.ts",
         "artifacts/bimlog/src/pages/project/FolderWizardImportPanel.tsx",
         "artifacts/bimlog/src/pages/project/FolderWizardPublishPanel.tsx",
+        "artifacts/bimlog/src/pages/project/folder-wizard-publish-options.behavior.ts",
         "artifacts/bimlog/src/pages/project/folder-wizard-publish-options.ts",
+        "artifacts/bimlog/src/pages/project/folder-wizard-request-lifetime.behavior.ts",
         "artifacts/bimlog/src/pages/project/folder-wizard-request-lifetime.ts",
         "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
         "evidence/coordination-routing-20260925/REPAIR_BLOCK_R1_R5.md",
@@ -41912,7 +41912,7 @@
         "living-brief/impact-declarations.json",
         "scripts/test-folder-wizard-publish-block06.mjs"
       ],
-      "reviewedChangeSha256": "9cf8cab65ccfad000c3bcf2208aff436cc4c4c63641e406ea2a8d822f8841c17"
+      "reviewedChangeSha256": "071530eaf0a2f0c72e3c56cd1269cfd25a4cdf47fb81c165f7ce535174b7dd7b"
     }
   ]
 }

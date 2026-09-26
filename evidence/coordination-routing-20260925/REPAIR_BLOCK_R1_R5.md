@@ -13,6 +13,9 @@ These five repairs do not replace Builds 31–80 of the agreed roadmap.
 
 Run: `node scripts/test-folder-wizard-publish-block06.mjs` (PASS).
 Frontend typecheck (PASS). Full gate and push recorded separately after execution.
+The first combined compilation caught frontend helper tests placed under the API TypeScript
+root. Tests were moved into the frontend source-test directory and the runner was corrected;
+no production behavior or compiler boundary was weakened. Repair corrections are not new builds.
 Helper and structural tests are not UI/browser acceptance. No tenant writes, credential changes,
 schema changes, Lens Next code, native binaries or installers are included.
 

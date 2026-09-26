@@ -13,7 +13,9 @@ for (const name of [
   "folder-wizard-publish-status", "folder-wizard-publish-lease",
   "folder-wizard-publish-worker",
 ]) {
-  const file = resolve(root, `artifacts/api-server/src/lib/${name}.behavior.ts`);
+  const directory = ["folder-wizard-request-lifetime", "folder-wizard-publish-options"].includes(name)
+    ? "artifacts/bimlog/src/pages/project" : "artifacts/api-server/src/lib";
+  const file = resolve(root, `${directory}/${name}.behavior.ts`);
   const result = spawnSync(process.execPath, [cli, file], { cwd: root, stdio: "inherit", windowsHide: true });
   if (result.error) throw result.error;
   if (result.status !== 0) process.exit(result.status ?? 1);
