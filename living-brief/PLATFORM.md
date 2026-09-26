@@ -815,6 +815,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/workflow-governance-policy-migration.ts
 - artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts
 - artifacts/api-server/src/lib/workflow-governance-role-authority.ts
+- artifacts/api-server/src/lib/workflow-governance-runtime-change.ts
 - artifacts/api-server/src/lib/workflow-governance-threshold.ts
 
 ## Agents (artifacts/api-server/src/agents)

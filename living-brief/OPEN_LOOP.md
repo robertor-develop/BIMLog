@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C009 candidate enforces frozen approved-work change prohibitions and new-version requirements before in-place mutations; real PostgreSQL denial tests preserve runtime and audit exactly. C010 decision explanations, full exact-head release and live acceptance remain next. This is not an implementation of an otherwise unsupported runtime replacement/economic-change operation; such actions remain unavailable. C006-C008 locally committed; no new publication yet.
+
 C008 candidate adds exact frozen-contract thresholds for phase/final-deliverable runtime approvals and readable editor values. Missing/mismatched economics deny explicitly; no zero fallback or currency conversion. Other action categories (economic-change execution, create/activate/template action hierarchies) are not thereby connected and remain open. C009/C010 release/live acceptance remain pending. Production unchanged73a5a7d7.
 
 C007 local candidate supersedes C007-unimplemented wording below: ordered frozen-policy phase/final approval stages and checkpoint/evidence maker-checker enforcement pass local runtime regression and typecheck. C006 committed730aee9a. C008 thresholds, C009 changes, C010 presentation/full release and live acceptance remain outstanding; production unchanged73a5a7d7. No Lens Native mutation.

@@ -17,6 +17,7 @@ import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint }
 import { workflowGovernanceActorRoles, requireWorkflowPolicyRole } from "./workflow-governance-role-authority";
 import { workflowPolicyApprovalProgress } from "./workflow-governance-approval-progress";
 import { frozenWorkflowMoney } from "./workflow-governance-threshold";
+import { assertWorkflowApprovedWorkChange } from "./workflow-governance-runtime-change";
 
 type Queryable = {
   query(sql: string, params?: any[]): Promise<{ rows: any[] }>;
@@ -181,7 +182,8 @@ async function runtimeEvent(
   await client.query(
     `INSERT INTO company_delivery_workflow_work_item_events(id,work_item_id,project_id,action,phase_id,task_id,actor_id,before_state,after_state,reason,evidence)
     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb || jsonb_build_object('runtimeRevision',
-      (SELECT revision FROM company_delivery_workflow_work_items WHERE work_item_id=$2)))`,
+      (SELECT revision FROM company_delivery_workflow_work_items WHERE work_item_id=$2), 'policyFingerprint',
+      (SELECT policy_fingerprint FROM company_delivery_workflow_work_items WHERE work_item_id=$2)))`,
     [
       randomUUID(),
       value.workItemId,
@@ -425,6 +427,13 @@ async function policyProgress(client: Queryable, context: Awaited<ReturnType<typ
     context.binding.policy_fingerprint, context.phase.id,
     finalPhase, events, money);
 }
+async function guardApprovedWorkChange(client: Queryable, context: Awaited<ReturnType<typeof locked>>, force = false) {
+  if (context.binding.policy_definition == null) return;
+  const checks = await phaseChecks(client, context.workItemId, context.phase.id);
+  const progress = await policyProgress(client, context);
+  if (force || checks?.approved_at || checks?.qc_approved_at || (progress?.approved ?? 0) > 0)
+    assertWorkflowApprovedWorkChange(validateWorkflowGovernancePolicy(context.binding.policy_definition));
+}
 
 async function readWorkItemDeliveryWorkflow(input: {
   actorUserId: number;
@@ -553,11 +562,16 @@ export function assignWorkItemDeliveryRole(input: {
         [context.workItemId, role],
       )
     ).rows[0];
+    if (Number(before?.user_id) === userId)
+      throw new FinancialControlError(409, "DELIVERY_WORKFLOW_ROLE_UNCHANGED", "This user already holds that workflow role.");
+    await guardApprovedWorkChange(client, context);
     await client.query(
       `INSERT INTO company_delivery_workflow_roles(work_item_id,role,user_id,assigned_by_id) VALUES($1,$2,$3,$4)
       ON CONFLICT(work_item_id,role) DO UPDATE SET user_id=EXCLUDED.user_id,assigned_by_id=EXCLUDED.assigned_by_id,assigned_at=now()`,
       [context.workItemId, role, userId, input.actorUserId],
     );
+    await client.query(`UPDATE company_delivery_workflow_phase_checks SET qc_approved_by_id=NULL,qc_approved_at=NULL,
+      approved_by_id=NULL,approved_at=NULL WHERE work_item_id=$1 AND phase_id=$2`, [context.workItemId, context.phase.id]);
     await runtimeEvent(client, {
       workItemId: context.workItemId,
       projectId: context.projectId,
@@ -620,6 +634,7 @@ export function setWorkItemDeliveryStep(input: {
         "The checkpoint is already in that state.",
       );
     const reopenReason = status === "pending" ? reason(input.reason) : null;
+    if (status === "pending") await guardApprovedWorkChange(client, context);
     await client.query(
       `UPDATE company_delivery_workflow_steps SET status=$4,revision=revision+1,completed_by_id=$5,completed_at=CASE WHEN $4='complete' THEN now() ELSE NULL END
       WHERE work_item_id=$1 AND phase_id=$2 AND task_id=$3`,
@@ -706,6 +721,7 @@ export function linkWorkItemDeliveryEvidence(input: {
         "Choose an existing file in this project.",
       );
     const id = randomUUID();
+    await guardApprovedWorkChange(client, context);
     const inserted = (
       await client.query(
         `INSERT INTO company_delivery_workflow_evidence(id,work_item_id,phase_id,task_id,document_code,file_id,linked_by_id)
@@ -957,6 +973,7 @@ export function reopenWorkItemDeliveryPhase(input: {
         "Choose a completed or earlier phase to reopen.",
       );
     const reopenReason = reason(input.reason);
+    await guardApprovedWorkChange(client, context, true);
     const affected = context.definition.phases
       .slice(targetIndex)
       .map((phase) => phase.id);

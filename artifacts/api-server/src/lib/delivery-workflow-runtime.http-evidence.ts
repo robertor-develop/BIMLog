@@ -168,5 +168,27 @@ await Promise.all([
     }
   })(),
 ]);
-console.log("Delivery Workflow isolated runtime: company selection, role and document gates, QC, approval, completion, immutable version, reopening, audit PASS");
+for (const [allowed, requiresNewVersion, code] of [[false,false,"WORKFLOW_POLICY_CHANGE_FORBIDDEN"],[true,true,"WORKFLOW_POLICY_NEW_VERSION_REQUIRED"]] as const) {
+  const deniedItem = randomUUID();
+  const frozenPolicy = { ...policyDefinition, changeRules: policyDefinition.changeRules.map(rule =>
+    rule.action === "edit_approved_work_item" ? {...rule,allowed,requiresNewVersion} : rule) };
+  await pool.query(`INSERT INTO job_activation_work_items(id,intake_id,project_id,stable_scope_item_id,name,unit,planned_hours,workflow_template,created_by_id)
+    VALUES($1,$2,$3,$1,'TEST governed denial','Hours',1,'generic',$4)`,[deniedItem,intakeId,project.id,owner]);
+  await pool.query(`INSERT INTO company_delivery_workflow_work_items(work_item_id,project_id,company_id,template_id,version_id,source,
+    template_code,template_version,deliverable_type,definition,fingerprint,selection,activated_by_id,policy_id,policy_version_id,
+    policy_code,policy_version,policy_definition,policy_fingerprint,status,phase_index)
+    SELECT $1,project_id,company_id,template_id,version_id,source,template_code,template_version,deliverable_type,definition,fingerprint,
+      selection,activated_by_id,policy_id,policy_version_id,policy_code,policy_version,$2::jsonb,$3,'complete',2
+    FROM company_delivery_workflow_work_items WHERE work_item_id=$4`,
+    [deniedItem,JSON.stringify(frozenPolicy),workflowGovernancePolicyFingerprint(frozenPolicy),workItemId]);
+  await pool.query(`INSERT INTO company_delivery_workflow_roles(work_item_id,role,user_id,assigned_by_id)
+    VALUES($1,'approve',$2,$2)`,[deniedItem,owner]);
+  const before = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId:deniedItem});
+  await assert.rejects(reopenWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId:deniedItem,
+    expectedRevision:before.revision,targetPhaseId:"preliminary",reason:"TEST forbidden reopening"}),
+    (error:unknown) => (error as {code?:string}).code === code);
+  const after = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId:deniedItem});
+  assert.deepEqual(after,before,"Denied reopening preserves complete runtime state and audit");
+}
+console.log("Delivery Workflow isolated runtime: scoped roles, ordered policy approvals, maker/checker, evidence reapproval, immutable snapshot, allowed reopening and atomic forbidden/new-version denial, concurrent audit reads PASS");
 await pool.end();

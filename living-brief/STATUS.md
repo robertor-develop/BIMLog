@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation C009 approved-work guard candidate — 2026-09-26
+
+- C008 committeddae0b181. C009 checks the frozen approved-work change rule before reopening or changing approved checkpoint/evidence/role state. Forbidden changes and changes requiring a new version reject without rewriting the active snapshot. Allowed in-place changes retain existing reapproval behavior and immutable history. Role changes invalidate current checks; unchanged-role submissions reject rather than resetting approval.
+- Actual PostgreSQL tests prove allowed reopen/history plus forbidden/new-version denial with identical before/after runtime and audit. All runtime events now carry their policy fingerprint and revision. Existing replacement-template validation remains in place. C010 presentation, release suite, push/publication and authenticated live acceptance remain pending; production unchanged.
+
 ## Consolidation C008 runtime threshold candidate — 2026-09-26
 
 - C007 committed7830804b. C008 phase/final-deliverable approval thresholds use the fingerprint-verified immutable contract-item baseline and its scoped currency. Exact six-decimal amounts are compared with ISO currency minor units using integers; equal/below do not trigger the additional hierarchy, strictly greater does. Existing workflow approval remains required independently. Missing baseline, mismatched currency or fingerprint fails explicitly.
