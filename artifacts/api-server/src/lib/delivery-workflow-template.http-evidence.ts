@@ -151,6 +151,16 @@ try {
   assert.equal(preserved.versions.find((x:any)=>x.versionId===fourth.body.versionId).state,"approved");
   assert.equal(preserved.versions.find((x:any)=>x.versionId===third.body.versionId).state,"published");
   assert.equal(preserved.history.filter((x:any)=>x.versionId===fourth.body.versionId && x.action==='published').length,0);
+  const context = {templateId:id,versionId:fourth.body.versionId};
+  const previewDenied = await call(pmo,"/company/delivery-workflows/preview",{...context,definition:changedTask});
+  assert.equal(previewDenied.status,409);
+  assert.equal(previewDenied.body.code,"WORKFLOW_POLICY_EDIT_TASKS_ROLES_FORBIDDEN");
+  const previewAllowed = await call(pmo,"/company/delivery-workflows/preview",{...context,definition});
+  assert.equal(previewAllowed.status,200);
+  assert.equal(previewAllowed.body.governance.code,"POLICY-TEST");
+  assert.equal(previewAllowed.body.governance.version,4);
+  assert.equal((await call(pmo,"/company/delivery-workflows/preview",{templateId:id,definition})).status,400);
+  assert.equal((await call(owner,"/company/delivery-workflows/preview",{templateId:randomUUID(),versionId:fourth.body.versionId,definition})).status,404);
   await assert.rejects(pool.query(`UPDATE company_delivery_workflow_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_events WHERE template_id=$1`,[id]));
   assert.equal((await call(member,"/company/delivery-workflows")).body.versions.length,1);

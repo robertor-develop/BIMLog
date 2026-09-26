@@ -13,7 +13,7 @@ import { waitForFinancialControlMigration } from "../lib/financial-control-migra
 import { economicCheckerAllowed, workflowTemplateCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
 import { boundedWorkflowRetirementReason } from "../lib/delivery-workflow-retirement";
 import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
-import { applicablePublishedGovernance, assertGovernanceChangeAllowed, publishedGovernanceRows, validateWorkflowAgainstGovernance, validateWorkflowReplacementForPolicy } from "../lib/workflow-governance-binding";
+import { applicablePublishedGovernance, assertGovernanceChangeAllowed, publishedGovernanceRows, validateWorkflowAgainstGovernance, validateWorkflowReplacementForPolicy, previewWorkflowGovernance } from "../lib/workflow-governance-binding";
 
 const router = Router();
 const templateCode = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -100,9 +100,12 @@ router.post("/company/delivery-workflows/preview", authMiddleware, async (req, r
     const connection = await pool.connect();
     try {
       await connection.query("BEGIN");
+      await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
+      const governance = await previewWorkflowGovernance(connection,actor.companyId,definition,
+        { templateId:req.body?.templateId, versionId:req.body?.versionId });
       const allocation = await economicPreview(connection, actor, definition);
       await connection.query("COMMIT");
-      res.json({ definition, fingerprint: deliveryWorkflowFingerprint(definition), allocation,
+      res.json({ definition, fingerprint: deliveryWorkflowFingerprint(definition), allocation, governance,
         phaseCount: definition.phases.length,
         taskCount: definition.phases.reduce((count, phase) => count + phase.tasks.length, 0) });
     } catch (error) { await connection.query("ROLLBACK"); throw error; }
