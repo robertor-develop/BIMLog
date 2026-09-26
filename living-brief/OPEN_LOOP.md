@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Core Builds 46–50 review inspection — 2026-09-26
+
+- [x] Reconcile Builds 41–45 full gate and push `3e30238d5aa2609b51852990e9be2b6ba03ea75c` from external block 09 receipt; five builds await the Build 50 publication milestone.
+- [ ] Expose current-actor review eligibility without changing approval authority; make released-version definitions inspectable; show relevant APU prerequisite failures clearly. Source detail currently hides released phase/task definitions and does not communicate independent-checker eligibility before attempted approval.
+- [ ] Gate/push/publish the ten-build candidate and run authenticated Chrome regression and broader workflow smoke. Full approval-to-Operations and real SharePoint delivery remain unverified until observed. Lens Next remains frozen.
+
 ## Core Builds 41–45 correction chain — 2026-09-26
 
 - [x] Reconcile the prior release from external receipt `F:/BIMLog/TestProof/core-block08-builds36-40-release-20260926.md`: final source `29c80f8da35c513d13356e7227db404221bf25c3`, deployment `4fcd87ed`. Earlier publication-pending notes are historical. Full-site acceptance remains incomplete.

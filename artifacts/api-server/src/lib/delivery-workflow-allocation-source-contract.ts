@@ -28,6 +28,18 @@ export function workflowTemplateCheckerAllowed(input: {
     input.checkerId !== input.creatorId && input.checkerId !== input.lastEditorId;
 }
 
+/** Eligibility is advisory; the locked approval command still rechecks all authority. */
+export function workflowReviewEligibility(input: {
+  state: string; canManage: boolean; creatorId: number; lastEditorId: number;
+  checkerId: number; economic: boolean; hasFinanceGrant: boolean;
+}): { eligible: boolean; code: string } {
+  if (!input.canManage) return { eligible:false, code:"DELIVERY_WORKFLOW_PMO_REQUIRED" };
+  if (input.state !== "draft") return { eligible:false, code:"DELIVERY_WORKFLOW_NOT_DRAFT_OR_STALE" };
+  if (!workflowTemplateCheckerAllowed(input)) return { eligible:false, code:"DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED" };
+  if (input.economic && !input.hasFinanceGrant) return { eligible:false, code:"DELIVERY_WORKFLOW_FINANCE_CHECKER_REQUIRED" };
+  return { eligible:true, code:"DELIVERY_WORKFLOW_REVIEW_ELIGIBLE" };
+}
+
 export function sourceFromVerifiedCommercialApu(input: {
   definition: unknown;
   versionId: string;

@@ -10,7 +10,7 @@ import { previewGovernedWorkflowAllocation } from "../lib/delivery-workflow-allo
 import { EconomicAllocationError } from "../lib/delivery-workflow-economic-allocation";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
-import { economicCheckerAllowed, workflowTemplateCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
+import { economicCheckerAllowed, workflowTemplateCheckerAllowed, workflowReviewEligibility } from "../lib/delivery-workflow-allocation-source-contract";
 import { boundedWorkflowRetirementReason } from "../lib/delivery-workflow-retirement";
 import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
 import { applicablePublishedGovernance, assertGovernanceChangeAllowed, publishedGovernanceRows, validateWorkflowAgainstGovernance, validateWorkflowReplacementForPolicy, previewWorkflowGovernance } from "../lib/workflow-governance-binding";
@@ -117,7 +117,7 @@ router.post("/company/delivery-workflows/preview", authMiddleware, async (req, r
 router.get("/company/delivery-workflows/:id", authMiddleware, async (req, res): Promise<void> => {
   const actor = await prepare(req, res); if (!actor) return;
   const result = await pool.query(`SELECT t.id "templateId",t.code,t.name,v.id "versionId",v.version,v.state,v.revision,
-    v.definition,v.fingerprint,v.effective_from "effectiveFrom",v.created_at "createdAt"
+    v.definition,v.fingerprint,v.effective_from "effectiveFrom",v.created_at "createdAt",v.created_by_id,v.updated_by_id
     FROM company_delivery_workflow_templates t JOIN company_delivery_workflow_versions v ON v.template_id=t.id
     WHERE t.id=$1 AND t.company_id=$2 AND ($3::boolean OR v.state='published') ORDER BY v.version DESC`,
     [param(req.params.id),actor.companyId,actor.canManage]);
@@ -126,7 +126,14 @@ router.get("/company/delivery-workflows/:id", authMiddleware, async (req, res): 
     FROM company_delivery_workflow_events e LEFT JOIN users u ON u.id=e.actor_id AND u.company_id=e.company_id
     WHERE e.template_id=$1 AND e.company_id=$2 ORDER BY e.created_at,e.id`,
     [param(req.params.id),actor.companyId])).rows : [];
-  res.json({ versions: result.rows, history });
+  const needsFinanceCheck = actor.canManage && result.rows.some(row => row.state === "draft" && row.definition?.economicAllocation);
+  const hasFinanceGrant = needsFinanceCheck ? await canApproveEconomics(pool, actor) : false;
+  const versions = result.rows.map(({ created_by_id, updated_by_id, ...row }) => ({ ...row,
+    reviewEligibility: workflowReviewEligibility({ state:row.state, canManage:actor.canManage,
+      creatorId:Number(created_by_id), lastEditorId:Number(updated_by_id), checkerId:actor.userId,
+      economic:!!row.definition?.economicAllocation, hasFinanceGrant }),
+  }));
+  res.json({ versions, history });
 });
 
 router.post("/company/delivery-workflows", authMiddleware, async (req, res): Promise<void> => {

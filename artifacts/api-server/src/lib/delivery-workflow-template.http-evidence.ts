@@ -58,6 +58,12 @@ try {
   assert.equal((await call(pmo,`/company/delivery-workflows/${id}/versions/${v1}/approve`,{ expectedRevision: 1 })).status,400);
   const edited = await call(pmo,`/company/delivery-workflows/${id}/versions/${v1}`,{ expectedRevision: 1, definition },"PATCH");
   assert.equal(edited.status,200); assert.equal(edited.body.version.revision,2);
+  const authorDetail = (await call(pmo,`/company/delivery-workflows/${id}`)).body;
+  assert.deepEqual(authorDetail.versions[0].reviewEligibility,{eligible:false,code:"DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED"});
+  assert.equal("created_by_id" in authorDetail.versions[0],false);
+  assert.equal("updated_by_id" in authorDetail.versions[0],false);
+  assert.deepEqual((await call(owner,`/company/delivery-workflows/${id}`)).body.versions[0].reviewEligibility,
+    {eligible:true,code:"DELIVERY_WORKFLOW_REVIEW_ELIGIBLE"});
   assert.equal((await call(pmo,`/company/delivery-workflows/${id}/versions/${v1}`,{ expectedRevision: 1, definition },"PATCH")).status,409);
   const selfApproval = await call(pmo,`/company/delivery-workflows/${id}/versions/${v1}/approve`,{ expectedRevision: 2 });
   assert.equal(selfApproval.status,403); assert.equal(selfApproval.body.code,"DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED");
