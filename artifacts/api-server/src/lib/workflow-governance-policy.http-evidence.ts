@@ -5,6 +5,17 @@ import { pool } from "@workspace/db";
 import router from "../routes/workflow-governance-policies";
 import { signToken } from "../middlewares/auth";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
+import { workflowPolicyReviewEligibility } from "./workflow-governance-policy-contract";
+
+const eligibilityBase = {canManage:true,state:"draft",actorUserId:3,createdById:1,updatedById:2,hasFinanceGrant:true};
+for (const [override,code] of [
+  [{},null], [{canManage:false},"WORKFLOW_POLICY_PMO_REQUIRED"],
+  [{state:"published"},"WORKFLOW_POLICY_NOT_DRAFT_OR_STALE"],
+  [{actorUserId:1},"WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED"],
+  [{actorUserId:2},"WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED"],
+  [{actorUserId:0},"WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED"],
+  [{hasFinanceGrant:false},"WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED"],
+] as const) assert.deepEqual(workflowPolicyReviewEligibility({...eligibilityBase,...override}),{eligible:code===null,code});
 
 const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/invalid");
 if (target.hostname !== "127.0.0.1" || target.port !== "55449" || target.pathname !== "/delivery_template_test")
@@ -121,9 +132,33 @@ try {
   assert.ok(history.body.history.some((x: any) => x.action === "superseded"));
   assert.ok(history.body.history.some((x: any) => x.action === "approved" && x.actorId === checker.id && x.actorName === checker.full_name));
   assert.equal(history.body.versions.find((x: any) => x.versionId === v2).approvedById,checker.id);
+  const reader = (await call(member,`/company/workflow-governance-policies/${id}`)).body;
+  assert.equal(reader.versions.length,1);
+  assert.equal(reader.versions[0].versionId,v2);
+  assert.equal("createdById" in reader.versions[0],false);
+  assert.equal("updatedById" in reader.versions[0],false);
+  assert.deepEqual(reader.history,[]);
+  assert.deepEqual(reader.versions[0].reviewEligibility,{eligible:false,code:"WORKFLOW_POLICY_PMO_REQUIRED"});
+  await pool.query(`INSERT INTO financial_authority_revocations(id,grant_id,reason,revoked_by_id)
+    SELECT $1,id,'Synthetic revocation regression',$2 FROM financial_authority_grants WHERE user_id=$3 AND company_id=$4`,
+    [randomUUID(),owner.id,checker.id,company.id]);
+  const afterRevocation = (await call(checker,`/company/workflow-governance-policies/${id}`)).body;
+  assert.deepEqual(afterRevocation.versions.find((row:any) => row.state==="draft").reviewEligibility,
+    {eligible:false,code:"WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED"});
+  const revokedApproval = await call(checker,`/company/workflow-governance-policies/${id}/versions/${incompatiblePolicy.body.versionId}/approve`,{expectedRevision:1});
+  assert.equal(revokedApproval.status,403);
+  assert.equal(revokedApproval.body.code,"WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED");
+  const unchanged = (await call(maker,`/company/workflow-governance-policies/${id}`)).body;
+  assert.equal(unchanged.history.length,history.body.history.length,"denied approval must not append a successful policy event");
+  assert.equal(unchanged.versions.find((row:any) => row.state==="draft").revision,1);
   await assert.rejects(pool.query(`UPDATE company_workflow_governance_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_workflow_governance_events WHERE policy_id=$1`,[id]));
   assert.equal((await call(maker,`/company/workflow-governance-policies/${id}/versions/${v2}/retire`,{ expectedRevision:4,reason:"" })).status,400);
+  assert.equal((await call(checker,`/company/workflow-governance-policies/${id}/versions/${v2}/retire`,{ expectedRevision:4,reason:"Revoked reviewer" })).status,403);
+  await pool.query(`INSERT INTO financial_authority_grants
+    (id,user_id,company_id,project_id,scope_type,authority,version,effective_from,reason,granted_by_id)
+    VALUES($1,$2,$3,NULL,'company','cost_approver',2,now()-interval '1 second','Synthetic renewed grant',$4)`,
+    [randomUUID(),checker.id,company.id,owner.id]);
   assert.equal((await call(checker,`/company/workflow-governance-policies/${id}/versions/${v2}/retire`,{ expectedRevision:4,reason:"Retire after QA" })).status,200);
   assert.equal((await call(member,"/company/workflow-governance-policies")).body.versions.filter((x: any) => x.code === "GOV").length,0);
   assert.equal((await call(outsider,"/company/workflow-governance-policies")).body.versions.length,0);

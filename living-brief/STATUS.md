@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Core operating chain Builds 51–55 — 2026-09-26
+
+- Prior Builds 46–50 are pushed and published at `93db6e99fa450c0d4072371afb0fb26f9b3210d5`, deployment `7eade195`. External receipt `F:/BIMLog/TestProof/core-block10-builds46-50-release-20260926.md` supersedes pending-publication descriptions below. Affected authenticated workflow regression passed; full-site acceptance did not.
+- Builds 51–54 remove Governance selection-triggered duplicate loading, preserve draft selection after creation, expose current reviewer eligibility, explain independent PMO/Finance requirements and permit read-only historical-version inspection. No approval grants or policy execution semantics change. Twenty-four local real-component Chrome fixture scenarios pass at desktop/390px in English/Spanish; these are synthetic-response tests, not production acceptance.
+- Build 55 adds eligibility, reader isolation and grant-revocation regression using disposable PostgreSQL. Focused HTTP and API/frontend typechecks pass. The exact-head full gate and push remain required at this authoring point. Five builds await publication at Build 60. Original planned remainder is 25 builds/five blocks; this count is not a guarantee that unresolved acceptance gaps fit that estimate.
+- Approval hierarchies, thresholds and runtime governance, full template-to-Intake/EDT/hours/QC acceptance and actual SharePoint tenant delivery remain open. Lens Next, production records, schema, credentials and installers are unchanged.
+
 ## Core operating chain Builds 46–50 — 2026-09-26
 
 - Builds 46–49 expose current-actor reviewer eligibility, fail closed in the editor when eligibility is absent, add read-only saved-version inspection, and explain APU/allocation prerequisites in English and Spanish. Approval commands still independently enforce authority; no grants, schema or Lens Next changes.

@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Core Builds 51–55 Governance review continuity — 2026-09-26
+
+- [x] Reconcile the published Build 50 source `93db6e99fa450c0d4072371afb0fb26f9b3210d5`, deployment `7eade195`, from the external block 10 release receipt. Earlier pending release notes are historical; full-site acceptance remains incomplete.
+- [x] Correct duplicate Governance loads and created-draft selection; expose advisory current-actor review eligibility and saved-version inspection without altering authority. Twenty-four local Chrome scenarios and disposable PostgreSQL review/revocation tests pass.
+- [ ] Complete the exact-head gate and five-build push. Publish at Build 60 and repeat authenticated live Governance and connected workflow regression. No more than ten unpublished builds.
+- [ ] Retain the unresolved full approval-to-Operations, policy hierarchy/threshold enforcement and real SharePoint tenant acceptance work. Remaining original estimate after Build 55 is 25 builds/five blocks; no complete-product claim. Lens Next remains frozen.
+
 ## Core Builds 46–50 review inspection — 2026-09-26
 
 - [x] Reconcile Builds 41–45 full gate and push `3e30238d5aa2609b51852990e9be2b6ba03ea75c` from external block 09 receipt; five builds await the Build 50 publication milestone.
