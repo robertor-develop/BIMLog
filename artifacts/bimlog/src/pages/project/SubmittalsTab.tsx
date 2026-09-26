@@ -543,7 +543,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
         <div>
           <div style={{ fontSize: 16, fontWeight: 800, color: "#1E3A5F" }}>
             {w("Shop Drawing Control", "Control de Shop Drawings", lang)}
@@ -569,7 +569,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 
       <div style={{
         display: "grid",
-        gridTemplateColumns: "repeat(5, minmax(140px, 1fr)) auto",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 180px), 1fr))",
         gap: 10,
         alignItems: "end",
         background: "white",
@@ -623,7 +623,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
         </Button>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(120px, 1fr))", gap: 10, marginBottom: 14 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 120px), 1fr))", gap: 10, marginBottom: 14 }}>
         {[
           [filtersActive ? w("Visible", "Visible", lang) : w("Total", "Total", lang), visibleSubmittals.length, "#1E3A5F"],
           [w("Overdue", "Vencidos", lang), overdueCount, overdueCount ? "#DC2626" : "#16A34A"],
@@ -642,7 +642,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           {w("No submittals match the selected Shop Drawing Control filters.", "Ningun entregable coincide con los filtros seleccionados de control de shop drawings.", lang)}
         </div>
       ) : (
-      <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
+      <div role="region" aria-label={w("Shop Drawing Control table", "Tabla de control de Shop Drawings", lang)} tabIndex={0} style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "#F9FAFB" }}>

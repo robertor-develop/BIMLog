@@ -2,6 +2,8 @@
 
 ## Post-C010 presentation repair — 2026-09-26
 
+Follow-up actual-component Chrome inspection at390px found fixed-width tracking filters/totals and clipped table columns. Repaired with responsive grids, wrapping header and a named keyboard-focusable horizontal table region. Desktop Spanish tracking and register labels inspected;390px corrected filters/totals/table inspected. The earlier running release gate is superseded because this additional repair changed its candidate; a new clean exact-head gate is required. Production remains a93d2241. These are C010 repairs, not C011-C015 builds.
+
 Exact live source a93d2241 passed the calendar-date retest and coverage save/refresh checks; external consolidation-c006-c010-release-20260926.md records evidence. Before C011, repair the observed untranslated tracking headings/status and unassociated register field labels in the existing Submittals component. Stable filter values remain unchanged; shared status labels are reused. Source review also found the Shop indicator comparing against an impossible normalized type, corrected to Shop Drawing. Local typecheck passed before the final fixture addition; actual-component browser, regression and release verification remain required. C011-C015 have not started; no new production change or full acceptance claim.
 
 ## C010 live calendar-date correction — 2026-09-26

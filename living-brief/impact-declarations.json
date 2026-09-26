@@ -44687,7 +44687,7 @@
             "status",
             "open_loop"
           ],
-          "summary": "Tracking display must use localized labels without changing filter identity; register inputs must have programmatic labels."
+          "summary": "Tracking display must use localized labels without changing filter identity; register inputs must have programmatic labels. Actual390px inspection also requires wrapping filters/totals/header and a focusable horizontally scrollable table; local visual retest passed, new exact-head gate and deployed retest remain required."
         }
       ],
       "authorities": [
@@ -44757,7 +44757,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e41e18d34e12437282db6ac660761c9e4966bb9f3076f86e5713c00cdaea8c88"
+      "reviewedChangeSha256": "9a0eb399429b0ad63d1d9cc6335e981f6223f1263cc0da574c5c62fe2c8b391b"
     }
   ]
 }

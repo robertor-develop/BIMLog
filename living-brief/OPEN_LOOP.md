@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C010 narrow-screen defect reproduced and repaired locally: filters/totals now wrap and table columns are scrollable in a named focusable region. Corrected390px screenshot inspected. Run a new clean exact-head gate; discard the in-flight earlier candidate receipt as acceptance evidence after its source changed. Push/publish and live retest remain required before C011. No customer data or Lens changes.
+
 Before C011: close observed tracking localization and register-label association defects. Local source repair uses existing status presentation, keeps filter identities stable and associates field labels with generated input IDs. The normalized Shop Drawing indicator comparison is also corrected. Verify the actual component, regression, publish and exact live retest before proceeding to C011-C015. Current production a93d2241; no full policy-bound multi-role acceptance yet.
 
 Live project58 synthetic coverage linking/persistence/filter/unlink passed, but September26 rendered September25. Calendar-date parsing is repaired locally without changing timestamp semantics or stored records. Verify the clean candidate, push/publish and repeat the tracking-date test before moving on. The denial-message repair08ecb065 is pushed and Replit reports publication; exact live identity/readback remains required. Full policy-bound multi-role acceptance and observed Spanish tracking-table/accessibility inconsistencies remain open. No full-platform PASS or next-block authorization checkpoint is inferred from these partial tests.
