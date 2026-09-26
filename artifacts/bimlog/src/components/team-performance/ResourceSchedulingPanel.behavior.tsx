@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { ResourceSchedulingWorkspaceView, validateResourcePlanningWorkspace, type ResourcePlanningWorkspace } from "./ResourceSchedulingPanel";
+import { ResourceSchedulingWorkspaceView, validateResourcePlanningWorkspace, nextUnselectedDirectTask, hasDuplicateStaffingTasks, type ResourcePlanningWorkspace } from "./ResourceSchedulingPanel";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(here, "ResourceSchedulingPanel.tsx"), "utf8");
@@ -29,6 +29,12 @@ const props = (overrides: Record<string, unknown> = {}) => ({
 const render = (overrides: Record<string, unknown> = {}) => renderToStaticMarkup(<ResourceSchedulingWorkspaceView {...props(overrides) as any}/>);
 
 assert.equal(validateResourcePlanningWorkspace(data), data);
+assert.equal(nextUnselectedDirectTask(data.tasks, []), data.tasks[0]);
+assert.equal(nextUnselectedDirectTask(data.tasks, [assignment]), undefined);
+assert.equal(nextUnselectedDirectTask([{...data.tasks[0], assignmentId:"priced"}], []), undefined);
+assert.equal(hasDuplicateStaffingTasks([assignment]), false);
+assert.equal(hasDuplicateStaffingTasks([assignment, {...assignment}]), true);
+assert.equal(nextUnselectedDirectTask([...data.tasks, {...data.tasks[0],id:"task-2"}], [assignment])?.id, "task-2");
 for (const malformed of [null, {}, { ...data, members: null }, { ...data, tasks: null }, { ...data, methodology: null }, { ...data, members: [{ ...data.members[0], verifiedExperience: null }] }, { ...data, members: [{ ...data.members[0], profile: { version: 2, content: {} } }] }, { ...data, tasks: [{ ...data.tasks[0], assignmentId: 7 }] }, { ...data, scenarios: [{ ...data.scenarios[0], content: { ...data.scenarios[0].content, assignments: [{}] } }] }, { ...data, scenarios: [{ ...data.scenarios[0], evaluation: { ...evaluation, people: [{}] } }] }]) {
   assert.throws(() => validateResourcePlanningWorkspace(malformed), /RESOURCE_PLANNING_RESPONSE_INCOMPLETE/);
 }
