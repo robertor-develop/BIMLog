@@ -1,10 +1,10 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
-The approved corrected report is `F:/BIMLog/TestProof/BIMLog_Consolidation_Vorea_Audit_and_120_Build_Plan_20260926.md`, revision 2. C001–C005 are authorized now; later blocks remain the approved planning scope, not completed work. Historical checkpoint counts below are not current publication counts. OPEN_LOOP_DISPOSITIONS.json retains their classifications; current release evidence is the reconciliation in STATUS.md and the coordination-routing ledger.
+The approved corrected report is `F:/BIMLog/TestProof/BIMLog_Consolidation_Identity_and_130_Build_Plan_20260926.md`, revision3. I001–I005 are authorized now; C001/C002 and the unfinished C003 change are preserved. Later blocks remain planning scope, not completed work. Historical checkpoint counts below are not current publication counts. OPEN_LOOP_DISPOSITIONS.json retains their classifications; current release evidence is the reconciliation in STATUS.md and the coordination-routing ledger.
 
-- [ ] Complete Workflow/Intake/resource consolidation and the approved C001–C120 module deltas without duplicate authorities; C001–C005 are the current implementation block.
+- [ ] Complete priority identity/invitation I001–I010 then Workflow/Intake/resource consolidation C001–C120 without duplicate authorities; I001–I005 are current. Correct nine stale company35 project bindings append-only, retire its operational alias, protect legitimate company creation and verified joining; do not merge unresolved company38 by name.
 - [ ] Prove Ruben project entry and full multi-role template-to-Operations acceptance using authenticated production workflows; memberships and fixture tests are insufficient.
 - [ ] Complete SharePoint provider enrollment, authorized destination and exact-byte delivery/readback; Microsoft administrator action and product implementation remain distinct obligations.
 - [ ] Preserve Ruben's deferred physical Navisworks 2025 field evidence and identify his exact installed package before any affected native release; local package evidence cannot substitute for his installation.

@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Priority identity block I001–I005 — 2026-09-26
+
+- Roberto authorized revision3: ten priority identity/invitation scopes before the remaining120 consolidation scopes;130 total,26 blocks. C001/C002 local commits and unfinished C003 Dashboard change are preserved. I001 source/live diagnostic evidence is `evidence/coordination-routing-20260925/IDENTITY_I001.md`.
+- Fresh read-only production checks confirm Rubén20 and Lorena25 already belong to company31 and have scoped PMO grants. Company35 has no users, but the latest version1 bindings of projects36,37,38,39,40,47,48,52,54 still point to35. This is an unresolved operational scope defect, not merely retained history. Preserve original versions and correct by append-only rebinding after verification.
+- Similar company38 has a different user and unresolved identity; no name-based merge is authorized by inference. No production mutation, push or publication occurred during I001. Registration name-only membership and punctuation/concurrency gaps are assigned to the priority repair, not accepted as secure onboarding.
+
 ## Current release reconciliation and consolidation C001 — 2026-09-26
 
 - Source baseline and freshly queried GitHub master are `25d6952efa2f7694734d3a8d34e47800ecde30ee`. The subsequent-publication section of `F:/BIMLog/TestProof/sharepoint-access-repair-20260926.md` records that exact live source, `v1.05.N18-P36`, readiness200, identityBound=true and schema action NONE. Earlier pending-publication paragraphs are historical and superseded by that receipt. Baseline unpublished implementation count is zero; this does not claim full-site acceptance.
