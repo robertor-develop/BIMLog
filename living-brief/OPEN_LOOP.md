@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C010 was published at17885b41 with exact live identity. Live acceptance found a generic Spanish message for a correctly denied incomplete-phase transition. Known error-code presentation is repaired locally; run exact-head release, push/publish and repeat this exact live negative test before continuing. Full policy-bound multi-role acceptance remains open; the existing project57 fixture has no company policy and only one member.
+
 C010 local decision UI is implemented and component-browser checked; C006-C009 are committed. Run clean exact-head release gate, push, Replit publication and authenticated live smoke before accepting this checkpoint. Seven unpublished scopes including C004/C005. Full configured-policy coverage is still partial: create/activate/template-update/economic-change hierarchies are not connected by these runtime slices and must not be reported complete. C003/I010 customer access/real email and provider consent remain separately unresolved. Production remains73a5a7d7 until an exact release receipt supersedes this statement.
 
 C009 candidate enforces frozen approved-work change prohibitions and new-version requirements before in-place mutations; real PostgreSQL denial tests preserve runtime and audit exactly. C010 decision explanations, full exact-head release and live acceptance remain next. This is not an implementation of an otherwise unsupported runtime replacement/economic-change operation; such actions remain unavailable. C006-C008 locally committed; no new publication yet.

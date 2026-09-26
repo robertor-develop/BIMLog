@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useAuthStore } from "@/store/auth";
-import { governanceDecisionMessage } from "@/lib/workflow-governance-decision-message";
+import { governanceDecisionMessage, workflowActionError } from "@/lib/workflow-governance-decision-message";
 
 type Translate = (en: string, es: string) => string;
 type Runtime = {
@@ -101,12 +101,12 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
       return true;
     } catch (cause) {
       setRuntime(null);
-      setError(String(cause));
+      setError(workflowActionError(cause, tt));
       return false;
     } finally {
       setLoading(false);
     }
-  }, [api, path]);
+  }, [api, path, tt]);
   const act = async (
     suffix: string,
     method: string,
@@ -126,7 +126,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
       const refreshed = await load();
       setNotice(refreshed ? label : tt("The change was saved, but the refreshed workflow could not be loaded. Refresh before making another change.","El cambio se guardó, pero no se pudo cargar el flujo actualizado. Actualice antes de realizar otro cambio."));
     } catch (cause) {
-      setError(String(cause));
+      setError(workflowActionError(cause, tt));
     } finally {
       setBusy(false);
     }

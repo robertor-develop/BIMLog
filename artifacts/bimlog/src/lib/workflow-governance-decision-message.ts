@@ -19,3 +19,10 @@ export function governanceDecisionMessage(code: string, tt: (en:string,es:string
   const text = messages[code];
   return text ? tt(...text) : tt("This action is unavailable. Review the policy and current role.","Esta acción no está disponible. Revise la política y el rol actual.");
 }
+
+/** Preserve the server denial code instead of displaying its generic translation. */
+export function workflowActionError(cause: unknown, tt: (en:string,es:string)=>string): string {
+  const code = typeof cause === "object" && cause !== null && "code" in cause ? cause.code : null;
+  if (typeof code === "string" && messages[code]) return governanceDecisionMessage(code, tt);
+  return cause instanceof Error ? cause.message : String(cause);
+}

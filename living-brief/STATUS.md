@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## C010 live denial-message correction — 2026-09-26
+
+C006-C010 are pushed and published at17885b4128b259b4fcf145b698eed980697e6628; exact live identity is bound. Full local eight-command gate passed. Live Spanish negative test on synthetic project57 returned409 DELIVERY_WORKFLOW_TASKS_INCOMPLETE but displayed only a generic error. The UI now maps known server denial codes to the existing bilingual explanations for reads and mutations, retaining safe fallback for unknown failures. Regression verifies both languages. This repair still requires exact-head release and live retest; full multi-role acceptance is not complete. Native Lens and production permissions are unchanged.
+
 ## Consolidation C010 decision-presentation candidate — 2026-09-26
 
 - C006730aee9a, C0077830804b, C008dae0b181 and C0093bb5a0ba are local bounded commits. C010 exposes server-side policy progress/denial codes in the existing Work Item panel, enables the next eligible hierarchical approval even without the old phase flag, and explains role, economic-baseline and change restrictions in English/Spanish. The Governance screen states the exact enforced and still-unconnected action categories. No broad completed-governance claim.

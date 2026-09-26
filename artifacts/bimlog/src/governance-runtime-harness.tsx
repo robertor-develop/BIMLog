@@ -11,7 +11,7 @@ function Harness() {
   const [spanish,setSpanish]=useState(false),[narrow,setNarrow]=useState(false),[mode,setMode]=useState("allowed");
   const tt=(en:string,es:string)=>spanish?es:en;
   const api=async (_path:string, init?:RequestInit) => {
-    if (mode === "error") throw new Error(tt("TEST read failure","TEST fallo de lectura"));
+    if (mode === "error") throw Object.assign(new Error("No se pudo completar la operación."), {code:"DELIVERY_WORKFLOW_TASKS_INCOMPLETE"});
     if (init) count++;
     const complete=count>=2;
     return {workItemId:"TEST",templateCode:"TEST-WORKFLOW",templateVersion:1,source:"company",selection:"explicit",status:"active",phaseIndex:1,

@@ -18,6 +18,12 @@ assert.throws(() => governanceThresholdApplies(usd, null), {code:"WORKFLOW_POLIC
 assert.equal(governanceThresholdApplies({currency:"USD",amountMinor:Number.MAX_SAFE_INTEGER}, {currency:"USD",amount:"90071992547409.910001"}), true);
 const presentationPath = "../../bimlog/src/lib/governance-threshold-presentation.ts";
 const { governanceThresholdLabel } = await import(presentationPath);
+const messagePath = "../../bimlog/src/lib/workflow-governance-decision-message.ts";
+const { workflowActionError } = await import(messagePath);
+const denied = Object.assign(new Error("No se pudo completar la operación."), {code:"DELIVERY_WORKFLOW_TASKS_INCOMPLETE"});
+assert.equal(workflowActionError(denied, (_en:string,es:string)=>es), "Complete primero todos los puntos de control de la fase.");
+assert.equal(workflowActionError(denied, (en:string)=>en), "Complete all phase checkpoints first.");
+assert.equal(workflowActionError(new Error("Safe fallback"), (en:string)=>en), "Safe fallback");
 assert.equal(governanceThresholdLabel(usd,false), "Greater than 25,000.00 USD");
 assert.equal(governanceThresholdLabel(null,true), "Siempre");
 const hierarchy = { approvalRules: [{ action: "complete_deliverable", roles: ["CEO"] },
