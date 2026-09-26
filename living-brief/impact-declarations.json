@@ -44758,6 +44758,107 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9a0eb399429b0ad63d1d9cc6335e981f6223f1263cc0da574c5c62fe2c8b391b"
+    },
+    {
+      "taskId": "consolidation-c011-workflow-readiness",
+      "reviewedThroughCommit": "7a3d82ee14f261062dcc7f38bdbfa2a908a47eee",
+      "reviewedAt": "2026-09-26T23:16:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "chrome_component_tests",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Readiness must distinguish published options blocked by governance, preserve independent approval, and never show a failed load as an empty company catalog."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Discovery uses existing company source/version authority; no new engine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing routing and release cadence unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Actual-component English/Spanish/narrow/error evidence; no deployed claim."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing template-to-intake scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new backend/schema or lifecycle."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Native and installers excluded."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report/export contract change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claims added."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Exact deployed repair and C011 local candidate recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Failed-load discovery defect and remaining C012-C015 captured."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No mutation or history contract change."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
+        "artifacts/bimlog/src/lib/company-workflow-readiness.behavior.ts",
+        "artifacts/bimlog/src/lib/company-workflow-readiness.ts",
+        "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
+        "artifacts/bimlog/src/workflow-readiness-harness.tsx",
+        "artifacts/bimlog/workflow-readiness-harness.html",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "caa4c6ec555f20b949a5d32bc6c71d62d90afefeac658b0257b2c3d54dbe5978"
     }
   ]
 }

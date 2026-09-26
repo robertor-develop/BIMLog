@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation C011 readiness candidate — 2026-09-26
+
+C010 presentation repairs are pushed and live at7a3d82ee; full clean eight-command suite passed. Exact health/package/schema identity and focused authenticated Spanish/English/date/filter/390px/register-label retests passed; external consolidation-c010-presentation-repair-20260926.md records limits. Full multi-role/platform smoke is not complete.
+
+C011 adds readiness counts from existing company versions/options, excluding defaults and governance-blocked options from the unblocked count. Lifecycle labels distinguish draft, approved-awaiting-publication, published-locked, superseded and retired without inventing persisted review/activation states. Failed loads now suppress stale readiness/edit controls and false empty-state claims. Real BIMTECH drafts and existing independent PMO/Finance checks are unchanged. Focused pure regression and actual-component synthetic Chrome narrow view passed; final C011 verification/commit remain pending. C012-C015 not started.
+
 ## Post-C010 presentation repair — 2026-09-26
 
 Follow-up actual-component Chrome inspection at390px found fixed-width tracking filters/totals and clipped table columns. Repaired with responsive grids, wrapping header and a named keyboard-focusable horizontal table region. Desktop Spanish tracking and register labels inspected;390px corrected filters/totals/table inspected. The earlier running release gate is superseded because this additional repair changed its candidate; a new clean exact-head gate is required. Production remains a93d2241. These are C010 repairs, not C011-C015 builds.

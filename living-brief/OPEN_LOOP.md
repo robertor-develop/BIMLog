@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C011 readiness candidate follows exact deployed repair7a3d82ee. Finish failed-load/recovery and actual-component checks, commit C011 then implement C012-C015 sequentially. Counts are discovery guidance, not Job activation approval; no draft or blocked published option can be advertised as ready. C010 focused deployed repair checks passed; full configured-policy/multi-role platform acceptance remains open. Preserve real company drafts and Lens Native.
+
 C010 narrow-screen defect reproduced and repaired locally: filters/totals now wrap and table columns are scrollable in a named focusable region. Corrected390px screenshot inspected. Run a new clean exact-head gate; discard the in-flight earlier candidate receipt as acceptance evidence after its source changed. Push/publish and live retest remain required before C011. No customer data or Lens changes.
 
 Before C011: close observed tracking localization and register-label association defects. Local source repair uses existing status presentation, keeps filter identities stable and associates field labels with generated input IDs. The normalized Shop Drawing indicator comparison is also corrected. Verify the actual component, regression, publish and exact live retest before proceeding to C011-C015. Current production a93d2241; no full policy-bound multi-role acceptance yet.

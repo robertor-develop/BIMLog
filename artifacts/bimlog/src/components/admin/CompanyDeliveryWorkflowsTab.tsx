@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { workflowApprovalError } from "@/lib/workflow-approval-error";
+import { workflowLifecycleLabel, workflowReadiness, type WorkflowAvailability } from "@/lib/company-workflow-readiness";
 import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -138,6 +139,7 @@ export function CompanyDeliveryWorkflowsTab({
   >([]);
   const [canManage, setCanManage] = useState(false);
   const [mode, setMode] = useState("");
+  const [availability, setAvailability] = useState<WorkflowAvailability[]>([]);
   const [apuOptions, setApuOptions] = useState<PricingOption[]>([]);
   const [apuError, setApuError] = useState("");
   const [selectedId, setSelectedId] = useState("");
@@ -204,6 +206,7 @@ export function CompanyDeliveryWorkflowsTab({
       setList(listing.versions ?? []);
       setCanManage(listing.canManage === true);
       setMode(options.mode);
+      setAvailability(options.options ?? []);
       if (listing.canManage === true) {
         try {
           const pricing = await request("/company/pricing-templates/options");
@@ -436,6 +439,7 @@ export function CompanyDeliveryWorkflowsTab({
       },
     ]);
   };
+  const readiness = workflowReadiness(list, availability);
   return (
     <section className="company-workflow-editor" style={{ display: "grid", gap: 16, minWidth: 0 }}>
       <div>
@@ -467,7 +471,20 @@ export function CompanyDeliveryWorkflowsTab({
         </div>
       )}
       {notice && <p role="status">{notice}</p>}
-      {!loading && (
+      {!loading && !loadFailed && <section aria-label={t("Company workflow readiness", "Disponibilidad de flujos de empresa")} style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14 }}>
+        <h2>{t("Before starting new work", "Antes de iniciar trabajo nuevo")}</h2>
+        <dl style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(100%,180px),1fr))", gap: 12 }}>
+          {[
+            [t("Visible drafts", "Borradores visibles"), readiness.drafts],
+            [t("Awaiting publication", "Pendientes de publicación"), readiness.awaitingPublication],
+            [t("Published without a governance block", "Publicados sin bloqueo de gobernanza"), readiness.selectable],
+            [t("Published with a governance block", "Publicados con bloqueo de gobernanza"), readiness.blocked],
+          ].map(([label, count]) => <div key={String(label)}><dt>{label}</dt><dd style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>{count}</dd></div>)}
+        </dl>
+        <p>{t("Draft → independent review and approval → publication. Review is an action on a saved draft, not a separate saved status. Publication locks the version; Job activation is a separate step in Intake.", "Borrador → revisión y aprobación independiente → publicación. La revisión es una acción sobre el borrador guardado, no un estado guardado separado. Publicar bloquea la versión; activar el trabajo es otro paso en Intake.")}</p>
+        <p>{t("Counts cover visible company versions, not BIMLog defaults. Published options still require the correct deliverable, contract/APU, budget and roles during activation. Select a template below to inspect its exact versions and next action.", "Los totales incluyen versiones visibles de la empresa, no los valores predeterminados de BIMLog. Las opciones publicadas aún requieren el entregable, contrato/APU, presupuesto y roles correctos al activar. Seleccione una plantilla abajo para revisar sus versiones exactas y la siguiente acción.")}</p>
+      </section>}
+      {!loading && !loadFailed && (
         <p>
           {mode === "approved_only"
             ? t(
@@ -484,7 +501,7 @@ export function CompanyDeliveryWorkflowsTab({
             : t("Read-only", "Solo lectura")}
         </p>
       )}
-      {canManage && (
+      {canManage && !loading && !loadFailed && (
         <section
           style={{
             border: "1px solid #cbd5e1",
@@ -547,7 +564,7 @@ export function CompanyDeliveryWorkflowsTab({
           </button>
         </section>
       )}
-      {!loading && list.length === 0 && (
+      {!loading && !loadFailed && list.length === 0 && (
         <p>
           {t(
             "No company workflow has been created. BIMLog defaults can still be used when policy allows them.",
@@ -559,7 +576,7 @@ export function CompanyDeliveryWorkflowsTab({
         {t("Company template", "Plantilla de empresa")}
         <select
           ref={templateSelect}
-          disabled={busy || loading}
+          disabled={busy || loading || loadFailed}
           value={selectedId}
           onChange={(event) => {
             if (draftDirty) setPendingTemplate(event.target.value);
@@ -598,7 +615,7 @@ export function CompanyDeliveryWorkflowsTab({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {selected && (
+      {selected && !loading && !loadFailed && (
         <section
           style={{
             border: "1px solid #cbd5e1",
@@ -610,7 +627,7 @@ export function CompanyDeliveryWorkflowsTab({
           }}
         >
           <h2>
-            {selected.name} · v{selected.version} · {selected.state}
+            {selected.name} · v{selected.version} · {workflowLifecycleLabel(selected.state, spanish)}
           </h2>
           <p>
           {t(
@@ -640,8 +657,9 @@ export function CompanyDeliveryWorkflowsTab({
               }}
             >
               <strong>
-                v{row.version} · {row.state}
+                v{row.version} · {workflowLifecycleLabel(row.state, spanish)}
               </strong>
+              {availability.find(option => option.versionId === row.versionId)?.activationBlock && <p role="status" style={{ flexBasis: "100%" }}>{t("Activation blocked by governance:", "Activación bloqueada por gobernanza:")} {workflowApprovalError(availability.find(option => option.versionId === row.versionId)!.activationBlock!.code, spanish)}</p>}
               <small>{row.fingerprint?.slice(0, 16) || "—"}</small>
               {row.state !== "draft" && <details style={{ flexBasis:"100%", minWidth:0 }}>
                 <summary>{t("View saved definition", "Ver definición guardada")} · v{row.version}</summary>
