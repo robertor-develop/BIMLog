@@ -3,13 +3,19 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import React from "react";
-import { resourceCsvCell, resourceEvaluationCsv } from "./ResourceSchedulingPanel";
+import { resourceCsvCell, resourceEvaluationCsv, resourceScenarioHoursError } from "./ResourceSchedulingPanel";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ResourceSchedulingWorkspaceView, validateResourcePlanningWorkspace, validateResourceEvaluation, nextUnselectedDirectTask, hasDuplicateStaffingTasks, type ResourcePlanningWorkspace } from "./ResourceSchedulingPanel";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const source = fs.readFileSync(path.join(here, "ResourceSchedulingPanel.tsx"), "utf8");
 const noop = () => undefined;
+for (const plannedHours of [-1, 0, 0.001, 100001, NaN, Infinity]) {
+  assert.match(resourceScenarioHoursError([{ plannedHours }], "es"), /Ingrese horas orientativas/);
+  assert.match(resourceScenarioHoursError([{ plannedHours }], "en"), /Enter advisory hours/);
+}
+for (const plannedHours of [0.01, 16, 100000]) assert.equal(resourceScenarioHoursError([{ plannedHours }], "es"), "");
+assert.match(source, /const payload = \(\) => \{ const validation = resourceScenarioHoursError/);
 const profile = { weeklyCapacityHours: 40, timezone: "America/New_York", workingDays: [1, 2, 3, 4, 5], leave: [{ startDate: "2026-08-20", endDate: "2026-08-21", label: "Approved leave" }], internalHourlyRate: 45, billingHourlyRate: 95 };
 const evaluation = { people: [{ userId: 5, capacityHours: 144, existingHours: 52, scenarioHours: 24, availableHours: 92, utilization: 0.5278, internalCost: null, billingValue: null, warnings: [] }], totals: { scenarioHours: 24, internalCost: null, billingValue: null }, warnings: [], decision: "review_required" };
 const assignment = { taskId: "task-1", userId: 5, plannedHours: 24, startDate: "2026-08-17", endDate: "2026-08-21", category: "MEP coordination", reason: "Reviewed staffing proposal", expectedTaskVersion: 3, assignmentId: null, expectedAssignmentVersion: null };
