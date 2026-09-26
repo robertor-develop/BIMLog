@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { FolderWizardRequestLifetime } from "./folder-wizard-request-lifetime";
+import { refreshAfterConfirmedFolderWizardMutation } from "./folder-wizard-confirmed-refresh";
 
 type Tier = { label: string; items: string[] };
 type Blueprint = { name: string; include: boolean; tiers: Tier[] };
@@ -27,22 +29,41 @@ export function FolderWizardRoutingPanel({ projectId, token, lang, blueprints }:
   const [preview, setPreview] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const lifetime = useRef(new FolderWizardRequestLifetime());
+  const inFlight = useRef(false);
   const endpoint = `/api/v1/projects/${projectId}/integrations/folder-wizard/routing`;
 
-  async function refresh() {
+  async function refresh(active: () => boolean) {
     if (!token) return;
     const response = await fetch(endpoint, { headers: { Authorization: `Bearer ${token}` } });
     if (!response.ok) throw new Error(`routing ${response.status}`);
     const data = await response.json() as Response;
+    if (!active()) return;
     setLoaded(data);
     const selected = scopeType === "project" ? data.projectProfile : data.companyProfile;
     setDefinition(selected?.definition ?? blank(included));
   }
-  useEffect(() => { setLoaded(null); setError(""); void refresh().catch(() => setError(tr("Routing rules could not be loaded.", "No se pudieron cargar las reglas de rutas."))); }, [projectId, token]);
+  async function reload() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    const active = lifetime.current.begin();
+    setBusy(true); setError(""); setPreview("");
+    try { await refresh(active); }
+    catch { if (active()) setError(tr("Routing rules could not be loaded. Retry Cancel and reload.", "No se pudieron cargar las reglas. Reintente Cancelar y recargar.")); }
+    finally { if (active()) { inFlight.current = false; setBusy(false); } }
+  }
+  useEffect(() => {
+    lifetime.current.invalidate(); inFlight.current = false;
+    setLoaded(null); setTags({}); setPreview(""); setError("");
+    void reload();
+    return () => { lifetime.current.invalidate(); };
+  }, [projectId, token, lang, included]);
   const selected = scopeType === "project" ? loaded?.projectProfile : loaded?.companyProfile;
   const canEdit = scopeType === "project" ? loaded?.canEditProject : loaded?.canEditCompany;
   const keys = [...new Set([...definition.selectors.map((entry) => entry.tagKey), ...definition.tierMappings.map((entry) => entry.tagKey)].filter(Boolean))];
   function selectScope(next: "project" | "company") {
+    if (inFlight.current) return;
+    lifetime.current.invalidate();
     setScopeType(next); setPreview(""); setError("");
     setDefinition((next === "project" ? loaded?.projectProfile : loaded?.companyProfile)?.definition ?? blank(included));
   }
@@ -63,29 +84,38 @@ export function FolderWizardRoutingPanel({ projectId, token, lang, blueprints }:
     return response.json() as Promise<Record<string, unknown>>;
   }
   async function save() {
-    if (!canEdit) return;
+    if (!canEdit || inFlight.current) return;
+    inFlight.current = true;
+    const active = lifetime.current.begin();
     setBusy(true); setError("");
     try {
       await request("", { scopeType, definition, expectedFingerprint: selected?.fingerprint ?? null });
-      await refresh();
-    } catch (cause) { setError(cause instanceof Error && cause.message.includes("STALE")
+      if (!active()) return;
+      const refreshed = await refreshAfterConfirmedFolderWizardMutation(() => refresh(active));
+      if (active() && !refreshed) setError(tr("Rules were saved, but could not be refreshed. Cancel and reload before saving again.", "Las reglas se guardaron, pero no se pudieron actualizar. Cancele y recargue antes de guardar nuevamente."));
+    } catch (cause) { if (active()) setError(cause instanceof Error && cause.message.includes("STALE")
       ? tr("Rules changed elsewhere. Reload before saving.", "Las reglas cambiaron en otra sesión. Recargue antes de guardar.")
       : tr("Rules were not saved. Check every tag value and Wizard item.", "No se guardaron las reglas. Revise cada etiqueta y elemento del Wizard.")); }
-    finally { setBusy(false); }
+    finally { if (active()) { inFlight.current = false; setBusy(false); } }
   }
   async function calculate() {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    const active = lifetime.current.begin();
     setBusy(true); setError(""); setPreview("");
     try {
       const result = await request("/preview", { definition, tags, filename });
+      if (!active()) return;
       setPreview(String(result.relativeFilePath ?? ""));
-    } catch { setError(tr("No exact folder path matched these tags. Complete the mapping and try again.", "No existe una ruta exacta para estas etiquetas. Complete las correspondencias y reintente.")); }
-    finally { setBusy(false); }
+    } catch { if (active()) setError(tr("No exact folder path matched these tags. Complete the mapping and try again.", "No existe una ruta exacta para estas etiquetas. Complete las correspondencias y reintente.")); }
+    finally { if (active()) { inFlight.current = false; setBusy(false); } }
   }
 
   return <section aria-label={tr("Folder routing rules", "Reglas de rutas de carpetas")} style={{ borderTop: "1px solid hsl(var(--border))", marginTop: 16, paddingTop: 16, fontSize: 12 }}>
     <h3 style={{ fontSize: 15, margin: "0 0 7px" }}>{tr("Tag-to-folder rules", "Correspondencia entre etiquetas y carpetas")}</h3>
     <p>{tr("Map each confirmed intake tag to an exact Wizard item. Unmapped values stop routing; no folder is guessed.", "Asigne cada etiqueta confirmada a un elemento exacto del Wizard. Una etiqueta sin correspondencia detiene la ruta; no se adivina una carpeta.")}</p>
-    {!loaded ? <p role="status">{error || tr("Loading rules…", "Cargando reglas…")}</p> : <>
+    {!loaded ? <><p role={error ? "alert" : "status"}>{error || tr("Loading rules…", "Cargando reglas…")}</p>
+      {error && <button type="button" disabled={busy} onClick={() => void reload()}>{tr("Retry", "Reintentar")}</button>}</> : <fieldset disabled={busy} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       <label>{tr("Rule scope", "Alcance de las reglas")}
         <select value={scopeType} onChange={(event) => selectScope(event.target.value as "project" | "company")} style={{ display: "block", marginTop: 4 }}>
           <option value="project">{tr("This project", "Este proyecto")}</option><option value="company">{tr("Company default", "Valor predeterminado de la empresa")}</option>
@@ -111,7 +141,7 @@ export function FolderWizardRoutingPanel({ projectId, token, lang, blueprints }:
       </div>)}
       {!canEdit && <p>{tr("You can view these rules, but only a project administrator or company PMO can change the corresponding scope.", "Puede ver estas reglas, pero solo un administrador del proyecto o PMO de la empresa puede cambiar el alcance correspondiente.")}</p>}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}><button type="button" disabled={!canEdit || busy} onClick={() => void save()}>{tr("Save new rule version", "Guardar nueva versión de reglas")}</button>
-        <button type="button" disabled={busy} onClick={() => void refresh()}>{tr("Cancel and reload", "Cancelar y recargar")}</button></div>
+        <button type="button" disabled={busy} onClick={() => void reload()}>{tr("Cancel and reload", "Cancelar y recargar")}</button></div>
       <h4>{tr("Test an exact destination", "Probar un destino exacto")}</h4>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 8 }}>
         {keys.map((key) => <label key={key}>{key}<input value={tags[key] ?? ""} onChange={(event) => setTags((before) => ({ ...before, [key]: event.target.value }))} /></label>)}
@@ -120,6 +150,6 @@ export function FolderWizardRoutingPanel({ projectId, token, lang, blueprints }:
       <button type="button" disabled={busy} onClick={() => void calculate()} style={{ marginTop: 8 }}>{tr("Preview path", "Vista previa de ruta")}</button>
       {preview && <p role="status" style={{ overflowWrap: "anywhere" }}>{preview}</p>}
       {error && <p role="alert" style={{ color: "#991B1B" }}>{error}</p>}
-    </>}
+    </fieldset>}
   </section>;
 }

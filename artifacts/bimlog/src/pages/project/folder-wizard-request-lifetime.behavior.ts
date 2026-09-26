@@ -27,3 +27,8 @@ assert.match(importer, /const text = await file.text\(\);\s+if \(!active\(\)\) r
 assert.match(importer, /await refreshAfterConfirmedFolderWizardMutation\(\(\) => reload\(\)\);\s+if \(!active\(\)\) return/);
 assert.match(importer, /if \(saveInFlight.current \|\| !token \|\| !sourceText\) return/);
 console.log("Folder Wizard async request invalidation: PASS");
+const routing = readFileSync(new URL("./FolderWizardRoutingPanel.tsx", import.meta.url), "utf8");
+assert.match(routing, /if \(!active\(\)\) return;\s+setLoaded\(data\)/);
+assert.match(routing, /if \(!canEdit \|\| inFlight.current\) return/);
+assert.match(routing, /<fieldset disabled=\{busy\}/);
+assert.match(routing, /return \(\) => \{ lifetime.current.invalidate\(\); \}/);
