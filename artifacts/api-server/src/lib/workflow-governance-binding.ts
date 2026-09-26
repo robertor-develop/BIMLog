@@ -46,6 +46,32 @@ export function assertGovernanceChangeAllowed(policy: WorkflowGovernancePolicy, 
   if (!rule?.allowed) throw new FinancialControlError(409,"WORKFLOW_POLICY_CHANGE_FORBIDDEN",`The published Governance Policy forbids ${action}.`);
 }
 
+export function workflowDefinitionChanges(before: DeliveryWorkflowDefinition, after: DeliveryWorkflowDefinition) {
+  const changed = (left: unknown, right: unknown) => JSON.stringify(left) !== JSON.stringify(right);
+  const actions: Array<WorkflowGovernancePolicy["changeRules"][number]["action"]> = [];
+  const structure = (value: DeliveryWorkflowDefinition) => ({
+    deliverableTypes: value.deliverableTypes,
+    phases: value.phases.map(({ tasks: _tasks, ...phase }) => phase),
+    transitions: value.transitions, reopen: value.reopen,
+  });
+  const tasks = (value: DeliveryWorkflowDefinition) => ({ roles: value.roles,
+    phases: value.phases.map(phase => ({ id: phase.id, tasks: phase.tasks })) });
+  if (changed(structure(before), structure(after))) actions.push("edit_phases");
+  if (changed(tasks(before), tasks(after))) actions.push("edit_tasks_roles");
+  if (changed(before.economicAllocation?.sourceVersionId ?? null, after.economicAllocation?.sourceVersionId ?? null)) actions.push("change_apu");
+  if (changed(before.economicAllocation?.proposal ?? null, after.economicAllocation?.proposal ?? null)) actions.push("edit_allocation");
+  return actions;
+}
+
+export function assertWorkflowReplacementAllowed(policy: WorkflowGovernancePolicy,
+  before: DeliveryWorkflowDefinition, after: DeliveryWorkflowDefinition): void {
+  for (const action of workflowDefinitionChanges(before, after)) {
+    if (!policy.changeRules.find(rule => rule.action === action)?.allowed)
+      throw new FinancialControlError(409, `WORKFLOW_POLICY_${action.toUpperCase()}_FORBIDDEN`,
+        "The published Governance Policy forbids this workflow replacement change.");
+  }
+}
+
 export async function validatePublishedWorkflowsForPolicy(client: Queryable, companyId: number,
   policy: WorkflowGovernancePolicy): Promise<void> {
   const rows = (await client.query(`SELECT t.id "templateId",v.definition,v.fingerprint

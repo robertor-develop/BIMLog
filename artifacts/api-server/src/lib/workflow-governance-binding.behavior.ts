@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { FinancialControlError } from "./financial-control-contract";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
-import { assertGovernanceChangeAllowed, validatePublishedWorkflowsForPolicy } from "./workflow-governance-binding";
+import { assertGovernanceChangeAllowed, assertWorkflowReplacementAllowed, workflowDefinitionChanges, validatePublishedWorkflowsForPolicy } from "./workflow-governance-binding";
 import { validateWorkflowGovernancePolicy } from "./workflow-governance-policy-contract";
 
 const workflow = validateDeliveryWorkflowDefinition({
@@ -39,3 +39,20 @@ const noRetirement = validateWorkflowGovernancePolicy({ ...policy,
 assert.throws(() => assertGovernanceChangeAllowed(noRetirement,"retire_version"),
   (error: unknown) => error instanceof FinancialControlError && error.code === "WORKFLOW_POLICY_CHANGE_FORBIDDEN");
 console.log("Published workflow policy compatibility: scoped, incompatible and integrity denial PASS");
+
+assert.deepEqual(workflowDefinitionChanges(workflow, structuredClone(workflow)), []);
+for (const action of ["edit_phases", "edit_tasks_roles", "change_apu", "edit_allocation"] as const) {
+  const next = structuredClone(workflow);
+  if (action === "edit_phases") next.phases[0].name = "Changed phase";
+  if (action === "edit_tasks_roles") next.roles.execute = "BIM_MODELER";
+  if (action === "change_apu" || action === "edit_allocation")
+    next.economicAllocation = { sourceVersionId: "source", proposal: { method: "apu_default" } };
+  assert.ok(workflowDefinitionChanges(workflow, next).includes(action));
+  const forbidden = validateWorkflowGovernancePolicy({ ...policy,
+    changeRules: policy.changeRules.map(rule => ({ ...rule, allowed: rule.action !== action })) });
+  assert.throws(() => assertWorkflowReplacementAllowed(forbidden, workflow, next),
+    (error: unknown) => error instanceof FinancialControlError && error.code === `WORKFLOW_POLICY_${action.toUpperCase()}_FORBIDDEN`);
+  assertWorkflowReplacementAllowed(policy, workflow, next);
+  assertWorkflowReplacementAllowed(forbidden, workflow, workflow);
+}
+console.log("Workflow replacement change classification and forbidden/allowed/no-change behavior PASS");
