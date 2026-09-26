@@ -34,6 +34,10 @@ for (const malformed of [null, {}, { ...data, members: null }, { ...data, tasks:
 }
 
 const english = render();
+assert.match(source, /revision !== draftRevision.current/);
+for (const edit of ["onRows", "onStartDate", "onEndDate", "onProfileDrafts"])
+  assert.match(source, new RegExp(`${edit}=\\{value => \\{ invalidateEvaluation\\(\\)`));
+assert.match(render({evaluation:null}), /disabled=""[^>]*>.*Export CSV/s);
 assert.match(english, /Saved scenario review evidence/);
 assert.match(english, /Proposed member.*Alicia Rivera/);
 assert.match(english, /24 advisory hours/);
