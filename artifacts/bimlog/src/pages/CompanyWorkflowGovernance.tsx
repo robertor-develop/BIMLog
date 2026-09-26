@@ -59,6 +59,7 @@ export function CompanyWorkflowGovernance() {
   const [selectedId,setSelectedId] = useState("");
   const loadSequence = useRef(0);
   const [versions,setVersions] = useState<Version[]>([]);
+  const [inspectedVersionId,setInspectedVersionId] = useState("");
   const [history,setHistory] = useState<History[]>([]);
   const [draft,setDraft] = useState<Definition>(starter);
   const [identity,setIdentity] = useState({ code:"",name:"" });
@@ -71,7 +72,7 @@ export function CompanyWorkflowGovernance() {
   const [notice,setNotice] = useState("");
   const [confirm,setConfirm] = useState<"publish"|"retire"|null>(null);
   const [reason,setReason] = useState("");
-  const current = versions.find(version => version.state === "draft") ?? versions[0];
+  const current = versions.find(version => version.versionId === inspectedVersionId) ?? versions.find(version => version.state === "draft") ?? versions[0];
   const editable = canManage && (!selectedId || current?.state === "draft");
   const request = useCallback(async (path:string,method="GET",body?:object) => {
     const response = await fetch(`${base}/api/v1${path}`, { method,headers:{ Authorization:`Bearer ${token}`,"Content-Type":"application/json" },
@@ -95,7 +96,7 @@ export function CompanyWorkflowGovernance() {
     }
     if (sequence !== loadSequence.current) return;
     setLoadFailed(false); setList(listing.versions ?? []); setCanManage(listing.canManage === true);
-    setWorkflows(availableWorkflows);
+    setWorkflows(availableWorkflows); setInspectedVersionId("");
     if (detail) {
       setVersions(detail.versions ?? []); setHistory(detail.history ?? []);
       const shown = detail.versions.find((version:Version) => version.state === "draft") ?? detail.versions[0];
@@ -210,7 +211,11 @@ export function CompanyWorkflowGovernance() {
         <button type="button" onClick={() => { setConfirm(null);setReason(""); }}>{t("Cancel","Cancelar")}</button>
       </div>}
       {selectedId && <section className="wgp-card"><h3>{t("Version history","Historial de versiones")}</h3>
-        <ul>{versions.map(version => <li key={version.versionId}>v{version.version} · {version.state} · {version.fingerprint?.slice(0,16) ?? "draft"}
+        <p>{t("Inspect a saved version without changing its history. Save or discard your draft before switching.","Inspeccione una versión guardada sin cambiar su historial. Guarde o descarte el borrador antes de cambiar.")}</p>
+        <ul>{versions.map(version => <li key={version.versionId}><button type="button" disabled={dirty || busy || loading}
+          aria-pressed={current?.versionId === version.versionId}
+          onClick={() => { setInspectedVersionId(version.versionId); setDraft(structuredClone(version.definition)); setConfirm(null); setReason(""); setError(""); setNotice(""); }}>
+          {t("Inspect version","Inspeccionar versión")} {version.version}</button> · {version.state} · {version.fingerprint?.slice(0,16) ?? t("Draft","Borrador")}
           {version.approvedAt && <> · {t("approved","aprobada")} {new Date(version.approvedAt).toLocaleString()}</>}
           {version.publishedAt && <> · {t("published","publicada")} {new Date(version.publishedAt).toLocaleString()}</>}
           {version.retiredAt && <> · {t("retired","retirada")} {new Date(version.retiredAt).toLocaleString()}</>}

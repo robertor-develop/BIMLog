@@ -38,6 +38,8 @@ async function scenario(width,language,mode){
     version:1,revision:1,state:mode==="read-only"?"published":"draft",definition:definition(),fingerprint:null,
     reviewEligibility:{eligible:false,code:"WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED"}};
   let history=[];
+  const historical={...structuredClone(version),versionId:"policy-old",version:0,state:"superseded",fingerprint:"a".repeat(64)};
+  historical.definition.approvalRules[3].threshold.amountMinor=123400;
   let detailReads=0;
   await context.route("**/api/v1/**",async route=>{
     const request=route.request(),pathname=new URL(request.url()).pathname,method=request.method();
@@ -56,7 +58,7 @@ async function scenario(width,language,mode){
     }
     if(pathname==="/api/v1/company/workflow-governance-policies/policy-1" && method==="GET") {
       detailReads++;
-      return respond({versions:[version],history});
+      return respond({versions:mode==="read-only"?[version]:[version,historical],history});
     }
     if(pathname==="/api/v1/company/workflow-governance-policies/policy-1/versions/policy-v1" && method==="PATCH"){
       const body=request.postDataJSON(); if(body.expectedRevision!==version.revision) return respond({code:"WORKFLOW_POLICY_NOT_DRAFT_OR_STALE"},409);
@@ -98,8 +100,15 @@ async function scenario(width,language,mode){
       assert.equal(await threshold.inputValue(),"2500000");
       await threshold.fill("2800000");
       await page.locator(".wgp-dirty").waitFor();
+      assert.equal(await page.getByRole("button",{name:es?"Inspeccionar versión 0":"Inspect version 0",exact:true}).isDisabled(),true);
       assert.equal(detailReads,1,"selection must not trigger a second effect load that discards edits");
       await page.getByRole("button",{name:es?"Descartar cambios":"Discard changes"}).click();
+      assert.equal(await threshold.inputValue(),"2500000");
+      await page.getByRole("button",{name:es?"Inspeccionar versión 0":"Inspect version 0",exact:true}).click();
+      assert.equal(await threshold.inputValue(),"123400");
+      assert.equal(await threshold.isDisabled(),true);
+      assert.equal(await page.getByRole("button",{name:es?"Guardar borrador":"Save draft"}).count(),0);
+      await page.getByRole("button",{name:es?"Inspeccionar versión 1":"Inspect version 1",exact:true}).click();
       assert.equal(await threshold.inputValue(),"2500000");
       await threshold.fill("3000000");
       await page.getByRole("button",{name:es?"Guardar borrador":"Save draft"}).click();
