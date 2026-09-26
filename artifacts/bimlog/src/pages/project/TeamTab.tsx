@@ -8,6 +8,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
+import { distinctInvitationRoles } from "@/lib/invitation-ui";
 import { Button } from "@/components/ui/button";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
@@ -1147,17 +1148,17 @@ function AddMemberForm({
   const { getOptions } = useConfig();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const roleOptions = getOptions("member_role");
+  const roleOptions = distinctInvitationRoles(getOptions("member_role"));
   const [activeTab, setActiveTab] = useState<"existing" | "invite">("existing");
 
   // Existing user tab
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState(roleOptions[0]?.value ?? "");
+  const [role, setRole] = useState("");
 
   // Invite by email tab
   const [invEmail, setInvEmail] = useState("");
   const [invFullName, setInvFullName] = useState("");
-  const [invRole, setInvRole] = useState(roleOptions[0]?.value ?? "");
+  const [invRole, setInvRole] = useState("");
   const [invPending, setInvPending] = useState(false);
   const [invPurpose, setInvPurpose] = useState("project_collaboration");
 
@@ -1179,7 +1180,7 @@ function AddMemberForm({
   });
 
   const handleInvite = async () => {
-    if (!invEmail) return;
+    if (!invEmail || !roleOptions.some(option => option.value === invRole) || invPending) return;
     setInvPending(true);
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}")
@@ -1277,6 +1278,7 @@ function AddMemberForm({
         </div>
         <button
           onClick={onClose}
+          aria-label={lang === "es" ? "Cancelar agregar miembro" : "Cancel adding member"}
           style={{
             padding: 5,
             border: "none",
@@ -1342,10 +1344,12 @@ function AddMemberForm({
               autoFocus
             />
             <select
+              aria-label={lang === "es" ? "Rol del miembro" : "Member role"}
               value={role}
               onChange={(e) => setRole(e.target.value)}
               style={{ height: 36, minWidth: 140 }}
             >
+              <option value="" disabled>{lang === "es" ? "Seleccione un rol" : "Select a role"}</option>
               {roleOptions.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {lang === "es" ? opt.labelEs : opt.label}
@@ -1354,7 +1358,7 @@ function AddMemberForm({
             </select>
             <Button
               size="sm"
-              disabled={!email || isPending}
+              disabled={!email || !roleOptions.some(option => option.value === role) || isPending}
               onClick={() => mutate({ projectId, data: { email, role } })}
               style={{ minWidth: 70 }}
             >
@@ -1396,10 +1400,12 @@ function AddMemberForm({
                 autoFocus
               />
               <select
+                aria-label={lang === "es" ? "Rol de la invitación" : "Invitation role"}
                 value={invRole}
                 onChange={(e) => setInvRole(e.target.value)}
                 style={{ height: 36, minWidth: 140 }}
               >
+                <option value="" disabled>{lang === "es" ? "Seleccione un rol" : "Select a role"}</option>
                 {roleOptions.map((opt) => (
                   <option key={opt.value} value={opt.value}>
                     {lang === "es" ? opt.labelEs : opt.label}
@@ -1430,7 +1436,7 @@ function AddMemberForm({
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <Button
                 size="sm"
-                disabled={!invEmail || invPending}
+                disabled={!invEmail || !roleOptions.some(option => option.value === invRole) || invPending}
                 onClick={handleInvite}
                 style={{ gap: 6 }}
               >

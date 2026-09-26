@@ -1,6 +1,15 @@
 export function readInvitationToken() {
   return new URLSearchParams(window.location.hash.slice(1)).get("invite") ?? "";
 }
+/** Configuration may repeat a role; render each stable role identity once. */
+export function distinctInvitationRoles<T extends { value: string }>(options: T[]): T[] {
+  const seen = new Set<string>();
+  return options.filter(option => {
+    if (!option.value || seen.has(option.value)) return false;
+    seen.add(option.value);
+    return true;
+  });
+}
 export function invitationError(code: string, tt: (en:string,es:string)=>string) {
   if(code.includes("WRONG_ACCOUNT"))return tt("Sign in with the email that received this invitation.","Inicie sesión con el correo que recibió esta invitación.");
   if(code.includes("TRANSFER"))return tt("This account belongs to another company. Ask an administrator to review the transfer; do not create another account.","Esta cuenta pertenece a otra empresa. Solicite al administrador revisar el traslado; no cree otra cuenta.");

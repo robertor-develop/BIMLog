@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+I008-R1 release defect: authenticated Chrome on published03164942 shows each invitation role three times and defaults to project_admin. Display deduplication and explicit role selection are locally browser-tested, not yet redeployed. The actual configuration service returns repeated stable role values; no stored role, permission or production configuration was rewritten. Existing mixed-language role descriptions remain an observed usability limitation. Approved email sender configuration is still missing, so actual invitation receipt/acceptance and full role-based smoke are not PASS. I009/I010 and canonical company binding correction remain open.
+
 I008 local registration/acceptance tests pass, including concurrent replay and wrong-tenant refusal. Publish the exact tested I008 checkpoint before I009 because it reaches ten unpublished changes. Directory email failure reporting and cancellation revocation are corrected. Screenshot capture is tool-blocked; local UI evidence is interaction/DOM only. Explicit resend UI, production identity/binding correction, real email receipt and full authenticated live acceptance remain open; no production PASS is inferred.
 
 The I008 release suite caught an obsolete onboarding assertion requiring email-only joining text. Its corrected regression requires token preview, explicit company-join semantics, no duplicate creation and invitation-preserving login navigation. Repeat the full exact-head suite; do not waive the onboarding checks.
