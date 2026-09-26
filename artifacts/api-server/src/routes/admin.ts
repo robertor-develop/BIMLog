@@ -524,6 +524,8 @@ router.get("/admin/companies", async (req, res) => {
     } else {
       companies = await db.select().from(companiesTable).orderBy(desc(companiesTable.createdAt));
     }
+    // Operational lists omit aliases. Historical references remain in the database.
+    companies = companies.filter(company => company.retiredIntoCompanyId === null);
     const scopedUserIdSet = scopedUserIds ? new Set(scopedUserIds) : null;
     const result = await Promise.all(companies.map(async (c) => {
       let userCount: number;

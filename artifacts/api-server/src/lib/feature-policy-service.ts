@@ -192,7 +192,7 @@ export async function bindProjectCompany(input:BindProjectCompanyInput):Promise<
     if(!current||Number(current.company_id)!==actor.companyId||Boolean(current.is_super_admin)!==actor.isSuperAdmin)throw new FeaturePolicyError(403,"AUTHORITY_CHANGED","Current metadata authority changed.","La autoridad actual de metadatos cambió.");
     const project=await client.query(`SELECT id,created_by_id FROM projects WHERE id=$1 FOR SHARE`,[input.projectId]);
     if(!project.rows[0])throw new FeaturePolicyError(404,"PROJECT_NOT_FOUND","Project not found.","No se encontró el proyecto.");
-    const company=await client.query(`SELECT 1 FROM companies WHERE id=$1`,[input.companyId]);
+    const company=await client.query(`SELECT 1 FROM companies WHERE id=$1 AND retired_into_company_id IS NULL`,[input.companyId]);
     if(!company.rows[0])throw new FeaturePolicyError(404,"COMPANY_NOT_FOUND","Company not found.","No se encontró la empresa.");
     const initialAllowed=input.initialCreation===true&&Number(project.rows[0].created_by_id)===actor.userId&&actor.companyId===input.companyId;
     if(!actor.isSuperAdmin&&!initialAllowed)throw new FeaturePolicyError(403,"PROJECT_BINDING_METADATA_AUTHORITY_REQUIRED","Verified super-admin metadata authority is required to bind or rebind a project.","Se requiere autoridad verificada de metadatos de superadministrador para vincular o revincular un proyecto.");

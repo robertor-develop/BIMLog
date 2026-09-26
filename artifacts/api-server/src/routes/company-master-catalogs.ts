@@ -132,11 +132,11 @@ router.post("/company/master-catalogs/:kind", authMiddleware, async (req, res): 
     if (kind === "client") {
       await connection.query(`SELECT pg_advisory_xact_lock(hashtext(lower($1)))`, [name.trim()]);
       if (suppliedClientCompanyId !== null) {
-        const existing = await connection.query(`SELECT id,name FROM companies WHERE id=$1 LIMIT 1`, [suppliedClientCompanyId]);
+        const existing = await connection.query(`SELECT id,name FROM companies WHERE id=$1 AND retired_into_company_id IS NULL LIMIT 1`, [suppliedClientCompanyId]);
         if (!existing.rows[0] || existing.rows[0].name.trim().toLowerCase() !== name.trim().toLowerCase()) { await connection.query("ROLLBACK"); res.status(400).json({ code: "CLIENT_COMPANY_MISMATCH" }); return; }
         clientCompanyId = suppliedClientCompanyId;
       } else {
-        const existing = await connection.query(`SELECT id FROM companies WHERE lower(trim(name))=lower(trim($1)) ORDER BY id LIMIT 1`, [name.trim()]);
+        const existing = await connection.query(`SELECT id FROM companies WHERE retired_into_company_id IS NULL AND lower(trim(name))=lower(trim($1)) ORDER BY id LIMIT 1`, [name.trim()]);
         clientCompanyId = Number(existing.rows[0]?.id ?? (await connection.query(`INSERT INTO companies(name) VALUES($1) RETURNING id`, [name.trim()])).rows[0].id);
       }
     }

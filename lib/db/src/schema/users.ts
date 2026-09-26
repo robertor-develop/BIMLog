@@ -1,10 +1,13 @@
-import { pgTable, serial, text, timestamp, integer, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, integer, jsonb, boolean, foreignKey, check } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
 export const companiesTable = pgTable("companies", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  retiredIntoCompanyId: integer("retired_into_company_id"),
+  retiredAt: timestamp("retired_at", { withTimezone: true }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   website: text("website"),
   address: text("address"),
@@ -15,7 +18,10 @@ export const companiesTable = pgTable("companies", {
   isPublicProfile: boolean("is_public_profile").default(false).notNull(),
   profileDescription: text("profile_description"),
   verifiedProjectsCount: integer("verified_projects_count").default(0).notNull(),
-});
+}, (t) => [
+  foreignKey({ name: "companies_retired_into_fk", columns: [t.retiredIntoCompanyId], foreignColumns: [t.id] }),
+  check("companies_retirement_chk", sql`(${t.retiredIntoCompanyId} IS NULL AND ${t.retiredAt} IS NULL) OR (${t.retiredIntoCompanyId} IS NOT NULL AND ${t.retiredAt} IS NOT NULL AND ${t.retiredIntoCompanyId} <> ${t.id})`),
+]);
 
 export const usersTable = pgTable("users", {
   id: serial("id").primaryKey(),

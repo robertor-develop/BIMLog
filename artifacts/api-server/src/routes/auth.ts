@@ -12,7 +12,7 @@ import {
   submittalsTable,
 } from "@workspace/db/schema";
 import { sendEmail, makePasswordResetEmail } from "../lib/email";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, isNull } from "drizzle-orm";
 import { RegisterBody, LoginBody } from "@workspace/api-zod";
 import {
   signToken,
@@ -86,7 +86,7 @@ router.post("/auth/register", async (req, res) => {
         ? await tx
             .select()
             .from(companiesTable)
-            .where(eq(companiesTable.id, boundCompanyId))
+            .where(and(eq(companiesTable.id, boundCompanyId), isNull(companiesTable.retiredIntoCompanyId)))
             .limit(1)
         : await tx
             .select()

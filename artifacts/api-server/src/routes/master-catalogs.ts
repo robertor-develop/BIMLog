@@ -56,7 +56,7 @@ router.get("/master-catalogs/:catalog", authMiddleware, async (req, res): Promis
   if (catalogName === "clients") {
     const clients = (await pool.query(`SELECT e.id "catalogEntryId",e.code,c.name,c.id,e.aliases,e.state,e.version
       FROM company_master_catalog_entries e JOIN companies c ON c.id=e.canonical_company_id
-      WHERE e.company_id=$1 AND e.kind='client' AND e.state='active' ORDER BY c.name,c.id`, [companyId])).rows;
+      WHERE e.company_id=$1 AND e.kind='client' AND e.state='active' AND c.retired_into_company_id IS NULL ORDER BY c.name,c.id`, [companyId])).rows;
     res.json({ catalog: catalogName, governed, entries: clients.map(row => ({ ...row, source: "company" })) }); return;
   }
   if (catalogName === "disciplines") {

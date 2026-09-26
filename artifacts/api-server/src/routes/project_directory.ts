@@ -844,6 +844,7 @@ router.post(
             : eq(companiesTable.id, selectedCanonicalId))
           .orderBy(companiesTable.id).limit(1);
         let reused = true;
+        if (company?.retiredIntoCompanyId != null) throw new Error("selected_company_retired");
         if (!company) {
           if (selectedCanonicalId !== null) throw new Error("selected_client_missing");
           reused = false;
