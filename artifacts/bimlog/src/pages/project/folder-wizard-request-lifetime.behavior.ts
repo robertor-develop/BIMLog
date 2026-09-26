@@ -32,3 +32,6 @@ assert.match(routing, /if \(!active\(\)\) return;\s+setLoaded\(data\)/);
 assert.match(routing, /if \(!canEdit \|\| inFlight.current\) return/);
 assert.match(routing, /<fieldset disabled=\{busy\}/);
 assert.match(routing, /return \(\) => \{ lifetime.current.invalidate\(\); \}/);
+assert.match(routing, /await onChanged\(\);/);
+assert.match(importer, /setRoutingRevision\(\(value\) => value \+ 1\); setReadiness\(null\); await reload\(\);/);
+assert.match(importer, /FolderWizardPublishPanel key=\{`\$\{projectId\}:\$\{current.sha256\}:\$\{routingRevision\}`\}/);

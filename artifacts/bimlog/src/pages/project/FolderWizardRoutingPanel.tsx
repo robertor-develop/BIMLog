@@ -16,8 +16,8 @@ function blank(blueprints: Blueprint[]): Definition {
     }))) };
 }
 
-export function FolderWizardRoutingPanel({ projectId, token, lang, blueprints }: {
-  projectId: number; token: string | null; lang: string; blueprints: Blueprint[];
+export function FolderWizardRoutingPanel({ projectId, token, lang, blueprints, onChanged }: {
+  projectId: number; token: string | null; lang: string; blueprints: Blueprint[]; onChanged: () => Promise<void>;
 }) {
   const tr = (en: string, es: string) => lang === "es" ? es : en;
   const included = useMemo(() => blueprints.filter((bp) => bp.include), [blueprints]);
@@ -91,7 +91,10 @@ export function FolderWizardRoutingPanel({ projectId, token, lang, blueprints }:
     try {
       await request("", { scopeType, definition, expectedFingerprint: selected?.fingerprint ?? null });
       if (!active()) return;
-      const refreshed = await refreshAfterConfirmedFolderWizardMutation(() => refresh(active));
+      const refreshed = await refreshAfterConfirmedFolderWizardMutation(async () => {
+        await onChanged();
+        if (active()) await refresh(active);
+      });
       if (active() && !refreshed) setError(tr("Rules were saved, but could not be refreshed. Cancel and reload before saving again.", "Las reglas se guardaron, pero no se pudieron actualizar. Cancele y recargue antes de guardar nuevamente."));
     } catch (cause) { if (active()) setError(cause instanceof Error && cause.message.includes("STALE")
       ? tr("Rules changed elsewhere. Reload before saving.", "Las reglas cambiaron en otra sesión. Recargue antes de guardar.")

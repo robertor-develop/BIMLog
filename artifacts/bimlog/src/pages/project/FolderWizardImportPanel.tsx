@@ -43,6 +43,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
   const [readinessError, setReadinessError] = useState(false);
   const [jobs, setJobs] = useState<PublishJob[]>([]);
   const [jobsError, setJobsError] = useState(false);
+  const [routingRevision, setRoutingRevision] = useState(0);
   const scopeRevision = useRef(0);
   const reads = useRef(new FolderWizardRequestLifetime());
   const selections = useRef(new FolderWizardRequestLifetime());
@@ -175,8 +176,9 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
         <button type="button" disabled={saving} onClick={() => { selections.current.invalidate(); setDraft(null); setSourceText(""); setFileName(""); }} style={{ marginLeft: 8 }}>{tr("Cancel", "Cancelar")}</button>
       </div>}
       {error && <p role="alert" style={{ color: "#991B1B" }}>{error}</p>}
-      {current && <FolderWizardRoutingPanel projectId={projectId} token={token} lang={lang} blueprints={current.document.blueprints} />}
-      {current && readiness?.ready && <FolderWizardPublishPanel projectId={projectId} token={token} lang={lang} onChanged={() => reload()} />}
+      {current && <FolderWizardRoutingPanel key={`${projectId}:${current.sha256}`} projectId={projectId} token={token} lang={lang} blueprints={current.document.blueprints}
+        onChanged={async () => { setRoutingRevision((value) => value + 1); setReadiness(null); await reload(); }} />}
+      {current && readiness?.ready && <FolderWizardPublishPanel key={`${projectId}:${current.sha256}:${routingRevision}`} projectId={projectId} token={token} lang={lang} onChanged={() => reload()} />}
     </>}
   </section>;
 }
