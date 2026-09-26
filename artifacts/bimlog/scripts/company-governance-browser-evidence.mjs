@@ -25,8 +25,9 @@ const results=[];
 async function scenario(width,language,mode){
   const context=await browser.newContext({viewport:{width,height:900}});
   await context.addInitScript(({language})=>{
-    localStorage.setItem("bimlog-auth",JSON.stringify({state:{token:"governance-browser-fixture",
-      user:{id:7,firstName:"Test",lastName:"PMO",email:"fixture@example.invalid"}},version:0}));
+    const token=`fixture.${btoa(JSON.stringify({exp:Math.floor(Date.now()/1000)+3600,iat:Math.floor(Date.now()/1000)}))}.fixture`;
+    localStorage.setItem("bimlog-auth",JSON.stringify({state:{token,
+      user:{id:7,firstName:"Test",lastName:"PMO",email:"fixture@example.invalid"}},version:1}));
     localStorage.setItem("bimlog-lang",language);
   },{language});
   const page=await context.newPage();
@@ -36,9 +37,11 @@ async function scenario(width,language,mode){
   let version={policyId:"policy-1",code:"SHOP_GOV",name:"Shop Governance",versionId:"policy-v1",
     version:1,revision:1,state:mode==="read-only"?"published":"draft",definition:definition(),fingerprint:null};
   let history=[];
+  let detailReads=0;
   await context.route("**/api/v1/**",async route=>{
     const request=route.request(),pathname=new URL(request.url()).pathname,method=request.method();
     const respond=(body,status=200)=>route.fulfill({status,contentType:"application/json",body:JSON.stringify(body)});
+    if(pathname==="/api/v1/auth/access-profile") return respond({facts:{authenticated:true,isSuperAdmin:false,isCompanyPmo:mode!=="read-only",activeProjectRoles:[],activeProjects:[]},decisions:{company_workflows:{allow:true,code:"COMPANY_MEMBER"}}});
     if(pathname==="/api/v1/company/workflow-governance-policies" && method==="GET"){
       if(mode==="loading") return new Promise(()=>undefined);
       if(mode==="denied") return respond({code:"WORKFLOW_POLICY_PMO_REQUIRED"},403);
@@ -50,8 +53,10 @@ async function scenario(width,language,mode){
       if(mode==="error") return respond({code:"WORKFLOW_LIST_FAILED"},500);
       return respond({versions:[{id:"workflow-1",code:"SLEEVE",name:"Sleeve",state:"published"}]});
     }
-    if(pathname==="/api/v1/company/workflow-governance-policies/policy-1" && method==="GET")
+    if(pathname==="/api/v1/company/workflow-governance-policies/policy-1" && method==="GET") {
+      detailReads++;
       return respond({versions:[version],history});
+    }
     if(pathname==="/api/v1/company/workflow-governance-policies/policy-1/versions/policy-v1" && method==="PATCH"){
       const body=request.postDataJSON(); if(body.expectedRevision!==version.revision) return respond({code:"WORKFLOW_POLICY_NOT_DRAFT_OR_STALE"},409);
       version={...version,revision:version.revision+1,definition:body.definition};
@@ -90,6 +95,7 @@ async function scenario(width,language,mode){
       assert.equal(await threshold.inputValue(),"2500000");
       await threshold.fill("2800000");
       await page.locator(".wgp-dirty").waitFor();
+      assert.equal(detailReads,1,"selection must not trigger a second effect load that discards edits");
       await page.getByRole("button",{name:es?"Descartar cambios":"Discard changes"}).click();
       assert.equal(await threshold.inputValue(),"2500000");
       await threshold.fill("3000000");

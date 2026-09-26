@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
@@ -56,6 +56,7 @@ export function CompanyWorkflowGovernance() {
   const [workflows,setWorkflows] = useState<Array<{ id:string;code:string;name:string }>>([]);
   const [canManage,setCanManage] = useState(false);
   const [selectedId,setSelectedId] = useState("");
+  const loadSequence = useRef(0);
   const [versions,setVersions] = useState<Version[]>([]);
   const [history,setHistory] = useState<History[]>([]);
   const [draft,setDraft] = useState<Definition>(starter);
@@ -79,31 +80,38 @@ export function CompanyWorkflowGovernance() {
     return value;
   },[token,spanish]);
   const load = useCallback(async (id?:string) => {
+    const sequence = ++loadSequence.current;
     const listing = await request("/company/workflow-governance-policies");
-    setLoadFailed(false);
-    setList(listing.versions ?? []); setCanManage(listing.canManage === true);
+    let availableWorkflows = [];
     if (listing.canManage) {
       const workflowsResult = await request("/company/delivery-workflows");
-      setWorkflows((workflowsResult.versions ?? []).filter((item:{state:string}) => item.state === "published"));
-    } else setWorkflows([]);
-    const target = id ?? selectedId;
+      availableWorkflows = (workflowsResult.versions ?? []).filter((item:{state:string}) => item.state === "published");
+    }
+    const target = id ?? "";
+    let detail;
     if (target && (listing.versions ?? []).some((row:Summary) => row.id === target)) {
-      const detail = await request(`/company/workflow-governance-policies/${target}`);
+      detail = await request(`/company/workflow-governance-policies/${target}`);
+    }
+    if (sequence !== loadSequence.current) return;
+    setLoadFailed(false); setList(listing.versions ?? []); setCanManage(listing.canManage === true);
+    setWorkflows(availableWorkflows);
+    if (detail) {
       setVersions(detail.versions ?? []); setHistory(detail.history ?? []);
       const shown = detail.versions.find((version:Version) => version.state === "draft") ?? detail.versions[0];
       setDraft(structuredClone(shown.definition)); setIdentity({ code:shown.code,name:shown.name }); setSelectedId(target);
       setCreating(false);
-    } else if (target) { setSelectedId(""); setVersions([]); setHistory([]); setDraft(starter()); }
+    } else { setSelectedId(""); setVersions([]); setHistory([]); setDraft(starter()); }
     setDirty(false);
-  },[request,selectedId]);
-  useEffect(() => { setLoading(true); void load().catch(cause => {
+  },[request]);
+  useEffect(() => { let active = true; setLoading(true); void load().catch(cause => {
+    if (!active) return;
     setList([]);setVersions([]);setHistory([]);setSelectedId("");setCanManage(false);setLoadFailed(true);setError(String(cause));
-  }).finally(() => setLoading(false)); },[load]);
+  }).finally(() => { if (active) setLoading(false); }); return () => { active = false; ++loadSequence.current; }; },[load]);
   useEffect(() => { if (!dirty) return; const guard = (event:BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     window.addEventListener("beforeunload",guard); return () => window.removeEventListener("beforeunload",guard); },[dirty]);
   const edit = (mutate:(value:Definition)=>void) => { setDraft(previous => { const next = structuredClone(previous); mutate(next); return next; }); setDirty(true); setNotice(""); };
   const act = async (callback:()=>Promise<unknown>,message:string) => { setBusy(true); setError(""); setNotice("");
-    try { await callback(); await load(selectedId || undefined); setNotice(message); setConfirm(null); setReason(""); }
+    try { const target = await callback(); await load(typeof target === "string" ? target : selectedId || undefined); setNotice(message); setConfirm(null); setReason(""); }
     catch (cause) { setError(String(cause)); }
     finally { setBusy(false); } };
   const select = async (id:string) => { if (dirty) { setError(t("Save or discard changes before switching.","Guarde o descarte los cambios antes de cambiar.")); return; }
@@ -114,7 +122,7 @@ export function CompanyWorkflowGovernance() {
     <button type="button" disabled={dirty} onClick={() => navigate("/dashboard")}>{t("Back to Headquarters","Volver a la Sede")}</button>
     <header className="wgp-header"><div><p>{t("Company configuration","Configuración de empresa")}</p><h1>{t("Governance Policies","Políticas de gobernanza")}</h1>
       <span>{t("Reusable Delivery Workflow controls. Project budget governance remains in Intake and Operations.","Controles reutilizables de flujos de entrega. La gobernanza presupuestaria del proyecto permanece en Ingreso y Operaciones.")}</span></div>
-      {canManage && <button type="button" disabled={dirty || busy} onClick={() => { setSelectedId("");setCreating(true);setVersions([]);setHistory([]);setDraft(starter());setIdentity({code:"",name:""});setError("");setNotice(""); }}>{t("New policy","Nueva política")}</button>}</header>
+      {canManage && <button type="button" disabled={dirty || busy || loading} onClick={() => { setSelectedId("");setCreating(true);setVersions([]);setHistory([]);setDraft(starter());setIdentity({code:"",name:""});setError("");setNotice(""); }}>{t("New policy","Nueva política")}</button>}</header>
     {loading && <p role="status">{t("Loading policies...","Cargando políticas...")}</p>}
     {error && <p role="alert" className="wgp-error">{error}</p>}
     {notice && <p role="status" className="wgp-notice">{notice}</p>}
@@ -178,7 +186,7 @@ export function CompanyWorkflowGovernance() {
       {canManage && <div className="wgp-actions">
         {editable && <button type="button" disabled={busy || !dirty || (!selectedId && (!identity.code || !identity.name))} onClick={() => void act(async () => {
           if (!selectedId) { const created=await request("/company/workflow-governance-policies","POST",{code:identity.code,name:identity.name,definition:draft});
-            setSelectedId(created.policyId); await load(created.policyId); }
+            return created.policyId; }
           else if (current) await request(`/company/workflow-governance-policies/${selectedId}/versions/${current.versionId}`,"PATCH",{expectedRevision:current.revision,definition:draft});
         },t("Draft saved.","Borrador guardado."))}>{t("Save draft","Guardar borrador")}</button>}
         {current?.state==="draft" && <button type="button" disabled={busy || dirty} onClick={() => void act(() => request(`/company/workflow-governance-policies/${selectedId}/versions/${current.versionId}/approve`,"POST",{expectedRevision:current.revision}),t("Policy approved.","Política aprobada."))}>{t("Approve with Finance checker","Aprobar con verificador financiero")}</button>}
