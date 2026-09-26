@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { workflowApprovalError } from "@/lib/workflow-approval-error";
+import { AlertDialog, AlertDialogContent, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Task = {
@@ -161,6 +162,16 @@ export function CompanyDeliveryWorkflowsTab({
   const [notice, setNotice] = useState("");
   const [retireTarget, setRetireTarget] = useState<{ templateId: string; versionId: string; revision: number } | null>(null);
   const [retireReason, setRetireReason] = useState("");
+  const [pendingTemplate, setPendingTemplate] = useState<string | null>(null);
+  const templateSelect = useRef<HTMLSelectElement>(null);
+  const selectTemplate = (id: string) => {
+    setSelectedId(id);
+    setPreview(null);
+    setRetireTarget(null);
+    setRetireReason("");
+    setPendingTemplate(null);
+  };
+  useEffect(() => { setPendingTemplate(null); }, [token, spanish]);
   const request = useCallback(
     async (path: string, init?: RequestInit) => {
       const response = await fetch(`${base}/api/v1${path}`, {
@@ -538,13 +549,12 @@ export function CompanyDeliveryWorkflowsTab({
       <label>
         {t("Company template", "Plantilla de empresa")}
         <select
+          ref={templateSelect}
+          disabled={busy || loading}
           value={selectedId}
           onChange={(event) => {
-            if (draftDirty && !window.confirm(t("Discard unsaved workflow changes?", "¿Descartar los cambios del flujo sin guardar?"))) return;
-            setSelectedId(event.target.value);
-            setPreview(null);
-            setRetireTarget(null);
-            setRetireReason("");
+            if (draftDirty) setPendingTemplate(event.target.value);
+            else selectTemplate(event.target.value);
           }}
         >
           <option value="">
@@ -559,6 +569,16 @@ export function CompanyDeliveryWorkflowsTab({
           )}
         </select>
       </label>
+      <AlertDialog open={pendingTemplate !== null} onOpenChange={(open) => { if (!open) setPendingTemplate(null); }}>
+        <AlertDialogContent onCloseAutoFocus={(event) => { event.preventDefault(); templateSelect.current?.focus(); }}>
+          <AlertDialogTitle>{t("Discard unsaved workflow changes?", "¿Descartar los cambios del flujo sin guardar?")}</AlertDialogTitle>
+          <AlertDialogDescription>{t("Your saved version will not change. Stay here to keep editing, or discard only the unsaved changes and switch templates.", "La versión guardada no cambiará. Permanezca aquí para seguir editando o descarte solo los cambios sin guardar y cambie de plantilla.")}</AlertDialogDescription>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("Keep editing", "Seguir editando")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { if (pendingTemplate !== null) selectTemplate(pendingTemplate); }}>{t("Discard and switch", "Descartar y cambiar")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {selected && (
         <section
           style={{
