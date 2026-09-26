@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FolderWizardRequestLifetime } from "./folder-wizard-request-lifetime";
+import { refreshAfterConfirmedFolderWizardMutation } from "./folder-wizard-confirmed-refresh";
 import { folderWizardPublishOptions, pruneFolderWizardTags, type PublishRoutingDefinition } from "./folder-wizard-publish-options";
 
 type SourceFile = { id: number; fileName: string; fileSize: number; status: string };
@@ -81,7 +82,9 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
         : data.execution === "retry" ? tr("Retry is available after the delay. Preview and confirm again later.", "El reintento estará disponible tras la espera. Actualice la vista previa y confirme de nuevo más tarde.")
         : tr("Review the publication status below before trying again.", "Revise el estado de publicación antes de volver a intentar."));
       setConfirming(false); setCandidate(null);
-      await onChanged();
+      const refreshed = await refreshAfterConfirmedFolderWizardMutation(onChanged);
+      if (current() && !refreshed) setError(tr("The publication response was received, but the status could not be refreshed. Reload to check its current state; do not submit again solely because of this refresh error.",
+        "Se recibió la respuesta de publicación, pero no se pudo actualizar el estado. Recargue para consultarlo; no vuelva a enviar solo por este error de actualización."));
     } catch { if (current()) setError(tr("Publication was not confirmed. Refresh the preview and try again; no overwrite is attempted.",
       "No se confirmó la publicación. Actualice la vista previa y reintente; no se sobrescribe ningún archivo.")); }
     finally { if (current()) { inFlight.current = false; setBusy(false); } }

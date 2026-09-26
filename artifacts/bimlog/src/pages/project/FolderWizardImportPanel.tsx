@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FolderWizardRequestLifetime } from "./folder-wizard-request-lifetime";
+import { refreshAfterConfirmedFolderWizardMutation } from "./folder-wizard-confirmed-refresh";
 import { parseFolderWizardDraft, type FolderWizardDraft } from "./folder-wizard-draft";
 import { FolderWizardRoutingPanel } from "./FolderWizardRoutingPanel";
 import { FolderWizardPublishPanel } from "./FolderWizardPublishPanel";
@@ -118,9 +119,11 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
         if (response.status === 403) throw new Error("forbidden");
         throw new Error(payload.error ?? "invalid");
       }
-      await reload();
-      if (!active()) return;
       setDraft(null); setSourceText(""); setFileName("");
+      const refreshed = await refreshAfterConfirmedFolderWizardMutation(() => reload());
+      if (!active()) return;
+      if (!refreshed) setError(tr("The import was saved, but the current version could not be refreshed. Reload before importing again.",
+        "Se guardó la importación, pero no se pudo actualizar la versión actual. Recargue antes de importar nuevamente."));
     } catch (cause) {
       if (!active()) return;
       const reason = cause instanceof Error ? cause.message : "invalid";

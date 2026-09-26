@@ -24,6 +24,6 @@ assert.equal(updates, 0);
 const importer = readFileSync(new URL("./FolderWizardImportPanel.tsx", import.meta.url), "utf8");
 assert.match(importer, /revision === scopeRevision.current/);
 assert.match(importer, /const text = await file.text\(\);\s+if \(!active\(\)\) return/);
-assert.match(importer, /await reload\(\);\s+if \(!active\(\)\) return/);
+assert.match(importer, /await refreshAfterConfirmedFolderWizardMutation\(\(\) => reload\(\)\);\s+if \(!active\(\)\) return/);
 assert.match(importer, /if \(saveInFlight.current \|\| !token \|\| !sourceText\) return/);
 console.log("Folder Wizard async request invalidation: PASS");
