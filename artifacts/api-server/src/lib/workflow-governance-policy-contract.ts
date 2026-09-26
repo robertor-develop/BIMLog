@@ -115,3 +115,15 @@ export function workflowPolicyIndependentCheckerAllowed(input: {
   return Number.isSafeInteger(input.actorUserId) && input.actorUserId > 0 &&
     input.actorUserId !== input.createdById && input.actorUserId !== input.updatedById;
 }
+
+/** Advisory only: the locked approval command rechecks current grants and revision. */
+export function workflowPolicyReviewEligibility(input: {
+  canManage: boolean; state: string; actorUserId: number;
+  createdById: number; updatedById: number; hasFinanceGrant: boolean;
+}): { eligible: boolean; code: string | null } {
+  const code = !input.canManage ? "WORKFLOW_POLICY_PMO_REQUIRED"
+    : input.state !== "draft" ? "WORKFLOW_POLICY_NOT_DRAFT_OR_STALE"
+    : !workflowPolicyIndependentCheckerAllowed(input) ? "WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED"
+    : !input.hasFinanceGrant ? "WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED" : null;
+  return { eligible: code === null, code };
+}

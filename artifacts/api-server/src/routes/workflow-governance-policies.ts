@@ -3,7 +3,7 @@ import { Router, type Request, type Response } from "express";
 import { pool } from "@workspace/db";
 import { authMiddleware } from "../middlewares/auth";
 import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
-import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, workflowPolicyIndependentCheckerAllowed, WorkflowGovernancePolicyError, type WorkflowGovernancePolicy } from "../lib/workflow-governance-policy-contract";
+import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, workflowPolicyIndependentCheckerAllowed, workflowPolicyReviewEligibility, WorkflowGovernancePolicyError, type WorkflowGovernancePolicy } from "../lib/workflow-governance-policy-contract";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
 import { ensureDeliveryWorkflowTemplateSchema } from "../lib/delivery-workflow-template-migration";
 import { policiesOverlap, validatePublishedWorkflowsForPolicy } from "../lib/workflow-governance-binding";
@@ -92,7 +92,12 @@ router.get("/company/workflow-governance-policies/:id", authMiddleware, async (r
     u.full_name "actorName",e.details,e.created_at "createdAt"
     FROM company_workflow_governance_events e LEFT JOIN users u ON u.id=e.actor_id AND u.company_id=e.company_id
     WHERE e.policy_id=$1 AND e.company_id=$2 ORDER BY e.created_at,e.id`, [id, actor.companyId])).rows : [];
-  res.json({ versions, history });
+  const hasFinanceGrant = actor.canManage && versions.some(row => row.state === "draft")
+    ? await financeChecker(pool, actor) : false;
+  res.json({ versions: versions.map(({ createdById, updatedById, ...row }) => ({ ...row,
+    reviewEligibility: workflowPolicyReviewEligibility({ canManage: actor.canManage, state: row.state,
+      actorUserId: actor.userId, createdById: Number(createdById), updatedById: Number(updatedById), hasFinanceGrant }),
+  })), history });
 });
 
 router.post("/company/workflow-governance-policies", authMiddleware, async (req, res): Promise<void> => {

@@ -10,6 +10,8 @@ const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/inva
 if (target.hostname !== "127.0.0.1" || target.port !== "55449" || target.pathname !== "/delivery_template_test")
   throw new Error("Workflow Governance Policy HTTP proof requires the existing disposable localhost test database.");
 await pool.query(`CREATE TABLE IF NOT EXISTS projects(id serial PRIMARY KEY,name text NOT NULL)`);
+await pool.query(`CREATE TABLE IF NOT EXISTS companies(id serial PRIMARY KEY,name text NOT NULL)`);
+await pool.query(`CREATE TABLE IF NOT EXISTS users(id serial PRIMARY KEY,email text NOT NULL,full_name text NOT NULL,company_id integer NOT NULL REFERENCES companies(id),is_super_admin boolean NOT NULL DEFAULT false)`);
 const suffix = randomUUID().slice(0, 8);
 const company = (await pool.query(`INSERT INTO companies(name) VALUES($1) RETURNING id`, [`Governance ${suffix}`])).rows[0];
 const otherCompany = (await pool.query(`INSERT INTO companies(name) VALUES($1) RETURNING id`, [`Other ${suffix}`])).rows[0];
@@ -55,6 +57,12 @@ try {
   const id = created.body.policyId; const v1 = created.body.versionId;
   assert.equal((await call(member,`/company/workflow-governance-policies/${id}`)).status,404);
   assert.equal((await call(outsider,`/company/workflow-governance-policies/${id}`)).status,404);
+  const authorDetail = (await call(maker,`/company/workflow-governance-policies/${id}`)).body.versions[0];
+  assert.deepEqual(authorDetail.reviewEligibility,{eligible:false,code:"WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED"});
+  assert.equal("createdById" in authorDetail,false);
+  assert.equal("updatedById" in authorDetail,false);
+  assert.deepEqual((await call(checker,`/company/workflow-governance-policies/${id}`)).body.versions[0].reviewEligibility,
+    {eligible:false,code:"WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED"});
   const selfApproval = await call(maker,`/company/workflow-governance-policies/${id}/versions/${v1}/approve`,{ expectedRevision:1 });
   assert.equal(selfApproval.status,403);
   assert.equal(selfApproval.body.code,"WORKFLOW_POLICY_INDEPENDENT_CHECKER_REQUIRED");
@@ -65,6 +73,8 @@ try {
     (id,user_id,company_id,project_id,scope_type,authority,version,effective_from,reason,granted_by_id)
     VALUES($1,$2,$3,NULL,'company','cost_approver',1,now()-interval '1 day','Governance QA',$4)`,
     [randomUUID(),checker.id,company.id,owner.id]);
+  assert.deepEqual((await call(checker,`/company/workflow-governance-policies/${id}`)).body.versions[0].reviewEligibility,
+    {eligible:true,code:null});
   const approved = await call(checker,`/company/workflow-governance-policies/${id}/versions/${v1}/approve`,{ expectedRevision:1 });
   assert.equal(approved.status,200,JSON.stringify(approved.body));
   assert.equal((await call(maker,`/company/workflow-governance-policies/${id}/versions/${v1}`,{ expectedRevision:2,definition },"PATCH")).status,409);
