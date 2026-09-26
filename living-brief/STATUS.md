@@ -1,5 +1,15 @@
 # STATUS.md - Current Accepted Platform State
 
+## C013 activation regression repair candidate — 2026-09-26
+
+Connected UI verification now counts reused package/scope tasks once; pure regressions cover empty/multiple/explicit task cases. A52a2459e suite finished successfully while this source correction was underway, so that receipt is explicitly superseded and not acceptance evidence. Release gate now also rejects any dirty or changed candidate at completion. Final clean source must rerun the full gate.
+
+Final callback annotation corrected after the full suite found TS7006; direct API typecheck now passes. The full exact-head gate must rerun; neither failed gate is represented as accepted.
+
+Final C013 correction supersedes the constraint proposal below: the full safety gate rejected DROP CONSTRAINT, so the database constraint is unchanged. Empty packages reuse the existing scope task and its budget hours; a sole package with no scope task uses the Work Item's planned hours. Unallocated explicit tasks reject409 with a useful explanation. Real PostgreSQL activation/replay/negative-hour checks and database safety now pass. Live project58 reproduces the pre-repair "Job Intake is temporarily unavailable" failure; exact deployed retest remains required. The first full gate failed and is not acceptance evidence.
+
+C012 committed a09970fe. The previously ungated multi-contract HTTP fixture was stale: updated to the current required floor/discipline/deliverable structure. Its real PostgreSQL run then reproduced an activation500: generated unallocated package tasks had zero hours while the task constraint required positive hours. The transactional migration now permits zero only for package tasks, retaining negative-hour denial and positive Work Item/resource/scope-task requirements. No invented budget allocation. Activation/retirement rollback and concurrent retry evidence is being added to the exact-head gate. Local fixture passes before final negative-constraint assertions; full release and live verification remain pending. C014-C015 not started. Production remains7a3d82ee; no Lens or customer-data mutation.
+
 ## Consolidation C012 selection candidate — 2026-09-26
 
 C011 committed47583794 after frontend typecheck, focused regression and actual-component English/Spanish/narrow/error/recovery checks. C012 repairs an explicit unavailable workflow selection displaying an automatic replacement preview: preserve the saved ID, expose an unavailable option and require explicit replacement. Display resolver mirrors the existing server's one-company/one-default/ambiguous selection rules without changing server authority. Existing Quick/Advanced and saved APU/budget binding regressions pass and are included in the gate. Actual editor fixture shows unavailable warning and explicit current-version replacement; production CSS is reused for390px inspection. No production acceptance inferred; C013-C015 remain pending, C011-C012 not pushed yet.

@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { expectedIntakeTaskCount as count } from "./intake-activation-task-count";
+const assignment = [{scopeItemId:"A"}];
+assert.equal(count([{id:"A"}],[]),1);
+assert.equal(count([{id:"A",workPackages:[{}]}],assignment),1,"Empty package reuses scope task");
+assert.equal(count([{id:"A",workPackages:[{},{}]}],assignment),1,"Shared links do not duplicate tasks");
+assert.equal(count([{id:"A",workPackages:[{}]}],[{scopeItemId:"A",workPackageId:"P"}]),1);
+assert.equal(count([{id:"A",workPackages:[{tasks:[{},{}]},{}]}],assignment),3);
+assert.equal(count([],[]),0);
+console.log("C013 activation task-count parity PASS");

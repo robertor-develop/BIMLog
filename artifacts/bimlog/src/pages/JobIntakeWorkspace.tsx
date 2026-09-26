@@ -22,6 +22,7 @@ import { ProjectCompanyCreator, type CreatedProjectCompany } from "@/components/
 import { ProjectContactCreator, type CreatedProjectContact } from "@/components/job-intake/ProjectContactCreator";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import { expectedIntakeTaskCount } from "@/lib/intake-activation-task-count";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
   authoritativeCompanyOptions,
@@ -856,19 +857,7 @@ export function JobIntakeWorkspace() {
       );
       const activated = await load();
       const expectedWorkItems = dataRef.current.scopeItems.length;
-      const expectedTasks = dataRef.current.scopeItems.reduce((total: number, item: any) => {
-        const workPackages = item.workPackages || [];
-        const hasScopeAssignment = dataRef.current.team.assignments.some(
-          (assignment: any) => assignment.scopeItemId === item.id && !assignment.workPackageId,
-        );
-        const scopeDeliveryTaskCount = workPackages.length === 0 || hasScopeAssignment ? 1 : 0;
-        const packageTaskCount = workPackages.reduce(
-          (packageTotal: number, workPackage: any) =>
-            packageTotal + Math.max(1, workPackage.tasks?.length || 0),
-          0,
-        );
-        return total + scopeDeliveryTaskCount + packageTaskCount;
-      }, 0);
+      const expectedTasks = expectedIntakeTaskCount(dataRef.current.scopeItems, dataRef.current.team.assignments);
       const expectedAssignments = dataRef.current.team.assignments.length;
       const actualWorkItems = activated?.activation?.workItems?.length ?? 0;
       const actualTasks = activated?.activation?.tasks?.length ?? 0;

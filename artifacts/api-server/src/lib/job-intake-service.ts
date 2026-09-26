@@ -1139,7 +1139,18 @@ async function createCoreActivationWithClient(
     for (const workPackage of item.workPackages) {
       const packageClass = workPackage.classification;
       await client.query(`INSERT INTO job_activation_work_packages(id,intake_id,project_id,work_item_id,package_code,title,description,package_type,status,created_by_id,discipline_id,discipline_code,discipline_name,service_id,service_code,service_name,phase_id,phase_code,phase_name) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) ON CONFLICT(project_id,package_code) DO NOTHING`, [workPackage.id,input.intakeId,input.projectId,actualWorkItemId,workPackage.packageCode,workPackage.title || workPackage.dimensionValue,`${workPackage.dimensionType}: ${workPackage.dimensionValue}`,workPackage.packageType,input.actorUserId,packageClass.disciplineId||null,packageClass.disciplineCode||null,packageClass.disciplineName||null,packageClass.serviceId||null,packageClass.serviceCode||null,packageClass.serviceName||null,packageClass.phaseId||null,packageClass.phaseCode||null,packageClass.phaseName||null]);
-      const taskDefinitions = workPackage.tasks.length ? workPackage.tasks : [{ id: "", taskCode: "", name: workPackage.title || workPackage.dimensionValue, plannedHours: "0", classification: packageClass }];
+      // An empty package groups existing work; it must not create a second,
+      // unbudgeted task. Reuse the scope task when one already owns the hours.
+      if (!workPackage.tasks.length && actualTaskId) {
+        packageTaskById.set(workPackage.id, actualTaskId);
+        packageTaskById.set(`${workPackage.id}:`, actualTaskId);
+        await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id)
+          VALUES($1,$2,$3) ON CONFLICT(package_id,task_id) DO NOTHING`,[workPackage.id,actualTaskId,input.actorUserId]);
+        continue;
+      }
+      const taskDefinitions = workPackage.tasks.length ? workPackage.tasks : [{ id: "", taskCode: "", name: workPackage.title || workPackage.dimensionValue, plannedHours: item.workPackages.length === 1 ? item.plannedHours : "0", classification: packageClass }];
+      if (taskDefinitions.some((task: { plannedHours: string }) => Number(task.plannedHours) <= 0))
+        throw new FinancialControlError(409,"JOB_INTAKE_TASK_HOURS_REQUIRED","Allocate positive planned hours to each operational task before activation.");
       for (const [taskIndex, taskDefinition] of taskDefinitions.entries()) {
         const packageTaskId = uuid();
         const taskKey = taskDefinition.id ? `package:${workPackage.id}:task:${taskDefinition.id}` : `package:${workPackage.id}`;

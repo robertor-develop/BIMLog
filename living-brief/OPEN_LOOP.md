@@ -2,6 +2,14 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C013 UI count verification must match scope-task reuse. The52a2459e receipt is superseded by this connected fix; end-of-gate candidate immutability is now enforced. No publication or acceptance claim until final clean gate and live retest.
+
+C013 direct API typecheck passes after correcting TS7006 from the full gate. Repeat the exact-head suite; push/publication/live activation still pending.
+
+C013 correction: preserve the task constraint and reuse budgeted scope tasks for empty packages. The proposed constraint relaxation was rejected by database safety and removed. Exact failure reproduced live on synthetic project58; local corrected HTTP and database-safety regressions pass. Rerun full clean release and publish/retest this defect before continuing C014. No complete-block claim.
+
+C013 actual HTTP/PostgreSQL regression exposed package-task zero-hour activation500. Repair the exact mismatch without manufacturing hours, rerun negative constraints/rollback/concurrent replay and full gate, then publish and verify affected live activation before calling this defect closed. C011/C012 are local commits; C013 is uncommitted; C014/C015 remain pending. Do not infer live acceptance from the isolated database proof.
+
 C012 closes misleading stale workflow preview while preserving saved selection identity and requiring an explicit replacement; no silent migration to another template. Finish exact C012 checks/commit, then C013-C015 and block push. Cross-path source regressions are not fresh-user live acceptance; full template/APU/budget cycle remains required. Current live7a3d82ee; C011 is local47583794.
 
 C011 readiness candidate follows exact deployed repair7a3d82ee. Finish failed-load/recovery and actual-component checks, commit C011 then implement C012-C015 sequentially. Counts are discovery guidance, not Job activation approval; no draft or blocked published option can be advertised as ready. C010 focused deployed repair checks passed; full configured-policy/multi-role platform acceptance remains open. Preserve real company drafts and Lens Native.

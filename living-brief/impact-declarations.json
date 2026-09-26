@@ -44959,6 +44959,110 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "66c547c1f8c5efc25e11b2b1f3827bc7f1655455398b0fab3433665c2a7110be"
+    },
+    {
+      "taskId": "consolidation-c013-activation-package-hours",
+      "reviewedThroughCommit": "a09970feb06ae239e809d0d40bf55a4b841ca05e",
+      "reviewedAt": "2026-09-26T23:45:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Real HTTP and live activation fail on empty package tasks. Preserve the existing positive-hour constraint, reuse scope tasks without duplicating planned hours, and permanently gate rollback/retry evidence. The rejected constraint proposal is removed."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authoritative budget retained."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Repair before further builds; deployment remains separate."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Real PostgreSQL HTTP regression added to release gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing intake activation only."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing task constraint preserved; package generation reuses budgeted tasks. No new entity, schema or route."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Native untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report formatting change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records real failure, repair and unverified deployment."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Live defect closure remains required."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production records or historical snapshots rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/bimlog/src/lib/intake-activation-task-count.behavior.ts",
+        "artifacts/bimlog/src/lib/intake-activation-task-count.ts",
+        "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/local-release-gate.mjs",
+        "scripts/test-intake-activation.mjs",
+        "scripts/test-workflow-database-fixture.mjs",
+        "scripts/workflow-database-fixture.mjs"
+      ],
+      "reviewedChangeSha256": "c99afb2a8a76c48a497c8a8749fd93fffc57a0a1c029b2ccea0a0916a914730b"
     }
   ]
 }

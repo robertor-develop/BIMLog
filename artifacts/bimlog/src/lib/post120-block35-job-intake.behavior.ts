@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import "./intake-activation-task-count.behavior";
 import "./company-workflow-readiness.behavior";
 import "./intake-workflow-preview-selection.behavior";
 import "../components/job-intake/QuickJobIntake.behavior";

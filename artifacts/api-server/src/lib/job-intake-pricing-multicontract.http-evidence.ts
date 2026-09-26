@@ -21,7 +21,7 @@ import { validatePricingTemplate } from "./company-pricing-template-contract";
 // below. Provision its base schema with the local Drizzle CLI first; this proof
 // then applies the additive runtime migrations and creates only synthetic rows.
 const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/invalid");
-if (target.hostname !== "127.0.0.1" || target.port !== "55460" || target.pathname !== "/bimlog_intake_integration_test")
+if (target.hostname !== "127.0.0.1" || target.port !== "55449" || target.pathname !== "/bimlog_intake_integration_test")
   throw new Error("Refusing to use any database except the exact isolated Intake integration fixture.");
 
 const companyId = Number((await pool.query(`INSERT INTO companies(name) VALUES('Intake integration company') RETURNING id`)).rows[0].id);
@@ -43,6 +43,10 @@ await startGenericApuPersistenceMigration();
 await startJobIntakeMigration();
 await ensureCompanyMasterCatalogSchema();
 await ensureDeliveryWorkflowRuntimeSchema();
+await pool.query(`INSERT INTO company_master_catalog_entries(id,company_id,kind,code,name,created_by_id,updated_by_id)
+  VALUES('intake-discipline',$1,'discipline','MECH','Test Mechanical',$2,$2)`,[companyId,actor.id]);
+const workPackage = (id:string) => ({id,packageCode:id,title:"Test Level 1",dimensionType:"floor",dimensionValue:"L1",packageType:"deliverable",
+  classification:{disciplineId:"intake-discipline",disciplineCode:"MECH",disciplineName:"Test Mechanical"}});
 
 await pool.query(`INSERT INTO company_cost_library_versions
   (id,library_id,company_id,version,effective_date,status,reason,content_fingerprint,created_by_id)
@@ -121,9 +125,9 @@ try {
     ] },
     scopeItems:[
       { id:"CI-DRAW",name:"Drawing",contractId:"BASE",plannedHours:"10",billingHourlyRate:"25",
-        apuPlanVersion:1,budgetSnapshotLineId:"intake-sl1",projectCostNodeId:"intake-pn1" },
+        apuPlanVersion:1,budgetSnapshotLineId:"intake-sl1",projectCostNodeId:"intake-pn1",deliverableType:"SHOP_DRAWING",workPackages:[workPackage("WP-DRAW")] },
       { id:"CI-REVIEW",name:"Review",contractId:"ADD",plannedHours:"4",billingHourlyRate:"42.5",
-        apuPlanVersion:2,budgetSnapshotLineId:"intake-sl2",projectCostNodeId:"intake-pn2" },
+        apuPlanVersion:2,budgetSnapshotLineId:"intake-sl2",projectCostNodeId:"intake-pn2",deliverableType:"SHOP_DRAWING",workPackages:[workPackage("WP-REVIEW")] },
     ],
     delivery:{ workflowTemplate:"generic",submittalStrategy:"Controlled review and delivery" },
     team:{ projectLeaderUserId:actor.id,assignments:[
@@ -170,6 +174,31 @@ try {
     expectedRevision:ready.body.revision,confirmationFingerprint:ready.body.completion.fingerprint });
   assert.equal(activated.status,200,JSON.stringify(activated.body));
   assert.equal(activated.body.contractIds.length,2);
+  const packageTasks = (await pool.query(`SELECT t.id,t.planned_hours FROM job_activation_tasks t
+    JOIN job_activation_work_items w ON w.id=t.work_item_id
+    JOIN job_activation_work_package_tasks p ON p.task_id=t.id WHERE w.project_id=$1`,[projectId])).rows;
+  assert.equal(packageTasks.length,2);
+  assert.equal(packageTasks.reduce((sum:number,task:any) => sum+Number(task.planned_hours),0),14,"Package links reuse the planned scope hours without duplication");
+  await assert.rejects(pool.query(`UPDATE job_activation_tasks SET planned_hours=-1 WHERE id=$1`,[packageTasks[0].id]),
+    (error:any) => error.constraint === "job_activation_task_hours_chk");
+  await assert.rejects(pool.query(`UPDATE job_activation_tasks SET planned_hours=0 WHERE task_key='scope-delivery'
+    AND work_item_id IN(SELECT id FROM job_activation_work_items WHERE project_id=$1)`,[projectId]),
+    (error:any) => error.constraint === "job_activation_task_hours_chk");
+  const activationState = async () => (await pool.query(`SELECT
+    (SELECT jsonb_agg(to_jsonb(c) ORDER BY c.id) FROM financial_contracts c WHERE c.project_id=$1) contracts,
+    (SELECT jsonb_agg(to_jsonb(w) ORDER BY w.id) FROM job_activation_work_items w WHERE w.project_id=$1) items,
+    (SELECT jsonb_agg(to_jsonb(b) ORDER BY b.id) FROM job_activation_execution_baselines b WHERE b.project_id=$1) baselines,
+    (SELECT jsonb_agg(to_jsonb(t) ORDER BY t.id) FROM job_activation_tasks t JOIN job_activation_work_items w ON w.id=t.work_item_id WHERE w.project_id=$1) tasks`,[projectId])).rows[0];
+  const firstActivationState = await activationState();
+  assert.ok(firstActivationState.items?.length > 0,"Activation must generate Work Items");
+  const repeated = await Promise.all(Array.from({length:4},() => request("POST",`${intakePath}/activate`,{
+    expectedRevision:ready.body.revision,confirmationFingerprint:ready.body.completion.fingerprint })));
+  for (const result of repeated) {
+    assert.equal(result.status,200,JSON.stringify(result.body));
+    assert.equal(result.body.idempotent,true);
+    assert.deepEqual(result.body.contractIds,activated.body.contractIds);
+  }
+  assert.deepEqual(await activationState(),firstActivationState,"Concurrent retries must preserve exact contract, Work Item and baseline rows");
   const replay = await request("POST",`${intakePath}/activate`,{
     expectedRevision:ready.body.revision,confirmationFingerprint:ready.body.completion.fingerprint });
   assert.equal(replay.status,200,JSON.stringify(replay.body)); assert.equal(replay.body.idempotent,true);
