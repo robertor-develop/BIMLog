@@ -42025,6 +42025,112 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d6bfd2184dea38a41242cc4ff81fd8e84225b534da51633a9497f74b01863377"
+    },
+    {
+      "taskId": "BIMLOG_CORE_BLOCK08_BUILDS36_40",
+      "reviewedThroughCommit": "152cbe34f6553c50f4be30ad1fceccccc845cde2",
+      "reviewedAt": "2026-09-26T03:42:00.000Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_source",
+          "run_local_validation",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_live_chrome_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Preview omitted Governance compatibility and replacement checks. Fresh-database initialization failure corrected and HTTP retested. Scope/version-bound preview preserves authority and history."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records bounded correction, failed-test repair and pending publication/live acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records bounded correction, failed-test repair and pending publication/live acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves existing authority, routes, schema and Lens Next; no new structural inventory or product doctrine."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
+        "artifacts/bimlog/src/lib/workflow-approval-error.behavior.ts",
+        "artifacts/bimlog/src/lib/workflow-approval-error.ts",
+        "evidence/coordination-routing-20260925/BLOCK_07_BUILDS_031_035.md",
+        "evidence/coordination-routing-20260925/BLOCK_08_BUILDS_036_040.md",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2b990bb9741ab5294166da65196daa1a277b52b3fe7ebc185186e1eba224e5bb"
     }
   ]
 }

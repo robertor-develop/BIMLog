@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Core Build 40 publication boundary — 2026-09-26
+
+- [x] Verify five-build push `620c225f` from the external exact-head receipt. Implement Builds 36–40 governed read-only preview, selected-version identity, bilingual checked-policy guidance, stale-response invalidation and isolated HTTP no-mutation/tenant-denial regression.
+- [x] Fix the observed fresh-database preview initialization failure before continuing; isolated PostgreSQL/HTTP retest passes.
+- [ ] Complete full exact-candidate gate, push and publish the ten-build core candidate through Replit Shell, then verify exact deployed source and authenticated Chrome preview/authoring regression. No further block before this ten-build boundary is released.
+- [ ] Continue remaining 40 planned source builds/eight blocks after release. Full role/hierarchy/threshold/runtime governance and end-to-end Operations acceptance remain open; preview success is never approval or full product acceptance.
+
 ## Core operating chain continuation — 2026-09-26
 
 - [x] Reconcile R1–R10 publication from the exact external receipt: source `152cbe34f6553c50f4be30ad1fceccccc845cde2`, deployment `78af273c`, zero unpublished repairs. Prior source-candidate bullets are historical, not current release identity.

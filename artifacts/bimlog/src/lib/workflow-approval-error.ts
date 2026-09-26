@@ -1,4 +1,7 @@
 export function workflowApprovalError(code: string, spanish: boolean): string {
+  if (code === "WORKFLOW_PREVIEW_CONTEXT_INVALID" || code === "DELIVERY_WORKFLOW_NOT_FOUND") return spanish
+    ? "No se pudo verificar la versión seleccionada en esta empresa. Recargue la lista y seleccione nuevamente el flujo."
+    : "The selected version could not be verified in this company. Reload the list and select the workflow again.";
   const changes: Record<string, [string, string]> = {
     WORKFLOW_POLICY_EDIT_PHASES_FORBIDDEN: ["fases, transiciones o reglas de reapertura", "phases, transitions or reopening rules"],
     WORKFLOW_POLICY_EDIT_TASKS_ROLES_FORBIDDEN: ["tareas o roles", "tasks or roles"],

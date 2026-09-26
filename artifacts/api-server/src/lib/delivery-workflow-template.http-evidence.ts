@@ -161,6 +161,11 @@ try {
   assert.equal(previewAllowed.body.governance.version,4);
   assert.equal((await call(pmo,"/company/delivery-workflows/preview",{templateId:id,definition})).status,400);
   assert.equal((await call(owner,"/company/delivery-workflows/preview",{templateId:randomUUID(),versionId:fourth.body.versionId,definition})).status,404);
+  const foreignAdmin = await user("foreign-admin@test.invalid",b.id,true);
+  assert.equal((await call(foreignAdmin,"/company/delivery-workflows/preview",{...context,definition})).status,404);
+  const afterPreview = (await call(pmo,`/company/delivery-workflows/${id}`)).body;
+  assert.deepEqual(afterPreview.history,preserved.history);
+  assert.deepEqual(afterPreview.versions,preserved.versions);
   await assert.rejects(pool.query(`UPDATE company_delivery_workflow_versions SET definition='{}'::jsonb WHERE id=$1`,[v2]));
   await assert.rejects(pool.query(`DELETE FROM company_delivery_workflow_events WHERE template_id=$1`,[id]));
   assert.equal((await call(member,"/company/delivery-workflows")).body.versions.length,1);

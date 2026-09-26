@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Core operating chain Builds 36–40 — 2026-09-26
+
+- Builds 31–35 were gated and pushed at `620c225f6e9bcde5b62e0a87c1d8fa5d745cc74a`; see external `F:/BIMLog/TestProof/core-block07-builds31-35-push-20260926.md`. The five prior builds are not yet published.
+- Builds 36–40 make workflow preview company/version-scoped, evaluate the current Governance Policy and replacement restrictions under the existing company lock, return the checked policy identity, show bilingual preview limitations, and invalidate stale preview results across selection/account/language changes. Isolated HTTP proves wrong-company/identity denial and no version/audit mutation from preview.
+- A fresh-database HTTP test exposed missing Governance schema initialization before preview. Correction `767e65b5` passed the repeated test; it is part of Build 37, not an additional build. No deployed failure is claimed.
+- This ten-build candidate requires the exact-head full gate, push, Replit Shell publication and authenticated Chrome smoke. Forty original planned source builds/eight blocks remain after Build 40. All Lens Next surfaces, schema definitions, production data and credentials remain unchanged. SharePoint provider round-trip acceptance is still separate and unverified.
+
 ## Core operating chain Builds 31–35 — 2026-09-26
 
 - Published baseline is exact source `152cbe34f6553c50f4be30ad1fceccccc845cde2`, Replit deployment `78af273c`; external receipt `F:/BIMLog/TestProof/sharepoint-repair-R6-R10-release-20260926.md` supersedes repair publication-pending notes below. SharePoint real tenant delivery and Chrome file-import acceptance remain unverified. Tool permission failure is not a demonstrated product failure and does not block independent authorized core source work.

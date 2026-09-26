@@ -9,6 +9,8 @@ assert.match(workflowApprovalError("WORKFLOW_POLICY_PHASE_REVIEW_REQUIRED", fals
 assert.match(workflowApprovalError("WORKFLOW_POLICY_DOCUMENT_REQUIRED", true), /documento requerido/);
 assert.match(workflowApprovalError("WORKFLOW_POLICY_FINGERPRINT_MISMATCH", false), /PMO administrator/);
 assert.equal(workflowApprovalError("OTHER_ERROR", true), "OTHER_ERROR");
+assert.match(workflowApprovalError("WORKFLOW_PREVIEW_CONTEXT_INVALID", true), /seleccione nuevamente/);
+assert.match(workflowApprovalError("DELIVERY_WORKFLOW_NOT_FOUND", false), /Reload the list/);
 console.log("Workflow approval guidance: pass");
 for (const action of ["EDIT_PHASES", "EDIT_TASKS_ROLES", "CHANGE_APU", "EDIT_ALLOCATION"]) {
   assert.match(workflowApprovalError(`WORKFLOW_POLICY_${action}_FORBIDDEN`,true), /La versión publicada sigue vigente/);
