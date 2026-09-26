@@ -71,6 +71,11 @@ await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:p
 await setWorkItemDeliveryStep({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,phaseId:"preliminary",taskId:"prepare",status:"complete"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision}),/QC approval/);
+await pool.query(`UPDATE company_delivery_workflow_roles SET user_id=$2 WHERE work_item_id=$1 AND role='review'`,[workItemId,producer]);
+await assert.rejects(approveWorkItemDeliveryPhase({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"qc"}),
+  (error:unknown) => (error as {code?:string}).code === "DELIVERY_WORKFLOW_INDEPENDENT_REVIEW_REQUIRED");
+assert.equal((await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId})).revision,runtime.revision);
+await pool.query(`UPDATE company_delivery_workflow_roles SET user_id=$2 WHERE work_item_id=$1 AND role='review'`,[workItemId,owner]);
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"qc"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 await advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision});

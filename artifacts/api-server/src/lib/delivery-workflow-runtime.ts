@@ -723,6 +723,12 @@ export function approveWorkItemDeliveryPhase(input: {
       input.actorUserId,
     );
     await allStepsComplete(client, context.workItemId, phase);
+    const selfCompleted = (await client.query(`SELECT 1 FROM company_delivery_workflow_steps
+      WHERE work_item_id=$1 AND phase_id=$2 AND completed_by_id=$3 LIMIT 1`,
+      [context.workItemId,phase.id,input.actorUserId])).rows[0];
+    if (selfCompleted)
+      throw new FinancialControlError(403,"DELIVERY_WORKFLOW_INDEPENDENT_REVIEW_REQUIRED",
+        "A different assigned reviewer must approve work completed by you.");
     await requiredEvidence(client, context.workItemId, phase);
     const before = await phaseChecks(client, context.workItemId, phase.id);
     if (
