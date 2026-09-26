@@ -41,6 +41,9 @@ for (const malformed of [null, {}, { ...data, members: null }, { ...data, tasks:
 }
 
 const english = render();
+assert.match(source, /generation !== loadGeneration.current/);
+assert.match(source, /generation === loadGeneration.current/);
+assert.match(source, /return <ResourceSchedulingSession key=/);
 assert.equal(resourceCsvCell("=1+1"), '"\'=1+1"');
 assert.equal(resourceCsvCell("-external"), '"\'-external"');
 assert.equal(resourceCsvCell(-2), '"-2"');
