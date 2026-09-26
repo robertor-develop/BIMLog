@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation C005 local candidate — 2026-09-26
+
+- C004's exact failed API packaging test now passes at `1d604f77`, including deterministic runtime verification. Earlier full-suite failures are preserved, not relabeled PASS. The final combined clean candidate still requires the full suite and push.
+- C005 replaces the verified-unused LegacyIntegrationsTab implementation with a compatibility export of the active governed screen. Published project57 confirmed the misleading availability sentence; bilingual copy now distinguishes capability, connected account and project readiness. Account connection no longer hides setup/review status. A narrow-container header defect was repaired and visually retested. Actual-component synthetic Chrome verifies state/filter/navigation/error behavior; it is not deployed acceptance.
+- Production remains73a5a7d7. Two new unpublished scopes: C004 and C005; repair commits are not extra builds. C001/C002 were already published; C003/I010 company-binding and real-email acceptance remain open. No native Lens, installer, provider permissions or customer-data changes.
+
 ## Consolidation C004 local candidate — 2026-09-26
 
 - C004 source commit `6bb4360a` and packaging repair `8ec988cd` remain unpublished. The inventory/hash drift was repaired by generating PLATFORM.md before state hashing. The rerun exposed missing same-unit STATUS/OPEN_LOOP reconciliation; this checkpoint corrects that bookkeeping. No release PASS is claimed until the clean exact-head gate reruns successfully.

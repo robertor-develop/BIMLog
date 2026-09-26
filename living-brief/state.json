@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "5da0ded43bc418bdb00c327c5727ff041e2a9f212dd7c2e21d0f0e90767f2c3a",
+  "bundleSha256": "8b645d5615c83a3841ec0da0ccab3e9d046a982c0656f070897cba117afb82d7",
   "impact": {
     "baselineCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
     "changedPaths": [
@@ -10,13 +10,18 @@
       "artifacts/api-server/src/lib/submittal-register-coverage.ts",
       "artifacts/api-server/src/routes/linked_items.ts",
       "artifacts/api-server/src/routes/submittals.ts",
+      "artifacts/bimlog/integration-catalog-harness.html",
       "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
+      "artifacts/bimlog/src/integration-catalog-harness.tsx",
       "artifacts/bimlog/src/lib/submittal-status-presentation.ts",
+      "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
+      "artifacts/bimlog/src/pages/project/LegacyIntegrationsTab.tsx",
       "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
       "artifacts/bimlog/src/submittal-coverage-harness.tsx",
       "artifacts/bimlog/submittal-coverage-harness.html",
       "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
       "evidence/coordination-routing-20260925/CONSOLIDATION_C004.md",
+      "evidence/coordination-routing-20260925/CONSOLIDATION_C005.md",
       "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
       "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
       "living-brief/OPEN_LOOP.md",
@@ -25,6 +30,7 @@
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
       "scripts/local-release-gate.mjs",
+      "scripts/test-integration-presentation.mjs",
       "scripts/test-local-release-gate.mjs",
       "scripts/update-living-brief-state.mjs"
     ],
@@ -45,9 +51,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "claude",
@@ -57,9 +63,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "quality",
@@ -69,9 +75,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "vision",
@@ -81,21 +87,21 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "2cadd341d3e94fe9f45b9570a82b21b4bdabe00530734bd5f919a2739a4bb991",
-      "sourceChangedAt": "2026-09-26T19:46:19.000Z",
+      "sourceChangedAt": "2026-09-26T19:55:30.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "plugin",
@@ -105,9 +111,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "report_design_system",
@@ -117,9 +123,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "standards_register",
@@ -129,33 +135,33 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "489db25a546fe4b138516736f495f5349beb839960d5fb8ebdeeea5da519e18e",
-      "sourceChangedAt": "2026-09-26T19:46:19.000Z",
+      "sha256": "d5e970a45b7fafb46ee20588055bbd0acc4d57d6bf526552bee3a49ee52062c0",
+      "sourceChangedAt": "2026-09-26T19:55:30.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "3e10d133a797e0bab36879a7266e3c68ddf487c2fd25c3338b2936697d9762fa",
-      "sourceChangedAt": "2026-09-26T19:46:19.000Z",
+      "sha256": "330355f7827bf99cfc3ae7025dc45298f91f1825f21216c076f0a4729aaae124",
+      "sourceChangedAt": "2026-09-26T19:55:30.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     },
     {
       "key": "audit",
@@ -165,9 +171,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
       "semanticReviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
-      "semanticReviewTask": "consolidation-c004-submittal-register-coverage",
+      "semanticReviewTask": "consolidation-c005-integration-presentation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-26T19:22:44Z"
+      "semanticReviewedAt": "2026-09-26T19:55:30Z"
     }
   ]
 }

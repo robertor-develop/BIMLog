@@ -148,19 +148,19 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
 
   return (
     <div id="integrations-current-view" className="px-4 py-5 sm:px-8 sm:py-7" aria-busy={loading} style={{ maxWidth: 1120 }}>
-      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-5">
-        <div className="min-w-0">
+      <div className="mb-6 flex flex-wrap items-start gap-4">
+        <div className="min-w-0 flex-[1_1_480px]">
           <h1 style={{ margin: 0, fontSize: 24, color: "hsl(var(--foreground))" }}>
             {tr("Integrations and file exchange", "Integraciones e intercambio de archivos")}
           </h1>
           <p style={{ margin: "7px 0 0", maxWidth: 720, color: "hsl(var(--muted-foreground))", fontSize: 13, lineHeight: 1.6 }}>
             {tr(
-              "Only approved, accurately available connections appear here. Private providers require a customer-specific review and entitlement before they can be shown or used.",
-              "Aquí solo aparecen conexiones aprobadas y realmente disponibles. Los proveedores privados requieren revisión y habilitación específica para el cliente antes de mostrarse o usarse.",
+              "This catalog shows capabilities enabled for your account, including those that still require setup or review. Availability is not proof of a connected account or a project ready to publish. Private providers require customer-specific authorization.",
+              "Este catálogo muestra las capacidades habilitadas para su cuenta, incluidas las que aún requieren configuración o revisión. Disponible no significa que la cuenta esté conectada ni que el proyecto esté listo para publicar. Los proveedores privados requieren autorización específica para el cliente.",
             )}
           </p>
         </div>
-        <div className="flex min-w-0 flex-wrap items-start gap-2 sm:flex-nowrap sm:justify-end">
+        <div className="flex min-w-0 max-w-full flex-wrap items-start gap-2">
           <PrintPdfButton
             lang={lang}
             onClick={() => void exportCurrentView()}
@@ -240,9 +240,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
             const label = lang === "es" ? provider.label.es : provider.label.en;
             const description = lang === "es" ? provider.description.es : provider.description.en;
             const available = provider.availability === "available";
-            const status = isConnected
-              ? tr("Connected", "Conectado")
-              : available
+            const status = available
                 ? tr("Available", "Disponible")
                 : provider.availability === "setup_required"
                   ? tr("Setup required", "Configuración requerida")
@@ -260,7 +258,12 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14 }}>
-                  <span style={{ fontSize: 10, fontWeight: 750, color: isConnected ? "#15803D" : available ? "#1D4ED8" : "#92400E" }}>{status}</span>
+                  <div style={{ fontSize: 10, fontWeight: 750, color: available ? "#1D4ED8" : "#92400E" }}>
+                    <span>{status}</span>
+                    {provider.oauthParam && <div style={{ marginTop: 4, color: isConnected ? "#15803D" : "hsl(var(--muted-foreground))" }}>
+                      {isConnected ? tr("Account connected", "Cuenta conectada") : tr("Account not connected", "Cuenta no conectada")}
+                    </div>}
+                  </div>
                   <button
                     onClick={() => openProvider(provider)}
                     style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700, cursor: "pointer" }}

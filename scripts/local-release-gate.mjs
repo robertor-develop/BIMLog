@@ -12,6 +12,7 @@ const git = (...args) => execFileSync("git", ["-c", `safe.directory=${root.repla
 if (git("status", "--porcelain")) throw new Error("Local release gate requires a clean candidate.");
 
 const commands = [
+  { id: "integration-presentation", command: process.execPath, args: ["scripts/test-integration-presentation.mjs"] },
   { id: "proof-roots", command: process.execPath, args: ["scripts/test-proof-root.mjs"] },
   { id: "workflow-database-fixture", command: process.execPath, args: ["scripts/test-workflow-database-fixture.mjs"] },
   { id: "platform-audit-policy", command: process.execPath, args: ["scripts/test-platform-audit-policy.mjs"] },

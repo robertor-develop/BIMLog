@@ -1,0 +1,11 @@
+# C005 — one governed integration presentation
+
+2026-09-26. Existing project route remains `/projects/:id/integrations`.
+
+Import and route search proved LegacyIntegrationsTab had no active caller. Its 733-line duplicate catalog/connection UI is replaced by a compatibility re-export of IntegrationsTab. The previous source remains recoverable in Git. IntegrationModal is not deleted; no claim is made that every other legacy artifact is retired. Provider catalog, entitlements, authentication, SharePoint destination/routing and Lens Native are unchanged.
+
+Authenticated read-only Chrome baseline on published73a5a7d7, synthetic project57, confirmed contradictory copy: the heading promised only available connections while Google Drive/Dropbox required setup. Corrected English/Spanish copy distinguishes capability availability from account connection and project publication readiness. Connected-account labels no longer hide setup/review availability. Existing Files, Profile and Contact destinations remain unchanged.
+
+Actual-component local Chrome fixture (synthetic transport, not deployed acceptance) verified four provider states, same compatibility export, English/Spanish, combined availability/connection filters, Files/Profile/Contact navigation callbacks, failed catalog and repeated retry, hidden unreliable cards/counts and disabled PDF on failure, recovery on remount. Console contains exactly the deliberately injected503 errors, not an unexpected runtime error. Narrow390px-container screenshot exposed viewport-only header wrapping; fixed with container-width flex wrapping and visually retested. Desktop screenshot also inspected. No device-viewport or full-site PASS claimed. Existing export formatting is unchanged and was not retested as a new feature.
+
+Focused route/presentation tests and frontend typecheck are required before commit; full clean exact-head suite and push remain required. C004 exact failed packaging test passed after inventory/hash and authority-record repairs; its earlier full-gate failures remain recorded. Production still73a5a7d7. C003/I010 operational acceptance remains open, so this is not five newly completed builds or complete live customer acceptance.

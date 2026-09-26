@@ -43829,6 +43829,124 @@
         "scripts/update-living-brief-state.mjs"
       ],
       "reviewedChangeSha256": "b0c0965a7bee759c005d21834df30374b2b2a5c885ceca1ea3ce89876de5b50f"
+    },
+    {
+      "taskId": "consolidation-c005-integration-presentation",
+      "reviewedThroughCommit": "73a5a7d7d5bafbb74d8bfac123c896561a07666d",
+      "reviewedAt": "2026-09-26T19:55:30Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Preserve one governed integration screen; account connection does not prove provider setup or project publishing readiness. Generate platform inventory before hashing release state."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Consolidates one existing capability without introducing duplicate product entities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release and evidence controls remain unchanged; failed checks were repaired rather than waived."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Honest state labels, actual-component testing and width-safe presentation apply existing quality rules."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Implements the approved bounded integration-presentation consolidation scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "C004 generated inventory is already reconciled; C005 preserves the existing route and catalog without adding a module, provider entitlement or schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens native, bridge, supported route and installers remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing report payload and PDF formatting are untouched; no export acceptance is inferred."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification or compliance claim added by this presentation cleanup."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact packaging retest and local C005 state while preserving published and operational limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Captures remaining full-candidate release and operational acceptance requirements without fake build completion."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded C005 evidence and preserved Git history retain traceability; no accepted history rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-submittal-register-coverage.ts",
+        "artifacts/api-server/src/lib/submittal-register-coverage.ts",
+        "artifacts/api-server/src/routes/linked_items.ts",
+        "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/bimlog/integration-catalog-harness.html",
+        "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
+        "artifacts/bimlog/src/integration-catalog-harness.tsx",
+        "artifacts/bimlog/src/lib/submittal-status-presentation.ts",
+        "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
+        "artifacts/bimlog/src/pages/project/LegacyIntegrationsTab.tsx",
+        "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
+        "artifacts/bimlog/src/submittal-coverage-harness.tsx",
+        "artifacts/bimlog/submittal-coverage-harness.html",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C004.md",
+        "evidence/coordination-routing-20260925/CONSOLIDATION_C005.md",
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/local-release-gate.mjs",
+        "scripts/test-integration-presentation.mjs",
+        "scripts/test-local-release-gate.mjs",
+        "scripts/update-living-brief-state.mjs"
+      ],
+      "reviewedChangeSha256": "d3e863398fe99d932a6df6a1cf769476e36fc8faea5c119225ed492a93af1a13"
     }
   ]
 }

@@ -16,8 +16,8 @@
     "C002": "published_7ca6a8a8",
     "C003": "I005_source_published_operational_access_acceptance_open",
     "C004": "local_candidate_required_package_coverage",
-    "C005": "pending",
-    "newUnpublishedScopes": 1,
+    "C005": "local_candidate_single_governed_integration_presentation",
+    "newUnpublishedScopes": 2,
     "I010Acceptance": "company_binding_confirmation_and_sender_configuration_pending",
     "fullLiveAcceptance": "NOT_COMPLETE"
   },
