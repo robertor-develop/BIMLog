@@ -41857,8 +41857,8 @@
         },
         {
           "key": "platform",
-          "result": "updated",
-          "reason": "Regenerate source inventory for bounded helper additions."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic PLATFORM generator reports unchanged structural inventory after the bounded SharePoint helpers; no route or architecture inventory change is required."
         },
         {
           "key": "plugin",

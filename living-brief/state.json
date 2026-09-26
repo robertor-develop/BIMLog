@@ -99,7 +99,7 @@
       "reconciledThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewedThroughCommit": "560e463cf997f444c42560b7679d8baf10c6cb28",
       "semanticReviewTask": "BIMLOG_SHAREPOINT_REPAIR_R1_R10",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-26T02:40:00.000Z"
     },
     {
