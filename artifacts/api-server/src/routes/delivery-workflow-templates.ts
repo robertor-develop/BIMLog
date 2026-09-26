@@ -250,7 +250,7 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authM
     await connection.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const template = await scopedTemplate(connection,param(req.params.id),actor,true);
     if (!template) { await connection.query("ROLLBACK"); res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }
-    const version = (await connection.query(`SELECT id,definition,fingerprint,revision,state FROM company_delivery_workflow_versions
+    const version = (await connection.query(`SELECT id,version,definition,fingerprint,revision,state FROM company_delivery_workflow_versions
       WHERE id=$1 AND template_id=$2 FOR UPDATE`, [param(req.params.versionId),template.id])).rows[0];
     if (!version || version.state !== "approved" || Number(version.revision) !== revision) {
       await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_NOT_APPROVED_OR_STALE" }); return;
@@ -260,7 +260,10 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authM
       await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH" }); return;
     }
     const governance = applicablePublishedGovernance(await publishedGovernanceRows(connection,actor.companyId),String(template.id));
-    if (governance) validateWorkflowAgainstGovernance(governance.definition,definition);
+    if (governance) {
+      validateWorkflowAgainstGovernance(governance.definition,definition);
+      await validateWorkflowReplacementForPolicy(connection,actor.companyId,String(template.id),Number(version.version),governance.definition,definition);
+    }
     const allocation = await economicPreview(connection, actor, definition);
     if (allocation) {
       const receipt = (await connection.query(`SELECT details FROM company_delivery_workflow_events
