@@ -146,16 +146,20 @@ async function runtimeScenario(width,language) {
     const {WorkItemDeliveryWorkflowPanel}=await import("/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx");
     useAuthStore.setState({user:{id:7}});
     const target=document.createElement("div");document.body.replaceChildren(target);
-    let saved=false,failRefresh=true;
+    let saved=false,failRefresh=true,delayNext=false,releaseDelayed;
     const runtime={workItemId:"qa",templateCode:"TEST_RUNTIME",templateVersion:1,source:"company",selection:"explicit",status:"active",phaseIndex:1,revision:1,canManage:false,fingerprint:"a".repeat(64),governancePolicy:null,
       definition:{phases:[{id:"phase",name:"TEST Phase",tasks:[{id:"task",name:"TEST Task",requiredDocuments:[]}],completionRule:"all_tasks_complete",qcRequired:true,approvalRequired:true}],transitions:[],reopen:{role:"approve"}},
       roles:[{role:"execute",userId:7},{role:"review",userId:7},{role:"approve",userId:7}],steps:[{phaseId:"phase",taskId:"task",status:"pending",completedById:null}],evidence:[],checks:[],events:[]};
     const api=async (_path,init)=>{
       if(init){const body=JSON.parse(init.body);if(body.expectedRevision!==runtime.revision)throw Error("stale fixture revision");saved=true;runtime.revision++;runtime.steps[0].status="complete";runtime.steps[0].completedById=7;return {};}
       if(saved&&failRefresh){failRefresh=false;throw Error("TEST_REFRESH_FAILURE");}
+      if(delayNext){delayNext=false;const snapshot=structuredClone(runtime);return new Promise(resolve=>{releaseDelayed=()=>resolve(snapshot);});}
       return structuredClone(runtime);
     };
-    createRoot(target).render(React.createElement(WorkItemDeliveryWorkflowPanel,{projectId:1,workItemId:"qa",members:[],files:[],api,tt:(en,es)=>language==="es"?es:en}));
+    const root=createRoot(target);
+    const render=(workItemId)=>root.render(React.createElement(WorkItemDeliveryWorkflowPanel,{projectId:1,workItemId,members:[{id:7,fullName:"TEST Executor"}],files:[{id:1,fileName:"TEST Drawing"}],api,tt:(en,es)=>language==="es"?es:en}));
+    window.runtimeFixture={runtime,render,delay:()=>{delayNext=true;},release:()=>releaseDelayed(),isDelayed:()=>!!releaseDelayed};
+    render("qa");
   },{language});
   const es=language==="es";
   await page.getByRole("button",{name:es?"Abrir flujo de entrega":"Open Delivery Workflow"}).click();
@@ -168,6 +172,27 @@ async function runtimeScenario(width,language) {
   assert.equal(await page.getByRole("button",{name:es?"Aprobar fase":"Approve phase",exact:true}).isDisabled(),true);
   assert.deepEqual(failures,[]);
   await page.screenshot({path:path.join(output,`${width}-${language}-runtime.png`),fullPage:true});
+  await page.evaluate(()=>window.runtimeFixture.delay());
+  await page.getByRole("button",{name:es?"Actualizar flujo":"Refresh workflow"}).click();
+  await page.waitForFunction(()=>window.runtimeFixture.isDelayed());
+  await page.evaluate(()=>{
+    window.runtimeFixture.runtime.templateCode="TEST_NEW_WORK_ITEM";
+    window.runtimeFixture.runtime.status="complete";
+    window.runtimeFixture.runtime.canManage=true;
+    window.runtimeFixture.runtime.definition.phases[0].tasks[0].requiredDocuments=["DRAWING"];
+    window.runtimeFixture.render("qa-new");
+  });
+  await page.getByRole("button",{name:es?"Abrir flujo de entrega":"Open Delivery Workflow"}).waitFor();
+  await page.evaluate(()=>window.runtimeFixture.release());
+  assert.equal(await page.getByText(/TEST_RUNTIME/).count(),0,"late old-work-item response must not leak into new selection");
+  await page.getByRole("button",{name:es?"Abrir flujo de entrega":"Open Delivery Workflow"}).click();
+  await page.getByText(/TEST_NEW_WORK_ITEM/).waitFor();
+  const assignments=page.getByRole("group",{name:es?"Asignaciones de funciones":"Role assignments"});
+  for(const select of await assignments.getByRole("combobox").all()) assert.equal(await select.isDisabled(),true);
+  assert.equal(await page.getByRole("button",{name:es?"Vincular":"Link",exact:true}).isDisabled(),true);
+  await page.getByText(es?"Reabra el flujo antes de cambiar las asignaciones de funciones.":"Reopen the workflow before changing role assignments.").waitFor();
+  assert.deepEqual(failures,[]);
+  await page.screenshot({path:path.join(output,`${width}-${language}-runtime-closed.png`),fullPage:true});
   results.push({width,language,mode:"runtime-saved-refresh-failure-independent-review"});
   await context.close();
 }

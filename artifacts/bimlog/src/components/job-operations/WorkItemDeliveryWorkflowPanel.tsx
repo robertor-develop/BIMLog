@@ -59,21 +59,21 @@ type Runtime = {
   }>;
 };
 
-export function WorkItemDeliveryWorkflowPanel({
-  projectId,
-  workItemId,
-  members,
-  files,
-  api,
-  tt,
-}: {
+type WorkflowPanelProps = {
   projectId: number;
   workItemId: string;
   members: any[];
   files: any[];
   api: (path: string, init?: RequestInit) => Promise<any>;
   tt: Translate;
-}) {
+};
+
+export function WorkItemDeliveryWorkflowPanel(props: WorkflowPanelProps) {
+  const { user } = useAuthStore();
+  return <ScopedWorkflowPanel key={`${props.projectId}:${props.workItemId}:${user?.id ?? "anonymous"}`} {...props} />;
+}
+
+function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }: WorkflowPanelProps) {
   const { user } = useAuthStore();
   const [open, setOpen] = useState(false);
   const [runtime, setRuntime] = useState<Runtime | null>(null);
@@ -185,7 +185,7 @@ export function WorkItemDeliveryWorkflowPanel({
                 {runtime.source === "bimlog"
                   ? "BIMLog"
                   : tt("Company", "Empresa")}{" "}
-                · {runtime.status} ·{" "}
+                · {runtime.status === "complete" ? tt("Complete", "Completado") : tt("Active", "Activo")} ·{" "}
                 {tt(
                   "Frozen activation snapshot",
                   "Instantánea congelada de activación",
@@ -209,11 +209,12 @@ export function WorkItemDeliveryWorkflowPanel({
                   <legend>
                     {tt("Role assignments", "Asignaciones de funciones")}
                   </legend>
+                  {runtime.status !== "active" && <p>{tt("Reopen the workflow before changing role assignments.", "Reabra el flujo antes de cambiar las asignaciones de funciones.")}</p>}
                   {(["execute", "review", "approve"] as const).map((name) => (
                     <label key={name}>
-                      {name}
+                      {name === "execute" ? tt("Execute", "Ejecutar") : name === "review" ? tt("Review", "Revisar") : tt("Approve", "Aprobar")}{" "}
                       <select
-                        disabled={busy}
+                        disabled={busy || loading || runtime.status !== "active"}
                         value={role(name) ?? ""}
                         onChange={(event) =>
                           void act(
@@ -263,7 +264,7 @@ export function WorkItemDeliveryWorkflowPanel({
                         }}
                       >
                         <strong>
-                          {task.name} · {step?.status}
+                          {task.name} · {step?.status === "complete" ? tt("Complete", "Completado") : tt("Pending", "Pendiente")}
                         </strong>
                         <div
                           style={{ display: "flex", gap: 8, flexWrap: "wrap" }}
@@ -302,7 +303,7 @@ export function WorkItemDeliveryWorkflowPanel({
                                 onChange={(event) =>
                                   setFileId(event.target.value)
                                 }
-                                disabled={busy || !canExecute}
+                                disabled={busy || loading || !canExecute || runtime.status !== "active"}
                               >
                                 <option value="">
                                   {tt(
@@ -318,7 +319,7 @@ export function WorkItemDeliveryWorkflowPanel({
                               </select>
                               <button
                                 type="button"
-                                disabled={!fileId || busy || !canExecute}
+                                disabled={!fileId || busy || loading || !canExecute || runtime.status !== "active"}
                                 onClick={() =>
                                   void act(
                                     "/evidence",
@@ -429,7 +430,7 @@ export function WorkItemDeliveryWorkflowPanel({
                       <select
                         value={fileId}
                         onChange={(event) => setFileId(event.target.value)}
-                        disabled={busy || !canExecute}
+                        disabled={busy || loading || !canExecute || runtime.status !== "active"}
                       >
                         <option value="">
                           {tt(
@@ -445,7 +446,7 @@ export function WorkItemDeliveryWorkflowPanel({
                       </select>
                       <button
                         type="button"
-                        disabled={!fileId || busy || !canExecute}
+                        disabled={!fileId || busy || loading || !canExecute || runtime.status !== "active"}
                         onClick={() =>
                           void act(
                             "/evidence",
@@ -478,7 +479,8 @@ export function WorkItemDeliveryWorkflowPanel({
                     </label>
                   ))}
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    {completedOwnWork && (canReview || canApprove) && <p role="status">{tt("Work you completed requires approval by a different assigned reviewer.","El trabajo que completó requiere aprobación de otro revisor asignado.")}</p>}
+                    {(check?.qcApprovedAt || check?.approvedAt) && runtime.status === "active" && canExecute && <p>{tt("Linking new evidence clears current approvals and requires review again. Previous decisions remain in history.", "Vincular nueva evidencia anula las aprobaciones actuales y requiere una nueva revisión. Las decisiones anteriores permanecen en el historial.")}</p>}
+                    {runtime.status === "active" && completedOwnWork && (canReview || canApprove) && <p role="status">{tt("Work you completed requires approval by a different assigned reviewer.","El trabajo que completó requiere aprobación de otro revisor asignado.")}</p>}
                     {(current.qcRequired ||
                       current.completionRule === "all_tasks_reviewed") && (
                       <button
