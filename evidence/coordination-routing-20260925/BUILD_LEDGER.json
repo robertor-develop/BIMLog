@@ -7,7 +7,7 @@
   "publishEveryBuilds": 10,
   "maxUnpublishedBuilds": 10,
   "lensNextFrozen": true,
-  "identityCheckpoint": { "builds": ["I006","I007","I008"], "state": "published_repair_required", "publishedCommit": "03164942e369cdf079386e24e6fe701d68c40062", "precedingPushedCommit": "c49ea8a5880227b10c8223787d4cbe9e88cf9e3d", "combinedUnpublishedBuilds": 0, "repairCandidate": "I008-R1 role selection", "publicationDueBefore": "I009_after_repair_retest", "remainingCurrentBlock": ["I009","I010"], "liveAcceptance": "FAIL_ROLE_SELECTION_AND_EMAIL_DELIVERY_UNVERIFIED", "visualScreenshotQA": "LOCAL_DESKTOP_PASS_NOT_FULL_ACCEPTANCE" },
+  "identityCheckpoint": { "builds": ["I006","I007","I008"], "state": "published_role_repair_live_pass_I009_candidate", "publishedCommit": "42d06df0566d37e73cf5edd65f94b002c6f74357", "precedingPushedCommit": "c49ea8a5880227b10c8223787d4cbe9e88cf9e3d", "combinedUnpublishedBuilds": 1, "currentCandidate": "I009 atomic notification and transaction regression", "publicationDueAt": "I010", "remainingCurrentBlock": ["I009_release", "I010"], "liveAcceptance": "BOUNDED_ROLE_RETEST_PASS_EMAIL_AND_COMPANY_CORRECTION_OPEN", "visualScreenshotQA": "BOUNDED_DESKTOP_AND_INVALID_LINK_MOBILE_PASS_NOT_FULL_ACCEPTANCE" },
   "historicalProgramScope": "lensNextFrozen describes this original program, not the later approved consolidation integration scope",
   "currentReleaseReconciliation": {
     "commit": "25d6952efa2f7694734d3a8d34e47800ecde30ee",

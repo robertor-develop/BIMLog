@@ -43517,6 +43517,107 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6b42ac9b4f3bc67c692f0a9b34f4c43b457d746e53e3c710e579a143f4d62b9a"
+    },
+    {
+      "taskId": "identity-i009-transactional-acceptance-notification",
+      "reviewedThroughCommit": "42d06df0566d37e73cf5edd65f94b002c6f74357",
+      "reviewedAt": "2026-09-26T17:54:06Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_push",
+          "authorized_replit_publish"
+        ],
+        "operatorOnly": [
+          "approved_sender_secret_configuration"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Reuse the accepted invitation transaction; include existing-inbox notification atomically and extend real database conflict, resend, rollback and replay coverage."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No company or role authority transferred."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing repair, release and data preservation controls retained."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Live failure drives bounded repair, automated coverage and actual component testing; no unproven PASS."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing invitation scope, no new product capability."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, schema or permission contract changes in this UI repair."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next native and installers unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claims or applicability changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Published checkpoint, real live defect and incomplete acceptance recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Repair/retest, email delivery and remaining identity obligations retained."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical customer or audit data rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-invitation-lifecycle.ts",
+        "artifacts/api-server/src/lib/invitation-acceptance.ts",
+        "evidence/coordination-routing-20260925/BUILD_LEDGER.json",
+        "evidence/coordination-routing-20260925/IDENTITY_I009.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/local-release-gate.mjs",
+        "scripts/test-local-release-gate.mjs"
+      ],
+      "reviewedChangeSha256": "0a60f17112370203f2314f76aec5c44c06098dc55ec68a6bc67c7f6070a4d387"
     }
   ]
 }

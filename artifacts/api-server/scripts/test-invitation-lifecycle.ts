@@ -7,7 +7,7 @@ const admin=new Client({host:"127.0.0.1",port:55469,user:"postgres",database:"bi
 await admin.connect();
 await admin.query(`CREATE SCHEMA ${schema}`);
 await admin.query(`SET search_path TO ${schema}`);
-for(const table of ["companies","users","projects","project_members","project_invitations","config_options","company_master_catalog_administrators","activity_log"])
+for(const table of ["companies","users","projects","project_members","project_invitations","config_options","company_master_catalog_administrators","activity_log","notifications"])
   await admin.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
 process.env.PROD_DATABASE_URL=`postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test?options=${encodeURIComponent('-csearch_path='+schema)}`;
 const {pool}=await import("@workspace/db");
@@ -52,7 +52,41 @@ try {
   assert.notEqual(one.replayed,two.replayed);
   assert.equal((await admin.query('SELECT count(*)::int n FROM project_members')).rows[0].n,1);
   assert.equal((await admin.query("SELECT count(*)::int n FROM activity_log WHERE action_type='accept_invitation'")).rows[0].n,1);
+  const notices=(await admin.query("SELECT * FROM notifications WHERE type='invitation_accepted'")).rows;
+  assert.equal(notices.length,1);assert.equal(notices[0].user_id,owner);
+  assert.equal(notices[0].action_url,`/projects/${project}/team`);
+  assert.equal(JSON.stringify(notices).includes(second.token),false);
   assert.equal((await admin.query('SELECT company_id FROM users WHERE id=$1',[recipient])).rows[0].company_id,company);
+  // Reinviting an active member with a stronger role must not silently escalate it.
+  const stronger=await inviteOrAddProjectMember({...input,role:'project_admin'});
+  if(stronger.kind!=='invited')throw new Error('fixture');
+  await accept(stronger.token);
+  assert.equal((await admin.query('SELECT role FROM project_members WHERE project_id=$1 AND user_id=$2',[project,recipient])).rows[0].role,'read_only');
+  assert.equal((await admin.query('SELECT count(*)::int n FROM project_members WHERE project_id=$1 AND user_id=$2',[project,recipient])).rows[0].n,1);
+  // A downstream failure rolls back membership, acceptance and audit together.
+  const rollbackUser=(await admin.query("INSERT INTO users(email,password_hash,full_name,company_id) VALUES('rollback@example.test','unused','TEST rollback',$1) RETURNING id",[company])).rows[0].id;
+  const rollbackInvite=await inviteOrAddProjectMember({...input,email:'rollback@example.test'});
+  if(rollbackInvite.kind!=='invited')throw new Error('fixture');
+  await assert.rejects(db.transaction(async tx=>{
+    const [user]=await tx.select().from(usersTable).where(eq(usersTable.id,rollbackUser)).for('update');
+    await acceptLockedInvitation(tx,await lockInvitation(tx,rollbackInvite.token,user.email),user);
+    throw new Error('TEST_ROLLBACK_AFTER_ACCEPTANCE');
+  }),/TEST_ROLLBACK_AFTER_ACCEPTANCE/);
+  assert.equal((await admin.query('SELECT count(*)::int n FROM project_members WHERE user_id=$1',[rollbackUser])).rows[0].n,0);
+  assert.equal((await admin.query('SELECT status FROM project_invitations WHERE id=$1',[rollbackInvite.row.id])).rows[0].status,'pending');
+  assert.equal((await admin.query("SELECT count(*)::int n FROM activity_log WHERE action_type='accept_invitation' AND entity_id=$1",[rollbackInvite.row.id])).rows[0].n,0);
+  assert.equal((await admin.query("SELECT count(*)::int n FROM notifications WHERE message LIKE $1",[`%#${rollbackInvite.row.id} /%`])).rows[0].n,0);
+  await accept(rollbackInvite.token,rollbackUser);
+  // Concurrent resends serialize onto one pending record; only its final token works.
+  const racing=await Promise.all([inviteOrAddProjectMember({...input,email:'rollback@example.test'}),inviteOrAddProjectMember({...input,email:'rollback@example.test'})]);
+  if(racing[0].kind!=='invited'||racing[1].kind!=='invited')throw new Error('fixture');
+  assert.equal(racing[0].row.id,racing[1].row.id);
+  const finalHash=(await admin.query('SELECT token_hash FROM project_invitations WHERE id=$1',[racing[0].row.id])).rows[0].token_hash;
+  const latest=racing.find(item=>item.kind==='invited'&&item.row.tokenHash===finalHash)!;
+  const obsolete=racing.find(item=>item.kind==='invited'&&item.row.tokenHash!==finalHash)!;
+  if(latest.kind!=='invited'||obsolete.kind!=='invited')throw new Error('fixture');
+  await assert.rejects(accept(obsolete.token,rollbackUser),/INVALID/);
+  await accept(latest.token,rollbackUser);
   const newInvite=await inviteOrAddProjectMember({...input,email:'new@example.test'});
   if(newInvite.kind!=='invited')throw new Error('fixture');
   const registration={email:'new@example.test',password:'Synthetic-test-only-12345!',fullName:'TEST new recipient',companyName:'Must never create this company'};
@@ -73,6 +107,16 @@ try {
   assert.equal(founder.status,201,JSON.stringify(founder.body));
   assert.notEqual(founder.body.user.companyId,company);
   assert.equal((await admin.query("SELECT count(*)::int n FROM company_master_catalog_administrators WHERE user_id=$1 AND state='active'",[founder.body.user.id])).rows[0].n,1);
+  // Conflicting company-join invitations cannot move an existing account or grant
+  // any project access in the other company, even when the credential is valid.
+  const foreignOwner=(await admin.query("INSERT INTO users(email,password_hash,full_name,company_id,is_super_admin) VALUES('foreign-owner@example.test','unused','TEST foreign owner',$1,true) RETURNING id",[founder.body.user.companyId])).rows[0].id;
+  const foreignProject=(await admin.query("INSERT INTO projects(name,code,status,created_by_id) VALUES('TEST foreign invitations','TEST-FOREIGN','active',$1) RETURNING id",[foreignOwner])).rows[0].id;
+  const conflict=await inviteOrAddProjectMember({...input,projectId:foreignProject,invitedByUserId:foreignOwner});
+  if(conflict.kind!=='invited')throw new Error('fixture');
+  await assert.rejects(accept(conflict.token),/TRANSFER_REQUIRES_ADMIN/);
+  assert.equal((await admin.query('SELECT company_id FROM users WHERE id=$1',[recipient])).rows[0].company_id,company);
+  assert.equal((await admin.query('SELECT count(*)::int n FROM project_members WHERE project_id=$1 AND user_id=$2',[foreignProject,recipient])).rows[0].n,0);
+  assert.equal((await admin.query('SELECT status FROM project_invitations WHERE id=$1',[conflict.row.id])).rows[0].status,'pending');
   const duplicate=await post('/auth/register',{...registration,email:'duplicate@example.test',companyName:'TEST genuinely new company.'});
   assert.equal(duplicate.status,409);assert.equal(duplicate.body.code,'COMPANY_JOIN_REQUIRED');
   const foreignInvite=await inviteOrAddProjectMember({...input,email:'founder@example.test'});
@@ -98,6 +142,7 @@ try {
   console.log('I008 real HTTP registration: link required, company join without duplicate, repeat denied, genuine founder PMO, punctuation duplicate denied; external collaboration preserves company PASS');
   console.log('I008 PostgreSQL: rotated-link denial, wrong-account denial, concurrent accept/replay, one membership, one audit, unchanged company PASS');
   console.log('I007 PostgreSQL: current inviter authority, invalid role denial, normalized recipient, resend rotation, no premature membership PASS');
+  console.log('I009 PostgreSQL: existing role preserved, all-or-nothing rollback, concurrent resend rotation, conflicting company-join denial PASS');
 } finally {
   await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));
   await pool.end();

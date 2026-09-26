@@ -1,5 +1,5 @@
 import {and,eq,sql} from "drizzle-orm";
-import {projectInvitations,projectMembersTable,usersTable,activityLogTable} from "@workspace/db/schema";
+import {projectInvitations,projectMembersTable,usersTable,activityLogTable,notificationsTable} from "@workspace/db/schema";
 import {invitationTokenHash,validateInvitationState} from "./invitation-token";
 import {invitationEmailLockKey,normalizeInvitationEmail,projectInvitationLockKey} from "./project-invitation-contract";
 import {requireInvitationAuthority,type InvitationTransaction} from "./project-invitation-service";
@@ -36,5 +36,11 @@ export async function acceptLockedInvitation(tx:InvitationTransaction,row:typeof
   await tx.insert(activityLogTable).values({projectId:row.projectId,userId:user.id,userFullName:user.fullName,
     userCompanyName:'',actionType:'accept_invitation',entityType:'invitation',entityId:row.id,
     details:JSON.stringify({purpose:row.purpose,companyId:row.companyId,invitedByUserId:row.invitedByUserId,preservedExistingRole:Boolean(existing)})});
+  // The existing in-app inbox receives the same atomic, replay-safe acceptance.
+  // Never include the invitation credential in notification content or URLs.
+  await tx.insert(notificationsTable).values({userId:row.invitedByUserId,projectId:row.projectId,
+    type:'invitation_accepted',title:'Invitation accepted / Invitación aceptada',
+    message:`${user.fullName} — invitation #${row.id} / invitación #${row.id}`,
+    actionUrl:`/projects/${row.projectId}/team`});
   return {projectId:row.projectId,replayed:false};
 }
