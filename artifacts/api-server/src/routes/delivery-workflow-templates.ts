@@ -95,6 +95,7 @@ router.get("/company/delivery-workflows/options", authMiddleware, async (req, re
 
 router.post("/company/delivery-workflows/preview", authMiddleware, async (req, res): Promise<void> => {
   const actor = await prepare(req, res, true); if (!actor) return;
+  await ensureWorkflowGovernancePolicySchema();
   try {
     const definition = validateDeliveryWorkflowDefinition(req.body?.definition);
     const connection = await pool.connect();
