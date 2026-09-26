@@ -6,6 +6,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const cli = resolve(root, "artifacts/api-server/node_modules/tsx/dist/cli.mjs");
 for (const name of [
   "folder-wizard-request-validation",
+  "folder-wizard-request-lifetime",
   "folder-wizard-graph-upload", "folder-wizard-publish-candidate",
   "folder-wizard-publish-candidate-route", "folder-wizard-publish-submission",
   "folder-wizard-publish-status", "folder-wizard-publish-lease",

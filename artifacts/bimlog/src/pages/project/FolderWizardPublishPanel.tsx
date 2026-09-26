@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FolderWizardRequestLifetime } from "./folder-wizard-request-lifetime";
 
 type SourceFile = { id: number; fileName: string; fileSize: number; status: string };
 type Routing = { projectProfile: { definition: { selectors: { tagKey: string }[];
@@ -20,21 +21,28 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState("");
+  const lifetime = useRef(new FolderWizardRequestLifetime());
+  const inFlight = useRef(false);
   const endpoint = `/api/v1/projects/${projectId}/integrations/folder-wizard`;
   useEffect(() => {
-    if (!token) return;
     const controller = new AbortController();
+    lifetime.current.invalidate(); inFlight.current = false;
+    setFiles([]); setRouting(null); setFileId(0); setTags({}); setResult(""); setBusy(false);
     setCandidate(null); setConfirming(false); setError("");
+    if (!token) return () => lifetime.current.invalidate();
     void Promise.all([
       fetch(`/api/v1/projects/${projectId}/files`, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal }),
       fetch(`${endpoint}/routing`, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal }),
     ]).then(async ([fileResponse, routingResponse]) => {
       if (!fileResponse.ok || !routingResponse.ok) throw new Error("LOAD_FAILED");
       if (controller.signal.aborted) return;
-      setFiles((await fileResponse.json() as SourceFile[]).filter((file) => file.status === "active" && file.fileSize > 0 && file.fileSize <= 10_485_760));
-      setRouting(await routingResponse.json() as Routing);
+      const loadedFiles = await fileResponse.json() as SourceFile[];
+      const loadedRouting = await routingResponse.json() as Routing;
+      if (controller.signal.aborted) return;
+      setFiles(loadedFiles.filter((file) => file.status === "active" && file.fileSize > 0 && file.fileSize <= 10_485_760));
+      setRouting(loadedRouting);
     }).catch(() => { if (!controller.signal.aborted) setError(tr("Could not load project files or routing rules.", "No se pudieron cargar los archivos o las reglas de rutas.")); });
-    return () => controller.abort();
+    return () => { controller.abort(); lifetime.current.invalidate(); };
   }, [projectId, token, lang]);
   const profile = routing?.projectProfile ?? routing?.companyProfile;
   const keys = [...new Set([...(profile?.definition.selectors ?? []).map((entry) => entry.tagKey),
@@ -48,29 +56,36 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
     return data;
   }
   async function preview() {
+    if (inFlight.current || !token || !fileId) return;
+    inFlight.current = true;
+    const current = lifetime.current.begin();
     setBusy(true); setError(""); setResult(""); setCandidate(null); setConfirming(false);
     try {
       const data = await request("/publishing-candidate", { fileId, tags }) as Candidate;
+      if (!current()) return;
       setCandidate(data);
       if (!data.ready) setError(tr("The destination is not ready. Review the setup above.", "El destino no está listo. Revise la configuración anterior."));
-    } catch { setError(tr("No exact route or verified file matched this selection.", "No se encontró una ruta exacta o un archivo verificado para esta selección.")); }
-    finally { setBusy(false); }
+    } catch { if (current()) setError(tr("No exact route or verified file matched this selection.", "No se encontró una ruta exacta o un archivo verificado para esta selección.")); }
+    finally { if (current()) { inFlight.current = false; setBusy(false); } }
   }
   async function publish() {
-    if (!candidate?.ready || !candidate.requestDigest) return;
+    if (inFlight.current || !token || !candidate?.ready || !candidate.requestDigest) return;
+    inFlight.current = true;
+    const current = lifetime.current.begin();
     setBusy(true); setError(""); setResult("");
     try {
       const data = await request("/publish", { fileId, tags, expectedDigest: candidate.requestDigest,
         confirmation: "publish_sharepoint" });
+      if (!current()) return;
       setResult(data.execution === "completed"
         ? tr("The exact file was published to SharePoint.", "El archivo exacto se publicó en SharePoint.")
         : data.execution === "retry" ? tr("Retry is available after the delay. Preview and confirm again later.", "El reintento estará disponible tras la espera. Actualice la vista previa y confirme de nuevo más tarde.")
         : tr("Review the publication status below before trying again.", "Revise el estado de publicación antes de volver a intentar."));
       setConfirming(false); setCandidate(null);
       await onChanged();
-    } catch { setError(tr("Publication was not confirmed. Refresh the preview and try again; no overwrite is attempted.",
+    } catch { if (current()) setError(tr("Publication was not confirmed. Refresh the preview and try again; no overwrite is attempted.",
       "No se confirmó la publicación. Actualice la vista previa y reintente; no se sobrescribe ningún archivo.")); }
-    finally { setBusy(false); }
+    finally { if (current()) { inFlight.current = false; setBusy(false); } }
   }
   return <section style={{ borderTop: "1px solid hsl(var(--border))", marginTop: 16, paddingTop: 16, fontSize: 12 }}>
     <h3 style={{ fontSize: 15, margin: "0 0 7px" }}>{tr("Publish a project file", "Publicar un archivo del proyecto")}</h3>
@@ -78,7 +93,7 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
       "Seleccione un archivo verificado del proyecto, revise su destino exacto en SharePoint y confirme. Nunca se sobrescriben archivos existentes.")}</p>
     {!routing?.canEditProject ? <p>{tr("Only a project administrator may publish.", "Solo un administrador del proyecto puede publicar.")}</p> : <>
       <label>{tr("Project file", "Archivo del proyecto")}
-        <select value={fileId} onChange={(event) => { setFileId(Number(event.target.value)); setCandidate(null); setConfirming(false); }}>
+        <select disabled={busy} value={fileId} onChange={(event) => { lifetime.current.invalidate(); setFileId(Number(event.target.value)); setCandidate(null); setConfirming(false); setResult(""); }}>
           <option value={0}>{tr("Select a file", "Seleccione un archivo")}</option>
           {files.map((file) => <option key={file.id} value={file.id}>{file.fileName} ({file.fileSize} B)</option>)}
         </select>
@@ -86,7 +101,7 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
       {files.length === 0 && <p>{tr("No eligible project file is available. Upload and verify one in Files first.",
         "No hay un archivo apto. Cargue y verifique uno en Archivos primero.")}</p>}
       {keys.map((key) => <label key={key} style={{ display: "block", marginTop: 8 }}>{key}
-        <input value={tags[key] ?? ""} onChange={(event) => { setTags((before) => ({ ...before, [key]: event.target.value })); setCandidate(null); setConfirming(false); }} />
+        <input disabled={busy} value={tags[key] ?? ""} onChange={(event) => { lifetime.current.invalidate(); setTags((before) => ({ ...before, [key]: event.target.value })); setCandidate(null); setConfirming(false); setResult(""); }} />
       </label>)}
       <button type="button" disabled={busy || !fileId} onClick={() => void preview()} style={{ display: "block", marginTop: 9 }}>
         {tr("Preview publication", "Vista previa de publicación")}</button>

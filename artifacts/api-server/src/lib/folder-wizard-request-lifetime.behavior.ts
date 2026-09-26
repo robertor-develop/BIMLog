@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import { FolderWizardRequestLifetime } from "../../../bimlog/src/pages/project/folder-wizard-request-lifetime";
+const lifetime = new FolderWizardRequestLifetime();
+const first = lifetime.begin();
+assert.equal(first(), true);
+const second = lifetime.begin();
+assert.equal(first(), false);
+assert.equal(second(), true);
+lifetime.invalidate();
+assert.equal(second(), false);
+const third = lifetime.begin();
+assert.equal(first(), false);
+assert.equal(third(), true);
+console.log("Folder Wizard async request invalidation: PASS");
