@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 process.env.PROD_DATABASE_URL ||= "postgresql://source-gate.invalid/bimlog";
-const { evaluateStaffingScenario,redactScenarioEvaluation } = await import("./team-resource-planning-service");
+const { evaluateStaffingScenario,redactScenarioEvaluation,resourcePlanningDate } = await import("./team-resource-planning-service");
+for(const invalid of ["2026-02-29","2026-02-30","2026-04-31","2026-13-01","2026-1-01",""])
+  assert.throws(()=>resourcePlanningDate(invalid,"startDate"),/real calendar date/);
+assert.equal(resourcePlanningDate("2028-02-29","startDate"),"2028-02-29");
+assert.equal(resourcePlanningDate("2026-12-31","endDate"),"2026-12-31");
 const { createTeamResourceMutationRateLimit } = await import("../middlewares/team-resource-planning-rate-limit");
 
 const root=path.resolve(import.meta.dirname,"../../../..");

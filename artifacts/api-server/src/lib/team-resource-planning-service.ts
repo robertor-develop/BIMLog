@@ -20,7 +20,13 @@ const externalScenarioKey = (projectId:number, value:string) => value.startsWith
 const storedEventKey = (projectId:number, value:string) => fingerprint({projectId,eventKey:value});
 function id(value: unknown, field: string) { const n=Number(value); if(!Number.isSafeInteger(n)||n<=0) throw new FinancialControlError(400,"TEAM_RESOURCE_ID_INVALID",`${field} is invalid.`); return n; }
 function text(value: unknown, field: string, min=1, max=200) { const s=String(value??"").trim(); if(s.length<min||s.length>max) throw new FinancialControlError(400,"TEAM_RESOURCE_TEXT_INVALID",`${field} is invalid.`); return s; }
-function date(value: unknown, field: string) { const s=String(value??""); if(!isoDate.test(s)||Number.isNaN(Date.parse(`${s}T00:00:00Z`))) throw new FinancialControlError(400,"TEAM_RESOURCE_DATE_INVALID",`${field} is invalid.`); return s; }
+export function resourcePlanningDate(value: unknown, field: string) {
+  const s=String(value??""),stamp=Date.parse(`${s}T00:00:00Z`);
+  if(!isoDate.test(s)||!Number.isFinite(stamp)||new Date(stamp).toISOString().slice(0,10)!==s)
+    throw new FinancialControlError(400,"TEAM_RESOURCE_DATE_INVALID",`${field} must be a real calendar date in YYYY-MM-DD format.`);
+  return s;
+}
+const date = resourcePlanningDate;
 function finite(value: unknown, field: string, min=0, max=1_000_000) { const n=Number(value); if(!Number.isFinite(n)||n<min||n>max) throw new FinancialControlError(400,"TEAM_RESOURCE_NUMBER_INVALID",`${field} is invalid.`); return n; }
 function nullableRate(value: unknown, field: string) { return value == null || value === "" ? null : finite(value,field,0); }
 function profile(value: any, options: { allowRates: boolean; existingRates?: Pick<Profile, "internalHourlyRate" | "billingHourlyRate"> } = { allowRates: true }): Profile {

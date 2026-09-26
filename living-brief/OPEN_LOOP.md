@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Resource Planning Builds 61–65 — 2026-09-26
+
+- [ ] Validate real calendar dates and availability profiles; evaluate assignment-window capacity without treating the whole scenario window as an assignment's availability. Keep all outputs advisory and approved hours/rates untouched.
+- [ ] Complete bilingual warnings, connected regression, exact-head push and publication after this block. R11–R15 already contribute five unpublished changes; this block reaches ten.
+- [ ] Full authenticated acceptance, actual SharePoint tenant delivery and remaining Resource/Earnings scope stay open. Lens Next is frozen.
+
 ## Runtime correction block R11–R15 — 2026-09-26
 
 - [x] Build 60 is published at source `800493e73cc46deaa9a1d9d3b761af9f30891208`, deployment `f04f3322`; external receipt `F:/BIMLog/TestProof/core-block12-builds56-60-release-20260926.md` supersedes the historical publication-pending entry below. Full live acceptance remains incomplete.
