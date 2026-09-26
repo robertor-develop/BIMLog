@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 1,
+  "scope": "C002 bounded recovery inventory; not a semantic equivalence or restoration claim",
+  "deletionAllowed": false,
+  "wholesaleMergeAllowed": false,
+  "sourceHead": "d21e4af3398857af7c324cf1a4973aa4f31f1e74",
+  "worktrees": [
+    {
+      "root": "F:/BIMLog/Repositories/bimlog",
+      "head": "835354da1ded3fd742e6b80246ea52f35de50aae",
+      "sourceMutated": false,
+      "files": [
+        {
+          "relative": ".replit",
+          "sourceSha256": "00dfc0960e429de36965d9f598cb3f24b2de9cf1d6fb253daee085200f5c9152",
+          "bytes": 471,
+          "currentSha256": "4113b0b19925049cf6c09927a4bad19ac8e0cfd51e0eeebcc7dcd9b4cf84e06f",
+          "identical": false,
+          "decision": "PRESERVE_ONLY",
+          "reason": "Outside bounded APU/Procore recovery; no mutation or deletion authorized.",
+          "compareWith": null
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-template-contract.behavior.ts",
+          "sourceSha256": "8adadf59a7b0d2dbe0589d3f05770c67a77f81675a7737fc4b2ec915672d479e",
+          "bytes": 7872,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-template-contract.ts",
+          "sourceSha256": "a0308381643ce1aea3689b7738e46807009537449ae11c8391629e585c11ccff",
+          "bytes": 12465,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/procore-rfi-project26-dry-run.behavior.ts",
+          "sourceSha256": "a1548fb2b74675ea700b99c5b4fe7424cd743e6415647468dbec0b72cbf3f495",
+          "bytes": 2194,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_NOT_IMPORT",
+          "reason": "Project26-specific dry-run wrapper; reuse current generic procore-rfi-import, never add customer-specific production authority.",
+          "compareWith": "artifacts/api-server/src/lib/procore-rfi-import.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/procore-rfi-project26-dry-run.ts",
+          "sourceSha256": "677b59d37b8cf93bc280cb5d3faf6771eeefe53fdd4de22b4d1e0d71c182345a",
+          "bytes": 2082,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_NOT_IMPORT",
+          "reason": "Project26-specific dry-run wrapper; reuse current generic procore-rfi-import, never add customer-specific production authority.",
+          "compareWith": "artifacts/api-server/src/lib/procore-rfi-import.ts"
+        }
+      ]
+    },
+    {
+      "root": "F:/BIMLog/Repositories/bimlog/.worktrees/commercial-financial-recovery-successor-20260731",
+      "head": "b80f455d75b9e8f202061364fe722dbc0183b598",
+      "sourceMutated": false,
+      "files": [
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-api-contract.behavior.ts",
+          "sourceSha256": "b47f8d8987a3f753f963530f25f4d3a3e614bead83a5cf1275e76eb33eaff788",
+          "bytes": 2882,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-api-contract.ts",
+          "sourceSha256": "8da1a256bd5bc562bf64e94eec51dc97d5cb3c74dfe1cd085006863b75997dd3",
+          "bytes": 5444,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-browser.behavior.ts",
+          "sourceSha256": "c954cabb61bf93d1122f665c2ce71c2d3dd88bf575bb49aad1da0b667c18bbf8",
+          "bytes": 6161,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-contract-adversarial.behavior.ts",
+          "sourceSha256": "8d00f20b89c276bff3dfbcd782d48bc804a023ef7b455dedf1b4f691b33309dc",
+          "bytes": 2649,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-phase2-readiness-contract.behavior.ts",
+          "sourceSha256": "95eb903e6cc1adac3056a8c5c2dc0ab9d40c842767ad559b91619f9cc19220da",
+          "bytes": 3313,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-phase2-readiness-contract.ts",
+          "sourceSha256": "27845d93a250804d9edcca5f5452874181d0a4e963f1d3d357864adaf7b3aa80",
+          "bytes": 5090,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-report-contract.behavior.ts",
+          "sourceSha256": "edf7f1e4cffbaa3c8e73b947f2d8070daa1bf33b82b7e82be846bfe738185922",
+          "bytes": 3324,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-report-contract.ts",
+          "sourceSha256": "39ed222312becc9fa5f67b1f870ef276f2b6837aa1e43056b7923b29bbc66b71",
+          "bytes": 7190,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-role-allocation-contract.behavior.ts",
+          "sourceSha256": "8d0bbac3cfaeee3e9de85e89be870643f1c2194553b83a4da0a6cf1313d603cd",
+          "bytes": 3630,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-role-allocation-contract.ts",
+          "sourceSha256": "4a65318d1f6a6188204da3bceefe216a1e48d5e0ecdb1973f34df713e5bfbc52",
+          "bytes": 7587,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-template-contract.behavior.ts",
+          "sourceSha256": "b1362bacce89cb7e7f4074e1c0f8464b4117347c6ef1b8ff6d507b6fe59857e2",
+          "bytes": 10341,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-template-contract.ts",
+          "sourceSha256": "bfb1192a457b9199fa5cc74e62eb861b7740e0da5e515d8a60f6d9089b7c7d77",
+          "bytes": 16340,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu-version-compatibility.behavior.ts",
+          "sourceSha256": "dda20a3691420b642542e35eef9c9e5538110c47d164e3f62f0f69699cf1b31e",
+          "bytes": 5422,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "artifacts/api-server/src/lib/generic-apu.security.behavior.ts",
+          "sourceSha256": "01ff1faf378be906f9d8ef9a3ab160fac257d6693809c105d1e6e03c81ed27be",
+          "bytes": 6531,
+          "currentSha256": null,
+          "identical": false,
+          "decision": "PRESERVE_COMPARE_IN_C011_C020",
+          "reason": "Unaccepted historical contract/test candidate. Names absent at current HEAD do not prove missing behavior; compare approved versions, snapshots and authority before any recovery.",
+          "compareWith": "artifacts/api-server/src/lib/company-pricing-template-contract.ts"
+        },
+        {
+          "relative": "scripts/check-database-safety.mjs",
+          "sourceSha256": "01c0fa4bf17d2d8cf982df389c610570dc0d2b584d08e4929b84633ae960b43c",
+          "bytes": 15615,
+          "currentSha256": "5acbde9428451253a660e89cc3f407e5edbae8f67def37b4284805fac8e330b7",
+          "identical": false,
+          "decision": "PRESERVE_NOT_REPLACE",
+          "reason": "Historical safety edits must not overwrite the current database protection implementation.",
+          "compareWith": "scripts/check-database-safety.mjs"
+        },
+        {
+          "relative": "scripts/test-database-safety.mjs",
+          "sourceSha256": "ad1175a97798b58abaec3e7ee5b99428b62ff0230045f1748c9d2ef0baf043be",
+          "bytes": 15037,
+          "currentSha256": "e26d8472b1155c7f694f304ab65b1f4cbb46a3815f892ec3d5ae02ab5babd9ea",
+          "identical": false,
+          "decision": "PRESERVE_NOT_REPLACE",
+          "reason": "Historical safety edits must not overwrite the current database protection implementation.",
+          "compareWith": "scripts/test-database-safety.mjs"
+        }
+      ]
+    },
+    {
+      "root": "F:/BIMLog/Repositories/bimlog/.worktrees/generic-apu-ui-20260805",
+      "head": "362c9533ab432206bbb2ed207bbf4d8746bf4260",
+      "sourceMutated": false,
+      "files": [
+        {
+          "relative": "artifacts/bimlog/apu-project-26-harness.html",
+          "sourceSha256": "050f55d8c164d0933129d3400f42726812d36da5d0352d70c3f5bb7ece1a3cb9",
+          "bytes": 356,
+          "currentSha256": "5241c00193ec27b475d53c88aca5b2a91992387b4948e0b07a10918b2f64fe8d",
+          "identical": false,
+          "decision": "PRESERVE_NOT_REPLACE",
+          "reason": "Old UI/harness changes cannot replace current APU workspace or sidebar wholesale; current canonical routes remain authoritative.",
+          "compareWith": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+        },
+        {
+          "relative": "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
+          "sourceSha256": "7447cdc0b5cdf0fa9d464a6eefc1a1e1d7e4c24adeb63ffb857585fd29fa7c17",
+          "bytes": 19346,
+          "currentSha256": "d7f6a84b10493c1642afce2d5e86780ec4480087cd3a771029eb65ec20125123",
+          "identical": false,
+          "decision": "PRESERVE_NOT_REPLACE",
+          "reason": "Old UI/harness changes cannot replace current APU workspace or sidebar wholesale; current canonical routes remain authoritative.",
+          "compareWith": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+        },
+        {
+          "relative": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "sourceSha256": "74c97236a2e7ea734b09175f59e597f89e4576fc5256d9b46bad7e1a2d7751e1",
+          "bytes": 25059,
+          "currentSha256": "cca8d7ca075561aedee661126906fdb01190fd0115bb9b28a5918494e0434170",
+          "identical": false,
+          "decision": "PRESERVE_NOT_REPLACE",
+          "reason": "Old UI/harness changes cannot replace current APU workspace or sidebar wholesale; current canonical routes remain authoritative.",
+          "compareWith": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+        },
+        {
+          "relative": "artifacts/bimlog/src/project-26-apu-harness.tsx",
+          "sourceSha256": "982d5e05e23f449f000d21bea6f2470581cefb8580058eacc9c972f6abc6cdf7",
+          "bytes": 5490,
+          "currentSha256": "d5de632cab211df0d282c7328297bd5498477cb49c798494168920f417d457d6",
+          "identical": false,
+          "decision": "PRESERVE_NOT_REPLACE",
+          "reason": "Old UI/harness changes cannot replace current APU workspace or sidebar wholesale; current canonical routes remain authoritative.",
+          "compareWith": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+        }
+      ]
+    }
+  ]
+}
