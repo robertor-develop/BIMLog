@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-C010 presentation repair — 2026-09-26
+
+Exact live source a93d2241 passed the calendar-date retest and coverage save/refresh checks; external consolidation-c006-c010-release-20260926.md records evidence. Before C011, repair the observed untranslated tracking headings/status and unassociated register field labels in the existing Submittals component. Stable filter values remain unchanged; shared status labels are reused. Source review also found the Shop indicator comparing against an impossible normalized type, corrected to Shop Drawing. Local typecheck passed before the final fixture addition; actual-component browser, regression and release verification remain required. C011-C015 have not started; no new production change or full acceptance claim.
+
 ## C010 live calendar-date correction — 2026-09-26
 
 Live synthetic project58 coverage creation, explicit linking, refresh persistence, missing-only filtering and unlinking passed. Package SUB-0001 entered with September26 displayed September25 in tracking: date-only strings were interpreted as UTC instants. The bounded repair parses calendar dates locally while retaining timestamp semantics; regression covers date components, invalid dates and timestamp identity. No stored data, schema or Lens Native changes. C006-C010 and denial-message repair are pushed; date repair requires clean release, push/publication and exact live retest. Full multi-role/platform acceptance remains open; this is not a full PASS.

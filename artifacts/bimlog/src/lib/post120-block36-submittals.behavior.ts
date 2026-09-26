@@ -14,6 +14,12 @@ import {
   submittalToEditorForm,
 } from "./submittal-editor-contract";
 import { createSubmittalHistoryScope, createSubmittalPresentationScope, submittalDisplayDate } from "./submittal-presentation-scope";
+import { submittalStatusLabel } from "./submittal-status-presentation";
+
+assert.equal(submittalStatusLabel("pending", "es"), "Pendiente");
+assert.equal(submittalStatusLabel("under_review", "es"), "En Revisión");
+assert.equal(submittalStatusLabel("pending", "en"), "Pending");
+assert.equal(submittalStatusLabel("historic_state", "es"), "historic_state");
 
 const calendar = submittalDisplayDate("2026-09-26");
 assert.equal(calendar.getFullYear(), 2026);
@@ -59,6 +65,10 @@ const page = readFileSync(new URL("../pages/project/SubmittalsTab.tsx", import.m
 const route = readFileSync(new URL("../../../api-server/src/routes/submittals.ts", import.meta.url), "utf8");
 assert.match(page, /filterSubmittals\(submittals, query\)/);
 assert.match(page, /createSubmittalPresentationScope/);
+assert.match(page, /<label htmlFor=\{id\}/);
+assert.equal((page.match(/id=\{props.id \?\? fieldId\}/g) || []).length, 3);
+assert.match(page, /submittalStatusLabel\(s.status, lang\)/);
+assert.match(page, /trackerDisplayLabel\(option.label\)/);
 assert.match(page, /submittalToEditorForm\(submittal\)/);
 assert.match(page, /buildSubmittalUpdateRequest\(editForm, submittal\.updatedAt\)/);
 assert.match(page, /buildSubmittalReviewRequest\(\{ reviewDecision, complianceNotes, rejectionReason, expectedUpdatedAt: submittal\.updatedAt \}\)/);

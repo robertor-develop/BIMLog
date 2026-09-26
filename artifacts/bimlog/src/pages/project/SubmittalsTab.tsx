@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Fragment, useMemo } from "react";
+import { useState, useEffect, useRef, Fragment, useMemo, useId, createContext, useContext } from "react";
 import { useListSubmittals, useCreateSubmittal } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
@@ -18,7 +18,7 @@ import {
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { SubmittalRegisterCoverage } from "@/components/SubmittalRegisterCoverage";
-import { SUBMITTAL_STATUS_BADGES as STATUS_BADGE } from "@/lib/submittal-status-presentation";
+import { SUBMITTAL_STATUS_BADGES as STATUS_BADGE, submittalStatusLabel } from "@/lib/submittal-status-presentation";
 import { OptionalSharePanel } from "@/components/OptionalSharePanel";
 import { format, differenceInDays, isValid } from "date-fns";
 import {
@@ -204,23 +204,28 @@ function PanelSection({ title }: { title: string }) {
 }
 
 // ─── Field row ────────────────────────────────────────────────────────────────
+const FieldId = createContext<string | undefined>(undefined);
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  const id = useId();
   return (
     <div style={{ marginBottom: 10 }}>
-      <div style={{ fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>{label}</div>
-      <div>{children}</div>
+      <label htmlFor={id} style={{ display: "block", fontSize: 10, fontWeight: 600, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 3 }}>{label}</label>
+      <FieldId.Provider value={id}><div>{children}</div></FieldId.Provider>
     </div>
   );
 }
 
 function FieldInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
-  return <input {...props} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, ...props.style }} />;
+  const fieldId = useContext(FieldId);
+  return <input {...props} id={props.id ?? fieldId} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, ...props.style }} />;
 }
 function FieldSelect(props: React.SelectHTMLAttributes<HTMLSelectElement> & { children: React.ReactNode }) {
-  return <select {...props} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, background: "white", ...props.style }} />;
+  const fieldId = useContext(FieldId);
+  return <select {...props} id={props.id ?? fieldId} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, background: "white", ...props.style }} />;
 }
 function FieldTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea {...props} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, resize: "vertical", ...props.style }} />;
+  const fieldId = useContext(FieldId);
+  return <textarea {...props} id={props.id ?? fieldId} style={{ width: "100%", border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13, resize: "vertical", ...props.style }} />;
 }
 
 function downloadBlob(blob: Blob, filename: string) {
@@ -393,6 +398,11 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
   }, [projectId]);
 
   const TRADE_ORDER = ["Plumbing", "HVAC", "Fire Protection", "Electrical", "Architectural", "Other"];
+  function trackerDisplayLabel(value: string): string {
+    if (lang !== "es") return value;
+    const labels: Record<string, string> = { Plumbing: "Plomería", "Fire Protection": "Protección contra incendios", Electrical: "Eléctrica", Architectural: "Arquitectura", Other: "Otro", "Sleeve V": "Sleeve vertical", "Sleeve H": "Sleeve horizontal" };
+    return labels[value] ?? CATEGORY_OPTIONS.find(option => option.label === value)?.labelEs ?? value;
+  }
   function tradeOf(s: Submittal): string {
     if (s.trade) return tradeLabel(s.trade);
     const t = (s.submittalCategory ?? s.submittalType ?? "").toLowerCase();
@@ -579,14 +589,14 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           {w("Trade", "Disciplina", lang)}
           <select className="input" value={filterTrade} onChange={e => setFilterTrade(e.target.value)}>
             <option value="">{w("All Trades", "Todas las Disciplinas", lang)}</option>
-            {filterOptions.trades.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            {filterOptions.trades.map(option => <option key={option.value} value={option.value}>{trackerDisplayLabel(option.label)}</option>)}
           </select>
         </label>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
           {w("Drawing Type", "Tipo de Plano", lang)}
           <select className="input" value={filterType} onChange={e => setFilterType(e.target.value)}>
             <option value="">{w("All Drawing Types", "Todos los Tipos de Plano", lang)}</option>
-            {filterOptions.types.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            {filterOptions.types.map(option => <option key={option.value} value={option.value}>{trackerDisplayLabel(option.label)}</option>)}
           </select>
         </label>
         <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 800, color: "#475569" }}>
@@ -600,7 +610,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
           {w("Review Status", "Estado de Revision", lang)}
           <select className="input" value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
             <option value="">{w("All Review Statuses", "Todos los Estados de Revision", lang)}</option>
-            {filterOptions.statuses.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            {filterOptions.statuses.map(option => <option key={option.value} value={option.value}>{submittalStatusLabel(option.label, lang)}</option>)}
           </select>
         </label>
         <Button
@@ -636,7 +646,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ background: "#F9FAFB" }}>
-              {["Building Level","Shop","Sleeve V","Sleeve H","Review","Date","Description","Review Status","Version","RFI Open","RFI Close","RFI Description"].map(h => (
+              {(lang === "es" ? ["Nivel","Plano de taller","Sleeve vertical","Sleeve horizontal","Revisión","Fecha","Descripción","Estado de revisión","Versión","RFI abierto","RFI cerrado","Descripción del RFI"] : ["Building Level","Shop","Sleeve V","Sleeve H","Review","Date","Description","Review Status","Version","RFI Open","RFI Close","RFI Description"]).map(h => (
                 <th key={h} style={{ padding: "8px 10px", fontSize: 10, fontWeight: 700, color: "#374151",
                   textAlign: "left", textTransform: "uppercase", whiteSpace: "nowrap", borderBottom: "1px solid #E5E7EB" }}>{h}</th>
               ))}
@@ -647,7 +657,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
               <Fragment key={tr}>
                 <tr>
                   <td colSpan={12} style={{ background: "#1E3A5F", color: "white", padding: "6px 12px",
-                    fontWeight: 800, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr}</td>
+                    fontWeight: 800, fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>{trackerDisplayLabel(tr)}</td>
                 </tr>
                 {Object.keys(grouped[tr]).sort().map(fl => (
                   <Fragment key={tr + fl}>
@@ -661,7 +671,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
                       return (
                         <tr key={s.id} style={{ borderBottom: "1px solid #F3F4F6" }}>
                           <td style={{ padding: "6px 10px", fontSize: 11 }}>{fl}</td>
-                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{trackerType === "Shop" ? "Yes" : ""}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11 }}>{trackerType === "Shop Drawing" ? w("Yes", "Sí", lang) : ""}</td>
                           <td style={{ padding: "6px 10px", fontSize: 11 }}>{trackerType === "Sleeve V" ? "X" : ""}</td>
                           <td style={{ padding: "6px 10px", fontSize: 11 }}>{trackerType === "Sleeve H" ? "X" : ""}</td>
                           <td style={{ padding: "6px 10px" }}>{approvalCell(s)}</td>
@@ -669,7 +679,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
                             {trackerDate ? trackerDateLabel(trackerDate) : "-"}
                           </td>
                           <td style={{ padding: "6px 10px", fontSize: 11, maxWidth: 240 }}>{s.title}</td>
-                          <td style={{ padding: "6px 10px", fontSize: 11, color: "#6B7280", whiteSpace: "nowrap" }}>{s.status}</td>
+                          <td style={{ padding: "6px 10px", fontSize: 11, color: "#6B7280", whiteSpace: "nowrap" }}>{submittalStatusLabel(s.status, lang)}</td>
                           <td style={{ padding: "6px 10px", fontSize: 11, color: "#374151", whiteSpace: "nowrap" }}>
                             R{(s as any).revisionNumber ?? 0}
                           </td>
