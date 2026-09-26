@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Core Builds 56–60 runtime safeguards — 2026-09-26
+
+- [x] Reconcile Build 55 push and passing gate from the external block 11 receipt.
+- [x] Require observed revisions, independent review and active assigned membership. Verify denied final approval leaves revision/audit unchanged; show honest saved-but-refresh-failed state. Disposable runtime and 28 local browser scenarios pass.
+- [ ] Gate, push and publish Build 60; verify exact production source and full authenticated Chrome smoke. Ten unpublished builds is the limit; no further block before publication.
+- [ ] Complete remaining policy/runtime and full template-to-Operations acceptance plus actual SharePoint tenant delivery. Original planned remainder is 20 builds/four blocks; Lens Next remains frozen.
+
 ## Core Builds 51–55 Governance review continuity — 2026-09-26
 
 - [x] Reconcile the published Build 50 source `93db6e99fa450c0d4072371afb0fb26f9b3210d5`, deployment `7eade195`, from the external block 10 release receipt. Earlier pending release notes are historical; full-site acceptance remains incomplete.

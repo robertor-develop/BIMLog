@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Core operating chain Builds 56–60 — 2026-09-26
+
+- Build 55 was gated and pushed at `fbaf7ea7f8d1e779211dd1b1cc51bf24c7578752`; external receipt `F:/BIMLog/TestProof/core-block11-builds51-55-push-20260926.md` supersedes its candidate notes. Production remains Build 50 until this release is verified.
+- Builds 56–59 require numeric observed revisions, independent phase review, active assigned project membership, and honest post-save refresh/error states. No production permissions, schema or Lens Next changes.
+- Build 60 adds independent final-approval and unchanged-audit regression. Disposable PostgreSQL runtime passes; 28 local Chrome component scenarios pass across English/Spanish and desktop/mobile. These are not authenticated production acceptance.
+- Ten builds now require exact-head gate, push, Replit publication and authenticated Chrome smoke before another block. Original planned remainder: 20 builds/four blocks, not a guarantee that unresolved gaps fit the estimate. Runtime policy hierarchy/threshold enforcement, full template-to-Operations acceptance and real SharePoint tenant delivery remain open.
+
 ## Core operating chain Builds 51–55 — 2026-09-26
 
 - Prior Builds 46–50 are pushed and published at `93db6e99fa450c0d4072371afb0fb26f9b3210d5`, deployment `7eade195`. External receipt `F:/BIMLog/TestProof/core-block10-builds46-50-release-20260926.md` supersedes pending-publication descriptions below. Affected authenticated workflow regression passed; full-site acceptance did not.

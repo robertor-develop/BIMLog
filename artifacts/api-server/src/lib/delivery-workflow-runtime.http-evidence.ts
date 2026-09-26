@@ -90,6 +90,13 @@ runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project
 await assert.rejects(approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"}),/Required DRAWING evidence/);
 await linkWorkItemDeliveryEvidence({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,phaseId:"for_record",taskId:"issue",documentCode:"DRAWING",fileId});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+await pool.query(`UPDATE company_delivery_workflow_roles SET user_id=$2 WHERE work_item_id=$1 AND role='approve'`,[workItemId,producer]);
+await assert.rejects(approveWorkItemDeliveryPhase({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"}),
+  (error:unknown) => (error as {code?:string}).code === "DELIVERY_WORKFLOW_INDEPENDENT_REVIEW_REQUIRED");
+const afterSelfApproval = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+assert.equal(afterSelfApproval.revision,runtime.revision);
+assert.equal(afterSelfApproval.events.length,runtime.events.length);
+await pool.query(`UPDATE company_delivery_workflow_roles SET user_id=$2 WHERE work_item_id=$1 AND role='approve'`,[workItemId,owner]);
 await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision,kind:"approval"});
 runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 await advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId,expectedRevision:runtime.revision});
