@@ -34,6 +34,11 @@ for (const malformed of [null, {}, { ...data, members: null }, { ...data, tasks:
 }
 
 const english = render();
+assert.match(english, /Saved scenario review evidence/);
+assert.match(english, /Proposed member.*Alicia Rivera/);
+assert.match(english, /24 advisory hours/);
+assert.match(english, /Reviewed staffing proposal/);
+assert.doesNotMatch(render({ selectedScenarioId: "" }), /Saved scenario review evidence/);
 for (const expected of ["Resource Scheduling &amp; Assignment Execution", "nothing is secretly scored or automatically assigned", "Alicia Rivera", "NORTH", "12.50h", "Verified evidence", "Saved immutable scenarios", "Apply changes only eligible direct task assignees", "Review warnings, leave, the current capacity profile, authorized commitments, verified evidence", "Apply reviewed assignees", "Scenario hours are never written"]) assert.match(english, new RegExp(expected, "i"));
 assert.match(english, /MEP coordination \(7\)/);
 assert.match(english, /type="checkbox"/);
