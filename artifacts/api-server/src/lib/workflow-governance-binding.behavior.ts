@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { FinancialControlError } from "./financial-control-contract";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
-import { assertGovernanceChangeAllowed, assertWorkflowReplacementAllowed, workflowDefinitionChanges, validatePublishedWorkflowsForPolicy, validateWorkflowReplacementForPolicy } from "./workflow-governance-binding";
+import { assertGovernanceChangeAllowed, assertWorkflowReplacementAllowed, workflowDefinitionChanges, validatePublishedWorkflowsForPolicy, validateWorkflowReplacementForPolicy, previewWorkflowGovernance } from "./workflow-governance-binding";
 import { validateWorkflowGovernancePolicy } from "./workflow-governance-policy-contract";
 
 const workflow = validateDeliveryWorkflowDefinition({
@@ -70,3 +70,10 @@ priorRows[0].fingerprint = "invalid";
 await assert.rejects(validateWorkflowReplacementForPolicy(replacementClient,7,"target",2,policy,workflow),
   (error: unknown) => error instanceof FinancialControlError && error.code === "DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH");
 console.log("Replacement baseline scope, first release, retired history and integrity checks PASS");
+const noRows = { async query() { return { rows: [] }; } };
+assert.equal(await previewWorkflowGovernance(noRows,7,workflow,{}),null);
+await assert.rejects(previewWorkflowGovernance(noRows,7,workflow,{templateId:"target"}),
+  (error:unknown) => error instanceof FinancialControlError && error.code === "WORKFLOW_PREVIEW_CONTEXT_INVALID");
+await assert.rejects(previewWorkflowGovernance(noRows,7,workflow,{templateId:"foreign",versionId:"version"}),
+  (error:unknown) => error instanceof FinancialControlError && error.status === 404);
+console.log("Governed preview context: paired identities and missing/foreign scope denied PASS");

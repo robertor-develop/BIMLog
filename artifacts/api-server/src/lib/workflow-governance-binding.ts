@@ -86,6 +86,29 @@ export async function validateWorkflowReplacementForPolicy(client: Queryable, co
   assertWorkflowReplacementAllowed(policy, baseline, definition);
 }
 
+export async function previewWorkflowGovernance(client: Queryable, companyId: number,
+  definition: DeliveryWorkflowDefinition, context: { templateId?: unknown; versionId?: unknown }) {
+  const hasContext = context.templateId !== undefined || context.versionId !== undefined;
+  let templateId: string | null = null;
+  let version = 1;
+  if (hasContext) {
+    const validId = (value: unknown): value is string => typeof value === "string" && /^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(value);
+    if (!validId(context.templateId) || !validId(context.versionId))
+      throw new FinancialControlError(400,"WORKFLOW_PREVIEW_CONTEXT_INVALID","Select an exact workflow version for preview.");
+    const row = (await client.query(`SELECT t.id,v.version FROM company_delivery_workflow_templates t
+      JOIN company_delivery_workflow_versions v ON v.template_id=t.id
+      WHERE t.company_id=$1 AND t.id=$2 AND v.id=$3`, [companyId,context.templateId,context.versionId])).rows[0];
+    if (!row) throw new FinancialControlError(404,"DELIVERY_WORKFLOW_NOT_FOUND","Workflow version not found in this company.");
+    templateId = String(row.id);
+    version = Number(row.version);
+  }
+  const policy = applicablePublishedGovernance(await publishedGovernanceRows(client,companyId),templateId);
+  if (!policy) return null;
+  validateWorkflowAgainstGovernance(policy.definition,definition);
+  if (templateId) await validateWorkflowReplacementForPolicy(client,companyId,templateId,version,policy.definition,definition);
+  return { code: policy.code, version: policy.version, versionId: policy.versionId, fingerprint: policy.fingerprint };
+}
+
 export async function validatePublishedWorkflowsForPolicy(client: Queryable, companyId: number,
   policy: WorkflowGovernancePolicy): Promise<void> {
   const rows = (await client.query(`SELECT t.id "templateId",v.definition,v.fingerprint
