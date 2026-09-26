@@ -6,6 +6,7 @@ import { createFolderWizardPublishJob } from "./folder-wizard-publish-job";
 import { FolderWizardPublishQueue } from "./folder-wizard-publish-queue";
 import { FolderWizardPublishLeaseStore } from "./folder-wizard-publish-lease";
 import { FolderWizardPublishSettlement } from "./folder-wizard-publish-settlement";
+import { createFolderWizardDestinationStore } from "./folder-wizard-destination";
 
 const rawUrl = process.env.BIMLOG_FOLDER_WIZARD_TEST_DATABASE_URL;
 if (!rawUrl) throw new Error("FOLDER_WIZARD_TEST_DATABASE_REQUIRED");
@@ -52,8 +53,18 @@ try {
     secret_tag,wrapped_data_key,wrap_iv,wrap_tag,key_version,created_by_id)
     VALUES($1,$2,'sharepoint',$3,'active','synthetic','synthetic','synthetic','synthetic','synthetic','synthetic',1,$4)`,
     [id("credential"), companyId, id("Wizard Test"), userId]);
-  await pool.query(`INSERT INTO sharepoint_project_mappings(id,company_id,project_id,credential_id,site_id,library_id,created_by_id)
-    VALUES($1,$2,$3,$4,'site-test','library-test',$5)`, [id("mapping"), companyId, projectId, id("credential"), userId]);
+  const destinations = createFolderWizardDestinationStore(pool as never, { async verify(input) {
+    assert.equal(input.companyId, companyId);
+    return { siteUrl: "https://test.sharepoint.com/sites/qa", libraryId: input.libraryId };
+  } });
+  const destinationScope = { projectId, actorUserId: userId };
+  const destinationInput = { credentialId: id("credential"), siteId: "site-test", libraryId: "library-test", confirmation: "configure_sharepoint_destination" };
+  assert.equal((await destinations.read(destinationScope)).current, null);
+  assert.equal((await destinations.create(destinationScope, destinationInput)).result, "created");
+  assert.equal((await destinations.create(destinationScope, destinationInput)).result, "idempotent");
+  await assert.rejects(destinations.create(destinationScope, { ...destinationInput, libraryId: "different-library" }), /CONFLICT/);
+  assert.equal((await destinations.read(destinationScope)).current?.libraryId, "library-test");
+  assert.equal(Number((await pool.query("SELECT count(*) FROM admin_actions_log WHERE action='sharepoint_destination_configured' AND target_id=$1", [String(projectId)])).rows[0].count), 1);
   await pool.query(`INSERT INTO folder_wizard_imports(id,company_id,project_id,version,source_sha256,source_text,imported_by_id)
     VALUES($1,$2,$3,1,$4,'{}',$5)`, [id("import"), companyId, projectId, digest, userId]);
   await pool.query(`INSERT INTO folder_wizard_current_imports(project_id,company_id,import_id,designated_by_id)
