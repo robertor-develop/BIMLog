@@ -45757,11 +45757,13 @@
       ],
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/approved-contract-economic-source.ts",
         "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
         "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
         "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
         "artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts",
         "artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/contract-economic-pool-service.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-service.ts",
@@ -45781,6 +45783,9 @@
         "artifacts/api-server/src/routes/financial-apu.ts",
         "artifacts/api-server/src/routes/financial-contracts.ts",
         "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+        "artifacts/bimlog/src/components/commercial/ContractPoolPreparation.tsx",
+        "artifacts/bimlog/src/components/commercial/ContractProductionAllocationReview.behavior.tsx",
+        "artifacts/bimlog/src/components/commercial/ContractProductionAllocationReview.tsx",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
         "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
@@ -45796,9 +45801,10 @@
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
+        "scripts/test-workflow-database-fixture.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "4d51a6e532834efe99009ee903356e733e64332afbbc58538c8ded2850853a12"
+      "reviewedChangeSha256": "a50ab05f979b18673a20121291c2cc410c2e165dccfa00e5e0f83f3eadc356de"
     }
   ]
 }
