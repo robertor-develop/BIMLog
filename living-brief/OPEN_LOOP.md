@@ -1,5 +1,7 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+C020 current20882eab exactlive after one Replit bundle-layer retry. Drafter project60 InsightsPASS with role redaction; maker budget self-approval denied. Fix misleading maker review controls, then fullgate/push/publish/exactretest. Synthetic60 budget600USD under_review awaits project-only effective approval policies through normalUI; Intake notactivated. Complete matched contract/funding/executor-time/bonus/report acceptance before C021. Lens unchanged.
+
 C020 current9205611a live and membershipcreationPASS EN/ES/refresh. Configured drafter membership then fails Project Insights read access under normal signed-in19 navigation; scoped-role map excludes it. Explicit bounded drafter mapping and negative tests prepared, focusedPASS; repeat fullgate/push/publish/live. Project60 draft+APUplanv1 saved; budgetnotcreated and Intake notactivated. Matched funding/executor-time/bonus/report acceptance remains open.
 
 C020 current: exact7f45 live; project59 contract approval/reserves pass. New synthetic60 QA-C020-MATCH draft has published company workflowv1/APUv3 and canonical client55; not activated. Add existing user19 failed422 because Intake sent hardcoded member despite configured roles. Repair explicit configured role selector (excluding administrator transfer), test/push/publish/retest exact failure. Remaining matched funding, executor time, bonus/report acceptance open. Do not weaken PMO/TIME_SUBMIT boundaries or modify frozen59.

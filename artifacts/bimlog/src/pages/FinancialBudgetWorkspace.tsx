@@ -543,6 +543,7 @@ function Budget({
   token: string;
   reload: () => void;
 }) {
+  const { user } = useAuthStore();
   const [busy, setBusy] = useState(""),
     [message, setMessage] = useState(""),
     [overrideReason, setOverrideReason] = useState(""),
@@ -879,15 +880,19 @@ function Budget({
                 )}
                 {b.status === "under_review" && (
                   <>
-                    <button
-                      disabled={busy === b.id}
-                      onClick={() => act(b, "approve")}
-                    >
-                      {tt(
-                        "Confirm exact approval",
-                        "Confirmar aprobación exacta",
-                      )}
-                    </button>
+                    {Number(b.prepared_by_id) === Number(user?.id) ? (
+                      <p>{tt("The budget maker cannot review or approve this request. Ask an independent reviewer.", "Quien preparó el presupuesto no puede revisar ni aprobar esta solicitud. Solicite un revisor independiente.")}</p>
+                    ) : (
+                      <button
+                        disabled={busy === b.id}
+                        onClick={() => act(b, "approve")}
+                      >
+                        {tt(
+                          "Confirm exact approval",
+                          "Confirmar aprobación exacta",
+                        )}
+                      </button>
+                    )}
                     <details className="fb-owner-override">
                       <summary>
                         {tt(
@@ -929,18 +934,16 @@ function Budget({
                         )}
                       </button>
                     </details>
-                    <button
-                      disabled={busy === b.id}
-                      onClick={() => act(b, "return")}
-                    >
-                      {tt("Return", "Devolver")}
-                    </button>
-                    <button
-                      disabled={busy === b.id}
-                      onClick={() => act(b, "reject")}
-                    >
-                      {tt("Reject", "Rechazar")}
-                    </button>
+                    {Number(b.prepared_by_id) !== Number(user?.id) && (
+                      <>
+                        <button disabled={busy === b.id} onClick={() => act(b, "return")}>
+                          {tt("Return", "Devolver")}
+                        </button>
+                        <button disabled={busy === b.id} onClick={() => act(b, "reject")}>
+                          {tt("Reject", "Rechazar")}
+                        </button>
+                      </>
+                    )}
                   </>
                 )}
               </div>

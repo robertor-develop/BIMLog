@@ -602,6 +602,10 @@ check(
 );
 assert.match(browser, /Confirm exact approval/);
 check("exact approval confirmation visible", "complete controlled action");
+assert.match(browser, /Number\(b\.prepared_by_id\) === Number\(user\?\.id\)/);
+assert.match(browser, /The budget maker cannot review or approve this request/);
+assert.match(browser, /Number\(b\.prepared_by_id\) !== Number\(user\?\.id\)/);
+check("maker cannot see ordinary review actions", "server denial is reflected in the budget UI");
 assert.match(browser, /Sole-owner approval override/);
 assert.match(browser, /SOLE_OWNER_OVERRIDE/);
 assert.match(browser, /Approve with owner override/);
@@ -646,7 +650,7 @@ assert.match(service, /ROLLBACK/);
 check("failed snapshot or audit rolls back", "single transaction helper");
 assert.match(service, /financial_authority_journal/);
 check("accepted append-only audit reused", "no second audit system");
-assert.equal(checks.length, 76);
+assert.equal(checks.length, 77);
 console.log(
   JSON.stringify(
     { suite: "cost-financial-control-build-2-pure", status: "passed", checks },
