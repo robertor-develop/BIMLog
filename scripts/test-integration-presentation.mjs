@@ -33,3 +33,10 @@ assert.match(access, /does not grant company financial authority or allow self-a
 assert.match(access, /permission, state, reason: reason\.trim\(\)/);
 assert.match(read("artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx"), /<ContractRecordAccess key=/);
 console.log("C020 record-access presentation PASS: named project members, bilingual explicit permissions, mandatory reason and authority explanation");
+const contracts = read("artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx");
+assert.match(contracts, /overBudgetReason: approvalReasons\[contract.versionId\]\?\.trim\(\) \|\| undefined/);
+assert.match(contracts, /Approval exception reason \(when required\)/);
+assert.match(contracts, /Motivo de excepción de aprobación \(cuando corresponda\)/);
+assert.doesNotMatch(contracts, /window\.prompt\(tt\("If this exceeds budget/);
+assert.match(contracts, /expectedRevision: contract.revision, confirmationFingerprint: contract.contentFingerprint/);
+console.log("C020 approval input PASS: visible bilingual version-scoped reason, no native approval prompt, unchanged revision/fingerprint checks");
