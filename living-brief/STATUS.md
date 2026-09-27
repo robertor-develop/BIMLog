@@ -1,5 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
+Release verification checkpoint: contract-funding local HTTP and Chrome component checks pass, but the complete clean gate is not yet passed. Fixed the stale four-fixture expectation; the network-enabled rerun cleared dependency audit and then caught the new endpoints missing from the committed route graph. The existing release-preparation updater now regenerates both platform and route inventories before hashing, with an ordering regression plus unchanged exact route-graph equality. Focused route test passes (53 frontend/683 API routes). No push/publication; repeat the full gate on the corrected clean checkpoint.
+
 ## C017/C018 contract reserve connection — 2026-09-27
 
 The existing independent contract approval now includes explicit Intake production allocations in each financial contract line/fingerprint. Review displays the five contract pools once and item production separately. Approved contract source resolution checks current project/company/record access, independent approval, pinned budget, historical APU integrity, exact frozen item allocations and totals. New immutable `job_contract_economic_pools` stores one full approved source per contract; repeats reuse it and a conflicting version or legacy Work Item reserve requires reconciliation rather than duplicate funding. SQL and Drizzle add this table and an optional contract funding foreign key to bonus proposals while preserving legacy funding identities with an exactly-one-source constraint. No production migration has been applied.

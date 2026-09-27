@@ -45801,10 +45801,12 @@
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
+        "scripts/test-post120-block37.mjs",
         "scripts/test-workflow-database-fixture.mjs",
+        "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "a50ab05f979b18673a20121291c2cc410c2e165dccfa00e5e0f83f3eadc356de"
+      "reviewedChangeSha256": "b193c09b721c446486e93eba0dfff0abbace1ba772149f442dd463be641d4176"
     }
   ]
 }

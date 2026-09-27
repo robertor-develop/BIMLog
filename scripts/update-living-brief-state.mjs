@@ -48,6 +48,11 @@ execFileSync(process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") :
     ? ["/d", "/s", "/c", "pnpm --filter @workspace/api-server run generate:platform"]
     : ["--filter", "@workspace/api-server", "run", "generate:platform"],
   { cwd: root, stdio: "inherit", windowsHide: true });
+// Keep the second source-derived inventory in the same pre-hash refresh path.
+// The release test still compares it exactly against source; never relax that gate.
+execFileSync(process.execPath, ["scripts/route-interconnection-graph.mjs", "--output",
+  "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json"],
+  { cwd: root, stdio: "inherit", windowsHide: true });
 const changedPaths = git("diff", "--name-only", reconciledThroughCommit, "--", ".")
   .split(/\r?\n/).filter(Boolean).map((value) => value.replaceAll("\\", "/"))
   .filter((value) => value !== "living-brief/state.json").sort();

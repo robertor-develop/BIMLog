@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 681,
+    "apiRoutes": 683,
     "frontendApiReferences": 257,
     "routeOwnedTables": 61
   },
@@ -4159,6 +4159,18 @@
       "method": "GET",
       "path": "/projects/:projectId/financial/snapshots/:snapshotId/export.xlsx",
       "owner": "artifacts/api-server/src/routes/financial-budgets.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",
+      "owner": "artifacts/api-server/src/routes/financial-contracts.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",
+      "owner": "artifacts/api-server/src/routes/financial-contracts.ts",
       "tables": []
     },
     {

@@ -9,6 +9,10 @@ const graph = buildRouteInterconnectionGraph();
 const recorded = JSON.parse(read("evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json"));
 
 assert.deepEqual(recorded, graph, "the committed route graph must exactly match tracked source");
+const releasePreparation=read("scripts/update-living-brief-state.mjs");
+assert.ok(releasePreparation.indexOf('"scripts/route-interconnection-graph.mjs"')>=0&&
+  releasePreparation.indexOf('"scripts/route-interconnection-graph.mjs"')<releasePreparation.indexOf('const changedPaths'),
+  "release preparation refreshes the source-derived route inventory before hashing changed files");
 assert.ok(graph.counts.frontendRoutes >= 35, "all routed frontend surfaces remain inventoried");
 assert.ok(graph.counts.apiRoutes >= 450, "the complete API route surface remains inventoried");
 assert.ok(graph.counts.frontendApiReferences >= 100, "screen-to-API references remain represented");
