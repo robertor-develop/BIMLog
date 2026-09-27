@@ -45797,6 +45797,7 @@
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
         "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
         "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
         "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
         "artifacts/bimlog/src/pages/company-pricing-errors.behavior.ts",
@@ -45810,13 +45811,14 @@
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
+        "scripts/test-integration-presentation.mjs",
         "scripts/test-post120-block27.mjs",
         "scripts/test-post120-block37.mjs",
         "scripts/test-workflow-database-fixture.mjs",
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "c2a0e12a5923709cef29dc7e3fc22951c385419e0aa6a77a73fc62fe89df186a"
+      "reviewedChangeSha256": "eba7a83b865c6fcb069e9a3a22a55ac6f4e0d83c955cd70baa03f3dbb4b5ea13"
     }
   ]
 }

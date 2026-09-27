@@ -801,6 +801,7 @@ function Budget({
         <div className="fb-import">
           <h3>{tt("Create initial estimate", "Crear estimación inicial")}</h3>
           <p>{tt("Enter the approved Job Intake/APU estimate. Every line remains bound to the pinned project cost structure.", "Ingrese la estimación aprobada de Ingreso/APU. Cada línea permanece vinculada a la estructura de costos fijada del proyecto.")}</p>
+          <p id="manual-budget-requirements">{tt("Required before creating a draft: Budget purpose (at least 3 characters), plus a cost node, description and line notes for every estimate line. Use line notes to explain the estimate source or calculation. Amounts are validated when you create the draft.", "Antes de crear el borrador, complete el propósito del presupuesto (al menos 3 caracteres) y el nodo de costo, la descripción y las notas de cada línea. Explique en las notas la fuente o el cálculo de la estimación. Los montos se validan al crear el borrador.")}</p>
           {manualLines.map((line, index) => <div className="fb-import-fields" key={index}>
             <label>{tt("Stable line ID", "ID estable de línea")}<input value={line.stableLineId} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, stableLineId: event.target.value } : item))} /></label>
             <label>{tt("Cost node", "Nodo de costo")}<select value={line.projectCostNodeId} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, projectCostNodeId: event.target.value } : item))}><option value="">{tt("Select a cost node", "Seleccione un nodo de costo")}</option>{data.nodes.filter((node: any) => node.active).map((node: any) => <option key={node.id} value={node.id}>{node.project_code} — {node.project_name}</option>)}</select></label>
@@ -814,7 +815,7 @@ function Budget({
           </div>)}
           <div className="fb-actions">
             <button type="button" onClick={() => setManualLines([...manualLines, { stableLineId: `BUDGET-${String(manualLines.length + 1).padStart(3, "0")}`, projectCostNodeId: "", description: "", amount: "0.00", quantity: "1", unit: "Hours", unitRate: "0.00", notes: "" }])}>{tt("Add estimate line", "Agregar línea de estimación")}</button>
-            <button type="button" disabled={busy !== "" || purpose.trim().length < 3 || manualLines.some((line) => !line.projectCostNodeId || line.description.trim().length < 1 || line.notes.trim().length < 1)} onClick={createManualDraft}>{tt("Create controlled budget draft", "Crear borrador presupuestario controlado")}</button>
+            <button type="button" aria-describedby="manual-budget-requirements" disabled={busy !== "" || purpose.trim().length < 3 || manualLines.some((line) => !line.projectCostNodeId || line.description.trim().length < 1 || line.notes.trim().length < 1)} onClick={createManualDraft}>{tt("Create controlled budget draft", "Crear borrador presupuestario controlado")}</button>
           </div>
         </div>
       )}
