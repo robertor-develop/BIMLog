@@ -1,5 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
+Release-refresh repair: the new06d772fa full gate cleared the functional suites but failed stale OPEN_LOOP_DISPOSITIONS line references after narrative updates. Added the existing dispositions generator to the same pre-hash updater used for platform/route inventories, with ordering regression coverage. No acceptance rule was weakened. Regenerate, commit and rerun the full gate;06d772fa is not a passed release receipt.
+
 ## Latest C017 Work Item funding connection — 2026-09-27
 
 The existing public economic-plan command now resolves approved Contract/APU funding and the activated Work Item workflow inside one serializable transaction. Request data supplies only the Work Item identity and current contract/workflow fingerprints, never monetary amounts or source versions. Exact six-decimal largest-remainder phase allocation preserves the approved item amount; contract reserves stay contract-scoped and zero on the Work Item. The internal writer now supports transaction composition without nested BEGIN/COMMIT. Full immutable source evidence, idempotency, conflicting-item funding rejection and concurrent-change handling remain enforced.

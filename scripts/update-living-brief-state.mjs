@@ -53,6 +53,9 @@ execFileSync(process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") :
 execFileSync(process.execPath, ["scripts/route-interconnection-graph.mjs", "--output",
   "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json"],
   { cwd: root, stdio: "inherit", windowsHide: true });
+// OPEN_LOOP line references and source hash must also precede the reviewed digest.
+execFileSync(process.execPath, ["scripts/open-loop-dispositions.mjs", "--write"],
+  { cwd: root, stdio: "inherit", windowsHide: true });
 const changedPaths = git("diff", "--name-only", reconciledThroughCommit, "--", ".")
   .split(/\r?\n/).filter(Boolean).map((value) => value.replaceAll("\\", "/"))
   .filter((value) => value !== "living-brief/state.json").sort();

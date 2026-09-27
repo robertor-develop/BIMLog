@@ -45758,6 +45758,7 @@
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
         "artifacts/api-server/src/lib/approved-contract-economic-source.ts",
+        "artifacts/api-server/src/lib/approved-work-item-economic-plan.ts",
         "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
         "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
         "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
@@ -45808,7 +45809,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "3c1b153d73db79c752d8be39b92e894a25f364be1ece407b8ea18905d1298085"
+      "reviewedChangeSha256": "c116285dfcf30461f12b68be8316314d77063ec09f0a9053c9e17bcb1c71d106"
     }
   ]
 }

@@ -14,6 +14,9 @@ assert.ok(releasePreparation.indexOf('"scripts/route-interconnection-graph.mjs"'
   releasePreparation.indexOf('"scripts/route-interconnection-graph.mjs"')<releasePreparation.indexOf('const changedPaths'),
   "release preparation refreshes the source-derived route inventory before hashing changed files");
 assert.ok(graph.counts.frontendRoutes >= 35, "all routed frontend surfaces remain inventoried");
+assert.ok(releasePreparation.indexOf('"scripts/open-loop-dispositions.mjs"')>=0&&
+  releasePreparation.indexOf('"scripts/open-loop-dispositions.mjs"')<releasePreparation.indexOf('const changedPaths'),
+  "release preparation refreshes open-loop line references before hashing changed files");
 assert.ok(graph.counts.apiRoutes >= 450, "the complete API route surface remains inventoried");
 assert.ok(graph.counts.frontendApiReferences >= 100, "screen-to-API references remain represented");
 assert.ok(graph.counts.routeOwnedTables >= 40, "route-to-table ownership remains represented");
