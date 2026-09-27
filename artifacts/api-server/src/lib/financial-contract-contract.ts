@@ -60,6 +60,7 @@ export type ContractItemSnapshot = {
   unit: string;
   unitRate: string;
   contractValue: string;
+  productionAllocation?: string;
   apuPlanVersion: number | null;
   apuFingerprint: string | null;
   apuContent: Record<string, unknown> | null;
@@ -248,6 +249,9 @@ export function normalizeContractLines(
         unit: item ? boundedText(item.unit, "contractItem.unit", 1, 40) : "LS",
         unitRate,
         contractValue,
+        ...(item?.productionAllocation == null || item.productionAllocation === "" ? {} : {
+          productionAllocation: exactPositiveAmount(item.productionAllocation, "contractItem.productionAllocation"),
+        }),
         apuPlanVersion,
         apuFingerprint: null,
         apuContent: null,

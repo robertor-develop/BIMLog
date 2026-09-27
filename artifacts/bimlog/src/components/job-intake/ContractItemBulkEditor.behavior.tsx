@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import "../commercial/ContractProductionAllocationReview.behavior";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {

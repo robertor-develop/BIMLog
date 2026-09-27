@@ -1409,6 +1409,7 @@ export async function activateJobIntake(input: {
                 quantity: item.plannedHours,
                 unit: item.unit,
                 unitRate: item.billingHourlyRate,
+                ...(item.productionAllocation === undefined ? {} : {productionAllocation:item.productionAllocation}),
                 apuPlanVersion: item.apuPlanVersion,
                 workflowTemplate:
                   item.workflowTemplate || data.delivery.workflowTemplate,

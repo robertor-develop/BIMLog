@@ -140,6 +140,14 @@ END $$;
 `;
 
 export const EDT_ENGINE_ECONOMIC_SQL = String.raw`
+CREATE TABLE IF NOT EXISTS job_contract_economic_pools (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id),
+  contract_id text NOT NULL UNIQUE REFERENCES financial_contracts(id), contract_version_id text NOT NULL REFERENCES financial_contract_versions(id),
+  currency text NOT NULL CHECK(currency ~ '^[A-Z]{3}$'), source_snapshot jsonb NOT NULL,
+  source_fingerprint text NOT NULL CHECK(source_fingerprint ~ '^[a-f0-9]{64}$'),
+  created_by_id integer NOT NULL REFERENCES users(id), created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS job_contract_economic_pools_scope_idx ON job_contract_economic_pools(company_id,project_id);
 CREATE TABLE IF NOT EXISTS job_activation_work_item_economic_plans (
   id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), intake_id text NOT NULL REFERENCES job_intakes(id),
   work_item_id text NOT NULL UNIQUE REFERENCES job_activation_work_items(id), contract_id text NOT NULL REFERENCES financial_contracts(id), contract_version_id text NOT NULL REFERENCES financial_contract_versions(id),
@@ -193,6 +201,16 @@ CREATE TABLE IF NOT EXISTS job_bonus_proposals (
   created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(project_id,maker_user_id,idempotency_key)
 );
 CREATE INDEX IF NOT EXISTS job_bonus_proposals_funding_idx ON job_bonus_proposals(funding_id);
+-- Keep historical Work Item foreign keys; new proposals reference the single
+-- contract reserve instead. Exactly one funding identity is required.
+ALTER TABLE job_bonus_proposals ALTER COLUMN funding_id DROP NOT NULL;
+ALTER TABLE job_bonus_proposals ADD COLUMN IF NOT EXISTS contract_funding_id text REFERENCES job_contract_economic_pools(id);
+CREATE INDEX IF NOT EXISTS job_bonus_proposals_contract_funding_idx ON job_bonus_proposals(contract_funding_id);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='job_bonus_proposals_one_funding_chk' AND conrelid='job_bonus_proposals'::regclass) THEN
+    ALTER TABLE job_bonus_proposals ADD CONSTRAINT job_bonus_proposals_one_funding_chk CHECK ((funding_id IS NULL) <> (contract_funding_id IS NULL));
+  END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS job_bonus_decisions (
   proposal_id text PRIMARY KEY REFERENCES job_bonus_proposals(id), actor_user_id integer NOT NULL REFERENCES users(id),
   outcome text NOT NULL CHECK(outcome IN ('approved','rejected')), reason text NOT NULL CHECK(length(reason) BETWEEN 8 AND 1000),
@@ -200,6 +218,7 @@ CREATE TABLE IF NOT EXISTS job_bonus_decisions (
 );
 CREATE OR REPLACE FUNCTION job_edt_append_only_guard() RETURNS trigger AS $$ BEGIN RAISE EXCEPTION 'EDT financial history is append-only'; END; $$ LANGUAGE plpgsql;
 DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_contract_economic_pools_immutable' AND tgrelid='job_contract_economic_pools'::regclass) THEN CREATE TRIGGER job_contract_economic_pools_immutable BEFORE UPDATE OR DELETE ON job_contract_economic_pools FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_bonus_proposal_immutable' AND tgrelid='job_bonus_proposals'::regclass) THEN CREATE TRIGGER job_bonus_proposal_immutable BEFORE UPDATE OR DELETE ON job_bonus_proposals FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_bonus_decision_immutable' AND tgrelid='job_bonus_decisions'::regclass) THEN CREATE TRIGGER job_bonus_decision_immutable BEFORE UPDATE OR DELETE ON job_bonus_decisions FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_activation_economic_plan_immutable') THEN CREATE TRIGGER job_activation_economic_plan_immutable BEFORE UPDATE OR DELETE ON job_activation_work_item_economic_plans FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;

@@ -50,6 +50,10 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
       if(existing.source_fingerprint!==sourceFingerprint)throw new EdtEngineConflict("ECONOMIC_PLAN_SOURCE_IMMUTABLE","An activated economic plan cannot be retried with a different source snapshot.");
       return{planFingerprint,idempotent:true};
     }
+    await client.query("SELECT id FROM financial_contracts WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE",[input.contractId,input.projectId,input.companyId]);
+    if([input.projectAdministrativeAmount,input.incentiveReserveAmount,input.projectEarningsAmount].some(amount=>decimalUnits(amount)!==0n)&&
+      (await client.query("SELECT id FROM job_contract_economic_pools WHERE contract_id=$1",[input.contractId])).rows.length)
+      throw new EdtEngineConflict("ECONOMIC_CONTRACT_POOLS_ALREADY_FROZEN","Contract-level pools cannot also be funded on a Work Item.");
     const id=deterministicEdtId("economic-plan",input.workItemId);
     await client.query("INSERT INTO job_activation_work_item_economic_plans(id,company_id,project_id,intake_id,work_item_id,contract_id,contract_version_id,pricing_template_version_id,delivery_workflow_version_id,currency,direct_production_amount,project_administrative_amount,incentive_reserve_amount,task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id,source_snapshot) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19,$20::jsonb)",[id,input.companyId,input.projectId,input.intakeId,input.workItemId,input.contractId,input.contractVersionId,input.pricingTemplateVersionId,input.deliveryWorkflowVersionId,input.currency,input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount,JSON.stringify(input.resolvedAllocation),sourceFingerprint,planFingerprint,input.actor.actorUserId,sourceSnapshotJson]);
     await client.query("UPDATE job_activation_work_items SET economic_plan_fingerprint=$2,updated_at=now() WHERE id=$1",[input.workItemId,planFingerprint]);

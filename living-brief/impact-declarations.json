@@ -45772,16 +45772,20 @@
         "artifacts/api-server/src/lib/edt-engine-build314.behavior.ts",
         "artifacts/api-server/src/lib/edt-engine-economic-service.ts",
         "artifacts/api-server/src/lib/edt-engine-migration.ts",
+        "artifacts/api-server/src/lib/financial-contract-contract.ts",
+        "artifacts/api-server/src/lib/financial-contract.behavior.ts",
         "artifacts/api-server/src/lib/job-activation-commercial-baseline.ts",
         "artifacts/api-server/src/lib/job-intake-contract.ts",
         "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
         "artifacts/api-server/src/lib/job-intake-service.ts",
         "artifacts/api-server/src/routes/financial-apu.ts",
+        "artifacts/api-server/src/routes/financial-contracts.ts",
         "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
         "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
         "artifacts/bimlog/src/pages/company-pricing-errors.ts",
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "lib/api-zod/src/exact-allocation.ts",
@@ -45794,7 +45798,7 @@
         "living-brief/impact-declarations.json",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "e0cc8cc0927480e2e5b0a5cf727cbd3cc024d92998181ff756698c9cd2c5e371"
+      "reviewedChangeSha256": "4d51a6e532834efe99009ee903356e733e64332afbbc58538c8ded2850853a12"
     }
   ]
 }

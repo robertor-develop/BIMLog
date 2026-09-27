@@ -61,6 +61,11 @@ const contractItem = normalizeContractLines([{ stableLineId: "ITEM-1", budgetSna
 assert.equal(contractItem.contractItem.contractValue, "5531.4");
 assert.equal(contractItem.contractItem.displayName, "Basement Composite");
 assert.equal(contractItem.contractItem.unit, "Hours");
+const allocatedItem=normalizeContractLines([{...contractItem,contractItem:{...contractItem.contractItem,productionAllocation:"100.250000"}}])[0];
+assert.equal(allocatedItem.contractItem.productionAllocation,"100.25");
+assert.equal(Object.hasOwn(contractItem.contractItem,"productionAllocation"),false);
+assert.throws(()=>normalizeContractLines([{...contractItem,contractItem:{...contractItem.contractItem,productionAllocation:"-1"}}]));
+assert.equal(pinContractItemApuSnapshot(allocatedItem,{content:{currency:"USD",sellingPrice:"10000"},evaluation:{},content_fingerprint:"fixture"},"USD").contractItem.productionAllocation,"100.25");
 check("Contract Item exact value", "180 Hours multiplied by 30.73 equals 5531.40 without floating arithmetic");
 const pinnedItem = pinContractItemApuSnapshot(
   contractItem,

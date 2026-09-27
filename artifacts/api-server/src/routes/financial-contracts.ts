@@ -2,6 +2,11 @@ import crypto from "crypto";
 import { Router } from "express";
 import { pool } from "@workspace/db";
 import { authMiddleware } from "../middlewares/auth";
+import {freezeApprovedContractPools} from "../lib/contract-economic-pool-service";
+import {ensureEdtEngineSchema} from "../lib/edt-engine-migration";
+import {withEdtTransaction} from "../lib/edt-engine-transaction";
+import {loadApprovedContractEconomicSource} from "../lib/approved-contract-economic-source";
+import {authorizeFinancialOperation} from "../lib/financial-control-service";
 import { singleFileUpload } from "../middlewares/multipart";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import { boundedText, positiveId } from "../lib/financial-budget-contract";
@@ -36,6 +41,35 @@ const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any,
   }
 };
 const project = (req: any) => positiveId(req.params.projectId, "projectId");
+router.get("/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",run(async(req,res)=>{
+  await ensureEdtEngineSchema();
+  const result=await withEdtTransaction(async client=>{
+    const source=await loadApprovedContractEconomicSource(client,{actorUserId:req.user.userId,projectId:project(req),contractVersionId:req.params.versionId});
+    if(source.contractId!==req.params.contractId)throw new FinancialControlError(404,"ECONOMIC_CONTRACT_NOT_FOUND","Contract version not found.");
+    const stored=(await client.query<any>("SELECT id,source_fingerprint FROM job_contract_economic_pools WHERE contract_id=$1",[source.contractId])).rows[0];
+    if(stored&&stored.source_fingerprint!==source.sourceFingerprint)throw new FinancialControlError(409,"CONTRACT_POOLS_RECONCILIATION_REQUIRED","The frozen pools require governed reconciliation.");
+    let canPrepare=true;
+    try{await authorizeFinancialOperation({actorUserId:req.user.userId,projectId:project(req),featureKey:"cost.value_planner.prepare",operation:"prepare",client});}
+    catch(error){if(error instanceof FinancialControlError&&error.status===403)canPrepare=false;else throw error;}
+    return {id:stored?.id??null,canPrepare,paymentAuthorized:false};
+  });
+  res.json(result);
+}));
+router.post("/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",run(async(req,res)=>{
+  if(!req.body||Object.keys(req.body).some(key=>key!=="confirmationFingerprint")||
+    typeof req.body.confirmationFingerprint!=="string"||!/^[a-f0-9]{64}$/.test(req.body.confirmationFingerprint))
+    throw new FinancialControlError(400,"CONTRACT_POOLS_REQUEST_INVALID","Confirm the exact contract fingerprint; monetary inputs are not accepted.");
+  await ensureEdtEngineSchema();
+  try{
+    const result=await withEdtTransaction(client=>freezeApprovedContractPools(client,{actorUserId:req.user.userId,projectId:project(req),
+      contractVersionId:req.params.versionId,expectedContractId:req.params.contractId,expectedContractFingerprint:req.body.confirmationFingerprint}));
+    res.json({id:result.id,idempotent:result.idempotent,paymentAuthorized:false});
+  }catch(error){
+    if(error&&typeof error==="object"&&"code" in error&&["40001","40P01","23505"].includes(String(error.code)))
+      throw new FinancialControlError(409,"CONTRACT_POOLS_CONCURRENT_CHANGE","Another request changed this contract. Reopen it and retry.");
+    throw error;
+  }
+}));
 const statuses = new Set(["all", "draft", "submitted", "under_review", "approved", "executed", "returned", "rejected", "withdrawn", "superseded", "terminated", "voided", "closed"]);
 const perspectives = new Set(["all", "downstream", "upstream"]);
 const kinds = new Set(["all", "subcontract", "purchase_order", "consultant_agreement", "owner_prime", "other_commitment"]);

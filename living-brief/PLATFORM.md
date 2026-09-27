@@ -192,6 +192,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ai-control-plane.ts
 - artifacts/api-server/src/lib/ai-control-plane.ui-fixture.ts
 - artifacts/api-server/src/lib/ai-usage.ts
+- artifacts/api-server/src/lib/approved-contract-economic-source.ts
 - artifacts/api-server/src/lib/approved-labor-evidence.behavior.ts
 - artifacts/api-server/src/lib/approved-labor-evidence.ts
 - artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
@@ -310,6 +311,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/connector-validation-operations.behavior.ts
 - artifacts/api-server/src/lib/connector-validation-operations.ts
 - artifacts/api-server/src/lib/construction-coordination-records.ts
+- artifacts/api-server/src/lib/contract-economic-pool-service.ts
 - artifacts/api-server/src/lib/contract-item-workflow-contract.ts
 - artifacts/api-server/src/lib/contract-item-workflow-migration.ts
 - artifacts/api-server/src/lib/contract-item-workflow-service.ts

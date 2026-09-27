@@ -5,6 +5,8 @@ import { FinancialControlError } from "./financial-control-contract";
 import { ensureEdtEngineSchema } from "./edt-engine-migration";
 import { withEdtTransaction, type EdtTransactionClient } from "./edt-engine-transaction";
 import { prepareBonusProposal, verifyBonusCapacity, verifyIndependentBonusDecision, type BonusProposal, type BonusReservation, type BonusFunding } from "./cost-value-bonus-allocation";
+import {loadApprovedContractEconomicSource} from "./approved-contract-economic-source";
+import {edtFingerprint} from "./edt-engine-transaction";
 
 const fail = (code: string, message: string): never => { throw new FinancialControlError(409, code, message); };
 
@@ -21,15 +23,28 @@ export async function getManualBonuses(actorUserId: number, projectId: number, b
   };
   const rows = (await pool.query(`SELECT p.id,p.proposal,p.fingerprint,p.created_at,d.outcome,d.actor_user_id AS decided_by_id,d.reason AS decision_reason,d.created_at AS decided_at
     FROM job_bonus_proposals p LEFT JOIN job_bonus_decisions d ON d.proposal_id=p.id
-    WHERE p.company_id=$1 AND p.project_id=$2 AND ($3::text IS NULL OR (p.created_at,p.id)<
+    WHERE p.company_id=$1 AND p.project_id=$2 AND (p.contract_funding_id IS NULL OR EXISTS (
+      SELECT 1 FROM job_contract_economic_pools f WHERE f.id=p.contract_funding_id AND
+        (SELECT g.state FROM financial_contract_record_grants g WHERE g.contract_id=f.contract_id AND g.user_id=$4
+          AND g.permission='view' ORDER BY g.version DESC LIMIT 1)='active')) AND ($3::text IS NULL OR (p.created_at,p.id)<
       (SELECT c.created_at,c.id FROM job_bonus_proposals c WHERE c.id=$3 AND c.company_id=$1 AND c.project_id=$2))
-    ORDER BY p.created_at DESC,p.id DESC LIMIT 101`, [companyId, projectId, before ?? null])).rows;
+    ORDER BY p.created_at DESC,p.id DESC LIMIT 101`, [companyId, projectId, before ?? null,actorUserId])).rows;
   const sources = (await pool.query(`SELECT p.id,p.work_item_id,COALESCE(w.display_code,w.name) AS work_item_label,p.currency,p.incentive_reserve_amount::text AS reserve_amount,p.plan_fingerprint,
     COALESCE((SELECT sum(b.amount) FROM job_bonus_proposals b LEFT JOIN job_bonus_decisions d ON d.proposal_id=b.id
       WHERE b.funding_id=p.id AND COALESCE(d.outcome,'pending') IN ('pending','approved')),0)::text AS reserved_amount
     FROM job_activation_work_item_economic_plans p JOIN job_intakes i ON i.id=p.intake_id AND i.project_id=p.project_id AND i.company_id=p.company_id
     JOIN job_activation_work_items w ON w.id=p.work_item_id AND w.project_id=p.project_id AND w.intake_id=p.intake_id
     WHERE p.project_id=$1 AND p.company_id=$2 AND i.status='activated' ORDER BY p.created_at,p.id`, [projectId, companyId])).rows;
+  const contractSources=(await pool.query(`SELECT p.id,NULL::text work_item_id,c.legal_number AS work_item_label,'contract' AS funding_scope,
+    p.currency,p.source_snapshot->'contractPools'->>'incentiveReserve' AS reserve_amount,p.source_fingerprint AS plan_fingerprint,
+    COALESCE((SELECT sum(b.amount) FROM job_bonus_proposals b LEFT JOIN job_bonus_decisions d ON d.proposal_id=b.id
+      WHERE b.contract_funding_id=p.id AND COALESCE(d.outcome,'pending') IN ('pending','approved')),0)::text AS reserved_amount
+    FROM job_contract_economic_pools p JOIN financial_contracts c ON c.id=p.contract_id
+    JOIN financial_contract_versions v ON v.id=p.contract_version_id
+    WHERE p.project_id=$1 AND p.company_id=$2 AND v.status IN ('approved','executed') AND
+      (SELECT g.state FROM financial_contract_record_grants g WHERE g.contract_id=p.contract_id AND g.user_id=$3
+        AND g.permission='view' ORDER BY g.version DESC LIMIT 1)='active' ORDER BY p.created_at,p.id`,[projectId,companyId,actorUserId])).rows;
+  sources.push(...contractSources);
   const recipients = (await pool.query(`SELECT DISTINCT u.id,u.full_name FROM project_members pm JOIN users u ON u.id=pm.user_id
     WHERE pm.project_id=$1 AND pm.status='active' AND u.company_id=$2 ORDER BY u.full_name,u.id`, [projectId, companyId])).rows;
   const approvableCurrencies: string[] = [];
@@ -49,12 +64,21 @@ function concurrent(error: unknown): never {
     fail("BONUS_CONCURRENT_CHANGE", "Another allocation changed this reserve. Refresh before trying again.");
   throw error;
 }
-async function fundingSource(client: EdtTransactionClient, fundingId: string, projectId: number, companyId: number): Promise<BonusFunding> {
+async function fundingSource(client: EdtTransactionClient, fundingId: string, projectId: number, companyId: number, actorUserId:number): Promise<{funding:BonusFunding;contractScoped:boolean}> {
+  const contract=(await client.query<any>(`SELECT * FROM job_contract_economic_pools
+    WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE`,[fundingId,projectId,companyId])).rows[0];
+  if(contract){
+    const source=await loadApprovedContractEconomicSource(client,{actorUserId,projectId,contractVersionId:contract.contract_version_id});
+    if(source.sourceFingerprint!==contract.source_fingerprint||edtFingerprint(contract.source_snapshot)!==contract.source_fingerprint)
+      fail("BONUS_SOURCE_CHANGED","The approved contract differs from its frozen reserve source.");
+    return {contractScoped:true,funding:{id:contract.id,version:1,fingerprint:contract.source_fingerprint,companyId,projectId,
+      reserve:{amount:source.contractPools.incentiveReserve,currency:source.currency}}};
+  }
   const row = (await client.query<any>(`SELECT p.id,p.plan_fingerprint,p.incentive_reserve_amount::text amount,p.currency
     FROM job_activation_work_item_economic_plans p JOIN job_intakes i ON i.id=p.intake_id AND i.project_id=p.project_id AND i.company_id=p.company_id
     WHERE p.id=$1 AND p.project_id=$2 AND p.company_id=$3 AND i.status='activated' FOR UPDATE OF p`, [fundingId, projectId, companyId])).rows[0];
   if (!row) fail("BONUS_FUNDING_REQUIRED", "An activated, scoped economic-plan reserve is required; a performance scenario is not funding.");
-  return { id: row.id, version: 1, fingerprint: row.plan_fingerprint, companyId, projectId, reserve: { amount: row.amount, currency: row.currency } };
+  return {contractScoped:false,funding:{ id: row.id, version: 1, fingerprint: row.plan_fingerprint, companyId, projectId, reserve: { amount: row.amount, currency: row.currency } }};
 }
 async function eligibleRecipients(client: EdtTransactionClient, projectId: number, companyId: number): Promise<number[]> {
   const rows = await client.query<{ user_id: number }>(`SELECT DISTINCT pm.user_id FROM project_members pm JOIN users u ON u.id=pm.user_id
@@ -62,10 +86,10 @@ async function eligibleRecipients(client: EdtTransactionClient, projectId: numbe
   return rows.rows.map(row => Number(row.user_id));
 }
 async function reservations(client: EdtTransactionClient, fundingId: string, excludeId?: string): Promise<BonusReservation[]> {
-  return (await client.query<any>(`SELECT p.id,p.funding_id AS "fundingId",p.company_id AS "companyId",p.project_id AS "projectId",
+  return (await client.query<any>(`SELECT p.id,COALESCE(p.contract_funding_id,p.funding_id) AS "fundingId",p.company_id AS "companyId",p.project_id AS "projectId",
     COALESCE(d.outcome,'pending') AS state,jsonb_build_object('amount',p.amount::text,'currency',p.currency) AS amount
     FROM job_bonus_proposals p LEFT JOIN job_bonus_decisions d ON d.proposal_id=p.id
-    WHERE p.funding_id=$1 AND ($2::text IS NULL OR p.id<>$2)`, [fundingId, excludeId ?? null])).rows;
+    WHERE COALESCE(p.contract_funding_id,p.funding_id)=$1 AND ($2::text IS NULL OR p.id<>$2)`, [fundingId, excludeId ?? null])).rows;
 }
 
 export async function proposeManualBonus(actorUserId: number, projectId: number, input: {
@@ -78,7 +102,7 @@ export async function proposeManualBonus(actorUserId: number, projectId: number,
   return withEdtTransaction(async client => {
     const auth = await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.prepare", operation: "prepare", client });
     const companyId = auth.scope.companyId;
-    const funding = await fundingSource(client, input.fundingId, projectId, companyId);
+    const {funding,contractScoped} = await fundingSource(client, input.fundingId, projectId, companyId,actorUserId);
     const proposal = prepareBonusProposal({ funding, makerUserId: actorUserId, reason: input.reason, entries: input.entries,
       eligibleUserIds: await eligibleRecipients(client, projectId, companyId) });
     const previous = (await client.query<any>(`SELECT id,fingerprint FROM job_bonus_proposals
@@ -89,8 +113,8 @@ export async function proposeManualBonus(actorUserId: number, projectId: number,
     }
     verifyBonusCapacity(proposal, await reservations(client, funding.id));
     const proposalId = randomUUID();
-    await client.query(`INSERT INTO job_bonus_proposals(id,company_id,project_id,funding_id,maker_user_id,idempotency_key,proposal,fingerprint,amount,currency)
-      VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10)`, [proposalId, companyId, projectId, funding.id, actorUserId, input.idempotencyKey, JSON.stringify(proposal), proposal.fingerprint, proposal.total.amount, proposal.total.currency]);
+    await client.query(`INSERT INTO job_bonus_proposals(id,company_id,project_id,funding_id,maker_user_id,idempotency_key,proposal,fingerprint,amount,currency,contract_funding_id)
+      VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10,$11)`, [proposalId, companyId, projectId, contractScoped?null:funding.id, actorUserId, input.idempotencyKey, JSON.stringify(proposal), proposal.fingerprint, proposal.total.amount, proposal.total.currency,contractScoped?funding.id:null]);
     return { id: proposalId, fingerprint: proposal.fingerprint, idempotent: false, paymentAuthorized: false };
   }).catch(concurrent);
 }
@@ -106,7 +130,7 @@ export async function decideManualBonus(actorUserId: number, projectId: number, 
     const row = (await client.query<any>(`SELECT * FROM job_bonus_proposals WHERE id=$1 AND project_id=$2 AND company_id=$3`, [proposalId, projectId, read.scope.companyId])).rows[0];
     if (!row) fail("BONUS_PROPOSAL_NOT_FOUND", "Proposal not found in this scope.");
     const proposal = row.proposal as BonusProposal;
-    const funding = await fundingSource(client, row.funding_id, projectId, read.scope.companyId);
+    const {funding} = await fundingSource(client, row.contract_funding_id??row.funding_id, projectId, read.scope.companyId,actorUserId);
     const related = (await client.query<any>(`SELECT p.maker_user_id,p.amount::text,p.currency,p.created_at FROM job_bonus_proposals p
       LEFT JOIN job_bonus_decisions d ON d.proposal_id=p.id
       WHERE p.company_id=$1 AND p.project_id=$2 AND p.maker_user_id=$3 AND p.id<>$4

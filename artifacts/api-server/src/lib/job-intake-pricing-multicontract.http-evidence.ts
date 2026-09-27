@@ -30,6 +30,9 @@ import { startJobIntakeMigration } from "./job-intake-migration";
 import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { validatePricingTemplate } from "./company-pricing-template-contract";
+import {loadApprovedContractEconomicSource} from "./approved-contract-economic-source";
+import {freezeApprovedContractPools} from "./contract-economic-pool-service";
+import {withEdtTransaction} from "./edt-engine-transaction";
 
 // Run only against an empty, disposable database on the exact localhost target
 // below. Provision its base schema with the local Drizzle CLI first; this proof
@@ -101,9 +104,9 @@ for (const [version,price] of [[1,"25"],[2,"42.5"]] as const)
 async function publishedTemplate(name: string,price: string,classified = false) {
   const templateId = randomUUID(), versionId = randomUUID();
   const definition = { schemaVersion:1,currency:"USD",industry:"BIM Services",name,
-    nodes:[{ id:"labor",label:"Labor",method:"fixed_amount",amount:price }],
+    nodes:[{ id:"labor",label:"Labor",method:"fixed_amount",amount:price },...(classified?[{id:"reserve",label:"TEST explicit reserve",method:"fixed_amount",amount:"30"}]:[])],
     ...(classified ? {economicAllocation:{directProductionNodeIds:["labor"],phases:[{phaseId:"production",code:"PROD",name:"Production",percent:"100"}]},
-      economicPools:{fixedCompanyCost:[],directProduction:["labor"],projectAdministration:[],incentiveReserve:[],projectEarnings:[]}} : {}) };
+      economicPools:{fixedCompanyCost:[],directProduction:["labor"],projectAdministration:[],incentiveReserve:["reserve"],projectEarnings:[]}} : {}) };
   const validated = validatePricingTemplate(definition);
   await pool.query(`INSERT INTO generic_apu_template_versions
     (id,template_id,company_id,project_id,version,name,industry,status,currency,reason,content_fingerprint,
@@ -123,8 +126,8 @@ const address = server.address(); assert.ok(address && typeof address !== "strin
 const base = `http://127.0.0.1:${address.port}/api/v1`;
 const token = signToken({ userId:actor.id,email:actor.email,fullName:actor.full_name,companyId,
   companyName:"Intake integration company",isSuperAdmin:true });
-async function request(method:string,path:string,body?:unknown) {
-  const response = await fetch(`${base}${path}`,{ method,headers:{ Authorization:`Bearer ${token}`,
+async function request(method:string,path:string,body?:unknown,authorization=token) {
+  const response = await fetch(`${base}${path}`,{ method,headers:{ Authorization:`Bearer ${authorization}`,
     "Content-Type":"application/json" },body:body == null ? undefined : JSON.stringify(body) });
   return { status:response.status,body:await response.json() as any };
 }
@@ -313,6 +316,7 @@ try {
     JOIN financial_contracts c ON c.id=v.contract_id WHERE c.project_id=$1 ORDER BY l.stable_line_id`,[projectId])).rows;
   assert.deepEqual(snapshots.map((row:any) => row.contract_item_snapshot.unitRate),["25","42.5"]);
   assert.deepEqual(snapshots.map((row:any) => row.contract_item_snapshot.apuPlanVersion),[1,2]);
+  assert.equal(snapshots.find((row:any)=>row.stable_line_id==="CI-REVIEW").contract_item_snapshot.productionAllocation,"240","Approval fingerprint includes the explicit allocation in the contract line snapshot");
   assert.deepEqual(snapshots.map((row:any) => row.commercial_metadata.pricingTemplateBinding.versionId).sort(),
     [drawingTemplate.versionId,replacement.versionId].sort());
   const budget = (await pool.query(`SELECT content->'projectBudget'->>'total' total FROM job_activation_execution_baselines
@@ -322,6 +326,96 @@ try {
   assert.equal(productionBaseline.pricing_snapshot.productionAllocation,"240");
   assert.equal(productionBaseline.pricing_snapshot.contractValue,"170","Frozen production allocation stays distinct from commercial selling value");
   console.log("C017 explicit production allocation: missing/mismatch activation rollback, correction, save/reopen and frozen allocation distinct from selling value PASS");
+  // Prove the existing independent contract lifecycle reviews the same allocation,
+  // rather than relabeling the Intake save or APU reference as approval.
+  const productionContract=byNumber.get("INT-ADD-001") as any;
+  const loadProductionSource=async(userId=actor.id)=>{
+    const client=await pool.connect();
+    try{await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE');
+      const result=await loadApprovedContractEconomicSource(client,{actorUserId:userId,projectId,contractVersionId:productionContract.versionId});
+      await client.query('COMMIT');return result;
+    }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+  };
+  await assert.rejects(()=>loadProductionSource(),(error:any)=>error.code==='ECONOMIC_CONTRACT_APPROVAL_REQUIRED');
+  const freezeProductionPools=()=>withEdtTransaction(client=>freezeApprovedContractPools(client,
+    {actorUserId:actor.id,projectId,contractVersionId:productionContract.versionId}));
+  await assert.rejects(freezeProductionPools,(error:any)=>error.code==='ECONOMIC_CONTRACT_APPROVAL_REQUIRED');
+  const allocationReviewer=(await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id)
+    VALUES('allocation-reviewer@test.invalid','unused','TEST allocation reviewer',$1) RETURNING *`,[companyId])).rows[0];
+  await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'member','active')`,[projectId,allocationReviewer.id]);
+  await pool.query(`INSERT INTO commercial_entitlement_events(event_key,user_id,enabled,reason,actor_user_id,source,feature_key)
+    VALUES($1,$2,true,'TEST contract review entitlement',$3,'super_admin','contracts')`,[randomUUID(),allocationReviewer.id,actor.id]);
+  for(const permission of ['view','review','approve']) await pool.query(`INSERT INTO financial_contract_record_grants(id,contract_id,user_id,permission,version,state,reason,granted_by_id)
+    VALUES($1,$2,$3,$4,1,'active','TEST exact contract review',$5)`,[randomUUID(),productionContract.id,allocationReviewer.id,permission,actor.id]);
+  await pool.query(`INSERT INTO financial_approval_policy_versions(id,company_id,project_id,scope_type,transaction_category,currency,max_amount,version,effective_from,state,reason,created_by_id)
+    VALUES($1,$2,$3,'project','owner_contract_approval','USD',1000,1,now(),'active','TEST independent contract limit',$4)`,[randomUUID(),companyId,projectId,actor.id]);
+  const allocationReviewerToken=signToken({userId:allocationReviewer.id,email:allocationReviewer.email,fullName:allocationReviewer.full_name,companyId,companyName:'TEST',isSuperAdmin:false});
+  const productionContractPath=`/projects/${projectId}/financial/contracts/${productionContract.id}`;
+  const productionVersionPath=`${productionContractPath}/versions/${productionContract.versionId}`;
+  const submitProduction=await request('POST',`${productionVersionPath}/actions`,{action:'submit',expectedRevision:productionContract.revision});
+  assert.equal(submitProduction.status,200,JSON.stringify(submitProduction.body));
+  const reviewProduction=await request('POST',`${productionVersionPath}/actions`,{action:'start_review',expectedRevision:submitProduction.body.revision},allocationReviewerToken);
+  assert.equal(reviewProduction.status,200,JSON.stringify(reviewProduction.body));
+  const reviewDetail=await request('GET',productionContractPath,undefined,allocationReviewerToken);
+  assert.equal(reviewDetail.status,200);
+  assert.equal(reviewDetail.body.detail.lines.find((line:any)=>line.stableLineId==='CI-REVIEW').contractItem.productionAllocation,'240');
+  const decisionPayload={expectedRevision:reviewProduction.body.revision,confirmationFingerprint:productionContract.contentFingerprint};
+  const selfProduction=await request('POST',`${productionVersionPath}/approve`,decisionPayload);
+  assert.equal(selfProduction.status,403);assert.equal(selfProduction.body.code,'FIN_MAKER_CHECKER_REQUIRED');
+  const staleProduction=await request('POST',`${productionVersionPath}/approve`,{...decisionPayload,confirmationFingerprint:'stale'},allocationReviewerToken);
+  assert.equal(staleProduction.status,409);assert.equal(staleProduction.body.code,'CONTRACT_APPROVAL_STALE');
+  const approveProduction=await request('POST',`${productionVersionPath}/approve`,decisionPayload,allocationReviewerToken);
+  assert.equal(approveProduction.status,200,JSON.stringify(approveProduction.body));
+  const approvedProduction=await request('GET',productionContractPath,undefined,allocationReviewerToken);
+  assert.equal(approvedProduction.body.contracts[0].status,'approved');
+  assert.equal(approvedProduction.body.contracts[0].contentFingerprint,productionContract.contentFingerprint);
+  assert.equal(approvedProduction.body.detail.lines.find((line:any)=>line.stableLineId==='CI-REVIEW').contractItem.productionAllocation,'240');
+  console.log('C017 independent contract approval: regular reviewer sees exact allocation; self/stale approval denied; approved version preserves allocation PASS');
+  const approvedSource=await loadProductionSource(allocationReviewer.id);
+  assert.equal(approvedSource.contractPools.directProduction,'240.00');
+  assert.deepEqual(approvedSource.allocations.map(item=>[item.stableLineId,item.productionAmount]),[['CI-REVIEW','240']]);
+  assert.equal(approvedSource.approval.approvedById,allocationReviewer.id);
+  const poolsPath=`${productionVersionPath}/economic-pools`;
+  assert.equal((await fetch(`${base}${poolsPath}`)).status,401);
+  const poolStatus=await request('GET',poolsPath);
+  assert.equal(poolStatus.status,200,JSON.stringify(poolStatus.body));
+  assert.equal(poolStatus.body.id,null);
+  assert.equal(poolStatus.body.canPrepare,true);
+  const readOnlyPools=await request('GET',poolsPath,undefined,allocationReviewerToken);
+  assert.equal(readOnlyPools.status,200);
+  assert.equal(readOnlyPools.body.canPrepare,false);
+  assert.equal((await request('POST',poolsPath,{confirmationFingerprint:productionContract.contentFingerprint},allocationReviewerToken)).status,403);
+  assert.equal((await request('POST',poolsPath,{confirmationFingerprint:productionContract.contentFingerprint,amount:'999'})).status,400);
+  assert.equal((await request('POST',poolsPath,{confirmationFingerprint:'0'.repeat(64)})).status,409);
+  const preparedPools=await request('POST',poolsPath,{confirmationFingerprint:productionContract.contentFingerprint});
+  assert.equal(preparedPools.status,200,JSON.stringify(preparedPools.body));
+  assert.equal(preparedPools.body.idempotent,false);
+  const frozenPools=await freezeProductionPools();
+  assert.equal(frozenPools.idempotent,true);
+  assert.equal(frozenPools.id,preparedPools.body.id);
+  assert.equal((await request('GET',poolsPath)).body.id,frozenPools.id);
+  const repeatedPools=await freezeProductionPools();
+  assert.equal(repeatedPools.id,frozenPools.id);
+  assert.equal(repeatedPools.idempotent,true);
+  assert.deepEqual(repeatedPools.source,approvedSource);
+  const storedPools=(await pool.query(`SELECT * FROM job_contract_economic_pools WHERE contract_id=$1`,[productionContract.id])).rows;
+  assert.equal(storedPools.length,1,'Exactly one reserve source per contract, not per Work Item or retry');
+  assert.equal(edtFingerprint(storedPools[0].source_snapshot),approvedSource.sourceFingerprint);
+  await assert.rejects(()=>pool.query(`UPDATE job_contract_economic_pools SET source_snapshot='{}' WHERE id=$1`,[frozenPools.id]),/append-only/);
+  await assert.rejects(()=>pool.query(`DELETE FROM job_contract_economic_pools WHERE id=$1`,[frozenPools.id]),/append-only/);
+  await ensureEdtEngineSchema(pool);
+  assert.equal((await freezeProductionPools()).id,frozenPools.id,'Migration replay preserves exact funding identity');
+  await assert.rejects(()=>pool.query(`INSERT INTO job_contract_economic_pools
+    (id,company_id,project_id,contract_id,contract_version_id,currency,source_snapshot,source_fingerprint,created_by_id)
+    SELECT $1,company_id,project_id,contract_id,contract_version_id,currency,source_snapshot,source_fingerprint,created_by_id
+    FROM job_contract_economic_pools WHERE id=$2`,[randomUUID(),frozenPools.id]),(error:any)=>error.code==='23505');
+  console.log('C017 contract pools: draft denied, approved immutable snapshot, one contract reserve, idempotent replay and update/delete denial PASS');
+  await pool.query(`INSERT INTO financial_contract_record_grants(id,contract_id,user_id,permission,version,state,reason,granted_by_id)
+    VALUES($1,$2,$3,'view',2,'revoked','TEST revoke exact source access',$4)`,[randomUUID(),productionContract.id,allocationReviewer.id,actor.id]);
+  await assert.rejects(()=>loadProductionSource(allocationReviewer.id),(error:any)=>error.code==='CONTRACT_RECORD_PERMISSION_DENIED');
+  await pool.query(`INSERT INTO financial_contract_record_grants(id,contract_id,user_id,permission,version,state,reason,granted_by_id)
+    VALUES($1,$2,$3,'view',3,'active','TEST restore exact source access',$4)`,[randomUUID(),productionContract.id,allocationReviewer.id,actor.id]);
+  assert.deepEqual(await loadProductionSource(allocationReviewer.id),approvedSource,'Access restoration does not rewrite monetary source');
   await pool.query(`INSERT INTO generic_apu_template_versions
     (id,template_id,company_id,project_id,version,name,industry,status,currency,reason,content_fingerprint,
      supersedes_id,provenance,created_by_id,published_by_id,published_at)
@@ -329,6 +423,8 @@ try {
      'Retired after accepted contract',$4,$5,'{}'::jsonb,$6,$7,now())`,
     [randomUUID(),replacement.templateId,companyId,`retired-${randomUUID()}`,replacement.versionId,actor.id,checker.id]);
   const historical = await request("GET",`/projects/${projectId}/financial/contracts`);
+  assert.deepEqual(await loadProductionSource(allocationReviewer.id),approvedSource,'Retiring a master template must not rewrite already approved contract funding sources');
+  console.log('C017 approved contract source: draft denied, independent approval and budget/APU/baseline verification, immutable historical source after retirement PASS');
   assert.equal(historical.status,200);
   assert.equal(historical.body.contracts.find((contract:any) => contract.legalNumber === "INT-ADD-001")
     ?.pricingTemplateBinding.versionId,replacement.versionId);
@@ -432,6 +528,41 @@ try {
   assert.equal((await request("POST",bonusPath,{...bonusInput,reserve:{amount:"99999",currency:"USD"}})).status,400);
   assert.equal((await request("POST",bonusPath,{...bonusInput,idempotencyKey:"TEST-over-reserve-http"})).status,409);
   console.log("C018 HTTP: authenticated read, persisted state/capacity, anonymous denial and injected funding denial PASS");
+  // Contract-level funding uses the actual approved APU/contract chain above,
+  // not the legacy synthetic Work Item reserve used by compatibility tests.
+  await pool.query(`INSERT INTO commercial_entitlement_events(event_key,user_id,enabled,reason,actor_user_id,source,feature_key)
+    VALUES($1,$2,true,'TEST ordinary bonus proposer',$3,'super_admin','cost_value_planner')`,[randomUUID(),allocationReviewer.id,actor.id]);
+  await pool.query(`INSERT INTO financial_contract_record_grants(id,contract_id,user_id,permission,version,state,reason,granted_by_id)
+    VALUES($1,$2,$3,'view',1,'active','TEST independent reserve review',$4)`,[randomUUID(),productionContract.id,bonusReviewer.id,actor.id]);
+  const contractBonusList=await request('GET',bonusPath,undefined,allocationReviewerToken);
+  assert.equal(contractBonusList.status,200,JSON.stringify(contractBonusList.body));
+  const contractReserve=contractBonusList.body.sources.find((source:any)=>source.id===frozenPools.id);
+  assert.equal(contractReserve.funding_scope,'contract');
+  assert.equal(contractReserve.reserve_amount,'30.00');
+  const contractBonusInput={fundingId:frozenPools.id,idempotencyKey:'TEST-contract-bonus-1',reason:'TEST explicit contract reserve proposal',entries:[{userId:checker.id,amount:'20'}]};
+  const contractProposal=await request('POST',bonusPath,contractBonusInput,allocationReviewerToken);
+  assert.equal(contractProposal.status,200,JSON.stringify(contractProposal.body));
+  const storedContractProposal=(await pool.query('SELECT funding_id,contract_funding_id FROM job_bonus_proposals WHERE id=$1',[contractProposal.body.id])).rows[0];
+  assert.equal(storedContractProposal.funding_id,null);
+  assert.equal(storedContractProposal.contract_funding_id,frozenPools.id);
+  assert.equal((await request('POST',bonusPath,contractBonusInput,allocationReviewerToken)).body.id,contractProposal.body.id);
+  assert.equal((await request('POST',bonusPath,{...contractBonusInput,idempotencyKey:'TEST-contract-over-reserve'},allocationReviewerToken)).status,409);
+  const bonusReviewToken=signToken({userId:bonusReviewer.id,email:bonusReviewer.email,fullName:bonusReviewer.full_name,companyId,companyName:'TEST',isSuperAdmin:true});
+  const contractDecision={outcome:'approved',expectedFingerprint:contractProposal.body.fingerprint,reason:'TEST independent contract reserve decision'};
+  const contractApproved=await request('POST',`${bonusPath}/${contractProposal.body.id}/decision`,contractDecision,bonusReviewToken);
+  assert.equal(contractApproved.status,200,JSON.stringify(contractApproved.body));
+  assert.equal(contractApproved.body.paymentAuthorized,false);
+  const contractReopened=await request('GET',bonusPath,undefined,allocationReviewerToken);
+  assert.equal(contractReopened.body.sources.find((source:any)=>source.id===frozenPools.id).reserved_amount,'20.000000');
+  assert.equal(contractReopened.body.proposals.find((proposal:any)=>proposal.id===contractProposal.body.id).state,'approved');
+  await pool.query(`INSERT INTO financial_contract_record_grants(id,contract_id,user_id,permission,version,state,reason,granted_by_id)
+    VALUES($1,$2,$3,'view',4,'revoked','TEST hide contract reserve after revocation',$4)`,[randomUUID(),productionContract.id,allocationReviewer.id,actor.id]);
+  const hiddenContractBonus=await request('GET',bonusPath,undefined,allocationReviewerToken);
+  assert.equal(hiddenContractBonus.status,200);
+  assert.equal(hiddenContractBonus.body.sources.some((source:any)=>source.id===frozenPools.id),false);
+  assert.equal(hiddenContractBonus.body.proposals.some((proposal:any)=>proposal.id===contractProposal.body.id),false);
+  assert.equal((await request('POST',bonusPath,{...contractBonusInput,idempotencyKey:'TEST-revoked-contract-bonus'},allocationReviewerToken)).status,403);
+  console.log('C017/C018 real contract HTTP funding: exact approval -> prepare once -> ordinary-user proposal -> capacity denial -> independent approval -> reopen; legacy sources preserved PASS');
   const timeId=randomUUID();
   await pool.query(`INSERT INTO job_activation_time_entries(id,intake_id,project_id,work_item_id,task_id,assignment_id,user_id,work_date,hours,note,created_by_id)
     VALUES($1,$2,$3,$4,$5,$6,$7,current_date,2,'TEST independent time review',$7)`,[timeId,assignment.intake_id,projectId,assignment.work_item_id,assignment.task_id,assignment.id,checker.id]);

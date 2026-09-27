@@ -13,12 +13,14 @@ const definition = validateDeliveryWorkflowDefinition({schemaVersion:1,deliverab
 let workflow:any=null;
 let existingPlan:{plan_fingerprint:string;source_fingerprint:string}|null=null;
 let insertedSnapshot: unknown;
+let contractPoolsExist=false;
 const client:EdtTransactionClient={async query<Row>(sql:string, values?: readonly unknown[]){calls.push(sql);
   if(sql.includes("INSERT INTO job_activation_work_item_economic_plans")) insertedSnapshot=JSON.parse(String(values?.[19]));
   if(sql.includes("FROM job_activation_work_items w"))return{rows:[{id:"w1",intake_id:"i1",project_id:11,contract_id:"c1",contract_version_id:"cv1",intake_status:intakeStatus}] as Row[]};
   if(sql.includes("FROM financial_contract_versions v"))return{rows:[{currency,pricing_template_binding:{versionId}}] as Row[]};
   if(sql.includes("FROM company_delivery_workflow_work_items"))return{rows:(workflow?[workflow]:[]) as Row[]};
   if(sql.includes("FROM job_activation_work_item_economic_plans"))return{rows:(existingPlan?[existingPlan]:[]) as Row[]};
+  if(sql.includes("FROM job_contract_economic_pools"))return{rows:(contractPoolsExist?[{id:"contract-pool"}]:[]) as Row[]};
   return{rows:[]};
 }};
 const host:EdtTransactionHost={async connect(){return client}};
@@ -67,4 +69,11 @@ await assert.rejects(()=>createWorkItemEconomicPlan({...input,sourceSnapshot:{bu
   (e:unknown)=>e instanceof Error&&"code" in e&&e.code==="ECONOMIC_PLAN_SOURCE_IMMUTABLE");
 assert.ok(calls.includes("ROLLBACK"));
 assert.equal(calls.some(sql=>sql.startsWith("INSERT")||sql.startsWith("UPDATE")),false);
-console.log("EDT_ENGINE_BUILD314_RESULT=PASS economic plan checks canonical activated contract APU and currency");
+existingPlan=null;contractPoolsExist=true;calls.length=0;
+for(const field of ["projectAdministrativeAmount","incentiveReserveAmount","projectEarningsAmount"]){
+  await assert.rejects(()=>createWorkItemEconomicPlan({...sourceInput,[field]:"1"},host),
+    (error:any)=>error.code==="ECONOMIC_CONTRACT_POOLS_ALREADY_FROZEN");
+}
+assert.equal(calls.some(sql=>sql.startsWith("INSERT")||sql.startsWith("UPDATE")),false);
+assert.equal((await createWorkItemEconomicPlan(sourceInput,host)).idempotent,false,"Production-only plan can coexist with contract-level pools");
+console.log("EDT_ENGINE_BUILD314_RESULT=PASS economic plan checks canonical activated contract APU and currency; no duplicated contract pools");

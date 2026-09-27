@@ -6,16 +6,33 @@ import { filesTable } from "./files";
 import { financialContractsTable, financialContractVersionsTable } from "./financial-contracts";
 import { projectCostNodesTable } from "./financial-budgets";
 
+export const jobContractEconomicPoolsTable = pgTable("job_contract_economic_pools", {
+  id: text("id").primaryKey(), companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  projectId: integer("project_id").notNull().references(() => projectsTable.id),
+  contractId: text("contract_id").notNull().references(() => financialContractsTable.id),
+  contractVersionId: text("contract_version_id").notNull().references(() => financialContractVersionsTable.id),
+  currency: text("currency").notNull(), sourceSnapshot: jsonb("source_snapshot").$type<Record<string, unknown>>().notNull(),
+  sourceFingerprint: text("source_fingerprint").notNull(), createdById: integer("created_by_id").notNull().references(() => usersTable.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [uniqueIndex("job_contract_economic_pools_contract_id_key").on(table.contractId),
+  index("job_contract_economic_pools_scope_idx").on(table.companyId,table.projectId),
+  check("job_contract_economic_pools_currency_check",sql`${table.currency} ~ '^[A-Z]{3}$'`),
+  check("job_contract_economic_pools_source_fingerprint_check",sql`${table.sourceFingerprint} ~ '^[a-f0-9]{64}$'`)]);
+
 export const jobBonusProposalsTable = pgTable("job_bonus_proposals", {
   id: text("id").primaryKey(), companyId: integer("company_id").notNull().references(() => companiesTable.id),
   projectId: integer("project_id").notNull().references(() => projectsTable.id),
-  fundingId: text("funding_id").notNull().references((): AnyPgColumn => jobActivationWorkItemEconomicPlansTable.id),
+  fundingId: text("funding_id").references((): AnyPgColumn => jobActivationWorkItemEconomicPlansTable.id),
+  contractFundingId: text("contract_funding_id").references(() => jobContractEconomicPoolsTable.id),
   makerUserId: integer("maker_user_id").notNull().references(() => usersTable.id),
   idempotencyKey: text("idempotency_key").notNull(), proposal: jsonb("proposal").$type<Record<string, unknown>>().notNull(),
   fingerprint: text("fingerprint").notNull(), amount: numeric("amount", { precision: 30, scale: 6 }).notNull(), currency: text("currency").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [uniqueIndex("job_bonus_proposals_project_id_maker_user_id_idempotency_key_key").on(table.projectId, table.makerUserId, table.idempotencyKey),
-  index("job_bonus_proposals_funding_idx").on(table.fundingId), check("job_bonus_proposals_fingerprint_check", sql`${table.fingerprint} ~ '^[a-f0-9]{64}$'`),
+  index("job_bonus_proposals_funding_idx").on(table.fundingId),
+  index("job_bonus_proposals_contract_funding_idx").on(table.contractFundingId),
+  check("job_bonus_proposals_one_funding_chk",sql`(${table.fundingId} IS NULL) <> (${table.contractFundingId} IS NULL)`),
+  check("job_bonus_proposals_fingerprint_check", sql`${table.fingerprint} ~ '^[a-f0-9]{64}$'`),
   check("job_bonus_proposals_amount_check", sql`${table.amount} > 0`), check("job_bonus_proposals_currency_check", sql`${table.currency} ~ '^[A-Z]{3}$'`)]);
 export const jobBonusDecisionsTable = pgTable("job_bonus_decisions", {
   proposalId: text("proposal_id").primaryKey().references(() => jobBonusProposalsTable.id), actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id),

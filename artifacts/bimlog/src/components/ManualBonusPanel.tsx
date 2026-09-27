@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 type Proposal = { id: string; fingerprint: string; state: string; decision_reason?: string;
   proposal: { makerUserId: number; reason: string; total: { amount: string; currency: string }; entries: Array<{ userId: number; amount: string }> } };
 type Data = { actorUserId: number; canPropose: boolean; canReview: boolean; approvableCurrencies: string[]; proposals: Proposal[]; nextCursor: string | null;
-  sources: Array<{ id: string; work_item_id: string; work_item_label?: string; currency: string; reserve_amount: string; reserved_amount: string }>;
+  sources: Array<{ id: string; work_item_id: string|null; work_item_label?: string; funding_scope?:string; currency: string; reserve_amount: string; reserved_amount: string }>;
   recipients: Array<{ id: number; full_name: string }> };
 type Props = { projectId: number; token: string | null; language: string };
 export function ManualBonusPanel(props: Props) {
