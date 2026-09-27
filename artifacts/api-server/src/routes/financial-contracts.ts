@@ -23,6 +23,7 @@ import {
   executeAmendment,
   executeContract,
   getContractWorkspace,
+  getContractRecordAccess,
   setContractRecordGrant,
   transitionAmendment,
   transitionContract,
@@ -212,6 +213,7 @@ router.post("/projects/:projectId/financial/contracts/:contractId/amendments/:am
 router.post("/projects/:projectId/financial/contracts/:contractId/amendments/:amendmentId/versions/:versionId/approve", run(async (req, res) => res.json(await approveAmendment({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, amendmentId: req.params.amendmentId, versionId: req.params.versionId, expectedRevision: req.body.expectedRevision, confirmationFingerprint: req.body.confirmationFingerprint, overBudgetReason: req.body.overBudgetReason }))));
 router.post("/projects/:projectId/financial/contracts/:contractId/amendments/:amendmentId/versions/:versionId/execute", run(async (req, res) => res.json(await executeAmendment({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, amendmentId: req.params.amendmentId, versionId: req.params.versionId, expectedRevision: req.body.expectedRevision, confirmationFingerprint: req.body.confirmationFingerprint, signedFileId: req.body.signedFileId }))));
 
+router.get("/projects/:projectId/financial/contracts/:contractId/grants", run(async (req, res) => res.json(await getContractRecordAccess({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId }))));
 router.post("/projects/:projectId/financial/contracts/:contractId/grants", run(async (req, res) => res.status(201).json(await setContractRecordGrant({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, userId: req.body.userId, permission: req.body.permission, state: req.body.state, reason: req.body.reason }))));
 
 router.get("/projects/:projectId/financial/contracts/:contractId/payments", run(async (req, res) => res.json(await getContractPaymentApplications({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId }))));

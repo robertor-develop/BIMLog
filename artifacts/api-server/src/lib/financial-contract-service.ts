@@ -424,6 +424,17 @@ export async function executeAmendment(input: { actorUserId: number; projectId: 
   });
 }
 
+export async function getContractRecordAccess(input: { actorUserId: number; projectId: unknown; contractId: unknown }) {
+  await waitForFinancialContractMigration();
+  const projectId = positiveId(input.projectId, "projectId"), contractId = boundedText(input.contractId, "contractId", 3, 100);
+  const root = await contractScope(pool, contractId, projectId);
+  const auth = await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.contract.manage", operation: "manage" });
+  await requireRecordPermission(pool, { contractId, userId: auth.actor.userId, permission: "manage" });
+  const members = (await pool.query(`SELECT u.id,u.full_name FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.status='active' AND u.company_id=$2 ORDER BY u.full_name,u.id`, [projectId, root.company_id])).rows;
+  const grants = (await pool.query(`SELECT DISTINCT ON(user_id,permission) user_id,permission,state,version FROM financial_contract_record_grants WHERE contract_id=$1 ORDER BY user_id,permission,version DESC`, [contractId])).rows;
+  return { members: members.map((row: any) => ({ userId: Number(row.id), name: row.full_name })), grants: grants.map((row: any) => ({ userId: Number(row.user_id), permission: row.permission, state: row.state, version: Number(row.version) })) };
+}
+
 export async function setContractRecordGrant(input: { actorUserId: number; projectId: unknown; contractId: unknown; userId: unknown; permission: unknown; state: unknown; reason: unknown }) {
   const projectId = positiveId(input.projectId, "projectId"), contractId = boundedText(input.contractId, "contractId", 3, 100), userId = positiveId(input.userId, "userId"), permission = contractPermission(input.permission), state = String(input.state), reason = boundedText(input.reason, "reason", 3, 1000);
   if (!["active", "revoked"].includes(state)) throw new FinancialControlError(400, "CONTRACT_GRANT_STATE_INVALID", "Record grant state must be active or revoked.");

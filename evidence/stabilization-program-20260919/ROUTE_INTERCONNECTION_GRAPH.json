@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 683,
+    "apiRoutes": 684,
     "frontendApiReferences": 257,
     "routeOwnedTables": 61
   },
@@ -4236,6 +4236,12 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/financial/contracts/:contractId/amendments/:amendmentId/versions/:versionId/execute",
+      "owner": "artifacts/api-server/src/routes/financial-contracts.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/financial/contracts/:contractId/grants",
       "owner": "artifacts/api-server/src/routes/financial-contracts.ts",
       "tables": []
     },

@@ -45778,6 +45778,7 @@
         "artifacts/api-server/src/lib/edt-engine-route-context.ts",
         "artifacts/api-server/src/lib/financial-budget-service.ts",
         "artifacts/api-server/src/lib/financial-contract-contract.ts",
+        "artifacts/api-server/src/lib/financial-contract-service.ts",
         "artifacts/api-server/src/lib/financial-contract.behavior.ts",
         "artifacts/api-server/src/lib/job-activation-commercial-baseline.ts",
         "artifacts/api-server/src/lib/job-intake-commercial-core-fingerprint.behavior.ts",
@@ -45793,6 +45794,7 @@
         "artifacts/bimlog/src/components/commercial/ContractPoolPreparation.tsx",
         "artifacts/bimlog/src/components/commercial/ContractProductionAllocationReview.behavior.tsx",
         "artifacts/bimlog/src/components/commercial/ContractProductionAllocationReview.tsx",
+        "artifacts/bimlog/src/components/commercial/ContractRecordAccess.tsx",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
         "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
@@ -45818,7 +45820,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "eba7a83b865c6fcb069e9a3a22a55ac6f4e0d83c955cd70baa03f3dbb4b5ea13"
+      "reviewedChangeSha256": "5eee0642912fefc62ff38d6350af09a64965160edade888282535abd817b24be"
     }
   ]
 }

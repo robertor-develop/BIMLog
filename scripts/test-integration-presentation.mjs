@@ -26,3 +26,10 @@ assert.match(budget, /propósito del presupuesto \(al menos 3 caracteres\) y el 
 assert.match(budget, /purpose\.trim\(\)\.length < 3/);
 assert.match(budget, /line\.notes\.trim\(\)\.length < 1/);
 console.log("C020 budget readiness guidance PASS: bilingual prerequisites linked to create button, existing validation preserved");
+const access = read("artifacts/bimlog/src/components/commercial/ContractRecordAccess.tsx");
+assert.match(access, /Select a member", "Seleccione un miembro/);
+assert.match(access, /reason\.trim\(\)\.length < 3/);
+assert.match(access, /does not grant company financial authority or allow self-approval/);
+assert.match(access, /permission, state, reason: reason\.trim\(\)/);
+assert.match(read("artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx"), /<ContractRecordAccess key=/);
+console.log("C020 record-access presentation PASS: named project members, bilingual explicit permissions, mandatory reason and authority explanation");

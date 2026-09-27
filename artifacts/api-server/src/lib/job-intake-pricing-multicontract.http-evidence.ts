@@ -400,12 +400,25 @@ try {
   await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'member','active')`,[projectId,allocationReviewer.id]);
   await pool.query(`INSERT INTO commercial_entitlement_events(event_key,user_id,enabled,reason,actor_user_id,source,feature_key)
     VALUES($1,$2,true,'TEST contract review entitlement',$3,'super_admin','contracts')`,[randomUUID(),allocationReviewer.id,actor.id]);
-  for(const permission of ['view','review','approve']) await pool.query(`INSERT INTO financial_contract_record_grants(id,contract_id,user_id,permission,version,state,reason,granted_by_id)
-    VALUES($1,$2,$3,$4,1,'active','TEST exact contract review',$5)`,[randomUUID(),productionContract.id,allocationReviewer.id,permission,actor.id]);
   await pool.query(`INSERT INTO financial_approval_policy_versions(id,company_id,project_id,scope_type,transaction_category,currency,max_amount,version,effective_from,state,reason,created_by_id)
     VALUES($1,$2,$3,'project','owner_contract_approval','USD',1000,1,now(),'active','TEST independent contract limit',$4)`,[randomUUID(),companyId,projectId,actor.id]);
   const allocationReviewerToken=signToken({userId:allocationReviewer.id,email:allocationReviewer.email,fullName:allocationReviewer.full_name,companyId,companyName:'TEST',isSuperAdmin:false});
   const productionContractPath=`/projects/${projectId}/financial/contracts/${productionContract.id}`;
+  const accessPath=`${productionContractPath}/grants`;
+  const access=await request('GET',accessPath);
+  assert.equal(access.status,200,JSON.stringify(access.body));
+  assert.ok(access.body.members.some((member:any)=>member.userId===allocationReviewer.id));
+  assert.equal((await request('GET',accessPath,undefined,allocationReviewerToken)).status,403,'A reviewer cannot enumerate management-only grants');
+  for(const permission of ['view','review','approve']) {
+    const granted=await request('POST',accessPath,{userId:allocationReviewer.id,permission,state:'active',reason:'TEST independent record access'});
+    assert.equal(granted.status,201,JSON.stringify(granted.body));
+  }
+  const repeatGrant=await request('POST',accessPath,{userId:allocationReviewer.id,permission:'view',state:'active',reason:'TEST idempotent retry'});
+  assert.equal(repeatGrant.body.idempotent,true);
+  assert.equal((await request('POST',accessPath,{userId:actor.id,permission:'manage',state:'active',reason:'TEST unauthorized escalation'},allocationReviewerToken)).status,403);
+  const reopenedAccess=await request('GET',accessPath);
+  assert.equal(reopenedAccess.body.grants.filter((grant:any)=>grant.userId===allocationReviewer.id&&grant.state==='active').length,3);
+  console.log('C020 contract record access HTTP: named current members, manager-only read/write, persisted grants and idempotent retry PASS');
   const productionVersionPath=`${productionContractPath}/versions/${productionContract.versionId}`;
   const submitProduction=await request('POST',`${productionVersionPath}/actions`,{action:'submit',expectedRevision:productionContract.revision});
   assert.equal(submitProduction.status,200,JSON.stringify(submitProduction.body));
@@ -698,6 +711,9 @@ try {
   const foreignCompany=(await pool.query(`INSERT INTO companies(name) VALUES('TEST isolated foreign company') RETURNING id`)).rows[0];
   const foreignUser=(await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id) VALUES('time-foreign@test.invalid','unused','TEST foreign user',$1) RETURNING *`,[foreignCompany.id])).rows[0];
   const foreignBonusToken=signToken({userId:foreignUser.id,email:foreignUser.email,fullName:foreignUser.full_name,companyId:foreignCompany.id,companyName:"TEST foreign",isSuperAdmin:false});
+  assert.equal((await request('GET',accessPath,undefined,foreignBonusToken)).status,403,'Cross-company record-access enumeration denied');
+  assert.equal((await request('POST',accessPath,{userId:foreignUser.id,permission:'view',state:'active',reason:'TEST foreign member rejection'})).status,400,'Manager cannot grant an outside-company user access');
+  console.log('C020 contract record access cross-company read and grantee denial PASS');
   for (const [method,path,body] of [["GET",bonusPath,undefined],["POST",bonusPath,bonusInput],
     ["POST",`${bonusPath}/${finalBonus.id}/decision`,{outcome:"approved",expectedFingerprint:finalBonus.fingerprint,reason:"TEST denied tenant bypass"}]] as const) {
     const denied=await fetch(`${base}${path}`,{method,headers:{Authorization:`Bearer ${foreignBonusToken}`,"Content-Type":"application/json"},...(body?{body:JSON.stringify(body)}:{})});
