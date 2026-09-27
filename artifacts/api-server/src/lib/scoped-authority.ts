@@ -1,4 +1,4 @@
-export type CurrentProjectRole = "project_admin" | "convention_manager" | "discipline_lead" | "member" | "sub_trade" | "read_only";
+export type CurrentProjectRole = "project_admin" | "convention_manager" | "discipline_lead" | "member" | "drafter" | "sub_trade" | "read_only";
 export type LegacyProjectRole = "admin" | "viewer";
 export type CurrentPermissionCategory = "admin" | "write" | "read";
 
@@ -14,6 +14,7 @@ const ROLE_AUTHORITIES: Record<CurrentProjectRole | LegacyProjectRole, readonly 
   convention_manager: ["project:write", "project:read", "convention:manage", "coordination:upload"],
   discipline_lead: ["project:write", "project:read", "discipline:lead", "coordination:upload"],
   member: ["project:write", "project:read", "coordination:upload"],
+  drafter: ["project:write", "project:read", "coordination:upload"],
   sub_trade: ["project:read", "coordination:upload"],
   read_only: ["project:read"],
   admin: ["project:admin", "project:write", "project:read", "convention:manage", "discipline:lead", "coordination:upload"],
@@ -26,7 +27,7 @@ const PERMISSION_CEILINGS: Record<CurrentPermissionCategory, ReadonlySet<string>
   read: new Set(["project:read"]),
 };
 
-export const CURRENT_PROJECT_ROLES = Object.freeze(["project_admin", "convention_manager", "discipline_lead", "member", "sub_trade", "read_only"] as const);
+export const CURRENT_PROJECT_ROLES = Object.freeze(["project_admin", "convention_manager", "discipline_lead", "member", "drafter", "sub_trade", "read_only"] as const);
 export const LEGACY_PROJECT_ROLE_ALIASES = Object.freeze(["admin", "viewer"] as const);
 
 export function mapCurrentProjectRole(role: string | null | undefined, permissionCategory?: string | null): ScopedAuthorityMapping {

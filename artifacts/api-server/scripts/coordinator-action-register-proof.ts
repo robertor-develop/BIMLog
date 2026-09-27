@@ -259,6 +259,11 @@ check("tenant.current_binding_matches_authenticated_company", () => {
   );
 });
 check("tenant.active_membership_and_read_authority", () => {
+  const drafter = { currentCompanyId: 10, boundCompanyId: 10, role: "drafter", status: "active", permission: "write", isSuperAdmin: false };
+  assert.equal(evaluateProjectReadAccess(drafter), "member");
+  assert.equal(evaluateProjectReadAccess({ ...drafter, boundCompanyId: 11 }), null);
+  assert.equal(evaluateProjectReadAccess({ ...drafter, status: "inactive" }), null);
+  assert.equal(evaluateProjectReadAccess({ ...drafter, permission: null }), null);
   assert.match(service, /input\.status === "active"/);
   assert.match(service, /hasScopedAuthority\(mapping, \["project:read"\]\)/);
   assert.equal(

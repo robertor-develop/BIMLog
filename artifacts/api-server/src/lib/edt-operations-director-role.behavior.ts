@@ -5,6 +5,10 @@ import { permissionsForDefaultRole } from "./edt-engine-authorization";
 const ordinary = { isOperationsDirector: false, projectRole: "project_admin",
   isSuperAdmin: false, isCompanyPmo: false };
 assert.equal(edtRoleFromCurrentAuthority(ordinary), "PROJECT_LEADER");
+assert.equal(edtRoleFromCurrentAuthority({ ...ordinary, projectRole: "drafter" }), "DRAFTER");
+assert.equal(edtRoleFromCurrentAuthority({ ...ordinary, projectRole: "drafter", isCompanyPmo: true }), "PMO");
+assert.equal(permissionsForDefaultRole("DRAFTER").includes("TIME_SUBMIT"), true);
+assert.equal(permissionsForDefaultRole("DRAFTER").includes("TIME_APPROVE"), false);
 assert.equal(edtRoleFromCurrentAuthority({ ...ordinary, isCompanyPmo: true }), "PMO");
 assert.equal(edtRoleFromCurrentAuthority({ ...ordinary, isSuperAdmin: true }), "CEO");
 assert.equal(edtRoleFromCurrentAuthority({ ...ordinary, isOperationsDirector: true }), "OPERATIONS_DIRECTOR");

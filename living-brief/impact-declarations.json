@@ -45757,6 +45757,7 @@
       ],
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/coordinator-action-register-proof.ts",
         "artifacts/api-server/src/lib/approved-contract-economic-source.ts",
         "artifacts/api-server/src/lib/approved-work-item-economic-plan.ts",
         "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
@@ -45776,6 +45777,8 @@
         "artifacts/api-server/src/lib/edt-engine-economic-service.ts",
         "artifacts/api-server/src/lib/edt-engine-migration.ts",
         "artifacts/api-server/src/lib/edt-engine-route-context.ts",
+        "artifacts/api-server/src/lib/edt-operations-director-role.behavior.ts",
+        "artifacts/api-server/src/lib/entitlement-resolver.behavior.ts",
         "artifacts/api-server/src/lib/financial-budget-service.ts",
         "artifacts/api-server/src/lib/financial-contract-contract.ts",
         "artifacts/api-server/src/lib/financial-contract-service.ts",
@@ -45786,6 +45789,7 @@
         "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
         "artifacts/api-server/src/lib/job-intake-service.ts",
         "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/api-server/src/lib/scoped-authority.ts",
         "artifacts/api-server/src/routes/edt-engine.ts",
         "artifacts/api-server/src/routes/financial-apu.ts",
         "artifacts/api-server/src/routes/financial-contracts.ts",
@@ -45821,7 +45825,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "7a01724758eaa81d9be7b2f1d6e985bd67ea2238b3c1934d777f4187171841dc"
+      "reviewedChangeSha256": "f39f595edced6017c9936e56d05fc9f559f09165984fd3a666c630b6ce05df93"
     }
   ]
 }

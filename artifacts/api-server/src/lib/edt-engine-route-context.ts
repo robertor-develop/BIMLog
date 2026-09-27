@@ -20,6 +20,7 @@ const projectRoleProfiles: Readonly<Record<string, EdtDefaultRoleProfile>> = Obj
   convention_manager: "BIM_COORDINATOR",
   discipline_lead: "PROJECT_MANAGER",
   member: "DRAFTER",
+  drafter: "DRAFTER",
   sub_trade: "DRAFTER",
 });
 
