@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { allocateMinorUnits } from "@workspace/api-zod";
 import { pool } from "@workspace/db";
 import { authorizeFinancialOperation } from "./financial-control-service";
 import { evaluateGenericApu } from "./generic-apu-engine";
@@ -98,11 +99,7 @@ export function createBimServicesReferencePlan(input: {
   ];
   // Largest remainder retains exact cents even for tiny budgets. Stable phase
   // order resolves ties; a residual must never create a negative final phase.
-  const phaseUnits = definitions.map(phase => production * phase.percentage / 100n);
-  let remaining = production - sum(phaseUnits);
-  const remainderOrder = definitions.map((phase, index) => ({ index, remainder: production * phase.percentage % 100n }))
-    .sort((a, b) => a.remainder === b.remainder ? a.index - b.index : a.remainder > b.remainder ? -1 : 1);
-  for (const entry of remainderOrder) { if (remaining === 0n) break; phaseUnits[entry.index]++; remaining--; }
+  const phaseUnits = allocateMinorUnits(production, definitions.map(phase => phase.percentage));
   return validateCostValuePlan({
     ...input, allocationMode: "percentage",
     allocationPercentages: { labor: "70", bonus: "20", taskEarnings: "10" },

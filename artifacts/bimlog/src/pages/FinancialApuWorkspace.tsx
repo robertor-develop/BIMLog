@@ -6,6 +6,7 @@ import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/Pri
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { ManualBonusPanel } from "@/components/ManualBonusPanel";
+import { allocateMinorUnits } from "@workspace/api-zod";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 export const forecastStyles = `.forecast-scenarios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.scenario{display:grid;gap:5px;border:1px solid hsl(var(--border));border-radius:10px;padding:12px}.scenario strong{text-transform:capitalize}.scenario span{font-size:12px}.forecast-status{margin-top:12px!important;padding:8px 10px;border-radius:8px;font-weight:800;text-transform:capitalize}.forecast-status.healthy{background:#DCFCE7;color:#166534}.forecast-status.warning{background:#FEF3C7;color:#92400E}.forecast-status.critical{background:#FEE2E2;color:#991B1B}.mode-switch{display:flex;gap:6px}.mode-switch .selected{background:#1D4ED8!important;color:white!important}.calculated-amounts{font-size:12px;color:hsl(var(--muted-foreground));margin-top:10px}@media(max-width:760px){.forecast-scenarios{grid-template-columns:1fr}}`;
@@ -80,13 +81,11 @@ const derivedTopPercentages = (labor: string, bonus: string, net: bigint | null)
   return { labor: format(laborPoints), bonus: format(bonusPoints), taskEarnings: format(earningsPoints) };
 };
 const reallocateLines = (lines: Line[], base: bigint) => {
-  let used = 0n;
   const points = lines.map((line) => percentBasisPoints(line.percentage) ?? 0n);
   const balanced = points.reduce((sum, value) => sum + value, 0n) === 10_000n;
+  const amounts = balanced ? allocateMinorUnits(base, points) : points.map(point => (base * point + 5_000n) / 10_000n);
   return lines.map((line, index) => {
-    const amount = balanced && index === lines.length - 1 ? base - used : (base * points[index]! + 5_000n) / 10_000n;
-    used += amount;
-    return { ...line, amount: format(amount) };
+    return { ...line, amount: format(amounts[index]!) };
   });
 };
 const completeLineRemainder = (lines: Line[], base: bigint) => {
@@ -399,8 +398,7 @@ export function FinancialApuWorkspace() {
     const earnings = net - labor - incentive;
     const production = (labor * 8_500n + 5_000n) / 10_000n;
     const administrative = labor - production;
-    const phaseAmounts = [4_500n, 3_500n, 1_500n].map((percent) => (production * percent + 5_000n) / 10_000n);
-    phaseAmounts.push(production - phaseAmounts.reduce((sum, amount) => sum + amount, 0n));
+    const phaseAmounts = allocateMinorUnits(production, [4_500n, 3_500n, 1_500n, 500n]);
     return {
       ...current,
       name: current.name || "BIM services standard",
@@ -538,7 +536,10 @@ function Field({ label, value, onChange }: { label: string; value: string; onCha
 function DateField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label><span className="label">{label}</span><input type="date" value={value} onChange={(event) => onChange(event.target.value)}/></label>; }
 function Money({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label><span className="label">{label}</span><input inputMode="decimal" value={value} onFocus={(event) => event.currentTarget.select()} onChange={(event) => onChange(event.target.value)} onBlur={() => onChange(normalizeTwoDecimals(value))}/></label>; }
 function Percent({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) { return <label><span className="label">{label}</span><div style={{position:"relative"}}><input inputMode="decimal" value={value} onFocus={(event) => event.currentTarget.select()} onChange={(event) => onChange(event.target.value)} onBlur={() => onChange(normalizeTwoDecimals(value))} style={{paddingRight:30}}/><span style={{position:"absolute",right:11,top:"50%",transform:"translateY(-50%)"}}>%</span></div></label>; }
-function AllocationRow({ label, amount, percent, onAmount, onPercent, readOnly = false }: { label: string; amount: string; percent: string; onAmount?: (value: string) => void; onPercent?: (value: string) => void; readOnly?: boolean }) { return <div className="allocation-row"><strong>{label}</strong><label><span className="label">Amount</span><input aria-label={`${label} amount`} inputMode="decimal" value={amount} readOnly={readOnly} onFocus={(event) => !readOnly && event.currentTarget.select()} onChange={(event) => onAmount?.(event.target.value)} onBlur={() => onAmount?.(normalizeTwoDecimals(amount))}/></label><label><span className="label">%</span><div className="percent-input"><input aria-label={`${label} percentage`} inputMode="decimal" value={percent} readOnly={readOnly} onFocus={(event) => !readOnly && event.currentTarget.select()} onChange={(event) => onPercent?.(event.target.value)} onBlur={() => onPercent?.(normalizeTwoDecimals(percent))}/><span>%</span></div></label></div>; }
+function AllocationRow({ label, amount, percent, onAmount, onPercent, readOnly = false }: { label: string; amount: string; percent: string; onAmount?: (value: string) => void; onPercent?: (value: string) => void; readOnly?: boolean }) {
+  const { tt } = useI18n();
+  return <div className="allocation-row"><strong>{label}</strong><label><span className="label">{tt("Amount", "Monto")}</span><input aria-label={`${label} ${tt("amount", "monto")}`} inputMode="decimal" value={amount} readOnly={readOnly} onFocus={(event) => !readOnly && event.currentTarget.select()} onChange={(event) => onAmount?.(event.target.value)} onBlur={() => onAmount?.(normalizeTwoDecimals(amount))}/></label><label><span className="label">%</span><div className="percent-input"><input aria-label={`${label} ${tt("percentage", "porcentaje")}`} inputMode="decimal" value={percent} readOnly={readOnly} onFocus={(event) => !readOnly && event.currentTarget.select()} onChange={(event) => onPercent?.(event.target.value)} onBlur={() => onPercent?.(normalizeTwoDecimals(percent))}/><span>%</span></div></label></div>;
+}
 function Metric({ label, value, currency }: { label: string; value: string; currency: string }) { return <div className="metric"><span className="label">{label}</span><strong>{value} {currency}</strong></div>; }
 export function PerformanceEvidence({ latestPerformance, lang }: {latestPerformance:PerformanceSnapshot|null;lang:string}) {
   const tt=(en:string,es:string)=>lang==="es"?es:en;
@@ -559,7 +560,11 @@ export function PerformanceEvidence({ latestPerformance, lang }: {latestPerforma
   </>;
 }
 export { styles as financialApuStyles };
-function Balance({ actual, expected }: { actual: bigint | null; expected: bigint | null }) { const ok = actual != null && expected != null && actual === expected; return <p className={ok ? "balance ok" : "balance"}>{ok ? "Balanced" : `Total ${format(actual)} / Required ${format(expected)}`}</p>; }
+function Balance({ actual, expected }: { actual: bigint | null; expected: bigint | null }) {
+  const { tt } = useI18n();
+  const ok = actual != null && expected != null && actual === expected;
+  return <p className={ok ? "balance ok" : "balance"}>{ok ? tt("Balanced", "Balanceado") : `Total ${format(actual)} / ${tt("Required", "Requerido")} ${format(expected)}`}</p>;
+}
 function SectionHelp({ children }: { children: string }) { return <p className="section-help"><Info size={16}/><span>{children}</span></p>; }
 function LineEditor({ title, help, rows, base: _base, onAdd, onChange, onPercent, onComplete, onEqual, onRemove, actual, expected, tt }: { title: string; help?: string; rows: Line[]; base: bigint | null; onAdd: () => void; onChange: (id: string, field: "name" | "amount", value: string) => void; onPercent: (id: string, value: string) => void; onComplete: () => void; onEqual: () => void; onRemove: (id: string) => void; actual: bigint | null; expected: bigint | null; tt: (en: string, es: string) => string }) { return <section className="panel"><div className="section-title"><h2>{title}</h2><div className="section-actions"><button onClick={onEqual}><Sparkles size={15}/>{tt("Split equally", "Dividir igualmente")}</button><button onClick={onComplete}><Sparkles size={15}/>{tt("Complete remainder", "Completar remanente")}</button><button onClick={onAdd}><Plus size={15}/>{tt("Add line", "Agregar línea")}</button></div></div>{help && <SectionHelp>{help}</SectionHelp>}<div className="line-head"><span>{tt("Name", "Nombre")}</span><span>{tt("Amount", "Monto")}</span><span>%</span><span/></div><div className="lines">{rows.map((line) => <div className="line" key={line.id}><input aria-label={tt("Line name", "Nombre de línea")} placeholder={tt("Name", "Nombre")} value={line.name} onChange={(event) => onChange(line.id, "name", event.target.value)}/><input aria-label={tt("Line amount", "Monto de línea")} inputMode="decimal" value={line.amount} onFocus={(event) => event.currentTarget.select()} onChange={(event) => onChange(line.id, "amount", event.target.value)} onBlur={() => onChange(line.id, "amount", normalizeTwoDecimals(line.amount))}/><div className="percent-input"><input aria-label={tt("Line percentage", "Porcentaje de línea")} inputMode="decimal" value={line.percentage} onFocus={(event) => event.currentTarget.select()} onChange={(event) => onPercent(line.id, event.target.value)} onBlur={() => onPercent(line.id, normalizeTwoDecimals(line.percentage))}/><span>%</span></div><button aria-label={tt("Remove line", "Eliminar línea")} onClick={() => onRemove(line.id)}><Trash2 size={15}/></button></div>)}</div><Balance actual={actual} expected={expected}/></section>; }
 

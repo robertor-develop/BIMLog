@@ -45768,6 +45768,8 @@
         "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/api-zod/src/exact-allocation.ts",
+        "lib/api-zod/src/index.ts",
         "lib/db/src/schema/job-intakes.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -45775,7 +45777,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "6d3744e28de8a4d742dcd38637a4181f35a22a0d94933d55a79d1a063b5fe234"
+      "reviewedChangeSha256": "dc3d991ee1dafe34d2d6905d0c2447ef542859cd00b6ea0362c3354399ad2397"
     }
   ]
 }

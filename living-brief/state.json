@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "3686f3dbd513426a09e7c0a328576b3c75046d603a0c447c70e62ec23a3a53da",
+  "bundleSha256": "979279985e77becbe455afeddc88b4f4bb55c50b66cb523f8e33033cded4ccd7",
   "impact": {
     "baselineCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
     "changedPaths": [
@@ -18,6 +18,8 @@
       "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
       "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
       "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+      "lib/api-zod/src/exact-allocation.ts",
+      "lib/api-zod/src/index.ts",
       "lib/db/src/schema/job-intakes.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -132,7 +134,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "3bd69451619590dd6b20392f088c5d9e28cf8c68b29f5fe94f0f0e21f8ebaf10",
+      "sha256": "b5d7411f2fe3abb0c3959d7f1a718d13afdd0e826ffb5d3a5ddec83d71f33e7e",
       "sourceChangedAt": "2026-09-27T05:45:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
@@ -144,7 +146,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "942ca8dc7055aa2f4059ea87564081d3eccab6ccc62b84ad19288d0489e46dff",
+      "sha256": "35da1a34a1ddcfbc9adbdd8e97ab2ae8c12d64d23790e09e60afff2c195ab3b7",
       "sourceChangedAt": "2026-09-27T05:45:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",

@@ -1,6 +1,26 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { allocateMinorUnits } from "@workspace/api-zod";
+
+// The planner previously rounded 10 cents into 5 + 4 + 2 - 1 cents.
+// Exercise the shared browser/server allocator, including stable tie handling.
+assert.deepEqual(allocateMinorUnits(10n, [45n, 35n, 15n, 5n]), [5n, 4n, 1n, 0n]);
+assert.deepEqual(allocateMinorUnits(2n, [1n, 1n, 1n]), [1n, 1n, 0n]);
+assert.deepEqual(allocateMinorUnits(9n, [0n, 100n, 0n]), [0n, 9n, 0n]);
+assert.throws(() => allocateMinorUnits(-1n, [1n]), RangeError);
+assert.throws(() => allocateMinorUnits(1n, []), RangeError);
+assert.throws(() => allocateMinorUnits(1n, [0n]), RangeError);
+assert.throws(() => allocateMinorUnits(1n, [-1n, 2n]), RangeError);
+for (const weights of [[45n,35n,15n,5n], [1n,1n,1n], [0n,7n,3n], [9999n,1n]]) {
+  for (let total=0n; total<=1000n; total++) {
+    const amounts=allocateMinorUnits(total,weights);
+    assert.equal(amounts.reduce((sum,amount)=>sum+amount,0n),total);
+    assert.ok(amounts.every(amount=>amount>=0n));
+    assert.deepEqual(allocateMinorUnits(total,weights),amounts);
+  }
+}
+assert.equal(allocateMinorUnits(999999999999999999n,[45n,35n,15n,5n]).reduce((sum,amount)=>sum+amount,0n),999999999999999999n);
 
 process.env.PROD_DATABASE_URL = process.env.PROD_DATABASE_URL ?? "postgresql://apu-test:apu-test@127.0.0.1:1/apu-test";
 const { CostValuePlanError, validateCostValuePlan, createBimServicesReferencePlan } = await import("./cost-value-plan-service");
