@@ -12,7 +12,9 @@ const definition = validateDeliveryWorkflowDefinition({schemaVersion:1,deliverab
   transitions:[],reopen:{role:"approve",reasonRequired:true},economicAllocation:{sourceVersionId:"apu-1",proposal:{method:"apu_default"}}});
 let workflow:any=null;
 let existingPlan:{plan_fingerprint:string;source_fingerprint:string}|null=null;
-const client:EdtTransactionClient={async query<Row>(sql:string){calls.push(sql);
+let insertedSnapshot: unknown;
+const client:EdtTransactionClient={async query<Row>(sql:string, values?: readonly unknown[]){calls.push(sql);
+  if(sql.includes("INSERT INTO job_activation_work_item_economic_plans")) insertedSnapshot=JSON.parse(String(values?.[19]));
   if(sql.includes("FROM job_activation_work_items w"))return{rows:[{id:"w1",intake_id:"i1",project_id:11,contract_id:"c1",contract_version_id:"cv1",intake_status:intakeStatus}] as Row[]};
   if(sql.includes("FROM financial_contract_versions v"))return{rows:[{currency,pricing_template_binding:{versionId}}] as Row[]};
   if(sql.includes("FROM company_delivery_workflow_work_items"))return{rows:(workflow?[workflow]:[]) as Row[]};
@@ -44,12 +46,21 @@ workflow.fingerprint=deliveryWorkflowFingerprint(workflow.definition);
 await rejectsWorkflow("ECONOMIC_WORKFLOW_APU_MISMATCH");
 workflow={version_id:"dw1",definition,fingerprint:deliveryWorkflowFingerprint(definition)};
 calls.length=0;
-const created=await createWorkItemEconomicPlan(input,host);
+const sourceEvidence={contract:{versionId:"cv1"},apu:{versionId:"apu-1",currency:"USD"},workflow:{versionId:"dw1"},values:["1.00","0.00"]};
+const sourceInput={...input,sourceSnapshot:sourceEvidence};
+const created=await createWorkItemEconomicPlan(sourceInput,host);
+assert.deepEqual(insertedSnapshot,sourceEvidence);
 assert.equal(created.idempotent,false);
 assert.equal(calls.filter(sql=>sql.includes("INSERT INTO job_activation_work_item_economic_plans")).length,1);
-existingPlan={plan_fingerprint:created.planFingerprint,source_fingerprint:edtFingerprint(input.sourceSnapshot)};
+for(const invalid of [{missing:undefined},{invalid:NaN},{oversized:"x".repeat(1024*1024)},[]]) {
+  calls.length=0;
+  await assert.rejects(()=>createWorkItemEconomicPlan({...input,sourceSnapshot:invalid as Record<string,unknown>},host),
+    (e:any)=>e.code==="ECONOMIC_SOURCE_SNAPSHOT_INVALID");
+  assert.equal(calls.length,0,"Invalid evidence is denied before transaction/writes");
+}
+existingPlan={plan_fingerprint:created.planFingerprint,source_fingerprint:edtFingerprint(sourceEvidence)};
 calls.length=0;
-assert.deepEqual(await createWorkItemEconomicPlan(input,host),{planFingerprint:created.planFingerprint,idempotent:true});
+assert.deepEqual(await createWorkItemEconomicPlan(sourceInput,host),{planFingerprint:created.planFingerprint,idempotent:true});
 assert.equal(calls.some(sql=>sql.startsWith("INSERT")||sql.startsWith("UPDATE")),false);
 calls.length=0;
 await assert.rejects(()=>createWorkItemEconomicPlan({...input,sourceSnapshot:{budgetVersion:"different"}},host),

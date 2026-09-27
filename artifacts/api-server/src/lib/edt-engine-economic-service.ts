@@ -11,6 +11,17 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
   authorize(input.actor,"JOB_OPERATE",input.companyId,input.projectId);
   for(const [name,value] of Object.entries({directProductionAmount:input.directProductionAmount,projectAdministrativeAmount:input.projectAdministrativeAmount,incentiveReserveAmount:input.incentiveReserveAmount,taskEarningsAmount:input.taskEarningsAmount,projectEarningsAmount:input.projectEarningsAmount}))nonnegative(value,name);
   if(!/^[A-Z]{3}$/.test(input.currency))throw new EdtEngineConflict("CURRENCY_INVALID","Currency must be an ISO-style three-letter code.");
+  let sourceSnapshotJson: string;
+  try {
+    if (!input.sourceSnapshot || Array.isArray(input.sourceSnapshot) || typeof input.sourceSnapshot !== "object") throw new Error();
+    sourceSnapshotJson = JSON.stringify(input.sourceSnapshot, (_key, value) => {
+      if (["undefined", "function", "symbol", "bigint"].includes(typeof value) ||
+          (typeof value === "number" && !Number.isFinite(value))) throw new Error();
+      return value;
+    });
+    if (Buffer.byteLength(sourceSnapshotJson, "utf8") > 1024 * 1024 ||
+        edtFingerprint(JSON.parse(sourceSnapshotJson)) !== edtFingerprint(input.sourceSnapshot)) throw new Error();
+  } catch { throw new EdtEngineConflict("ECONOMIC_SOURCE_SNAPSHOT_INVALID", "Economic source evidence must be a bounded JSON object without lossy values."); }
   const sourceFingerprint=edtFingerprint(input.sourceSnapshot);const planFingerprint=edtFingerprint({workItemId:input.workItemId,contractVersionId:input.contractVersionId,pricingTemplateVersionId:input.pricingTemplateVersionId,deliveryWorkflowVersionId:input.deliveryWorkflowVersionId,currency:input.currency,amounts:[input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount],resolvedAllocation:input.resolvedAllocation});
   return withEdtTransaction(async client=>{
     const item=(await client.query<any>("SELECT w.id,w.intake_id,w.project_id,w.contract_id,w.contract_version_id,w.economic_plan_fingerprint,i.status AS intake_status FROM job_activation_work_items w JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id WHERE w.id=$1 AND w.project_id=$2 AND i.company_id=$3 FOR UPDATE OF w",[input.workItemId,input.projectId,input.companyId])).rows[0];
@@ -40,7 +51,7 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
       return{planFingerprint,idempotent:true};
     }
     const id=deterministicEdtId("economic-plan",input.workItemId);
-    await client.query("INSERT INTO job_activation_work_item_economic_plans(id,company_id,project_id,intake_id,work_item_id,contract_id,contract_version_id,pricing_template_version_id,delivery_workflow_version_id,currency,direct_production_amount,project_administrative_amount,incentive_reserve_amount,task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19)",[id,input.companyId,input.projectId,input.intakeId,input.workItemId,input.contractId,input.contractVersionId,input.pricingTemplateVersionId,input.deliveryWorkflowVersionId,input.currency,input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount,JSON.stringify(input.resolvedAllocation),sourceFingerprint,planFingerprint,input.actor.actorUserId]);
+    await client.query("INSERT INTO job_activation_work_item_economic_plans(id,company_id,project_id,intake_id,work_item_id,contract_id,contract_version_id,pricing_template_version_id,delivery_workflow_version_id,currency,direct_production_amount,project_administrative_amount,incentive_reserve_amount,task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id,source_snapshot) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19,$20::jsonb)",[id,input.companyId,input.projectId,input.intakeId,input.workItemId,input.contractId,input.contractVersionId,input.pricingTemplateVersionId,input.deliveryWorkflowVersionId,input.currency,input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount,JSON.stringify(input.resolvedAllocation),sourceFingerprint,planFingerprint,input.actor.actorUserId,sourceSnapshotJson]);
     await client.query("UPDATE job_activation_work_items SET economic_plan_fingerprint=$2,updated_at=now() WHERE id=$1",[input.workItemId,planFingerprint]);
     return{planFingerprint,idempotent:false};
   },host);

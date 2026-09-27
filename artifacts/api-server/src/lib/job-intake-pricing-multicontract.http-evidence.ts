@@ -16,6 +16,7 @@ import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLabo
 import { saveCostValuePerformance, getCostValuePerformance, exportCostValuePerformanceCsv } from "./cost-value-performance-service";
 import { saveCostValueForecast, getCostValueForecast, exportCostValueForecastCsv } from "./cost-value-forecast-service";
 import { createWorkItemEconomicPlan } from "./edt-engine-economic-service";
+import { edtFingerprint } from "./edt-engine-transaction";
 import { proposeManualBonus, decideManualBonus } from "./cost-value-bonus-service";
 import { signToken } from "../middlewares/auth";
 import { startFeaturePolicyMigration } from "./feature-policy-migration";
@@ -331,11 +332,19 @@ try {
   console.log("C017 real PostgreSQL: unrelated workflow economic plan denied without inserted record PASS");
   // Synthetic economic funding fixture: tests persistence, not the unfinished public funding-creation workflow.
   const bonusFundingId=randomUUID();
+  const bonusSourceSnapshot={classification:"SYNTHETIC_TEST_ONLY",contractVersionId:economicItem.contract_version_id,
+    pricingTemplateVersionId:economicItem.apu_version,currency:"USD",reserve:"100"};
   await pool.query(`INSERT INTO job_activation_work_item_economic_plans(id,company_id,project_id,intake_id,work_item_id,contract_id,contract_version_id,
     pricing_template_version_id,delivery_workflow_version_id,currency,direct_production_amount,project_administrative_amount,incentive_reserve_amount,
-    task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,'TEST bonus workflow','USD',0,0,100,0,0,'{}',$9,$9,$10)`,
-    [bonusFundingId,companyId,projectId,economicItem.intake_id,economicItem.id,economicItem.contract_id,economicItem.contract_version_id,economicItem.apu_version,"b".repeat(64),actor.id]);
+    task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id,source_snapshot)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,'TEST bonus workflow','USD',0,0,100,0,0,'{}',$9,$9,$10,$11::jsonb)`,
+    [bonusFundingId,companyId,projectId,economicItem.intake_id,economicItem.id,economicItem.contract_id,economicItem.contract_version_id,economicItem.apu_version,edtFingerprint(bonusSourceSnapshot),actor.id,JSON.stringify(bonusSourceSnapshot)]);
+  await ensureEdtEngineSchema();
+  const storedSource=(await pool.query("SELECT source_snapshot,source_fingerprint FROM job_activation_work_item_economic_plans WHERE id=$1",[bonusFundingId])).rows[0];
+  assert.deepEqual(storedSource.source_snapshot,bonusSourceSnapshot);
+  assert.equal(edtFingerprint(storedSource.source_snapshot),storedSource.source_fingerprint);
+  await assert.rejects(()=>pool.query("UPDATE job_activation_work_item_economic_plans SET source_snapshot='{}' WHERE id=$1",[bonusFundingId]));
+  console.log("C017 source snapshot round-trip, migration replay and immutable evidence PASS (synthetic funding fixture)");
   const bonusReviewer=(await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id,is_super_admin)
     VALUES('bonus-reviewer@test.invalid','unused','TEST bonus reviewer',$1,true) RETURNING *`,[companyId])).rows[0];
   const bonusInput={fundingId:bonusFundingId,idempotencyKey:"TEST-bonus-request-1",reason:"TEST reviewed allocation",entries:[{userId:checker.id,amount:"60"}]};

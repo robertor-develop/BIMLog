@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "181db6008dea4e5f20f6b8980b8d5299a928ede453f653a4055c2545db2cf75c",
+  "bundleSha256": "133801aea6fe867737cf5b7323511baa581384b113f17113c15ea544228cf831",
   "impact": {
     "baselineCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
     "changedPaths": [
@@ -18,6 +18,8 @@
       "artifacts/api-server/src/lib/cost-value-plan.behavior.ts",
       "artifacts/api-server/src/lib/delivery-workflow-allocation-source-contract.ts",
       "artifacts/api-server/src/lib/delivery-workflow-allocation-source.behavior.ts",
+      "artifacts/api-server/src/lib/edt-engine-build314.behavior.ts",
+      "artifacts/api-server/src/lib/edt-engine-economic-service.ts",
       "artifacts/api-server/src/lib/edt-engine-migration.ts",
       "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
       "artifacts/api-server/src/routes/financial-apu.ts",
@@ -143,7 +145,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "19b0e466e08e5d69e09a4f3080ee9940fe7e812bbad75f396d11ac893d5ceabd",
+      "sha256": "6fd63f52f3674a113ffd85d9481952a371b3ea8f9a834fd82a93d2d210f222b4",
       "sourceChangedAt": "2026-09-27T05:45:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
@@ -155,7 +157,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "c54d62dfd1dd8eaaf37a34ac65dec01a397b7de71a7e1ceed6a0d0eada7b6339",
+      "sha256": "c01d13a902d558761077540902827100b8ef82e33d23ec531cae080a3d95d38d",
       "sourceChangedAt": "2026-09-27T05:45:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",

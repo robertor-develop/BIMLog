@@ -151,6 +151,9 @@ CREATE TABLE IF NOT EXISTS job_activation_work_item_economic_plans (
   CONSTRAINT job_activation_economic_plan_amounts_chk CHECK (direct_production_amount >= 0 AND project_administrative_amount >= 0 AND incentive_reserve_amount >= 0 AND task_earnings_amount >= 0 AND project_earnings_amount >= 0)
 );
 CREATE INDEX IF NOT EXISTS job_activation_economic_plan_project_idx ON job_activation_work_item_economic_plans(project_id,contract_id);
+-- Historical rows remain explicitly unavailable; never manufacture a snapshot
+-- from current templates or rewrite append-only economic history.
+ALTER TABLE job_activation_work_item_economic_plans ADD COLUMN IF NOT EXISTS source_snapshot jsonb;
 
 ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'legacy_recorded';
 ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS optimistic_version integer NOT NULL DEFAULT 1;

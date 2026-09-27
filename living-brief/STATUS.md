@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## C017 complete source-evidence storage — 2026-09-27
+
+Economic-plan persistence now stores the complete bounded JSON source snapshot beside its existing fingerprint, in the same insert/transaction. Additive SQL and Drizzle preserve historical rows as null rather than inventing evidence from current records. Validation rejects arrays, oversized and lossy JSON (including NaN/undefined) before database writes. Focused private-writer regression proves nested evidence insertion and immutable idempotent retry; real isolated PostgreSQL proves source round-trip/fingerprint equality, repeated migration and update denial. Connected Intake/time/bonus/forecast HTTP regressions pass in F:/BIMLog/TestProof/c017-source-snapshot-regression-20260927.log; API typecheck passes. Synthetic funding remains explicitly synthetic: the public approved-source funding resolver and complete C016–C020 release are still unfinished. No push/publication or Lens Next modification.
+
 ## C017 explicit APU pool classification — 2026-09-27
 
 Company APU drafts now support explicit, exhaustive, non-overlapping component classification into fixed company cost, Direct Production, contract administration, project incentive reserve and project earnings. Existing unclassified definitions/fingerprints remain unchanged; no name-based inference or automatic template conversion. Published binding freezes classified amounts but remains reference_only, not budget approval. Exact shared minor-unit apportionment reconciles fractional component totals; classified workflow previews use the same production amount. Rename/removal preserves or removes the explicit component references.
