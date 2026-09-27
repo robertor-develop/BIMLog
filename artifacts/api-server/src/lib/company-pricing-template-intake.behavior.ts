@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { jobIntakeCompletion, normalizeJobIntakeData } from "./job-intake-contract";
+import { assertIntakeProductionAllocation, jobIntakeCoreFingerprint, jobIntakeCompletion, normalizeJobIntakeData } from "./job-intake-contract";
 import { buildActivatedCommercialBaseline } from "./job-activation-commercial-baseline";
 
 const versionId = "7a0b7ad5-576d-4cea-890d-ff385ea283b3";
@@ -37,4 +37,21 @@ assert.equal(baseline.projectBudget.contractCount,2);
 assert.deepEqual(baseline.contractItems.map(item => item.pricingSnapshot.apuPlanVersion),[3,9]);
 assert.equal(baseline.contractItems.some(item => "pricingTemplateBinding" in item.pricingSnapshot),false);
 assert.equal(jobIntakeCompletion(data,[]).totals.contractValue,"420");
+const explicitlyAllocated=normalizeJobIntakeData({...data,scopeItems:data.scopeItems.map(item=>({...item,productionAllocation:"100.25"}))});
+assert.equal(explicitlyAllocated.scopeItems[0].productionAllocation,"100.25");
+assert.notEqual(jobIntakeCoreFingerprint(explicitlyAllocated),jobIntakeCoreFingerprint(data));
+assert.deepEqual(normalizeJobIntakeData(JSON.parse(JSON.stringify(explicitlyAllocated))),explicitlyAllocated);
+assert.equal(Object.hasOwn(data.scopeItems[0],"productionAllocation"),false,"Legacy snapshots retain absent optional field");
+assertIntakeProductionAllocation(explicitlyAllocated.scopeItems,{economicPools:{directProduction:"200.50"}});
+assertIntakeProductionAllocation([{productionAllocation:"0"},{productionAllocation:"0.01"}],{economicPools:{directProduction:"0.01"}});
+for (const [items,binding,code] of [
+  [[{}],{economicPools:{directProduction:"1"}},"INTAKE_PRODUCTION_ALLOCATION_REQUIRED"],
+  [[{productionAllocation:"0.01"}],{economicPools:{directProduction:"0.02"}},"INTAKE_PRODUCTION_ALLOCATION_TOTAL"],
+  [[{productionAllocation:"1"}],null,"INTAKE_PRODUCTION_APU_REQUIRED"],
+] as const) assert.throws(()=>assertIntakeProductionAllocation([...items],binding),(error:any)=>error.code===code);
+assert.throws(()=>normalizeJobIntakeData({...data,scopeItems:[{...data.scopeItems[0],productionAllocation:"-1"}]}));
+const explicitBaseline=buildActivatedCommercialBaseline({intakeId:"INTAKE-1",projectId:1,currency:"USD",workflowInstances:1,workItems:1,tasks:1,resourceAssignments:0,contracts:[{profileId:"BASE",contractId:"CON-BASE",contractVersionId:"VER-BASE",contractNumber:"BASE-001",currency:"USD",
+  items:[{stableLineId:"CI-1",displayName:"Drawing",projectCostNodeId:"PCN-1",budgetSnapshotLineId:"BL-1",quantity:"10",unit:"Hours",unitRate:"25",contractValue:"250",workflowTemplate:"generic",productionAllocation:"100.25"}]}]});
+assert.equal(explicitBaseline.contractItems[0].pricingSnapshot.productionAllocation,"100.25");
+assert.equal(explicitBaseline.contractItems[0].pricingSnapshot.contractValue,"250","Production funding is not the selling value");
 console.log("company pricing-template Intake: two independent references preserve contract allocation and canonical APU rates/baseline PASS");

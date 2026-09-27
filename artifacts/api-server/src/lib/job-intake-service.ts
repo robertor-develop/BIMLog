@@ -34,6 +34,7 @@ import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
+import { assertIntakeProductionAllocation } from "./job-intake-contract";
 import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 const uuid = () => crypto.randomUUID();
@@ -1418,6 +1419,7 @@ export async function activateJobIntake(input: {
           },
           client,
         );
+        assertIntakeProductionAllocation(contractItems, draft.pricingTemplateBinding);
         const initialized = await initializeContractItemWorkflowsWithClient(
           {
             actorUserId: input.actorUserId,
@@ -1477,6 +1479,7 @@ export async function activateJobIntake(input: {
             unit: item.unit,
             unitRate: item.billingHourlyRate,
             contractValue: item.contractValue,
+            ...(item.productionAllocation === undefined ? {} : {productionAllocation:item.productionAllocation}),
             apuPlanVersion: item.apuPlanVersion,
             workflowTemplate: item.workflowTemplate || data.delivery.workflowTemplate,
           })),

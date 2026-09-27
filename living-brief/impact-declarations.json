@@ -45760,6 +45760,7 @@
         "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
         "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
         "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts",
         "artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.ts",
@@ -45771,9 +45772,14 @@
         "artifacts/api-server/src/lib/edt-engine-build314.behavior.ts",
         "artifacts/api-server/src/lib/edt-engine-economic-service.ts",
         "artifacts/api-server/src/lib/edt-engine-migration.ts",
+        "artifacts/api-server/src/lib/job-activation-commercial-baseline.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
         "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
         "artifacts/api-server/src/routes/financial-apu.ts",
         "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
         "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
         "artifacts/bimlog/src/pages/company-pricing-errors.ts",
@@ -45788,7 +45794,7 @@
         "living-brief/impact-declarations.json",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "b4b5edb69382081be3b9e1be69178a04e059e66672e163dd4926321397c1162c"
+      "reviewedChangeSha256": "e0cc8cc0927480e2e5b0a5cf727cbd3cc024d92998181ff756698c9cd2c5e371"
     }
   ]
 }

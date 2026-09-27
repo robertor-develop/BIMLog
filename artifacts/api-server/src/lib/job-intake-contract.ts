@@ -465,6 +465,9 @@ export function normalizeJobIntakeData(raw: unknown) {
       ),
       plannedHours,
       billingHourlyRate,
+      ...(item.productionAllocation == null || item.productionAllocation === "" ? {} : {
+        productionAllocation: exact(item.productionAllocation, `scopeItems[${index}].productionAllocation`),
+      }),
       contractValue: decimalFromScaled(
         (scaledSignedDecimal(plannedHours) *
           scaledSignedDecimal(billingHourlyRate) +
@@ -856,6 +859,21 @@ export const FULL_JOB_INTAKE_CAPABILITIES: JobIntakeCapabilities = {
   anyCommercial: true,
   fullCommercialActivation: true,
 };
+
+/** Explicit reviewed amounts, never commercial value or hours used as inferred weights. */
+export function assertIntakeProductionAllocation(items: Array<{productionAllocation?: string}>,
+  binding: {economicPools?: {directProduction: string}} | null) {
+  if (!binding?.economicPools) {
+    if (items.some(item => item.productionAllocation !== undefined))
+      throw new FinancialControlError(409,"INTAKE_PRODUCTION_APU_REQUIRED","Production allocation requires a published APU with classified economic pools.");
+    return;
+  }
+  if (!items.length || items.some(item => item.productionAllocation === undefined))
+    throw new FinancialControlError(409,"INTAKE_PRODUCTION_ALLOCATION_REQUIRED","Enter an explicit production amount for every Work Item, including zero where applicable.");
+  const total = items.reduce((sum,item)=>sum+scaledSignedDecimal(exact(item.productionAllocation,"productionAllocation")),0n);
+  if (total !== scaledSignedDecimal(binding.economicPools.directProduction))
+    throw new FinancialControlError(409,"INTAKE_PRODUCTION_ALLOCATION_TOTAL","Work Item production allocations must equal the contract APU production pool; administration is separate.");
+}
 
 export function jobIntakeBudgetLinkRequested(data: JobIntakeData) {
   return Boolean(

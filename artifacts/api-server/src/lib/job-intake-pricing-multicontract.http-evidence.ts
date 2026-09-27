@@ -98,10 +98,12 @@ for (const [version,price] of [[1,"25"],[2,"42.5"]] as const)
     VALUES($1,$2,$3,$4::jsonb,'{}'::jsonb,$5,$6)`,
     [`intake-apu-${version}`,projectId,version,JSON.stringify({ currency:"USD",sellingPrice:price }),`intake-apu-fp-${version}`,actor.id]);
 
-async function publishedTemplate(name: string,price: string) {
+async function publishedTemplate(name: string,price: string,classified = false) {
   const templateId = randomUUID(), versionId = randomUUID();
   const definition = { schemaVersion:1,currency:"USD",industry:"BIM Services",name,
-    nodes:[{ id:"labor",label:"Labor",method:"fixed_amount",amount:price }] };
+    nodes:[{ id:"labor",label:"Labor",method:"fixed_amount",amount:price }],
+    ...(classified ? {economicAllocation:{directProductionNodeIds:["labor"],phases:[{phaseId:"production",code:"PROD",name:"Production",percent:"100"}]},
+      economicPools:{fixedCompanyCost:[],directProduction:["labor"],projectAdministration:[],incentiveReserve:[],projectEarnings:[]}} : {}) };
   const validated = validatePricingTemplate(definition);
   await pool.query(`INSERT INTO generic_apu_template_versions
     (id,template_id,company_id,project_id,version,name,industry,status,currency,reason,content_fingerprint,
@@ -243,13 +245,31 @@ try {
   assert.equal(retiredAttempt.body.code,"PRICING_TEMPLATE_RETIRED");
   assert.equal(Number((await pool.query(`SELECT count(*)::int n FROM financial_contracts WHERE project_id=$1`,[projectId])).rows[0].n),0);
   assert.equal(Number((await pool.query(`SELECT count(*)::int n FROM job_activation_work_items WHERE project_id=$1`,[projectId])).rows[0].n),0);
-  const replacement = await publishedTemplate("Replacement Review Reference","240");
-  const correctedData = { ...data,commercial:{ ...data.commercial,contracts:[data.commercial.contracts[0],
+  const replacement = await publishedTemplate("Replacement Review Reference","240",true);
+  let correctedData = { ...data,commercial:{ ...data.commercial,contracts:[data.commercial.contracts[0],
     { ...data.commercial.contracts[1],pricingTemplateVersionId:replacement.versionId }] } };
   const recovered = await request("PUT",intakePath,{ expectedRevision:reopened.body.revision,data:correctedData });
   assert.equal(recovered.status,200,JSON.stringify(recovered.body));
-  const ready = await request("GET",intakePath);
+  let ready = await request("GET",intakePath);
   assert.equal(ready.body.data.commercial.contracts[1].pricingTemplateVersionId,replacement.versionId);
+  for (const [allocation,code] of [[undefined,"INTAKE_PRODUCTION_ALLOCATION_REQUIRED"],["239.99","INTAKE_PRODUCTION_ALLOCATION_TOTAL"]] as const) {
+    if (allocation !== undefined) {
+      const invalidAllocation = await request("PUT",intakePath,{expectedRevision:ready.body.revision,
+        data:{...correctedData,scopeItems:correctedData.scopeItems.map(item=>item.contractId==="ADD"?{...item,productionAllocation:allocation}:item)}});
+      assert.equal(invalidAllocation.status,200,JSON.stringify(invalidAllocation.body));
+      ready=await request("GET",intakePath);
+    }
+    const rejected=await request("POST",`${intakePath}/activate`,{expectedRevision:ready.body.revision,confirmationFingerprint:ready.body.completion.fingerprint});
+    assert.equal(rejected.status,409,JSON.stringify(rejected.body));
+    assert.equal(rejected.body.code,code);
+    assert.equal(Number((await pool.query(`SELECT count(*)::int n FROM financial_contracts WHERE project_id=$1`,[projectId])).rows[0].n),0,"Invalid production funding rolls back contracts");
+    assert.equal(Number((await pool.query(`SELECT count(*)::int n FROM job_activation_work_items WHERE project_id=$1`,[projectId])).rows[0].n),0,"Invalid production funding creates no Work Items");
+  }
+  correctedData={...correctedData,scopeItems:correctedData.scopeItems.map(item=>item.contractId==="ADD"?{...item,productionAllocation:"240"}:item)};
+  const allocated=await request("PUT",intakePath,{expectedRevision:ready.body.revision,data:correctedData});
+  assert.equal(allocated.status,200,JSON.stringify(allocated.body));
+  ready=await request("GET",intakePath);
+  assert.equal(ready.body.data.scopeItems.find((item:any)=>item.contractId==="ADD").productionAllocation,"240");
   const activated = await request("POST",`${intakePath}/activate`,{
     expectedRevision:ready.body.revision,confirmationFingerprint:ready.body.completion.fingerprint });
   assert.equal(activated.status,200,JSON.stringify(activated.body));
@@ -298,6 +318,10 @@ try {
   const budget = (await pool.query(`SELECT content->'projectBudget'->>'total' total FROM job_activation_execution_baselines
     WHERE project_id=$1`,[projectId])).rows[0];
   assert.equal(budget.total,"420");
+  const productionBaseline=(await pool.query(`SELECT pricing_snapshot FROM job_activation_contract_item_baselines WHERE project_id=$1 AND stable_line_id='CI-REVIEW'`,[projectId])).rows[0];
+  assert.equal(productionBaseline.pricing_snapshot.productionAllocation,"240");
+  assert.equal(productionBaseline.pricing_snapshot.contractValue,"170","Frozen production allocation stays distinct from commercial selling value");
+  console.log("C017 explicit production allocation: missing/mismatch activation rollback, correction, save/reopen and frozen allocation distinct from selling value PASS");
   await pool.query(`INSERT INTO generic_apu_template_versions
     (id,template_id,company_id,project_id,version,name,industry,status,currency,reason,content_fingerprint,
      supersedes_id,provenance,created_by_id,published_by_id,published_at)

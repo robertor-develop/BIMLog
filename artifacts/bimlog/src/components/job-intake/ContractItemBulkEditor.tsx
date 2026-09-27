@@ -524,6 +524,13 @@ export function ContractItemBulkEditor(props: Props) {
                     />
                   </label>
                   <label>
+                    {props.tt("Production allocation", "Asignación de producción")}
+                    <input inputMode="decimal" value={item.productionAllocation ?? ""}
+                      aria-label={props.tt(`Production allocation row ${index + 1}`, `Asignación de producción fila ${index + 1}`)}
+                      onChange={event=>update(index,{productionAllocation:event.target.value})} />
+                    <small>{props.tt("For a classified contract APU: enter the reviewed amount, including zero. Contract allocations must total its production pool. Administration stays separate.", "Para un APU contractual con fondos clasificados: indique el monto revisado, incluido cero. Las asignaciones deben sumar su fondo de producción. La administración se mantiene separada.")}</small>
+                  </label>
+                  <label>
                     {props.tt("Calculated value", "Valor calculado")}
                     <input
                       value={`${exactProduct(item.plannedHours, item.billingHourlyRate)} ${props.currency}`}
