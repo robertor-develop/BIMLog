@@ -48,3 +48,11 @@ for (const category of ["commitment_approval", "owner_contract_approval"]) {
 assert.match(financialSettings, /Aprobación de compromiso/);
 assert.match(financialSettings, /Aprobación de contrato con el propietario/);
 console.log("C020 approval policy choices PASS: UI categories match existing contract service categories in English and Spanish");
+const intake = read("artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx");
+assert.match(intake, /selectableTeamRoles\(getOptions\("member_role"\), ""\)/);
+assert.match(intake, /Project membership role", "Rol de membresía del proyecto/);
+assert.match(intake, /email: selected.email, role: projectMemberRole/);
+assert.doesNotMatch(intake, /email: selected.email, role: "member"/);
+assert.match(intake, /projectMemberRoles.some\(role => role.value === projectMemberRole\)/);
+assert.match(intake, /typeof payload\?\.error === "string"/);
+console.log("C020 Intake membership PASS: explicit configured non-administrator role, no retired hardcoded role, server denial preserved");

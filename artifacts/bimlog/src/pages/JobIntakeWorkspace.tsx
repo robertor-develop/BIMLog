@@ -22,6 +22,8 @@ import { ProjectCompanyCreator, type CreatedProjectCompany } from "@/components/
 import { ProjectContactCreator, type CreatedProjectContact } from "@/components/job-intake/ProjectContactCreator";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import { useConfig } from "@/lib/config-context";
+import { selectableTeamRoles } from "@/lib/team-role-options";
 import { expectedIntakeTaskCount } from "@/lib/intake-activation-task-count";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
@@ -79,6 +81,9 @@ const css = `
 export function JobIntakeWorkspace() {
   const { token } = useAuthStore();
   const { language, tt } = useI18n();
+  const { getOptions } = useConfig();
+  const projectMemberRoles = selectableTeamRoles(getOptions("member_role"), "");
+  const [projectMemberRole, setProjectMemberRole] = useState("");
   const [, route] = useRoute("/projects/:id/intake");
   const [, setLocation] = useLocation();
   const projectId = Number(route?.id);
@@ -156,6 +161,7 @@ export function JobIntakeWorkspace() {
         throw new Error(
           (language === "es" ? payload?.error?.es : payload?.error?.en) ||
             payload?.error?.en ||
+            (typeof payload?.error === "string" ? payload.error : "") ||
             tt("The request failed.", "La solicitud falló."),
         );
       return payload;
@@ -517,7 +523,7 @@ export function JobIntakeWorkspace() {
     const selected = eligibleProjectUsers?.find(
       (candidate: any) => String(candidate.id) === eligibleProjectUserId,
     );
-    if (!selected || addingProjectMember) return;
+    if (!selected || addingProjectMember || !projectMemberRoles.some(role => role.value === projectMemberRole)) return;
     setAddingProjectMember(true);
     setError("");
     try {
@@ -525,7 +531,7 @@ export function JobIntakeWorkspace() {
       await api(`/projects/${projectId}/members`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: selected.email, role: "member" }),
+        body: JSON.stringify({ email: selected.email, role: projectMemberRole }),
       });
       await load();
       setNotice(
@@ -2382,9 +2388,16 @@ export function JobIntakeWorkspace() {
                           </option>
                         ))}
                       </select>
+                      <label>
+                        {tt("Project membership role", "Rol de membresía del proyecto")}
+                        <select value={projectMemberRole} onChange={event => setProjectMemberRole(event.target.value)}>
+                          <option value="">{tt("Select a configured role", "Seleccione un rol configurado")}</option>
+                          {projectMemberRoles.map(role => <option key={role.value} value={role.value}>{language === "es" ? role.labelEs || role.label : role.label}</option>)}
+                        </select>
+                      </label>
                       <button
                         type="button"
-                        disabled={!eligibleProjectUserId || addingProjectMember}
+                        disabled={!eligibleProjectUserId || addingProjectMember || !projectMemberRoles.some(role => role.value === projectMemberRole)}
                         onClick={() => void addExistingProjectMember()}
                       >
                         <Plus size={14} /> {addingProjectMember
