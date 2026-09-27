@@ -1,5 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
+Latest C020 checkpoint: cd48a033 passed all nine local gates, was pushed to master and synchronized to Replit. Production/development backups were restored privately before applying the additive economic migration; affected existing row counts remained unchanged. Prepublication parity caught the bonus unique-constraint spelling. Restored-production rehearsal then proved the former declared spelling itself exceeded the identifier limit; the schema and migration now share job_bonus_proposals_idempotency_uidx. Real PostgreSQL regression verifies returned text spelling, unchanged index OID/data and repeated migration. The corrected restore rehearsal passes without truncation. Earlier9eb67f74 full gate was intentionally stopped, not passed. Run the new clean gate before push/publication. Live remains7957540c/provider8628213d; full authenticated acceptance and C020 completion remain open. No Lens changes or C021 work. Older notes below are historical checkpoints.
+
 Release-refresh repair: the new06d772fa full gate cleared the functional suites but failed stale OPEN_LOOP_DISPOSITIONS line references after narrative updates. Added the existing dispositions generator to the same pre-hash updater used for platform/route inventories, with ordering regression coverage. No acceptance rule was weakened. Regenerate, commit and rerun the full gate;06d772fa is not a passed release receipt.
 
 ## Latest C017 Work Item funding connection — 2026-09-27

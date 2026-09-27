@@ -577,12 +577,12 @@ try {
   try {
     await namingProof.query('BEGIN');
     const before = (await namingProof.query('SELECT * FROM job_bonus_proposals ORDER BY id')).rows;
-    await namingProof.query(`ALTER TABLE job_bonus_proposals ADD CONSTRAINT job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key UNIQUE USING INDEX job_bonus_proposals_project_id_maker_user_id_idempotency_key_key`);
+    await namingProof.query(`ALTER TABLE job_bonus_proposals ADD CONSTRAINT job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key UNIQUE USING INDEX job_bonus_proposals_idempotency_uidx`);
     const indexOid = (await namingProof.query(`SELECT conindid FROM pg_constraint WHERE conrelid='job_bonus_proposals'::regclass AND conname='job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key'`)).rows[0].conindid;
     await namingProof.query(EDT_ENGINE_ECONOMIC_SQL);
     await namingProof.query(EDT_ENGINE_ECONOMIC_SQL);
-    const repaired = (await namingProof.query(`SELECT conindid,pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE conrelid='job_bonus_proposals'::regclass AND conname='job_bonus_proposals_project_id_maker_user_id_idempotency_key_key'`)).rows;
-    assert.deepEqual(repaired,[{conindid:indexOid,definition:'UNIQUE (project_id, maker_user_id, idempotency_key)'}]);
+    const repaired = (await namingProof.query(`SELECT conname::text AS name,conindid,pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE conrelid='job_bonus_proposals'::regclass AND conname::text='job_bonus_proposals_idempotency_uidx'`)).rows;
+    assert.deepEqual(repaired,[{name:'job_bonus_proposals_idempotency_uidx',conindid:indexOid,definition:'UNIQUE (project_id, maker_user_id, idempotency_key)'}]);
     assert.deepEqual((await namingProof.query('SELECT * FROM job_bonus_proposals ORDER BY id')).rows,before);
     console.log('C020 schema naming PASS: exact declared name, same unique index OID, two replays, unchanged proposal records');
   } finally {

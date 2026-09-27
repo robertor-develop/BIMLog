@@ -28,7 +28,7 @@ export const jobBonusProposalsTable = pgTable("job_bonus_proposals", {
   idempotencyKey: text("idempotency_key").notNull(), proposal: jsonb("proposal").$type<Record<string, unknown>>().notNull(),
   fingerprint: text("fingerprint").notNull(), amount: numeric("amount", { precision: 30, scale: 6 }).notNull(), currency: text("currency").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [uniqueIndex("job_bonus_proposals_project_id_maker_user_id_idempotency_key_key").on(table.projectId, table.makerUserId, table.idempotencyKey),
+}, table => [uniqueIndex("job_bonus_proposals_idempotency_uidx").on(table.projectId, table.makerUserId, table.idempotencyKey),
   index("job_bonus_proposals_funding_idx").on(table.fundingId),
   index("job_bonus_proposals_contract_funding_idx").on(table.contractFundingId),
   check("job_bonus_proposals_one_funding_chk",sql`(${table.fundingId} IS NULL) <> (${table.contractFundingId} IS NULL)`),

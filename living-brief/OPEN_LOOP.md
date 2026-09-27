@@ -1,5 +1,7 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+Follow-up C020 repair: restored-production rehearsal exposed truncation of the declared identifier too. Both schema and migration now use short job_bonus_proposals_idempotency_uidx. Focused PostgreSQL test checks actual text name, same index OID, record preservation and two replays; corrected restore rehearsal passes. Stopped9eb67f74 gate is not acceptance. Repeat new clean gate and publication prerequisites; no new block completion.
+
 C020 publication remains open: cd48a033 pushed/synchronized and additive migration applied after private restore proof. Exact schema parity caught shortened bonus constraint name; permanent repair and real PostgreSQL replay/data-preservation test now pass locally. Complete clean release gate, push/sync repair, restore rehearsal and exact database parity, publish and authenticated acceptance before C021. Live remains7957540c. Lens excluded.
 
 Latest release correction:06d772fa full gate failed stale generated open-loop source/line references, not a production action. The shared pre-hash updater now invokes the existing dispositions generator as well as platform and route inventories. Exact generated-state checks remain in force. Reverify the clean successor; no push/publication or completed-block claim.

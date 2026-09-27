@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "a10201ce445a6b8953757dfdccefb206a2e2bfd8e9ab4a4835a0de3e451f0469",
+  "bundleSha256": "d75a4bbca26012e0ce8f6fffda5cb557a237470905ecc88c6bf1b88be53be40d",
   "impact": {
     "baselineCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
     "changedPaths": [
@@ -119,7 +119,7 @@
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "c959cb677005ca3313852c04e5be8c00dc23daec75559b88df207ef089f557d2",
-      "sourceChangedAt": "2026-09-27T16:00:00.000Z",
+      "sourceChangedAt": "2026-09-27T15:10:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
       "semanticReviewedThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
@@ -166,8 +166,8 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "a4d858316dc295d7239592c0a0e9b0eb2dc4316fc4c07c18b74c7bd4836e2332",
-      "sourceChangedAt": "2026-09-27T16:00:00.000Z",
+      "sha256": "fcf6cf7746211287d09944394212b6e2f8137e6b2360113e0d880d8a2697eea0",
+      "sourceChangedAt": "2026-09-27T15:10:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
       "semanticReviewedThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
@@ -178,8 +178,8 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "f5442be2d543fd9e480ba40c7304afb7fc408a66ffad3c8db480cc5e4edd0095",
-      "sourceChangedAt": "2026-09-27T16:00:00.000Z",
+      "sha256": "14f6e2ff740ac54ae31177a2d8b451b55203827f0225b25e1a6c6dacf22c1f48",
+      "sourceChangedAt": "2026-09-27T15:10:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
       "semanticReviewedThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
