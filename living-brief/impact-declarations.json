@@ -45760,6 +45760,8 @@
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-service.ts",
+        "artifacts/api-server/src/lib/cost-value-plan-service.ts",
+        "artifacts/api-server/src/lib/cost-value-plan.behavior.ts",
         "artifacts/api-server/src/lib/edt-engine-migration.ts",
         "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
         "artifacts/api-server/src/routes/financial-apu.ts",
@@ -45773,7 +45775,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "18104c18a60aa4043449fc6ea8b55b4e0f84ae7ec73124abd87896a5dcd56d5c"
+      "reviewedChangeSha256": "6d3744e28de8a4d742dcd38637a4181f35a22a0d94933d55a79d1a063b5fe234"
     }
   ]
 }

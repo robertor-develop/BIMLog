@@ -3,7 +3,21 @@ import fs from "node:fs";
 import path from "node:path";
 
 process.env.PROD_DATABASE_URL = process.env.PROD_DATABASE_URL ?? "postgresql://apu-test:apu-test@127.0.0.1:1/apu-test";
-const { CostValuePlanError, validateCostValuePlan } = await import("./cost-value-plan-service");
+const { CostValuePlanError, validateCostValuePlan, createBimServicesReferencePlan } = await import("./cost-value-plan-service");
+
+const reference = createBimServicesReferencePlan({ name:"TEST BIM Services reference", currency:"USD", sellingPrice:"11000", fixedCompanyCost:"1000" });
+assert.deepEqual(reference.plan.allocations,{labor:"7000.00",bonus:"2000.00",taskEarnings:"1000.00"});
+assert.deepEqual(reference.plan.laborSplit,{production:"5950.00",administrative:"1050.00"});
+assert.deepEqual(reference.plan.productionPhases.map(p=>p.amount),["2677.50","2082.50","892.50","297.50"]);
+assert.equal(reference.plan.administrativeLines[0].amount,"1050.00");
+for (let minor=0; minor<=200; minor++) {
+  const tiny=createBimServicesReferencePlan({name:"TEST rounding",currency:"USD",sellingPrice:(minor/100).toFixed(2),fixedCompanyCost:"0"}).plan;
+  const units=(value:string)=>BigInt(value.replace(".",""));
+  assert.equal(tiny.productionPhases.reduce((total,line)=>total+units(line.amount),0n),units(tiny.laborSplit.production));
+  assert.ok(tiny.productionPhases.every(line=>!line.amount.startsWith("-")));
+  assert.equal(Object.values(tiny.allocations).reduce((total,value)=>total+units(value),0n),BigInt(minor));
+}
+assert.throws(()=>createBimServicesReferencePlan({name:"TEST invalid",currency:"USD",sellingPrice:"1",fixedCompanyCost:"2"}), (error:any)=>error.code==="COST_VALUE_NEGATIVE_DISTRIBUTABLE");
 
 const balanced = {
   name: "Standard commercial plan", currency: "usd", sellingPrice: "1000.00", fixedCompanyCost: "100.00",

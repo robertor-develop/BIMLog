@@ -76,6 +76,42 @@ const withDerivedPercentages = (lines: Line[], whole: bigint) => {
 };
 const digest = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
+/** Explicit BIM Services reference model: Architecture Closure v1.2 §§4.2–4.3.
+ * Produces a draft calculation, never funding/approval authority. Generic APUs
+ * must not acquire these percentages implicitly or through their display name.
+ */
+export function createBimServicesReferencePlan(input: {
+  name: string; currency: string; sellingPrice: string; fixedCompanyCost: string;
+}) {
+  const selling = cents(input.sellingPrice, "sellingPrice");
+  const fixed = cents(input.fixedCompanyCost, "fixedCompanyCost");
+  if (fixed > selling) throw new CostValuePlanError(400, "COST_VALUE_NEGATIVE_DISTRIBUTABLE", "Fixed company cost cannot exceed selling price.");
+  const portion = (amount: bigint, percent: bigint) => (amount * percent + 50n) / 100n;
+  const labor = portion(selling - fixed, 70n);
+  const production = portion(labor, 85n);
+  const administrative = labor - production;
+  const definitions = [
+    { id: "PRE", name: "Preliminary", percentage: 45n },
+    { id: "COO", name: "Coordination", percentage: 35n },
+    { id: "FR", name: "For Record", percentage: 15n },
+    { id: "AB", name: "As-Built", percentage: 5n },
+  ];
+  // Largest remainder retains exact cents even for tiny budgets. Stable phase
+  // order resolves ties; a residual must never create a negative final phase.
+  const phaseUnits = definitions.map(phase => production * phase.percentage / 100n);
+  let remaining = production - sum(phaseUnits);
+  const remainderOrder = definitions.map((phase, index) => ({ index, remainder: production * phase.percentage % 100n }))
+    .sort((a, b) => a.remainder === b.remainder ? a.index - b.index : a.remainder > b.remainder ? -1 : 1);
+  for (const entry of remainderOrder) { if (remaining === 0n) break; phaseUnits[entry.index]++; remaining--; }
+  return validateCostValuePlan({
+    ...input, allocationMode: "percentage",
+    allocationPercentages: { labor: "70", bonus: "20", taskEarnings: "10" },
+    laborSplit: { production: money(production), administrative: money(administrative) },
+    productionPhases: definitions.map((phase, index) => ({ id: phase.id, name: phase.name, amount: money(phaseUnits[index]), percentage: String(phase.percentage) })),
+    administrativeLines: [{ id: "PROJECT-ADMIN", name: "Project Administrative Labor", amount: money(administrative), percentage: "100" }],
+  });
+}
+
 export function validateCostValuePlan(input: unknown): { plan: CostValuePlanInput; evaluation: Record<string, unknown> } {
   if (!input || typeof input !== "object") throw new CostValuePlanError(400, "COST_VALUE_INPUT_INVALID", "A plan is required.");
   const raw = input as Record<string, any>;

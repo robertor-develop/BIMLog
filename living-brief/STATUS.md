@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## C017 approved economic reference recovered — 2026-09-27
+
+Direct reading of the original approved Architecture Closure v1.2 DOCX sections4.2–4.3 confirms the BIM Services reference: net selling value minus fixed company cost;70% labor,20% incentive reserve,10% project earnings;85% of labor production and15% Job/Contract administration; production stages45/35/15/5. Earlier requests for Roberto to provide these percentages were unnecessary and are superseded. Do not apply the model to unrelated generic APUs or infer individual bonuses. Explicit createBimServicesReferencePlan now reuses the existing Cost & Value validator/evaluator and exact-cent handling; deterministic phase remainder distribution prevents negative final phases on tiny amounts. Reference values,201 small-budget cases, conservation and invalid fixed-cost tests pass. API typecheck passes. This is an internal draft calculation, NOT approved funding, a public template integration, deployment or a completed block. Still wire explicitly selected approved model versions and immutable Contract/Work Item allocations without duplicating Job-level administration.
+
 ## C018 recipient revocation regression — 2026-09-27
 
 Real isolated PostgreSQL test now removes a proposed recipient's active project membership before independent approval, verifies BONUS_RECIPIENT_INELIGIBLE and zero persisted decisions, restores the synthetic membership and proves the valid approval path. Connected database/HTTP tests pass in F:/BIMLog/TestProof/c018-recipient-lifecycle-20260927.log. This is additional local regression coverage, not a new completed build or deployed acceptance. Source inspection confirms mergeMappedContractItems deliberately treats Generic APU sellingPrice as a plan total, not a unit rate; that does not define the missing protected-pool mapping for the public economic-plan resolver. No push/publication or Lens Next change.

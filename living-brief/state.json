@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "74ccddbb7f0e6656367c52e25745e02c2353f70259e2488a4b36a6095e888d06",
+  "bundleSha256": "3686f3dbd513426a09e7c0a328576b3c75046d603a0c447c70e62ec23a3a53da",
   "impact": {
     "baselineCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
     "changedPaths": [
@@ -10,6 +10,8 @@
       "artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts",
       "artifacts/api-server/src/lib/cost-value-bonus-allocation.ts",
       "artifacts/api-server/src/lib/cost-value-bonus-service.ts",
+      "artifacts/api-server/src/lib/cost-value-plan-service.ts",
+      "artifacts/api-server/src/lib/cost-value-plan.behavior.ts",
       "artifacts/api-server/src/lib/edt-engine-migration.ts",
       "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
       "artifacts/api-server/src/routes/financial-apu.ts",
@@ -130,7 +132,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "619ca11acddfd9bfdda9510a2f3657a0251a56cb02fe032ed503772e2ecdba4f",
+      "sha256": "3bd69451619590dd6b20392f088c5d9e28cf8c68b29f5fe94f0f0e21f8ebaf10",
       "sourceChangedAt": "2026-09-27T05:45:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
@@ -142,7 +144,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "a32774064bfa5921ab4d5108a0d4dfee4611bd7c29b45f284e8bcb5c3d6a9623",
+      "sha256": "942ca8dc7055aa2f4059ea87564081d3eccab6ccc62b84ad19288d0489e46dff",
       "sourceChangedAt": "2026-09-27T05:45:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
