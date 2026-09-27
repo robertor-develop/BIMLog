@@ -45669,6 +45669,111 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "27327194caffe105815a64554881fa047ccfc314e47a0962ac60133cf1bda82a"
+    },
+    {
+      "taskId": "consolidation-c018-manual-proposal-rules",
+      "reviewedThroughCommit": "c199c6e2aa8f97e1eacb438b259734342d596473",
+      "reviewedAt": "2026-09-27T05:45:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Manual proposals have immutable SQL/Drizzle persistence, authenticated APIs and a bilingual existing-planner panel. Server-scoped cursor history, capability hints, readable reserve labels and context isolation added. Real disposable PostgreSQL/HTTP tests pass concurrency, independent decisions, pagination and cross-company list/propose/decision denial. Actual production-component synthetic Chrome checks cover submission, review reasons, cancel, empty/read-only/maker cases and measured390 layout; not deployed acceptance. Public funding integration, remaining financial-policy matrix, release and live acceptance remain unfinished. No automatic payment or repeated formula-choice blocker."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reuse existing money and financial authorization contracts; no second calculator."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local checks do not prove deployed workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact amounts and negative authorization/capacity cases tested; connected tests pending."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing C018 governed allocation scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Additive proposal/decision schema and authenticated API recorded by generated inventory; existing economic reserve and financial authority reused."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No artifact/UI changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards assertions."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record persisted API/UI implementation and local tests separately from unfinished public funding and deployed acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Remove repeated formula decision blocker; preserve concrete integration gaps."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical or production records changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts",
+        "artifacts/api-server/src/lib/cost-value-bonus-allocation.ts",
+        "artifacts/api-server/src/lib/cost-value-bonus-service.ts",
+        "artifacts/api-server/src/lib/edt-engine-migration.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/routes/financial-apu.ts",
+        "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+        "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/db/src/schema/job-intakes.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "18104c18a60aa4043449fc6ea8b55b4e0f84ae7ec73124abd87896a5dcd56d5c"
     }
   ]
 }

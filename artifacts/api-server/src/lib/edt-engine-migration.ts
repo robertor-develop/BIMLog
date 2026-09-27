@@ -182,8 +182,23 @@ CREATE TABLE IF NOT EXISTS job_activation_budget_ledger_entries (
 );
 CREATE INDEX IF NOT EXISTS job_activation_budget_ledger_account_idx ON job_activation_budget_ledger_entries(budget_account_id,pool,created_at);
 CREATE INDEX IF NOT EXISTS job_activation_budget_ledger_work_item_idx ON job_activation_budget_ledger_entries(work_item_id,created_at);
+CREATE TABLE IF NOT EXISTS job_bonus_proposals (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id),
+  funding_id text NOT NULL REFERENCES job_activation_work_item_economic_plans(id), maker_user_id integer NOT NULL REFERENCES users(id),
+  idempotency_key text NOT NULL, proposal jsonb NOT NULL, fingerprint text NOT NULL CHECK(fingerprint ~ '^[a-f0-9]{64}$'),
+  amount numeric(30,6) NOT NULL CHECK(amount > 0), currency text NOT NULL CHECK(currency ~ '^[A-Z]{3}$'),
+  created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(project_id,maker_user_id,idempotency_key)
+);
+CREATE INDEX IF NOT EXISTS job_bonus_proposals_funding_idx ON job_bonus_proposals(funding_id);
+CREATE TABLE IF NOT EXISTS job_bonus_decisions (
+  proposal_id text PRIMARY KEY REFERENCES job_bonus_proposals(id), actor_user_id integer NOT NULL REFERENCES users(id),
+  outcome text NOT NULL CHECK(outcome IN ('approved','rejected')), reason text NOT NULL CHECK(length(reason) BETWEEN 8 AND 1000),
+  authority jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now()
+);
 CREATE OR REPLACE FUNCTION job_edt_append_only_guard() RETURNS trigger AS $$ BEGIN RAISE EXCEPTION 'EDT financial history is append-only'; END; $$ LANGUAGE plpgsql;
 DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_bonus_proposal_immutable' AND tgrelid='job_bonus_proposals'::regclass) THEN CREATE TRIGGER job_bonus_proposal_immutable BEFORE UPDATE OR DELETE ON job_bonus_proposals FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_bonus_decision_immutable' AND tgrelid='job_bonus_decisions'::regclass) THEN CREATE TRIGGER job_bonus_decision_immutable BEFORE UPDATE OR DELETE ON job_bonus_decisions FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_activation_economic_plan_immutable') THEN CREATE TRIGGER job_activation_economic_plan_immutable BEFORE UPDATE OR DELETE ON job_activation_work_item_economic_plans FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_activation_budget_ledger_immutable') THEN CREATE TRIGGER job_activation_budget_ledger_immutable BEFORE UPDATE OR DELETE ON job_activation_budget_ledger_entries FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
 END $$;

@@ -9,12 +9,14 @@ import intakeRouter from "../routes/job-intake";
 import contractsRouter from "../routes/financial-contracts";
 import edtRouter from "../routes/edt-engine";
 import reportsRouter from "../routes/reports";
+import financialApuRouter from "../routes/financial-apu";
 import { ensureEdtEngineSchema } from "./edt-engine-migration";
 import { getTeamPerformance } from "./team-performance-service";
 import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
 import { saveCostValuePerformance, getCostValuePerformance, exportCostValuePerformanceCsv } from "./cost-value-performance-service";
 import { saveCostValueForecast, getCostValueForecast, exportCostValueForecastCsv } from "./cost-value-forecast-service";
 import { createWorkItemEconomicPlan } from "./edt-engine-economic-service";
+import { proposeManualBonus, decideManualBonus } from "./cost-value-bonus-service";
 import { signToken } from "../middlewares/auth";
 import { startFeaturePolicyMigration } from "./feature-policy-migration";
 import { startCommercialEntitlementMigration } from "./commercial-entitlement";
@@ -111,7 +113,7 @@ async function publishedTemplate(name: string,price: string) {
 const drawingTemplate = await publishedTemplate("Drawing Reference","300");
 const reviewTemplate = await publishedTemplate("Review Reference","200");
 
-const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,edtRouter,reportsRouter);
+const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,edtRouter,reportsRouter,financialApuRouter);
 const server = app.listen(0,"127.0.0.1");
 await new Promise<void>(resolve => server.once("listening",resolve));
 const address = server.address(); assert.ok(address && typeof address !== "string");
@@ -327,6 +329,76 @@ try {
   }),(error:any)=>error.code==="ECONOMIC_WORKFLOW_VERSION_MISMATCH");
   assert.equal(await planCount(),plansBefore,"Rejected workflow binding must leave no economic plan");
   console.log("C017 real PostgreSQL: unrelated workflow economic plan denied without inserted record PASS");
+  // Synthetic economic funding fixture: tests persistence, not the unfinished public funding-creation workflow.
+  const bonusFundingId=randomUUID();
+  await pool.query(`INSERT INTO job_activation_work_item_economic_plans(id,company_id,project_id,intake_id,work_item_id,contract_id,contract_version_id,
+    pricing_template_version_id,delivery_workflow_version_id,currency,direct_production_amount,project_administrative_amount,incentive_reserve_amount,
+    task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,'TEST bonus workflow','USD',0,0,100,0,0,'{}',$9,$9,$10)`,
+    [bonusFundingId,companyId,projectId,economicItem.intake_id,economicItem.id,economicItem.contract_id,economicItem.contract_version_id,economicItem.apu_version,"b".repeat(64),actor.id]);
+  const bonusReviewer=(await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id,is_super_admin)
+    VALUES('bonus-reviewer@test.invalid','unused','TEST bonus reviewer',$1,true) RETURNING *`,[companyId])).rows[0];
+  const bonusInput={fundingId:bonusFundingId,idempotencyKey:"TEST-bonus-request-1",reason:"TEST reviewed allocation",entries:[{userId:checker.id,amount:"60"}]};
+  const simultaneous=await Promise.allSettled([proposeManualBonus(actor.id,projectId,bonusInput),
+    proposeManualBonus(actor.id,projectId,{...bonusInput,idempotencyKey:"TEST-bonus-request-2"})]);
+  assert.equal(simultaneous.filter(result=>result.status==='fulfilled').length,1,"Concurrent proposals cannot both reserve60 from100");
+  const successful=simultaneous.find(result=>result.status==='fulfilled') as PromiseFulfilledResult<any>;
+  const successfulInput={...bonusInput,idempotencyKey:simultaneous[0].status==='fulfilled'?"TEST-bonus-request-1":"TEST-bonus-request-2"};
+  assert.equal((await proposeManualBonus(actor.id,projectId,successfulInput)).idempotent,true);
+  await assert.rejects(()=>proposeManualBonus(actor.id,projectId,{...successfulInput,entries:[{userId:checker.id,amount:"61"}]}),(error:any)=>error.code==='BONUS_IDEMPOTENCY_CONFLICT');
+  await assert.rejects(()=>decideManualBonus(actor.id,projectId,successful.value.id,{outcome:"approved",expectedFingerprint:successful.value.fingerprint,reason:"TEST self approval denied"}),
+    (error:any)=>error.code==='FIN_MAKER_CHECKER_REQUIRED');
+  const reviewFirst=()=>decideManualBonus(bonusReviewer.id,projectId,successful.value.id,{outcome:"approved",expectedFingerprint:successful.value.fingerprint,reason:"TEST policy boundary"});
+  await assert.rejects(reviewFirst,(error:any)=>error.code==='FIN_APPROVAL_POLICY_MISSING');
+  const restrictiveBonusPolicy=randomUUID();
+  await pool.query(`INSERT INTO financial_approval_policy_versions(id,company_id,scope_type,transaction_category,currency,max_amount,version,effective_from,state,reason,created_by_id)
+    VALUES($1,$2,'company','bonus_allocation','USD',50,1,now(),'active','TEST restrictive bonus limit',$3)`,[restrictiveBonusPolicy,companyId,actor.id]);
+  await assert.rejects(reviewFirst,(error:any)=>error.code==='FIN_APPROVAL_LIMIT_EXCEEDED');
+  assert.equal((await pool.query("SELECT count(*)::int AS count FROM job_bonus_decisions WHERE proposal_id=$1",[successful.value.id])).rows[0].count,0,"Denied approvals cannot leave decisions");
+  await decideManualBonus(bonusReviewer.id,projectId,successful.value.id,{outcome:"rejected",expectedFingerprint:successful.value.fingerprint,reason:"TEST rejection releases reserve"});
+  const finalBonus=await proposeManualBonus(actor.id,projectId,{...bonusInput,idempotencyKey:"TEST-bonus-request-final",entries:[{userId:checker.id,amount:"100"}]});
+  await pool.query(`INSERT INTO financial_approval_policy_versions(id,company_id,scope_type,transaction_category,currency,max_amount,version,effective_from,state,reason,created_by_id,supersedes_id)
+    VALUES($1,$2,'company','bonus_allocation','USD',100,2,now(),'active','TEST independent bonus limit version',$3,$4)`,[randomUUID(),companyId,actor.id,restrictiveBonusPolicy]);
+  await assert.rejects(()=>decideManualBonus(bonusReviewer.id,projectId,finalBonus.id,{outcome:"approved",expectedFingerprint:"0".repeat(64),reason:"TEST stale fingerprint"}),
+    (error:any)=>error.code==='BONUS_PROPOSAL_STALE');
+  const recipientMembership=(await pool.query("SELECT status FROM project_members WHERE project_id=$1 AND user_id=$2",[projectId,checker.id])).rows[0];
+  await pool.query("UPDATE project_members SET status='inactive' WHERE project_id=$1 AND user_id=$2",[projectId,checker.id]);
+  try {
+    await assert.rejects(()=>decideManualBonus(bonusReviewer.id,projectId,finalBonus.id,{outcome:"approved",expectedFingerprint:finalBonus.fingerprint,reason:"TEST revoked recipient denied"}),
+      (error:any)=>error.code==='BONUS_RECIPIENT_INELIGIBLE');
+    assert.equal((await pool.query("SELECT count(*)::int AS count FROM job_bonus_decisions WHERE proposal_id=$1",[finalBonus.id])).rows[0].count,0);
+  } finally {
+    await pool.query("UPDATE project_members SET status=$3 WHERE project_id=$1 AND user_id=$2",[projectId,checker.id,recipientMembership.status]);
+  }
+  console.log("C018 recipient lifecycle PASS: revocation after proposal denies approval without a decision; synthetic membership restored");
+  const approvedBonus=await decideManualBonus(bonusReviewer.id,projectId,finalBonus.id,{outcome:"approved",expectedFingerprint:finalBonus.fingerprint,reason:"TEST independent approval"});
+  assert.equal(approvedBonus.paymentAuthorized,false);
+  const approvalEvidence=(await pool.query("SELECT authority FROM job_bonus_decisions WHERE proposal_id=$1",[finalBonus.id])).rows[0].authority;
+  assert.ok(approvalEvidence.policyId && approvalEvidence.policyId!==restrictiveBonusPolicy,"Decision freezes the current effective policy, not its superseded limit");
+  console.log("C018 financial policy PASS: missing policy, limit denial, rejection above limit, stale fingerprint, current version and denied-write rollback");
+  await assert.rejects(()=>decideManualBonus(bonusReviewer.id,projectId,finalBonus.id,{outcome:"approved",expectedFingerprint:finalBonus.fingerprint,reason:"TEST repeated approval denied"}),
+    (error:any)=>error.code==='BONUS_ALREADY_DECIDED');
+  await assert.rejects(()=>pool.query("UPDATE job_bonus_proposals SET amount=1 WHERE id=$1",[finalBonus.id]));
+  await assert.rejects(()=>pool.query("DELETE FROM job_bonus_decisions WHERE proposal_id=$1",[finalBonus.id]));
+  console.log("C018 PostgreSQL persistence PASS: concurrent reserve protection, idempotency, independent rejection/approval, immutable audit, no payment");
+  const bonusPath=`/projects/${projectId}/financial/apu/bonus-proposals`;
+  assert.equal((await fetch(`${base}${bonusPath}`)).status,401);
+  const bonusList=await request("GET",bonusPath);
+  assert.equal(bonusList.status,200,JSON.stringify(bonusList.body));
+  assert.equal(bonusList.body.proposals.length,2);
+  assert.equal(bonusList.body.actorUserId,actor.id);
+  assert.equal(bonusList.body.canPropose,true);
+  assert.equal(typeof bonusList.body.canReview,"boolean");
+  assert.equal(bonusList.body.nextCursor,null);
+  const olderBonus=await request("GET",`${bonusPath}?before=${bonusList.body.proposals[0].id}`);
+  assert.equal(olderBonus.status,200); assert.equal(olderBonus.body.proposals.length,1);
+  assert.notEqual(olderBonus.body.proposals[0].id,bonusList.body.proposals[0].id);
+  assert.equal((await request("GET",`${bonusPath}?before=invalid`)).status,400);
+  assert.equal(bonusList.body.proposals.find((p:any)=>p.id===finalBonus.id).state,"approved");
+  assert.equal(bonusList.body.sources.find((p:any)=>p.id===bonusFundingId).reserved_amount,"100.000000");
+  assert.equal((await request("POST",bonusPath,{...bonusInput,reserve:{amount:"99999",currency:"USD"}})).status,400);
+  assert.equal((await request("POST",bonusPath,{...bonusInput,idempotencyKey:"TEST-over-reserve-http"})).status,409);
+  console.log("C018 HTTP: authenticated read, persisted state/capacity, anonymous denial and injected funding denial PASS");
   const timeId=randomUUID();
   await pool.query(`INSERT INTO job_activation_time_entries(id,intake_id,project_id,work_item_id,task_id,assignment_id,user_id,work_date,hours,note,created_by_id)
     VALUES($1,$2,$3,$4,$5,$6,$7,current_date,2,'TEST independent time review',$7)`,[timeId,assignment.intake_id,projectId,assignment.work_item_id,assignment.task_id,assignment.id,checker.id]);
@@ -346,6 +418,13 @@ try {
   assert.ok(ownerList.every(row=>!("rate" in row)&&!("internal_hourly_rate" in row)));
   const foreignCompany=(await pool.query(`INSERT INTO companies(name) VALUES('TEST isolated foreign company') RETURNING id`)).rows[0];
   const foreignUser=(await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id) VALUES('time-foreign@test.invalid','unused','TEST foreign user',$1) RETURNING *`,[foreignCompany.id])).rows[0];
+  const foreignBonusToken=signToken({userId:foreignUser.id,email:foreignUser.email,fullName:foreignUser.full_name,companyId:foreignCompany.id,companyName:"TEST foreign",isSuperAdmin:false});
+  for (const [method,path,body] of [["GET",bonusPath,undefined],["POST",bonusPath,bonusInput],
+    ["POST",`${bonusPath}/${finalBonus.id}/decision`,{outcome:"approved",expectedFingerprint:finalBonus.fingerprint,reason:"TEST denied tenant bypass"}]] as const) {
+    const denied=await fetch(`${base}${path}`,{method,headers:{Authorization:`Bearer ${foreignBonusToken}`,"Content-Type":"application/json"},...(body?{body:JSON.stringify(body)}:{})});
+    assert.equal(denied.status,403,"Cross-company bonus access must be denied before data access");
+  }
+  console.log("C018 HTTP cross-company list/propose/decision denial PASS");
   await timeList(foreignUser,403);
   assert.equal((await timeRequest(foreignUser,{decision:"submit",expectedVersion:1,reason:"TEST denied cross company"})).status,403);
   const injected=await timeRequest(checker,{decision:"submit",expectedVersion:1,reason:"TEST submit",amount:"0"});

@@ -6,6 +6,24 @@ import { filesTable } from "./files";
 import { financialContractsTable, financialContractVersionsTable } from "./financial-contracts";
 import { projectCostNodesTable } from "./financial-budgets";
 
+export const jobBonusProposalsTable = pgTable("job_bonus_proposals", {
+  id: text("id").primaryKey(), companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  projectId: integer("project_id").notNull().references(() => projectsTable.id),
+  fundingId: text("funding_id").notNull().references((): AnyPgColumn => jobActivationWorkItemEconomicPlansTable.id),
+  makerUserId: integer("maker_user_id").notNull().references(() => usersTable.id),
+  idempotencyKey: text("idempotency_key").notNull(), proposal: jsonb("proposal").$type<Record<string, unknown>>().notNull(),
+  fingerprint: text("fingerprint").notNull(), amount: numeric("amount", { precision: 30, scale: 6 }).notNull(), currency: text("currency").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [uniqueIndex("job_bonus_proposals_project_id_maker_user_id_idempotency_key_key").on(table.projectId, table.makerUserId, table.idempotencyKey),
+  index("job_bonus_proposals_funding_idx").on(table.fundingId), check("job_bonus_proposals_fingerprint_check", sql`${table.fingerprint} ~ '^[a-f0-9]{64}$'`),
+  check("job_bonus_proposals_amount_check", sql`${table.amount} > 0`), check("job_bonus_proposals_currency_check", sql`${table.currency} ~ '^[A-Z]{3}$'`)]);
+export const jobBonusDecisionsTable = pgTable("job_bonus_decisions", {
+  proposalId: text("proposal_id").primaryKey().references(() => jobBonusProposalsTable.id), actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id),
+  outcome: text("outcome").notNull(), reason: text("reason").notNull(), authority: jsonb("authority").$type<Record<string, unknown>>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [check("job_bonus_decisions_outcome_check", sql`${table.outcome} IN ('approved','rejected')`),
+  check("job_bonus_decisions_reason_check", sql`length(${table.reason}) BETWEEN 8 AND 1000`)]);
+
 export const jobIntakesTable = pgTable("job_intakes", {
   id: text("id").primaryKey(), companyId: integer("company_id").notNull().references(() => companiesTable.id), projectId: integer("project_id").notNull().references(() => projectsTable.id),
   status: text("status").notNull().default("draft"), revision: integer("revision").notNull().default(1), data: jsonb("data").$type<Record<string, unknown>>().notNull().default({}), completion: jsonb("completion").$type<Record<string, unknown>>().notNull().default({}),

@@ -375,6 +375,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordinator-bulk-actions.ts
 - artifacts/api-server/src/lib/coordinator-saved-view-migration.ts
 - artifacts/api-server/src/lib/coordinator-saved-views.ts
+- artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts
+- artifacts/api-server/src/lib/cost-value-bonus-allocation.ts
+- artifacts/api-server/src/lib/cost-value-bonus-service.ts
 - artifacts/api-server/src/lib/cost-value-forecast-service.ts
 - artifacts/api-server/src/lib/cost-value-forecast.behavior.ts
 - artifacts/api-server/src/lib/cost-value-performance-provenance.behavior.ts

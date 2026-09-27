@@ -6,8 +6,8 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 678,
-    "frontendApiReferences": 256,
+    "apiRoutes": 681,
+    "frontendApiReferences": 257,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -4022,6 +4022,24 @@
         "projectsTable",
         "projectMembersTable"
       ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/financial/apu/bonus-proposals",
+      "owner": "artifacts/api-server/src/routes/financial-apu.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/financial/apu/bonus-proposals",
+      "owner": "artifacts/api-server/src/routes/financial-apu.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/financial/apu/bonus-proposals/:proposalId/decision",
+      "owner": "artifacts/api-server/src/routes/financial-apu.ts",
+      "tables": []
     },
     {
       "method": "GET",
@@ -9022,6 +9040,10 @@
     {
       "screen": "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
       "apiPath": "/api/v1/downloads/sync-agent-windows"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+      "apiPath": "${(import.meta.env.VITE_API_URL as string | undefined) ?? \"\"}/api/v1/projects/${projectId}/financial/apu/bonus-proposals"
     },
     {
       "screen": "artifacts/bimlog/src/components/notifications/NotificationPreferenceCenter.tsx",

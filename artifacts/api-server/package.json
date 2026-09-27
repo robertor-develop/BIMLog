@@ -29,7 +29,7 @@
     "test:edt-engine-build311": "tsx ./src/lib/edt-engine-build311.behavior.ts",
     "test:edt-engine-build312": "tsx ./src/lib/edt-engine-build312.behavior.ts",
     "test:edt-engine-build313": "tsx ./src/lib/edt-engine-build313.behavior.ts",
-    "test:edt-engine-build314": "tsx ./src/lib/edt-engine-build314.behavior.ts",
+    "test:edt-engine-build314": "tsx ./src/lib/edt-engine-build314.behavior.ts && tsx ./src/lib/cost-value-bonus-allocation.behavior.ts",
     "test:edt-engine-build315": "tsx ./src/lib/edt-engine-build315.behavior.ts",
     "test:edt-engine-build316": "tsx ./src/lib/edt-engine-build316.behavior.ts",
     "test:edt-engine-build317": "tsx ./src/lib/edt-engine-build317.behavior.ts",
