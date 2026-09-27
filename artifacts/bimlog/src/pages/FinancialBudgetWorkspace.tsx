@@ -29,6 +29,10 @@ const valueText = (value: unknown) => String(value ?? "");
 const matchesBudgetSearch = (values: unknown[], search: string) =>
   !search.trim() || values.map(valueText).join(" ").toLowerCase().includes(search.trim().toLowerCase());
 const statusLabel = (status: string) => status.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+const budgetStatusLabel = (status: string, tt: (a: string, b: string) => string) => {
+  const es: Record<string, string> = { draft: "Borrador", submitted: "Enviado", under_review: "En revisión", approved: "Aprobado", returned: "Devuelto", rejected: "Rechazado", withdrawn: "Retirado" };
+  return tt(statusLabel(status), es[status] ?? statusLabel(status));
+};
 const sortLabel = (sort: string, tt: (a: string, b: string) => string) => {
   if (sort === "code_asc") return tt("Cost code A-Z", "Codigo A-Z");
   if (sort === "amount_desc") return tt("Amount high to low", "Monto mayor a menor");
@@ -551,7 +555,7 @@ function Budget({
     [importFile, setImportFile] = useState<File | null>(null),
     [sourceFileId, setSourceFileId] = useState(""),
     [currency, setCurrency] = useState("USD"),
-    [purpose, setPurpose] = useState("Initial controlled budget import"),
+    [purpose, setPurpose] = useState(tt("Initial controlled budget import", "Importación inicial de presupuesto controlado")),
     [manualLines, setManualLines] = useState([{ stableLineId: "BUDGET-001", projectCostNodeId: "", description: "", amount: "0.00", quantity: "1", unit: "Hours", unitRate: "0.00", notes: "" }]),
     [preview, setPreview] = useState<any | null>(null);
   const createManualDraft = async () => {
@@ -839,7 +843,7 @@ function Budget({
                 <b>
                   {tt("Version", "Versión")} {b.version}
                 </b>
-                <span className="fb-status">{b.status}</span>
+                <span className="fb-status">{budgetStatusLabel(b.status, tt)}</span>
                 {b.self_approval_override === true && (
                   <span className="fb-status">
                     {tt("Approved with owner override", "Aprobado con excepción del propietario")}
