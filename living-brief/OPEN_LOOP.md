@@ -1,5 +1,7 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+Implementation c6abc55187921d0a7337f6c3090e20cf06960017 is reconciled: standalone API typing passes after new regression annotation fix. Release rerun stopped on narrative freshness; repair state metadata without waiving checks. Continue push/publication/live C020-LIVE-02 retest only after full clean PASS. Pricing synthetic v2 save/reopen verified, independent publication/funding acceptance still open; no next-block advancement.
+
 C020-LIVE-02: repair derived APU assignment mirrors incorrectly blocking commercial-only save after core activation. C020-LIVE-01 now passes live EN/ES on published3c50e0ac. Budget600USD independently approved and APU v1 persisted for synthetic58. New fingerprint and budget-selector DTO repairs need full clean gate, push, publication, exact failed-action retest and remaining contract/funding/time/bonus/report live acceptance. Preserve operational immutability; no Lens change/C021. Earlier checkpoints below are historical.
 
 C020-LIVE-01 remains open until deployed retest: live3010c05a published successfully, but synthetic project58 Commercial enrichment silently replayed core activation with no contracts. Explicit Commercial intent/prerequisite rejection and bilingual UI/no-false-success repair passes isolated HTTP regression. Run full clean gate, push/publish corrected source, retest exact UI and complete remaining authenticated acceptance before C021. Lens unchanged.
