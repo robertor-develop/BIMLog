@@ -45826,7 +45826,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "2a9a87080abdfc3301cfa802ef0d42da79ef3736e17238d68a94640cda06ca55"
+      "reviewedChangeSha256": "e9cf623013c5f8f7fbc20dff44c5e7a0a596a6d4e6e1f8b5191fb99d7963c37b"
     }
   ]
 }
