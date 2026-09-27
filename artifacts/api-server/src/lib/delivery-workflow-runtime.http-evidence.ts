@@ -193,5 +193,52 @@ for (const [allowed, requiresNewVersion, code] of [[false,false,"WORKFLOW_POLICY
   const after = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId:deniedItem});
   assert.deepEqual(after,before,"Denied reopening preserves complete runtime state and audit");
 }
-console.log("Delivery Workflow isolated runtime: scoped roles, ordered policy approvals, maker/checker, evidence reapproval, immutable snapshot, allowed reopening and atomic forbidden/new-version denial, concurrent audit reads PASS");
+// A second deliverable must execute its own frozen checkpoints, never the Shop sequence.
+const sleeveItem = randomUUID();
+await pool.query(`INSERT INTO job_activation_work_items(id,intake_id,project_id,stable_scope_item_id,name,unit,planned_hours,workflow_template,created_by_id)
+  VALUES($1,$2,$3,$1,'TEST Sleeve','Hours',4,'generic',$4)`,[sleeveItem,intakeId,project.id,owner]);
+const sleeveClient = await pool.connect();
+try {
+  await sleeveClient.query("BEGIN");
+  await bindDeliveryWorkflowWithClient({client:sleeveClient,companyId:company.id,projectId:project.id,workItemId:sleeveItem,
+    actorUserId:owner,deliverableType:"SLEEVE",selectedVersionId:"bimlog:SLEEVE:1",executeUserId:producer,leaderUserId:owner});
+  await sleeveClient.query("COMMIT");
+} catch(error) { await sleeveClient.query("ROLLBACK"); throw error; } finally { sleeveClient.release(); }
+const readSleeve = () => getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId:sleeveItem});
+let sleeveRuntime = await readSleeve();
+const shopBeforeSleeve = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
+const sleeveFingerprint = sleeveRuntime.fingerprint;
+assert.equal(sleeveRuntime.definition.roles.execute,"MODELER");
+assert.deepEqual(sleeveRuntime.definition.phases.map(phase=>phase.id),["layout","release"]);
+await assert.rejects(setWorkItemDeliveryStep({actorUserId:producer,projectId:project.id,workItemId:sleeveItem,
+  expectedRevision:sleeveRuntime.revision,phaseId:"preliminary",taskId:"prepare",status:"complete"}));
+assert.deepEqual(await readSleeve(),sleeveRuntime,"Shop checkpoint cannot mutate Sleeve");
+await setWorkItemDeliveryStep({actorUserId:producer,projectId:project.id,workItemId:sleeveItem,
+  expectedRevision:sleeveRuntime.revision,phaseId:"layout",taskId:"coordinate",status:"complete"});
+sleeveRuntime=await readSleeve();
+await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId:sleeveItem,
+  expectedRevision:sleeveRuntime.revision}),/QC approval/);
+await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId:sleeveItem,
+  expectedRevision:sleeveRuntime.revision,kind:"qc"});
+sleeveRuntime=await readSleeve();
+await advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId:sleeveItem,expectedRevision:sleeveRuntime.revision});
+sleeveRuntime=await readSleeve();
+await setWorkItemDeliveryStep({actorUserId:producer,projectId:project.id,workItemId:sleeveItem,
+  expectedRevision:sleeveRuntime.revision,phaseId:"release",taskId:"issue",status:"complete"});
+sleeveRuntime=await readSleeve();
+await assert.rejects(approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId:sleeveItem,
+  expectedRevision:sleeveRuntime.revision,kind:"approval"}),/Required DRAWING evidence/);
+await linkWorkItemDeliveryEvidence({actorUserId:producer,projectId:project.id,workItemId:sleeveItem,
+  expectedRevision:sleeveRuntime.revision,phaseId:"release",taskId:"issue",documentCode:"DRAWING",fileId});
+sleeveRuntime=await readSleeve();
+await approveWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId:sleeveItem,
+  expectedRevision:sleeveRuntime.revision,kind:"approval"});
+sleeveRuntime=await readSleeve();
+await advanceWorkItemDeliveryPhase({actorUserId:owner,projectId:project.id,workItemId:sleeveItem,expectedRevision:sleeveRuntime.revision});
+sleeveRuntime=await readSleeve();
+assert.equal(sleeveRuntime.status,"complete");
+assert.equal(sleeveRuntime.fingerprint,sleeveFingerprint);
+assert.deepEqual(await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId}),shopBeforeSleeve,
+  "Sleeve execution must not change Shop tasks, approvals, frozen definition or audit");
+console.log("Delivery Workflow isolated runtime: distinct Shop/Sleeve execution, scoped roles, ordered policy approvals, maker/checker, evidence reapproval, immutable snapshot, allowed reopening and atomic forbidden/new-version denial, concurrent audit reads PASS");
 await pool.end();

@@ -45063,6 +45063,100 @@
         "scripts/workflow-database-fixture.mjs"
       ],
       "reviewedChangeSha256": "c99afb2a8a76c48a497c8a8749fd93fffc57a0a1c029b2ccea0a0916a914730b"
+    },
+    {
+      "taskId": "consolidation-c014-distinct-runtime",
+      "reviewedThroughCommit": "043291dc15d3543a1e23ced71475e073da0a7bdf",
+      "reviewedAt": "2026-09-27T00:00:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Distinct Sleeve execution proves Shop runtime isolation; deployed multi-role acceptance remains separate."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing runtime authority preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sequential bounded regression."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Real PostgreSQL distinct workflow execution."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No duplicate workflow engine."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema or route change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Native and installers remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No reporting UI change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards or certification claim added."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Exact C013 deployment and bounded C014 proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Full UI acceptance remains open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Synthetic isolated records only."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "05034477b3786e5c062c50252f3a498f71f87b98e0857e1dd829f39774923467"
     }
   ]
 }

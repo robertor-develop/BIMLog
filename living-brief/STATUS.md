@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## C014 distinct runtime regression — 2026-09-27
+
+C013 exact043291dc is pushed and published (provider3a6ab7ba), schema action NONE; clean nine-command gate passed. The previously failing synthetic project58 activated successfully through Chrome and refreshed with one Work Item, one task,12 planned hours,360 internal cost and600 billable plan. This supersedes earlier pending C013 entries below, not full-platform acceptance. C014 extends the existing real PostgreSQL runtime proof with a separate Sleeve execution: its own frozen phases/roles, rejection of Shop checkpoints, QC/evidence gates and completion without changing Shop runtime/audit. Focused regression passes; C015 and final block gate/push remain pending. Native Lens is untouched.
+
 ## C013 activation regression repair candidate — 2026-09-26
 
 Connected UI verification now counts reused package/scope tasks once; pure regressions cover empty/multiple/explicit task cases. A52a2459e suite finished successfully while this source correction was underway, so that receipt is explicitly superseded and not acceptance evidence. Release gate now also rejects any dirty or changed candidate at completion. Final clean source must rerun the full gate.
