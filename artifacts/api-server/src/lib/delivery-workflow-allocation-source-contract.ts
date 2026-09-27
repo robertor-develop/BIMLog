@@ -1,5 +1,5 @@
 import { FinancialControlError } from "./financial-control-contract";
-import { validatePricingTemplate } from "./company-pricing-template-contract";
+import { resolvePricingPoolAmounts, validatePricingTemplate } from "./company-pricing-template-contract";
 import type { CommercialApuAllocationSource } from "./delivery-workflow-economic-allocation";
 
 function cents(value: string): bigint {
@@ -55,7 +55,9 @@ export function sourceFromVerifiedCommercialApu(input: {
   if (!allocation) throw new FinancialControlError(409, "WORKFLOW_APU_PHASE_DEFAULTS_MISSING",
     "This APU version has no approved direct-production phase schedule; publish a new APU version with one.");
   const selected = new Set(allocation.directProductionNodeIds);
-  const amount = validated.preview.lines.reduce((total, line) => total + (selected.has(line.id) ? cents(line.roundedAmount) : 0n), 0n);
+  const amount = validated.definition.economicPools
+    ? cents(resolvePricingPoolAmounts(validated.definition).amounts.directProduction)
+    : validated.preview.lines.reduce((total, line) => total + (selected.has(line.id) ? cents(line.roundedAmount) : 0n), 0n);
   if (amount > 100_000_000_000n) throw new FinancialControlError(409, "WORKFLOW_APU_AMOUNT_RANGE", "The direct-production amount is outside the preview range.");
   return {
     commercialApuVersionId: input.versionId,

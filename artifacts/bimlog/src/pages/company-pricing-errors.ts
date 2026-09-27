@@ -1,5 +1,7 @@
 export function pricingErrorMessage(payload: { code?: unknown; field?: unknown }, es: boolean): string {
   const field = typeof payload.field === "string" ? payload.field : "";
+  if (typeof payload.code === "string" && payload.code.startsWith("PRICING_TEMPLATE_POOL"))
+    return es ? "Asigne cada componente a un solo fondo y conserve al menos uno en producción directa con sus fases." : "Assign every component to exactly one pool and keep at least one direct-production component with its phases.";
   if (payload.code === "PRICING_TEMPLATE_TEXT_INVALID" && field === "name")
     return es ? "Escriba un nombre para la plantilla antes de continuar." : "Enter a template name before continuing.";
   if (payload.code === "PRICING_TEMPLATE_TEXT_INVALID")

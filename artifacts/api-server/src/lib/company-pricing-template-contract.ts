@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { allocateMinorUnits, economicPoolKeys, type EconomicPoolNodes } from "@workspace/api-zod";
 import { evaluateGenericApu } from "./generic-apu-engine";
 import type { GenericApuEvaluationInput, GenericApuNode } from "./generic-apu-contract";
 
@@ -13,6 +14,7 @@ export type PricingTemplateDefinition = {
   industry: string;
   name: string;
   nodes: PricingTemplateNode[];
+  economicPools?: EconomicPoolNodes;
   economicAllocation?: {
     directProductionNodeIds: string[];
     phases: Array<{ phaseId: string; code: string; name: string; percent: string }>;
@@ -42,7 +44,7 @@ function text(value: unknown, field: string, max = 160): string {
 export function validatePricingTemplate(input: unknown): { definition: PricingTemplateDefinition; preview: ReturnType<typeof evaluateGenericApu>; fingerprint: string } {
   const raw = object(input, "definition");
   if (Buffer.byteLength(JSON.stringify(raw), "utf8") > 64 * 1024) fail("PRICING_TEMPLATE_TOO_LARGE", "definition");
-  closed(raw, ["schemaVersion", "currency", "industry", "name", "nodes", "economicAllocation"], "definition");
+  closed(raw, ["schemaVersion", "currency", "industry", "name", "nodes", "economicAllocation", "economicPools"], "definition");
   if (raw.schemaVersion !== 1) fail("PRICING_TEMPLATE_SCHEMA_INVALID", "schemaVersion");
   const currency = text(raw.currency, "currency", 3).toUpperCase();
   if (!/^[A-Z]{3}$/.test(currency)) fail("PRICING_TEMPLATE_CURRENCY_INVALID", "currency");
@@ -109,13 +111,65 @@ export function validatePricingTemplate(input: unknown): { definition: PricingTe
     if (points !== 10000) fail("PRICING_TEMPLATE_PHASE_TOTAL_INVALID", "economicAllocation.phases");
     economicAllocation = { directProductionNodeIds, phases };
   }
+  let economicPools: EconomicPoolNodes | undefined;
+  if (raw.economicPools !== undefined) {
+    const pools = object(raw.economicPools, "economicPools");
+    closed(pools, [...economicPoolKeys], "economicPools");
+    const assigned = new Set<string>();
+    economicPools = Object.fromEntries(economicPoolKeys.map(key => {
+      if (!Array.isArray(pools[key]) || pools[key].length > nodes.length)
+        fail("PRICING_TEMPLATE_POOLS_INVALID", `economicPools.${key}`);
+      const ids = (pools[key] as unknown[]).map(value => {
+        const id = text(value, `economicPools.${key}`, 80);
+        if (!nodes.some(node => node.id === id) || assigned.has(id))
+          fail("PRICING_TEMPLATE_POOL_NODE_INVALID", `economicPools.${key}`);
+        assigned.add(id);
+        return id;
+      });
+      return [key, ids];
+    })) as EconomicPoolNodes;
+    if (assigned.size !== nodes.length) fail("PRICING_TEMPLATE_POOL_NODE_UNASSIGNED", "economicPools");
+    if (!economicAllocation || !economicPools.directProduction.length ||
+      economicAllocation.directProductionNodeIds.length !== economicPools.directProduction.length ||
+      economicAllocation.directProductionNodeIds.some(id => !economicPools!.directProduction.includes(id)))
+      fail("PRICING_TEMPLATE_POOL_PRODUCTION_MISMATCH", "economicPools.directProduction");
+  }
   // Do not add an absent optional key: legacy published v1 fingerprints must
   // remain byte-for-byte identical after this additive contract extension.
   const definition: PricingTemplateDefinition = {
     schemaVersion: 1, currency, industry, name, nodes,
     ...(economicAllocation ? { economicAllocation } : {}),
+    ...(economicPools ? { economicPools } : {}),
   };
   const preview = evaluateGenericApu({ currency, nodes: nodes as GenericApuNode[], rootNodeIds: nodes.map(node => node.id) } satisfies GenericApuEvaluationInput);
   const fingerprint = createHash("sha256").update(JSON.stringify(definition)).digest("hex");
   return { definition, preview, fingerprint };
+}
+
+/** Resolve a complete approved classification, never infer pools from labels or scenarios.
+ * The caller must verify publication, company, contract binding and frozen fingerprint.
+ */
+export function resolvePricingPoolAmounts(input: unknown) {
+  const validated = validatePricingTemplate(input);
+  const pools = validated.definition.economicPools;
+  if (!pools) fail("PRICING_TEMPLATE_POOLS_REQUIRED", "economicPools");
+  const units = (amount: string) => {
+    const [whole, fraction = ""] = amount.split(".");
+    return BigInt(whole) * 100n + BigInt(fraction.padEnd(2, "0"));
+  };
+  const money = (amount: bigint) => `${amount / 100n}.${String(amount % 100n).padStart(2,"0")}`;
+  // Line rounding can differ from the rounded contract total. Allocate that
+  // exact total using unrounded pool weights rather than losing/creating cents.
+  const scale = Math.max(0, ...validated.preview.lines.map(line => (line.rawAmount.split(".")[1] ?? "").length));
+  const rawUnits = (value: string) => {
+    const [whole, fraction = ""] = value.split(".");
+    return BigInt(whole) * 10n ** BigInt(scale) + BigInt(fraction.padEnd(scale, "0") || "0");
+  };
+  const weights = economicPoolKeys.map(key => validated.preview.lines.filter(line => pools[key].includes(line.id))
+    .reduce((sum, line) => sum + rawUnits(line.rawAmount), 0n));
+  const rounded = weights.every(weight => weight === 0n) ? weights : allocateMinorUnits(units(validated.preview.roundedTotal), weights);
+  const amounts = Object.fromEntries(economicPoolKeys.map((key, index) => [key, money(rounded[index])])) as Record<typeof economicPoolKeys[number], string>;
+  if (Object.values(amounts).reduce((sum,amount) => sum + units(amount),0n) !== units(validated.preview.roundedTotal))
+    fail("PRICING_TEMPLATE_POOLS_UNBALANCED", "economicPools");
+  return {currency:validated.definition.currency, total:validated.preview.roundedTotal, amounts, fingerprint:validated.fingerprint};
 }

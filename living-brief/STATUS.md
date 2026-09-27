@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## C017 explicit APU pool classification — 2026-09-27
+
+Company APU drafts now support explicit, exhaustive, non-overlapping component classification into fixed company cost, Direct Production, contract administration, project incentive reserve and project earnings. Existing unclassified definitions/fingerprints remain unchanged; no name-based inference or automatic template conversion. Published binding freezes classified amounts but remains reference_only, not budget approval. Exact shared minor-unit apportionment reconciles fractional component totals; classified workflow previews use the same production amount. Rename/removal preserves or removes the explicit component references.
+
+Focused definition and workflow-source tests, API/frontend typechecks, isolated real PostgreSQL pricing lifecycle and connected Intake regression pass. HTTP evidence covers save/reopen, maker/checker publication, denied overlap without version insertion, tenant/currency boundaries and preserved retired-version history. Local Chrome inspected actual CompanyPricingTemplates with synthetic network: classification, rename/removal, unsaved publication denial, read-only controls and corrected Spanish desktop layout. Harness-only sidebar response errors were corrected; not deployed authentication/persistence proof. Evidence: F:/BIMLog/TestProof/c017-pricing-pools-http-20260927.log and c017-pools-intake-regression-20260927.log. Harness archived outside production source. C017 still lacks public server-resolved approved contract-to-Work-Item funding; C018 complete funding-to-allocation proof and C020 release/live acceptance remain open. C016–C020 is not a completed block. No push, publication or Lens Next change.
+
 ## C017 planner rounding repair — 2026-09-27
 
 Connected isolated PostgreSQL/HTTP regression also passes: F:/BIMLog/TestProof/c017-shared-rounding-integration-20260927.log (Intake activation, stored time, protected reserves/decisions, financial-policy boundaries, recipient revocation, currency/provenance and report/date checks). No deployed acceptance is implied.

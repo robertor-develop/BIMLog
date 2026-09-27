@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { validatePricingTemplate } from "./company-pricing-template-contract";
+import { validatePricingTemplate, resolvePricingPoolAmounts } from "./company-pricing-template-contract";
+import { createHash } from "node:crypto";
 
 const valid = {
   schemaVersion: 1,
@@ -16,6 +17,8 @@ assert.equal(first.preview.roundedTotal, "300.00");
 assert.equal(first.definition.nodes.length, 2);
 assert.equal(Object.hasOwn(first.definition, "economicAllocation"), false);
 assert.equal(validatePricingTemplate(valid).fingerprint, first.fingerprint);
+assert.equal(first.fingerprint,createHash("sha256").update(JSON.stringify(valid)).digest("hex"));
+assert.equal(Object.hasOwn(first.definition,"economicPools"),false);
 const withPhases = validatePricingTemplate({ ...valid, economicAllocation: {
   directProductionNodeIds: ["labor"],
   phases: [
@@ -27,6 +30,25 @@ const withPhases = validatePricingTemplate({ ...valid, economicAllocation: {
 } });
 assert.notEqual(withPhases.fingerprint, first.fingerprint);
 assert.equal(withPhases.definition.economicAllocation?.phases.length, 4);
+const classified = {...withPhases.definition,economicPools:{fixedCompanyCost:[],directProduction:["labor"],projectAdministration:["review"],incentiveReserve:[],projectEarnings:[]}};
+assert.deepEqual(resolvePricingPoolAmounts(classified).amounts,{fixedCompanyCost:"0.00",directProduction:"250.00",projectAdministration:"50.00",incentiveReserve:"0.00",projectEarnings:"0.00"});
+assert.equal(resolvePricingPoolAmounts(classified).total,"300.00");
+const halfCents = {...classified,nodes:classified.nodes.map(node=>({id:node.id,label:node.label,method:"fixed_amount",amount:"0.005"}))};
+assert.equal(resolvePricingPoolAmounts(halfCents).total,"0.01");
+assert.equal(resolvePricingPoolAmounts(halfCents).amounts.directProduction,"0.01");
+assert.equal(resolvePricingPoolAmounts(halfCents).amounts.projectAdministration,"0.00");
+assert.equal(resolvePricingPoolAmounts({...halfCents,nodes:halfCents.nodes.map(node=>({...node,amount:"0"}))}).total,"0.00");
+assert.notEqual(validatePricingTemplate(classified).fingerprint,withPhases.fingerprint);
+assert.equal(validatePricingTemplate(JSON.parse(JSON.stringify(classified))).fingerprint,validatePricingTemplate(classified).fingerprint);
+const denyPools=(economicPools:unknown,code:string)=>assert.throws(()=>validatePricingTemplate({...classified,economicPools}),(e:any)=>e.code===code);
+denyPools({...classified.economicPools,incentiveReserve:["labor"]},"PRICING_TEMPLATE_POOL_NODE_INVALID");
+denyPools({...classified.economicPools,projectAdministration:[]},"PRICING_TEMPLATE_POOL_NODE_UNASSIGNED");
+denyPools({...classified.economicPools,projectAdministration:["missing"]},"PRICING_TEMPLATE_POOL_NODE_INVALID");
+denyPools({...classified.economicPools,projectAdministration:["review","review"]},"PRICING_TEMPLATE_POOL_NODE_INVALID");
+denyPools({...classified.economicPools,directProduction:["review"],projectAdministration:["labor"]},"PRICING_TEMPLATE_POOL_PRODUCTION_MISMATCH");
+denyPools({...classified.economicPools,projectAdministration:null},"PRICING_TEMPLATE_POOLS_INVALID");
+denyPools({...classified.economicPools,taskEarnings:[]},"PRICING_TEMPLATE_UNKNOWN_FIELD");
+assert.throws(()=>resolvePricingPoolAmounts(valid),(e:any)=>e.code==="PRICING_TEMPLATE_POOLS_REQUIRED");
 assert.throws(() => validatePricingTemplate({ ...valid, economicAllocation: {
   ...withPhases.definition.economicAllocation, phases: withPhases.definition.economicAllocation!.phases.slice(0, 3),
 } }), (error: any) => error.code === "PRICING_TEMPLATE_PHASE_TOTAL_INVALID");

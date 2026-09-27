@@ -45757,16 +45757,24 @@
       ],
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
+        "artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-service.ts",
         "artifacts/api-server/src/lib/cost-value-plan-service.ts",
         "artifacts/api-server/src/lib/cost-value-plan.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-allocation-source-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-allocation-source.behavior.ts",
         "artifacts/api-server/src/lib/edt-engine-migration.ts",
         "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
         "artifacts/api-server/src/routes/financial-apu.ts",
         "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+        "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "artifacts/bimlog/src/pages/company-pricing-errors.ts",
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "lib/api-zod/src/exact-allocation.ts",
         "lib/api-zod/src/index.ts",
@@ -45775,9 +45783,10 @@
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
+        "living-brief/impact-declarations.json",
+        "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "dc3d991ee1dafe34d2d6905d0c2447ef542859cd00b6ea0362c3354399ad2397"
+      "reviewedChangeSha256": "da951df91034086129b1de2d10697291a22e70ed43ede0fd49c45d69cbb81034"
     }
   ]
 }

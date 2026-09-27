@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { pricingErrorMessage } from "./company-pricing-errors";
+import { economicPoolKeys, type EconomicPoolNodes, type EconomicPoolKey } from "@workspace/api-zod";
 import "./CompanyPricingTemplates.css";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -13,6 +14,7 @@ type Node = {
 };
 type AllocationPhase = { phaseId: string; code: string; name: string; percent: string };
 type Definition = { schemaVersion: 1; currency: string; industry: string; name: string; nodes: Node[];
+  economicPools?: EconomicPoolNodes;
   economicAllocation?: { directProductionNodeIds: string[]; phases: AllocationPhase[] } };
 type Version = { templateId: string; versionId: string; version: number; status: string; provenance: { code: string; definition: Definition }; createdById?: number; publishedById?: number };
 const initial: Definition = { schemaVersion: 1, currency: "USD", industry: "BIM Services", name: "", nodes: [{ id: "labor", label: "Labor", method: "hours_hourly_rate", hours: "1", hourlyRate: "0" }] };
@@ -23,6 +25,13 @@ export function CompanyPricingTemplates() {
   const [, setLocation] = useLocation();
   const es = lang === "es";
   const t = (en: string, spanish: string) => es ? spanish : en;
+  const poolLabel = (key: EconomicPoolKey) => ({
+    fixedCompanyCost: t("Fixed company cost", "Costo fijo de empresa"),
+    directProduction: t("Direct production", "Producción directa"),
+    projectAdministration: t("Contract administration", "Administración del contrato"),
+    incentiveReserve: t("Project incentive reserve", "Reserva de incentivos del proyecto"),
+    projectEarnings: t("Project earnings", "Ganancias del proyecto"),
+  })[key];
   const statusText = (status: string) => status === "published" ? t("Published", "Publicada")
     : status === "retired" ? t("Retired", "Retirada") : t("Draft", "Borrador");
   const [items, setItems] = useState<Version[]>([]);
@@ -86,8 +95,24 @@ export function CompanyPricingTemplates() {
     finally { setBusy(false); }
   };
   const newTemplate = () => { if (!confirmDiscard()) return; setSelected(null); setHistory([]); setCode(""); setDefinition(initial); setReason(""); setPreview(null); setConfirmingRetire(false); setError(""); setNotice(""); };
-  const updateNode = (index: number, patch: Partial<Node>) => setDefinition(current => ({ ...current,
-    nodes: current.nodes.map((node, position) => position === index ? { ...node, ...patch } : node) }));
+  const updateNode = (index: number, patch: Partial<Node>) => setDefinition(current => {
+    const previousId = current.nodes[index].id;
+    const mapIds = (ids: string[]) => ids.map(id => id === previousId && patch.id !== undefined ? patch.id : id);
+    return { ...current,
+      nodes: current.nodes.map((node, position) => position === index ? { ...node, ...patch } : node),
+      ...(current.economicAllocation ? { economicAllocation: { ...current.economicAllocation,
+        directProductionNodeIds: mapIds(current.economicAllocation.directProductionNodeIds) } } : {}),
+      ...(current.economicPools ? { economicPools: Object.fromEntries(economicPoolKeys.map(key =>
+        [key, mapIds(current.economicPools![key])])) as EconomicPoolNodes } : {}) };
+  });
+  const removeNode = (index: number) => setDefinition(current => {
+    const removedId = current.nodes[index].id;
+    return { ...current, nodes: current.nodes.filter((_, position) => position !== index),
+      ...(current.economicAllocation ? { economicAllocation: { ...current.economicAllocation,
+        directProductionNodeIds: current.economicAllocation.directProductionNodeIds.filter(id => id !== removedId) } } : {}),
+      ...(current.economicPools ? { economicPools: Object.fromEntries(economicPoolKeys.map(key =>
+        [key, current.economicPools![key].filter(id => id !== removedId)])) as EconomicPoolNodes } : {}) };
+  });
   const changeMethod = (index: number, method: Node["method"]) => setDefinition(current => ({ ...current,
     nodes: current.nodes.map((node, position) => position !== index ? node : method === "fixed_amount"
       ? { id: node.id, label: node.label, method, amount: node.amount ?? "0" }
@@ -171,13 +196,13 @@ export function CompanyPricingTemplates() {
               {node.method === "fixed_amount" && <label>{t("Amount", "Monto")}<input inputMode="decimal" value={node.amount ?? ""} onChange={event => updateNode(index, { amount: event.target.value })} /></label>}
               {node.method === "quantity_unit_cost" && <><label>{t("Quantity", "Cantidad")}<input inputMode="decimal" value={node.quantity ?? ""} onChange={event => updateNode(index, { quantity: event.target.value })} /></label><label>{t("Unit cost", "Costo unitario")}<input inputMode="decimal" value={node.unitCost ?? ""} onChange={event => updateNode(index, { unitCost: event.target.value })} /></label></>}
               {node.method === "hours_hourly_rate" && <><label>{t("Hours", "Horas")}<input inputMode="decimal" value={node.hours ?? ""} onChange={event => updateNode(index, { hours: event.target.value })} /></label><label>{t("Hourly rate", "Tarifa por hora")}<input inputMode="decimal" value={node.hourlyRate ?? ""} onChange={event => updateNode(index, { hourlyRate: event.target.value })} /></label></>}
-              <button type="button" onClick={() => setDefinition(current => ({ ...current, nodes: current.nodes.filter((_, position) => position !== index) }))} disabled={definition.nodes.length <= 1}>{t("Remove component", "Quitar componente")}</button>
+              <button type="button" onClick={() => removeNode(index)} disabled={definition.nodes.length <= 1}>{t("Remove component", "Quitar componente")}</button>
             </fieldset>)}
             {canManage && <button type="button" onClick={() => setDefinition(current => ({ ...current, nodes: [...current.nodes, { id: `line${current.nodes.length + 1}`, label: "", method: "fixed_amount", amount: "0" }] }))}>{t("Add component", "Agregar componente")}</button>}
             <fieldset className="company-pricing-economic" disabled={!canManage} style={{ border: "1px solid #CBD5E1", borderRadius: 8, padding: 12, minWidth: 0 }}>
               <legend>{t("Direct Production phase defaults", "Fases predeterminadas de producción directa")}</legend>
               <p>{t("Optional Commercial APU authority for Delivery Workflows. Select the cost components that fund Direct Production; percentages must total 100%. Published versions stay unchanged.", "Autoridad APU Comercial opcional para los flujos de entrega. Seleccione los componentes que financian producción directa; los porcentajes deben sumar 100 %. Las versiones publicadas permanecen sin cambios.")}</p>
-              <label className="company-pricing-check"><input type="checkbox" checked={!!definition.economicAllocation} onChange={event => setDefinition(current => ({
+              <label className="company-pricing-check"><input type="checkbox" disabled={!!definition.economicPools} checked={!!definition.economicAllocation} onChange={event => setDefinition(current => ({
                 ...current, economicAllocation: event.target.checked
                   ? { directProductionNodeIds: current.nodes.length ? [current.nodes[0].id] : [], phases: [{ phaseId: "production", code: "PRODUCTION", name: "Production", percent: "100.00" }] }
                   : undefined,
@@ -185,7 +210,7 @@ export function CompanyPricingTemplates() {
               {definition.economicAllocation && <>
                 <h4>{t("Direct Production components", "Componentes de producción directa")}</h4>
                 {definition.nodes.map(node => <label className="company-pricing-check" key={node.id}>
-                  <input type="checkbox" checked={definition.economicAllocation!.directProductionNodeIds.includes(node.id)}
+                  <input type="checkbox" disabled={!!definition.economicPools} checked={definition.economicAllocation!.directProductionNodeIds.includes(node.id)}
                     onChange={event => setDefinition(current => {
                       const allocation = current.economicAllocation!;
                       return { ...current, economicAllocation: { ...allocation,
@@ -212,6 +237,27 @@ export function CompanyPricingTemplates() {
                       code: `PHASE_${current.economicAllocation!.phases.length + 1}`, name: "", percent: "0.00" }] } }))}>{t("Add phase", "Agregar fase")}</button>
                 <p role="status">{t("Allocation total", "Total de asignación")}: {definition.economicAllocation.phases.reduce((sum, phase) => sum + (Number(phase.percent) || 0), 0).toFixed(2)}%</p>
               </>}
+            </fieldset>
+            <fieldset className="company-pricing-economic" style={{border:"1px solid #CBD5E1",borderRadius:8,padding:12,minWidth:0}} disabled={!canManage || busy}>
+              <legend>{t("Contract economic pools", "Fondos económicos del contrato")}</legend>
+              <p>{t("Classify every component exactly once. These are contract-level amounts, not per-item rates. Saving creates a draft; independent publication is still required. Existing versions are never rewritten.", "Clasifique cada componente una sola vez. Son montos del contrato, no tarifas por elemento. El guardado crea un borrador; aún requiere publicación independiente. Las versiones existentes no se reescriben.")}</p>
+              <label className="company-pricing-check"><input type="checkbox" checked={!!definition.economicPools} disabled={!definition.economicAllocation}
+                onChange={event => setDefinition(current => ({...current, economicPools: event.target.checked
+                  ? {fixedCompanyCost:[],directProduction:[...(current.economicAllocation?.directProductionNodeIds ?? [])],projectAdministration:[],incentiveReserve:[],projectEarnings:[]}
+                  : undefined}))}/>{t("Define protected pools (requires phase defaults)", "Definir fondos protegidos (requiere fases predeterminadas)")}</label>
+              {definition.economicPools && definition.nodes.map(node => <label key={node.id}>{node.label || node.id}
+                <select aria-label={`${t("Economic pool", "Fondo económico")}: ${node.label || node.id}`}
+                  value={economicPoolKeys.find(key => definition.economicPools![key].includes(node.id)) ?? ""}
+                  onChange={event => setDefinition(current => {
+                    const pools = Object.fromEntries(economicPoolKeys.map(key => [key, current.economicPools![key].filter(id => id !== node.id)])) as EconomicPoolNodes;
+                    const key = event.target.value as EconomicPoolKey;
+                    if (economicPoolKeys.includes(key)) pools[key].push(node.id);
+                    return {...current, economicPools:pools, economicAllocation:{...current.economicAllocation!,directProductionNodeIds:[...pools.directProduction]}};
+                  })}>
+                  <option value="">{t("Select a pool", "Seleccione un fondo")}</option>
+                  {economicPoolKeys.map(key => <option key={key} value={key}>{poolLabel(key)}</option>)}
+                </select>
+              </label>)}
             </fieldset>
             {canManage && <label>{t("Reason for audit history", "Motivo para el historial de auditoría")}<textarea value={reason} onChange={event => setReason(event.target.value)} /></label>}
             {selected?.status === "retired" && <p role="status">{t("Retired: unavailable for new contracts. Earlier contracts keep their exact historical reference. To publish a replacement, save a revised definition for separate review.", "Retirada: no está disponible para contratos nuevos. Los contratos anteriores conservan su referencia histórica exacta. Para publicar un reemplazo, guarde una definición revisada para otra revisión.")}</p>}

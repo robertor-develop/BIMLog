@@ -1,3 +1,7 @@
+export const economicPoolKeys = ["fixedCompanyCost", "directProduction", "projectAdministration", "incentiveReserve", "projectEarnings"] as const;
+export type EconomicPoolKey = typeof economicPoolKeys[number];
+export type EconomicPoolNodes = Record<EconomicPoolKey, string[]>;
+
 /** Apportion integer minor units without a negative residual. Ties use input order.
  * Pure arithmetic only: callers supply the authorized weights and funding source.
  */

@@ -1,5 +1,6 @@
 import { FinancialControlError } from "./financial-control-contract";
-import { validatePricingTemplate } from "./company-pricing-template-contract";
+import { validatePricingTemplate, resolvePricingPoolAmounts } from "./company-pricing-template-contract";
+import type { EconomicPoolKey } from "@workspace/api-zod";
 import { waitForGenericApuPersistenceMigration } from "./generic-apu-persistence-migration";
 
 type Queryable = { query(sql: string, values?: unknown[]): Promise<{ rows: any[] }> };
@@ -14,6 +15,7 @@ export type PricingTemplateBinding = {
   fingerprint: string;
   evaluatedTotal: string;
   status: "reference_only";
+  economicPools?: Record<EconomicPoolKey, string>;
 };
 
 export async function resolveCompanyPricingTemplateBinding(input: {
@@ -53,5 +55,6 @@ export async function resolveCompanyPricingTemplateBinding(input: {
     fingerprint: validated.fingerprint,
     evaluatedTotal: validated.preview.roundedTotal,
     status: "reference_only",
+    ...(validated.definition.economicPools ? {economicPools:resolvePricingPoolAmounts(validated.definition).amounts} : {}),
   };
 }

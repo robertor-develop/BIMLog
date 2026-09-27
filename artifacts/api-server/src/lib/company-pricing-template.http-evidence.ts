@@ -7,9 +7,9 @@ import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template
 import { startFeaturePolicyMigration } from "./feature-policy-migration";
 
 const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/invalid");
-if (target.hostname !== "127.0.0.1" || target.port !== "55459" || target.pathname !== "/company_pricing_template_test")
+if (target.hostname !== "127.0.0.1" || target.port !== "55449" || target.pathname !== "/company_pricing_template_test")
   throw new Error("Pricing-template HTTP proof requires its isolated localhost database.");
-await pool.query(`CREATE TABLE companies(id serial PRIMARY KEY,name text NOT NULL)`);
+await pool.query(`CREATE TABLE companies(id serial PRIMARY KEY,name text NOT NULL,retired_into_company_id integer)`);
 await pool.query(`CREATE TABLE users(id serial PRIMARY KEY,email text NOT NULL,full_name text NOT NULL,
   company_id integer NOT NULL REFERENCES companies(id),is_super_admin boolean NOT NULL DEFAULT false)`);
 await pool.query(`CREATE TABLE projects(id serial PRIMARY KEY,name text NOT NULL,status text NOT NULL DEFAULT 'active',created_by_id integer REFERENCES users(id))`);
@@ -66,7 +66,7 @@ try {
   assert.equal(published.status,201); assert.equal(published.body.version,2); assert.equal(published.body.fingerprint,preview.body.fingerprint);
   assert.equal((await call(maker,"/company/pricing-templates/options")).body.options[0].versionId,published.body.versionId);
   await pool.query(`CREATE TABLE IF NOT EXISTS project_members(id serial PRIMARY KEY,project_id integer NOT NULL REFERENCES projects(id),
-    user_id integer NOT NULL REFERENCES users(id),role text NOT NULL,status text NOT NULL DEFAULT 'active')`);
+    user_id integer NOT NULL REFERENCES users(id),role text NOT NULL,status text NOT NULL DEFAULT 'active',joined_at timestamp NOT NULL DEFAULT now(),permissions_override jsonb)`);
   await pool.query(`CREATE TABLE IF NOT EXISTS config_options(id serial PRIMARY KEY,category text NOT NULL,value text NOT NULL,meta jsonb)`);
   await startFeaturePolicyMigration();
   const project = (await pool.query(`INSERT INTO projects(name,created_by_id) VALUES('Pricing reference QA',$1) RETURNING id`,[owner.id])).rows[0];
@@ -88,9 +88,18 @@ try {
   const details = await call(checker,`/company/pricing-templates/${id}`);
   assert.equal(details.body.versions.length,2);
   assert.equal(details.body.versions[0].status,"published");
-  const revised = { ...definition,nodes:[{ ...definition.nodes[0],hours:"12" },definition.nodes[1]] };
+  const revised = { ...definition,nodes:[{ ...definition.nodes[0],hours:"12" },definition.nodes[1]],
+    economicAllocation:{directProductionNodeIds:["labor"],phases:[{phaseId:"production",code:"PROD",name:"Production",percent:"100"}]},
+    economicPools:{fixedCompanyCost:[],directProduction:["labor"],projectAdministration:["review"],incentiveReserve:[],projectEarnings:[]} };
   const draft = await call(maker,`/company/pricing-templates/${id}/versions`,{expectedVersion:2,reason:"New labor plan",definition:revised});
   assert.equal(draft.status,201); assert.equal(draft.body.version,3);
+  const reopened = await call(maker,`/company/pricing-templates/${id}`);
+  assert.deepEqual(reopened.body.versions[0].provenance.definition.economicPools,revised.economicPools);
+  assert.equal(reopened.body.versions.find((v:any)=>v.version===2).provenance.definition.economicPools,undefined);
+  const invalidPools = await call(maker,`/company/pricing-templates/${id}/versions`,{expectedVersion:3,reason:"Invalid overlapping pool",definition:{...revised,economicPools:{...revised.economicPools,incentiveReserve:["labor"]}}});
+  assert.equal(invalidPools.status,400);
+  assert.equal(invalidPools.body.code,"PRICING_TEMPLATE_POOL_NODE_INVALID");
+  assert.equal((await call(maker,`/company/pricing-templates/${id}`)).body.versions.length,3);
   assert.equal((await call(maker,`/company/pricing-templates/${id}/versions`,{expectedVersion:2,reason:"Stale",definition:revised})).status,409);
   const republished = await call(checker,`/company/pricing-templates/${id}/publish`,{expectedVersion:3,reason:"Checked revision"});
   assert.equal(republished.status,201); assert.equal(republished.body.version,4);
@@ -98,6 +107,7 @@ try {
   assert.equal(binding?.fingerprint,republished.body.fingerprint);
   assert.equal(binding?.evaluatedTotal,"350.00");
   assert.equal(binding?.status,"reference_only");
+  assert.deepEqual(binding?.economicPools,{fixedCompanyCost:"0.00",directProduction:"300.00",projectAdministration:"50.00",incentiveReserve:"0.00",projectEarnings:"0.00"});
   await assert.rejects(resolveCompanyPricingTemplateBinding({ client:pool,companyId:b.id,currency:"USD",versionId:republished.body.versionId }),
     (error: any) => error.code === "PRICING_TEMPLATE_VERSION_NOT_FOUND");
   await assert.rejects(resolveCompanyPricingTemplateBinding({ client:pool,companyId:a.id,currency:"EUR",versionId:republished.body.versionId }),

@@ -22,6 +22,11 @@ const source = sourceFromVerifiedCommercialApu({ definition, versionId: "apu-v2"
 assert.equal(source.directProductionAmount, "250.00");
 assert.equal(source.commercialApuVersionId, "apu-v2");
 assert.equal(source.phases.length, 2);
+const classified = {...definition,
+  nodes:definition.nodes.map(node=>({id:node.id,label:node.label,method:"fixed_amount",amount:"0.005"})),
+  economicPools:{fixedCompanyCost:["review"],directProduction:["labor"],projectAdministration:[],incentiveReserve:[],projectEarnings:[]}};
+assert.equal(sourceFromVerifiedCommercialApu({definition:classified,versionId:"apu-classified",
+  fingerprint:validatePricingTemplate(classified).fingerprint,currency:"USD"}).directProductionAmount,"0.00");
 assert.equal(economicCheckerAllowed({ creatorId: 1, lastEditorId: 1, checkerId: 2, hasFinanceGrant: true }), true);
 assert.equal(economicCheckerAllowed({ creatorId: 1, lastEditorId: 2, checkerId: 2, hasFinanceGrant: true }), false);
 assert.equal(economicCheckerAllowed({ creatorId: 1, lastEditorId: 1, checkerId: 2, hasFinanceGrant: false }), false);
