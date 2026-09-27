@@ -30,6 +30,7 @@
       "artifacts/api-server/src/lib/financial-contract-contract.ts",
       "artifacts/api-server/src/lib/financial-contract.behavior.ts",
       "artifacts/api-server/src/lib/job-activation-commercial-baseline.ts",
+      "artifacts/api-server/src/lib/job-intake-commercial-core-fingerprint.behavior.ts",
       "artifacts/api-server/src/lib/job-intake-contract.ts",
       "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
       "artifacts/api-server/src/lib/job-intake-service.ts",

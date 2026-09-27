@@ -45780,6 +45780,7 @@
         "artifacts/api-server/src/lib/financial-contract-contract.ts",
         "artifacts/api-server/src/lib/financial-contract.behavior.ts",
         "artifacts/api-server/src/lib/job-activation-commercial-baseline.ts",
+        "artifacts/api-server/src/lib/job-intake-commercial-core-fingerprint.behavior.ts",
         "artifacts/api-server/src/lib/job-intake-contract.ts",
         "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
         "artifacts/api-server/src/lib/job-intake-service.ts",
@@ -45814,7 +45815,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "49071e03f8670975660f263e68fcfab3a1d374e6f13076e353c4e97e5863ae14"
+      "reviewedChangeSha256": "8e767337e7d6dd81bdd3c997c4ce837a4ae49ccf719efcb7044f40a79f40c11d"
     }
   ]
 }
