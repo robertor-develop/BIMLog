@@ -30,9 +30,12 @@ import { startJobIntakeMigration } from "./job-intake-migration";
 import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { validatePricingTemplate } from "./company-pricing-template-contract";
+import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
 import {loadApprovedContractEconomicSource} from "./approved-contract-economic-source";
 import {freezeApprovedContractPools} from "./contract-economic-pool-service";
 import {withEdtTransaction} from "./edt-engine-transaction";
+import {approvedItemPhaseAllocation} from "./approved-work-item-economic-plan";
+import {scaledSignedDecimal} from "./financial-budget-contract";
 
 // Run only against an empty, disposable database on the exact localhost target
 // below. Provision its base schema with the local Drizzle CLI first; this proof
@@ -249,7 +252,24 @@ try {
   assert.equal(Number((await pool.query(`SELECT count(*)::int n FROM financial_contracts WHERE project_id=$1`,[projectId])).rows[0].n),0);
   assert.equal(Number((await pool.query(`SELECT count(*)::int n FROM job_activation_work_items WHERE project_id=$1`,[projectId])).rows[0].n),0);
   const replacement = await publishedTemplate("Replacement Review Reference","240",true);
-  let correctedData = { ...data,commercial:{ ...data.commercial,contracts:[data.commercial.contracts[0],
+  // Synthetic published prerequisites, selected before activation. Never patch
+  // an activated binding to manufacture a positive funding test.
+  const productionWorkflowId=randomUUID(),productionWorkflowVersionId=randomUUID();
+  const productionDefinition=validateDeliveryWorkflowDefinition({schemaVersion:1,deliverableTypes:["SHOP_DRAWING"],
+    roles:{execute:"DRAFTER",review:"QC_REVIEWER",approve:"PROJECT_MANAGER"},
+    phases:[{id:"production",code:"PROD",name:"TEST Production",order:1,
+      tasks:[{id:"produce",code:"PRODUCE",name:"TEST Produce",order:1,requiredDocuments:[]}],
+      completionRule:"all_tasks_complete",qcRequired:true,approvalRequired:true}],
+    transitions:[],reopen:{role:"approve",reasonRequired:true},
+    economicAllocation:{sourceVersionId:replacement.versionId,proposal:{method:"apu_default"}}});
+  const productionWorkflowFingerprint=deliveryWorkflowFingerprint(productionDefinition);
+  await pool.query(`INSERT INTO company_delivery_workflow_templates(id,company_id,code,name,created_by_id)
+    VALUES($1,$2,'TEST-PRODUCTION','TEST Production',$3)`,[productionWorkflowId,companyId,actor.id]);
+  await pool.query(`INSERT INTO company_delivery_workflow_versions
+    (id,template_id,version,state,revision,definition,fingerprint,effective_from,approved_at,approved_by_id,published_at,published_by_id,created_by_id,updated_by_id)
+    VALUES($1,$2,1,'published',3,$3::jsonb,$4,now(),now(),$5,now(),$6,$6,$6)`,
+    [productionWorkflowVersionId,productionWorkflowId,JSON.stringify(productionDefinition),productionWorkflowFingerprint,checker.id,actor.id]);
+  let correctedData = { ...data,scopeItems:data.scopeItems.map(item=>item.contractId==='ADD'?{...item,deliveryWorkflowVersionId:productionWorkflowVersionId}:item),commercial:{ ...data.commercial,contracts:[data.commercial.contracts[0],
     { ...data.commercial.contracts[1],pricingTemplateVersionId:replacement.versionId }] } };
   const recovered = await request("PUT",intakePath,{ expectedRevision:reopened.body.revision,data:correctedData });
   assert.equal(recovered.status,200,JSON.stringify(recovered.body));
@@ -375,12 +395,29 @@ try {
   assert.equal(approvedSource.contractPools.directProduction,'240.00');
   assert.deepEqual(approvedSource.allocations.map(item=>[item.stableLineId,item.productionAmount]),[['CI-REVIEW','240']]);
   assert.equal(approvedSource.approval.approvedById,allocationReviewer.id);
+  const fractionalDefinition=validateDeliveryWorkflowDefinition({...productionDefinition,
+    transitions:[{from:'a',to:'b',gate:'qc_approved',requiredDocuments:[]},{from:'b',to:'c',gate:'qc_approved',requiredDocuments:[]}],
+    phases:['a','b','c'].map((id,index)=>({...productionDefinition.phases[0],id,code:id.toUpperCase(),order:index+1,
+      tasks:[{...productionDefinition.phases[0].tasks[0],id:`task-${id}`,code:`TASK-${id.toUpperCase()}`}]})),
+    economicAllocation:{sourceVersionId:replacement.versionId,proposal:{method:'custom',approvalReason:'TEST exact arithmetic',
+      phases:['a','b','c'].map((id,index)=>({phaseId:id,code:id.toUpperCase(),name:id,percent:index===2?'33.34':'33.33'}))}}});
+  for(const amount of ['0','0.000001','0.000003','1.123456','999999999.123456']){
+    const projection=approvedItemPhaseAllocation({...approvedSource,allocations:[{...approvedSource.allocations[0],productionAmount:amount}]},'CI-REVIEW',
+      {definition:fractionalDefinition,fingerprint:deliveryWorkflowFingerprint(fractionalDefinition)});
+    assert.equal(projection.rows.reduce((sum,row)=>sum+scaledSignedDecimal(row.amount),0n),scaledSignedDecimal(amount));
+    assert.ok(projection.rows.every(row=>scaledSignedDecimal(row.amount)>=0n));
+  }
+  assert.throws(()=>approvedItemPhaseAllocation(approvedSource,'CI-REVIEW',{definition:productionDefinition,fingerprint:'corrupt'}),
+    (error:any)=>error.code==='ECONOMIC_WORKFLOW_SNAPSHOT_MISMATCH');
   const poolsPath=`${productionVersionPath}/economic-pools`;
   assert.equal((await fetch(`${base}${poolsPath}`)).status,401);
   const poolStatus=await request('GET',poolsPath);
   assert.equal(poolStatus.status,200,JSON.stringify(poolStatus.body));
   assert.equal(poolStatus.body.id,null);
   assert.equal(poolStatus.body.canPrepare,true);
+  assert.equal(poolStatus.body.canPrepareItems,true);
+  assert.equal(poolStatus.body.workItems[0].eligible,true);
+  assert.equal(poolStatus.body.workItems[0].prepared,false);
   const readOnlyPools=await request('GET',poolsPath,undefined,allocationReviewerToken);
   assert.equal(readOnlyPools.status,200);
   assert.equal(readOnlyPools.body.canPrepare,false);
@@ -410,6 +447,31 @@ try {
     SELECT $1,company_id,project_id,contract_id,contract_version_id,currency,source_snapshot,source_fingerprint,created_by_id
     FROM job_contract_economic_pools WHERE id=$2`,[randomUUID(),frozenPools.id]),(error:any)=>error.code==='23505');
   console.log('C017 contract pools: draft denied, approved immutable snapshot, one contract reserve, idempotent replay and update/delete denial PASS');
+  const productionItem=(await pool.query(`SELECT id FROM job_activation_work_items WHERE contract_version_id=$1`,[productionContract.versionId])).rows[0];
+  const economicPath=`/projects/${projectId}/edt-engine/economic-plans`;
+  const economicRequest={workItemId:productionItem.id,expectedContractFingerprint:productionContract.contentFingerprint,
+    expectedWorkflowFingerprint:productionWorkflowFingerprint};
+  assert.equal((await fetch(`${base}${economicPath}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(economicRequest)})).status,401);
+  assert.equal((await request('POST',economicPath,{...economicRequest,directProductionAmount:'999'})).status,409);
+  assert.equal((await request('POST',economicPath,{...economicRequest,expectedWorkflowFingerprint:'0'.repeat(64)})).status,409);
+  assert.equal((await request('POST',economicPath,economicRequest,allocationReviewerToken)).status,403);
+  assert.equal(Number((await pool.query('SELECT count(*)::int n FROM job_activation_work_item_economic_plans WHERE work_item_id=$1',[productionItem.id])).rows[0].n),0);
+  const preparedItem=await request('POST',economicPath,economicRequest);
+  assert.equal(preparedItem.status,201,JSON.stringify(preparedItem.body));
+  assert.equal(preparedItem.body.allocation.directProductionAmount,'240');
+  assert.deepEqual(preparedItem.body.allocation.rows.map((row:any)=>[row.phaseId,row.amount]),[['production','240']]);
+  assert.equal((await request('POST',economicPath,economicRequest)).status,200);
+  const storedItemPlan=(await pool.query('SELECT * FROM job_activation_work_item_economic_plans WHERE work_item_id=$1',[productionItem.id])).rows;
+  assert.equal(storedItemPlan.length,1);
+  for(const name of ['project_administrative_amount','incentive_reserve_amount','task_earnings_amount','project_earnings_amount'])
+    assert.equal(storedItemPlan[0][name],'0.000000','Contract reserves must not be repeated on items');
+  assert.equal(edtFingerprint(storedItemPlan[0].source_snapshot),storedItemPlan[0].source_fingerprint);
+  assert.equal(storedItemPlan[0].source_snapshot.workflow.versionId,productionWorkflowVersionId);
+  assert.equal(storedItemPlan[0].source_snapshot.approvedContract.apu.versionId,replacement.versionId);
+  const reopenedItemStatus=await request('GET',poolsPath);
+  assert.equal(reopenedItemStatus.body.workItems[0].prepared,true);
+  assert.equal(reopenedItemStatus.body.workItems[0].allocation.directProductionAmount,'240');
+  console.log('C017 public HTTP item funding: approved source + activated workflow -> exact plan and full immutable source; injected/stale/unauthorized denial; idempotency and no duplicate pools PASS');
   await pool.query(`INSERT INTO financial_contract_record_grants(id,contract_id,user_id,permission,version,state,reason,granted_by_id)
     VALUES($1,$2,$3,'view',2,'revoked','TEST revoke exact source access',$4)`,[randomUUID(),productionContract.id,allocationReviewer.id,actor.id]);
   await assert.rejects(()=>loadProductionSource(allocationReviewer.id),(error:any)=>error.code==='CONTRACT_RECORD_PERMISSION_DENIED');
@@ -438,7 +500,7 @@ try {
   assert.ok(assignment,"activated checker assignment exists");
   const economicItem=(await pool.query(`SELECT w.*,v.commercial_metadata->'pricingTemplateBinding'->>'versionId' AS apu_version
     FROM job_activation_work_items w JOIN financial_contract_versions v ON v.id=w.contract_version_id
-    WHERE w.id=$1 AND w.project_id=$2`,[assignment.work_item_id,projectId])).rows[0];
+    WHERE w.contract_id<>$1 AND w.project_id=$2`,[productionContract.id,projectId])).rows[0];
   const planCount=async()=>Number((await pool.query("SELECT count(*) AS count FROM job_activation_work_item_economic_plans WHERE project_id=$1",[projectId])).rows[0].count);
   const plansBefore=await planCount();
   await assert.rejects(()=>createWorkItemEconomicPlan({
@@ -450,7 +512,7 @@ try {
   }),(error:any)=>error.code==="ECONOMIC_WORKFLOW_VERSION_MISMATCH");
   assert.equal(await planCount(),plansBefore,"Rejected workflow binding must leave no economic plan");
   console.log("C017 real PostgreSQL: unrelated workflow economic plan denied without inserted record PASS");
-  // Synthetic economic funding fixture: tests persistence, not the unfinished public funding-creation workflow.
+  // Separate synthetic legacy funding fixture preserves old bonus compatibility.
   const bonusFundingId=randomUUID();
   const bonusSourceSnapshot={classification:"SYNTHETIC_TEST_ONLY",contractVersionId:economicItem.contract_version_id,
     pricingTemplateVersionId:economicItem.apu_version,currency:"USD",reserve:"100"};

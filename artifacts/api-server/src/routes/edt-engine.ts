@@ -3,6 +3,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { edtProjectId, resolveEdtRouteActor, sendEdtRouteError } from "../lib/edt-engine-route-context";
 import { EdtEngineConflict } from "../lib/edt-engine-transaction";
 import { transitionStoredTimeEntry } from "../lib/edt-engine-economic-service";
+import { prepareApprovedWorkItemEconomicPlan } from "../lib/approved-work-item-economic-plan";
 import { pool } from "@workspace/db";
 import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-engine-governed-change-service";
 import { decideWorkItemQc, previewResultImport, submitWorkItemIssuance } from "../lib/edt-engine-qc-import-service";
@@ -132,8 +133,16 @@ router.post("/projects/:projectId/edt-engine/change-requests/:requestId/decision
 
 router.post("/projects/:projectId/edt-engine/economic-plans",authMiddleware,async(req,res):Promise<void>=>{
   try{
-    const projectId=edtProjectId(req);await resolveEdtRouteActor(req,projectId);
-    throw new EdtEngineConflict("ECONOMIC_PLAN_NOT_SERVER_RESOLVED","The immutable Economic Plan must be computed from approved Contract, APU and Workflow records, not request amounts.");
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);
+    if(Object.keys(body).some(key=>!["workItemId","expectedContractFingerprint","expectedWorkflowFingerprint"].includes(key)))
+      throw new EdtEngineConflict("ECONOMIC_PLAN_NOT_SERVER_RESOLVED","Economic amounts and versions must come from approved server records, not request data.");
+    const expectedContractFingerprint=requiredText(body,"expectedContractFingerprint");
+    const expectedWorkflowFingerprint=requiredText(body,"expectedWorkflowFingerprint");
+    if(![expectedContractFingerprint,expectedWorkflowFingerprint].every(value=>/^[a-f0-9]{64}$/.test(value)))
+      throw new EdtEngineConflict("REQUEST_BODY_INVALID","Current contract and workflow fingerprints are required.");
+    const result=await prepareApprovedWorkItemEconomicPlan({actor,projectId,workItemId:requiredText(body,"workItemId"),
+      expectedContractFingerprint,expectedWorkflowFingerprint});
+    res.status(result.idempotent?200:201).json(result);
   }catch(error){sendEdtRouteError(res,error);}
 });
 

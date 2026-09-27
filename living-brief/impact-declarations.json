@@ -45774,12 +45774,14 @@
         "artifacts/api-server/src/lib/edt-engine-build314.behavior.ts",
         "artifacts/api-server/src/lib/edt-engine-economic-service.ts",
         "artifacts/api-server/src/lib/edt-engine-migration.ts",
+        "artifacts/api-server/src/lib/edt-engine-route-context.ts",
         "artifacts/api-server/src/lib/financial-contract-contract.ts",
         "artifacts/api-server/src/lib/financial-contract.behavior.ts",
         "artifacts/api-server/src/lib/job-activation-commercial-baseline.ts",
         "artifacts/api-server/src/lib/job-intake-contract.ts",
         "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
         "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/routes/edt-engine.ts",
         "artifacts/api-server/src/routes/financial-apu.ts",
         "artifacts/api-server/src/routes/financial-contracts.ts",
         "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
@@ -45806,7 +45808,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "b193c09b721c446486e93eba0dfff0abbace1ba772149f442dd463be641d4176"
+      "reviewedChangeSha256": "3c1b153d73db79c752d8be39b92e894a25f364be1ece407b8ea18905d1298085"
     }
   ]
 }

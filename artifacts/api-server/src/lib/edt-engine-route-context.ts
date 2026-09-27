@@ -5,6 +5,7 @@ import {
   type EdtDefaultRoleProfile,
 } from "./edt-engine-authorization";
 import { EdtEngineConflict } from "./edt-engine-transaction";
+import { FinancialControlError } from "./financial-control-contract";
 
 export type EdtRouteActor = Readonly<{
   grants: ReturnType<typeof permissionsForDefaultRole>;
@@ -91,6 +92,7 @@ export function edtProjectId(req: Request): number {
 }
 
 export function sendEdtRouteError(res: Response, error: unknown): void {
+  if(error instanceof FinancialControlError){res.status(error.status).json({code:error.code,error:error.message});return;}
   if (!(error instanceof EdtEngineConflict)) throw error;
   const denied = /REQUIRED$|PROHIBITED$|DENIED$|MISMATCH$/.test(error.code);
   const missing = /NOT_FOUND$/.test(error.code);

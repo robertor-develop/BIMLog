@@ -195,6 +195,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/approved-contract-economic-source.ts
 - artifacts/api-server/src/lib/approved-labor-evidence.behavior.ts
 - artifacts/api-server/src/lib/approved-labor-evidence.ts
+- artifacts/api-server/src/lib/approved-work-item-economic-plan.ts
 - artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-service.ts

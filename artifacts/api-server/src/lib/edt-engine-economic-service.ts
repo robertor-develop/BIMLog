@@ -7,7 +7,19 @@ function nonnegative(value:string,name:string){if(!decimal.test(value))throw new
 function decimalUnits(value:string){const [whole,fraction=""]=value.replace(/^-/,"").split(".");return BigInt(whole)*1000000n+BigInt(fraction.padEnd(6,"0"));}
 function authorize(actor:Actor,permission:"JOB_OPERATE"|"TIME_SUBMIT"|"TIME_APPROVE",companyId:number,projectId:number,requester?:number){const decision=decideEdtRecordAuthorization({...actor,permission,recordCompanyId:companyId,recordProjectId:projectId,recordRequesterUserId:requester});if(!decision.allow)throw new EdtEngineConflict(decision.code,"Economic-operation authorization denied.");}
 
-export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:number;projectId:number;intakeId:string;workItemId:string;contractId:string;contractVersionId:string;pricingTemplateVersionId:string;deliveryWorkflowVersionId:string;currency:string;directProductionAmount:string;projectAdministrativeAmount:string;incentiveReserveAmount:string;taskEarningsAmount:string;projectEarningsAmount:string;resolvedAllocation:Record<string,unknown>;sourceSnapshot:Record<string,unknown>},host?:EdtTransactionHost){
+type EconomicPlanInput={actor:Actor;companyId:number;projectId:number;intakeId:string;workItemId:string;contractId:string;contractVersionId:string;pricingTemplateVersionId:string;deliveryWorkflowVersionId:string;currency:string;directProductionAmount:string;projectAdministrativeAmount:string;incentiveReserveAmount:string;taskEarningsAmount:string;projectEarningsAmount:string;resolvedAllocation:Record<string,unknown>;sourceSnapshot:Record<string,unknown>};
+
+export async function createWorkItemEconomicPlan(input:EconomicPlanInput,host?:EdtTransactionHost){
+  const prepared=prepareEconomicPlan(input);
+  return withEdtTransaction(client=>persistWorkItemEconomicPlan(input,prepared,client),host);
+}
+
+/** Internal composition: approved-source reads and persistence share one transaction. */
+export async function createWorkItemEconomicPlanWithClient(input:EconomicPlanInput,client:EdtTransactionClient){
+  return persistWorkItemEconomicPlan(input,prepareEconomicPlan(input),client);
+}
+
+function prepareEconomicPlan(input:EconomicPlanInput){
   authorize(input.actor,"JOB_OPERATE",input.companyId,input.projectId);
   for(const [name,value] of Object.entries({directProductionAmount:input.directProductionAmount,projectAdministrativeAmount:input.projectAdministrativeAmount,incentiveReserveAmount:input.incentiveReserveAmount,taskEarningsAmount:input.taskEarningsAmount,projectEarningsAmount:input.projectEarningsAmount}))nonnegative(value,name);
   if(!/^[A-Z]{3}$/.test(input.currency))throw new EdtEngineConflict("CURRENCY_INVALID","Currency must be an ISO-style three-letter code.");
@@ -23,7 +35,11 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
         edtFingerprint(JSON.parse(sourceSnapshotJson)) !== edtFingerprint(input.sourceSnapshot)) throw new Error();
   } catch { throw new EdtEngineConflict("ECONOMIC_SOURCE_SNAPSHOT_INVALID", "Economic source evidence must be a bounded JSON object without lossy values."); }
   const sourceFingerprint=edtFingerprint(input.sourceSnapshot);const planFingerprint=edtFingerprint({workItemId:input.workItemId,contractVersionId:input.contractVersionId,pricingTemplateVersionId:input.pricingTemplateVersionId,deliveryWorkflowVersionId:input.deliveryWorkflowVersionId,currency:input.currency,amounts:[input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount],resolvedAllocation:input.resolvedAllocation});
-  return withEdtTransaction(async client=>{
+  return {sourceSnapshotJson,sourceFingerprint,planFingerprint};
+}
+
+async function persistWorkItemEconomicPlan(input:EconomicPlanInput,prepared:ReturnType<typeof prepareEconomicPlan>,client:EdtTransactionClient){
+    const {sourceSnapshotJson,sourceFingerprint,planFingerprint}=prepared;
     const item=(await client.query<any>("SELECT w.id,w.intake_id,w.project_id,w.contract_id,w.contract_version_id,w.economic_plan_fingerprint,i.status AS intake_status FROM job_activation_work_items w JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id WHERE w.id=$1 AND w.project_id=$2 AND i.company_id=$3 FOR UPDATE OF w",[input.workItemId,input.projectId,input.companyId])).rows[0];
     if(!item||item.intake_id!==input.intakeId||item.contract_id!==input.contractId||item.contract_version_id!==input.contractVersionId)throw new EdtEngineConflict("ECONOMIC_SCOPE_MISMATCH","Economic plan does not match the activated Work Item contract.");
     if(item.intake_status!=="activated")throw new EdtEngineConflict("ECONOMIC_INTAKE_NOT_ACTIVATED","Economic plans require an activated canonical Intake.");
@@ -58,7 +74,6 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
     await client.query("INSERT INTO job_activation_work_item_economic_plans(id,company_id,project_id,intake_id,work_item_id,contract_id,contract_version_id,pricing_template_version_id,delivery_workflow_version_id,currency,direct_production_amount,project_administrative_amount,incentive_reserve_amount,task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id,source_snapshot) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19,$20::jsonb)",[id,input.companyId,input.projectId,input.intakeId,input.workItemId,input.contractId,input.contractVersionId,input.pricingTemplateVersionId,input.deliveryWorkflowVersionId,input.currency,input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount,JSON.stringify(input.resolvedAllocation),sourceFingerprint,planFingerprint,input.actor.actorUserId,sourceSnapshotJson]);
     await client.query("UPDATE job_activation_work_items SET economic_plan_fingerprint=$2,updated_at=now() WHERE id=$1",[input.workItemId,planFingerprint]);
     return{planFingerprint,idempotent:false};
-  },host);
 }
 
 type TimeDecision = {actor:Actor;companyId:number;projectId:number;entryId:string;expectedVersion:number;decision:"submit"|"approve"|"reject";budgetAccountId:string;pool:"direct_production"|"project_administrative";amount:string;reason:string;evidence:Record<string,unknown>};

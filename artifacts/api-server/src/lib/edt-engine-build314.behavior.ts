@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {createWorkItemEconomicPlan} from "./edt-engine-economic-service";
+import {createWorkItemEconomicPlan,createWorkItemEconomicPlanWithClient} from "./edt-engine-economic-service";
 import type {EdtTransactionClient,EdtTransactionHost} from "./edt-engine-transaction";
 import { edtFingerprint } from "./edt-engine-transaction";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
@@ -76,4 +76,12 @@ for(const field of ["projectAdministrativeAmount","incentiveReserveAmount","proj
 }
 assert.equal(calls.some(sql=>sql.startsWith("INSERT")||sql.startsWith("UPDATE")),false);
 assert.equal((await createWorkItemEconomicPlan(sourceInput,host)).idempotent,false,"Production-only plan can coexist with contract-level pools");
-console.log("EDT_ENGINE_BUILD314_RESULT=PASS economic plan checks canonical activated contract APU and currency; no duplicated contract pools");
+calls.length=0;
+assert.equal((await createWorkItemEconomicPlanWithClient(sourceInput,client)).idempotent,false);
+assert.equal(calls.some(sql=>/^(BEGIN|COMMIT|ROLLBACK)/.test(sql)),false,"Composed writer must not end or nest the caller's source-lock transaction");
+assert.deepEqual(insertedSnapshot,sourceEvidence);
+calls.length=0;
+await assert.rejects(()=>createWorkItemEconomicPlanWithClient({...sourceInput,sourceSnapshot:{invalid:NaN}},client),
+  (error:any)=>error.code==="ECONOMIC_SOURCE_SNAPSHOT_INVALID");
+assert.equal(calls.length,0);
+console.log("EDT_ENGINE_BUILD314_RESULT=PASS economic plan checks canonical activated contract APU and currency; no duplicated contract pools; shared transaction composition");

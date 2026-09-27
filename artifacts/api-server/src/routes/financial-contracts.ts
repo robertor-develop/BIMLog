@@ -7,6 +7,9 @@ import {ensureEdtEngineSchema} from "../lib/edt-engine-migration";
 import {withEdtTransaction} from "../lib/edt-engine-transaction";
 import {loadApprovedContractEconomicSource} from "../lib/approved-contract-economic-source";
 import {authorizeFinancialOperation} from "../lib/financial-control-service";
+import {resolveEdtRouteActor} from "../lib/edt-engine-route-context";
+import {EdtEngineConflict} from "../lib/edt-engine-transaction";
+import {approvedItemPhaseAllocation} from "../lib/approved-work-item-economic-plan";
 import { singleFileUpload } from "../middlewares/multipart";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import { boundedText, positiveId } from "../lib/financial-budget-contract";
@@ -51,7 +54,24 @@ router.get("/projects/:projectId/financial/contracts/:contractId/versions/:versi
     let canPrepare=true;
     try{await authorizeFinancialOperation({actorUserId:req.user.userId,projectId:project(req),featureKey:"cost.value_planner.prepare",operation:"prepare",client});}
     catch(error){if(error instanceof FinancialControlError&&error.status===403)canPrepare=false;else throw error;}
-    return {id:stored?.id??null,canPrepare,paymentAuthorized:false};
+    let canPrepareItems=false;
+    if(canPrepare){try{canPrepareItems=(await resolveEdtRouteActor(req,project(req))).grants.includes("JOB_OPERATE");}
+      catch(error){if(!(error instanceof EdtEngineConflict))throw error;}}
+    const items=(await client.query<any>(`SELECT w.id,w.name,w.stable_scope_item_id,f.version_id,f.definition,f.fingerprint,
+      p.plan_fingerprint,p.resolved_allocation FROM job_activation_work_items w
+      JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id
+      LEFT JOIN company_delivery_workflow_work_items f ON f.work_item_id=w.id AND f.company_id=i.company_id AND f.project_id=w.project_id
+      LEFT JOIN job_activation_work_item_economic_plans p ON p.work_item_id=w.id
+      WHERE w.contract_version_id=$1 AND w.project_id=$2 AND i.company_id=$3 AND i.status='activated'
+      ORDER BY w.stable_scope_item_id,w.id`,[source.contractVersionId,source.projectId,source.companyId])).rows;
+    const workItems=items.map(item=>{
+      let allocation=null;
+      if(item.version_id){try{allocation=approvedItemPhaseAllocation(source,item.stable_scope_item_id,item);}
+        catch(error){if(!(error instanceof EdtEngineConflict)&&!(error instanceof FinancialControlError))throw error;}}
+      return {id:item.id,name:item.name,workflowFingerprint:item.fingerprint,eligible:allocation!==null,
+        prepared:!!item.plan_fingerprint,allocation:item.plan_fingerprint?item.resolved_allocation:allocation};
+    });
+    return {id:stored?.id??null,canPrepare,canPrepareItems,workItems,projectId:source.projectId,currency:source.currency,paymentAuthorized:false};
   });
   res.json(result);
 }));
