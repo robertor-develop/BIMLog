@@ -198,8 +198,20 @@ CREATE TABLE IF NOT EXISTS job_bonus_proposals (
   funding_id text NOT NULL REFERENCES job_activation_work_item_economic_plans(id), maker_user_id integer NOT NULL REFERENCES users(id),
   idempotency_key text NOT NULL, proposal jsonb NOT NULL, fingerprint text NOT NULL CHECK(fingerprint ~ '^[a-f0-9]{64}$'),
   amount numeric(30,6) NOT NULL CHECK(amount > 0), currency text NOT NULL CHECK(currency ~ '^[A-Z]{3}$'),
-  created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(project_id,maker_user_id,idempotency_key)
+  created_at timestamptz NOT NULL DEFAULT now(), CONSTRAINT job_bonus_proposals_project_id_maker_user_id_idempotency_key_key UNIQUE(project_id,maker_user_id,idempotency_key)
 );
+-- PostgreSQL shortens automatically generated multi-column constraint names.
+-- Preserve the existing unique index and rows while matching the declared schema.
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='job_bonus_proposals'::regclass
+    AND conname='job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key'
+    AND contype='u' AND pg_get_constraintdef(oid)='UNIQUE (project_id, maker_user_id, idempotency_key)') THEN
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='job_bonus_proposals'::regclass
+      AND conname='job_bonus_proposals_project_id_maker_user_id_idempotency_key_key') THEN
+      ALTER TABLE job_bonus_proposals RENAME CONSTRAINT job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key TO job_bonus_proposals_project_id_maker_user_id_idempotency_key_key;
+    END IF;
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS job_bonus_proposals_funding_idx ON job_bonus_proposals(funding_id);
 -- Keep historical Work Item foreign keys; new proposals reference the single
 -- contract reserve instead. Exactly one funding identity is required.

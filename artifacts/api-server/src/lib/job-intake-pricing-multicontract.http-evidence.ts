@@ -10,7 +10,7 @@ import contractsRouter from "../routes/financial-contracts";
 import edtRouter from "../routes/edt-engine";
 import reportsRouter from "../routes/reports";
 import financialApuRouter from "../routes/financial-apu";
-import { ensureEdtEngineSchema } from "./edt-engine-migration";
+import { ensureEdtEngineSchema, EDT_ENGINE_ECONOMIC_SQL } from "./edt-engine-migration";
 import { getTeamPerformance } from "./team-performance-service";
 import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
 import { saveCostValuePerformance, getCostValuePerformance, exportCostValuePerformanceCsv } from "./cost-value-performance-service";
@@ -571,6 +571,24 @@ try {
     (error:any)=>error.code==='BONUS_ALREADY_DECIDED');
   await assert.rejects(()=>pool.query("UPDATE job_bonus_proposals SET amount=1 WHERE id=$1",[finalBonus.id]));
   await assert.rejects(()=>pool.query("DELETE FROM job_bonus_decisions WHERE proposal_id=$1",[finalBonus.id]));
+  // Reproduce the runtime-created constraint spelling, not just Drizzle's index.
+  // Roll back fixture-only DDL after proving replay preserves index identity/data.
+  const namingProof = await pool.connect();
+  try {
+    await namingProof.query('BEGIN');
+    const before = (await namingProof.query('SELECT * FROM job_bonus_proposals ORDER BY id')).rows;
+    await namingProof.query(`ALTER TABLE job_bonus_proposals ADD CONSTRAINT job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key UNIQUE USING INDEX job_bonus_proposals_project_id_maker_user_id_idempotency_key_key`);
+    const indexOid = (await namingProof.query(`SELECT conindid FROM pg_constraint WHERE conrelid='job_bonus_proposals'::regclass AND conname='job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key'`)).rows[0].conindid;
+    await namingProof.query(EDT_ENGINE_ECONOMIC_SQL);
+    await namingProof.query(EDT_ENGINE_ECONOMIC_SQL);
+    const repaired = (await namingProof.query(`SELECT conindid,pg_get_constraintdef(oid) AS definition FROM pg_constraint WHERE conrelid='job_bonus_proposals'::regclass AND conname='job_bonus_proposals_project_id_maker_user_id_idempotency_key_key'`)).rows;
+    assert.deepEqual(repaired,[{conindid:indexOid,definition:'UNIQUE (project_id, maker_user_id, idempotency_key)'}]);
+    assert.deepEqual((await namingProof.query('SELECT * FROM job_bonus_proposals ORDER BY id')).rows,before);
+    console.log('C020 schema naming PASS: exact declared name, same unique index OID, two replays, unchanged proposal records');
+  } finally {
+    await namingProof.query('ROLLBACK');
+    namingProof.release();
+  }
   console.log("C018 PostgreSQL persistence PASS: concurrent reserve protection, idempotency, independent rejection/approval, immutable audit, no payment");
   const bonusPath=`/projects/${projectId}/financial/apu/bonus-proposals`;
   assert.equal((await fetch(`${base}${bonusPath}`)).status,401);
