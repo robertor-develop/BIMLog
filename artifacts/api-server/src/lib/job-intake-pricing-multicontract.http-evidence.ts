@@ -36,6 +36,7 @@ import {freezeApprovedContractPools} from "./contract-economic-pool-service";
 import {withEdtTransaction} from "./edt-engine-transaction";
 import {approvedItemPhaseAllocation} from "./approved-work-item-economic-plan";
 import {scaledSignedDecimal} from "./financial-budget-contract";
+import {getFinancialBudgetWorkspace} from "./financial-budget-service";
 
 // Run only against an empty, disposable database on the exact localhost target
 // below. Provision its base schema with the local Drizzle CLI first; this proof
@@ -244,7 +245,22 @@ try {
   assert.equal(rejectedEnrichment.body.code,'JOB_INTAKE_COMMERCIAL_BUDGET_REQUIRED');
   assert.deepEqual((await request('GET',corePath)).body.activation,coreBefore.body.activation);
   assert.equal((await pool.query('SELECT count(*)::int n FROM financial_contracts WHERE project_id=$1',[coreProjectId])).rows[0].n,0);
+  const commercialMirrors = await request('PUT',corePath,{expectedRevision:coreBefore.body.revision,
+    data:{...coreBefore.body.data,scopeItems:coreBefore.body.data.scopeItems.map((item:any)=>({...item,apuPlanVersion:1}))}});
+  assert.equal(commercialMirrors.status,200,JSON.stringify(commercialMirrors.body));
+  const persistedMirrors=await request('GET',corePath);
+  assert.equal(persistedMirrors.body.data.team.assignments[0].apuPlanVersion,1);
+  assert.deepEqual(persistedMirrors.body.activation,coreBefore.body.activation);
+  const changedHours=await request('PUT',corePath,{expectedRevision:persistedMirrors.body.revision,
+    data:{...persistedMirrors.body.data,team:{...persistedMirrors.body.data.team,
+      assignments:persistedMirrors.body.data.team.assignments.map((a:any)=>({...a,plannedHours:'99'}))}}});
+  assert.equal(changedHours.status,409,JSON.stringify(changedHours.body));
+  assert.equal(changedHours.body.code,'JOB_INTAKE_CORE_IMMUTABLE');
   console.log('C020 live-defect regression PASS: core activation remains available; explicit Commercial request cannot silently return core success; existing activation unchanged');
+  const budgetChoices=await getFinancialBudgetWorkspace({actorUserId:actor.id,projectId});
+  assert.equal(budgetChoices.snapshots[0].budgetVersion,1);
+  assert.equal(budgetChoices.snapshots[0].total,'420.000000');
+  assert.equal(budgetChoices.snapshots[0].currency,'USD');
   const invalid = await request("PUT",intakePath,{ expectedRevision:initialized.body.revision,
     data:{ ...data,commercial:{ ...data.commercial,contracts:[{ ...data.commercial.contracts[0],pricingTemplateVersionId:randomUUID() },data.commercial.contracts[1]] } } });
   assert.equal(invalid.status,404,JSON.stringify(invalid.body));

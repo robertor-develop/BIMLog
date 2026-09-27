@@ -1005,6 +1005,9 @@ function snapshotResponse(row: any, idempotent = false) {
   return {
     id: String(row.id),
     budgetVersionId: String(row.budget_version_id),
+    budgetVersion: Number(row.budget_version),
+    total: String(row.total),
+    currency: String(row.currency),
     status: "approved",
     contentFingerprint: String(row.content_fingerprint),
     snapshotFingerprint: String(row.snapshot_fingerprint),

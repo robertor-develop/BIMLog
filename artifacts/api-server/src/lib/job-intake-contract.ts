@@ -909,6 +909,12 @@ export function jobIntakeCoreFingerprint(data: JobIntakeData) {
               const {
                 internalHourlyRate: _internalHourlyRate,
                 plannedLaborCost: _plannedLaborCost,
+                // Derived commercial mirrors change when a saved APU is linked.
+                // They are not operational scope, assignment identity, or hours.
+                apuPlanVersion: _assignmentApuPlanVersion,
+                customerHourlyRate: _customerHourlyRate,
+                apuCalculationRate: _apuCalculationRate,
+                rateProvenance: _rateProvenance,
                 ...assignment
               } = entry;
               return assignment;

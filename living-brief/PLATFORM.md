@@ -666,6 +666,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-apu-reload.behavior.ts
 - artifacts/api-server/src/lib/job-intake-budget-account.behavior.ts
 - artifacts/api-server/src/lib/job-intake-combined-scenario.behavior.ts
+- artifacts/api-server/src/lib/job-intake-commercial-core-fingerprint.behavior.ts
 - artifacts/api-server/src/lib/job-intake-configuration-snapshot.behavior.ts
 - artifacts/api-server/src/lib/job-intake-configuration.behavior.ts
 - artifacts/api-server/src/lib/job-intake-configuration.ts
