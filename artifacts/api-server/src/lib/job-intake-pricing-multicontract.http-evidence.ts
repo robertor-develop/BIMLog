@@ -14,6 +14,7 @@ import { getTeamPerformance } from "./team-performance-service";
 import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
 import { saveCostValuePerformance, getCostValuePerformance, exportCostValuePerformanceCsv } from "./cost-value-performance-service";
 import { saveCostValueForecast, getCostValueForecast, exportCostValueForecastCsv } from "./cost-value-forecast-service";
+import { createWorkItemEconomicPlan } from "./edt-engine-economic-service";
 import { signToken } from "../middlewares/auth";
 import { startFeaturePolicyMigration } from "./feature-policy-migration";
 import { startCommercialEntitlementMigration } from "./commercial-entitlement";
@@ -312,6 +313,20 @@ try {
   await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active')`,[projectId,reviewer.id]);
   const assignment=(await pool.query(`SELECT * FROM job_activation_resource_assignments WHERE user_id=$1 AND intake_id=$2`,[checker.id,after.body.id])).rows[0];
   assert.ok(assignment,"activated checker assignment exists");
+  const economicItem=(await pool.query(`SELECT w.*,v.commercial_metadata->'pricingTemplateBinding'->>'versionId' AS apu_version
+    FROM job_activation_work_items w JOIN financial_contract_versions v ON v.id=w.contract_version_id
+    WHERE w.id=$1 AND w.project_id=$2`,[assignment.work_item_id,projectId])).rows[0];
+  const planCount=async()=>Number((await pool.query("SELECT count(*) AS count FROM job_activation_work_item_economic_plans WHERE project_id=$1",[projectId])).rows[0].count);
+  const plansBefore=await planCount();
+  await assert.rejects(()=>createWorkItemEconomicPlan({
+    actor:{grants:["JOB_OPERATE"],actorUserId:actor.id,actorCompanyId:companyId,actorProjectIds:[projectId],eligibleRole:"OPERATIONS_DIRECTOR"},
+    companyId,projectId,intakeId:economicItem.intake_id,workItemId:economicItem.id,contractId:economicItem.contract_id,
+    contractVersionId:economicItem.contract_version_id,pricingTemplateVersionId:economicItem.apu_version,
+    deliveryWorkflowVersionId:"TEST-unrelated-workflow",currency:"USD",directProductionAmount:"0",projectAdministrativeAmount:"0",
+    incentiveReserveAmount:"0",taskEarningsAmount:"0",projectEarningsAmount:"0",resolvedAllocation:{},sourceSnapshot:{},
+  }),(error:any)=>error.code==="ECONOMIC_WORKFLOW_VERSION_MISMATCH");
+  assert.equal(await planCount(),plansBefore,"Rejected workflow binding must leave no economic plan");
+  console.log("C017 real PostgreSQL: unrelated workflow economic plan denied without inserted record PASS");
   const timeId=randomUUID();
   await pool.query(`INSERT INTO job_activation_time_entries(id,intake_id,project_id,work_item_id,task_id,assignment_id,user_id,work_date,hours,note,created_by_id)
     VALUES($1,$2,$3,$4,$5,$6,$7,current_date,2,'TEST independent time review',$7)`,[timeId,assignment.intake_id,projectId,assignment.work_item_id,assignment.task_id,assignment.id,checker.id]);

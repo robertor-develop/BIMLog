@@ -1,5 +1,6 @@
 import { decideEdtRecordAuthorization,type EdtRecordAuthorizationInput } from "./edt-engine-authorization";
 import { deterministicEdtId,edtFingerprint,EdtEngineConflict,withEdtTransaction,type EdtTransactionHost,type EdtTransactionClient } from "./edt-engine-transaction";
+import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
 type Actor=Pick<EdtRecordAuthorizationInput,"grants"|"actorUserId"|"actorCompanyId"|"actorProjectIds">&{eligibleRole:string};
 const decimal=/^(0|[1-9]\d*)(\.\d{1,6})?$/;
 function nonnegative(value:string,name:string){if(!decimal.test(value))throw new EdtEngineConflict("ECONOMIC_AMOUNT_INVALID",`${name} must be a non-negative decimal with at most six places.`);}
@@ -18,8 +19,26 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
     const contract=(await client.query<{currency:string;pricing_template_binding:Record<string,unknown>|null}>("SELECT v.currency,v.commercial_metadata->'pricingTemplateBinding' AS pricing_template_binding FROM financial_contract_versions v JOIN financial_contracts c ON c.id=v.contract_id WHERE v.id=$1 AND c.id=$2 AND c.project_id=$3 AND c.company_id=$4",[input.contractVersionId,input.contractId,input.projectId,input.companyId])).rows[0];
     if(!contract||contract.currency!==input.currency||contract.pricing_template_binding?.versionId!==input.pricingTemplateVersionId)
       throw new EdtEngineConflict("ECONOMIC_CONTRACT_VERSION_MISMATCH","Economic plan currency or APU version differs from the activated contract version.");
-    const existing=(await client.query<{plan_fingerprint:string}>("SELECT plan_fingerprint FROM job_activation_work_item_economic_plans WHERE work_item_id=$1",[input.workItemId])).rows[0];
-    if(existing){if(existing.plan_fingerprint!==planFingerprint)throw new EdtEngineConflict("ECONOMIC_PLAN_IMMUTABLE","An activated Work Item economic plan cannot be replaced.");return{planFingerprint,idempotent:true};}
+    // Resolve only the activated copy, never a newly published/latest template.
+    const workflow=(await client.query<{version_id:string|null;definition:unknown;fingerprint:string}>(
+      "SELECT version_id,definition,fingerprint FROM company_delivery_workflow_work_items WHERE work_item_id=$1 AND project_id=$2 AND company_id=$3 FOR SHARE",
+      [input.workItemId,input.projectId,input.companyId])).rows[0];
+    if(!workflow||workflow.version_id!==input.deliveryWorkflowVersionId)
+      throw new EdtEngineConflict("ECONOMIC_WORKFLOW_VERSION_MISMATCH","Economic plan must use this Work Item's activated workflow version.");
+    let definition:ReturnType<typeof validateDeliveryWorkflowDefinition>;
+    try { definition=validateDeliveryWorkflowDefinition(workflow.definition); }
+    catch { throw new EdtEngineConflict("ECONOMIC_WORKFLOW_SNAPSHOT_MISMATCH","The activated workflow definition failed integrity verification."); }
+    if(deliveryWorkflowFingerprint(definition)!==workflow.fingerprint)
+      throw new EdtEngineConflict("ECONOMIC_WORKFLOW_SNAPSHOT_MISMATCH","The activated workflow fingerprint failed integrity verification.");
+    if(definition.economicAllocation?.sourceVersionId!==input.pricingTemplateVersionId)
+      throw new EdtEngineConflict("ECONOMIC_WORKFLOW_APU_MISMATCH","The activated workflow must reference the same approved APU as the contract.");
+    const existing=(await client.query<{plan_fingerprint:string;source_fingerprint:string}>("SELECT plan_fingerprint,source_fingerprint FROM job_activation_work_item_economic_plans WHERE work_item_id=$1",[input.workItemId])).rows[0];
+    if(existing){
+      if(existing.plan_fingerprint!==planFingerprint)throw new EdtEngineConflict("ECONOMIC_PLAN_IMMUTABLE","An activated Work Item economic plan cannot be replaced.");
+      // Keep historical plan hashes stable while checking their separately stored source authority.
+      if(existing.source_fingerprint!==sourceFingerprint)throw new EdtEngineConflict("ECONOMIC_PLAN_SOURCE_IMMUTABLE","An activated economic plan cannot be retried with a different source snapshot.");
+      return{planFingerprint,idempotent:true};
+    }
     const id=deterministicEdtId("economic-plan",input.workItemId);
     await client.query("INSERT INTO job_activation_work_item_economic_plans(id,company_id,project_id,intake_id,work_item_id,contract_id,contract_version_id,pricing_template_version_id,delivery_workflow_version_id,currency,direct_production_amount,project_administrative_amount,incentive_reserve_amount,task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19)",[id,input.companyId,input.projectId,input.intakeId,input.workItemId,input.contractId,input.contractVersionId,input.pricingTemplateVersionId,input.deliveryWorkflowVersionId,input.currency,input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount,JSON.stringify(input.resolvedAllocation),sourceFingerprint,planFingerprint,input.actor.actorUserId]);
     await client.query("UPDATE job_activation_work_items SET economic_plan_fingerprint=$2,updated_at=now() WHERE id=$1",[input.workItemId,planFingerprint]);

@@ -45573,6 +45573,102 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "30b3719ac430a10a3977a722d8410248362c786d86a51c03dfb24fd14660320c"
+    },
+    {
+      "taskId": "consolidation-c017-economic-workflow-source-repair",
+      "reviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "reviewedAt": "2026-09-27T05:15:48Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Economic plan creation verifies the activated Work Item workflow version, definition fingerprint and contract APU binding. Idempotent retries also verify the separately stored source fingerprint without changing historical plan hashes. Both missing checks were reproduced before repair; focused tests pass and disposable PostgreSQL workflow rejection passed. Monetary pool resolution, public creation and individual bonus policy remain unfinished; no deployment claim."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Activated snapshots remain canonical; no new authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local repair does not constitute deployment or acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Failing regression and disposable database rollback checks verify the guard."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing C017 scope only."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing internal writer and activated workflow table; no schema changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and installers unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new standards claims."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record bounded C017 repair and exact remaining integration work."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keep public monetary resolver, bonus policy and live acceptance incomplete."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence preserved; no production mutations."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/edt-engine-build314.behavior.ts",
+        "artifacts/api-server/src/lib/edt-engine-economic-service.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "27327194caffe105815a64554881fa047ccfc314e47a0962ac60133cf1bda82a"
     }
   ]
 }

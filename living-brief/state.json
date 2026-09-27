@@ -1,25 +1,16 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
+  "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "8315a6c12909655e8711c44bc7fb6d1f73450a55e90f6ba31bbc612a10066258",
+  "bundleSha256": "a8a05d7dbe39a814fc110d13047e5ac34fbfd4b8ab6de4bd80972fcc74934702",
   "impact": {
-    "baselineCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
+    "baselineCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
     "changedPaths": [
-      "artifacts/api-server/src/lib/cost-value-forecast-service.ts",
-      "artifacts/api-server/src/lib/cost-value-performance-service.ts",
-      "artifacts/api-server/src/lib/cost-value-performance.behavior.ts",
-      "artifacts/api-server/src/lib/financial-export-contract.behavior.ts",
-      "artifacts/api-server/src/lib/financial-export-contract.ts",
-      "artifacts/api-server/src/lib/financial-revision-ledger.ts",
+      "artifacts/api-server/src/lib/edt-engine-build314.behavior.ts",
+      "artifacts/api-server/src/lib/edt-engine-economic-service.ts",
       "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
-      "artifacts/api-server/src/lib/pdf-kit.ts",
-      "artifacts/api-server/src/routes/reports.ts",
-      "artifacts/bimlog/src/components/PrintPdfButton.tsx",
-      "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -27,7 +18,6 @@
       "CLAUDE.md",
       "OPEN_LOOP.md",
       "PLATFORM.md",
-      "REPORT_DESIGN_SYSTEM.md",
       "STATUS.md"
     ]
   },
@@ -38,11 +28,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "claude",
@@ -50,11 +40,11 @@
       "sha256": "90538da58f64a59e860713face1fefeff05dcfb598472fd0b06e4b56f2e590c8",
       "sourceChangedAt": "2026-09-21T03:45:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "quality",
@@ -62,11 +52,11 @@
       "sha256": "b6cced2db201c506cda5eb1ac6f7d03167c8893de71f880eda4ccef3b51d2829",
       "sourceChangedAt": "2026-09-21T09:39:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "vision",
@@ -74,23 +64,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "834342180315929850040d78ca58dc1651cea1bb6d0106cf308e176ca9b89ad4",
-      "sourceChangedAt": "2026-09-27T04:36:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "sourceChangedAt": "2026-09-27T01:09:22-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "plugin",
@@ -98,11 +88,11 @@
       "sha256": "812ec9814ea5bd043051ec97d9c54d468c9c84855ee1136250ce5c8df798b71d",
       "sourceChangedAt": "2026-09-23T11:41:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "report_design_system",
@@ -110,11 +100,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "standards_register",
@@ -122,35 +112,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "1e0046a1bf4192d2977509e4c9f68f12d68b7805bd3b3af5a5235714bfad12fc",
-      "sourceChangedAt": "2026-09-27T04:36:00.000Z",
+      "sha256": "938a3d44b2177a28ed8413ea8fae0761f05d228499a61f55bce155d37419435e",
+      "sourceChangedAt": "2026-09-27T05:15:48.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "b0d7411e38f10d4ea363256cd6af1ed293ada5e280022d6e205a608b614e21bb",
-      "sourceChangedAt": "2026-09-27T04:36:00.000Z",
+      "sha256": "6a00aef2863dea299ea72855933ebddb1dcda47d39dc5339cb1d2884b8ab6d26",
+      "sourceChangedAt": "2026-09-27T05:15:48.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     },
     {
       "key": "audit",
@@ -158,11 +148,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
-      "semanticReviewTask": "consolidation-c019-financial-defect-repair",
+      "reconciledThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewedThroughCommit": "fec5a3a1f3fa6c60d1a9951e84158b99f2bddecf",
+      "semanticReviewTask": "consolidation-c017-economic-workflow-source-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-27T04:36:00Z"
+      "semanticReviewedAt": "2026-09-27T05:15:48Z"
     }
   ]
 }
