@@ -55,13 +55,14 @@ function pdfHeader(
   project: { name: string; code: string; companyName?: string },
   title: string,
   theme: ReportTheme,
+  lang: "en" | "es" = "en",
 ) {
   doc.y =
     drawBrandedHeader(doc, {
       margin: 50,
-      companyName: project.companyName || "Company",
+      companyName: project.companyName || (lang === "es" ? "Empresa" : "Company"),
       title,
-      subtitle: "Reports & PDFs",
+      subtitle: lang === "es" ? "Reportes y PDF" : "Reports & PDFs",
       projectName: project.name,
       projectCode: project.code,
       reportDate: new Date(),
@@ -135,16 +136,17 @@ function drawKpis(doc: PDFKit.PDFDocument, values: Array<[string, string]>, them
   doc.y = y + 60;
 }
 
-function finishProfessionalReport(doc: PDFKit.PDFDocument, project: { name: string; companyName?: string }, reportNumber: string, snapshot: unknown) {
+function finishProfessionalReport(doc: PDFKit.PDFDocument, project: { name: string; companyName?: string }, reportNumber: string, snapshot: unknown, lang: "en" | "es" = "en") {
   addPageNumbers(doc, {
     margin: 50,
     footerY: doc.page.height - 24,
     fingerprintY: doc.page.height - 36,
-    companyName: project.companyName || "Company",
+    companyName: project.companyName || (lang === "es" ? "Empresa" : "Company"),
     projectName: project.name,
     reportNumber,
-    timestamp: new Date().toLocaleString("en-US"),
+    timestamp: new Date().toLocaleString(lang === "es" ? "es" : "en-US"),
     contentHash: computeContentHash(snapshot),
+    lang,
   });
   doc.end();
 }
@@ -178,6 +180,12 @@ router.post(
       return;
     }
     const lang = req.body?.lang === "es" ? "es" : "en";
+    if (Array.isArray(req.body?.rows) && req.body.rows.length > 250) {
+      res.status(400).json({ code: "CURRENT_VIEW_ROW_LIMIT", error: lang === "es"
+        ? "La vista supera 250 filas. Reduzca el intervalo o los filtros para exportar sin omitir datos."
+        : "This view exceeds 250 rows. Narrow the date range or filters to export without omitting data." });
+      return;
+    }
     const clean = (value: unknown, limit = 180) =>
       String(value ?? "").replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, limit);
     const context = Array.isArray(req.body?.context)
@@ -187,7 +195,7 @@ router.post(
       ? req.body.columns.slice(0, 6).map((value: unknown) => clean(value, 60))
       : [];
     const rows: string[][] = Array.isArray(req.body?.rows)
-      ? req.body.rows.slice(0, 250).map((record: unknown) =>
+      ? req.body.rows.map((record: unknown) =>
           Array.isArray(record)
             ? record.slice(0, columns.length).map((value: unknown) => clean(value))
             : [],
@@ -202,7 +210,7 @@ router.post(
     res.type("application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
     doc.pipe(res);
-    pdfHeader(doc, project, title, REPORT_THEMES.platform.standard);
+    pdfHeader(doc, project, title, REPORT_THEMES.platform.standard, lang);
     doc.y = sectionBar(doc, lang === "es" ? "Contexto de la vista" : "Current View Context", doc.y, {
       margin: 50,
       theme: REPORT_THEMES.platform.standard,
@@ -226,7 +234,7 @@ router.post(
         rows: rows.map((record) => Object.fromEntries(record.map((value, index) => [`c${index}`, value]))),
         onPageBreak: () => {
           doc.addPage();
-          pdfHeader(doc, project, title, REPORT_THEMES.platform.standard);
+          pdfHeader(doc, project, title, REPORT_THEMES.platform.standard, lang);
           return doc.y;
         },
       });
@@ -239,7 +247,7 @@ router.post(
         });
     }
     const reportNumber = `VIEW-${computeContentHash({ projectId, surface, context, columns, rows }).slice(0, 10).toUpperCase()}`;
-    finishProfessionalReport(doc, project, reportNumber, { projectId, surface, context, columns, rows });
+    finishProfessionalReport(doc, project, reportNumber, { projectId, surface, context, columns, rows }, lang);
   },
 );
 

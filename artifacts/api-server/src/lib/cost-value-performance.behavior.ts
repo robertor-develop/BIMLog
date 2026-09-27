@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import "./cost-value-performance-provenance.behavior";
 import "./approved-labor-evidence.behavior";
+import "./financial-export-contract.behavior";
 
 process.env.PROD_DATABASE_URL = process.env.PROD_DATABASE_URL ?? "postgresql://apu-test:apu-test@127.0.0.1:1/apu-test";
 const { CostValuePlanError } = await import("./cost-value-plan-service");
@@ -20,6 +21,10 @@ const snapshot = {
 };
 
 const full = validateCostValuePerformance(snapshot, "100.00");
+for (const field of ["snapshotDate", "baselineStartDate", "baselineEndDate"]) {
+  assert.throws(() => validateCostValuePerformance({ ...snapshot, [field]: "2026-02-30" }, "100.00"),
+    (error: unknown) => error instanceof CostValuePlanError && error.status === 400 && error.code === "COST_VALUE_PERFORMANCE_DATE_INVALID");
+}
 assert.equal(full.evaluation.cpi, "1.0000");
 assert.equal(full.evaluation.spi, "1.0000");
 assert.equal(full.evaluation.bonusPayoutPercent, "100.00");

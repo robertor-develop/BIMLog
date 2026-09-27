@@ -574,6 +574,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-control.behavior.ts
 - artifacts/api-server/src/lib/financial-correctness-contract.ts
 - artifacts/api-server/src/lib/financial-correctness-golden-vectors.behavior.ts
+- artifacts/api-server/src/lib/financial-export-contract.behavior.ts
+- artifacts/api-server/src/lib/financial-export-contract.ts
 - artifacts/api-server/src/lib/financial-revision-ledger.behavior.ts
 - artifacts/api-server/src/lib/financial-revision-ledger.ts
 - artifacts/api-server/src/lib/financial-statement-mapping.behavior.ts

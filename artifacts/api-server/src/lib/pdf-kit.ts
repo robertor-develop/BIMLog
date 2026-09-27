@@ -447,6 +447,7 @@ export function drawWatermark(doc: Doc, text: string, o: WatermarkOptions = {}):
 
 // ── Fingerprint ──
 export interface FingerprintOptions {
+  lang?: "en" | "es";
   margin?: number;
   y?: number;
   fontSize?: number;
@@ -462,7 +463,7 @@ export function appendFingerprint(doc: Doc, contentHash: string, o: FingerprintO
   doc.page.margins.bottom = 0;
   try {
     doc.fontSize(o.fontSize ?? 6.5).font(PALETTE.FONT).fillColor(o.color ?? PALETTE.FOOTER)
-      .text(`Document SHA-256: ${contentHash}`, M, o.y ?? 548, { width: CW, align: "center", lineBreak: false });
+      .text(`${o.lang === "es" ? "Documento" : "Document"} SHA-256: ${contentHash}`, M, o.y ?? 548, { width: CW, align: "center", lineBreak: false });
   } finally {
     doc.page.margins.bottom = originalBottomMargin;
   }
@@ -523,6 +524,8 @@ export function drawFooter(doc: Doc, o: FooterOptions = {}): void {
 
 // ── Page numbering + per-page chrome ──
 export interface PageNumberOptions {
+  /** Opt-in language; existing callers retain English output. */
+  lang?: "en" | "es";
   margin?: number;
   footerY?: number;
   fingerprintY?: number;
@@ -549,7 +552,7 @@ export function addPageNumbers(doc: Doc, o: PageNumberOptions = {}): void {
     doc.switchToPage(range.start + i);
     if (o.watermarkText) drawWatermark(doc, o.watermarkText, { margin: M });
     if (o.contentHash && i === range.count - 1) {
-      appendFingerprint(doc, o.contentHash, { margin: M, y: o.fingerprintY });
+      appendFingerprint(doc, o.contentHash, { margin: M, y: o.fingerprintY, lang: o.lang });
     }
     drawFooter(doc, {
       margin: M,
@@ -558,7 +561,7 @@ export function addPageNumbers(doc: Doc, o: PageNumberOptions = {}): void {
       projectName: o.projectName,
       reportNumber: o.reportNumber,
       timestamp: o.timestamp,
-      pageLabel: `Page ${i + 1} of ${range.count}`,
+      pageLabel: o.lang === "es" ? `Página ${i + 1} de ${range.count}` : `Page ${i + 1} of ${range.count}`,
     });
   }
   doc.flushPages();

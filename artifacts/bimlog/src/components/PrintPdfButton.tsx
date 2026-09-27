@@ -91,6 +91,9 @@ export async function downloadGovernedCurrentViewPdf(
   },
   fallbackFileName: string,
 ) {
+  if (payload.rows.length > 250) throw new Error(payload.lang === "es"
+    ? "La vista supera 250 filas. Reduzca el intervalo o los filtros para exportar sin omitir datos."
+    : "This view exceeds 250 rows. Narrow the date range or filters to export without omitting data.");
   const response = await fetch(`/api/v1/projects/${projectId}/reports/current-view/pdf`, {
     method: "POST",
     headers: {

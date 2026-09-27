@@ -1,14 +1,19 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
+import { PDFParse } from "pdf-parse";
 import express from "express";
 import { pool } from "@workspace/db";
 import intakeRouter from "../routes/job-intake";
 import contractsRouter from "../routes/financial-contracts";
 import edtRouter from "../routes/edt-engine";
+import reportsRouter from "../routes/reports";
 import { ensureEdtEngineSchema } from "./edt-engine-migration";
 import { getTeamPerformance } from "./team-performance-service";
 import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
 import { saveCostValuePerformance, getCostValuePerformance, exportCostValuePerformanceCsv } from "./cost-value-performance-service";
+import { saveCostValueForecast, getCostValueForecast, exportCostValueForecastCsv } from "./cost-value-forecast-service";
 import { signToken } from "../middlewares/auth";
 import { startFeaturePolicyMigration } from "./feature-policy-migration";
 import { startCommercialEntitlementMigration } from "./commercial-entitlement";
@@ -105,7 +110,7 @@ async function publishedTemplate(name: string,price: string) {
 const drawingTemplate = await publishedTemplate("Drawing Reference","300");
 const reviewTemplate = await publishedTemplate("Review Reference","200");
 
-const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,edtRouter);
+const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,edtRouter,reportsRouter);
 const server = app.listen(0,"127.0.0.1");
 await new Promise<void>(resolve => server.once("listening",resolve));
 const address = server.address(); assert.ok(address && typeof address !== "string");
@@ -119,6 +124,71 @@ async function request(method:string,path:string,body?:unknown) {
 }
 const intakePath = `/projects/${projectId}/intake`;
 try {
+  // Exercise the production renderer, not a substitute report generator.
+  const pdfOutput = process.env.BIMLOG_FINANCIAL_PDF_PROOF_OUTPUT;
+  if (pdfOutput) {
+    assert.ok(path.resolve(pdfOutput).replaceAll("\\", "/").startsWith("F:/BIMLog/TestProof/"), "PDF evidence must remain in the F-rooted test directory");
+    await mkdir(pdfOutput, { recursive: true });
+  }
+  for (const lang of ["en", "es"]) {
+    const authority = lang === "es" ? "Solo escenario; no son ganancias ni pagos aprobados" : "Scenario only; not approved earnings or payment";
+    const response = await fetch(`${base}/projects/${projectId}/reports/current-view/pdf`, {
+      method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ surface: "cost-value-planner", lang, columns: lang === "es" ? ["Sección", "Campo", "Valor"] : ["Section", "Field", "Value"],
+        context: ["SYNTHETIC renderer regression, not live acceptance"], rows: [
+          ["Forecast", "Authority", authority], ["Forecast", "Source currency / plan / performance version", "USD / 3 / 1"],
+          ["Performance", "Approved labor cost / hours", "139.000000 USD / 3.000000"],
+        ] }),
+    });
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("content-type") ?? "", /application\/pdf/);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (pdfOutput) await writeFile(path.join(pdfOutput, `financial-${lang}.pdf`), bytes);
+    const parser = new PDFParse({ data: bytes });
+    try {
+      const extracted = (await parser.getText()).text.replace(/\s+/g, " ");
+      assert.ok(extracted.includes(authority), `Financial ${lang} PDF must preserve the complete authority disclaimer`);
+      assert.ok(extracted.includes("139.000000 USD / 3.000000"));
+      assert.ok(extracted.includes("USD / 3 / 1"));
+      assert.ok(extracted.includes(lang === "es" ? "Reportes y PDF" : "Reports & PDFs"));
+      assert.ok(extracted.includes(lang === "es" ? "Página 1 de 1" : "Page 1 of 1"));
+      assert.ok(extracted.includes(lang === "es" ? "Documento SHA-256:" : "Document SHA-256:"));
+      if (lang === "es") assert.doesNotMatch(extracted, /Reports & PDFs|Page 1 of|Document SHA-256/);
+    } finally { await parser.destroy(); }
+  }
+  for (const rowCount of [0, 250]) {
+    const response = await fetch(`${base}/projects/${projectId}/reports/current-view/pdf`, {
+      method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ surface: "team-performance", lang: "es", columns: ["Usuario", "Registradas", "Pendientes", "Aprobadas", "Comprometidas", "Rechazadas"],
+        context: ["SYNTHETIC 250-row boundary / empty-state renderer regression"],
+        rows: Array.from({ length: rowCount }, (_, index) => [`TEST-${String(index + 1).padStart(3, "0")}`, "3.00", "1.00", "2.00", "1.00", "0.00"]),
+      }),
+    });
+    assert.equal(response.status, 200);
+    const bytes = Buffer.from(await response.arrayBuffer());
+    if (pdfOutput) await writeFile(path.join(pdfOutput, `team-${rowCount}.pdf`), bytes);
+    const parser = new PDFParse({ data: bytes });
+    try {
+      const text = (await parser.getText()).text;
+      assert.ok(text.includes("Página 1 de"));
+      assert.ok(text.includes("Documento SHA-256:"));
+      assert.doesNotMatch(text, /Reports & PDFs|Page \d+ of|Document SHA-256/);
+      if (!rowCount) assert.ok(text.includes("No hay resultados en la vista actual."));
+      for (let index = 1; index <= rowCount; index++) {
+        const marker = `TEST-${String(index).padStart(3, "0")}`;
+        assert.equal(text.split(marker).length - 1, 1, `Export must preserve ${marker} exactly once`);
+      }
+    } finally { await parser.destroy(); }
+  }
+  console.log("C019 production PDF renderer: bilingual financial authority/provenance, empty state and all 250 rows PASS (synthetic local, not live acceptance)");
+  for (const lang of ["en","es"]) {
+    const oversized=await request("POST",`/projects/${projectId}/reports/current-view/pdf`,{
+      surface:"cost-value-planner",lang,columns:["TEST"],rows:Array.from({length:251},()=>["TEST"]),context:[]
+    });
+    assert.equal(oversized.status,400);
+    assert.equal(oversized.body.code,"CURRENT_VIEW_ROW_LIMIT");
+    assert.match(oversized.body.error,/250/);
+  }
   const initialized = await request("POST",intakePath);
   assert.equal(initialized.status,201,JSON.stringify(initialized.body));
   const data = {
@@ -315,8 +385,10 @@ try {
   assert.equal(historicalTeam.hourSourceTotals.recorded,"3.00");assert.equal(historicalTeam.hourSourceTotals.approved,"3.00");
   assert.equal((await laborEvidence()).amount,"139.000000","Former member approved sources retained");
   await pool.query(`INSERT INTO generic_cost_value_plan_versions(id,project_id,version,content,evaluation,content_fingerprint,created_by_id)
-    VALUES('TEST-performance-plan-3',$1,3,'{"currency":"USD","allocations":{"bonus":"100.00"}}','{}','TEST-performance-fp-3',$2)`,[projectId,actor.id]);
-  const scenario={snapshotDate:evidenceCutoff,label:"TEST manual scenario",plannedValue:"100",earnedValue:"100",actualCost:"1",baselineStartDate:null,baselineEndDate:null,sourceNote:"Synthetic source provenance proof"};
+    VALUES('TEST-performance-plan-3',$1,3,'{"currency":"USD","sellingPrice":"1000.00","fixedCompanyCost":"100.00","allocations":{"bonus":"100.00"}}','{}','TEST-performance-fp-3',$2)`,[projectId,actor.id]);
+  const scenario={snapshotDate:evidenceCutoff,label:"=1+1",plannedValue:"100",earnedValue:"100",actualCost:"1",baselineStartDate:null,baselineEndDate:null,sourceNote:"Synthetic source provenance proof"};
+  await assert.rejects(()=>saveCostValuePerformance(actor.id,projectId,{...scenario,snapshotDate:"2026-02-30"}),
+    (error:any)=>error.status===400 && error.code==="COST_VALUE_PERFORMANCE_DATE_INVALID");
   const savedPerformance=await saveCostValuePerformance(actor.id,projectId,scenario);
   assert.equal(savedPerformance.data.latest.provenance.currency,"USD");
   assert.equal(savedPerformance.data.latest.provenance.planVersion,3);
@@ -327,11 +399,15 @@ try {
   const storedPerformanceEvidence=(await pool.query(`SELECT evaluation->'approvedLaborEvidence' AS evidence FROM generic_cost_value_performance_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1`,[projectId])).rows[0].evidence;
   assert.equal(storedPerformanceEvidence.sources.length,2,"Full source trace remains frozen in storage");
   const savedEvidenceFingerprint=savedPerformance.data.latest.evaluation.approvedLaborEvidence.fingerprint;
+  const savedForecast=await saveCostValueForecast(actor.id,projectId,{label:"=1+1",sourceNote:"TEST forecast sources"});
+  assert.equal(savedForecast.data.latest.provenance.currency,"USD");
+  assert.equal(savedForecast.data.latest.provenance.sourcePlanMatches,true);
+  const forecastFingerprint=savedForecast.data.latest.fingerprint;
   // Synthetic late-correction state: original snapshot remains frozen, current evidence excludes it.
   await pool.query(`UPDATE job_activation_time_entries SET status='corrected',optimistic_version=optimistic_version+1 WHERE id=$1`,[timeId]);
   assert.equal((await laborEvidence()).amount,"99.000000");
   await pool.query(`INSERT INTO generic_cost_value_plan_versions(id,project_id,version,content,evaluation,content_fingerprint,created_by_id)
-    VALUES('TEST-performance-plan-4',$1,4,'{"currency":"EUR","allocations":{"bonus":"200.00"}}','{}','TEST-performance-fp-4',$2)`,[projectId,actor.id]);
+    VALUES('TEST-performance-plan-4',$1,4,'{"currency":"EUR","sellingPrice":"2000.00","fixedCompanyCost":"200.00","allocations":{"bonus":"200.00"}}','{}','TEST-performance-fp-4',$2)`,[projectId,actor.id]);
   const reopenedPerformance=await getCostValuePerformance(actor.id,projectId);
   assert.equal(reopenedPerformance.data.latest.provenance.currency,"USD","History must not inherit current EUR currency");
   assert.equal(reopenedPerformance.data.latest.provenance.planVersion,3);
@@ -340,6 +416,19 @@ try {
   assert.ok(performanceCsv.includes('"manual_scenario","USD","3"'));
   assert.ok(performanceCsv.includes('"false","139.000000","3.000000","2"'));
   assert.ok(performanceCsv.includes(savedEvidenceFingerprint));
+  assert.ok(performanceCsv.includes('"\'=1+1"'),"Formula-like labels export as text");
+  await assert.rejects(()=>saveCostValueForecast(actor.id,projectId,{label:"TEST mismatched forecast"}),
+    (error:any)=>error.status===409 && error.code==="COST_VALUE_FORECAST_PLAN_MISMATCH");
+  const reopenedForecast=await getCostValueForecast(actor.id,projectId);
+  assert.equal(reopenedForecast.data.latest.fingerprint,forecastFingerprint);
+  assert.equal(reopenedForecast.data.latest.provenance.currency,"USD");
+  assert.equal(reopenedForecast.data.latest.provenance.planVersion,3);
+  assert.equal(reopenedForecast.data.history.length,savedForecast.data.history.length,"Failed new forecast leaves no record");
+  const forecastCsv=await exportCostValueForecastCsv(actor.id,projectId);
+  assert.ok(forecastCsv.includes('"\'=1+1"'));
+  assert.ok(forecastCsv.includes('"USD","3","TEST-performance-fp-3"'));
+  assert.ok(forecastCsv.includes('"true","manual_scenario","false"'));
+  console.log("C019 real database: invalid date400, CSV neutralization, immutable forecast sources, mixed-plan409 and rollback PASS");
   await assert.rejects(()=>saveCostValuePerformance(actor.id,projectId,scenario),/could not be reconciled/);
   console.log("C017 source evidence: approved-only frozen cost, pending/rejected/correction exclusion, company/currency boundaries and saved provenance PASS");
   console.log("C016 time HTTP/database: stored amount, legacy submission, denied self approval, frozen rate, independent approval, stale replay and ledger balance PASS");

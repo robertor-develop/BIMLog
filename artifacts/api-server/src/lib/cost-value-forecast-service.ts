@@ -3,6 +3,8 @@ import { pool } from "@workspace/db";
 import { authorizeFinancialOperation } from "./financial-control-service";
 import { waitForGenericApuPersistenceMigration } from "./generic-apu-persistence-migration";
 import { CostValuePlanError } from "./cost-value-plan-service";
+import { financialCsvCell } from "./financial-export-contract";
+import { performanceProvenance } from "./cost-value-performance-provenance";
 
 const amountPattern = /^(?:0|[1-9]\d{0,15})(?:\.\d{1,2})?$/;
 const cents = (value: unknown, field: string) => {
@@ -63,8 +65,18 @@ export function evaluateCostValueForecast(input: { plan: any; performance: any }
 export async function getCostValueForecast(actorUserId: number, projectId: number) {
   await waitForGenericApuPersistenceMigration();
   await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.view", operation: "read" });
-  const rows = (await pool.query(`SELECT version,content,evaluation,content_fingerprint,created_at FROM generic_cost_value_forecast_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 24`, [projectId])).rows;
-  const history = rows.map(row => ({ ...row.content, evaluation: row.evaluation, version: Number(row.version), fingerprint: row.content_fingerprint, savedAt: new Date(row.created_at).toISOString() }));
+  const rows = (await pool.query(`SELECT f.version,f.content,f.evaluation,f.content_fingerprint,f.created_at,
+    p.id AS plan_id,p.version AS plan_version,p.content_fingerprint AS plan_fingerprint,p.content AS plan_content,
+    s.version AS performance_version,s.content_fingerprint AS performance_fingerprint,s.plan_version_id AS performance_plan_id
+    FROM generic_cost_value_forecast_versions f
+    JOIN generic_cost_value_plan_versions p ON p.id=f.plan_version_id AND p.project_id=f.project_id
+    JOIN generic_cost_value_performance_versions s ON s.id=f.performance_version_id AND s.project_id=f.project_id
+    WHERE f.project_id=$1 ORDER BY f.version DESC LIMIT 24`, [projectId])).rows;
+  const history = rows.map(row => ({ ...row.content, evaluation: row.evaluation,
+    provenance: { ...performanceProvenance({id:row.plan_id,version:row.plan_version,content_fingerprint:row.plan_fingerprint,content:row.plan_content}),
+      performanceVersion:Number(row.performance_version),performanceFingerprint:row.performance_fingerprint,
+      sourcePlanMatches:row.performance_plan_id === row.plan_id },
+    version: Number(row.version), fingerprint: row.content_fingerprint, savedAt: new Date(row.created_at).toISOString() }));
   return { data: { latest: history[0] ?? null, history } };
 }
 
@@ -80,8 +92,9 @@ export async function saveCostValueForecast(actorUserId: number, projectId: numb
     await client.query("BEGIN");
     await client.query(`SELECT pg_advisory_xact_lock($1)`, [projectId]);
     const plan = (await client.query(`SELECT id,content FROM generic_cost_value_plan_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1 FOR SHARE`, [projectId])).rows[0];
-    const performance = (await client.query(`SELECT id,content FROM generic_cost_value_performance_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1 FOR SHARE`, [projectId])).rows[0];
+    const performance = (await client.query(`SELECT id,content,plan_version_id FROM generic_cost_value_performance_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1 FOR SHARE`, [projectId])).rows[0];
     if (!plan || !performance) throw new CostValuePlanError(409, "COST_VALUE_FORECAST_PREREQUISITES_REQUIRED", "Save Module 1 and Module 2 before creating a forecast.");
+    if (performance.plan_version_id !== plan.id) throw new CostValuePlanError(409, "COST_VALUE_FORECAST_PLAN_MISMATCH", "Save a performance snapshot for the current plan before creating a forecast. Existing forecasts retain their original sources.");
     const evaluation = evaluateCostValueForecast({ plan: plan.content, performance: performance.content });
     const content = { label, sourceNote, forecastDate: new Date().toISOString().slice(0, 10) };
     const fingerprint = digest({ planVersionId: plan.id, performanceVersionId: performance.id, content, evaluation });
@@ -95,8 +108,8 @@ export async function saveCostValueForecast(actorUserId: number, projectId: numb
 }
 
 export async function exportCostValueForecastCsv(actorUserId: number, projectId: number) {
-  const result = await getCostValueForecast(actorUserId, projectId), quote = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
-  const header = ["version","forecast_date","label","status","scenario","bac","cpi","spi","tcpi","cv","sv","eac","etc","vac","forecast_cpi","projected_margin","projected_bonus_percent","projected_bonus_amount","source_note"];
-  const lines = result.data.history.flatMap((row: any) => row.evaluation.scenarios.map((scenario: any) => [row.version,row.forecastDate,row.label,row.evaluation.status,scenario.name,row.evaluation.budgetAtCompletion,row.evaluation.cpi,row.evaluation.spi,row.evaluation.tcpi,row.evaluation.costVariance,row.evaluation.scheduleVariance,scenario.eac,scenario.etc,scenario.vac,scenario.forecastCpi,scenario.projectedMargin,scenario.projectedBonusPercent,scenario.projectedBonusAmount,row.sourceNote].map(quote).join(",")));
+  const result = await getCostValueForecast(actorUserId, projectId), quote = financialCsvCell;
+  const header = ["version","forecast_date","label","status","scenario","bac","cpi","spi","tcpi","cv","sv","eac","etc","vac","forecast_cpi","projected_margin","projected_bonus_percent","projected_bonus_amount","source_note","currency","plan_version","plan_fingerprint","performance_version","performance_fingerprint","source_plan_matches","classification","payment_authorized"];
+  const lines = result.data.history.flatMap((row: any) => row.evaluation.scenarios.map((scenario: any) => [row.version,row.forecastDate,row.label,row.evaluation.status,scenario.name,row.evaluation.budgetAtCompletion,row.evaluation.cpi,row.evaluation.spi,row.evaluation.tcpi,row.evaluation.costVariance,row.evaluation.scheduleVariance,scenario.eac,scenario.etc,scenario.vac,scenario.forecastCpi,scenario.projectedMargin,scenario.projectedBonusPercent,scenario.projectedBonusAmount,row.sourceNote,row.provenance.currency,row.provenance.planVersion,row.provenance.planFingerprint,row.provenance.performanceVersion,row.provenance.performanceFingerprint,row.provenance.sourcePlanMatches,row.provenance.classification,row.provenance.paymentAuthorized].map(quote).join(",")));
   return `${header.join(",")}\n${lines.join("\n")}${lines.length ? "\n" : ""}`;
 }

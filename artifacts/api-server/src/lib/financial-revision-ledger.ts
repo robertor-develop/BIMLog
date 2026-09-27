@@ -1,4 +1,5 @@
 import { FinancialControlError } from "./financial-control-contract";
+import { financialCsvCell } from "./financial-export-contract";
 import { financialFingerprint, type CommercialPriceResult } from "./financial-correctness-contract";
 
 export type FinancialRevision = Readonly<{
@@ -42,7 +43,7 @@ export function approveFinancialRevision(history: readonly FinancialRevision[], 
 }
 
 export function exportFinancialRevisionCsv(history: readonly FinancialRevision[]): string {
-  const quote = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+  const quote = financialCsvCell;
   const header = ["Version", "Status", "Prepared By", "Approved By", "Currency", "Quantity", "Unit Price", "Total", "Fingerprint"];
   const rows = history.map(item => [item.version, item.status, item.preparedBy, item.approvedBy ?? "", item.price.currency, item.price.quantity, item.price.unitPrice, item.price.total, item.fingerprint]);
   return `${[header, ...rows].map(row => row.map(quote).join(",")).join("\r\n")}\r\n`;

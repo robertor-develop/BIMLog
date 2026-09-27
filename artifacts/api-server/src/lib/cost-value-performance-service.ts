@@ -4,6 +4,7 @@ import { authorizeFinancialOperation } from "./financial-control-service";
 import { waitForGenericApuPersistenceMigration } from "./generic-apu-persistence-migration";
 import { CostValuePlanError } from "./cost-value-plan-service";
 import { performanceProvenance } from "./cost-value-performance-provenance";
+import { financialCsvCell, isFinancialCalendarDate } from "./financial-export-contract";
 import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
 
 export type CostValuePerformanceInput = {
@@ -18,7 +19,6 @@ export type CostValuePerformanceInput = {
 };
 
 const amountPattern = /^(?:0|[1-9]\d{0,15})(?:\.\d{1,2})?$/;
-const datePattern = /^\d{4}-\d{2}-\d{2}$/;
 const cents = (value: unknown, field: string) => {
   const raw = String(value ?? "").trim();
   if (!amountPattern.test(raw)) throw new CostValuePlanError(400, "COST_VALUE_PERFORMANCE_AMOUNT_INVALID", `${field} must be a non-negative amount with at most two decimals.`);
@@ -36,7 +36,7 @@ const boundedText = (value: unknown, field: string, max: number, required = true
 const date = (value: unknown, field: string, required: boolean): string | null => {
   const result = String(value ?? "").trim();
   if (!result && !required) return null;
-  if (!datePattern.test(result) || Number.isNaN(Date.parse(`${result}T00:00:00.000Z`))) {
+  if (!isFinancialCalendarDate(result)) {
     throw new CostValuePlanError(400, "COST_VALUE_PERFORMANCE_DATE_INVALID", `${field} must be a valid ISO date.`);
   }
   return result;
@@ -160,7 +160,7 @@ export async function saveCostValuePerformance(actorUserId: number, projectId: n
 
 export async function exportCostValuePerformanceCsv(actorUserId: number, projectId: number) {
   const result = await getCostValuePerformance(actorUserId, projectId);
-  const quote = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+  const quote = financialCsvCell;
   const header = ["project_code","project_name","version","snapshot_date","label","planned_value","earned_value","actual_cost","cpi","spi","bonus_pool","scenario_eligibility_percent","scenario_bonus_estimate","source_note","classification","currency","plan_version","plan_fingerprint","payment_authorized","approved_labor_cost","approved_labor_hours","approved_labor_source_count","approved_labor_fingerprint"];
   const lines = result.data.history.map((row: any) => [result.data.project.code,result.data.project.name,row.version,row.snapshotDate,row.label,row.plannedValue,row.earnedValue,row.actualCost,row.evaluation.cpi,row.evaluation.spi,row.evaluation.bonusPool,row.evaluation.bonusPayoutPercent,row.evaluation.bonusEligibleAmount,row.sourceNote,row.provenance.classification,row.provenance.currency,row.provenance.planVersion,row.provenance.planFingerprint,row.provenance.paymentAuthorized,row.evaluation.approvedLaborEvidence?.amount,row.evaluation.approvedLaborEvidence?.hours,row.evaluation.approvedLaborEvidence?.sourceCount,row.evaluation.approvedLaborEvidence?.fingerprint].map(quote).join(","));
   return `${header.join(",")}\n${lines.join("\n")}${lines.length ? "\n" : ""}`;

@@ -45467,6 +45467,112 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "efe7de2401e6c6127e68ca20c296405f6be52634b8edc5ca150367611c8beab5"
+    },
+    {
+      "taskId": "consolidation-c019-financial-defect-repair",
+      "reviewedThroughCommit": "89695514950fa01e6f68d925dd162b37f0a9d435",
+      "reviewedAt": "2026-09-27T04:36:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "chrome_synthetic_test"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Strict calendar validation, shared safe financial CSV cells and immutable forecast source/version/currency repair confirmed defects. Preserve legacy mismatch evidence; no bonus allocation policy inferred. Local tests and component QA do not prove deployment."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical evidence retained; no second financial authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local verification remains distinct from publication and acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact historical currency, negative input validation and real database/component checks apply existing quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap expansion."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial service and page extended without schema or architecture changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and installers unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Shared report pathway retained; source labels added, artifact QA remains open."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claims."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record exact C019 repair evidence and unfinished acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retain C018 rule, shared export truncation, artifact and live acceptance gaps."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence not rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/cost-value-forecast-service.ts",
+        "artifacts/api-server/src/lib/cost-value-performance-service.ts",
+        "artifacts/api-server/src/lib/cost-value-performance.behavior.ts",
+        "artifacts/api-server/src/lib/financial-export-contract.behavior.ts",
+        "artifacts/api-server/src/lib/financial-export-contract.ts",
+        "artifacts/api-server/src/lib/financial-revision-ledger.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/lib/pdf-kit.ts",
+        "artifacts/api-server/src/routes/reports.ts",
+        "artifacts/bimlog/src/components/PrintPdfButton.tsx",
+        "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "30b3719ac430a10a3977a722d8410248362c786d86a51c03dfb24fd14660320c"
     }
   ]
 }
