@@ -40,3 +40,11 @@ assert.match(contracts, /Motivo de excepción de aprobación \(cuando correspond
 assert.doesNotMatch(contracts, /window\.prompt\(tt\("If this exceeds budget/);
 assert.match(contracts, /expectedRevision: contract.revision, confirmationFingerprint: contract.contentFingerprint/);
 console.log("C020 approval input PASS: visible bilingual version-scoped reason, no native approval prompt, unchanged revision/fingerprint checks");
+const financialSettings = read("artifacts/bimlog/src/pages/FinancialControlsSettings.tsx");
+for (const category of ["commitment_approval", "owner_contract_approval"]) {
+  assert.ok(financialSettings.includes(`value="${category}"`));
+  assert.ok(read("artifacts/api-server/src/lib/financial-contract-service.ts").includes(`"${category}"`));
+}
+assert.match(financialSettings, /Aprobación de compromiso/);
+assert.match(financialSettings, /Aprobación de contrato con el propietario/);
+console.log("C020 approval policy choices PASS: UI categories match existing contract service categories in English and Spanish");

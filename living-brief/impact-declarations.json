@@ -45801,6 +45801,7 @@
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
         "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
         "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+        "artifacts/bimlog/src/pages/FinancialControlsSettings.tsx",
         "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
         "artifacts/bimlog/src/pages/company-pricing-errors.behavior.ts",
         "artifacts/bimlog/src/pages/company-pricing-errors.ts",
@@ -45820,7 +45821,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "c1a52b69306d703d7dd8bedc6b68a6f7bf68435ef04d16400779e40b1da8b768"
+      "reviewedChangeSha256": "47b9b9c2513bb36b05709fd0e0f1d534575b5244716d565c0c1ea40071c9bee6"
     }
   ]
 }

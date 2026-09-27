@@ -889,6 +889,8 @@ export function FinancialControlsSettings() {
                           <option value="">{tt("Select transaction category", "Seleccione la categoría")}</option>
                           <option value="original_budget">{tt("Original budget", "Presupuesto original")}</option>
                           <option value="budget_revision">{tt("Budget revision", "Revisión presupuestaria")}</option>
+                          <option value="commitment_approval">{tt("Commitment approval", "Aprobación de compromiso")}</option>
+                          <option value="owner_contract_approval">{tt("Owner contract approval", "Aprobación de contrato con el propietario")}</option>
                         </select>
                         <input
                           style={inputStyle}
