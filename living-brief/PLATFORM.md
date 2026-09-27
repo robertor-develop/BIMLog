@@ -192,6 +192,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ai-control-plane.ts
 - artifacts/api-server/src/lib/ai-control-plane.ui-fixture.ts
 - artifacts/api-server/src/lib/ai-usage.ts
+- artifacts/api-server/src/lib/approved-labor-evidence.behavior.ts
+- artifacts/api-server/src/lib/approved-labor-evidence.ts
 - artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-service.ts
@@ -375,6 +377,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordinator-saved-views.ts
 - artifacts/api-server/src/lib/cost-value-forecast-service.ts
 - artifacts/api-server/src/lib/cost-value-forecast.behavior.ts
+- artifacts/api-server/src/lib/cost-value-performance-provenance.behavior.ts
+- artifacts/api-server/src/lib/cost-value-performance-provenance.ts
 - artifacts/api-server/src/lib/cost-value-performance-service.ts
 - artifacts/api-server/src/lib/cost-value-performance.behavior.ts
 - artifacts/api-server/src/lib/cost-value-plan-service.ts

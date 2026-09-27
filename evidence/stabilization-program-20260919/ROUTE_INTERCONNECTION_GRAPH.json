@@ -6,8 +6,8 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 677,
-    "frontendApiReferences": 254,
+    "apiRoutes": 678,
+    "frontendApiReferences": 256,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -3280,6 +3280,12 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/edt-engine/economic-plans",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/edt-engine/time-review",
       "owner": "artifacts/api-server/src/routes/edt-engine.ts",
       "tables": []
     },
@@ -8976,6 +8982,14 @@
     {
       "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
       "apiPath": "${API_BASE}/api/v1/feedback"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/job-operations/TimeApprovalPanel.tsx",
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/edt-engine/time-review"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/job-operations/TimeApprovalPanel.tsx",
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/edt-engine/time-entries/${encodeURIComponent(selection.entry.id)}/transition"
     },
     {
       "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",

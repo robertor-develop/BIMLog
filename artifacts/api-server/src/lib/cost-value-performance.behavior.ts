@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import "./cost-value-performance-provenance.behavior";
+import "./approved-labor-evidence.behavior";
 
 process.env.PROD_DATABASE_URL = process.env.PROD_DATABASE_URL ?? "postgresql://apu-test:apu-test@127.0.0.1:1/apu-test";
 const { CostValuePlanError } = await import("./cost-value-plan-service");

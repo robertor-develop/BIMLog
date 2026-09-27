@@ -45363,6 +45363,110 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "adaf08f78a31b6ece119a923dcf3c27ce833920ff2ef5c5f814918b100f021d0"
+    },
+    {
+      "taskId": "consolidation-c017-approved-source-evidence",
+      "reviewedThroughCommit": "084fe973cbd9266a55c7d47c7a26653dae2e7ed0",
+      "reviewedAt": "2026-09-27T03:53:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "chrome_synthetic_test"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Manual performance scenarios were labeled as bonus payouts and inherited current editor currency. Preserve original plan provenance and freeze approved labor ledger evidence separately; no earnings distribution or payment authority is inferred. Local database/component evidence is not deployed acceptance."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical evidence retained; no second financial authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local verification remains distinct from publication and acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact currency, immutable evidence and local UI checks implement existing requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap expansion."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial service and page extended without schema or architecture changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and installers unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Shared report pathway retained; source labels added, artifact QA remains open."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claims."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Exact local evidence and remaining gates recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Unfinished earnings/allocation and release scope remains explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence not rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/approved-labor-evidence.behavior.ts",
+        "artifacts/api-server/src/lib/approved-labor-evidence.ts",
+        "artifacts/api-server/src/lib/cost-value-performance-provenance.behavior.ts",
+        "artifacts/api-server/src/lib/cost-value-performance-provenance.ts",
+        "artifacts/api-server/src/lib/cost-value-performance-service.ts",
+        "artifacts/api-server/src/lib/cost-value-performance.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "efe7de2401e6c6127e68ca20c296405f6be52634b8edc5ca150367611c8beab5"
     }
   ]
 }

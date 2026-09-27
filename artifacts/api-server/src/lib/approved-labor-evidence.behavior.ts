@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import { buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
+const source: ApprovedLaborSource = {ledgerId:"a",entryId:"time-a",entryVersion:3,workItemId:"work-a",taskId:"task-a",userId:1,approvedById:2,approvedAt:"2026-09-27",workDate:"2026-09-26",hours:"2.000000",amount:"40.000000",currency:"USD",baselineFingerprint:"a".repeat(64),sourceFingerprint:"b".repeat(64),assignmentVersion:1};
+const proof = buildApprovedLaborEvidence([source],"USD","2026-09-27");
+assert.equal(proof.amount,"40.000000");assert.equal(proof.hours,"2.000000");
+assert.equal(proof.paymentAuthorized,false);assert.equal(proof.classification,"approved_labor_cost");
+assert.equal(proof.sourceCount,1);
+assert.throws(()=>buildApprovedLaborEvidence([source,{...source,ledgerId:"b"}],"USD","2026-09-27"),/DUPLICATE/);
+assert.throws(()=>buildApprovedLaborEvidence([source],"EUR","2026-09-27"),/CURRENCY/);
+assert.throws(()=>buildApprovedLaborEvidence([],"","2026-09-27"),/CURRENCY/);
+assert.throws(()=>buildApprovedLaborEvidence([{...source,baselineFingerprint:""}],"USD","2026-09-27"),/PROVENANCE/);
+assert.throws(()=>buildApprovedLaborEvidence([{...source,amount:"-40"}],"USD","2026-09-27"),/DECIMAL/);
+const extra={...source,ledgerId:"b",entryId:"time-b",amount:"0.000001",hours:"0.000001"};
+assert.equal(buildApprovedLaborEvidence([source,extra],"USD","2026-09-27").amount,"40.000001");
+assert.equal(buildApprovedLaborEvidence([source,extra],"USD","2026-09-27").fingerprint,buildApprovedLaborEvidence([extra,source],"USD","2026-09-27").fingerprint);
+assert.notEqual(proof.fingerprint,buildApprovedLaborEvidence([{...source,sourceFingerprint:"c".repeat(64)}],"USD","2026-09-27").fingerprint);
+console.log("Approved labor evidence: PASS");

@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import { performanceProvenance } from "./cost-value-performance-provenance";
+const saved = {id:"original-plan",version:2,content_fingerprint:"a".repeat(64),content:{currency:"USD"}};
+const proof = performanceProvenance(saved);
+assert.equal(proof.currency,"USD");
+assert.equal(proof.planVersion,2);
+assert.equal(proof.planVersionId,"original-plan");
+assert.equal(proof.planFingerprint,saved.content_fingerprint);
+assert.equal(proof.approvedEarnings,false);
+assert.equal(proof.paymentAuthorized,false);
+assert.equal(proof.policyAuthority,"scenario_evaluator_only");
+saved.content.currency="EUR";
+assert.equal(proof.currency,"USD");
+assert.equal(performanceProvenance({...saved,content:{}}).currency,null);
+assert.equal(performanceProvenance({...saved,content:{currency:"not-a-currency"}}).currency,null);
+console.log("Performance provenance: PASS (scenario is not earnings/payment authority)");

@@ -3,6 +3,8 @@ import { pool } from "@workspace/db";
 import { authorizeFinancialOperation } from "./financial-control-service";
 import { waitForGenericApuPersistenceMigration } from "./generic-apu-persistence-migration";
 import { CostValuePlanError } from "./cost-value-plan-service";
+import { performanceProvenance } from "./cost-value-performance-provenance";
+import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
 
 export type CostValuePerformanceInput = {
   snapshotDate: string;
@@ -109,14 +111,20 @@ export async function getCostValuePerformance(actorUserId: number, projectId: nu
   await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.view", operation: "read" });
   const project = (await pool.query(`SELECT id,name,code FROM projects WHERE id=$1`, [projectId])).rows[0];
   if (!project) throw new CostValuePlanError(404, "PROJECT_NOT_FOUND", "Project not found.");
-  const rows = (await pool.query(`SELECT version,content,evaluation,content_fingerprint,created_at FROM generic_cost_value_performance_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 24`, [projectId])).rows;
-  const snapshots = rows.map(row => ({ ...row.content, evaluation: row.evaluation, version: Number(row.version), fingerprint: row.content_fingerprint, savedAt: new Date(row.created_at).toISOString() }));
+  const rows = (await pool.query(`SELECT s.version,s.content,(s.evaluation #- '{approvedLaborEvidence,sources}') AS evaluation,s.content_fingerprint,s.created_at,
+    p.id AS plan_id,p.version AS plan_version,p.content_fingerprint AS plan_fingerprint,p.content AS plan_content
+    FROM generic_cost_value_performance_versions s
+    JOIN generic_cost_value_plan_versions p ON p.id=s.plan_version_id AND p.project_id=s.project_id
+    WHERE s.project_id=$1 ORDER BY s.version DESC LIMIT 24`, [projectId])).rows;
+  const snapshots = rows.map(row => ({ ...row.content, evaluation: row.evaluation,
+    provenance: performanceProvenance({id:row.plan_id,version:row.plan_version,content_fingerprint:row.plan_fingerprint,content:row.plan_content}),
+    version: Number(row.version), fingerprint: row.content_fingerprint, savedAt: new Date(row.created_at).toISOString() }));
   return { data: { project: { id: Number(project.id), name: project.name, code: project.code }, latest: snapshots[0] ?? null, history: snapshots } };
 }
 
 export async function saveCostValuePerformance(actorUserId: number, projectId: number, input: unknown) {
   await waitForGenericApuPersistenceMigration();
-  await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.prepare", operation: "prepare" });
+  const authority = await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.prepare", operation: "prepare" });
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -125,6 +133,15 @@ export async function saveCostValuePerformance(actorUserId: number, projectId: n
     if (!plan) throw new CostValuePlanError(409, "COST_VALUE_PLAN_REQUIRED", "Save the Cost & Value Plan before recording performance.");
     const bonusPool = String(plan.content?.allocations?.bonus ?? "");
     const { snapshot, evaluation } = validateCostValuePerformance(input, bonusPool);
+    // Keep entered scenario values separate from server-resolved, frozen approval evidence.
+    const laborRows = (await client.query<ApprovedLaborSource>(approvedLaborEvidenceSql,
+      [projectId,authority.scope.companyId,snapshot.snapshotDate])).rows;
+    try {
+      evaluation.approvedLaborEvidence = buildApprovedLaborEvidence(laborRows,String(plan.content?.currency ?? ""),snapshot.snapshotDate);
+    } catch (error) {
+      const code = error instanceof Error ? error.message : "APPROVED_LABOR_PROVENANCE_MISSING";
+      throw new CostValuePlanError(409,code,"Approved labor evidence could not be reconciled. Review its currency and source records before saving.");
+    }
     const prior = (await client.query(`SELECT id,version,content_fingerprint FROM generic_cost_value_performance_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1 FOR SHARE`, [projectId])).rows[0] ?? null;
     const fingerprint = digest({ planVersionId: plan.id, snapshot, evaluation });
     if (prior?.content_fingerprint === fingerprint) {
@@ -144,7 +161,7 @@ export async function saveCostValuePerformance(actorUserId: number, projectId: n
 export async function exportCostValuePerformanceCsv(actorUserId: number, projectId: number) {
   const result = await getCostValuePerformance(actorUserId, projectId);
   const quote = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
-  const header = ["project_code","project_name","version","snapshot_date","label","planned_value","earned_value","actual_cost","cpi","spi","bonus_pool","bonus_payout_percent","bonus_eligible_amount","source_note"];
-  const lines = result.data.history.map((row: any) => [result.data.project.code,result.data.project.name,row.version,row.snapshotDate,row.label,row.plannedValue,row.earnedValue,row.actualCost,row.evaluation.cpi,row.evaluation.spi,row.evaluation.bonusPool,row.evaluation.bonusPayoutPercent,row.evaluation.bonusEligibleAmount,row.sourceNote].map(quote).join(","));
+  const header = ["project_code","project_name","version","snapshot_date","label","planned_value","earned_value","actual_cost","cpi","spi","bonus_pool","scenario_eligibility_percent","scenario_bonus_estimate","source_note","classification","currency","plan_version","plan_fingerprint","payment_authorized","approved_labor_cost","approved_labor_hours","approved_labor_source_count","approved_labor_fingerprint"];
+  const lines = result.data.history.map((row: any) => [result.data.project.code,result.data.project.name,row.version,row.snapshotDate,row.label,row.plannedValue,row.earnedValue,row.actualCost,row.evaluation.cpi,row.evaluation.spi,row.evaluation.bonusPool,row.evaluation.bonusPayoutPercent,row.evaluation.bonusEligibleAmount,row.sourceNote,row.provenance.classification,row.provenance.currency,row.provenance.planVersion,row.provenance.planFingerprint,row.provenance.paymentAuthorized,row.evaluation.approvedLaborEvidence?.amount,row.evaluation.approvedLaborEvidence?.hours,row.evaluation.approvedLaborEvidence?.sourceCount,row.evaluation.approvedLaborEvidence?.fingerprint].map(quote).join(","));
   return `${header.join(",")}\n${lines.join("\n")}${lines.length ? "\n" : ""}`;
 }

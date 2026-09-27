@@ -7,6 +7,8 @@ import contractsRouter from "../routes/financial-contracts";
 import edtRouter from "../routes/edt-engine";
 import { ensureEdtEngineSchema } from "./edt-engine-migration";
 import { getTeamPerformance } from "./team-performance-service";
+import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
+import { saveCostValuePerformance, getCostValuePerformance, exportCostValuePerformanceCsv } from "./cost-value-performance-service";
 import { signToken } from "../middlewares/auth";
 import { startFeaturePolicyMigration } from "./feature-policy-migration";
 import { startCommercialEntitlementMigration } from "./commercial-entitlement";
@@ -265,6 +267,10 @@ try {
   assert.equal(injected.status,409);
   const submitted=await timeRequest(checker,{decision:"submit",expectedVersion:1,reason:"TEST submit"});
   assert.equal(submitted.status,200,JSON.stringify(submitted.body));assert.equal(submitted.body.status,"submitted");
+  const evidenceCutoff=(await pool.query("SELECT current_date::text AS value")).rows[0].value;
+  const laborEvidence=async(company=companyId)=>buildApprovedLaborEvidence(
+    (await pool.query<ApprovedLaborSource>(approvedLaborEvidenceSql,[projectId,company,evidenceCutoff])).rows,"USD",evidenceCutoff);
+  assert.equal((await laborEvidence()).sourceCount,0,"Submitted hours never become approved evidence");
   assert.equal((await timeList(reviewer)).find(row=>row.id===timeId)?.canDecide,true);
   assert.equal((await timeList(checker)).find(row=>row.id===timeId)?.canSubmit,false);
   const self=await timeRequest(checker,{decision:"approve",expectedVersion:2,reason:"TEST self approval denied"});assert.equal(self.status,403);
@@ -277,6 +283,8 @@ try {
   const ledger=(await pool.query(`SELECT ledger_state,amount_delta::text,hours_delta::text,evidence FROM job_activation_budget_ledger_entries WHERE time_entry_id=$1 ORDER BY ledger_state`,[timeId])).rows;
   assert.equal(ledger.length,3);assert.equal(ledger.find(row=>row.ledger_state==="approved_consumed")?.amount_delta,"-40.000000");
   assert.equal(ledger.find(row=>row.ledger_state==="approved_consumed")?.evidence.rate,"20.000000");
+  assert.equal((await laborEvidence()).amount,"40.000000","Use frozen approval amount, not edited assignment rate");
+  assert.equal((await laborEvidence(foreignCompany.id)).sourceCount,0,"Company isolation");
   const team=await getTeamPerformance({actorUserId:actor.id,projectId});
   const checkerHours=team.people.find(person=>person.userId===checker.id)?.hourSources;
   assert.equal(checkerHours?.recorded,"2.00");assert.equal(checkerHours?.approved,"2.00");
@@ -288,6 +296,7 @@ try {
   assert.equal((await timeRequest(checker,{decision:"submit",expectedVersion:1,reason:"TEST send for rejection"},rejectedTimeId)).status,200);
   const rejected=await timeRequest(reviewer,{decision:"reject",expectedVersion:2,reason:"TEST evidence needs correction"},rejectedTimeId);
   assert.equal(rejected.status,200);assert.equal(rejected.body.status,"rejected");
+  assert.equal((await laborEvidence()).amount,"40.000000","Rejected time excluded");
   const rejectedTeam=await getTeamPerformance({actorUserId:actor.id,projectId});
   assert.equal(rejectedTeam.people.find(person=>person.userId===checker.id)?.hourSources.rejected,"1.00");
   assert.equal(rejectedTeam.people.find(person=>person.userId===checker.id)?.hourSources.committed,"0.00");
@@ -304,6 +313,35 @@ try {
   const historicalTeam=await getTeamPerformance({actorUserId:actor.id,projectId});
   assert.equal(historicalTeam.people.some(person=>person.userId===checker.id),false);
   assert.equal(historicalTeam.hourSourceTotals.recorded,"3.00");assert.equal(historicalTeam.hourSourceTotals.approved,"3.00");
+  assert.equal((await laborEvidence()).amount,"139.000000","Former member approved sources retained");
+  await pool.query(`INSERT INTO generic_cost_value_plan_versions(id,project_id,version,content,evaluation,content_fingerprint,created_by_id)
+    VALUES('TEST-performance-plan-3',$1,3,'{"currency":"USD","allocations":{"bonus":"100.00"}}','{}','TEST-performance-fp-3',$2)`,[projectId,actor.id]);
+  const scenario={snapshotDate:evidenceCutoff,label:"TEST manual scenario",plannedValue:"100",earnedValue:"100",actualCost:"1",baselineStartDate:null,baselineEndDate:null,sourceNote:"Synthetic source provenance proof"};
+  const savedPerformance=await saveCostValuePerformance(actor.id,projectId,scenario);
+  assert.equal(savedPerformance.data.latest.provenance.currency,"USD");
+  assert.equal(savedPerformance.data.latest.provenance.planVersion,3);
+  assert.equal(savedPerformance.data.latest.actualCost,"1.00","Manual scenario remains explicitly separate");
+  assert.equal(savedPerformance.data.latest.evaluation.approvedLaborEvidence.amount,"139.000000");
+  assert.equal(savedPerformance.data.latest.evaluation.approvedLaborEvidence.paymentAuthorized,false);
+  assert.equal(savedPerformance.data.latest.evaluation.approvedLaborEvidence.sources,undefined,"History UI uses bounded summary, not private per-person source records");
+  const storedPerformanceEvidence=(await pool.query(`SELECT evaluation->'approvedLaborEvidence' AS evidence FROM generic_cost_value_performance_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1`,[projectId])).rows[0].evidence;
+  assert.equal(storedPerformanceEvidence.sources.length,2,"Full source trace remains frozen in storage");
+  const savedEvidenceFingerprint=savedPerformance.data.latest.evaluation.approvedLaborEvidence.fingerprint;
+  // Synthetic late-correction state: original snapshot remains frozen, current evidence excludes it.
+  await pool.query(`UPDATE job_activation_time_entries SET status='corrected',optimistic_version=optimistic_version+1 WHERE id=$1`,[timeId]);
+  assert.equal((await laborEvidence()).amount,"99.000000");
+  await pool.query(`INSERT INTO generic_cost_value_plan_versions(id,project_id,version,content,evaluation,content_fingerprint,created_by_id)
+    VALUES('TEST-performance-plan-4',$1,4,'{"currency":"EUR","allocations":{"bonus":"200.00"}}','{}','TEST-performance-fp-4',$2)`,[projectId,actor.id]);
+  const reopenedPerformance=await getCostValuePerformance(actor.id,projectId);
+  assert.equal(reopenedPerformance.data.latest.provenance.currency,"USD","History must not inherit current EUR currency");
+  assert.equal(reopenedPerformance.data.latest.provenance.planVersion,3);
+  assert.equal(reopenedPerformance.data.latest.evaluation.approvedLaborEvidence.fingerprint,savedEvidenceFingerprint);
+  const performanceCsv=await exportCostValuePerformanceCsv(actor.id,projectId);
+  assert.ok(performanceCsv.includes('"manual_scenario","USD","3"'));
+  assert.ok(performanceCsv.includes('"false","139.000000","3.000000","2"'));
+  assert.ok(performanceCsv.includes(savedEvidenceFingerprint));
+  await assert.rejects(()=>saveCostValuePerformance(actor.id,projectId,scenario),/could not be reconciled/);
+  console.log("C017 source evidence: approved-only frozen cost, pending/rejected/correction exclusion, company/currency boundaries and saved provenance PASS");
   console.log("C016 time HTTP/database: stored amount, legacy submission, denied self approval, frozen rate, independent approval, stale replay and ledger balance PASS");
   console.log("multi-contract Intake HTTP: invalid save rollback, save/reopen, stale revision, retirement blocks activation without residue, replacement save/reopen, two contract activation, APU/rate preservation, baseline, idempotent retry, historical binding after retirement, immutable accepted Intake PASS");
 } finally {
