@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import "./resource-hour-sources.behavior";
 import fs from "node:fs";
 import path from "node:path";
 

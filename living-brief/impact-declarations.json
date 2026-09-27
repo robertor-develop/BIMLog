@@ -45256,6 +45256,113 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "83dec171e2deb2bf5635b7cd1ffa0922613ee4d928390d43c2ed64127ec72785"
+    },
+    {
+      "taskId": "consolidation-c016-resource-hour-sources",
+      "reviewedThroughCommit": "7957540c819a06935e5834058ed2af08c05aefe4",
+      "reviewedAt": "2026-09-27T01:30:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "chrome_synthetic_test"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "C016 distinguishes approved v1.2 pending/consumed time from scenario estimates. Public time-transition stored-authority repair and Operations UI pass isolated database/HTTP and synthetic component checks, including concurrency; screenshot capture, full QA and deployed acceptance remain open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native and installers remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial authority retained; local candidate evidence and remaining acceptance are explicit."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/edt-engine-economic-service.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/lib/resource-hour-sources.behavior.ts",
+        "artifacts/api-server/src/lib/resource-hour-sources.ts",
+        "artifacts/api-server/src/lib/team-performance-service.ts",
+        "artifacts/api-server/src/lib/team-performance.behavior.ts",
+        "artifacts/api-server/src/routes/edt-engine.ts",
+        "artifacts/bimlog/src/components/job-operations/TimeApprovalPanel.tsx",
+        "artifacts/bimlog/src/components/team-performance/ResourceHourSummary.tsx",
+        "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "artifacts/bimlog/src/pages/TeamPerformanceWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "adaf08f78a31b6ece119a923dcf3c27ce833920ff2ef5c5f814918b100f021d0"
     }
   ]
 }

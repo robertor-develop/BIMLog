@@ -1,5 +1,5 @@
 import { decideEdtRecordAuthorization,type EdtRecordAuthorizationInput } from "./edt-engine-authorization";
-import { deterministicEdtId,edtFingerprint,EdtEngineConflict,withEdtTransaction,type EdtTransactionHost } from "./edt-engine-transaction";
+import { deterministicEdtId,edtFingerprint,EdtEngineConflict,withEdtTransaction,type EdtTransactionHost,type EdtTransactionClient } from "./edt-engine-transaction";
 type Actor=Pick<EdtRecordAuthorizationInput,"grants"|"actorUserId"|"actorCompanyId"|"actorProjectIds">&{eligibleRole:string};
 const decimal=/^(0|[1-9]\d*)(\.\d{1,6})?$/;
 function nonnegative(value:string,name:string){if(!decimal.test(value))throw new EdtEngineConflict("ECONOMIC_AMOUNT_INVALID",`${name} must be a non-negative decimal with at most six places.`);}
@@ -27,17 +27,21 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
   },host);
 }
 
-export async function transitionTimeEntry(input:{actor:Actor;companyId:number;projectId:number;entryId:string;expectedVersion:number;decision:"submit"|"approve"|"reject";budgetAccountId:string;pool:"direct_production"|"project_administrative";amount:string;reason:string;evidence:Record<string,unknown>},host?:EdtTransactionHost){
+type TimeDecision = {actor:Actor;companyId:number;projectId:number;entryId:string;expectedVersion:number;decision:"submit"|"approve"|"reject";budgetAccountId:string;pool:"direct_production"|"project_administrative";amount:string;reason:string;evidence:Record<string,unknown>};
+export async function transitionTimeEntry(input:TimeDecision,host?:EdtTransactionHost){
+  return withEdtTransaction(client => transitionTimeEntryWithClient(input, client), host);
+}
+async function transitionTimeEntryWithClient(input:TimeDecision,client:EdtTransactionClient){
   nonnegative(input.amount,"amount");
-  return withEdtTransaction(async client=>{
     const entry=(await client.query<any>("SELECT e.*,w.project_id,w.intake_id FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id WHERE e.id=$1 AND w.project_id=$2 AND i.company_id=$3 FOR UPDATE OF e",[input.entryId,input.projectId,input.companyId])).rows[0];
     if(!entry||Number(entry.optimistic_version)!==input.expectedVersion)throw new EdtEngineConflict("TIME_ENTRY_STALE","Time entry is missing or stale.");
     const account=(await client.query<{id:string}>("SELECT a.id FROM job_activation_budget_accounts a JOIN job_intakes i ON i.id=a.intake_id AND i.project_id=a.project_id WHERE a.id=$1 AND a.intake_id=$2 AND a.project_id=$3 AND i.company_id=$4 FOR UPDATE OF a",[input.budgetAccountId,entry.intake_id,input.projectId,input.companyId])).rows[0];
     if(!account)throw new EdtEngineConflict("BUDGET_ACCOUNT_SCOPE_MISMATCH","Time impact must use a budget account belonging to this Intake and company.");
     const submit=input.decision==="submit";authorize(input.actor,submit?"TIME_SUBMIT":"TIME_APPROVE",input.companyId,input.projectId,submit?undefined:entry.submitted_by_id);
-    if(submit&&!(["draft","rejected"].includes(entry.status)))throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only draft or rejected time may be submitted.");
+    if(submit&&!(["legacy_recorded","draft","rejected"].includes(entry.status)))throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only unreviewed or rejected time may be submitted.");
     if(!submit&&entry.status!=="submitted")throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only submitted time may be decided.");
     if(submit&&entry.user_id!==input.actor.actorUserId)throw new EdtEngineConflict("TIME_ENTRY_OWNER_REQUIRED","Only the time-entry owner may submit it.");
+    if(!submit && [entry.user_id,entry.created_by_id,entry.submitted_by_id].includes(input.actor.actorUserId))throw new EdtEngineConflict("SELF_APPROVAL_PROHIBITED","The owner, recorder and submitter cannot decide this time entry.");
     if(!submit){
       const commitment=(await client.query<{budget_account_id:string;pool:string;amount_delta:string;hours_delta:string}>("SELECT budget_account_id,pool,amount_delta::text,hours_delta::text FROM job_activation_budget_ledger_entries WHERE time_entry_id=$1 AND source_version=$2 AND ledger_state='committed_pending' FOR UPDATE",[input.entryId,input.expectedVersion-1])).rows[0];
       if(!commitment||commitment.budget_account_id!==input.budgetAccountId||commitment.pool!==input.pool||decimalUnits(commitment.amount_delta)!==decimalUnits(input.amount)||decimalUnits(commitment.hours_delta)!==decimalUnits(String(entry.hours)))
@@ -46,9 +50,45 @@ export async function transitionTimeEntry(input:{actor:Actor;companyId:number;pr
     const next=submit?"submitted":input.decision==="approve"?"approved":"rejected";
     const updated=await client.query("UPDATE job_activation_time_entries SET status=$2,optimistic_version=optimistic_version+1,submitted_by_id=CASE WHEN $2='submitted' THEN $3 ELSE submitted_by_id END,submitted_at=CASE WHEN $2='submitted' THEN now() ELSE submitted_at END,decided_by_id=CASE WHEN $2 IN ('approved','rejected') THEN $3 ELSE decided_by_id END,decided_at=CASE WHEN $2 IN ('approved','rejected') THEN now() ELSE decided_at END,decision_reason=$4 WHERE id=$1 AND optimistic_version=$5",[input.entryId,next,input.actor.actorUserId,input.reason,input.expectedVersion]);
     if(updated.rowCount!==1)throw new EdtEngineConflict("TIME_ENTRY_STALE","Concurrent time-entry update detected.");
-    const base=`time:${input.entryId}:v${input.expectedVersion}:${input.decision}`;const ledger=async(state:string,amountDelta:string,hoursDelta:string,suffix:string)=>client.query("INSERT INTO job_activation_budget_ledger_entries(id,company_id,project_id,intake_id,budget_account_id,work_item_id,task_id,assignment_id,time_entry_id,pool,ledger_state,amount_delta,hours_delta,idempotency_key,source_version,source_fingerprint,actor_user_id,reason,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19::jsonb) ON CONFLICT(idempotency_key) DO NOTHING",[deterministicEdtId("budget-ledger",`${base}:${suffix}`),input.companyId,input.projectId,entry.intake_id,input.budgetAccountId,entry.work_item_id,entry.task_id,entry.assignment_id??null,input.entryId,input.pool,state,amountDelta,hoursDelta,`${base}:${suffix}`,input.expectedVersion,edtFingerprint({entryId:input.entryId,version:input.expectedVersion,decision:input.decision,suffix}),input.actor.actorUserId,input.reason,JSON.stringify(input.evidence)]);
+    const base=`time:${input.entryId}:v${input.expectedVersion}:${input.decision}`;const ledger=async(state:string,amountDelta:string,hoursDelta:string,suffix:string)=>client.query("INSERT INTO job_activation_budget_ledger_entries(id,company_id,project_id,intake_id,budget_account_id,work_item_id,task_id,assignment_id,time_entry_id,pool,ledger_state,amount_delta,hours_delta,idempotency_key,source_version,source_fingerprint,actor_user_id,reason,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19::jsonb) ON CONFLICT(project_id,idempotency_key) DO NOTHING",[deterministicEdtId("budget-ledger",`${base}:${suffix}`),input.companyId,input.projectId,entry.intake_id,input.budgetAccountId,entry.work_item_id,entry.task_id,entry.assignment_id??null,input.entryId,input.pool,state,amountDelta,hoursDelta,`${base}:${suffix}`,input.expectedVersion,edtFingerprint({entryId:input.entryId,version:input.expectedVersion,decision:input.decision,suffix}),input.actor.actorUserId,input.reason,JSON.stringify(input.evidence)]);
     if(submit)await ledger("committed_pending",`-${input.amount}`,`-${entry.hours}`,"commit");
     else{await ledger("released",input.amount,String(entry.hours),"release");if(input.decision==="approve")await ledger("approved_consumed",`-${input.amount}`,`-${entry.hours}`,"consume");}
     return{entryId:input.entryId,status:next,version:input.expectedVersion+1};
-  },host);
+}
+
+/** Public workflow resolves monetary authority under the same transaction locks as the decision. */
+export async function transitionStoredTimeEntry(input:Omit<TimeDecision,"budgetAccountId"|"pool"|"amount"|"evidence">,host?:EdtTransactionHost){
+  if(!Number.isSafeInteger(input.expectedVersion)||input.expectedVersion<1||!input.reason.trim()||input.reason.length>1000)
+    throw new EdtEngineConflict("TIME_DECISION_INVALID","A current version and a reason of at most 1000 characters are required.");
+  if(!["submit","approve","reject"].includes(input.decision))throw new EdtEngineConflict("TIME_DECISION_INVALID","Unsupported time decision.");
+  return withEdtTransaction(async client=>{
+    const entry=(await client.query<any>(`SELECT e.*,w.project_cost_node_id,w.contract_version_id,w.stable_scope_item_id
+      FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id AND w.project_id=e.project_id
+      JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id
+      WHERE e.id=$1 AND e.project_id=$2 AND i.company_id=$3 AND i.status='activated' FOR UPDATE OF e`,[input.entryId,input.projectId,input.companyId])).rows[0];
+    if(!entry||Number(entry.optimistic_version)!==input.expectedVersion)throw new EdtEngineConflict("TIME_ENTRY_STALE","Time entry is missing or stale.");
+    let authority:{budgetAccountId:string;pool:TimeDecision["pool"];amount:string;evidence:Record<string,unknown>};
+    if(input.decision==="submit"){
+      const stored=(await client.query<any>(`SELECT b.budget_account_id,r.internal_hourly_rate::text rate,r.version assignment_version,
+        round(e.hours*r.internal_hourly_rate,6)::text amount,a.currency,b.snapshot_fingerprint
+        FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id
+        JOIN job_activation_resource_assignments r ON r.id=e.assignment_id AND r.task_id=e.task_id AND r.work_item_id=w.id AND r.user_id=e.user_id
+        JOIN job_activation_contract_item_baselines b ON b.intake_id=w.intake_id AND b.project_id=w.project_id
+          AND b.contract_version_id=w.contract_version_id AND b.stable_line_id=w.stable_scope_item_id
+        JOIN job_activation_budget_accounts a ON a.id=b.budget_account_id AND a.project_cost_node_id=w.project_cost_node_id
+        WHERE e.id=$1 AND r.internal_hourly_rate IS NOT NULL AND r.internal_hourly_rate>=0 FOR SHARE OF r,b,a`,[input.entryId])).rows[0];
+      if(!stored)throw new EdtEngineConflict("TIME_AMOUNT_NOT_SERVER_RESOLVED","This time entry needs its priced assignment and activated contract budget mapping before submission.");
+      authority={budgetAccountId:stored.budget_account_id,pool:"direct_production",amount:stored.amount,evidence:{source:"stored_assignment_and_activated_contract",assignmentVersion:stored.assignment_version,rate:stored.rate,currency:stored.currency,baselineFingerprint:stored.snapshot_fingerprint}};
+    }else{
+      const stored=(await client.query<any>(`SELECT budget_account_id,pool,(-amount_delta)::text amount,evidence FROM job_activation_budget_ledger_entries
+        WHERE time_entry_id=$1 AND project_id=$2 AND company_id=$3 AND source_version=$4 AND ledger_state='committed_pending' FOR UPDATE`,[input.entryId,input.projectId,input.companyId,input.expectedVersion-1])).rows[0];
+      if(!stored)throw new EdtEngineConflict("TIME_COMMITMENT_MISMATCH","The submitted time commitment is missing.");
+      authority={budgetAccountId:stored.budget_account_id,pool:stored.pool,amount:stored.amount,evidence:stored.evidence};
+    }
+    return transitionTimeEntryWithClient({...input,...authority},client);
+  },host).catch((error: unknown) => {
+    if (error && typeof error === "object" && "code" in error && ["40001", "40P01"].includes(String(error.code)))
+      throw new EdtEngineConflict("TIME_ENTRY_STALE", "A concurrent decision changed this entry. Refresh before trying again.");
+    throw error;
+  });
 }

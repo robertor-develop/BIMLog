@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import { summarizeResourceHours } from "./resource-hour-sources";
+const rows = [{ status: "draft", hours: "1.25" }, { status: "submitted", hours: "2.50" }, { status: "approved", hours: "3.75" }, { status: "rejected", hours: "4" }, { status: "legacy_recorded", hours: "5" }, { status: "superseded", hours: "100" }, { status: "approved", hours: "200", supersededByEntryId: "replacement" }];
+assert.deepEqual(summarizeResourceHours(rows), { recorded: "16.50", pending: "8.75", approved: "3.75", draft: "1.25", rejected: "4.00", legacy: "5.00", committed: "8.75" });
+assert.equal(summarizeResourceHours([{ status: "approved", hours: "0.004" }, { status: "approved", hours: "0.004" }]).approved, "0.01");
+assert.equal(summarizeResourceHours([]).committed, "0.00");
+assert.throws(() => summarizeResourceHours([{ status: "unknown", hours: "1" }]));
+assert.throws(() => summarizeResourceHours([{ status: "__proto__", hours: "1" }]));
+assert.throws(() => summarizeResourceHours([{ status: "approved", hours: "-1" }]));
+assert.equal(rows[0].hours, "1.25");
+console.log("PASS resource hour source classification, supersession, reconciliation and exact rounding");

@@ -1,5 +1,27 @@
 # STATUS.md - Current Accepted Platform State
 
+## C016 source verification — 2026-09-27
+
+C016 implementation now includes project hour totals preserving former-member records, while personal cards retain their explicit filters. CSV/PDF carry the same project hour sources; PDF uses the loaded date interval and fails visibly above the shared250-row export bound rather than silently dropping detail. Concurrent decisions and rejected/resubmitted time reconcile in the real disposable PostgreSQL fixture. Screenshot capture recovered after bringing the local Chrome tab forward: actual components with the real Operations stylesheet were inspected in Spanish desktop and Spanish/English narrow layouts without visible clipping. Requested390px viewport was measured433px; exact390px is not asserted. Harness stays outside production source. No live acceptance or rendered PDF acceptance is claimed from component screenshots. C016 source checkpoint is eligible for a bounded local commit after final checks; push/publication remain at the block boundary. C017–C020 and full live acceptance remain open. Lens Next unchanged.
+
+## C016 time-review repair checkpoint — 2026-09-27
+
+Still an uncommitted local candidate; production remains 7957540c. The public time transition resolves assignment rate and immutable contract budget mapping server-side in its decision transaction, rejects caller amounts, freezes submitted impact for approval, and denies owner/recorder/submitter self-approval. The ledger conflict key now matches its composite unique constraint. Concurrent serialization/deadlock conflicts return a stale-entry response rather than a server error. Operations mounts a scoped, paginated, bilingual time-review panel. Team Performance PDF includes separate hour sources and the actually loaded date period.
+
+Real disposable PostgreSQL/HTTP verification passes list eligibility, cross-company read/write denial, submission, approval, rejection/resubmission, concurrent decisions, immutable submitted rate, exact ledger balance and Team Performance approved/pending reconciliation. Synthetic actual-component Chrome DOM passes reason requirement, cancellation, actionable missing-budget error, submitted state and EN/ES; console errors empty. This is not live deployment acceptance. Screenshot capture still times out, so visual QA is not passed. Local harness archived outside production source under F:/BIMLog/TestProof.
+
+C016 export rendering/full gate and deployed independent-role acceptance remain open. C017–C020 are not complete or counted. No push/publication occurred at this checkpoint; Lens Next and production customer data are unchanged.
+
+## C016 resource-hour source candidate — 2026-09-27
+
+Accepted production remains 7957540c819a06935e5834058ed2af08c05aefe4, provider receipt 8628213d, per external consolidation-c014-c015-progress-20260927.md. Earlier pending C015 statements below are historical checkpoints. This turn starts C016–C020; no new commit, push or publication has occurred.
+
+C016 local candidate separates recorded, draft, committed/pending, approved/consumed, rejected and legacy time in Team Performance and CSV. Architecture Closure v1.2 controls semantics: unapproved recorded hours, including draft/legacy, are pending; approved hours are consumed separately. Superseded/corrected entries are excluded from current totals. Remaining staffing estimates use all assignments rather than collapsing multiple assignments on the same task. No monetary approval, payout, rate change or customer-data mutation is made.
+
+Focused classification and connected source regressions pass; API typecheck and final frontend typecheck pass. Actual production-component local synthetic DOM checks passed EN/ES and empty state with no captured console errors. Screenshot capture timed out on both supported browser surfaces; exact390 visual QA has NOT passed (observed viewport was433). Full service/database, exports and live multi-role acceptance remain pending. C016 is not complete. C017–C020 are not started.
+
+Confirmed source defect: the existing EDT time-transition endpoint unconditionally rejects with TIME_AMOUNT_NOT_SERVER_RESOLVED despite an underlying transition service and status/ledger schema. Resolve stored budget/rate authority and connect the UI with independent approval before claiming the approved-hour/earnings flow. Do not remove the fail-closed guard without implementing the missing resolution. Lens Next remains unchanged.
+
 ## C015 reporting-source correction candidate — 2026-09-27
 
 C014 committed92bf800d with distinct Shop/Sleeve isolated runtime regression PASS. C015 corrects Operations/Controls/CSV wording: recorded hours multiplied by the applicable rate are recorded-hour value, not proof of approved hours or invoicing. English/Spanish Help explains this separation; stored fields and calculations are unchanged. Synthetic live project58 recorded2 hours through UI: actual2, remaining10, internal cost60, billable-hour value100 against12/360/600 plan. Filter attribution and source-label regressions pass. Complete approved-hour/multi-role end-to-end acceptance is still open, not substituted by these checks. Final source gate/push pending; production remains043291dc. Lens Native unchanged.

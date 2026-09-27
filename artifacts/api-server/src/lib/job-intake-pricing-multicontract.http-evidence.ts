@@ -4,6 +4,9 @@ import express from "express";
 import { pool } from "@workspace/db";
 import intakeRouter from "../routes/job-intake";
 import contractsRouter from "../routes/financial-contracts";
+import edtRouter from "../routes/edt-engine";
+import { ensureEdtEngineSchema } from "./edt-engine-migration";
+import { getTeamPerformance } from "./team-performance-service";
 import { signToken } from "../middlewares/auth";
 import { startFeaturePolicyMigration } from "./feature-policy-migration";
 import { startCommercialEntitlementMigration } from "./commercial-entitlement";
@@ -43,6 +46,7 @@ await startGenericApuPersistenceMigration();
 await startJobIntakeMigration();
 await ensureCompanyMasterCatalogSchema();
 await ensureDeliveryWorkflowRuntimeSchema();
+await ensureEdtEngineSchema();
 await pool.query(`INSERT INTO company_master_catalog_entries(id,company_id,kind,code,name,created_by_id,updated_by_id)
   VALUES('intake-discipline',$1,'discipline','MECH','Test Mechanical',$2,$2)`,[companyId,actor.id]);
 const workPackage = (id:string) => ({id,packageCode:id,title:"Test Level 1",dimensionType:"floor",dimensionValue:"L1",packageType:"deliverable",
@@ -99,7 +103,7 @@ async function publishedTemplate(name: string,price: string) {
 const drawingTemplate = await publishedTemplate("Drawing Reference","300");
 const reviewTemplate = await publishedTemplate("Review Reference","200");
 
-const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter);
+const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,edtRouter);
 const server = app.listen(0,"127.0.0.1");
 await new Promise<void>(resolve => server.once("listening",resolve));
 const address = server.address(); assert.ok(address && typeof address !== "string");
@@ -232,6 +236,75 @@ try {
   assert.equal(after.body.status,"activated");
   const immutable = await request("PUT",intakePath,{ expectedRevision:after.body.revision,data:correctedData });
   assert.equal(immutable.status,409); assert.equal(immutable.body.code,"JOB_INTAKE_ACTIVATED");
+  const reviewer = (await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id) VALUES('time-reviewer@test.invalid','unused','TEST time reviewer',$1) RETURNING *`,[companyId])).rows[0];
+  await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active')`,[projectId,reviewer.id]);
+  const assignment=(await pool.query(`SELECT * FROM job_activation_resource_assignments WHERE user_id=$1 AND intake_id=$2`,[checker.id,after.body.id])).rows[0];
+  assert.ok(assignment,"activated checker assignment exists");
+  const timeId=randomUUID();
+  await pool.query(`INSERT INTO job_activation_time_entries(id,intake_id,project_id,work_item_id,task_id,assignment_id,user_id,work_date,hours,note,created_by_id)
+    VALUES($1,$2,$3,$4,$5,$6,$7,current_date,2,'TEST independent time review',$7)`,[timeId,assignment.intake_id,projectId,assignment.work_item_id,assignment.task_id,assignment.id,checker.id]);
+  async function timeRequest(user:any,body:unknown,entryId=timeId){
+    const timeToken=signToken({userId:user.id,email:user.email,fullName:user.full_name,companyId:user.company_id,companyName:"Intake integration company",isSuperAdmin:false});
+    const response=await fetch(`${base}/projects/${projectId}/edt-engine/time-entries/${entryId}/transition`,{method:"POST",headers:{Authorization:`Bearer ${timeToken}`,"Content-Type":"application/json"},body:JSON.stringify(body)});
+    return {status:response.status,body:await response.json() as any};
+  }
+  async function timeList(user:any,expectedStatus=200){
+    const timeToken=signToken({userId:user.id,email:user.email,fullName:user.full_name,companyId:user.company_id,companyName:"Intake integration company",isSuperAdmin:false});
+    const response=await fetch(`${base}/projects/${projectId}/edt-engine/time-review`,{headers:{Authorization:`Bearer ${timeToken}`}});
+    const body=await response.json() as any;assert.equal(response.status,expectedStatus,JSON.stringify(body));return body.entries as any[];
+  }
+  const ownerList=await timeList(checker);
+  assert.equal(ownerList.find(row=>row.id===timeId)?.canSubmit,true);
+  assert.ok(ownerList.every(row=>!row.canDecide));
+  assert.ok(ownerList.every(row=>!("rate" in row)&&!("internal_hourly_rate" in row)));
+  const foreignCompany=(await pool.query(`INSERT INTO companies(name) VALUES('TEST isolated foreign company') RETURNING id`)).rows[0];
+  const foreignUser=(await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id) VALUES('time-foreign@test.invalid','unused','TEST foreign user',$1) RETURNING *`,[foreignCompany.id])).rows[0];
+  await timeList(foreignUser,403);
+  assert.equal((await timeRequest(foreignUser,{decision:"submit",expectedVersion:1,reason:"TEST denied cross company"})).status,403);
+  const injected=await timeRequest(checker,{decision:"submit",expectedVersion:1,reason:"TEST submit",amount:"0"});
+  assert.equal(injected.status,409);
+  const submitted=await timeRequest(checker,{decision:"submit",expectedVersion:1,reason:"TEST submit"});
+  assert.equal(submitted.status,200,JSON.stringify(submitted.body));assert.equal(submitted.body.status,"submitted");
+  assert.equal((await timeList(reviewer)).find(row=>row.id===timeId)?.canDecide,true);
+  assert.equal((await timeList(checker)).find(row=>row.id===timeId)?.canSubmit,false);
+  const self=await timeRequest(checker,{decision:"approve",expectedVersion:2,reason:"TEST self approval denied"});assert.equal(self.status,403);
+  await pool.query(`UPDATE job_activation_resource_assignments SET internal_hourly_rate=99 WHERE id=$1`,[assignment.id]);
+  const approved=await timeRequest(reviewer,{decision:"approve",expectedVersion:2,reason:"TEST independent review"});
+  assert.equal(approved.status,200,JSON.stringify(approved.body));assert.equal(approved.body.status,"approved");
+  const approvedList=(await timeList(reviewer)).find(row=>row.id===timeId);
+  assert.equal(approvedList?.status,"approved");assert.equal(approvedList?.canDecide,false);
+  const staleTime=await timeRequest(reviewer,{decision:"approve",expectedVersion:2,reason:"TEST duplicate"});assert.equal(staleTime.status,409);
+  const ledger=(await pool.query(`SELECT ledger_state,amount_delta::text,hours_delta::text,evidence FROM job_activation_budget_ledger_entries WHERE time_entry_id=$1 ORDER BY ledger_state`,[timeId])).rows;
+  assert.equal(ledger.length,3);assert.equal(ledger.find(row=>row.ledger_state==="approved_consumed")?.amount_delta,"-40.000000");
+  assert.equal(ledger.find(row=>row.ledger_state==="approved_consumed")?.evidence.rate,"20.000000");
+  const team=await getTeamPerformance({actorUserId:actor.id,projectId});
+  const checkerHours=team.people.find(person=>person.userId===checker.id)?.hourSources;
+  assert.equal(checkerHours?.recorded,"2.00");assert.equal(checkerHours?.approved,"2.00");
+  assert.equal(checkerHours?.pending,"0.00");assert.equal(checkerHours?.committed,"0.00");
+  assert.deepEqual(team.hourSourceTotals,checkerHours);
+  const rejectedTimeId=randomUUID();
+  await pool.query(`INSERT INTO job_activation_time_entries(id,intake_id,project_id,work_item_id,task_id,assignment_id,user_id,work_date,hours,note,created_by_id)
+    VALUES($1,$2,$3,$4,$5,$6,$7,current_date,1,'TEST rejection and resubmission',$7)`,[rejectedTimeId,assignment.intake_id,projectId,assignment.work_item_id,assignment.task_id,assignment.id,checker.id]);
+  assert.equal((await timeRequest(checker,{decision:"submit",expectedVersion:1,reason:"TEST send for rejection"},rejectedTimeId)).status,200);
+  const rejected=await timeRequest(reviewer,{decision:"reject",expectedVersion:2,reason:"TEST evidence needs correction"},rejectedTimeId);
+  assert.equal(rejected.status,200);assert.equal(rejected.body.status,"rejected");
+  const rejectedTeam=await getTeamPerformance({actorUserId:actor.id,projectId});
+  assert.equal(rejectedTeam.people.find(person=>person.userId===checker.id)?.hourSources.rejected,"1.00");
+  assert.equal(rejectedTeam.people.find(person=>person.userId===checker.id)?.hourSources.committed,"0.00");
+  assert.equal((await timeRequest(checker,{decision:"submit",expectedVersion:3,reason:"TEST corrected evidence resubmission"},rejectedTimeId)).status,200);
+  const concurrent=await Promise.all([
+    timeRequest(reviewer,{decision:"approve",expectedVersion:4,reason:"TEST concurrent A"},rejectedTimeId),
+    timeRequest(reviewer,{decision:"approve",expectedVersion:4,reason:"TEST concurrent B"},rejectedTimeId),
+  ]);
+  assert.equal(concurrent.filter(result=>result.status===200).length,1);
+  assert.ok(concurrent.some(result=>result.status===409));
+  const finalLedger=(await pool.query(`SELECT SUM(amount_delta)::text amount,SUM(hours_delta)::text hours,COUNT(*)::int count FROM job_activation_budget_ledger_entries WHERE time_entry_id=$1`,[rejectedTimeId])).rows[0];
+  assert.equal(finalLedger.count,5);assert.equal(finalLedger.amount,"-99.000000");assert.equal(finalLedger.hours,"-1.000000");
+  await pool.query(`DELETE FROM project_members WHERE project_id=$1 AND user_id=$2`,[projectId,checker.id]);
+  const historicalTeam=await getTeamPerformance({actorUserId:actor.id,projectId});
+  assert.equal(historicalTeam.people.some(person=>person.userId===checker.id),false);
+  assert.equal(historicalTeam.hourSourceTotals.recorded,"3.00");assert.equal(historicalTeam.hourSourceTotals.approved,"3.00");
+  console.log("C016 time HTTP/database: stored amount, legacy submission, denied self approval, frozen rate, independent approval, stale replay and ledger balance PASS");
   console.log("multi-contract Intake HTTP: invalid save rollback, save/reopen, stale revision, retirement blocks activation without residue, replacement save/reopen, two contract activation, APU/rate preservation, baseline, idempotent retry, historical binding after retirement, immutable accepted Intake PASS");
 } finally {
   await new Promise<void>((resolve,reject) => server.close(error => error ? reject(error) : resolve()));

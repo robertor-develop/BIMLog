@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import "../../../api-server/src/lib/resource-hour-sources.behavior";
 import "./operations-value-source.behavior";
 import "./intake-activation-task-count.behavior";
 import "./company-workflow-readiness.behavior";

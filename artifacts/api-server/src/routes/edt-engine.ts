@@ -2,6 +2,8 @@ import { Router, type IRouter } from "express";
 import { authMiddleware } from "../middlewares/auth";
 import { edtProjectId, resolveEdtRouteActor, sendEdtRouteError } from "../lib/edt-engine-route-context";
 import { EdtEngineConflict } from "../lib/edt-engine-transaction";
+import { transitionStoredTimeEntry } from "../lib/edt-engine-economic-service";
+import { pool } from "@workspace/db";
 import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-engine-governed-change-service";
 import { decideWorkItemQc, previewResultImport, submitWorkItemIssuance } from "../lib/edt-engine-qc-import-service";
 import { previewActivatedEdtPlan } from "../lib/edt-engine-plan-projection";
@@ -135,10 +137,32 @@ router.post("/projects/:projectId/edt-engine/economic-plans",authMiddleware,asyn
   }catch(error){sendEdtRouteError(res,error);}
 });
 
+router.get("/projects/:projectId/edt-engine/time-review",authMiddleware,async(req,res):Promise<void>=>{
+  try{
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);
+    const review=actor.grants.includes("TIME_APPROVE");
+    const entries=(await pool.query(`SELECT e.id,e.user_id,e.created_by_id,e.submitted_by_id,e.status,e.optimistic_version AS version,
+      e.work_date::text AS "workDate",e.hours::text,e.note,e.decision_reason AS "decisionReason",u.full_name AS "userName",t.name_en AS "taskName",t.name_es AS "taskNameEs"
+      FROM job_activation_time_entries e JOIN users u ON u.id=e.user_id JOIN job_activation_tasks t ON t.id=e.task_id
+      JOIN job_intakes i ON i.id=e.intake_id AND i.project_id=e.project_id
+      WHERE e.project_id=$1 AND i.company_id=$2 AND ($3::boolean OR e.user_id=$4)
+        AND e.superseded_by_entry_id IS NULL AND e.status NOT IN ('corrected','superseded')
+      ORDER BY e.work_date DESC,e.created_at DESC,e.id DESC LIMIT 500`,[projectId,actor.actorCompanyId,review,actor.actorUserId])).rows;
+    res.json({entries:entries.map(row=>({id:row.id,status:row.status,version:row.version,workDate:row.workDate,hours:row.hours,note:row.note,decisionReason:row.decisionReason,userName:row.userName,taskName:row.taskName,taskNameEs:row.taskNameEs,
+      canSubmit:actor.grants.includes("TIME_SUBMIT")&&row.user_id===actor.actorUserId&&["legacy_recorded","draft","rejected"].includes(row.status),
+      canDecide:review&&row.status==="submitted"&&![row.user_id,row.created_by_id,row.submitted_by_id].includes(actor.actorUserId)})),limit:500});
+  }catch(error){sendEdtRouteError(res,error);}
+});
+
 router.post("/projects/:projectId/edt-engine/time-entries/:entryId/transition",authMiddleware,async(req,res):Promise<void>=>{
   try{
-    const projectId=edtProjectId(req);await resolveEdtRouteActor(req,projectId);
-    throw new EdtEngineConflict("TIME_AMOUNT_NOT_SERVER_RESOLVED","Time-entry budget impact must be derived from the stored entry, assignment and rate, not request amounts.");
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);
+    if(Object.keys(body).some(key=>!["decision","expectedVersion","reason"].includes(key)))
+      throw new EdtEngineConflict("TIME_AMOUNT_NOT_SERVER_RESOLVED","Time-entry budget impact must be derived from the stored entry, assignment and rate, not request amounts.");
+    const decision=requiredText(body,"decision");
+    if(!["submit","approve","reject"].includes(decision))throw new EdtEngineConflict("TIME_DECISION_INVALID","Unsupported time decision.");
+    const result=await transitionStoredTimeEntry({actor,companyId:actor.actorCompanyId,projectId,entryId:String(req.params.entryId),expectedVersion:requiredInteger(body,"expectedVersion"),decision:decision as "submit"|"approve"|"reject",reason:requiredText(body,"reason")});
+    res.json(result);
   }catch(error){sendEdtRouteError(res,error);}
 });
 

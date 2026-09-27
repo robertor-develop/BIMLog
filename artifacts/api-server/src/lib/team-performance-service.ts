@@ -2,6 +2,7 @@ import { pool } from "@workspace/db";
 import { FinancialControlError } from "./financial-control-contract";
 import { effectiveCommercialAccessForUser } from "./commercial-entitlement";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
+import { summarizeResourceHours } from "./resource-hour-sources";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[] }> };
 
@@ -61,10 +62,15 @@ export async function getTeamPerformance(input: { actorUserId: unknown; projectI
       SUM(e.hours*COALESCE(r.internal_hourly_rate,0)) "actualInternalCost"
     FROM job_activation_time_entries e LEFT JOIN job_activation_resource_assignments r ON r.id=e.assignment_id
     WHERE e.project_id=$1 AND ($2::date IS NULL OR e.work_date >= $2::date) AND ($3::date IS NULL OR e.work_date <= $3::date)
+      AND e.superseded_by_entry_id IS NULL AND e.status NOT IN ('corrected','superseded')
     GROUP BY e.user_id,e.task_id`, [projectId, from, to])).rows;
+  const hourSources = (await client.query(`SELECT e.user_id "userId",e.status,e.hours::text hours,e.superseded_by_entry_id "supersededByEntryId"
+    FROM job_activation_time_entries e WHERE e.project_id=$1
+    AND ($2::date IS NULL OR e.work_date >= $2::date) AND ($3::date IS NULL OR e.work_date <= $3::date)`, [projectId, from, to])).rows;
   const monthlyTime = (await client.query(`SELECT e.user_id "userId",to_char(date_trunc('month',e.work_date),'YYYY-MM') "month",SUM(e.hours) hours
     FROM job_activation_time_entries e
     WHERE e.project_id=$1 AND ($2::date IS NULL OR e.work_date >= $2::date) AND ($3::date IS NULL OR e.work_date <= $3::date)
+      AND e.superseded_by_entry_id IS NULL AND e.status NOT IN ('corrected','superseded')
     GROUP BY e.user_id,date_trunc('month',e.work_date) ORDER BY "month"`, [projectId, from, to])).rows;
   const deliverables = (await client.query(`SELECT COALESCE(r.user_id,t.assignee_user_id) "userId",d.id,d.deliverable_type "deliverableType",
       d.linked_at "linkedAt",t.id "taskId",t.name_en "taskNameEn",t.name_es "taskNameEs",w.name "workItem"
@@ -91,7 +97,7 @@ export async function getTeamPerformance(input: { actorUserId: unknown; projectI
     const memberPackages = packages.filter(row => Number(row.userId) === userId);
     const plannedHours = work.reduce((sum, row) => sum + number(row.plannedHours), 0);
     const actualHours = memberTime.reduce((sum, row) => sum + number(row.hours), 0);
-    const earnedHours = uniqueTasks.reduce((sum, row) => sum + number(row.plannedHours) * number(row.progress) / 100, 0);
+    const earnedHours = work.reduce((sum, row) => sum + number(row.plannedHours) * number(row.progress) / 100, 0);
     const plannedInternalCost = work.reduce((sum, row) => sum + number(row.plannedHours) * number(row.internalRate), 0);
     const actualInternalCost = memberTime.reduce((sum, row) => sum + number(row.actualInternalCost), 0);
     const completedTasks = uniqueTasks.filter(row => row.status === "complete").length;
@@ -99,7 +105,7 @@ export async function getTeamPerformance(input: { actorUserId: unknown; projectI
     const approvedPackages = memberPackages.filter(row => row.status === "approved").length;
     const returnedPackages = memberPackages.filter(row => row.status === "returned").length;
     const overduePackages = memberPackages.filter(row => row.dueDate && String(row.dueDate).slice(0, 10) < today && !["approved", "cancelled"].includes(row.status)).length;
-    const remainingCommittedHours = uniqueTasks.filter(row => !["complete", "cancelled"].includes(row.status)).reduce((sum, row) => sum + number(row.plannedHours) * (1 - number(row.progress) / 100), 0);
+    const remainingCommittedHours = work.filter(row => !["complete", "cancelled"].includes(row.status)).reduce((sum, row) => sum + number(row.plannedHours) * (1 - number(row.progress) / 100), 0);
     const activeTasks = uniqueTasks.filter(row => !["complete", "cancelled"].includes(row.status)).length;
     const evidencePoints = uniqueTasks.length + memberTime.length + memberPackages.length + memberDeliverables.length;
     const lastActivity = [
@@ -162,6 +168,7 @@ export async function getTeamPerformance(input: { actorUserId: unknown; projectI
       observedCategories: { roles, workItems, packageTypes },
       tasks: { assigned: uniqueTasks.length, completed: completedTasks, blocked: blockedTasks, completionRate: ratio(completedTasks, uniqueTasks.length) },
       hours: { planned: fixed(plannedHours), actual: fixed(actualHours), earned: fixed(earnedHours), efficiencyIndex: ratio(earnedHours, actualHours) },
+      hourSources: summarizeResourceHours(hourSources.filter(row => Number(row.userId) === userId)),
       costs: { plannedInternal: fixed(plannedInternalCost), actualInternal: fixed(actualInternalCost), averageInternalHourlyRate: actualHours > 0 ? fixed(actualInternalCost / actualHours) : plannedHours > 0 ? fixed(plannedInternalCost / plannedHours) : null },
       delivery: { deliverables: memberDeliverables.length, approvedPackages, returnedPackages, overduePackages, qualityRate: ratio(approvedPackages, reviewed) },
       capacity: { activeTasks, remainingCommittedHours: fixed(remainingCommittedHours) },
@@ -190,9 +197,10 @@ export async function getTeamPerformance(input: { actorUserId: unknown; projectI
   return {
     project: { id: projectId, name: access.name, code: access.code },
     period: { from, to },
+    hourSourceTotals: summarizeResourceHours(hourSources),
     methodology: {
       source: "Job Intake and Job Operations records for this project",
-      limitations: "Observed categories are evidence labels, not inferred skill ratings. Capacity uses remaining committed task hours; weekly capacity and planning horizon are user-entered scenarios. No AI ranking, personality score, or fabricated history is used.",
+      limitations: "Observed categories are evidence labels, not inferred skill ratings. Capacity is an estimate from planned assignment hours and task progress, not approved time. Recorded time includes draft, submitted, approved, rejected and legacy entries; superseded entries are excluded from hourSources. Committed/pending time is recorded but not approved or rejected, including draft and legacy time. Approved time is consumed separately. Weekly capacity and planning horizon are user-entered scenarios. No AI ranking, personality score, or fabricated history is used.",
     },
     totals: { ...totals, plannedHours: fixed(totals.plannedHours), actualHours: fixed(totals.actualHours), earnedHours: fixed(totals.earnedHours), efficiencyIndex: ratio(totals.earnedHours, totals.actualHours) },
     filters: {
