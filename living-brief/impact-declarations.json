@@ -45157,6 +45157,105 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "05034477b3786e5c062c50252f3a498f71f87b98e0857e1dd829f39774923467"
+    },
+    {
+      "taskId": "consolidation-c015-recorded-value-source",
+      "reviewedThroughCommit": "92bf800d3333c032aef61eaad2e7b55dd22dbbbb",
+      "reviewedAt": "2026-09-27T00:00:00Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "chrome_synthetic_test"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Recorded-hour values were described as earned/approved. Correct presentation without inventing approval evidence; full approved-hour cycle stays open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing operational sources retained."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded correction with explicit acceptance limits."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source attribution and bilingual regression coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No duplicate reporting or approval engine."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema, calculation or route change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Native and installers remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing controls preserved; source labels corrected."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards or certification claim added."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records actual UI totals and incomplete acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Approved-hour full cycle remains explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only synthetic hours through normal UI; no history rewriting."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/job-operations/ProjectControlsDashboard.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/lib/operations-value-source.behavior.ts",
+        "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "83dec171e2deb2bf5635b7cd1ffa0922613ee4d928390d43c2ed64127ec72785"
     }
   ]
 }

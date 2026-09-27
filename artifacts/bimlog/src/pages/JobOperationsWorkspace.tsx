@@ -1565,7 +1565,7 @@ export function JobOperationsWorkspace() {
                   <div className="jo-stat jo-financial">
                     <strong>{money(total.earnedBillableValue)}</strong>
                     <span>
-                      {tt("Earned billable value", "Valor facturable ganado")}
+                      {tt("Recorded-hour billable value", "Valor facturable de horas registradas")}
                     </span>
                   </div>
                 </>

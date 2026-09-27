@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## C015 reporting-source correction candidate — 2026-09-27
+
+C014 committed92bf800d with distinct Shop/Sleeve isolated runtime regression PASS. C015 corrects Operations/Controls/CSV wording: recorded hours multiplied by the applicable rate are recorded-hour value, not proof of approved hours or invoicing. English/Spanish Help explains this separation; stored fields and calculations are unchanged. Synthetic live project58 recorded2 hours through UI: actual2, remaining10, internal cost60, billable-hour value100 against12/360/600 plan. Filter attribution and source-label regressions pass. Complete approved-hour/multi-role end-to-end acceptance is still open, not substituted by these checks. Final source gate/push pending; production remains043291dc. Lens Native unchanged.
+
 ## C014 distinct runtime regression — 2026-09-27
 
 C013 exact043291dc is pushed and published (provider3a6ab7ba), schema action NONE; clean nine-command gate passed. The previously failing synthetic project58 activated successfully through Chrome and refreshed with one Work Item, one task,12 planned hours,360 internal cost and600 billable plan. This supersedes earlier pending C013 entries below, not full-platform acceptance. C014 extends the existing real PostgreSQL runtime proof with a separate Sleeve execution: its own frozen phases/roles, rejection of Shop checkpoints, QC/evidence gates and completion without changing Shop runtime/audit. Focused regression passes; C015 and final block gate/push remain pending. Native Lens is untouched.

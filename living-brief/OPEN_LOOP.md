@@ -2,6 +2,8 @@
 
 ## Current open-loop authority — Identity I001–I010 and Consolidation C001–C120 — 2026-09-26 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
+C015 reporting wording repair distinguishes recorded-value from approval/invoicing. Synthetic UI2-hour reconciliation is observed; full approved-hour/multi-role cycle remains unproven. Run final clean source gate and push; do not call all block acceptance complete from labels or isolated tests. Production043291dc contains C013 activation repair; C014/C015 not yet deployed.
+
 C013 is published043291dc and its exact failed activation/reload passes live. C014 distinct Sleeve/Shop runtime isolation passes disposable PostgreSQL tests; this is not complete multi-role deployed acceptance. Finish C015 reporting-source clarity and full clean block gate/push. Full independent budget/template/runtime UI cycle remains open; do not use focused activation as a substitute.
 
 C013 UI count verification must match scope-task reuse. The52a2459e receipt is superseded by this connected fix; end-of-gate candidate immutability is now enforced. No publication or acceptance claim until final clean gate and live retest.
