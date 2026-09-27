@@ -1226,12 +1226,17 @@ export async function activateJobIntake(input: {
   projectId: unknown;
   expectedRevision: unknown;
   confirmationFingerprint: unknown;
+  requireCommercial?: unknown;
 }) {
   await waitForJobIntakeMigration();
   await ensureDeliveryWorkflowRuntimeSchema();
   const projectId = positiveId(input.projectId, "projectId");
   const projectAccess = await scope(input.actorUserId, projectId);
   const capabilities = await capabilitiesFor(input.actorUserId);
+  if (input.requireCommercial !== undefined && typeof input.requireCommercial !== "boolean")
+    throw new FinancialControlError(400, "JOB_INTAKE_INVALID_ACTIVATION_MODE", "Commercial activation selection must be true or false.");
+  if (input.requireCommercial === true && !capabilities.fullCommercialActivation)
+    throw new FinancialControlError(403, "JOB_INTAKE_COMMERCIAL_UNAVAILABLE", "Commercial activation is not available for this account.");
   if (capabilities.fullCommercialActivation)
     await Promise.all([
       waitForFinancialContractMigration(),
@@ -1300,6 +1305,9 @@ export async function activateJobIntake(input: {
       );
     const budgetLinkRequested =
       capabilities.budget && jobIntakeBudgetLinkRequested(data);
+    if (input.requireCommercial === true && !budgetLinkRequested)
+      throw new FinancialControlError(409, "JOB_INTAKE_COMMERCIAL_BUDGET_REQUIRED",
+        "Select an approved budget snapshot and map the Contract Items before creating Commercial records. Existing operational work is unchanged.");
     if (data.commercial.contracts.some((contract: any) => contract.pricingTemplateVersionId) &&
       !(capabilities.fullCommercialActivation && budgetLinkRequested))
       throw new FinancialControlError(409, "PRICING_TEMPLATE_CONTRACT_ACTIVATION_REQUIRED", "A referenced pricing template requires a governed Commercial contract activation and approved budget snapshot.");

@@ -226,6 +226,25 @@ try {
     ] },
     review:{ scopeConfirmed:true,pricingConfirmed:true,contractConfirmed:true,deliveryConfirmed:true,teamConfirmed:true },
   };
+  const coreProjectId=Number((await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('TEST core enrichment','TEST-CORE-ENRICH','active',$1) RETURNING id`,[actor.id])).rows[0].id);
+  await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'admin','active'),($1,$3,'member','active')`,[coreProjectId,actor.id,checker.id]);
+  const corePath=`/projects/${coreProjectId}/intake`;
+  const coreInitial=await request('POST',corePath);
+  const coreData={...data,commercial:{...data.commercial,budgetSnapshotId:'',contracts:data.commercial.contracts.map(({pricingTemplateVersionId,...contract})=>contract)},
+    scopeItems:data.scopeItems.map(({apuPlanVersion,budgetSnapshotLineId,projectCostNodeId,...item})=>({...item,workPackages:item.workPackages.map(pkg=>({...pkg,id:`CORE-${pkg.id}`,packageCode:`CORE-${pkg.packageCode}`}))}))};
+  const coreSaved=await request('PUT',corePath,{expectedRevision:coreInitial.body.revision,data:coreData});
+  assert.equal(coreSaved.status,200,JSON.stringify(coreSaved.body));
+  const coreRequest={expectedRevision:coreSaved.body.revision,confirmationFingerprint:coreSaved.body.completion.fingerprint};
+  const coreActivated=await request('POST',`${corePath}/activate`,coreRequest);
+  assert.equal(coreActivated.status,200,JSON.stringify(coreActivated.body));
+  assert.equal(coreActivated.body.activationMode,'core');
+  const coreBefore=await request('GET',corePath);
+  const rejectedEnrichment=await request('POST',`${corePath}/activate`,{expectedRevision:coreBefore.body.revision,confirmationFingerprint:coreBefore.body.completion.fingerprint,requireCommercial:true});
+  assert.equal(rejectedEnrichment.status,409,JSON.stringify(rejectedEnrichment.body));
+  assert.equal(rejectedEnrichment.body.code,'JOB_INTAKE_COMMERCIAL_BUDGET_REQUIRED');
+  assert.deepEqual((await request('GET',corePath)).body.activation,coreBefore.body.activation);
+  assert.equal((await pool.query('SELECT count(*)::int n FROM financial_contracts WHERE project_id=$1',[coreProjectId])).rows[0].n,0);
+  console.log('C020 live-defect regression PASS: core activation remains available; explicit Commercial request cannot silently return core success; existing activation unchanged');
   const invalid = await request("PUT",intakePath,{ expectedRevision:initialized.body.revision,
     data:{ ...data,commercial:{ ...data.commercial,contracts:[{ ...data.commercial.contracts[0],pricingTemplateVersionId:randomUUID() },data.commercial.contracts[1]] } } });
   assert.equal(invalid.status,404,JSON.stringify(invalid.body));

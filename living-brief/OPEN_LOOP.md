@@ -1,5 +1,7 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+C020-LIVE-01 remains open until deployed retest: live3010c05a published successfully, but synthetic project58 Commercial enrichment silently replayed core activation with no contracts. Explicit Commercial intent/prerequisite rejection and bilingual UI/no-false-success repair passes isolated HTTP regression. Run full clean gate, push/publish corrected source, retest exact UI and complete remaining authenticated acceptance before C021. Lens unchanged.
+
 Follow-up C020 repair: restored-production rehearsal exposed truncation of the declared identifier too. Both schema and migration now use short job_bonus_proposals_idempotency_uidx. Focused PostgreSQL test checks actual text name, same index OID, record preservation and two replays; corrected restore rehearsal passes. Stopped9eb67f74 gate is not acceptance. Repeat new clean gate and publication prerequisites; no new block completion.
 
 C020 publication remains open: cd48a033 pushed/synchronized and additive migration applied after private restore proof. Exact schema parity caught shortened bonus constraint name; permanent repair and real PostgreSQL replay/data-preservation test now pass locally. Complete clean release gate, push/sync repair, restore rehearsal and exact database parity, publish and authenticated acceptance before C021. Live remains7957540c. Lens excluded.

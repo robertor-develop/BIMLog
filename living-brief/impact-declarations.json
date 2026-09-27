@@ -45785,6 +45785,7 @@
         "artifacts/api-server/src/routes/edt-engine.ts",
         "artifacts/api-server/src/routes/financial-apu.ts",
         "artifacts/api-server/src/routes/financial-contracts.ts",
+        "artifacts/api-server/src/routes/job-intake.ts",
         "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
         "artifacts/bimlog/src/components/commercial/ContractPoolPreparation.tsx",
         "artifacts/bimlog/src/components/commercial/ContractProductionAllocationReview.behavior.tsx",
@@ -45794,6 +45795,7 @@
         "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
         "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
         "artifacts/bimlog/src/pages/company-pricing-errors.ts",
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "lib/api-zod/src/exact-allocation.ts",
@@ -45804,12 +45806,13 @@
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
+        "scripts/test-post120-block27.mjs",
         "scripts/test-post120-block37.mjs",
         "scripts/test-workflow-database-fixture.mjs",
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "75e6b9ed7e1a10eff625a7b229aec79007c76d515b081b23bdb05b41e83667e8"
+      "reviewedChangeSha256": "f74e1c6284b56f427239795de82ae90fd8b040a791f4a51d2a2bfe5fb5d78f5c"
     }
   ]
 }

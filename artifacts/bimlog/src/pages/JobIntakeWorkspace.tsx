@@ -823,6 +823,11 @@ export function JobIntakeWorkspace() {
     setBusy(true);
     setError("");
     try {
+      if (canEnrich && !dataRef.current.commercial.budgetSnapshotId)
+        throw new Error(tt(
+          "Select an approved budget snapshot and map each Contract Item and its saved APU before creating Commercial records. Use Open Project Budget below. Existing operational work is unchanged.",
+          "Seleccione un presupuesto aprobado y vincule cada Partida de Contrato y su APU guardado antes de crear registros comerciales. Use Abrir presupuesto del proyecto más abajo. El trabajo operativo existente no cambió.",
+        ));
       const saved = await persist(dataRef.current);
       if (!saved?.completion?.ready)
         throw new Error(
@@ -837,6 +842,7 @@ export function JobIntakeWorkspace() {
         body: JSON.stringify({
           expectedRevision: saved.revision,
           confirmationFingerprint: saved.completion.fingerprint,
+          requireCommercial: canEnrich,
         }),
       });
       const createdContracts = Array.isArray(result.contractIds)
@@ -844,6 +850,11 @@ export function JobIntakeWorkspace() {
         : result.contractId
           ? 1
           : 0;
+      if (canEnrich && createdContracts === 0)
+        throw new Error(tt(
+          "No Commercial records were created. Select an approved budget snapshot, map each Contract Item and its saved APU, then retry. Existing operational work is unchanged.",
+          "No se crearon registros comerciales. Seleccione un presupuesto aprobado, vincule cada Partida de Contrato y su APU guardado, y vuelva a intentar. El trabajo operativo existente no cambió.",
+        ));
       setNotice(
         createdContracts > 0
           ? tt(

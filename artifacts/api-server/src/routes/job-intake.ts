@@ -234,6 +234,7 @@ router.post(
         projectId: req.params.projectId,
         expectedRevision: req.body?.expectedRevision,
         confirmationFingerprint: req.body?.confirmationFingerprint,
+        requireCommercial: req.body?.requireCommercial,
       }),
     );
   }),

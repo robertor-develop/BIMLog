@@ -18,6 +18,11 @@ assert.equal(reports.classification.flatMap((item) => item.findingIds).length, 9
 const operational = read("artifacts/api-server/src/lib/operational-failure.ts");
 const intake = read("artifacts/api-server/src/lib/job-intake-service.ts");
 const intakeUi = read("artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx");
+assert.match(intakeUi, /requireCommercial: canEnrich/);
+assert.match(intakeUi, /if \(canEnrich && createdContracts === 0\)/);
+assert.ok(intakeUi.indexOf("if (canEnrich && createdContracts === 0)") < intakeUi.indexOf("const activated = await load()"), "Commercial failure must not navigate to Operations as success");
+assert.match(intakeUi, /No se crearon registros comerciales/);
+assert.match(intake, /JOB_INTAKE_COMMERCIAL_BUDGET_REQUIRED/);
 const meetings = read("artifacts/bimlog/src/pages/project/MeetingsTab.tsx");
 const sharing = read("artifacts/bimlog/src/components/OptionalSharePanel.tsx");
 const packages = read("artifacts/api-server/src/lib/feedback-package-worker.ts");
