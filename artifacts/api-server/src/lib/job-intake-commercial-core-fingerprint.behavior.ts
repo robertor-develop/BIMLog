@@ -14,7 +14,7 @@ assert.equal(jobIntakeCoreFingerprint(core), jobIntakeCoreFingerprint(enriched),
   "APU-derived assignment mirrors must not block commercial enrichment of activated core work");
 for (const change of [{ plannedHours: "13" }, { userId: 2 }, { role: "Changed role" }]) {
   const modified = normalizeJobIntakeData({ ...enriched,
-    team: { ...enriched.team, assignments: enriched.team.assignments.map(a => ({ ...a, ...change })) },
+    team: { ...enriched.team, assignments: enriched.team.assignments.map((a: (typeof core.team.assignments)[number]) => ({ ...a, ...change })) },
   });
   assert.notEqual(jobIntakeCoreFingerprint(core), jobIntakeCoreFingerprint(modified),
     "Actual operational changes remain protected");
