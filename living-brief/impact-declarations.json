@@ -45799,6 +45799,7 @@
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
         "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
         "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/company-pricing-errors.behavior.ts",
         "artifacts/bimlog/src/pages/company-pricing-errors.ts",
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "lib/api-zod/src/exact-allocation.ts",
@@ -45815,7 +45816,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "2f661fc3cbd6cae8a61ce180014a1d6896f36fe7279fb4ba8ef3cbe5ca84d828"
+      "reviewedChangeSha256": "c2a0e12a5923709cef29dc7e3fc22951c385419e0aa6a77a73fc62fe89df186a"
     }
   ]
 }

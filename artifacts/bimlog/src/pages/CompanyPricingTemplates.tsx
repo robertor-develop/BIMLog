@@ -65,9 +65,7 @@ export function CompanyPricingTemplates() {
   const request = useCallback(async (path: string, method = "GET", body?: object) => {
     const response = await fetch(`${base}/api/v1${path}`, { method, headers: { Authorization: `Bearer ${token}`, ...(body ? { "Content-Type": "application/json" } : {}) }, body: body ? JSON.stringify(body) : undefined });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(response.status === 403
-      ? t("You do not have company permission to view pricing templates.", "No tiene permiso de la empresa para ver las plantillas de precios.")
-      : pricingErrorMessage(payload, es));
+    if (!response.ok) throw new Error(pricingErrorMessage(payload, es, response.status));
     return payload;
   }, [token, lang]);
 
