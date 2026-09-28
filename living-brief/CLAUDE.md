@@ -46,6 +46,24 @@ and continue. A read-only request must remain read-only. An implementation reque
 proceed after verification. A genuine authorization boundary stops the task and requires
 Roberto's decision.
 
+## Execution continuity and inherited authorization
+
+Clear in-scope proceed/build/push/publish/deploy authorization persists through completion,
+including diagnosis, bounded repair, verification and retest. Do not require a magic phrase,
+repeat approval, or a new task to resume the same authorized objective. Recoverable build,
+provider and browser failures require root-cause investigation, safe correction and retest,
+then continuation; they are not terminal product blockers or new business decisions.
+Never repeat an unchanged failed paid publication: verify the correction first and carry the
+existing explicit release authorization forward within its scope and constitutional controls.
+
+Stop only the affected action for a genuinely new business decision, destructive out-of-scope
+action, missing secret or required user-presence step, or a technical failure unresolved after
+the permitted safe alternatives. Preserve evidence and continue unaffected authorized work.
+Browser recovery remains bounded; no safety, permission or tool restriction may be bypassed.
+Migration, production/customer data, destructive actions, security and credential boundaries
+remain mandatory. Authorization continuity does not create new authority or manufacture PASS.
+Non-runtime documentation/checker corrections do not alone require a production republication.
+
 ## Owner authority and document precedence
 Development governance follows this hierarchy:
 1. Roberto's explicit current instruction.

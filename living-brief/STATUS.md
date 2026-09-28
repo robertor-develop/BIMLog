@@ -1,6 +1,23 @@
 # STATUS.md - Current Accepted Platform State
 
-C020 repair continuation: exact1581530a passed all nine local release commands and pushed, but Replit build d33c8d3e failed at Bundle after Build passed; live remains461294ad. No paid retry or Agents. Confirmed contract/Operations phase mismatch now locally repaired: contract reads exact frozen Work Item workflow, new activation skips duplicate legacy tree, and legacy initialize/add/update deny linked records. Historical rows preserved. Real isolated Intake HTTP regression passes linkage, no duplicate tree, mutation denial, history preservation and connected funding/time/bonus/isolation cases. Presentation and both TypeScript checks passed. This newer candidate still needs complete clean-source release verification, push, successful publication and deployed retest. C016–C020 block remains unfinished; C021 not begun; Lens unchanged.
+## Current execution checkpoint — publication recovery closed
+
+Accepted runtime source is `7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918`, release `v1.05.N18-P36`.
+Norte reproduced the Vite heap root cause, corrected it at `60ae18d5cdb2c7a8246a7b03d0ab5c14944dd10e`,
+and reports successful provider publication, exact live identity, HTTP 200 and focused authenticated
+dashboard/contract/frozen-workflow/Operations/Lens load-and-reload smoke. Local HEAD and origin/master
+were independently verified at the accepted source. Norte's smoke is attributed evidence, not a
+new smoke run by this task. Complete funding/time/bonus/report acceptance remains unfinished;
+this repair is not an additional five-build block. No Lens Next Native or installer change.
+Execution continuity is being made durable in the manual and normal Living Brief checker.
+Existing authorization persists through in-scope diagnosis, repair and retest; real migration,
+destructive-action, credential, security and customer-data boundaries remain intact.
+
+## Historical/superseded recovery checkpoint
+
+> Historical/superseded: C020 repair continuation: exact1581530a passed all nine local release commands and pushed, but Replit build d33c8d3e failed at Bundle after Build passed; live remains461294ad. No paid retry or Agents. Confirmed contract/Operations phase mismatch now locally repaired: contract reads exact frozen Work Item workflow, new activation skips duplicate legacy tree, and legacy initialize/add/update deny linked records. Historical rows preserved. Real isolated Intake HTTP regression passes linkage, no duplicate tree, mutation denial, history preservation and connected funding/time/bonus/isolation cases. Presentation and both TypeScript checks passed. This newer candidate still needs complete clean-source release verification, push, successful publication and deployed retest. C016–C020 block remains unfinished; C021 not begun; Lens unchanged.
+
+The dated checkpoints below are preserved evidence, not current release identity or repeat-authorization gates.
 
 Current C020 continuation:461294ad6ee7b5e0b6cba44095285dc323df49ac was pushed/published with exact live identity. Synthetic project60 original-budget and commitment approval policies are project-only, capped600USD. Independent budget v1 approval passed with unchanged fingerprint. Intake selected the approved budget line, assigned producer19 and activated successfully. Operations shows12planned hours,600USD APU snapshot, L1 package and published QA-SD-BC-0924v1 frozen runtime with independent review/approval assignments. Generated contract is submitted, not approved/executed. Live maker start-review correctly denied server-side but misleading action remained visible. Bounded repair exposes exact-version maker identity and hides maker review/approval/execution controls with bilingual explanation; server authority remains unchanged. Focused verification underway; repair is not yet released. Full C020 funding/time/bonus/report acceptance remains open, C021 not started, Lens unchanged.
 
@@ -2957,4 +2974,4 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 
 - Source commit `60ae18d5cdb2c7a8246a7b03d0ab5c14944dd10e` replaces the BIMLog frontend's unbounded direct Vite invocation with a portable production-build wrapper that defaults Vite to a 768 MB old-space limit while preserving an explicit `BIMLOG_VITE_MAX_OLD_SPACE_MB` override.
 - The correction addresses the provider's generic Bundle failure without changing BIMLog product behavior, database/schema, customer data, Lens Next Native, installers, Replit configuration, or production state.
-- The frontend build passed in Replit Shell with 2,379 modules transformed and `BUILD_EXIT=0`; complete root-build, publication, and authenticated live acceptance remain release actions until separately proven on the reconciled evidence-bearing head.
+- Publication recovery is closed at `7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918` with Norte's successful provider and focused authenticated live evidence. Remaining complete funding/time/bonus/report acceptance is not covered by that focused smoke.

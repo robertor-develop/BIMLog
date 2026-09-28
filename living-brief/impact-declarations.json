@@ -45925,6 +45925,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6c411cd0ab4748ab96659eafdfe9953a137a26ea2ba0a968e78ef1ac3fc1e57d"
+    },
+    {
+      "taskId": "durable-execution-continuity-repair",
+      "reviewedThroughCommit": "7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918",
+      "reviewedAt": "2026-09-28T03:47:11.972Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "f_root_source_edits",
+          "local_verification",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Capture inherited in-scope authorization through diagnosis, repair and retest; reject repeat approval and terminal recoverable failures without weakening destructive, migration, security or customer boundaries. Close superseded publication blocker with attributed exact-source evidence; remaining C020 end-to-end acceptance stays open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution-only documentation and checker correction; this authority's product, quality, architecture and historical requirements remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Capture durable execution continuity and truthful supersession of the resolved publication checkpoint."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution-only documentation and checker correction; this authority's product, quality, architecture and historical requirements remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution-only documentation and checker correction; this authority's product, quality, architecture and historical requirements remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution-only documentation and checker correction; this authority's product, quality, architecture and historical requirements remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution-only documentation and checker correction; this authority's product, quality, architecture and historical requirements remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution-only documentation and checker correction; this authority's product, quality, architecture and historical requirements remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution-only documentation and checker correction; this authority's product, quality, architecture and historical requirements remain unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Capture durable execution continuity and truthful supersession of the resolved publication checkpoint."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Capture durable execution continuity and truthful supersession of the resolved publication checkpoint."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution-only documentation and checker correction; this authority's product, quality, architecture and historical requirements remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/check-living-brief.mjs",
+        "scripts/execution-continuity-policy.mjs"
+      ],
+      "reviewedChangeSha256": "57948e16eb81dea24550631348faf73f87ed1ff2bb356336843ce3c8727d8f34"
     }
   ]
 }

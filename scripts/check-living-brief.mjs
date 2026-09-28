@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
+import { executionContinuityProblems, testExecutionContinuityPolicy } from "./execution-continuity-policy.mjs";
 
 const repoRoot = process.cwd();
 const livingBriefRoot = path.join(repoRoot, "living-brief");
@@ -690,6 +691,18 @@ validateActiveDocument(
 validateRequiredReferences();
 validateStandardsLinks();
 validateCatalogAndFreshness();
+
+for (const file of ["CLAUDE.md", "STATUS.md", "OPEN_LOOP.md"]) {
+  for (const problem of executionContinuityProblems(readText(path.join(livingBriefRoot, file)))) {
+    report(`living-brief/${file}`, `execution continuity contradiction: ${problem}`);
+  }
+}
+try {
+  const cases = testExecutionContinuityPolicy();
+  console.log(`Execution continuity regression checks passed: ${cases} cases.`);
+} catch (error) {
+  report("scripts/execution-continuity-policy.mjs", error.message);
+}
 
 if (process.argv.includes("--self-test-release-policy")) {
   const validText = fs.readFileSync(path.join(livingBriefRoot, "CLAUDE.md"), "utf8");

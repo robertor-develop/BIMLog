@@ -1,6 +1,22 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-C020 current: pushed1581530a publication failed at Replit Bundle, buildd33c8d3e, with no specific underlying exception in visible log. Live461294ad healthy. New local repair links contract display to frozen Delivery Workflow and prevents a duplicate legacy tree/edits, preserving existing history; real PostgreSQL/HTTP tests pass. Full clean release, successful deployment identity, exact authenticated UI retest, independent contract approval and downstream acceptance remain open. Do not count repairs as another five-build block or advance C021. No paid retry without required failure diagnosis; no Lens mutation.
+## Current execution checkpoint — publication recovery closed
+
+The bounded-memory repair `60ae18d5cdb2c7a8246a7b03d0ab5c14944dd10e`, reconciled at
+`7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918`, is pushed and published as `v1.05.N18-P36`.
+Norte reported successful provider stages, exact live identity and authenticated dashboard,
+contract/frozen-workflow, Operations and Lens load/reload smoke. Local HEAD and origin/master
+were independently verified at that exact source. This is focused release evidence, not proof
+of the entire funding/time/bonus/report cycle. Finish that genuinely unfinished C020 acceptance
+before C021. Existing in-scope authorization remains valid through repair and retest.
+The execution-continuity documentation/checker correction requires verification and push,
+not a republication solely for non-runtime changes. Lens Next remains protected.
+
+## Historical/superseded recovery checkpoint
+
+> Historical/superseded: C020 current: pushed1581530a publication failed at Replit Bundle, buildd33c8d3e, with no specific underlying exception in visible log. Live461294ad healthy. New local repair links contract display to frozen Delivery Workflow and prevents a duplicate legacy tree/edits, preserving existing history; real PostgreSQL/HTTP tests pass. Full clean release, successful deployment identity, exact authenticated UI retest, independent contract approval and downstream acceptance remain open. Do not count repairs as another five-build block or advance C021. No paid retry without required failure diagnosis; no Lens mutation.
+
+The dated checkpoints below are preserved evidence, not current release identity or repeat-authorization gates.
 
 C020 live continuation on461294ad: project60 independent budget approval and approved-budget Intake activation now pass. Published workflowv1 and APU/pricing references are frozen; producer19/resource plan preserved. Contract maker28 cannot review their own submitted request server-side, but UI offers Start review. Repair exact-version maker metadata and presentation without changing authorization; focused/isolated verification then full release/publication/exact live retest required. Contract remains submitted: independent named-record review/approval and downstream funding/time/bonus/report acceptance remain unfinished. Contract SOV also displays Sin vínculo although Operations has frozen workflow runtime; investigate actual linkage before classifying/fixing. No C021 advancement or Lens change.
 
@@ -3523,4 +3539,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 - [x] Reproduce the provider Bundle failure in Replit Shell and isolate it to the default-memory BIMLog Vite process after the mockup and API workspaces build successfully.
 - [x] Bound the BIMLog Vite production build to 768 MB by default through a portable tracked wrapper and prove the same frontend build passes in Replit Shell without Replit Agents.
-- [ ] Pass the complete reconciled root build, publish the exact source through Replit, and complete exact-identity authenticated Chrome smoke. Roberto's existing publication instruction remains valid and must not be requested again.
+- [x] Publication recovery closed at `7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918`: Norte reports complete build/publication and focused authenticated Chrome smoke. This does not close the remaining C020 end-to-end acceptance. Existing authorization remains valid.
