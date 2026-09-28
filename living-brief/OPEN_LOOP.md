@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Consolidation Block 17 — commercial impacts and forecasts — 2026-09-28
+
+- [x] C081 captures exact-source/version potential time/cost impact without treating it as approved value.
+- [x] C082 routes reviewed impacts into one idempotent canonical Change Order draft lineage.
+- [x] C083 requires the existing versioned approval threshold before revising an approved baseline.
+- [x] C084 separates original, current approved, potential, forecast and actual values with source identities.
+- [x] C085 creates reproducible internal/customer-review evidence without signature, notice or payment authority.
+- [ ] Complete the exact-head gate and push `origin/master`; publication and authenticated Chrome smoke remain paired with C086–C090.
+- [x] No Navisworks smoke is required because Native and installers are unchanged.
+
 ## Consolidation Block 12 — drawing register foundation — 2026-09-28
 
 - [x] C056 binds sheet/set metadata to existing immutable File IDs and hashes with project-scoped identity.

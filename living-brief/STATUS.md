@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation Block 17 commercial-impact candidate — 2026-09-28
+
+- C081–C085 connect exact-version RFI/Submittal/field evidence to potential impacts, canonical Change Order drafts, existing approval thresholds, versioned approved baselines, separated forecast/actual presentation and reproducible customer-review evidence.
+- Potential impact is never approved contract value. Only a threshold-complete approved Change Order can produce a new approved-baseline version; contract signature, legal notice and payment authority remain false.
+- This is Platform/API domain-contract work only. It changes no schema, customer data, provider configuration, Lens Next Native code or installer. Push is due now; publication and authenticated Chrome smoke remain due after C090.
+
 ## Consolidation Block 12 source candidate — 2026-09-28
 
 - C056–C060 add a drawing-register foundation over existing immutable File custody: project-scoped sheet/set identity, uncertainty-visible import preview with mandatory confirmation, reviewable revision succession, current/as-of resolution with bulletin fallback semantics, and deterministic release lineage to existing Files, RFI attachments and Lens references.
