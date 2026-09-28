@@ -7,6 +7,7 @@ import express from "express";
 import { pool } from "@workspace/db";
 import intakeRouter from "../routes/job-intake";
 import contractsRouter from "../routes/financial-contracts";
+import contractItemWorkflowsRouter from "../routes/contract-item-workflows";
 import edtRouter from "../routes/edt-engine";
 import reportsRouter from "../routes/reports";
 import financialApuRouter from "../routes/financial-apu";
@@ -123,7 +124,7 @@ async function publishedTemplate(name: string,price: string,classified = false) 
 const drawingTemplate = await publishedTemplate("Drawing Reference","300");
 const reviewTemplate = await publishedTemplate("Review Reference","200");
 
-const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,edtRouter,reportsRouter,financialApuRouter);
+const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,contractItemWorkflowsRouter,edtRouter,reportsRouter,financialApuRouter);
 const server = app.listen(0,"127.0.0.1");
 await new Promise<void>(resolve => server.once("listening",resolve));
 const address = server.address(); assert.ok(address && typeof address !== "string");
@@ -364,6 +365,36 @@ try {
   assert.equal(contracts.status,200,JSON.stringify(contracts.body));
   assert.equal(contracts.body.contracts.length,2);
   assert.ok(contracts.body.contracts.every((contract:any)=>contract.makerUserId===actor.id), 'Maker presentation uses the exact prepared version identity');
+  const boundItems = (await pool.query(`SELECT w.id,w.contract_id,w.contract_version_id,w.stable_scope_item_id,b.definition,b.fingerprint
+    FROM job_activation_work_items w JOIN company_delivery_workflow_work_items b ON b.work_item_id=w.id WHERE w.project_id=$1`,[projectId])).rows;
+  assert.equal(boundItems.length,2);
+  assert.equal(Number((await pool.query(`SELECT count(*)::int n FROM contract_item_workflows WHERE project_id=$1`,[projectId])).rows[0].n),0,
+    'Activation must not duplicate the authoritative workflow with a generic contract tree');
+  for (const item of boundItems) {
+    const path=`/projects/${projectId}/financial/contracts/${item.contract_id}/items/${item.stable_scope_item_id}/workflow`;
+    const linked=await request('GET',path);
+    assert.equal(linked.status,200,JSON.stringify(linked.body));
+    assert.equal(linked.body.deliveryWorkflow.workItemId,item.id);
+    assert.equal(linked.body.deliveryWorkflow.fingerprint,item.fingerprint);
+    assert.deepEqual(linked.body.deliveryWorkflow.phases,item.definition.phases.map((phase:any)=>({id:phase.id,name:phase.name})));
+    assert.deepEqual(linked.body.nodes,[]);
+    assert.equal((await request('POST',`${path}/initialize`,{})).status,409);
+    assert.equal((await request('POST',`${path}/nodes`,{nodeType:'phase',name:'Forbidden duplicate phase'})).status,409);
+  }
+  console.log('C020 canonical workflow linkage PASS: exact frozen phases, no duplicate tree, legacy initialization and mutation denied');
+  const historicalItem=boundItems[0], historicalWorkflowId=randomUUID(), historicalNodeId=randomUUID();
+  await pool.query(`INSERT INTO contract_item_workflows(id,project_id,contract_id,contract_version_id,stable_line_id,display_name,template_key,created_by_id)
+    VALUES($1,$2,$3,$4,$5,'Preserved legacy fixture','generic',$6)`,
+    [historicalWorkflowId,projectId,historicalItem.contract_id,historicalItem.contract_version_id,historicalItem.stable_scope_item_id,actor.id]);
+  await pool.query(`INSERT INTO contract_item_workflow_nodes(id,workflow_id,node_type,name,sequence,created_by_id)
+    VALUES($1,$2,'phase','Historical Preliminary',1,$3)`,[historicalNodeId,historicalWorkflowId,actor.id]);
+  const legacyHistory=async()=>(await pool.query(`SELECT to_jsonb(w) workflow,to_jsonb(n) node FROM contract_item_workflows w
+    JOIN contract_item_workflow_nodes n ON n.workflow_id=w.id WHERE w.id=$1`,[historicalWorkflowId])).rows;
+  const beforeLegacy=await legacyHistory();
+  const historicalPath=`/projects/${projectId}/financial/contracts/${historicalItem.contract_id}/items/${historicalItem.stable_scope_item_id}/workflow`;
+  assert.equal((await request('GET',historicalPath)).body.deliveryWorkflow.workItemId,historicalItem.id);
+  assert.equal((await request('PATCH',`${historicalPath}/nodes/${historicalNodeId}`,{expectedRevision:1,status:'in_progress'})).status,409);
+  assert.deepEqual(await legacyHistory(),beforeLegacy,'Legacy frozen history must not be overwritten or advanced');
   const byNumber = new Map(contracts.body.contracts.map((contract:any) => [contract.legalNumber,contract]));
   assert.equal((byNumber.get("INT-BASE-001") as any)?.pricingTemplateBinding.versionId,drawingTemplate.versionId);
   assert.equal((byNumber.get("INT-ADD-001") as any)?.pricingTemplateBinding.versionId,replacement.versionId);

@@ -45766,6 +45766,7 @@
         "artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts",
         "artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts",
         "artifacts/api-server/src/lib/contract-economic-pool-service.ts",
+        "artifacts/api-server/src/lib/contract-item-workflow-service.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-allocation.ts",
         "artifacts/api-server/src/lib/cost-value-bonus-service.ts",
@@ -45796,6 +45797,7 @@
         "artifacts/api-server/src/routes/financial-contracts.ts",
         "artifacts/api-server/src/routes/job-intake.ts",
         "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+        "artifacts/bimlog/src/components/commercial/ContractItemWorkflowPanel.tsx",
         "artifacts/bimlog/src/components/commercial/ContractPoolPreparation.tsx",
         "artifacts/bimlog/src/components/commercial/ContractProductionAllocationReview.behavior.tsx",
         "artifacts/bimlog/src/components/commercial/ContractProductionAllocationReview.tsx",
@@ -45828,7 +45830,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "de6b1382524f7c13fab8dd12f1c4f3686eb02db0dd4817bfd87c3fbb70b849e5"
+      "reviewedChangeSha256": "fcc0f8d20b25d8b8a7e32360b96f1019ed6c9a9aebdf1ffbf3ca8ca1d0e99755"
     }
   ]
 }

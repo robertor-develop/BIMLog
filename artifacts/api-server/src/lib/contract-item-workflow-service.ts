@@ -5,6 +5,30 @@ import { authorizeFinancialOperation } from "./financial-control-service";
 import { boundedText, positiveId } from "./financial-budget-contract";
 import { waitForContractItemWorkflowMigration } from "./contract-item-workflow-migration";
 import { assertWorkflowParent, defaultWorkflowPhases, requiredWorkflowParent, workflowNodeStatus, workflowNodeType } from "./contract-item-workflow-contract";
+import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
+import { validateDeliveryWorkflowDefinition, deliveryWorkflowFingerprint } from "./delivery-workflow-template-contract";
+
+async function linkedDeliveryWorkflow(client: any, projectId: number, contractId: string, versionId: string, stableLineId: string) {
+  await ensureDeliveryWorkflowRuntimeSchema();
+  const rows = (await client.query(`SELECT b.* FROM company_delivery_workflow_work_items b
+    JOIN job_activation_work_items w ON w.id=b.work_item_id
+    JOIN financial_contracts c ON c.id=w.contract_id AND c.project_id=w.project_id AND c.company_id=b.company_id
+    WHERE w.project_id=$1 AND b.project_id=$1 AND w.contract_id=$2 AND w.contract_version_id=$3 AND w.stable_scope_item_id=$4`,
+    [projectId, contractId, versionId, stableLineId])).rows;
+  if (rows.length > 1) throw new FinancialControlError(409, "WORKFLOW_BINDING_AMBIGUOUS", "This Contract Item has multiple activated workflow bindings.");
+  if (!rows.length) return null;
+  const binding = rows[0];
+  const definition = validateDeliveryWorkflowDefinition(binding.definition);
+  if (deliveryWorkflowFingerprint(definition) !== binding.fingerprint)
+    throw new FinancialControlError(409, "DELIVERY_WORKFLOW_SNAPSHOT_MISMATCH", "The activated workflow snapshot failed integrity verification.");
+  return { workItemId: binding.work_item_id, code: binding.template_code, version: Number(binding.template_version),
+    fingerprint: binding.fingerprint, status: binding.status, phases: definition.phases.map(phase => ({id: phase.id, name: phase.name})) };
+}
+
+async function assertLegacyWorkflowEditable(client: any, scope: any, projectId: number, contractId: string, stableLineId: string) {
+  if (await linkedDeliveryWorkflow(client, projectId, contractId, scope.contract_version_id, stableLineId))
+    throw new FinancialControlError(409, "WORKFLOW_MANAGED_IN_OPERATIONS", "Use the activated Delivery Workflow in Operations; its frozen phases cannot be changed through the legacy contract workflow.");
+}
 
 const uuid = () => crypto.randomUUID();
 
@@ -49,6 +73,8 @@ export async function getContractItemWorkflow(input: { actorUserId: number; proj
   await waitForContractItemWorkflowMigration();
   await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.view", operation: "read" });
   const scope = await itemScope(pool, projectId, contractId, stableLineId);
+  const deliveryWorkflow = await linkedDeliveryWorkflow(pool, projectId, contractId, scope.contract_version_id, stableLineId);
+  if (deliveryWorkflow) return { workflow: null, nodes: [], deliveryWorkflow };
   const workflow = (await pool.query(`SELECT * FROM contract_item_workflows WHERE contract_version_id=$1 AND stable_line_id=$2`, [scope.contract_version_id, stableLineId])).rows[0];
   return workflow ? response(pool, workflow) : { workflow: null, nodes: [] };
 }
@@ -58,6 +84,7 @@ export async function initializeContractItemWorkflow(input: { actorUserId: numbe
   return transaction(async (client) => {
     await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.prepare", operation: "prepare", client });
     const scope = await itemScope(client, projectId, contractId, stableLineId);
+    await assertLegacyWorkflowEditable(client, scope, projectId, contractId, stableLineId);
     let workflow = (await client.query(`SELECT * FROM contract_item_workflows WHERE contract_version_id=$1 AND stable_line_id=$2 FOR UPDATE`, [scope.contract_version_id, stableLineId])).rows[0];
     if (workflow) return response(client, workflow);
     const snapshot = scope.contract_item_snapshot ?? {};
@@ -80,11 +107,12 @@ export async function initializeContractItemWorkflowsWithClient(input: {
   items: Array<{ stableLineId: string; displayName: string; templateKey: string }>;
 }, client: any) {
   await waitForContractItemWorkflowMigration();
-  let created = 0;
+  let created = 0, linked = 0;
   for (const item of input.items) {
     const stableLineId = boundedText(item.stableLineId, "stableLineId", 1, 100);
     const displayName = boundedText(item.displayName, "displayName", 1, 300);
     const templateKey = boundedText(item.templateKey || "generic", "templateKey", 1, 100);
+    if (await linkedDeliveryWorkflow(client, input.projectId, input.contractId, input.contractVersionId, stableLineId)) { linked += 1; continue; }
     const workflowId = uuid();
     const inserted = (await client.query(`INSERT INTO contract_item_workflows(id,project_id,contract_id,contract_version_id,stable_line_id,display_name,template_key,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(contract_version_id,stable_line_id) DO NOTHING RETURNING *`, [workflowId, input.projectId, input.contractId, input.contractVersionId, stableLineId, displayName, templateKey, input.actorUserId])).rows[0];
     if (!inserted) continue;
@@ -93,7 +121,7 @@ export async function initializeContractItemWorkflowsWithClient(input: {
     for (let index = 0; index < phases.length; index++) await client.query(`INSERT INTO contract_item_workflow_nodes(id,workflow_id,parent_id,node_type,name,sequence,created_by_id) VALUES($1,$2,NULL,'phase',$3,$4,$5)`, [uuid(), workflowId, phases[index], index + 1, input.actorUserId]);
     await client.query(`INSERT INTO contract_item_workflow_events(id,workflow_id,actor_user_id,event_type,after_state,reason) VALUES($1,$2,$3,'workflow_initialized','active','Job activation created the Contract Item execution baseline')`, [uuid(), workflowId, input.actorUserId]);
   }
-  return { requested: input.items.length, created };
+  return { requested: input.items.length, created, linked };
 }
 
 export async function addContractItemWorkflowNode(input: { actorUserId: number; projectId: unknown; contractId: unknown; stableLineId: unknown; parentId?: unknown; nodeType: unknown; name: unknown; dueDate?: unknown; assigneeUserId?: unknown }) {
@@ -104,6 +132,7 @@ export async function addContractItemWorkflowNode(input: { actorUserId: number; 
   return transaction(async (client) => {
     await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.prepare", operation: "prepare", client });
     const scope = await itemScope(client, projectId, contractId, stableLineId);
+    await assertLegacyWorkflowEditable(client, scope, projectId, contractId, stableLineId);
     const workflow = (await client.query(`SELECT * FROM contract_item_workflows WHERE contract_version_id=$1 AND stable_line_id=$2 FOR UPDATE`, [scope.contract_version_id, stableLineId])).rows[0];
     if (!workflow) throw new FinancialControlError(409, "WORKFLOW_NOT_INITIALIZED", "Initialize the Contract Item workflow first.");
     if (workflow.status !== "active") throw new FinancialControlError(409, "WORKFLOW_NOT_ACTIVE", "Only an active workflow can be changed.");
@@ -135,6 +164,7 @@ export async function updateContractItemWorkflowNode(input: { actorUserId: numbe
   return transaction(async (client) => {
     await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.prepare", operation: "prepare", client });
     const scope = await itemScope(client, projectId, contractId, stableLineId);
+    await assertLegacyWorkflowEditable(client, scope, projectId, contractId, stableLineId);
     const workflow = (await client.query(`SELECT * FROM contract_item_workflows WHERE contract_version_id=$1 AND stable_line_id=$2 FOR UPDATE`, [scope.contract_version_id, stableLineId])).rows[0];
     if (!workflow) throw new FinancialControlError(404, "WORKFLOW_NOT_FOUND", "Contract Item workflow not found.");
     const node = (await client.query(`SELECT * FROM contract_item_workflow_nodes WHERE id=$1 AND workflow_id=$2 FOR UPDATE`, [nodeId, workflow.id])).rows[0];

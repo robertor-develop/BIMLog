@@ -1429,6 +1429,12 @@ export async function activateJobIntake(input: {
           client,
         );
         assertIntakeProductionAllocation(contractItems, draft.pricingTemplateBinding);
+        // Link the already activated, frozen workflow before compatibility initialization.
+        // This prevents a second generic phase tree for the same Contract Item.
+        await client.query(
+          `UPDATE job_activation_work_items SET contract_id=$2,contract_version_id=$3,updated_at=now() WHERE intake_id=$1 AND stable_scope_item_id=ANY($4::text[])`,
+          [intake.id, draft.id, draft.versionId, contractItems.map((item) => item.id)],
+        );
         const initialized = await initializeContractItemWorkflowsWithClient(
           {
             actorUserId: input.actorUserId,
@@ -1444,16 +1450,7 @@ export async function activateJobIntake(input: {
           },
           client,
         );
-        workflowBaseline.created += initialized.created;
-        await client.query(
-          `UPDATE job_activation_work_items SET contract_id=$2,contract_version_id=$3,updated_at=now() WHERE intake_id=$1 AND stable_scope_item_id=ANY($4::text[])`,
-          [
-            intake.id,
-            draft.id,
-            draft.versionId,
-            contractItems.map((item) => item.id),
-          ],
-        );
+        workflowBaseline.created += initialized.created + initialized.linked;
         drafts.push({
           profileId: contract.id,
           contractId: draft.id,
