@@ -414,6 +414,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts
 - artifacts/api-server/src/lib/design-comment-control.behavior.ts
 - artifacts/api-server/src/lib/design-comment-control.ts
+- artifacts/api-server/src/lib/drawing-current-resolution.behavior.ts
+- artifacts/api-server/src/lib/drawing-current-resolution.ts
+- artifacts/api-server/src/lib/drawing-import-preview.behavior.ts
+- artifacts/api-server/src/lib/drawing-import-preview.ts
+- artifacts/api-server/src/lib/drawing-register-identity.behavior.ts
+- artifacts/api-server/src/lib/drawing-register-identity.ts
+- artifacts/api-server/src/lib/drawing-register-release.behavior.ts
+- artifacts/api-server/src/lib/drawing-register-release.ts
+- artifacts/api-server/src/lib/drawing-revision-matching.behavior.ts
+- artifacts/api-server/src/lib/drawing-revision-matching.ts
 - artifacts/api-server/src/lib/edt-engine-activation-candidate.ts
 - artifacts/api-server/src/lib/edt-engine-activation-service.ts
 - artifacts/api-server/src/lib/edt-engine-authorization.behavior.ts
