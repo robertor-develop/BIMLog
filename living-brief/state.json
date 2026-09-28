@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "82661f182ed42213c072991d5132986459d9e932eda243f4f9fe2a4d238a7cef",
+  "bundleSha256": "67a98bf4621bfeeaa99467a6b2356282f60c7f4de7f147ed20e3b83e3b552f1b",
   "impact": {
     "baselineCommit": "7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918",
     "changedPaths": [
@@ -36,7 +36,7 @@
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "df2d41f806ad389aa9c071c95f6bfaba45a9634ce7f9b6856a64c5d748d3dce1",
+      "sha256": "a5c632542a09c0a68290e7bb135a363acf0f39dbda312c69bb2b83f3cf2cf7b2",
       "sourceChangedAt": "2026-09-28T03:47:11.972Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918",

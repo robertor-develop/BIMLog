@@ -63,6 +63,8 @@ Browser recovery remains bounded; no safety, permission or tool restriction may 
 Migration, production/customer data, destructive actions, security and credential boundaries
 remain mandatory. Authorization continuity does not create new authority or manufacture PASS.
 Non-runtime documentation/checker corrections do not alone require a production republication.
+Current register checkpoints supersede dated recovery notes; preserved historical failures
+cannot recreate a closed blocker or cancel the inherited authorization.
 
 ## Owner authority and document precedence
 Development governance follows this hierarchy:
