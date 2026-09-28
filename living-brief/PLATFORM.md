@@ -403,6 +403,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/cost-value-performance.behavior.ts
 - artifacts/api-server/src/lib/cost-value-plan-service.ts
 - artifacts/api-server/src/lib/cost-value-plan.behavior.ts
+- artifacts/api-server/src/lib/customer-delivery-preparation.behavior.ts
+- artifacts/api-server/src/lib/customer-delivery-preparation.ts
+- artifacts/api-server/src/lib/customer-review-request.behavior.ts
+- artifacts/api-server/src/lib/customer-review-request.ts
+- artifacts/api-server/src/lib/customer-setup-diagnosis.behavior.ts
+- artifacts/api-server/src/lib/customer-setup-diagnosis.ts
+- artifacts/api-server/src/lib/customer-workspace-landing.behavior.ts
+- artifacts/api-server/src/lib/customer-workspace-landing.ts
+- artifacts/api-server/src/lib/customer-workspace-records.behavior.ts
+- artifacts/api-server/src/lib/customer-workspace-records.ts
 - artifacts/api-server/src/lib/daily-evidence-link.behavior.ts
 - artifacts/api-server/src/lib/daily-evidence-link.ts
 - artifacts/api-server/src/lib/daily-field-record.behavior.ts
