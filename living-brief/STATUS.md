@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation Block 22 — security, privacy and recovery — 2026-09-28
+
+C106–C110 bind the current SharePoint publication path to exact company/project/capability authority, secret-free diagnostics, explicit lifecycle and retention rules, exact restore parity and aggregate acceptance. Cross-tenant and guessed-object access deny; completed/dead-letter/held evidence remains immutable. No production database/schema, customer data, provider binding, credential, Lens Next Native or installer changed. C110 is the scheduled push/publication/authenticated-Chrome boundary.
+
 ## Consolidation Block 21 — SharePoint publication closure — 2026-09-28
 
 C101–C105 connect the existing Folder Wizard readiness, exact human confirmation, worker outcome, safe receipt and real bilingual publication status UI without adding a parallel queue or provider authority. Completed, retry, dead-letter, cancelled and pending states remain distinct; only a completed provider outcome is published. No schema, customer data, Microsoft tenant, credential, Lens Next Native or installer changed. Build 105 is the five-build push checkpoint; publication and authenticated Chrome smoke remain due at C110.
