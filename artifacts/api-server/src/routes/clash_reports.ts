@@ -33,6 +33,7 @@ import {
 } from "../lib/clash-report-contracts";
 import { clashReportScopeWhere, clashScopeWhere } from "../lib/clash-report-provenance";
 import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../lib/clash-visual-package-truth";
+import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } from "../lib/company-directory-resolution";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -2001,21 +2002,45 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
     const projectId = Number(req.params.projectId);
     try {
       const [directoryRows, lensRows] = await Promise.all([
-        db.select({ companyName: projectDirectoryTable.companyName }).from(projectDirectoryTable)
+        db.select({ companyName: projectDirectoryTable.companyName, companyId: projectDirectoryTable.companyId }).from(projectDirectoryTable)
           .where(eq(projectDirectoryTable.projectId, projectId)),
         db.select({ responsibleCompany: lensViewpointsTable.responsibleCompany }).from(lensViewpointsTable)
           .where(eq(lensViewpointsTable.projectId, projectId)),
       ]);
+      const ids = [...new Set(directoryRows.map((row) => row.companyId).filter((id): id is number => Number.isInteger(id)))];
+      const companyRows = ids.length ? await db.select({ id: companiesTable.id, name: companiesTable.name,
+        retiredIntoCompanyId: companiesTable.retiredIntoCompanyId }).from(companiesTable)
+        .where(inArray(companiesTable.id, ids)) : [];
+      const byId = new Map(companyRows.map((row) => [row.id, row]));
+      const candidates: CompanyDirectoryCandidate[] = companyRows.map((row) => ({
+        companyId: row.id,
+        canonicalCompanyId: row.retiredIntoCompanyId ?? row.id,
+        companyName: row.name,
+        source: row.retiredIntoCompanyId == null ? "company" : "directory_alias",
+      }));
       const names = new Set<string>();
+      const references: ReturnType<typeof resolveLensCompanyDirectoryReference>[] = [];
       for (const row of directoryRows) {
         const v = row.companyName?.trim();
-        if (v) names.add(v);
+        if (!v) continue;
+        const company = row.companyId == null ? null : byId.get(row.companyId);
+        const canonicalId = company?.retiredIntoCompanyId ?? company?.id ?? null;
+        if (canonicalId != null && !candidates.some((candidate) => candidate.companyId === canonicalId)) {
+          const canonical = await db.select({ id: companiesTable.id, name: companiesTable.name,
+            retiredIntoCompanyId: companiesTable.retiredIntoCompanyId }).from(companiesTable)
+            .where(eq(companiesTable.id, canonicalId)).limit(1);
+          if (canonical[0]) candidates.push({ companyId: canonical[0].id, canonicalCompanyId: canonical[0].id,
+            companyName: canonical[0].name, source: "company" });
+        }
+        const resolved = resolveLensCompanyDirectoryReference({ companyId: row.companyId, companyName: v, candidates });
+        names.add(resolved.displayName);
+        references.push(resolved);
       }
       for (const row of lensRows) {
         const v = row.responsibleCompany?.trim();
         if (v) names.add(v);
       }
-      res.json({ success: true, companies: Array.from(names).sort((a, b) => a.localeCompare(b)) });
+      res.json({ success: true, companies: Array.from(names).sort((a, b) => a.localeCompare(b)), references });
     } catch (err) {
       res.status(500).json({ error: "responsible_companies_failed", message: err instanceof Error ? err.message : String(err) });
     }
