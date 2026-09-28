@@ -393,6 +393,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/cost-value-performance.behavior.ts
 - artifacts/api-server/src/lib/cost-value-plan-service.ts
 - artifacts/api-server/src/lib/cost-value-plan.behavior.ts
+- artifacts/api-server/src/lib/daily-evidence-link.behavior.ts
+- artifacts/api-server/src/lib/daily-evidence-link.ts
+- artifacts/api-server/src/lib/daily-field-record.behavior.ts
+- artifacts/api-server/src/lib/daily-field-record.ts
+- artifacts/api-server/src/lib/daily-record-report.behavior.ts
+- artifacts/api-server/src/lib/daily-record-report.ts
+- artifacts/api-server/src/lib/daily-site-observation.behavior.ts
+- artifacts/api-server/src/lib/daily-site-observation.ts
+- artifacts/api-server/src/lib/daily-workforce-observation.behavior.ts
+- artifacts/api-server/src/lib/daily-workforce-observation.ts
 - artifacts/api-server/src/lib/database-startup-serialization.behavior.ts
 - artifacts/api-server/src/lib/delivery-workflow-allocation-source-contract.ts
 - artifacts/api-server/src/lib/delivery-workflow-allocation-source.behavior.ts

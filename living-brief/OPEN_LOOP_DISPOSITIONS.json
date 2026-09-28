@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "e6bad8661dcec23bd96e3902e48b6416f81ecce36d883c68767da310219feb45",
-  "itemCount": 236,
+  "sourceSha256": "ae347abf84c2e8d2f9b0dc6cd066bddcfc03e792947221be322a3f6e1bed5768",
+  "itemCount": 237,
   "counts": {
-    "ACTIVE": 201,
+    "ACTIVE": 202,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4317,6 +4317,24 @@
       "evidence": [
         "OPEN_LOOP.md:3633",
         "Consolidation Block 14 — specification and procurement readiness — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "af526dbeb6d79776",
+      "sourceLine": 3640,
+      "heading": "Consolidation Block 15 — daily field records — 2026-09-28",
+      "statement": "Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C076–C080.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3640",
+        "Consolidation Block 15 — daily field records — 2026-09-28"
       ],
       "currentAuthority": false
     }
