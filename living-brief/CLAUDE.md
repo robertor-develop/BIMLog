@@ -879,3 +879,4 @@ Run `pnpm run generate:route-interconnection-graph` only when intentionally refr
 - Summary totals drill down to exact record keys and reasons. Missing or unavailable source details remain explicit instead of being guessed.
 - History requires current tenant/project membership; former members are denied. Retained customer output is reproducible from immutable baseline fingerprints.
 - `test:consolidation-block09` is permanent through the existing Block 8 pre-push chain. This Platform/API block changes no schema, customer data, Lens Next Native or installers and is pushed without publication until C050.
+- The Block 9 state seal must be generated only after the structural platform inventory reflects all five accepted source units; the final narrative and seal cover the same exact candidate boundary.

@@ -3589,3 +3589,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Keep capture explicit and permission-bound; do not add schedules, background captures, notifications or a parallel report/source authority.
 - [ ] Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C046–C050.
 - [ ] Do not run focused Navisworks smoke because C041–C045 do not change Native or installer paths.
+- [x] Refresh the generated platform inventory, semantic review and Living Brief state seal in the correct order so the exact Block 9 candidate has no unreviewed structural-document boundary.
