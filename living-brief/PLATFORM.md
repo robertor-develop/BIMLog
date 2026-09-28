@@ -704,6 +704,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/generic-apu-persistence-migration.ts
 - artifacts/api-server/src/lib/generic-apu-persistence-startup.behavior.ts
 - artifacts/api-server/src/lib/generic-apu.behavior.ts
+- artifacts/api-server/src/lib/handover-package-manifest.behavior.ts
+- artifacts/api-server/src/lib/handover-package-manifest.ts
+- artifacts/api-server/src/lib/handover-readiness.behavior.ts
+- artifacts/api-server/src/lib/handover-readiness.ts
 - artifacts/api-server/src/lib/help-center.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
@@ -746,6 +750,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-operations-service.ts
 - artifacts/api-server/src/lib/job-operations.behavior.ts
 - artifacts/api-server/src/lib/job-work-packages.behavior.ts
+- artifacts/api-server/src/lib/knowledge-company-reuse.behavior.ts
+- artifacts/api-server/src/lib/knowledge-company-reuse.ts
+- artifacts/api-server/src/lib/knowledge-context-lookup.behavior.ts
+- artifacts/api-server/src/lib/knowledge-context-lookup.ts
+- artifacts/api-server/src/lib/knowledge-lesson-proposal-link.behavior.ts
+- artifacts/api-server/src/lib/knowledge-lesson-proposal-link.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.behavior.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.ts
