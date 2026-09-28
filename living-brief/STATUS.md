@@ -2990,3 +2990,10 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Source commit `60ae18d5cdb2c7a8246a7b03d0ab5c14944dd10e` replaces the BIMLog frontend's unbounded direct Vite invocation with a portable production-build wrapper that defaults Vite to a 768 MB old-space limit while preserving an explicit `BIMLOG_VITE_MAX_OLD_SPACE_MB` override.
 - The correction addresses the provider's generic Bundle failure without changing BIMLog product behavior, database/schema, customer data, Lens Next Native, installers, Replit configuration, or production state.
 - Publication recovery is closed at `7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918` with Norte's successful provider and focused authenticated live evidence. Remaining complete funding/time/bonus/report acceptance is not covered by that focused smoke.
+
+## Consolidation Block 6 source candidate — 2026-09-28
+
+- C026–C030 add one read-only Headquarters responsibility workspace over existing RFI, Submittal, Meeting, Schedule and Lens records. Canonical modules remain authoritative; no parallel task, issue, status or project-access store was introduced.
+- The workspace provides `My Work`, `My Company` and `Authorized Projects` views bounded by active project membership, deterministic due/overdue/blocked/no-response classifications, explicit missing context, saved non-authoritative view context, and direct links to the owning editor and related Lens evidence.
+- Product commits are `bcf67505`, `5e3742df`, `58bb4f3b`, `c7c15cc8` and `881bd279`. Living Brief and route-graph reconciliation are bound through `8c32f9c303e08456bd7c525d3ac5cf3b37e3630c`.
+- This block changes Platform/API only. Database/schema, customer data, Lens Next Native, installers, bridge, Autodesk state and Navisworks licensing are unchanged. Ten unpublished consolidation builds now require the established push, Replit Shell publication without Agents, and authenticated visible-Chrome smoke.

@@ -787,6 +787,14 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/release-metadata.ts
 - artifacts/api-server/src/lib/resource-hour-sources.behavior.ts
 - artifacts/api-server/src/lib/resource-hour-sources.ts
+- artifacts/api-server/src/lib/responsibility-action-routing.behavior.ts
+- artifacts/api-server/src/lib/responsibility-action-routing.ts
+- artifacts/api-server/src/lib/responsibility-classification.behavior.ts
+- artifacts/api-server/src/lib/responsibility-classification.ts
+- artifacts/api-server/src/lib/responsibility-workspace-scope.behavior.ts
+- artifacts/api-server/src/lib/responsibility-workspace-scope.ts
+- artifacts/api-server/src/lib/responsibility-workspace.behavior.ts
+- artifacts/api-server/src/lib/responsibility-workspace.ts
 - artifacts/api-server/src/lib/rfi-command-service.ts
 - artifacts/api-server/src/lib/rfi-complete-package.behavior.ts
 - artifacts/api-server/src/lib/rfi-complete-package.ts

@@ -3560,3 +3560,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Reproduce the provider Bundle failure in Replit Shell and isolate it to the default-memory BIMLog Vite process after the mockup and API workspaces build successfully.
 - [x] Bound the BIMLog Vite production build to 768 MB by default through a portable tracked wrapper and prove the same frontend build passes in Replit Shell without Replit Agents.
 - [x] Publication recovery closed at `7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918`: Norte reports complete build/publication and focused authenticated Chrome smoke. This does not close the remaining C020 end-to-end acceptance. Existing authorization remains valid.
+
+## Consolidation Block 6 — responsibility workspace — 2026-09-28
+
+- [x] C026–C030 implement the canonical responsibility projection, active-membership scopes, independent urgency metrics, owning-module action routes, saved accessible Headquarters workspace and permanent focused gate.
+- [x] Preserve RFI, Submittal, Meeting, Schedule and Lens as the only source authorities; do not create a second task store, second project-access authority or synthetic Lens issue workflow.
+- [ ] Pass the complete clean pre-push gate on the reconciled exact head, push normally to `origin/master`, publish the ten-build C021–C030 batch through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke of Headquarters scope/group persistence, source navigation, linked Lens evidence, reload and session continuity.
+- [ ] Do not run focused Navisworks smoke for this block because Native and installer paths are unchanged. Ruben's separate physical Navisworks 2025 field confirmation remains outside this Platform-only block.

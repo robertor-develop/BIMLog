@@ -851,3 +851,4 @@ Run `pnpm run generate:route-interconnection-graph` only when intentionally refr
 - Workspace actions open the existing authorized owning-module editor. Linked Lens evidence remains linked evidence. `Publish Update` records a source update and never means document publication.
 - The selected responsibility scope and urgency group are saved as non-authoritative browser context. Missing owner, deadline or project context remains visible instead of being guessed.
 - `test:consolidation-block06` is a permanent pre-push gate. This block changed Platform/API only; Lens Next Native, installers and the immutable Lens fallback were not modified.
+- The accepted implementation and deterministic route graph are reconciled through `8c32f9c303e08456bd7c525d3ac5cf3b37e3630c`; provider publication evidence must bind the later clean exact-head candidate.
