@@ -1,10 +1,16 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation Block 12 source candidate — 2026-09-28
+
+- C056–C060 add a drawing-register foundation over existing immutable File custody: project-scoped sheet/set identity, uncertainty-visible import preview with mandatory confirmation, reviewable revision succession, current/as-of resolution with bulletin fallback semantics, and deterministic release lineage to existing Files, RFI attachments and Lens references.
+- Five bounded implementation commits run from `82deb151` through `a95e516a`. Focused behavior suites and API TypeScript compilation pass. The complete exact-head pre-push gate, push, Replit publication and authenticated Chrome smoke remain the release-closing checks.
+- No duplicate blob store, production database/schema, customer data, Lens Next Native or installer changed. Navisworks smoke is not triggered. C051–C060 form the ten-build publication batch.
+
 ## Consolidation Block 11 source candidate — 2026-09-28
 
 - C051–C055 extend existing Meetings and Schedule authority without parallel records: deterministic agenda snapshots from canonical overdue/blocked items, identity-preserving commitment carry-forward and evidence-based closure, independently versioned schedule placement that cannot overwrite contractual deadlines, accountable two/six-week lookahead, and governed meeting-pack preparation without sending.
-- Five bounded implementation commits run from `391b21bf` through `e0308ace`. Focused behavior suites and API TypeScript compilation pass. The complete clean pre-push gate and exact-head push remain the block-closing checks.
-- No database/schema, customer data, Lens Next Native or installer changed. Navisworks smoke is not triggered. C051–C055 are five unpublished builds; publication and authenticated Chrome smoke are due after C056–C060.
+- Five bounded implementation commits run from `391b21bf` through `e0308ace`. Focused behavior suites, full pre-push verification and exact-head push passed at `c0aad6ab9283d29b317ebf7f384e394a6b0700ea`.
+- No database/schema, customer data, Lens Next Native or installer changed. Navisworks smoke was not triggered. C051–C055 remain the first half of the C060 publication batch.
 
 ## Consolidation Block C021-C025 candidate - 2026-09-28
 

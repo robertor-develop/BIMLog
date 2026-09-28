@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Consolidation Block 12 — drawing register foundation — 2026-09-28
+
+- [x] C056 binds sheet/set metadata to existing immutable File IDs and hashes with project-scoped identity.
+- [x] C057 exposes extraction uncertainty and requires complete manual confirmation before metadata is committable.
+- [x] C058 makes revision succession reviewable, preserves prior bytes/history and blocks ambiguous automatic supersession.
+- [x] C059 resolves current and as-of-date sheets with explicit withdrawn/out-of-scope bulletin fallback semantics.
+- [x] C060 builds a deterministic register release with authorized File, RFI-attachment and Lens-reference lineage.
+- [ ] Pass the complete exact-head gate, push `origin/master`, publish through the established Replit Shell/Publish path, and complete exact-identity authenticated Chrome smoke.
+- [x] No focused Navisworks smoke is required because no Lens Next Native or installer changed.
+
 ## Consolidation Block 11 — meetings, commitments and lookahead — 2026-09-28
 
 - [x] C051 creates a dated agenda from canonical overdue/blocked records without cloning them.
@@ -7,7 +17,7 @@
 - [x] C053 versions schedule placement separately and protects contractual/source deadlines.
 - [x] C054 provides accountable two/six-week lookahead with blocked/late/planned truth.
 - [x] C055 prepares the agenda-to-next-meeting package without external sending.
-- [ ] Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C056–C060.
+- [x] Complete exact-head pre-push gate passed and `c0aad6ab9283d29b317ebf7f384e394a6b0700ea` was pushed normally to `origin/master`; publication remains paired with C056–C060.
 - [x] No focused Navisworks smoke is required because no Lens Next Native or installer changed.
 
 ## Consolidation Block C021-C025 - 2026-09-28
