@@ -122,7 +122,7 @@
       "reconciledThroughCommit": "19d982e3e87337f345b044bd961b3d1e5c4352e3",
       "semanticReviewedThroughCommit": "19d982e3e87337f345b044bd961b3d1e5c4352e3",
       "semanticReviewTask": "consolidation-c071-c075-final-state-seal",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-28T18:13:58Z"
     },
     {
@@ -134,7 +134,7 @@
       "reconciledThroughCommit": "19d982e3e87337f345b044bd961b3d1e5c4352e3",
       "semanticReviewedThroughCommit": "19d982e3e87337f345b044bd961b3d1e5c4352e3",
       "semanticReviewTask": "consolidation-c071-c075-final-state-seal",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-28T18:13:58Z"
     },
     {

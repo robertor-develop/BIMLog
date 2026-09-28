@@ -47300,13 +47300,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "STATUS records the exact five product commits and unchanged boundaries."
+          "result": "reviewed_no_semantic_change",
+          "reason": "STATUS already records the exact five product commits and unchanged boundaries; the final seal adds no further semantic change."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "OPEN_LOOP records the complete gate and push due now and publication due at C080."
+          "result": "reviewed_no_semantic_change",
+          "reason": "OPEN_LOOP already records the complete gate and push due now and publication due at C080; the final seal adds no further semantic change."
         },
         {
           "key": "audit",
