@@ -1,0 +1,2 @@
+export type CustomerSetupCheck={kind:"permission"|"template"|"connection";label:string;ready:boolean;userAction:string};
+export function diagnoseCustomerSetup(input:{checks:readonly CustomerSetupCheck[]}){const incomplete=input.checks.filter(check=>!check.ready).map(check=>Object.freeze({kind:check.kind,label:check.label,userAction:check.userAction}));return Object.freeze({ready:incomplete.length===0,incomplete,secretFieldsExposed:false,developerIdsExposed:false,summary:incomplete.length?`${incomplete.length} setup item(s) need attention.`:"Setup is ready."});}
