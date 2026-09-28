@@ -1,0 +1,21 @@
+import assert from "node:assert/strict";
+import { approveFieldChecklist, defineFieldChecklist, freezeChecklistForInspection } from "./field-checklist-definition";
+import { completeFieldInspection, recordInspectionResult, startFieldInspection } from "./field-inspection-execution";
+import { ensureCorrectiveAction } from "./field-corrective-action-link";
+import { closeCorrectionCase, openCorrectionCase, recordReinspection, reopenCorrectionCase } from "./field-reinspection";
+
+const checklist = freezeChecklistForInspection(approveFieldChecklist(defineFieldChecklist({ templateId: "CHK", projectId: 8, version: 1, title: "Punch", purpose: "punch", items: [{ itemId: "support", prompt: "Support", evidenceRequired: true }] }), { approvedBy: "lead", approvedAt: "2026-09-28T14:00:00Z" }));
+let inspection = startFieldInspection({ inspectionId: "INSP-1", projectId: 8, checklist, executorId: "executor-1", executorRole: "field_inspector" });
+inspection = completeFieldInspection(recordInspectionResult(inspection, { itemId: "support", outcome: "fail", evidenceIds: ["PHOTO-1"], note: "Missing", recordedBy: "executor-1", recordedAt: "2026-09-28T15:00:00Z" }), "2026-09-28T15:10:00Z");
+const action = ensureCorrectiveAction({ inspection, itemId: "support", ownerId: "trade", dueDate: "2026-10-02", createdBy: "lead", createdAt: "2026-09-28T15:20:00Z", existing: [] }).action;
+let correction = openCorrectionCase(action);
+assert.throws(() => recordReinspection(correction, inspection, { reinspectionId: "RE-1", actionId: action.actionId, reviewerId: "executor-1", reviewerRole: "quality_reviewer", outcome: "pass", evidenceIds: ["PHOTO-2"], recordedAt: "2026-09-29T15:00:00Z" }), /original executor/);
+correction = recordReinspection(correction, inspection, { reinspectionId: "RE-1", actionId: action.actionId, reviewerId: "reviewer-2", reviewerRole: "quality_reviewer", outcome: "pass", evidenceIds: ["PHOTO-2"], recordedAt: "2026-09-29T15:00:00Z" });
+const beforeClose = correction.reinspections;
+correction = closeCorrectionCase(correction, { actorId: "reviewer-2", at: "2026-09-29T15:05:00Z", reason: "Correction verified" });
+assert.strictEqual(correction.reinspections, beforeClose, "closure preserves immutable reinspection results");
+assert.throws(() => reopenCorrectionCase(correction, { actorId: "executor-1", actorRole: "other", at: "2026-09-30T09:00:00Z", reason: "Disputed" }), /authorization/);
+const reopened = reopenCorrectionCase(correction, { actorId: "quality-lead", actorRole: "quality_lead", at: "2026-09-30T09:00:00Z", reason: "New evidence requires review" });
+assert.equal(reopened.state, "reopened");
+assert.deepEqual(reopened.history.map(event => event.event), ["closed", "reopened"]);
+console.log("C079 independent reinspection, closure and authorized reopening: PASS");
