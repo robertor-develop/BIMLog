@@ -47567,8 +47567,8 @@
     },
     {
       "taskId": "consolidation-c091-c095-final-state-seal",
-      "reviewedThroughCommit": "1df68b1e50d28682b0fede51e76fa82250ce966d",
-      "reviewedAt": "2026-09-28T21:15:11Z",
+      "reviewedThroughCommit": "e5b9395576cfb9484cb313c7498571a85a7c42f1",
+      "reviewedAt": "2026-09-28T21:24:47Z",
       "status": "local_candidate",
       "captureTiming": "same_task_after_narrative_and_generated_inventory_before_full_gate",
       "capabilityPreflight": {
@@ -47640,10 +47640,9 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e2046967ca061a8558f386c30a41e6a6500b188284044abe08a501565bb49e41"
+      "reviewedChangeSha256": "683c1806b1bbc7dec9e445ae082acda47dcfbe6153af066d0085ef8a9839e6dc"
     }
   ]
 }
