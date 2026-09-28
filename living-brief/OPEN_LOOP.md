@@ -9,6 +9,7 @@
 - [x] C095 diagnoses permission, template and connection gaps without secrets or developer-only IDs.
 - [ ] Complete the exact-head gate and push `origin/master`; publication and authenticated Chrome smoke remain paired with C096–C100.
 - [x] No Navisworks smoke is required because Native and installers are unchanged.
+- [x] Reconcile the generated authority inventories and semantic state seal after implementation without counting them as another build.
 
 ## Consolidation Block 18 — knowledge reuse and handover — 2026-09-28
 
