@@ -3518,3 +3518,9 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Create the BIMTECH Shop Drawing and Sleeve Delivery Workflow drafts, Delivery Governance draft, and BIM Services Standard APU/Pricing draft from the approved v1.2 source documents.
 - [ ] Complete authorized Operations Director review and lifecycle approval/publication of the four BIMTECH drafts; do not fabricate approval or grant an unrelated account elevated authority.
 - [ ] Verify the deployed repair in authenticated Chrome, then complete direct Rubén and Lorena visibility/role acceptance when their authorized sessions or credentials are available.
+
+## Replit bounded-memory publication correction — 2026-09-27
+
+- [x] Reproduce the provider Bundle failure in Replit Shell and isolate it to the default-memory BIMLog Vite process after the mockup and API workspaces build successfully.
+- [x] Bound the BIMLog Vite production build to 768 MB by default through a portable tracked wrapper and prove the same frontend build passes in Replit Shell without Replit Agents.
+- [ ] Pass the complete reconciled root build, publish the exact source through Replit, and complete exact-identity authenticated Chrome smoke. Roberto's existing publication instruction remains valid and must not be requested again.

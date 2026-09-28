@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2063e71a12e19f938ea3d7a60841520cc48c99a46148eb6a724feadfd1bb357b",
-  "itemCount": 225,
+  "sourceSha256": "bb8d5f3ac076b7d182efc85d794ad4985ee90fa248b6c6033606f6feeb41846d",
+  "itemCount": 226,
   "counts": {
-    "ACTIVE": 190,
+    "ACTIVE": 191,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4119,6 +4119,24 @@
       "evidence": [
         "OPEN_LOOP.md:3520",
         "BIMTECH identity and template repair — 2026-09-25"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d04de7fbe44485f7",
+      "sourceLine": 3526,
+      "heading": "Replit bounded-memory publication correction — 2026-09-27",
+      "statement": "Pass the complete reconciled root build, publish the exact source through Replit, and complete exact-identity authenticated Chrome smoke. Roberto's existing publication instruction remains valid and must not be requested again.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3526",
+        "Replit bounded-memory publication correction — 2026-09-27"
       ],
       "currentAuthority": false
     }

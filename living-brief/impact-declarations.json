@@ -45831,6 +45831,100 @@
         "scripts/workflow-database-fixture.mjs"
       ],
       "reviewedChangeSha256": "fcc0f8d20b25d8b8a7e32360b96f1019ed6c9a9aebdf1ffbf3ca8ca1d0e99755"
+    },
+    {
+      "taskId": "replit-bounded-memory-publication-correction",
+      "reviewedThroughCommit": "60ae18d5cdb2c7a8246a7b03d0ab5c14944dd10e",
+      "reviewedAt": "2026-09-28T01:45:51Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "replit_shell_build"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The generic Replit Bundle failure was reproduced and isolated to the default-memory BIMLog Vite process. A portable tracked wrapper now bounds Vite old-space to 768 MB by default; the exact frontend build passes in Replit Shell without Agents. Product behavior, database/schema, customer data, Lens Next Native and installers are unchanged. Root build, publication and authenticated live smoke remain unclaimed until proven."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build-resource correction only; product doctrine unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Replit Shell and no-Agent procedure preserved."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing verification gates remain unchanged and mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product capability or user outcome changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime architecture, route, API, schema or provider binding changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native and installers untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or visual system change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards assertion changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the reproduced provider failure, bounded-memory correction and unclaimed release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Close diagnosis and frontend-build proof while retaining root-build, publication and live-smoke gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6c411cd0ab4748ab96659eafdfe9953a137a26ea2ba0a968e78ef1ac3fc1e57d"
     }
   ]
 }

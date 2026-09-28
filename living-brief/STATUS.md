@@ -2952,3 +2952,9 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Company ID 31 now has draft Delivery Workflow templates `BIMTECH_SHOP_DRAWING` and `BIMTECH_SLEEVE`, draft Governance template `BIMTECH_DELIVERY_GOVERNANCE`, and draft APU/Pricing template `BIM_SERVICES_STANDARD`, derived from the approved v1.2 BIMTECH source documents.
 - Source and operator corrections are bound through commit `d5b9deafb4d9e30cc9dd5d91999323b569c73822`; focused behavior, pricing, workflow, TypeScript, secret, encoding, and database-safety checks passed. The operator preserves append-only company-binding history and performs no schema startup migration.
 - Template lifecycle status remains truthfully `draft`. Operations Director review/approval and direct Rubén/Lorena authenticated UI acceptance remain open; no synthetic approval or impersonation is claimed.
+
+## Replit bounded-memory publication correction — 2026-09-27
+
+- Source commit `60ae18d5cdb2c7a8246a7b03d0ab5c14944dd10e` replaces the BIMLog frontend's unbounded direct Vite invocation with a portable production-build wrapper that defaults Vite to a 768 MB old-space limit while preserving an explicit `BIMLOG_VITE_MAX_OLD_SPACE_MB` override.
+- The correction addresses the provider's generic Bundle failure without changing BIMLog product behavior, database/schema, customer data, Lens Next Native, installers, Replit configuration, or production state.
+- The frontend build passed in Replit Shell with 2,379 modules transformed and `BUILD_EXIT=0`; complete root-build, publication, and authenticated live acceptance remain release actions until separately proven on the reconciled evidence-bearing head.
