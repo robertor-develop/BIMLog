@@ -942,6 +942,14 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/sharepoint-discovery-adapter.ts
 - artifacts/api-server/src/lib/sharepoint-enrollment-state.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-enrollment-state.ts
+- artifacts/api-server/src/lib/sharepoint-publication-confirmation.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-publication-confirmation.ts
+- artifacts/api-server/src/lib/sharepoint-publication-outcome.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-publication-outcome.ts
+- artifacts/api-server/src/lib/sharepoint-publication-readiness.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-publication-readiness.ts
+- artifacts/api-server/src/lib/sharepoint-publication-receipt.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-publication-receipt.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.ts
 - artifacts/api-server/src/lib/specification-procurement-readiness-view.behavior.ts
