@@ -46021,7 +46021,7 @@
         "scripts/check-living-brief.mjs",
         "scripts/execution-continuity-policy.mjs"
       ],
-      "reviewedChangeSha256": "57948e16eb81dea24550631348faf73f87ed1ff2bb356336843ce3c8727d8f34"
+      "reviewedChangeSha256": "cb3d8cfb55408c3a0bb8925820bd83204c36b3617883cf2cec60a925fc2b23ad"
     }
   ]
 }
