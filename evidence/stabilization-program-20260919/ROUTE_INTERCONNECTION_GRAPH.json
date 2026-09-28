@@ -6,8 +6,8 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 684,
-    "frontendApiReferences": 257,
+    "apiRoutes": 685,
+    "frontendApiReferences": 258,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -3028,6 +3028,25 @@
     {
       "method": "GET",
       "path": "/dashboard/briefing",
+      "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
+      "tables": [
+        "rfisTable",
+        "submittalsTable",
+        "filesTable",
+        "projectMembersTable",
+        "projectsTable",
+        "activityLogTable",
+        "usersTable",
+        "companiesTable",
+        "clashReportsTable",
+        "clashesTable",
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard/responsibilities",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
         "rfisTable",
@@ -8968,6 +8987,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/ContractPaymentApplicationsPanel.tsx",
       "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/projects/${projectId}/financial/contracts/${encodeURIComponent(contract.id)}/payments"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/dashboard/ResponsibilityWorkspace.tsx",
+      "apiPath": "/api/v1/dashboard/responsibilities"
     },
     {
       "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
