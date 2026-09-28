@@ -3625,3 +3625,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Preserve existing File custody, downloads, RFI/Submittal/Work Item/Change Order records, coordination issue identity and Lens Working View behavior.
 - [ ] Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C066–C070.
 - [x] Do not run focused Navisworks smoke because C061–C065 do not change Native or installer paths.
+
+## Consolidation Block 14 — specification and procurement readiness — 2026-09-28
+
+- [x] C066–C070 implement verified specification indexing, duplicate-safe register previews, approval-bound procurement evidence, explicit-calendar lead-time risk and reconciled readiness exports.
+- [x] Preserve existing File, Submittal Register, package and procurement authorities; do not infer extraction truth, approval, lead time or contractual-date changes.
+- [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C061–C070 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
+- [x] Do not run focused Navisworks smoke because C066–C070 do not change Native or installer paths.

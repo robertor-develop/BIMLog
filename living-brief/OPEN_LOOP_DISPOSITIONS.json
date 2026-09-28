@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "87e963d14f99f1164d42406b0394d58d28c3265009e1d4b6d254ab8db3b83eeb",
-  "itemCount": 235,
+  "sourceSha256": "e6bad8661dcec23bd96e3902e48b6416f81ecce36d883c68767da310219feb45",
+  "itemCount": 236,
   "counts": {
-    "ACTIVE": 200,
+    "ACTIVE": 201,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4299,6 +4299,24 @@
       "evidence": [
         "OPEN_LOOP.md:3626",
         "Consolidation Block 13 — usable drawing workspace — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "e6d6eb1f1eacb84f",
+      "sourceLine": 3633,
+      "heading": "Consolidation Block 14 — specification and procurement readiness — 2026-09-28",
+      "statement": "Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C061–C070 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3633",
+        "Consolidation Block 14 — specification and procurement readiness — 2026-09-28"
       ],
       "currentAuthority": false
     }

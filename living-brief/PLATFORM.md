@@ -796,6 +796,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-rfi-import-migration.ts
 - artifacts/api-server/src/lib/procore-rfi-import.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import.ts
+- artifacts/api-server/src/lib/procurement-lead-time-risk.behavior.ts
+- artifacts/api-server/src/lib/procurement-lead-time-risk.ts
+- artifacts/api-server/src/lib/procurement-readiness-chain.behavior.ts
+- artifacts/api-server/src/lib/procurement-readiness-chain.ts
 - artifacts/api-server/src/lib/professional-report-layout.behavior.ts
 - artifacts/api-server/src/lib/professional-report-layout.ts
 - artifacts/api-server/src/lib/professional-report-package.behavior.ts
@@ -884,6 +888,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/sharepoint-discovery-adapter.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.ts
+- artifacts/api-server/src/lib/specification-procurement-readiness-view.behavior.ts
+- artifacts/api-server/src/lib/specification-procurement-readiness-view.ts
+- artifacts/api-server/src/lib/specification-requirement-preview.behavior.ts
+- artifacts/api-server/src/lib/specification-requirement-preview.ts
+- artifacts/api-server/src/lib/specification-section-index.behavior.ts
+- artifacts/api-server/src/lib/specification-section-index.ts
 - artifacts/api-server/src/lib/storage-adapter.behavior.ts
 - artifacts/api-server/src/lib/storage-adapter.ts
 - artifacts/api-server/src/lib/submittal-register-coverage.ts
