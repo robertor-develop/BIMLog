@@ -8,6 +8,9 @@ import { eq, and, inArray, ne, or, count, desc } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { deterministicBriefing, type BriefingDraft } from "../lib/ai-assistance-governance";
 import { ScopedBriefingCache } from "../lib/scoped-briefing-cache";
+import { loadCoordinatorActionRegister, parseRegisterQuery } from "../lib/coordinator-action-register";
+import { projectResponsibilityItems } from "../lib/responsibility-workspace";
+import { parseResponsibilityScope, scopeResponsibilityItems } from "../lib/responsibility-workspace-scope";
 import {
   addPageNumbers,
   computeContentHash,
@@ -769,6 +772,49 @@ router.get("/dashboard/briefing", authMiddleware, async (req, res) => {
     res.json(result);
   } catch {
     res.json(deterministicBriefing({ summary: "Project briefing data is temporarily unavailable.", todaysDate, failureCode: "BRIEFING_DATA_UNAVAILABLE" }));
+  }
+});
+
+router.get("/dashboard/responsibilities", authMiddleware, async (req, res) => {
+  try {
+    const scope = parseResponsibilityScope(req.query.scope);
+    const memberships = await db.select({
+      projectId: projectMembersTable.projectId,
+      projectName: projectsTable.name,
+      projectCode: projectsTable.code,
+    }).from(projectMembersTable)
+      .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
+      .where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.status, "active"), ne(projectsTable.status, "archived")));
+
+    const sourceFailures: Array<{ projectId: number; code: string }> = [];
+    const allItems = [];
+    for (const membership of memberships) {
+      const first = await loadCoordinatorActionRegister({
+        userId: req.user!.userId,
+        projectId: membership.projectId,
+        query: parseRegisterQuery({ page: 1, pageSize: 50, builtInView: "all_actionable", timezone: "UTC" }),
+      });
+      let actions = [...first.items];
+      for (let page = 2; page <= Math.min(first.totalPages, 100); page += 1) {
+        const result = await loadCoordinatorActionRegister({
+          userId: req.user!.userId,
+          projectId: membership.projectId,
+          query: parseRegisterQuery({ page, pageSize: 50, builtInView: "all_actionable", timezone: "UTC" }),
+        });
+        actions.push(...result.items);
+      }
+      if (first.partial || first.totalPages > 100) sourceFailures.push({ projectId: membership.projectId, code: first.totalPages > 100 ? "RESULT_LIMIT_EXCEEDED" : "SOURCE_PARTIAL" });
+      allItems.push(...projectResponsibilityItems({ project: { id: membership.projectId, name: membership.projectName, code: membership.projectCode }, actions }));
+    }
+    const items = scopeResponsibilityItems({ items: allItems, scope, userId: req.user!.userId, companyName: req.user!.companyName });
+    res.setHeader("Cache-Control", "no-store");
+    res.json({ scope, items, total: items.length, authorizedProjectCount: memberships.length, partial: sourceFailures.length > 0, sourceFailures, readOnly: true });
+  } catch (error) {
+    if (error instanceof Error && error.message === "RESPONSIBILITY_SCOPE_INVALID") {
+      res.status(400).json({ code: error.message, error: "Responsibility scope is invalid." });
+      return;
+    }
+    res.status(503).json({ code: "RESPONSIBILITY_WORKSPACE_UNAVAILABLE", error: "Responsibility workspace is temporarily unavailable." });
   }
 });
 
