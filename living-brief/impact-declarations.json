@@ -47969,6 +47969,87 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "consolidation-c106-c110-publication-boundary",
+      "reviewedThroughCommit": "59be08007ece898c0f426858b06be48a52177b06",
+      "reviewedAt": "2026-09-28T23:06:52.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_after_five_bounded_commits_before_exact_head_gate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "established_replit_publish",
+          "authenticated_browser_smoke"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Block 22 security/privacy/recovery regression contract is recorded."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "C106-C110 and the publication boundary are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 22 preserves existing authority and introduces no unrelated product rule."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a52f7906433a51f137e218139e4096c58fca2c41e09500ced3bb118b5a387045"
     }
   ]
 }
