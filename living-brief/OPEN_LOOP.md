@@ -3597,3 +3597,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Preserve existing report renderers and source authorities; do not duplicate customer renderers, business rows, project access, approval authority or delivery state.
 - [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C041–C050 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
 - [x] Do not run focused Navisworks smoke because C046–C050 do not change Native or installer paths.
+- [x] Reconcile the generated Platform/open-loop inventory and final semantic state seal in narrative authority before repeating the complete exact-head gate.
