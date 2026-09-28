@@ -3580,5 +3580,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 - [x] C036–C040 implement typed report capabilities, bounded ownership/default controls, reconciled authorized pivots, explicit preview/edit/duplicate semantics, and common current-view export presets.
 - [x] Preserve existing Coordinator and Lens saved-view semantics; reject unsupported fields and do not create a parallel record or authorization store.
-- [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C031–C040 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
-- [ ] Do not run focused Navisworks smoke because C036–C040 do not change Native or installer paths.
+- [x] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C031–C040 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke at source `950db22a6839c7ce5a9a57e901da363e944a2546`.
+- [x] Do not run focused Navisworks smoke because C036–C040 do not change Native or installer paths.
+
+## Consolidation Block 9 — weekly reporting baselines — 2026-09-28
+
+- [x] C041–C045 implement immutable source/version baselines, authorized idempotent capture, deterministic non-duplicating deltas, explainable weekly drilldown and governed retained output.
+- [x] Keep capture explicit and permission-bound; do not add schedules, background captures, notifications or a parallel report/source authority.
+- [ ] Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C046–C050.
+- [ ] Do not run focused Navisworks smoke because C041–C045 do not change Native or installer paths.

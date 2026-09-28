@@ -870,3 +870,12 @@ Run `pnpm run generate:route-interconnection-graph` only when intentionally refr
 - RFI/Submittal pivots expose both row and distinct canonical-record totals so parallel reviewer rows cannot inflate record counts.
 - Common bilingual presets and PDF/Excel output derive from one current-view model and fingerprint. This block changes no schema, customer data, Lens Next Native or installers.
 - `test:consolidation-block08` is permanent through the existing Block 7 pre-push chain. C031–C040 require push, governed Replit Shell publication without Agents, and exact-identity authenticated visible-Chrome smoke.
+
+## Consolidation Block 9 — weekly reporting baselines (C041–C045)
+
+- Reporting baselines freeze tenant/project scope, capture time, actor, source record/version/status identities and a deterministic source fingerprint. Later source edits cannot mutate captured history.
+- Capture is explicit, permission-bound and idempotent across retries/restarts. Reserved or failed captures are never represented as complete, and no scheduled capture is authorized.
+- Weekly comparisons classify each canonical record exactly once as opened, returned, closed, pending, revised, voided or late-imported. Scope mismatch fails closed.
+- Summary totals drill down to exact record keys and reasons. Missing or unavailable source details remain explicit instead of being guessed.
+- History requires current tenant/project membership; former members are denied. Retained customer output is reproducible from immutable baseline fingerprints.
+- `test:consolidation-block09` is permanent through the existing Block 8 pre-push chain. This Platform/API block changes no schema, customer data, Lens Next Native or installers and is pushed without publication until C050.

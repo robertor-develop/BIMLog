@@ -3011,3 +3011,9 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - C036–C040 add typed dataset/column/sort/group capabilities, personal and company view ownership rules, versioned defaults and visible conflicts, reconciled RFI/Submittal pivots, safe shared-view preview/duplicate behavior, and common bilingual presets with current-view PDF/Excel parity.
 - Product commits are `7d867896`, `755de22c`, `288a439b`, `4564a611` and `ef30979a`. Unsupported fields are rejected, legacy Coordinator view values remain represented, parallel reviewer rows do not inflate distinct-record totals, and shared previews never autosave.
 - This block changes Platform/API only. It adds no database/schema, customer-data, Lens Next Native, installer, bridge, Autodesk or Navisworks-facing mutation. C031–C040 now reach the required ten-build push/publication/authenticated-Chrome boundary.
+
+## Consolidation Block 9 source candidate — 2026-09-28
+
+- C041–C045 add immutable tenant/project-scoped reporting baselines, explicit authorized and restart-safe idempotent capture, deterministic weekly delta classification, count-to-record drilldown, explicit missing-source handling, retained history access and reproducible customer comparison output.
+- Product commits are `b8ef9d9b`, `31c79509`, `5906ba70`, `4992af73` and `4596a608`. Scheduled capture remains prohibited; capture mode is explicit and authorized only.
+- This block changes Platform/API domain contracts only. It adds no database/schema, customer-data, Lens Next Native, installer, bridge, Autodesk or Navisworks-facing mutation. Five unpublished builds remain after push; publication and authenticated Chrome smoke are due after C046–C050.
