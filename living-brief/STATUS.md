@@ -3050,3 +3050,9 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - C066–C070 add source-proven specification indexing, duplicate-safe reviewed-requirement previews, approval-bound procurement traceability, versioned-calendar lead-time risk and a reconciled readiness view/export fingerprint.
 - Product commits are `90dc3651`, `ada45e19`, `a4dd5b8c`, `cdb0bd1f` and `f3a6a8e1`. Uncertain extraction, repeat imports, unapproved procurement evidence and missing lead-time inputs remain explicit.
 - This block changes Platform/API domain contracts only. It adds no database/schema, customer data, Native source, installer, bridge, Autodesk or Navisworks-facing mutation. C061–C070 now reach the required ten-build push/publication/authenticated-Chrome boundary.
+
+## Consolidation Block 15 source candidate — 2026-09-28
+
+- C071–C075 add isolated dated daily records and immutable revision history, assignment-linked non-payroll workforce observations, custody-preserving evidence links, source-labeled manual/provider observations, and attributable corrections with reconciled report counts.
+- Product commits are `382921b3`, `1db320f2`, `2452fd9d`, `74d594f2` and `77ded311`. Duplicate policy, unknown hours, upload/privacy failures and provider outage remain explicit.
+- This block changes Platform/API domain contracts only. It adds no database/schema, customer data, Native source, installer, bridge, Autodesk or Navisworks-facing mutation. Five unpublished builds remain after push; publication and authenticated Chrome smoke are due after C076–C080.

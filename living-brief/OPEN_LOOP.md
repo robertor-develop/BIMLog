@@ -3632,3 +3632,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Preserve existing File, Submittal Register, package and procurement authorities; do not infer extraction truth, approval, lead time or contractual-date changes.
 - [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C061–C070 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
 - [x] Do not run focused Navisworks smoke because C066–C070 do not change Native or installer paths.
+
+## Consolidation Block 15 — daily field records — 2026-09-28
+
+- [x] C071–C075 implement isolated dated records, non-payroll workforce observations, custody-preserving field evidence, source-labeled weather/delivery/constraint observations and attributable correction/report reconciliation.
+- [x] Preserve existing project/location, Files custody, team assignment, approved-time and canonical action authorities; do not infer payroll, payment, approval or provider weather truth.
+- [ ] Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C076–C080.
+- [x] Do not run focused Navisworks smoke because C071–C075 do not change Native or installer paths.
