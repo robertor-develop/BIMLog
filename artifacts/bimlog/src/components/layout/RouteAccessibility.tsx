@@ -21,6 +21,7 @@ const exactTitles: Record<string, string> = {
   "/lens-next": "Lens Next",
   "/help": "BIMLog Help Center",
   "/setup-guide": "BIMLog Setup Guide",
+  "/training/project-setup": "BIMLog Project Setup Training",
   "/profile": "BIMLog Profile",
   "/settings/company-profile": "Company Profile",
   "/settings/notifications": "Notification Settings",

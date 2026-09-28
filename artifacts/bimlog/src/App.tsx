@@ -25,6 +25,7 @@ const Dashboard = namedPage(() => import("@/pages/Dashboard"), "Dashboard");
 const PendingItems = namedPage(() => import("@/pages/PendingItems"), "PendingItems");
 const ProjectDetail = namedPage(() => import("@/pages/ProjectDetail"), "ProjectDetail");
 const HelpCenter = namedPage(() => import("@/pages/HelpCenter"), "HelpCenter");
+const ProjectSetupTraining = namedPage(() => import("@/pages/ProjectSetupTraining"), "ProjectSetupTraining");
 const Profile = namedPage(() => import("@/pages/Profile"), "Profile");
 const CompanyProfile = namedPage(() => import("@/pages/CompanyProfile"), "CompanyProfile");
 const NotificationSettings = namedPage(() => import("@/pages/NotificationSettings"), "NotificationSettings");
@@ -262,6 +263,9 @@ function Router() {
       </Route>
       <Route path="/setup-guide">
         {() => <ProtectedRoute component={SetupGuideRedirect} />}
+      </Route>
+      <Route path="/training/project-setup">
+        {() => <ProtectedRoute component={ProjectSetupTraining} />}
       </Route>
       <Route path="/profile">
         {() => <ProtectedRoute component={Profile} />}

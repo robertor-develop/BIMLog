@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
-    "routeTemplates": 41,
+    "routeTemplates": 42,
     "projectSurfaces": 19,
-    "customerSurfaces": 60,
-    "viewportCases": 180
+    "customerSurfaces": 61,
+    "viewportCases": 183
   },
   "viewports": [
     {
@@ -556,6 +556,29 @@
     },
     {
       "order": 33,
+      "path": "/training/project-setup",
+      "guard": "authenticated",
+      "target": "ProjectSetupTraining",
+      "samplePath": "/training/project-setup",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 34,
       "path": "/profile",
       "guard": "authenticated",
       "target": "Profile",
@@ -578,7 +601,7 @@
       ]
     },
     {
-      "order": 34,
+      "order": 35,
       "path": "/settings/company-profile",
       "guard": "authenticated",
       "target": "CompanyProfile",
@@ -601,7 +624,7 @@
       ]
     },
     {
-      "order": 35,
+      "order": 36,
       "path": "/settings/notifications",
       "guard": "authenticated",
       "target": "NotificationSettings",
@@ -624,7 +647,7 @@
       ]
     },
     {
-      "order": 36,
+      "order": 37,
       "path": "/settings/financial-controls",
       "guard": "access",
       "target": "FinancialControlsSettings",
@@ -647,7 +670,7 @@
       ]
     },
     {
-      "order": 37,
+      "order": 38,
       "path": "/admin/feedback",
       "guard": "access",
       "target": "AdminPanel",
@@ -670,7 +693,7 @@
       ]
     },
     {
-      "order": 38,
+      "order": 39,
       "path": "/company-catalogs",
       "guard": "access",
       "target": "CompanyMasterCatalogs",
@@ -693,7 +716,7 @@
       ]
     },
     {
-      "order": 39,
+      "order": 40,
       "path": "/company-workflows",
       "guard": "access",
       "target": "CompanyDeliveryWorkflows",
@@ -716,7 +739,7 @@
       ]
     },
     {
-      "order": 40,
+      "order": 41,
       "path": "/company-workflow-governance",
       "guard": "access",
       "target": "CompanyWorkflowGovernance",
@@ -739,7 +762,7 @@
       ]
     },
     {
-      "order": 41,
+      "order": 42,
       "path": "/company-pricing-templates",
       "guard": "access",
       "target": "CompanyPricingTemplates",
@@ -762,7 +785,7 @@
       ]
     },
     {
-      "order": 42,
+      "order": 43,
       "path": "/knowledge",
       "guard": "access",
       "target": "CoordinationKnowledgeLibrary",
@@ -785,7 +808,7 @@
       ]
     },
     {
-      "order": 43,
+      "order": 44,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel",
@@ -808,7 +831,7 @@
       ]
     },
     {
-      "order": 44,
+      "order": 45,
       "path": "/feedback",
       "guard": "access",
       "target": "Dashboard",
@@ -831,7 +854,7 @@
       ]
     },
     {
-      "order": 45,
+      "order": 46,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl",
@@ -854,7 +877,7 @@
       ]
     },
     {
-      "order": 46,
+      "order": 47,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief",
@@ -877,7 +900,7 @@
       ]
     },
     {
-      "order": 47,
+      "order": 48,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing",
@@ -900,7 +923,7 @@
       ]
     },
     {
-      "order": 48,
+      "order": 49,
       "path": "/features",
       "guard": "public",
       "target": "Features",
@@ -923,7 +946,7 @@
       ]
     },
     {
-      "order": 49,
+      "order": 50,
       "path": "/about",
       "guard": "public",
       "target": "About",
@@ -946,7 +969,7 @@
       ]
     },
     {
-      "order": 50,
+      "order": 51,
       "path": "/contact",
       "guard": "public",
       "target": "Contact",

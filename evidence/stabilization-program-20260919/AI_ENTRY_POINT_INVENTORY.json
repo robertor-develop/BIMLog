@@ -80,7 +80,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 357,
+      "line": 358,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -90,7 +90,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 405,
+      "line": 406,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -100,7 +100,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 438,
+      "line": 439,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -110,7 +110,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 521,
+      "line": 522,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
