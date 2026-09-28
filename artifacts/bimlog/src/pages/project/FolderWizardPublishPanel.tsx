@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { FolderWizardRequestLifetime } from "./folder-wizard-request-lifetime";
 import { refreshAfterConfirmedFolderWizardMutation } from "./folder-wizard-confirmed-refresh";
 import { folderWizardPublishOptions, pruneFolderWizardTags, type PublishRoutingDefinition } from "./folder-wizard-publish-options";
+import { sharePointPublicationStatus } from "./sharepoint-publication-status";
 
 type SourceFile = { id: number; fileName: string; fileSize: number; status: string };
 type Routing = { projectProfile: { definition: PublishRoutingDefinition } | null;
@@ -77,12 +78,7 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
       const data = await request("/publish", { fileId, tags, expectedDigest: candidate.requestDigest,
         confirmation: "publish_sharepoint" });
       if (!current()) return;
-      setResult(data.execution === "completed"
-        ? tr("The exact file was published to SharePoint.", "El archivo exacto se publicó en SharePoint.")
-        : data.execution === "retry" ? tr("Retry is available after the delay. Preview and confirm again later.", "El reintento estará disponible tras la espera. Actualice la vista previa y confirme de nuevo más tarde.")
-        : data.execution === "dead_letter" ? tr("Publication needs administrator attention. The attempt limit was reached or the failure is not retryable.", "La publicación requiere revisión del administrador. Se alcanzó el límite de intentos o el fallo no permite reintento.")
-        : data.execution === "cancelled" ? tr("This publication was cancelled. It was not restarted.", "Esta publicación fue cancelada. No se reinició.")
-        : tr("Review the publication status below before trying again.", "Revise el estado de publicación antes de volver a intentar."));
+      setResult(sharePointPublicationStatus(data.execution, lang).message);
       setConfirming(false); setCandidate(null);
       const refreshed = await refreshAfterConfirmedFolderWizardMutation(onChanged);
       if (current() && !refreshed) setError(tr("The publication response was received, but the status could not be refreshed. Reload to check its current state; do not submit again solely because of this refresh error.",
@@ -125,3 +121,4 @@ export function FolderWizardPublishPanel({ projectId, token, lang, onChanged }: 
     {error && <p role="alert">{error}</p>}
   </section>;
 }
+
