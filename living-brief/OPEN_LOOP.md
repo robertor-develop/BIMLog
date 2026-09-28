@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Consolidation Block 18 — knowledge reuse and handover — 2026-09-28
+
+- [x] C086 links resolved Lens/RFI/Submittal/field sources and evidence to one governed lesson proposal without publishing or changing source closure.
+- [x] C087 returns only approved same-company context with source/applicability and a safe non-decisional unavailable fallback.
+- [x] C088 prepares authorized company reuse as a new approval-required draft and copies no confidential project fields.
+- [x] C089 reports approved documents, warranties/manuals and unresolved actions without claiming final handover or an asset-maintenance engine.
+- [x] C090 creates a deterministic preview manifest from exact approved revisions, discloses exclusions and performs no delivery.
+- [ ] Complete the exact-head gate and push, publish C081–C090 through the established Replit path, verify exact live identity and run the full authenticated Chrome smoke.
+- [x] No focused Navisworks smoke is required because Native and installers are unchanged.
+
 ## Consolidation Block 17 — commercial impacts and forecasts — 2026-09-28
 
 - [x] C081 captures exact-source/version potential time/cost impact without treating it as approved value.

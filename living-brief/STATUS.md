@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation Block 18 knowledge and handover candidate — 2026-09-28
+
+- C086–C090 connect resolved source workflows to the existing governed lesson-proposal flow, provide tenant-scoped approved context lookup with safe fallback, prepare separately approved company reuse without confidential project fields, expose evidence-backed handover readiness, and create deterministic preview manifests from exact approved file revisions.
+- The block performs no automatic knowledge publication, engineering decision, issue closure, external delivery or final handover approval. It changes no production database/schema, customer data, Lens Next Native code or installer.
+- This completes the C081–C090 ten-build publication boundary. Exact-head gate, push, established Replit publication, deployed-identity verification and full authenticated Chrome smoke are due now.
+
 ## Consolidation Block 17 commercial-impact candidate — 2026-09-28
 
 - C081–C085 connect exact-version RFI/Submittal/field evidence to potential impacts, canonical Change Order drafts, existing approval thresholds, versioned approved baselines, separated forecast/actual presentation and reproducible customer-review evidence.
