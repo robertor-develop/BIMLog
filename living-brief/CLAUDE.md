@@ -862,3 +862,11 @@ Run `pnpm run generate:route-interconnection-graph` only when intentionally refr
 - `test:consolidation-block07` is a permanent pre-push gate. C031–C035 change Platform/API only; database/schema, customer data, Lens Next Native, installers and the immutable Lens fallback remain unchanged. This five-build block is pushed but not published until the C040 ten-build boundary.
 - The Block 7 Living Brief state seal is generated against the accepted C035 implementation boundary so later source work cannot inherit an unreviewed calendar, custody or summary contract.
 - The full production compiler's C031 literal-widening finding was corrected in `0016ef0d`; focused behavior and API typecheck pass, and the complete exact-head gate must be rerun before push.
+
+## Consolidation Block 8 — reusable saved views and pivots (C036–C040)
+
+- Report views declare a supported dataset and typed column/sort/group capabilities. Unknown fields fail closed; legacy Coordinator view values remain representable.
+- Personal and company ownership remain distinct. Shared readers cannot overwrite company defaults, stale writes conflict visibly, and preview mode never autosaves.
+- RFI/Submittal pivots expose both row and distinct canonical-record totals so parallel reviewer rows cannot inflate record counts.
+- Common bilingual presets and PDF/Excel output derive from one current-view model and fingerprint. This block changes no schema, customer data, Lens Next Native or installers.
+- `test:consolidation-block08` is permanent through the existing Block 7 pre-push chain. C031–C040 require push, governed Replit Shell publication without Agents, and exact-identity authenticated visible-Chrome smoke.

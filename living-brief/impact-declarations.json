@@ -46310,6 +46310,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a8bc0e3f71d67012329017713279191452c20db4cf102608ac44fcb29d8ebc83"
+    },
+    {
+      "taskId": "consolidation-c036-c040-reusable-saved-views",
+      "reviewedThroughCommit": "ef30979a73b150db0633be3a1d8100510af520f6",
+      "reviewedAt": "2026-09-28T12:55:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_before_final_gate_push_publication",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_git_push",
+          "replit_shell_publish",
+          "visible_chrome_smoke"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "category": "saved_view_scope_and_export_parity",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "claude"
+          ],
+          "summary": "C036-C040 preserve existing view authority while adding typed capabilities, explicit ownership, non-inflating pivots, safe preview semantics and one current-view export model."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block reuses canonical project and source authorities without creating a parallel workflow or record store."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Record permanent saved-view ownership, pivot reconciliation, export parity and release boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing traceability, accessibility, security, clean-code and full-gate requirements remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reusable coordination reporting supports the approved BIMLog product purpose without expanding authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Additive Platform and API contracts reuse existing saved-view and source-query architecture without schema mutation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, bridge and preserved fallback remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exports reuse one deterministic view model; no separate renderer or report-design authority was introduced."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external-standard assertion or interpretation changed in this block."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the five bounded commits, focused evidence and required ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retain only the real exact-head gate, push, publication and authenticated live-smoke sequence."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or prior production acceptance record was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ef95441e391c6f98e4967ac24df17a3ef08353af084ded376be1b8ad5a17f1e1"
     }
   ]
 }

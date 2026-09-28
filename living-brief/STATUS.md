@@ -3005,3 +3005,9 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Corrective commit `0016ef0d` preserves the C031 literal type contract after the complete gate exposed TypeScript widening; the focused behavior and API compiler pass after correction.
 - The Headquarters responsibility workspace now exposes neutral company-grouped actionable/overdue/blocked counts with direct authorized source links. It does not create performance scores, blame, automatic escalation decisions or external notifications.
 - This block changes Platform/API only. Database/schema, customer data, Lens Next Native, installers, bridge, Autodesk state and Navisworks licensing are unchanged. Five unpublished builds remain after push; publication and authenticated Chrome smoke are due at C040.
+
+## Consolidation Block 8 source candidate — 2026-09-28
+
+- C036–C040 add typed dataset/column/sort/group capabilities, personal and company view ownership rules, versioned defaults and visible conflicts, reconciled RFI/Submittal pivots, safe shared-view preview/duplicate behavior, and common bilingual presets with current-view PDF/Excel parity.
+- Product commits are `7d867896`, `755de22c`, `288a439b`, `4564a611` and `ef30979a`. Unsupported fields are rejected, legacy Coordinator view values remain represented, parallel reviewer rows do not inflate distinct-record totals, and shared previews never autosave.
+- This block changes Platform/API only. It adds no database/schema, customer-data, Lens Next Native, installer, bridge, Autodesk or Navisworks-facing mutation. C031–C040 now reach the required ten-build push/publication/authenticated-Chrome boundary.

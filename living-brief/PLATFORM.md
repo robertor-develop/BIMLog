@@ -787,6 +787,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/provider-governance.ts
 - artifacts/api-server/src/lib/release-metadata.behavior.ts
 - artifacts/api-server/src/lib/release-metadata.ts
+- artifacts/api-server/src/lib/report-view-capabilities.behavior.ts
+- artifacts/api-server/src/lib/report-view-capabilities.ts
+- artifacts/api-server/src/lib/report-view-ownership.behavior.ts
+- artifacts/api-server/src/lib/report-view-ownership.ts
+- artifacts/api-server/src/lib/report-view-pivots.behavior.ts
+- artifacts/api-server/src/lib/report-view-pivots.ts
+- artifacts/api-server/src/lib/report-view-presets.behavior.ts
+- artifacts/api-server/src/lib/report-view-presets.ts
+- artifacts/api-server/src/lib/report-view-preview.behavior.ts
+- artifacts/api-server/src/lib/report-view-preview.ts
 - artifacts/api-server/src/lib/resource-hour-sources.behavior.ts
 - artifacts/api-server/src/lib/resource-hour-sources.ts
 - artifacts/api-server/src/lib/responsibility-action-routing.behavior.ts

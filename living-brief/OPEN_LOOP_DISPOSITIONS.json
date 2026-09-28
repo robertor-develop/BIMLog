@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "676713912c8ecb852dd9472974505ecf79a7965909c81fe2108c64eb4ec2ae3f",
-  "itemCount": 230,
+  "sourceSha256": "df04a796a1220c3f43f5b0b7c75617b8b02c5c6e2067f81887b535d9471b28cc",
+  "itemCount": 232,
   "counts": {
-    "ACTIVE": 195,
+    "ACTIVE": 197,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4209,6 +4209,42 @@
       "evidence": [
         "OPEN_LOOP.md:3577",
         "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6ddfbdf480ad0357",
+      "sourceLine": 3583,
+      "heading": "Consolidation Block 8 — reusable saved views and pivots — 2026-09-28",
+      "statement": "Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C031–C040 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3583",
+        "Consolidation Block 8 — reusable saved views and pivots — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c15dc358c509f6f6",
+      "sourceLine": 3584,
+      "heading": "Consolidation Block 8 — reusable saved views and pivots — 2026-09-28",
+      "statement": "Do not run focused Navisworks smoke because C036–C040 do not change Native or installer paths.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3584",
+        "Consolidation Block 8 — reusable saved views and pivots — 2026-09-28"
       ],
       "currentAuthority": false
     }

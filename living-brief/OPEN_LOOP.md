@@ -3575,3 +3575,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Correct the C031 literal-type widening found by the full production compiler; focused behavior and API typecheck pass at `0016ef0d`.
 - [ ] Pass the complete clean pre-push gate on the reconciled exact head and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C036–C040.
 - [ ] Do not run focused Navisworks smoke because C031–C035 do not change Native or installer paths. Ruben's separate physical Navisworks 2025 field confirmation remains outside this Platform-only block.
+
+## Consolidation Block 8 — reusable saved views and pivots — 2026-09-28
+
+- [x] C036–C040 implement typed report capabilities, bounded ownership/default controls, reconciled authorized pivots, explicit preview/edit/duplicate semantics, and common current-view export presets.
+- [x] Preserve existing Coordinator and Lens saved-view semantics; reject unsupported fields and do not create a parallel record or authorization store.
+- [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C031–C040 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
+- [ ] Do not run focused Navisworks smoke because C036–C040 do not change Native or installer paths.
