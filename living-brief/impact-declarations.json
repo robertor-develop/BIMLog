@@ -47589,8 +47589,8 @@
         },
         {
           "key": "claude",
-          "result": "updated",
-          "reason": "The permanent Block 19 boundary and five-build push cadence are recorded."
+          "result": "reviewed_no_semantic_change",
+          "reason": "CLAUDE already records the permanent Block 19 boundary and five-build push cadence; the generated seal adds no execution rule."
         },
         {
           "key": "quality",
@@ -47624,13 +47624,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "STATUS records C091-C095 and the C100 publication boundary."
+          "result": "reviewed_no_semantic_change",
+          "reason": "STATUS already records C091-C095 and the C100 publication boundary; the generated seal adds no product state."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "OPEN_LOOP records all five builds, push due now and publication due at C100."
+          "result": "reviewed_no_semantic_change",
+          "reason": "OPEN_LOOP already records all five builds, push due now and publication due at C100; the generated seal adds no work item."
         },
         {
           "key": "audit",
