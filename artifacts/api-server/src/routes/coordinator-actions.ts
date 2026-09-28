@@ -18,6 +18,7 @@ import {
   listCoordinatorSavedViews,
   updateCoordinatorSavedView,
 } from "../lib/coordinator-saved-views";
+import { commonReportPresets } from "../lib/report-view-presets";
 import {
   CoordinatorBulkActionError,
   executeCoordinatorMeetingLinks,
@@ -448,7 +449,7 @@ router.get(
   async (req, res) => {
     try {
       res.setHeader("Cache-Control", "private, no-store");
-      res.json(await listCoordinatorSavedViews(scope(req)));
+      res.json({ ...(await listCoordinatorSavedViews(scope(req))), commonPresets: commonReportPresets });
     } catch (error) {
       savedViewFailure(res, error);
     }
