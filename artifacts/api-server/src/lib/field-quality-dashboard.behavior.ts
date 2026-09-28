@@ -1,0 +1,26 @@
+import assert from "node:assert/strict";
+import { createDailyFieldRecord } from "./daily-field-record";
+import { approveFieldChecklist, defineFieldChecklist, freezeChecklistForInspection } from "./field-checklist-definition";
+import { completeFieldInspection, recordInspectionResult, startFieldInspection } from "./field-inspection-execution";
+import { ensureCorrectiveAction } from "./field-corrective-action-link";
+import { closeCorrectionCase, openCorrectionCase, recordReinspection } from "./field-reinspection";
+import { buildFieldQualityDashboard } from "./field-quality-dashboard";
+
+const dailyRecord = createDailyFieldRecord({ recordId: "DR-8-1", projectId: 8, recordDate: "2026-09-28", locationId: "LEVEL-02", authorId: "field-1", existing: [], duplicatePolicy: "reject", recordedAt: "2026-09-28T12:00:00Z" });
+const checklist = freezeChecklistForInspection(approveFieldChecklist(defineFieldChecklist({ templateId: "CHK-PUNCH", projectId: 8, version: 2, title: "Limited punch review", purpose: "punch", items: [{ itemId: "support", prompt: "Support installed", evidenceRequired: true }] }), { approvedBy: "quality-lead", approvedAt: "2026-09-28T13:00:00Z" }));
+let inspection = startFieldInspection({ inspectionId: "INSP-1", projectId: 8, checklist, executorId: "field-1", executorRole: "field_inspector" });
+inspection = completeFieldInspection(recordInspectionResult(inspection, { itemId: "support", outcome: "fail", evidenceIds: ["CUSTODY-PHOTO-1"], note: "Missing support", recordedBy: "field-1", recordedAt: "2026-09-28T14:00:00Z" }), "2026-09-28T14:05:00Z");
+const action = ensureCorrectiveAction({ inspection, itemId: "support", ownerId: "trade-lead", dueDate: "2026-09-29", createdBy: "quality-lead", createdAt: "2026-09-28T14:10:00Z", existing: [] }).action;
+let correction = openCorrectionCase(action);
+correction = recordReinspection(correction, inspection, { reinspectionId: "RE-1", actionId: action.actionId, reviewerId: "reviewer-2", reviewerRole: "quality_reviewer", outcome: "pass", evidenceIds: ["CUSTODY-PHOTO-2"], recordedAt: "2026-09-29T10:00:00Z" });
+correction = closeCorrectionCase(correction, { actorId: "reviewer-2", at: "2026-09-29T10:05:00Z", reason: "Installed support verified" });
+const internal = buildFieldQualityDashboard({ projectId: 8, dailyRecord, inspections: [inspection, { ...inspection, inspectionId: "FOREIGN", projectId: 9 }], corrections: [correction], audience: "internal" });
+assert.deepEqual(internal.counts, { inspections: 1, failedChecks: 1, openCorrections: 0, closedCorrections: 1 });
+assert.equal(internal.rows[0]?.state, "closed");
+assert.equal(internal.rows[0]?.latestReinspectionOutcome, "pass");
+assert.deepEqual(internal.rows[0]?.evidenceIds, ["CUSTODY-PHOTO-1"]);
+const client = buildFieldQualityDashboard({ projectId: 8, dailyRecord, inspections: [inspection], corrections: [correction], audience: "client" });
+assert.deepEqual(client.rows[0]?.evidenceIds, [], "client report does not expose internal custody identities");
+assert.notEqual(client.fingerprint, internal.fingerprint);
+assert.equal(buildFieldQualityDashboard({ projectId: 8, dailyRecord, inspections: [inspection], corrections: [correction], audience: "internal" }).fingerprint, internal.fingerprint, "evidence package is deterministic");
+console.log("C080 daily log through closed reinspection field-quality report: PASS");
