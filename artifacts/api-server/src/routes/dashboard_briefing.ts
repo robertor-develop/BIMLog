@@ -12,6 +12,7 @@ import { loadCoordinatorActionRegister, parseRegisterQuery } from "../lib/coordi
 import { projectResponsibilityItems } from "../lib/responsibility-workspace";
 import { parseResponsibilityScope, scopeResponsibilityItems } from "../lib/responsibility-workspace-scope";
 import { classifyResponsibility } from "../lib/responsibility-classification";
+import { responsibilityActionRoute } from "../lib/responsibility-action-routing";
 import {
   addPageNumbers,
   computeContentHash,
@@ -809,7 +810,7 @@ router.get("/dashboard/responsibilities", authMiddleware, async (req, res) => {
     }
     const now = new Date();
     const scopedItems = scopeResponsibilityItems({ items: allItems, scope, userId: req.user!.userId, companyName: req.user!.companyName });
-    const items = scopedItems.map(item => ({ ...item, classification: classifyResponsibility(item, now) }));
+    const items = scopedItems.map(item => ({ ...item, classification: classifyResponsibility(item, now), action: responsibilityActionRoute(item) }));
     const groupCounts = items.reduce((counts, item) => {
       if (item.classification.groups.due) counts.due += 1;
       if (item.classification.groups.overdue) counts.overdue += 1;
