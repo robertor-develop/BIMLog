@@ -46914,6 +46914,89 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "55e27aa2dfe28900269254623706b9b2dda7f1ac72ffd8dc4b89337a28338dd8"
+    },
+    {
+      "taskId": "consolidation-c061-c065-release-candidate",
+      "reviewedThroughCommit": "e6a82b49a7e927fe9e0193c72c60134dcdc52297",
+      "reviewedAt": "2026-09-28T17:05:00Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_after_implementation_and_narrative_before_full_gate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Drawing revision workflows extend existing File custody and project authority without creating a parallel product or storage authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push cadence remains unchanged and this block does not alter the publication procedure."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "C061-C065 add deterministic behavior coverage for sheet filtering, revision comparison, record links, package manifests and stale-revision correction."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "The block makes current drawing revision truth visible and safely connects drawings to canonical coordination records."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Five bounded drawing-domain modules add filter, compare, linkage, manifest and correct-revision capabilities while preserving existing identities."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native and installer files are unchanged by C061-C065, so no focused Navisworks acceptance is due for this block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report renderer, report template or visual export contract changed in this drawing workflow block."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification or compliance claim was added or changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records completion of C061-C065, the push-only boundary and the next C066-C070 publication milestone."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP tracks the exact remaining full gate and push work without inventing a publication requirement for this block."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence remains append-only and no prior acceptance or production claim was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "1209fdc5d3786594f8d468a5a91ab7f02d7cce6d5bae458e62f0e92bb28f5859"
     }
   ]
 }

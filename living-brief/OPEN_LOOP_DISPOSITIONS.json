@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "99987054c366d5723f4a25e904c9bfc58bf2d638799d24cc16060b26ca1537aa",
-  "itemCount": 234,
+  "sourceSha256": "87e963d14f99f1164d42406b0394d58d28c3265009e1d4b6d254ab8db3b83eeb",
+  "itemCount": 235,
   "counts": {
-    "ACTIVE": 199,
+    "ACTIVE": 200,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4281,6 +4281,24 @@
       "evidence": [
         "OPEN_LOOP.md:3618",
         "Consolidation Block 10 — professional client reporting — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1e36029335c4b28c",
+      "sourceLine": 3626,
+      "heading": "Consolidation Block 13 — usable drawing workspace — 2026-09-28",
+      "statement": "Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C066–C070.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3626",
+        "Consolidation Block 13 — usable drawing workspace — 2026-09-28"
       ],
       "currentAuthority": false
     }

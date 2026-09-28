@@ -3037,3 +3037,10 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Product commits are `23fa5b80`, `57d42b52`, `639aa493`, `4a8b4d1d` and `9b938556`. Every output retains source versions and fingerprints; generation never implies approval or delivery.
 - This block changes Platform/API domain contracts only. It adds no database/schema, customer data, Lens Next Native, installer, bridge, Autodesk or Navisworks-facing mutation. C041–C050 now reach the required ten-build push/publication/authenticated-Chrome boundary.
 - The generated Platform/open-loop inventory and semantic state seal were reviewed after generation; this narrative reconciliation binds those generated artifacts to the same Block 10 candidate before the repeated complete gate.
+
+## Consolidation Block 13 source candidate — 2026-09-28
+
+- C061–C065 add a resolver-consistent sheet log, authorized revision comparison, stable canonical record links, deterministic drawing-package manifests and an explicit stale-to-current sheet journey.
+- Product commits are `32082489`, `29a6f77e`, `1a53dbb5`, `3c69b8d7` and `e6a82b49`. Historical revisions, original downloads, canonical linked records and Lens Working View behavior remain preserved.
+- Missing or unsupported previews, absent source markup, cross-project links, duplicate sheets, stale package entries and missing current revisions fail explicitly.
+- This block changes Platform/API domain contracts only. It adds no database/schema, customer data, Native source, installer, bridge, Autodesk or Navisworks-facing mutation. Five unpublished builds remain after push; publication and authenticated Chrome smoke are due after C066–C070.

@@ -3618,3 +3618,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C041–C050 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
 - [x] Do not run focused Navisworks smoke because C046–C050 do not change Native or installer paths.
 - [x] Reconcile the generated Platform/open-loop inventory and final semantic state seal in narrative authority before repeating the complete exact-head gate.
+
+## Consolidation Block 13 — usable drawing workspace — 2026-09-28
+
+- [x] C061–C065 implement the sheet log, authorized revision comparison, canonical record links, controlled package manifest and stale-to-current revision journey.
+- [x] Preserve existing File custody, downloads, RFI/Submittal/Work Item/Change Order records, coordination issue identity and Lens Working View behavior.
+- [ ] Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C066–C070.
+- [x] Do not run focused Navisworks smoke because C061–C065 do not change Native or installer paths.
