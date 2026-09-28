@@ -11,6 +11,7 @@ import { ScopedBriefingCache } from "../lib/scoped-briefing-cache";
 import { loadCoordinatorActionRegister, parseRegisterQuery } from "../lib/coordinator-action-register";
 import { projectResponsibilityItems } from "../lib/responsibility-workspace";
 import { parseResponsibilityScope, scopeResponsibilityItems } from "../lib/responsibility-workspace-scope";
+import { classifyResponsibility } from "../lib/responsibility-classification";
 import {
   addPageNumbers,
   computeContentHash,
@@ -806,9 +807,18 @@ router.get("/dashboard/responsibilities", authMiddleware, async (req, res) => {
       if (first.partial || first.totalPages > 100) sourceFailures.push({ projectId: membership.projectId, code: first.totalPages > 100 ? "RESULT_LIMIT_EXCEEDED" : "SOURCE_PARTIAL" });
       allItems.push(...projectResponsibilityItems({ project: { id: membership.projectId, name: membership.projectName, code: membership.projectCode }, actions }));
     }
-    const items = scopeResponsibilityItems({ items: allItems, scope, userId: req.user!.userId, companyName: req.user!.companyName });
+    const now = new Date();
+    const scopedItems = scopeResponsibilityItems({ items: allItems, scope, userId: req.user!.userId, companyName: req.user!.companyName });
+    const items = scopedItems.map(item => ({ ...item, classification: classifyResponsibility(item, now) }));
+    const groupCounts = items.reduce((counts, item) => {
+      if (item.classification.groups.due) counts.due += 1;
+      if (item.classification.groups.overdue) counts.overdue += 1;
+      if (item.classification.groups.blocked) counts.blocked += 1;
+      if (item.classification.groups.noResponse) counts.noResponse += 1;
+      return counts;
+    }, { due: 0, overdue: 0, blocked: 0, noResponse: 0 });
     res.setHeader("Cache-Control", "no-store");
-    res.json({ scope, items, total: items.length, authorizedProjectCount: memberships.length, partial: sourceFailures.length > 0, sourceFailures, readOnly: true });
+    res.json({ scope, items, total: items.length, groupCounts, authorizedProjectCount: memberships.length, partial: sourceFailures.length > 0, sourceFailures, generatedAt: now.toISOString(), readOnly: true });
   } catch (error) {
     if (error instanceof Error && error.message === "RESPONSIBILITY_SCOPE_INVALID") {
       res.status(400).json({ code: error.message, error: "Responsibility scope is invalid." });
