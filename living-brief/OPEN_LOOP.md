@@ -3572,5 +3572,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 - [x] C031–C035 implement custody provenance, versioned business calendars, honest sequential/parallel reviewer clocks, non-duplicating Submittal tracking and traceable neutral responsibility summaries.
 - [x] Preserve canonical RFI/Submittal histories and owning-module source links; do not create a second review store, blame score, automatic escalation, external notification or synthetic Lens workflow event.
+- [x] Correct the C031 literal-type widening found by the full production compiler; focused behavior and API typecheck pass at `0016ef0d`.
 - [ ] Pass the complete clean pre-push gate on the reconciled exact head and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C036–C040.
 - [ ] Do not run focused Navisworks smoke because C031–C035 do not change Native or installer paths. Ruben's separate physical Navisworks 2025 field confirmation remains outside this Platform-only block.

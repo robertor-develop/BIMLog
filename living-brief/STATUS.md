@@ -3002,5 +3002,6 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 
 - C031–C035 implement provenance-preserving RFI/Submittal custody reads, explicit versioned business calendars, honest reviewer-step clocks, non-duplicating Submittal requirement/package/revision tracking, and source-drillable neutral responsibility summaries.
 - Product commits are `07126549`, `749ae32d`, `90e948b7`, `dd1107b5` and `07bcb705`. Focused behavior suites and API/UI TypeScript compilers pass on the complete block candidate.
+- Corrective commit `0016ef0d` preserves the C031 literal type contract after the complete gate exposed TypeScript widening; the focused behavior and API compiler pass after correction.
 - The Headquarters responsibility workspace now exposes neutral company-grouped actionable/overdue/blocked counts with direct authorized source links. It does not create performance scores, blame, automatic escalation decisions or external notifications.
 - This block changes Platform/API only. Database/schema, customer data, Lens Next Native, installers, bridge, Autodesk state and Navisworks licensing are unchanged. Five unpublished builds remain after push; publication and authenticated Chrome smoke are due at C040.

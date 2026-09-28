@@ -46219,7 +46219,7 @@
     },
     {
       "taskId": "consolidation-c031-c035-reviewer-step-tracking",
-      "reviewedThroughCommit": "07bcb7052fe97e1503cda17cdab463aaaf795678",
+      "reviewedThroughCommit": "0016ef0d5bb4c696c45b5a166d8d39d0d8e87f15",
       "reviewedAt": "2026-09-28T11:42:27.222Z",
       "status": "local_candidate",
       "captureTiming": "same_task_before_final_gate_and_push",
@@ -46306,11 +46306,10 @@
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "5ab4e090cbfaee6d15de178023394130b06909aa765c21f8c17b2d6c638d6ae8"
+      "reviewedChangeSha256": "a8bc0e3f71d67012329017713279191452c20db4cf102608ac44fcb29d8ebc83"
     }
   ]
 }

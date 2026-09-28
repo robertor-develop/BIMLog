@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "27b8440ec401a119695b9343feff26a95154d8ef8813a79ad6d3f9f49781fd95",
+  "sourceSha256": "676713912c8ecb852dd9472974505ecf79a7965909c81fe2108c64eb4ec2ae3f",
   "itemCount": 230,
   "counts": {
     "ACTIVE": 195,
@@ -4178,7 +4178,7 @@
     },
     {
       "id": "4874d206a2ead63d",
-      "sourceLine": 3575,
+      "sourceLine": 3576,
       "heading": "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28",
       "statement": "Pass the complete clean pre-push gate on the reconciled exact head and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C036–C040.",
       "classification": "ACTIVE",
@@ -4189,14 +4189,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3575",
+        "OPEN_LOOP.md:3576",
         "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28"
       ],
       "currentAuthority": false
     },
     {
       "id": "6330051f2f00307e",
-      "sourceLine": 3576,
+      "sourceLine": 3577,
       "heading": "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28",
       "statement": "Do not run focused Navisworks smoke because C031–C035 do not change Native or installer paths. Ruben's separate physical Navisworks 2025 field confirmation remains outside this Platform-only block.",
       "classification": "ACTIVE",
@@ -4207,7 +4207,7 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3576",
+        "OPEN_LOOP.md:3577",
         "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28"
       ],
       "currentAuthority": false
