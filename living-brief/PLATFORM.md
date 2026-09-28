@@ -797,6 +797,17 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/report-view-presets.ts
 - artifacts/api-server/src/lib/report-view-preview.behavior.ts
 - artifacts/api-server/src/lib/report-view-preview.ts
+- artifacts/api-server/src/lib/reporting-baseline-capture.behavior.ts
+- artifacts/api-server/src/lib/reporting-baseline-capture.ts
+- artifacts/api-server/src/lib/reporting-baseline-comparison.behavior.ts
+- artifacts/api-server/src/lib/reporting-baseline-comparison.ts
+- artifacts/api-server/src/lib/reporting-baseline-history-types.ts
+- artifacts/api-server/src/lib/reporting-baseline-history.behavior.ts
+- artifacts/api-server/src/lib/reporting-baseline-history.ts
+- artifacts/api-server/src/lib/reporting-baseline-summary.behavior.ts
+- artifacts/api-server/src/lib/reporting-baseline-summary.ts
+- artifacts/api-server/src/lib/reporting-baseline.behavior.ts
+- artifacts/api-server/src/lib/reporting-baseline.ts
 - artifacts/api-server/src/lib/resource-hour-sources.behavior.ts
 - artifacts/api-server/src/lib/resource-hour-sources.ts
 - artifacts/api-server/src/lib/responsibility-action-routing.behavior.ts

@@ -46407,6 +46407,97 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ef95441e391c6f98e4967ac24df17a3ef08353af084ded376be1b8ad5a17f1e1"
+    },
+    {
+      "taskId": "consolidation-c041-c045-weekly-reporting-baselines",
+      "reviewedThroughCommit": "e310fbe98644230df4a184ee002926b7a26707c0",
+      "reviewedAt": "2026-09-28T13:44:35.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_before_final_gate_and_push",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "category": "immutable_weekly_reporting_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "claude"
+          ],
+          "summary": "C041-C045 freeze tenant/project source identities, require explicit idempotent capture, classify each changed canonical record once, expose count-to-record explanations and deny former-member history access."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves canonical source authority and human capture authority without creating a second workflow or scheduler."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Record immutable baseline, explicit capture, comparison, history and release boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing traceability, authorization, reproducibility and full-gate requirements remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Weekly historical comparison supports approved coordination reporting without changing BIMLog product purpose."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Additive Platform/API domain contracts introduce no schema, route, provider or runtime mutation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, bridge and preserved fallback remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Customer comparison output is a deterministic model; no renderer or visual report authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard assertion or interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the five bounded commits, focused evidence and five-build push boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Close C041-C045 implementation and retain only full-gate and push; publication remains due at C050."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or production acceptance record was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3ac1ac81b9a1dc3d176b44068ae0ff6158d60d646a1390000d046c8592305518"
     }
   ]
 }
