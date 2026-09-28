@@ -12,6 +12,8 @@ Living Brief UI and any agent tooling can read AI_DEV.md directly.
 
 ## Feedback Replit App Storage boundary
 
+`test:consolidation-block21` protects C101–C105: canonical publish readiness, exact digest-bound confirmation, distinct provider execution outcomes, sanitized durable receipts, and bilingual real-panel status. Only a completed provider outcome is represented as published. This block changes Platform/API only and does not modify Lens Next Native or installers.
+
 `test:consolidation-block20` protects C096–C100: server-only application-token renewal, selected-site validation without a root-site assumption, resumable administrator handoff, granted human-readable destinations owned by Folder Wizard, and explicit connection-health states. Incomplete Microsoft consent is never Connected; ordinary users never handle raw tokens or Entra configuration. This block changes Platform/API only and does not modify Lens Next Native or installers.
 
 `test:consolidation-block19` permanently protects the customer workspace boundary: same-company approved navigation, approved/issued records without internal pricing, attributable comment-only review requests, provider-receipt delivery truth, and secret-free setup diagnosis. C091–C095 change Platform/API only and are pushed without publication until C100; Lens Next Native and installers remain unchanged.

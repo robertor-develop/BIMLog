@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation Block 21 — SharePoint publication closure — 2026-09-28
+
+C101–C105 connect the existing Folder Wizard readiness, exact human confirmation, worker outcome, safe receipt and real bilingual publication status UI without adding a parallel queue or provider authority. Completed, retry, dead-letter, cancelled and pending states remain distinct; only a completed provider outcome is published. No schema, customer data, Microsoft tenant, credential, Lens Next Native or installer changed. Build 105 is the five-build push checkpoint; publication and authenticated Chrome smoke remain due at C110.
+
 ## Consolidation Block 19 — customer workspace and service delivery — 2026-09-28
 
 C091–C095 are implemented as bounded Platform/API services with focused positive and negative behavior coverage. The customer projection is same-company and capability-scoped, excludes internal pricing and non-approved records, keeps comments distinct from approval, treats delivery as prepared until a provider receipt exists, and exposes setup remediation without secrets or developer-only IDs. No database/schema, production customer data, provider send, Lens Next Native or installer changed. This block is the five-build push checkpoint; publication and authenticated Chrome smoke remain due at C100.
