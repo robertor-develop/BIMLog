@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 685,
-    "frontendApiReferences": 258,
+    "frontendApiReferences": 260,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -9787,6 +9787,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/RfisTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/rfis/attachments/from-cloud"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/SharePointEnrollmentStatus.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/coordination-hub/credential-lifecycle"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/SharePointEnrollmentStatus.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/integrations/folder-wizard/destination"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",

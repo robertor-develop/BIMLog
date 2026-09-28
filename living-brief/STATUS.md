@@ -6,6 +6,12 @@ C091–C095 are implemented as bounded Platform/API services with focused positi
 
 The generated authority inventories and semantic state seal were reconciled after implementation; they do not add another product build or change the C100 publication boundary.
 
+## Consolidation Block 20 SharePoint enrollment candidate — 2026-09-28
+
+- C096–C100 implement server-only application-token renewal, selected-site validation, resumable administrator consent state, governed readable destination selection, and live Folder Wizard connection-health presentation.
+- Focused tests and API/frontend typechecks pass. No schema, production data, Microsoft tenant, Lens Next Native, installer, or credential mutation occurred during implementation.
+- C100 is the planned publication boundary. Real Microsoft enrollment remains explicitly unproven until an authorized tenant/site is available; publication and authenticated Chrome smoke do not fabricate provider acceptance.
+
 ## Consolidation Block 18 knowledge and handover candidate — 2026-09-28
 
 - C086–C090 connect resolved source workflows to the existing governed lesson-proposal flow, provide tenant-scoped approved context lookup with safe fallback, prepare separately approved company reuse without confidential project fields, expose evidence-backed handover readiness, and create deterministic preview manifests from exact approved file revisions.

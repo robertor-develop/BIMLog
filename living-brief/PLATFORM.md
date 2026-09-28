@@ -932,10 +932,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/sendgrid-transport.ts
 - artifacts/api-server/src/lib/service-capability-rollout.behavior.ts
 - artifacts/api-server/src/lib/service-capability-rollout.ts
+- artifacts/api-server/src/lib/sharepoint-allowed-destinations.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-allowed-destinations.ts
+- artifacts/api-server/src/lib/sharepoint-application-token-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-application-token-lifecycle.ts
 - artifacts/api-server/src/lib/sharepoint-credential-validator.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-credential-validator.ts
 - artifacts/api-server/src/lib/sharepoint-discovery-adapter.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-discovery-adapter.ts
+- artifacts/api-server/src/lib/sharepoint-enrollment-state.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-enrollment-state.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.ts
 - artifacts/api-server/src/lib/specification-procurement-readiness-view.behavior.ts
@@ -1118,6 +1124,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/RfiCanonicalUiHarness.tsx
 - artifacts/bimlog/src/pages/project/RfisTab.tsx
 - artifacts/bimlog/src/pages/project/ScheduleTab.tsx
+- artifacts/bimlog/src/pages/project/SharePointEnrollmentStatus.tsx
 - artifacts/bimlog/src/pages/project/SubmittalsTab.tsx
 - artifacts/bimlog/src/pages/project/TeamTab.tsx
 - artifacts/bimlog/src/pages/project/TransmittalsTab.tsx

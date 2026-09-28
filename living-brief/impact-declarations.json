@@ -47643,6 +47643,91 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "683c1806b1bbc7dec9e445ae082acda47dcfbe6153af066d0085ef8a9839e6dc"
+    },
+    {
+      "taskId": "consolidation-c096-c100-release-boundary",
+      "reviewedThroughCommit": "d2fbc16478850d30cf6a574f26893d2d0a28fdbd",
+      "reviewedAt": "2026-09-28T21:55:41Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_after_implementation_before_full_gate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "established_replit_publish",
+          "authenticated_browser_smoke"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical connector and Folder Wizard remain the sole provider and routing authorities."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "The permanent Block 20 release and security boundary is recorded."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused, full build, publication and authenticated behavior evidence remain required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Simple customer setup advances the existing BIMLog vision without a parallel product."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Selected-site enrollment, token renewal, destination selection and health presentation were added."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, bridge, installers and Autodesk paths are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report renderer, identity or artifact presentation changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No statutory, engineering or Microsoft certification claim was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "C096-C100 implementation and explicit provider-evidence limitation are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The roadmap already owns C096-C100 and later provider-backed publishing work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence remains append-only and no prior claim was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/CLAUDE.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "4296c0e2a5a33922ff1807bcd06e7ebec19cef11fc39e8466ff196c1fd53f655"
     }
   ]
 }
