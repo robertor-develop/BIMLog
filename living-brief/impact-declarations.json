@@ -46302,8 +46302,15 @@
           "reason": "No historical evidence or production record was rewritten."
         }
       ],
-      "reviewedChangedPaths": [],
-      "reviewedChangeSha256": "pending-state-generation"
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5ab4e090cbfaee6d15de178023394130b06909aa765c21f8c17b2d6c638d6ae8"
     }
   ]
 }
