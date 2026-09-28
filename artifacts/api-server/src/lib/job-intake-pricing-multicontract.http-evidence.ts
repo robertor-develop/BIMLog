@@ -363,6 +363,7 @@ try {
   const contracts = await request("GET",`/projects/${projectId}/financial/contracts`);
   assert.equal(contracts.status,200,JSON.stringify(contracts.body));
   assert.equal(contracts.body.contracts.length,2);
+  assert.ok(contracts.body.contracts.every((contract:any)=>contract.makerUserId===actor.id), 'Maker presentation uses the exact prepared version identity');
   const byNumber = new Map(contracts.body.contracts.map((contract:any) => [contract.legalNumber,contract]));
   assert.equal((byNumber.get("INT-BASE-001") as any)?.pricingTemplateBinding.versionId,drawingTemplate.versionId);
   assert.equal((byNumber.get("INT-ADD-001") as any)?.pricingTemplateBinding.versionId,replacement.versionId);
@@ -426,6 +427,7 @@ try {
   assert.equal(reviewProduction.status,200,JSON.stringify(reviewProduction.body));
   const reviewDetail=await request('GET',productionContractPath,undefined,allocationReviewerToken);
   assert.equal(reviewDetail.status,200);
+  assert.equal(reviewDetail.body.detail.makerUserId,actor.id, 'Independent reviewer receives the original maker identity, not their own');
   assert.equal(reviewDetail.body.detail.lines.find((line:any)=>line.stableLineId==='CI-REVIEW').contractItem.productionAllocation,'240');
   const decisionPayload={expectedRevision:reviewProduction.body.revision,confirmationFingerprint:productionContract.contentFingerprint};
   const selfProduction=await request('POST',`${productionVersionPath}/approve`,decisionPayload);

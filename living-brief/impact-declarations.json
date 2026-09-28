@@ -45802,6 +45802,8 @@
         "artifacts/bimlog/src/components/commercial/ContractRecordAccess.tsx",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/lib/contract-review-controls.behavior.ts",
+        "artifacts/bimlog/src/lib/contract-review-controls.ts",
         "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
         "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
         "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
@@ -45826,7 +45828,7 @@
         "scripts/update-living-brief-state.mjs",
         "scripts/workflow-database-fixture.mjs"
       ],
-      "reviewedChangeSha256": "e9cf623013c5f8f7fbc20dff44c5e7a0a596a6d4e6e1f8b5191fb99d7963c37b"
+      "reviewedChangeSha256": "de6b1382524f7c13fab8dd12f1c4f3686eb02db0dd4817bfd87c3fbb70b849e5"
     }
   ]
 }
