@@ -15,6 +15,7 @@ import { OnboardingFlow, useOnboarding } from "@/components/OnboardingFlow";
 import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 import { confirmAndRetireProject } from "@/lib/project-retirement";
+import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWorkspace";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -561,6 +562,8 @@ export function Dashboard() {
 
           {/* AI Briefing banner */}
           <AiBriefingCard token={token ?? undefined} />
+
+          <ResponsibilityWorkspace token={token ?? undefined} lang={lang} />
 
           {/* SECTION 2 — Platform stats (5 cards) */}
           {!isLoading && (
