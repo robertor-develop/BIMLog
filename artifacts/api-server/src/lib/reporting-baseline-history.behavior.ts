@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { createReportingBaseline } from "./reporting-baseline";
+import { compareReportingBaselines } from "./reporting-baseline-comparison";
+import { buildWeeklyCoordinationSummary } from "./reporting-baseline-summary";
+import { baselineHistoryAccess, customerComparisonOutput, listBaselineHistory } from "./reporting-baseline-history";
+
+const make = (id: string, capturedAt: string, status: string) => createReportingBaseline({ id, tenantId: 31, projectId: 26, capturedAt, capturedByUserId: 7, sources: [{ dataset: "rfi", recordId: "1", version: id === "w1" ? 1 : 2, status, sourceUpdatedAt: capturedAt }] });
+const from = make("w1", "2026-09-21T13:00:00Z", "open");
+const to = make("w2", "2026-09-28T13:00:00Z", "closed");
+const retained = { baseline: from, retainedUntil: "2033-09-28T00:00:00Z", capturedByDisplayName: "Roberto" };
+const member = { userId: 7, tenantId: 31, projectIds: [26], activeMember: true };
+assert.equal(baselineHistoryAccess(retained, member).canRead, true);
+assert.equal(baselineHistoryAccess(retained, { ...member, activeMember: false }).canRead, false, "former member must be denied");
+assert.equal(listBaselineHistory([retained], member, "2026-09-28T00:00:00Z").length, 1);
+assert.equal(listBaselineHistory([{ ...retained, retainedUntil: "2026-01-01T00:00:00Z" }], member, "2026-09-28T00:00:00Z").length, 0);
+const comparison = compareReportingBaselines({ from, to });
+const summary = buildWeeklyCoordinationSummary({ changes: comparison.changes, sourceDetails: [{ recordKey: "rfi:1", title: "RFI 1", sourceAvailable: true }] });
+const first = customerComparisonOutput({ from, to, summary, language: "en" });
+const second = customerComparisonOutput({ from, to, summary, language: "en" });
+assert.equal(first.outputFingerprint, second.outputFingerprint, "historical output must be reproducible");
+assert.equal(first.captureMode, "explicit_authorized_only", "scheduled capture is not authorized");
+console.log("C045 governed baseline retention, history and reproducible output: PASS");
