@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ae347abf84c2e8d2f9b0dc6cd066bddcfc03e792947221be322a3f6e1bed5768",
-  "itemCount": 237,
+  "sourceSha256": "8d6e106cfd76919ddc3dce23083c30d16e40df43c4169f736814bd6c3148e7a0",
+  "itemCount": 238,
   "counts": {
-    "ACTIVE": 202,
+    "ACTIVE": 203,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4335,6 +4335,24 @@
       "evidence": [
         "OPEN_LOOP.md:3640",
         "Consolidation Block 15 — daily field records — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "97f4821c490e2e2e",
+      "sourceLine": 3647,
+      "heading": "Consolidation Block 16 — inspections and corrective actions — 2026-09-28",
+      "statement": "Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C071–C080 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3647",
+        "Consolidation Block 16 — inspections and corrective actions — 2026-09-28"
       ],
       "currentAuthority": false
     }

@@ -581,6 +581,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feedback-telegram-worker.behavior.ts
 - artifacts/api-server/src/lib/feedback-telegram-worker.ts
 - artifacts/api-server/src/lib/ffmpeg-capability.ts
+- artifacts/api-server/src/lib/field-checklist-definition.behavior.ts
+- artifacts/api-server/src/lib/field-checklist-definition.ts
+- artifacts/api-server/src/lib/field-corrective-action-link.behavior.ts
+- artifacts/api-server/src/lib/field-corrective-action-link.ts
+- artifacts/api-server/src/lib/field-inspection-execution.behavior.ts
+- artifacts/api-server/src/lib/field-inspection-execution.ts
+- artifacts/api-server/src/lib/field-quality-dashboard.behavior.ts
+- artifacts/api-server/src/lib/field-quality-dashboard.ts
+- artifacts/api-server/src/lib/field-reinspection.behavior.ts
+- artifacts/api-server/src/lib/field-reinspection.ts
 - artifacts/api-server/src/lib/financial-apu-allocation.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-contract.ts
