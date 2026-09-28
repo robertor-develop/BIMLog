@@ -52,7 +52,7 @@ function intervalState(openedAt: string | null, closedAt: string | null): Custod
 }
 
 export function normalizeRfiCustody(rows: readonly RfiCustodyRow[]): ReviewerCustodyStep[] {
-  return rows.map(row => {
+  return rows.map<ReviewerCustodyStep>(row => {
     const openedAt = iso(row.fromDate);
     const closedAt = iso(row.toDate);
     return {
@@ -78,13 +78,13 @@ export function normalizeSubmittalCustody(input: {
   history: readonly SubmittalHistoryEntry[] | null | undefined;
 }): ReviewerCustodyStep[] {
   const history = Array.isArray(input.history) ? input.history : [];
-  return history.map((entry, index) => {
+  return history.map<ReviewerCustodyStep>((entry, index) => {
     const openedAt = iso(entry.setAt);
     const nextOpenedAt = index + 1 < history.length ? iso(history[index + 1]?.setAt) : null;
     const closedAt = openedAt && nextOpenedAt && new Date(nextOpenedAt).getTime() >= new Date(openedAt).getTime()
       ? nextOpenedAt
       : null;
-    const state = openedAt
+    const state: CustodyIntervalState = openedAt
       ? (index + 1 < history.length ? (closedAt ? "closed" : "unknown") : "open")
       : "unknown";
     return {
