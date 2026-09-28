@@ -11,7 +11,8 @@ type Item = {
   classification: { groups: Record<Exclude<Group, "all">, boolean>; metrics: { recordAgeDays: number | null; deadlineDaysLate: number | null; reviewerDelayDays: number | null } };
   action: { label: string; openLink: string; publishUpdateMeaning: string; lensEvidenceLink: string | null };
 };
-type Payload = { items: Item[]; total: number; partial: boolean; groupCounts: Record<Exclude<Group, "all">, number> };
+type PerformanceAggregate = { identity: string; company: string | null; actionableCount: number; dueCount: number; overdueCount: number; blockedCount: number; noResponseCount: number; sourceReferences: Array<{ key: string; authorizedLink: string }> };
+type Payload = { items: Item[]; total: number; partial: boolean; groupCounts: Record<Exclude<Group, "all">, number>; performanceSummary?: { aggregates: PerformanceAggregate[]; escalationPreparation: { neutral: true; automaticScore: false; notificationSent: false } } };
 
 const SCOPE_KEY = "bimlog:headquarters:responsibility-scope";
 const GROUP_KEY = "bimlog:headquarters:responsibility-group";
@@ -54,6 +55,14 @@ export function ResponsibilityWorkspace({ token, lang }: { token?: string; lang:
     <div aria-label={es ? "Agrupar responsabilidades" : "Group responsibilities"} style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 12 }}>
       {groups.map(value => <button key={value} aria-pressed={group === value} onClick={() => setGroup(value)} style={{ border: "1px solid hsl(var(--border))", borderRadius: 999, padding: "5px 9px", background: group === value ? "hsl(var(--accent))" : "transparent", cursor: "pointer", fontSize: 11 }}>{groupLabels[value]} ({value === "all" ? payload?.total ?? 0 : payload?.groupCounts?.[value] ?? 0})</button>)}
     </div>
+    {(payload?.performanceSummary?.aggregates.length ?? 0) > 0 && <div aria-label={es ? "Resumen trazable de responsabilidad" : "Traceable responsibility summary"} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 8, marginBottom: 12 }}>
+      {payload!.performanceSummary!.aggregates.map(aggregate => <div key={aggregate.identity} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+        <strong style={{ fontSize: 12 }}>{aggregate.company || (es ? "Sin asignar" : "Unassigned")}</strong>
+        <div style={{ fontSize: 11, marginTop: 4 }}>{es ? "Accionables" : "Actionable"}: {aggregate.actionableCount} · {es ? "Vencidos" : "Overdue"}: {aggregate.overdueCount} · {es ? "Bloqueados" : "Blocked"}: {aggregate.blockedCount}</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 6 }}>{aggregate.sourceReferences.slice(0, 3).map((source, index) => <button key={source.key} onClick={() => navigate(source.authorizedLink)} style={{ border: 0, background: "none", color: "#2563eb", padding: 0, textDecoration: "underline", cursor: "pointer", fontSize: 10 }}>{es ? "Abrir fuente" : "Open source"} {index + 1}</button>)}</div>
+      </div>)}
+      <p style={{ gridColumn: "1 / -1", margin: 0, fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{es ? "Resumen neutral basado en registros fuente. No califica personas ni envía notificaciones." : "Neutral source-record summary. It does not score people or send notifications."}</p>
+    </div>}
     {state === "loading" && <p role="status">{es ? "Cargando responsabilidades…" : "Loading responsibilities…"}</p>}
     {state === "error" && <p role="alert">{es ? "No se pudo cargar. Actualice para intentar de nuevo." : "Could not load. Refresh to try again."}</p>}
     {state === "ready" && visible.length === 0 && <p>{es ? "No hay acciones en esta vista." : "No actions in this view."}</p>}

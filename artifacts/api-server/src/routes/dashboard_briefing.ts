@@ -13,6 +13,7 @@ import { projectResponsibilityItems } from "../lib/responsibility-workspace";
 import { parseResponsibilityScope, scopeResponsibilityItems } from "../lib/responsibility-workspace-scope";
 import { classifyResponsibility } from "../lib/responsibility-classification";
 import { responsibilityActionRoute } from "../lib/responsibility-action-routing";
+import { responsibilityPerformanceSummary } from "../lib/responsibility-performance-summary";
 import {
   addPageNumbers,
   computeContentHash,
@@ -819,7 +820,8 @@ router.get("/dashboard/responsibilities", authMiddleware, async (req, res) => {
       return counts;
     }, { due: 0, overdue: 0, blocked: 0, noResponse: 0 });
     res.setHeader("Cache-Control", "no-store");
-    res.json({ scope, items, total: items.length, groupCounts, authorizedProjectCount: memberships.length, partial: sourceFailures.length > 0, sourceFailures, generatedAt: now.toISOString(), readOnly: true });
+    const performanceSummary = responsibilityPerformanceSummary(items);
+    res.json({ scope, items, total: items.length, groupCounts, performanceSummary, authorizedProjectCount: memberships.length, partial: sourceFailures.length > 0, sourceFailures, generatedAt: now.toISOString(), readOnly: true });
   } catch (error) {
     if (error instanceof Error && error.message === "RESPONSIBILITY_SCOPE_INVALID") {
       res.status(400).json({ code: error.message, error: "Responsibility scope is invalid." });
