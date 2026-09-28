@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2f7c9f71b6cf92252b2e2ec04048c6a99fb291927882a8a5351a766be5e16a78",
-  "itemCount": 232,
+  "sourceSha256": "b4ae56a371dd1f3be1ea96750aa85c5f37348b66f996e392e2d1009c823cc427",
+  "itemCount": 233,
   "counts": {
-    "ACTIVE": 197,
+    "ACTIVE": 198,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4245,6 +4245,24 @@
       "evidence": [
         "OPEN_LOOP.md:3591",
         "Consolidation Block 9 — weekly reporting baselines — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "de0938725e323d90",
+      "sourceLine": 3598,
+      "heading": "Consolidation Block 10 — professional client reporting — 2026-09-28",
+      "statement": "Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C041–C050 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3598",
+        "Consolidation Block 10 — professional client reporting — 2026-09-28"
       ],
       "currentAuthority": false
     }

@@ -766,6 +766,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-rfi-import-migration.ts
 - artifacts/api-server/src/lib/procore-rfi-import.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import.ts
+- artifacts/api-server/src/lib/professional-report-layout.behavior.ts
+- artifacts/api-server/src/lib/professional-report-layout.ts
+- artifacts/api-server/src/lib/professional-report-package.behavior.ts
+- artifacts/api-server/src/lib/professional-report-package.ts
+- artifacts/api-server/src/lib/professional-report-parity.behavior.ts
+- artifacts/api-server/src/lib/professional-report-parity.ts
+- artifacts/api-server/src/lib/professional-report-presets.behavior.ts
+- artifacts/api-server/src/lib/professional-report-presets.ts
+- artifacts/api-server/src/lib/professional-report-sections.behavior.ts
+- artifacts/api-server/src/lib/professional-report-sections.ts
 - artifacts/api-server/src/lib/project-analytics-current-view-export.ts
 - artifacts/api-server/src/lib/project-context-source.behavior.ts
 - artifacts/api-server/src/lib/project-controls-dashboard.behavior.ts
