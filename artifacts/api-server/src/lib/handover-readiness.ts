@@ -1,0 +1,7 @@
+export type HandoverRequirement={requirementId:string;category:"approved_document"|"warranty"|"manual"|"unresolved_action";label:string;required:boolean};
+export type HandoverEvidence={requirementId:string;fileId:string|null;fileRevision:string|null;approvalStatus:"approved"|"draft"|"rejected"|null;actionStatus:"open"|"closed"|null};
+export function assessHandoverReadiness(input:{projectId:number;requirements:readonly HandoverRequirement[];evidence:readonly HandoverEvidence[]}){
+  if(new Set(input.requirements.map(row=>row.requirementId)).size!==input.requirements.length)throw new Error("Duplicate handover requirement.");
+  const evidenceByRequirement=new Map(input.evidence.map(row=>[row.requirementId,row]));const items=input.requirements.map(requirement=>{const evidence=evidenceByRequirement.get(requirement.requirementId);const satisfied=requirement.category==="unresolved_action"?evidence?.actionStatus==="closed":Boolean(evidence?.fileId&&evidence.fileRevision&&evidence.approvalStatus==="approved");return Object.freeze({...requirement,satisfied,evidence:evidence??null,reason:satisfied?null:requirement.category==="unresolved_action"?"Action remains unresolved.":"Approved file revision is missing."});});
+  const missing=items.filter(item=>item.required&&!item.satisfied);return Object.freeze({projectId:input.projectId,status:missing.length?"not_ready" as const:"ready_for_review" as const,items,missingCount:missing.length,assetMaintenanceEngineImplemented:false,finalHandoverApproved:false});
+}
