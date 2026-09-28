@@ -97,6 +97,7 @@ file, successful download, or build does not by itself prove artifact quality or
 
 - Lens Coordination PDF, clash report PDF, Lens Excel: `artifacts/api-server/src/routes/clash_reports.ts`
 - Lens report modal and PDF/Excel controls: `artifacts/bimlog/src/pages/project/LensViewpointsView.tsx`
+- Professional reporting presets, canonical combined sections, reproducible page layouts, governed package lifecycle and PDF/Excel parity contracts: `artifacts/api-server/src/lib/professional-report-*.ts`
 - Clash report controls: `artifacts/bimlog/src/pages/project/ClashReportsTab.tsx`
 
 ### Submittals

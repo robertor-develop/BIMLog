@@ -3590,3 +3590,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C046–C050.
 - [ ] Do not run focused Navisworks smoke because C041–C045 do not change Native or installer paths.
 - [x] Refresh the generated platform inventory, semantic review and Living Brief state seal in the correct order so the exact Block 9 candidate has no unreviewed structural-document boundary.
+
+## Consolidation Block 10 — professional client reporting — 2026-09-28
+
+- [x] C046–C050 implement governed report presets, combined canonical sections, reproducible preview/layout, package lifecycle integrity and PDF/Excel/official-record parity.
+- [x] Preserve existing report renderers and source authorities; do not duplicate customer renderers, business rows, project access, approval authority or delivery state.
+- [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C041–C050 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
+- [x] Do not run focused Navisworks smoke because C046–C050 do not change Native or installer paths.
