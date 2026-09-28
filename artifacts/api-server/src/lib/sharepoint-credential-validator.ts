@@ -7,7 +7,7 @@ import { isSharePointValidationAllowed } from "./provider-governance";
 import { createRuntimeProtectedProviderProbeExecutor } from "./protected-provider-probe-executor";
 
 const GRAPH_ORIGIN = "https://graph.microsoft.com";
-const GRAPH_PROBE_PATH = "/v1.0/sites/root?$select=id";
+const siteIdSchema = z.string().trim().min(1).max(1_024).regex(/^[^\x00-\x1f]+$/);
 
 const protectedProbeResultSchema = z.object({
   status: z.number().int().min(100).max(599),
@@ -35,6 +35,7 @@ export interface SharePointCredentialValidatorConfiguration {
   providerApprovals: string;
   graphOrigin: string;
   executor: ProtectedProviderProbeExecutor;
+  selectedSiteForProject: (projectId: number) => string | null;
 }
 
 function unavailable(): never {
@@ -49,6 +50,8 @@ export class SharePointCredentialValidator implements ConnectorCredentialValidat
     if (!this.configuration.enabled || !isSharePointValidationAllowed(input.companyId, this.configuration.providerApprovals)) unavailable();
     if (this.configuration.graphOrigin !== GRAPH_ORIGIN) throw new ConnectorValidationUnavailableError("SharePoint Graph origin is not governed");
     if (!/^[a-f0-9]{64}$/.test(input.configurationDigest)) throw new Error("Credential configuration digest is invalid");
+    const selectedSiteId = this.configuration.selectedSiteForProject(input.projectId);
+    if (!selectedSiteId || !siteIdSchema.safeParse(selectedSiteId).success) throw new ConnectorValidationUnavailableError("An authorized selected SharePoint site is required");
 
     let rawResult: unknown;
     try {
@@ -58,7 +61,7 @@ export class SharePointCredentialValidator implements ConnectorCredentialValidat
         provider: "sharepoint",
         request: {
           method: "GET",
-          url: `${GRAPH_ORIGIN}${GRAPH_PROBE_PATH}`,
+          url: `${GRAPH_ORIGIN}/v1.0/sites/${encodeURIComponent(selectedSiteId)}?$select=id`,
           redirect: "error",
           timeoutMs: 10_000,
           maxResponseBytes: 4_096,
@@ -73,10 +76,10 @@ export class SharePointCredentialValidator implements ConnectorCredentialValidat
     const parsed = protectedProbeResultSchema.safeParse(rawResult);
     if (!parsed.success) throw new Error("Protected SharePoint probe returned an invalid governed result");
     switch (parsed.data.status) {
-      case 200: return { valid: true, evidenceCode: "SHAREPOINT_GRAPH_AUTHORIZED" };
+      case 200: return { valid: true, evidenceCode: "SHAREPOINT_SELECTED_SITE_AUTHORIZED" };
       case 401: return { valid: false, evidenceCode: "SHAREPOINT_CREDENTIAL_REJECTED" };
       case 403: return { valid: false, evidenceCode: "SHAREPOINT_SCOPE_DENIED" };
-      case 404: return { valid: false, evidenceCode: "SHAREPOINT_ROOT_SITE_UNAVAILABLE" };
+      case 404: return { valid: false, evidenceCode: "SHAREPOINT_SELECTED_SITE_UNAVAILABLE" };
       case 408:
       case 425:
       case 429:
@@ -92,10 +95,13 @@ export class SharePointCredentialValidator implements ConnectorCredentialValidat
 }
 
 export function createRuntimeSharePointCredentialValidator(): ConnectorCredentialValidationPort {
+  let selectedSites: Record<string, string> = {};
+  try { selectedSites = z.record(z.string(), siteIdSchema).parse(JSON.parse(process.env.BIMLOG_SHAREPOINT_SELECTED_SITES ?? "{}")); } catch { selectedSites = {}; }
   return new SharePointCredentialValidator({
     enabled: process.env.BIMLOG_SHAREPOINT_VALIDATION_ENABLED === "true",
     providerApprovals: process.env.BIMLOG_PROVIDER_APPROVALS ?? "",
     graphOrigin: process.env.BIMLOG_SHAREPOINT_GRAPH_ORIGIN ?? GRAPH_ORIGIN,
     executor: createRuntimeProtectedProviderProbeExecutor(),
+    selectedSiteForProject: projectId => selectedSites[String(projectId)] ?? null,
   });
 }

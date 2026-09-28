@@ -19,9 +19,10 @@ const validator = new SharePointCredentialValidator({
   providerApprovals: "3:sharepoint:validate",
   graphOrigin: "https://graph.microsoft.com",
   executor,
+  selectedSiteForProject: projectId => projectId === 7 ? "site-allowed" : null,
 });
 
-assert.deepEqual(await validator.validate(baseInput), { valid: true, evidenceCode: "SHAREPOINT_GRAPH_AUTHORIZED" });
+assert.deepEqual(await validator.validate(baseInput), { valid: true, evidenceCode: "SHAREPOINT_SELECTED_SITE_AUTHORIZED" });
 const call = calls[0] as Record<string, unknown>;
 assert.deepEqual(call, {
   credentialId: "credential-1",
@@ -29,7 +30,7 @@ assert.deepEqual(call, {
   provider: "sharepoint",
   request: {
     method: "GET",
-    url: "https://graph.microsoft.com/v1.0/sites/root?$select=id",
+    url: "https://graph.microsoft.com/v1.0/sites/site-allowed?$select=id",
     redirect: "error",
     timeoutMs: 10_000,
     maxResponseBytes: 4_096,
@@ -40,7 +41,7 @@ assert.equal(JSON.stringify(call).includes("secret"), false);
 assert.equal(JSON.stringify(call).includes("envelope"), false);
 assert.equal(JSON.stringify(call).includes(baseInput.configurationDigest), false);
 
-for (const [status, evidenceCode] of [[401, "SHAREPOINT_CREDENTIAL_REJECTED"], [403, "SHAREPOINT_SCOPE_DENIED"], [404, "SHAREPOINT_ROOT_SITE_UNAVAILABLE"]] as const) {
+for (const [status, evidenceCode] of [[401, "SHAREPOINT_CREDENTIAL_REJECTED"], [403, "SHAREPOINT_SCOPE_DENIED"], [404, "SHAREPOINT_SELECTED_SITE_UNAVAILABLE"]] as const) {
   probeResult = { status };
   assert.deepEqual(await validator.validate(baseInput), { valid: false, evidenceCode });
 }
@@ -52,11 +53,11 @@ for (const status of [408, 425, 429, 500, 502, 503, 504]) {
 probeResult = { status: 200, body: { id: "must-not-cross-boundary" } };
 await assert.rejects(() => validator.validate(baseInput), /invalid governed result/);
 
-const disabled = new SharePointCredentialValidator({ enabled: false, providerApprovals: "3:sharepoint:validate", graphOrigin: "https://graph.microsoft.com", executor });
+const disabled = new SharePointCredentialValidator({ enabled: false, providerApprovals: "3:sharepoint:validate", graphOrigin: "https://graph.microsoft.com", executor, selectedSiteForProject: () => "site-allowed" });
 await assert.rejects(() => disabled.validate(baseInput), ConnectorValidationUnavailableError);
-const unapproved = new SharePointCredentialValidator({ enabled: true, providerApprovals: "4:sharepoint:validate", graphOrigin: "https://graph.microsoft.com", executor });
+const unapproved = new SharePointCredentialValidator({ enabled: true, providerApprovals: "4:sharepoint:validate", graphOrigin: "https://graph.microsoft.com", executor, selectedSiteForProject: () => "site-allowed" });
 await assert.rejects(() => unapproved.validate(baseInput), ConnectorValidationUnavailableError);
-const unsafeOrigin = new SharePointCredentialValidator({ enabled: true, providerApprovals: "3:sharepoint:validate", graphOrigin: "https://example.invalid", executor });
+const unsafeOrigin = new SharePointCredentialValidator({ enabled: true, providerApprovals: "3:sharepoint:validate", graphOrigin: "https://example.invalid", executor, selectedSiteForProject: () => "site-allowed" });
 await assert.rejects(() => unsafeOrigin.validate(baseInput), ConnectorValidationUnavailableError);
 await assert.rejects(() => validator.validate({ ...baseInput, provider: "outlook" }), ConnectorValidationUnavailableError);
 await assert.rejects(() => validator.validate({ ...baseInput, configurationDigest: "invalid" }), /digest is invalid/);
@@ -66,7 +67,10 @@ const failedExecutor = new SharePointCredentialValidator({
   providerApprovals: "3:sharepoint:validate",
   graphOrigin: "https://graph.microsoft.com",
   executor: { execute: async () => { throw new Error("sensitive provider text"); } },
+  selectedSiteForProject: () => "site-allowed",
 });
 await assert.rejects(() => failedExecutor.validate(baseInput), (error: unknown) => error instanceof ConnectorValidationUnavailableError && !error.message.includes("sensitive"));
+const missingSelection = new SharePointCredentialValidator({ enabled: true, providerApprovals: "3:sharepoint:validate", graphOrigin: "https://graph.microsoft.com", executor, selectedSiteForProject: () => null });
+await assert.rejects(() => missingSelection.validate(baseInput), ConnectorValidationUnavailableError);
 
 console.log("SharePoint credential validator behavior: PASS");
