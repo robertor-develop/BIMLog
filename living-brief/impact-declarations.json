@@ -47462,13 +47462,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "STATUS records the current C081-C085 source candidate and release boundary."
+          "result": "reviewed_no_semantic_change",
+          "reason": "STATUS already records the current C081-C085 source candidate and release boundary; the final generated state seal adds no further semantic change."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "OPEN_LOOP records all five accepted builds and the pending exact-head push."
+          "result": "reviewed_no_semantic_change",
+          "reason": "OPEN_LOOP already records all five accepted builds and the pending exact-head push; the final generated state seal adds no further semantic change."
         },
         {
           "key": "audit",
