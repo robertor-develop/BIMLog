@@ -1,0 +1,8 @@
+import type {ApprovedCommercialBaseline} from "./commercial-change-approval";
+const cents=(value:string)=>{if(!/^(?:0|[1-9]\d{0,15})(?:\.\d{1,2})?$/.test(value))throw new Error("Money value is invalid.");const [w,f=""]=value.split(".");return BigInt(w)*100n+BigInt(f.padEnd(2,"0"));};
+const money=(value:bigint)=>`${value/100n}.${(value%100n).toString().padStart(2,"0")}`;
+export function reconcileCommercialForecast(input:{baseline:ApprovedCommercialBaseline;approvedChanges:readonly {changeOrderId:string;amount:string;version:number}[];potentialImpacts:readonly {impactId:string;amount:string}[];actualCosts:readonly {costRecordId:string;amount:string}[]}){
+  const ids=(rows:readonly {changeOrderId:string}[])=>new Set(rows.map(row=>row.changeOrderId));if(ids(input.approvedChanges).size!==input.approvedChanges.length)throw new Error("Approved Change Order is duplicated.");
+  const original=cents(input.baseline.originalContractValue),current=cents(input.baseline.currentApprovedValue),potential=input.potentialImpacts.reduce((n,row)=>n+cents(row.amount),0n),actual=input.actualCosts.reduce((n,row)=>n+cents(row.amount),0n);
+  return Object.freeze({projectId:input.baseline.projectId,currency:input.baseline.currency,originalApprovedValue:money(original),currentApprovedValue:money(current),potentialUnapprovedValue:money(potential),forecastValue:money(current+potential),actualCostToDate:money(actual),baselineVersion:input.baseline.version,approvedChangeOrderIds:Object.freeze(input.approvedChanges.map(row=>row.changeOrderId).sort()),potentialImpactIds:Object.freeze(input.potentialImpacts.map(row=>row.impactId).sort()),actualCostRecordIds:Object.freeze(input.actualCosts.map(row=>row.costRecordId).sort())});
+}
