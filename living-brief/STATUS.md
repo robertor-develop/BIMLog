@@ -3056,3 +3056,9 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - C071–C075 add isolated dated daily records and immutable revision history, assignment-linked non-payroll workforce observations, custody-preserving evidence links, source-labeled manual/provider observations, and attributable corrections with reconciled report counts.
 - Product commits are `382921b3`, `1db320f2`, `2452fd9d`, `74d594f2` and `77ded311`. Duplicate policy, unknown hours, upload/privacy failures and provider outage remain explicit.
 - This block changes Platform/API domain contracts only. It adds no database/schema, customer data, Native source, installer, bridge, Autodesk or Navisworks-facing mutation. Five unpublished builds remain after push; publication and authenticated Chrome smoke are due after C076–C080.
+
+## Consolidation Block 16 source candidate — 2026-09-28
+
+- C076–C080 add immutable approved checklist snapshots, evidence- and role-gated inspection execution, idempotent failed-check corrective actions, independent reinspection/authorized reopening and deterministic field-quality reporting with controlled client visibility.
+- Product commits are `53b89336`, `6aaa37f1`, `ec1d8de7`, `d1491df1` and `57c8b1ab`. Checklist use never claims statutory certification; incomplete evidence cannot pass; originating inspection identity and historical results remain immutable.
+- This block changes Platform/API domain contracts only. It adds no database/schema, customer data, Native source, installer, bridge, Autodesk or Navisworks-facing mutation. C071–C080 now reach the required ten-build push/publication/authenticated-Chrome boundary.

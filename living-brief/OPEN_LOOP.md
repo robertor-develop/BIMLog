@@ -3639,3 +3639,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Preserve existing project/location, Files custody, team assignment, approved-time and canonical action authorities; do not infer payroll, payment, approval or provider weather truth.
 - [ ] Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C076–C080.
 - [x] Do not run focused Navisworks smoke because C071–C075 do not change Native or installer paths.
+
+## Consolidation Block 16 — inspections and corrective actions — 2026-09-28
+
+- [x] C076–C080 implement frozen approved checklist versions, complete evidence-backed inspection execution, one canonical action per failed check, independent reinspection/closure/reopening and audience-controlled field-quality evidence.
+- [x] Preserve daily records, Files custody, project access and canonical action identities; do not claim statutory certification, fabricate evidence, allow executor self-closure or expose internal custody IDs to client reports.
+- [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C071–C080 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
+- [x] Do not run focused Navisworks smoke because C076–C080 do not change Native or installer paths.
