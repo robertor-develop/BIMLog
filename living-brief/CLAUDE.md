@@ -842,3 +842,12 @@ capture to decision to report to audit trail.
 # Route graph release gate
 
 Run `pnpm run generate:route-interconnection-graph` only when intentionally refreshing the tracked graph after route changes. `pnpm run test:post120-block37` is part of the normal pre-push gate and must fail when the graph is stale, navigation is incomplete, route ownership is duplicated, project route ordering is unsafe, or compatibility redirects disappear.
+
+## Consolidation Block 6 — responsibility workspace (C026–C030)
+
+- Headquarters now projects actionable RFI, Submittal, Meeting, Schedule and Lens records into one read-only responsibility workspace. The owning module remains the sole source of truth; no parallel issue, task, status or project authority was created.
+- `My Work`, `My Company` and `Authorized Projects` are bounded by active project membership. Company matching never expands project access and no Super Administrator shortcut exists.
+- Due today, overdue, blocked and no-response are deterministic UTC classifications. Record age, deadline lateness and reviewer delay remain distinct metrics.
+- Workspace actions open the existing authorized owning-module editor. Linked Lens evidence remains linked evidence. `Publish Update` records a source update and never means document publication.
+- The selected responsibility scope and urgency group are saved as non-authoritative browser context. Missing owner, deadline or project context remains visible instead of being guessed.
+- `test:consolidation-block06` is a permanent pre-push gate. This block changed Platform/API only; Lens Next Native, installers and the immutable Lens fallback were not modified.
