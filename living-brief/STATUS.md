@@ -2997,3 +2997,10 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - The workspace provides `My Work`, `My Company` and `Authorized Projects` views bounded by active project membership, deterministic due/overdue/blocked/no-response classifications, explicit missing context, saved non-authoritative view context, and direct links to the owning editor and related Lens evidence.
 - Product commits are `bcf67505`, `5e3742df`, `58bb4f3b`, `c7c15cc8` and `881bd279`. Living Brief and route-graph reconciliation are bound through `8c32f9c303e08456bd7c525d3ac5cf3b37e3630c`.
 - This block changes Platform/API only. Database/schema, customer data, Lens Next Native, installers, bridge, Autodesk state and Navisworks licensing are unchanged. Ten unpublished consolidation builds now require the established push, Replit Shell publication without Agents, and authenticated visible-Chrome smoke.
+
+## Consolidation Block 7 source candidate — 2026-09-28
+
+- C031–C035 implement provenance-preserving RFI/Submittal custody reads, explicit versioned business calendars, honest reviewer-step clocks, non-duplicating Submittal requirement/package/revision tracking, and source-drillable neutral responsibility summaries.
+- Product commits are `07126549`, `749ae32d`, `90e948b7`, `dd1107b5` and `07bcb705`. Focused behavior suites and API/UI TypeScript compilers pass on the complete block candidate.
+- The Headquarters responsibility workspace now exposes neutral company-grouped actionable/overdue/blocked counts with direct authorized source links. It does not create performance scores, blame, automatic escalation decisions or external notifications.
+- This block changes Platform/API only. Database/schema, customer data, Lens Next Native, installers, bridge, Autodesk state and Navisworks licensing are unchanged. Five unpublished builds remain after push; publication and authenticated Chrome smoke are due at C040.

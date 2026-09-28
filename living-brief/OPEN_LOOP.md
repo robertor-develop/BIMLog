@@ -3565,5 +3565,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 - [x] C026–C030 implement the canonical responsibility projection, active-membership scopes, independent urgency metrics, owning-module action routes, saved accessible Headquarters workspace and permanent focused gate.
 - [x] Preserve RFI, Submittal, Meeting, Schedule and Lens as the only source authorities; do not create a second task store, second project-access authority or synthetic Lens issue workflow.
-- [ ] Pass the complete clean pre-push gate on the reconciled exact head, push normally to `origin/master`, publish the ten-build C021–C030 batch through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke of Headquarters scope/group persistence, source navigation, linked Lens evidence, reload and session continuity.
+- [x] Pass the complete clean pre-push gate on the reconciled exact head, push normally to `origin/master`, publish the ten-build C021–C030 batch through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke of Headquarters scope/group persistence, source navigation, linked Lens evidence, reload and session continuity. Live source is `1d269c275a8d137743f03ec19af1a8773884228b`, release `v1.05.N18-P36`.
 - [ ] Do not run focused Navisworks smoke for this block because Native and installer paths are unchanged. Ruben's separate physical Navisworks 2025 field confirmation remains outside this Platform-only block.
+
+## Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28
+
+- [x] C031–C035 implement custody provenance, versioned business calendars, honest sequential/parallel reviewer clocks, non-duplicating Submittal tracking and traceable neutral responsibility summaries.
+- [x] Preserve canonical RFI/Submittal histories and owning-module source links; do not create a second review store, blame score, automatic escalation, external notification or synthetic Lens workflow event.
+- [ ] Pass the complete clean pre-push gate on the reconciled exact head and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C036–C040.
+- [ ] Do not run focused Navisworks smoke because C031–C035 do not change Native or installer paths. Ruben's separate physical Navisworks 2025 field confirmation remains outside this Platform-only block.

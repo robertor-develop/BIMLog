@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "5d7f101c61f145be45fde5d98da1bae920abd779cd1b93ab95df87ea36b24854",
-  "itemCount": 229,
+  "sourceSha256": "27b8440ec401a119695b9343feff26a95154d8ef8813a79ad6d3f9f49781fd95",
+  "itemCount": 230,
   "counts": {
-    "ACTIVE": 194,
+    "ACTIVE": 195,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4159,24 +4159,6 @@
       "currentAuthority": false
     },
     {
-      "id": "902f494917b9a199",
-      "sourceLine": 3568,
-      "heading": "Consolidation Block 6 — responsibility workspace — 2026-09-28",
-      "statement": "Pass the complete clean pre-push gate on the reconciled exact head, push normally to `origin/master`, publish the ten-build C021–C030 batch through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke of Headquarters scope/group persistence, source navigation, linked Lens evidence, reload and session continuity.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:3568",
-        "Consolidation Block 6 — responsibility workspace — 2026-09-28"
-      ],
-      "currentAuthority": false
-    },
-    {
       "id": "e2dd9cd5ce40ea01",
       "sourceLine": 3569,
       "heading": "Consolidation Block 6 — responsibility workspace — 2026-09-28",
@@ -4191,6 +4173,42 @@
       "evidence": [
         "OPEN_LOOP.md:3569",
         "Consolidation Block 6 — responsibility workspace — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "4874d206a2ead63d",
+      "sourceLine": 3575,
+      "heading": "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28",
+      "statement": "Pass the complete clean pre-push gate on the reconciled exact head and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C036–C040.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3575",
+        "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6330051f2f00307e",
+      "sourceLine": 3576,
+      "heading": "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28",
+      "statement": "Do not run focused Navisworks smoke because C031–C035 do not change Native or installer paths. Ruben's separate physical Navisworks 2025 field confirmation remains outside this Platform-only block.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3576",
+        "Consolidation Block 7 — reviewer-step tracking and honest clocks — 2026-09-28"
       ],
       "currentAuthority": false
     }

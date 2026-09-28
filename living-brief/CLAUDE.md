@@ -852,3 +852,11 @@ Run `pnpm run generate:route-interconnection-graph` only when intentionally refr
 - The selected responsibility scope and urgency group are saved as non-authoritative browser context. Missing owner, deadline or project context remains visible instead of being guessed.
 - `test:consolidation-block06` is a permanent pre-push gate. This block changed Platform/API only; Lens Next Native, installers and the immutable Lens fallback were not modified.
 - The accepted implementation and deterministic route graph are reconciled through `8c32f9c303e08456bd7c525d3ac5cf3b37e3630c`; provider publication evidence must bind the later clean exact-head candidate.
+
+## Consolidation Block 7 — reviewer-step tracking and honest clocks (C031–C035)
+
+- Existing RFI custody rows and Submittal `ball_in_court_history` remain authoritative. The shared read contract preserves source identity and provenance; malformed or missing boundaries remain unknown, and linked Lens evidence never creates a custody, delivery, review or approval event.
+- Business durations require an explicit calendar version, timezone, workday, weekday set and holiday set. Current reviewer-step time and total record age are separate measures. Reassignment/reopening creates another traceable step; supported parallel reviewers keep independent clocks.
+- Submittal tracking keeps planned requirements, received packages and revisions distinct. Stable package identities prevent join multiplication, unmatched planned work and unmatched received packages remain visible, and reviewer-company filtering does not broaden project authority.
+- Responsibility summaries are neutral, source-drillable aggregates. They do not score or blame people, send notifications, or make an approval/escalation decision. Escalation preparation contains reasons and authorized source links only.
+- `test:consolidation-block07` is a permanent pre-push gate. C031–C035 change Platform/API only; database/schema, customer data, Lens Next Native, installers and the immutable Lens fallback remain unchanged. This five-build block is pushed but not published until the C040 ten-build boundary.

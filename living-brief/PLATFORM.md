@@ -268,6 +268,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block24-final-release-contract.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
+- artifacts/api-server/src/lib/business-calendar.behavior.ts
+- artifacts/api-server/src/lib/business-calendar.ts
 - artifacts/api-server/src/lib/clash-report-contracts.ts
 - artifacts/api-server/src/lib/clash-report-provenance.ts
 - artifacts/api-server/src/lib/clash-visual-package-truth.ts
@@ -791,10 +793,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/responsibility-action-routing.ts
 - artifacts/api-server/src/lib/responsibility-classification.behavior.ts
 - artifacts/api-server/src/lib/responsibility-classification.ts
+- artifacts/api-server/src/lib/responsibility-performance-summary.behavior.ts
+- artifacts/api-server/src/lib/responsibility-performance-summary.ts
 - artifacts/api-server/src/lib/responsibility-workspace-scope.behavior.ts
 - artifacts/api-server/src/lib/responsibility-workspace-scope.ts
 - artifacts/api-server/src/lib/responsibility-workspace.behavior.ts
 - artifacts/api-server/src/lib/responsibility-workspace.ts
+- artifacts/api-server/src/lib/reviewer-custody-history.behavior.ts
+- artifacts/api-server/src/lib/reviewer-custody-history.ts
+- artifacts/api-server/src/lib/reviewer-step-tracking.behavior.ts
+- artifacts/api-server/src/lib/reviewer-step-tracking.ts
 - artifacts/api-server/src/lib/rfi-command-service.ts
 - artifacts/api-server/src/lib/rfi-complete-package.behavior.ts
 - artifacts/api-server/src/lib/rfi-complete-package.ts
@@ -818,6 +826,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/storage-adapter.behavior.ts
 - artifacts/api-server/src/lib/storage-adapter.ts
 - artifacts/api-server/src/lib/submittal-register-coverage.ts
+- artifacts/api-server/src/lib/submittal-review-tracking.behavior.ts
+- artifacts/api-server/src/lib/submittal-review-tracking.ts
 - artifacts/api-server/src/lib/team-performance-postgres-query.behavior.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
 - artifacts/api-server/src/lib/team-performance.behavior.ts

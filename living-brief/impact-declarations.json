@@ -46216,6 +46216,94 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8ec8e4b161bdb53f3dda0d6c16a23e2f1a8a628c77fd4eeae9b1659bffcf81c2"
+    },
+    {
+      "taskId": "consolidation-c031-c035-reviewer-step-tracking",
+      "reviewedThroughCommit": "07bcb7052fe97e1503cda17cdab463aaaf795678",
+      "reviewedAt": "2026-09-28T11:42:27.222Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_before_final_gate_and_push",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "category": "reviewer_step_truth_and_traceability",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "claude"
+          ],
+          "summary": "C031-C035 preserve canonical custody provenance, calculate versioned business time, keep reviewer-step time distinct from total age, prevent Submittal join inflation and expose only neutral source-drillable summaries."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block links canonical source records and preserves human authority without creating a second workflow or automated decision."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Record the permanent Block 7 source, calendar, clock, summary and release boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing traceability, accessibility, security, clean-code and full-gate requirements remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block implements approved responsibility and review visibility without changing BIMLog product purpose."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Additive read contracts and one existing dashboard response reuse canonical stores; no schema or provider architecture changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, bridge and preserved fallback are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, spreadsheet or report design authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external-standard assertion changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the exact five-build candidate, passing focused evidence and cadence state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Close implementation and retain only the complete pre-push gate and push; publication remains due at C040."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or production record was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [],
+      "reviewedChangeSha256": "pending-state-generation"
     }
   ]
 }
