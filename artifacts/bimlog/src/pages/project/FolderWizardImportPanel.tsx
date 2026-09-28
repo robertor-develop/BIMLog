@@ -6,6 +6,7 @@ import { parseFolderWizardDraft, type FolderWizardDraft } from "./folder-wizard-
 import { FolderWizardRoutingPanel } from "./FolderWizardRoutingPanel";
 import { FolderWizardPublishPanel } from "./FolderWizardPublishPanel";
 import { FolderWizardDestinationPanel } from "./FolderWizardDestinationPanel";
+import { SharePointEnrollmentStatus } from "./SharePointEnrollmentStatus";
 
 type ImportRecord = { id: string; version: number; sha256: string;
   document: { destination: { sharepoint_url: string; base_path: string }; blueprints: { name: string; include: boolean; tiers: { label: string; items: string[] }[] }[] };
@@ -152,6 +153,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
       {refreshing ? tr("Refreshing…", "Actualizando…") : tr("Refresh routing and publication status", "Actualizar rutas y estado de publicación")}
     </button>
     <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{tr("Import the Wizard JSON to configure folder rules. File publication is a separate, explicit step after destination verification.", "Importe el JSON del Wizard para configurar las reglas de carpetas. La publicación de archivos es un paso separado y explícito después de verificar el destino.")}</p>
+    <SharePointEnrollmentStatus projectId={projectId} token={token} lang={lang} />
     <FolderWizardDestinationPanel projectId={projectId} token={token} lang={lang} onSaved={() => reload()} />
     {loading ? <p role="status">{tr("Loading routing…", "Cargando rutas…")}</p> : error && !current && !draft ? <p role="alert">{error}</p> : <>
       {current ? <div style={{ fontSize: 12 }}>
