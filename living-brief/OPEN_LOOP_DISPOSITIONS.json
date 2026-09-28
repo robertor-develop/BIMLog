@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "df04a796a1220c3f43f5b0b7c75617b8b02c5c6e2067f81887b535d9471b28cc",
+  "sourceSha256": "72a56a223dd4225685e2e8e7d5fc027c3a8c279430a3233723632c401b71a751",
   "itemCount": 232,
   "counts": {
     "ACTIVE": 197,
@@ -4213,10 +4213,10 @@
       "currentAuthority": false
     },
     {
-      "id": "6ddfbdf480ad0357",
-      "sourceLine": 3583,
-      "heading": "Consolidation Block 8 — reusable saved views and pivots — 2026-09-28",
-      "statement": "Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C031–C040 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.",
+      "id": "f171e2ea0a58743c",
+      "sourceLine": 3590,
+      "heading": "Consolidation Block 9 — weekly reporting baselines — 2026-09-28",
+      "statement": "Pass the complete exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after C046–C050.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -4225,16 +4225,16 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3583",
-        "Consolidation Block 8 — reusable saved views and pivots — 2026-09-28"
+        "OPEN_LOOP.md:3590",
+        "Consolidation Block 9 — weekly reporting baselines — 2026-09-28"
       ],
       "currentAuthority": false
     },
     {
-      "id": "c15dc358c509f6f6",
-      "sourceLine": 3584,
-      "heading": "Consolidation Block 8 — reusable saved views and pivots — 2026-09-28",
-      "statement": "Do not run focused Navisworks smoke because C036–C040 do not change Native or installer paths.",
+      "id": "e26668d01454f48d",
+      "sourceLine": 3591,
+      "heading": "Consolidation Block 9 — weekly reporting baselines — 2026-09-28",
+      "statement": "Do not run focused Navisworks smoke because C041–C045 do not change Native or installer paths.",
       "classification": "ACTIVE",
       "workClass": "FIELD_EVIDENCE",
       "ownership": {
@@ -4243,8 +4243,8 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3584",
-        "Consolidation Block 8 — reusable saved views and pivots — 2026-09-28"
+        "OPEN_LOOP.md:3591",
+        "Consolidation Block 9 — weekly reporting baselines — 2026-09-28"
       ],
       "currentAuthority": false
     }
