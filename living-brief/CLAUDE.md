@@ -12,6 +12,8 @@ Living Brief UI and any agent tooling can read AI_DEV.md directly.
 
 ## Feedback Replit App Storage boundary
 
+`test:consolidation-block19` permanently protects the customer workspace boundary: same-company approved navigation, approved/issued records without internal pricing, attributable comment-only review requests, provider-receipt delivery truth, and secret-free setup diagnosis. C091–C095 change Platform/API only and are pushed without publication until C100; Lens Next Native and installers remain unchanged.
+
 Production Feedback may use the official Replit App Storage SDK only when an explicit private bucket ID and governed maximum read size are bound at startup. The adapter must preserve opaque object names, exact-byte SHA-256 readback, bounded streaming downloads, retention holds, health-probe cleanup, and sanitized default-deny failures. Replit App Storage is temporary persistent custody and does not replace the Roberto-controlled receiver, malware-scanner authority, transcription authority, verified transfer receipt, or governed post-transfer deletion.
 
 The deterministic production runtime assembler may accept a dependency's ordinary `*` version declaration only when the installed value is a valid semantic version and the exact issuer edge remains bound in `pnpm-lock.yaml`; wildcard support must never bypass lockfile identity or runtime closure checks.

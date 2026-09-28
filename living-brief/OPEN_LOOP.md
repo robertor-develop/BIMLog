@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Consolidation Block 19 — customer workspace and service delivery — 2026-09-28
+
+- [x] C091 limits customer landing navigation to same-company approved capabilities.
+- [x] C092 exposes only approved/issued customer records and omits internal pricing server-side.
+- [x] C093 records attributable version-bound review requests without approval authority.
+- [x] C094 prepares delivery and preferences without claiming a send before provider receipt.
+- [x] C095 diagnoses permission, template and connection gaps without secrets or developer-only IDs.
+- [ ] Complete the exact-head gate and push `origin/master`; publication and authenticated Chrome smoke remain paired with C096–C100.
+- [x] No Navisworks smoke is required because Native and installers are unchanged.
+
 ## Consolidation Block 18 — knowledge reuse and handover — 2026-09-28
 
 - [x] C086 links resolved Lens/RFI/Submittal/field sources and evidence to one governed lesson proposal without publishing or changing source closure.

@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation Block 19 — customer workspace and service delivery — 2026-09-28
+
+C091–C095 are implemented as bounded Platform/API services with focused positive and negative behavior coverage. The customer projection is same-company and capability-scoped, excludes internal pricing and non-approved records, keeps comments distinct from approval, treats delivery as prepared until a provider receipt exists, and exposes setup remediation without secrets or developer-only IDs. No database/schema, production customer data, provider send, Lens Next Native or installer changed. This block is the five-build push checkpoint; publication and authenticated Chrome smoke remain due at C100.
+
 ## Consolidation Block 18 knowledge and handover candidate — 2026-09-28
 
 - C086–C090 connect resolved source workflows to the existing governed lesson-proposal flow, provide tenant-scoped approved context lookup with safe fallback, prepare separately approved company reuse without confidential project fields, expose evidence-backed handover readiness, and create deterministic preview manifests from exact approved file revisions.
