@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { createDailyFieldRecord, addDailyRecordRevision } from "./daily-field-record";
+import { buildDailyRecordReport, correctDailyRecord } from "./daily-record-report";
+import { recordWorkforceObservation } from "./daily-workforce-observation";
+import { linkDailyEvidence } from "./daily-evidence-link";
+import { recordDailySiteObservation } from "./daily-site-observation";
+
+let record = createDailyFieldRecord({ recordId: "DR-8-1", projectId: 8, recordDate: "2026-09-28", locationId: "LEVEL-02", authorId: "user-4", existing: [], duplicatePolicy: "reject", recordedAt: "2026-09-28T12:00:00Z" });
+record = addDailyRecordRevision(record, { revisionId: "DR-8-1:r2", authorId: "reviewer-2", state: "approved", recordedAt: "2026-09-28T17:00:00Z" });
+const correctionResult = correctDailyRecord(record, { correctionId: "COR-1", supersededRevisionId: "DR-8-1:r2", correctedBy: "reviewer-2", correctedAt: "2026-09-28T18:00:00Z", reason: "Corrected delivery count", replacementRevision: { revisionId: "DR-8-1:r3", projectId: 8, recordDate: "2026-09-28", locationId: "LEVEL-02", authorId: "reviewer-2", state: "approved", recordedAt: "2026-09-28T18:00:00Z" } });
+const workforce = recordWorkforceObservation({ observationId: "OBS-1", projectId: 8, dailyRecordId: "DR-8-1", assignmentId: "ASSIGN-22", companyId: 4, activity: "Install", observedHeadcount: 3, observedHours: 18, observedAt: "2026-09-28T15:00:00Z", observerId: "user-4" });
+const evidence = linkDailyEvidence({ linkId: "LINK-1", projectId: 8, dailyRecordId: "DR-8-1", custodyObjectId: "custody/photo/91", originalFileId: 91, note: null, state: "linked", failureCode: null, linkedBy: "user-4", linkedAt: "2026-09-28T16:00:00Z" }, []);
+const observation = recordDailySiteObservation({ observationId: "WX-1", projectId: 8, dailyRecordId: "DR-8-1", kind: "weather", source: "manual", sourceLabel: "Field observation", providerRecordId: null, detail: "Rain", observedAt: "2026-09-28T16:00:00Z", recordedBy: "user-4" });
+const report = buildDailyRecordReport({ record: correctionResult.record, corrections: [correctionResult.correction], workforce: [workforce], evidence: [evidence], observations: [observation], linkedActionIds: ["ACTION-2", "ACTION-1", "ACTION-1"] });
+assert.deepEqual(report.counts, { workforce: 1, evidence: 1, observations: 1, linkedActions: 2 }, "record and report counts reconcile");
+assert.equal(report.approvedRevisionId, "DR-8-1:r3");
+assert.deepEqual(report.history.map(revision => revision.revisionId), ["DR-8-1:r1", "DR-8-1:r2", "DR-8-1:r3"], "approved history is preserved after correction");
+assert.equal(report.corrections[0]?.correctedBy, "reviewer-2");
+assert.match(report.fingerprint, /^[0-9a-f]{64}$/);
+console.log("C075 attributable review, correction and reconciled daily report: PASS");
