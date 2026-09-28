@@ -1,5 +1,20 @@
 # STATUS.md - Current Accepted Platform State
 
+## Consolidation Block C021-C025 candidate - 2026-09-28
+
+The five bounded implementation units are committed sequentially through
+`0f20911955cc08718562d79ac6884018e3ed796a`: governed service-capability presets,
+canonical company/directory resolution shared with Lens, role-readiness derived from current
+authority, deterministic resumable setup-readiness snapshots, and a protected synthetic
+actual-UI setup rehearsal. Optional Lens capability never grants itself; duplicate company
+names require exact identity; role readiness has no SuperAdmin shortcut; optional providers do
+not block core setup; and the training route performs no customer, template, database or
+Navisworks mutation. Focused C021-C025 tests, API/frontend typing, security, database-safety,
+Lens Next regressions and the current isolated artifact-fixture check pass. At this reconciliation
+checkpoint the complete pre-push gate and normal Block 05 push remain to be completed. This is
+five unpublished builds; publication and authenticated Chrome smoke are due after C026-C030.
+Lens Next Native and installers are unchanged, so this block does not trigger Navisworks smoke.
+
 ## Current execution checkpoint — publication recovery closed
 
 Accepted runtime source is `7ed6f5bb6effa5ef48178b14c36f6d7d7daa5918`, release `v1.05.N18-P36`.

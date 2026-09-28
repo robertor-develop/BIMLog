@@ -46022,6 +46022,101 @@
         "scripts/execution-continuity-policy.mjs"
       ],
       "reviewedChangeSha256": "18a0a46d84e5896d22ef6bd3143551d06f806a6b823f56db3e36cdddc5209e35"
+    },
+    {
+      "taskId": "consolidation-c021-c025-setup-readiness",
+      "reviewedThroughCommit": "0f20911955cc08718562d79ac6884018e3ed796a",
+      "reviewedAt": "2026-09-28T05:39:49.028Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_before_final_gate_and_push",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "edit_f_root_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "provider_mfa_if_requested"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "future_builder_workflow_correction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "C021-C025 add fail-closed capability presets, canonical company resolution, authority-derived role readiness, deterministic resumable setup snapshots and a protected synthetic setup rehearsal. No grant, tenant merge, customer mutation, database migration, Native or installer change is introduced. Publication remains due only after C030."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block reuses existing authorities and canonical identities without creating a parallel control plane."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution, release and provider boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused behavior, typing and full-gate requirements remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block consolidates the approved BIMLog setup journey without changing product purpose."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Additive application modules and one protected training route reuse existing platform authority; no schema or provider architecture changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native and installers are unchanged; only shared company/capability readiness is reconciled."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report format or design-system authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external-standard assertion changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the exact five-build candidate, proven boundaries and cadence state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Close C021-C025 implementation and retain only the real full-gate, push and C030 publication sequence."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or production record was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8e3c2ecf12f1935c8b3f78c89275abe15dc1315274fc84fc4989db617e33fe16"
     }
   ]
 }

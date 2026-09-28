@@ -1,5 +1,23 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Consolidation Block C021-C025 - 2026-09-28
+
+- [x] C021 adds deny-by-default service-capability presets; optional Lens requires both explicit
+  selection and an existing server entitlement and never grants authority.
+- [x] C022 centralizes canonical company/directory resolution for web and Lens while preserving
+  historical values, rejecting ambiguous duplicate names and preventing tenant merges.
+- [x] C023 derives PMO, reviewer, executor, reader and Lens setup readiness only from current
+  project membership, mapped role, company PMO status and existing workflow assignments.
+- [x] C024 produces deterministic resumable readiness snapshots for catalogs, templates,
+  budget, optional providers and Lens company binding; optional-provider gaps do not block core.
+- [x] C025 adds a protected synthetic actual-UI setup rehearsal linked to governed workspaces;
+  it has no mutation transport and cannot autoapprove or change customer/Navisworks state.
+- [ ] Complete the exact full pre-push gate and normal push for head
+  `0f20911955cc08718562d79ac6884018e3ed796a`. Publication is not due until C030; do not run
+  authenticated Chrome or Navisworks smoke solely for this non-Native five-build checkpoint.
+- [ ] Continue C026-C030 only after the Block 05 gate and push pass. Then publish the ten-build
+  batch and run the full authenticated Chrome smoke under the standing authorization.
+
 ## Current execution checkpoint — publication recovery closed
 
 The bounded-memory repair `60ae18d5cdb2c7a8246a7b03d0ab5c14944dd10e`, reconciled at

@@ -275,6 +275,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.ts
 - artifacts/api-server/src/lib/commercial-project-scope.ts
+- artifacts/api-server/src/lib/company-directory-resolution.behavior.ts
+- artifacts/api-server/src/lib/company-directory-resolution.ts
 - artifacts/api-server/src/lib/company-identity-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/company-identity-reconciliation.ts
 - artifacts/api-server/src/lib/company-identity.behavior.ts
@@ -774,6 +776,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-invitation-service.ts
 - artifacts/api-server/src/lib/project-invitation.behavior.ts
 - artifacts/api-server/src/lib/project-retirement.ts
+- artifacts/api-server/src/lib/project-role-readiness.behavior.ts
+- artifacts/api-server/src/lib/project-role-readiness.ts
+- artifacts/api-server/src/lib/project-setup-readiness.behavior.ts
+- artifacts/api-server/src/lib/project-setup-readiness.ts
 - artifacts/api-server/src/lib/protected-provider-probe-executor.behavior.ts
 - artifacts/api-server/src/lib/protected-provider-probe-executor.ts
 - artifacts/api-server/src/lib/provider-governance.ts
@@ -793,6 +799,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/scoped-briefing-cache.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts
+- artifacts/api-server/src/lib/service-capability-rollout.behavior.ts
+- artifacts/api-server/src/lib/service-capability-rollout.ts
 - artifacts/api-server/src/lib/sharepoint-credential-validator.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-credential-validator.ts
 - artifacts/api-server/src/lib/sharepoint-discovery-adapter.behavior.ts
@@ -939,6 +947,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/Privacy.tsx
 - artifacts/bimlog/src/pages/Profile.tsx
 - artifacts/bimlog/src/pages/ProjectDetail.tsx
+- artifacts/bimlog/src/pages/ProjectSetupTraining.tsx
 - artifacts/bimlog/src/pages/Register.tsx
 - artifacts/bimlog/src/pages/ResetPassword.tsx
 - artifacts/bimlog/src/pages/SetupGuide.tsx
@@ -1002,6 +1011,7 @@ It changes only when the code structure or curated architectural facts change.
 - /projects/:id/:tab?
 - /help
 - /setup-guide
+- /training/project-setup
 - /profile
 - /settings/company-profile
 - /settings/notifications
