@@ -3761,3 +3761,12 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Keep future tasks assignable later; when a priced resource is reassigned, apply the member's approved internal profile cost without changing the customer rate.
 - [x] Show the next actor, review restriction, reconciled hour definitions and a canonical RFI create-return-link path that leaves the task unchanged on cancel.
 - [ ] Pass the complete exact-head pre-push gate, push the five-build block, publish the accumulated UX031–UX040 ten-build set, and complete authenticated Chrome smoke.
+
+## Experience makeover Block 9 — one file-intake journey — 2026-09-29
+
+- [x] Distinguish record-only, retained-evidence and connected-delivery behavior before file selection.
+- [x] Resolve Convention setup before upload and return to the intended Files intake context without creating a duplicate record.
+- [x] Preview filename, storage truth, destination state and optional AI cost before submission; keep unavailable capabilities blocked and explicit.
+- [x] Show exact document, family, version and source identity and preserve retry context with a stable attempt identity.
+- [ ] Complete the exact-head gate and push UX041–UX045 as one block. Do not publish until UX046–UX050 complete the next ten-build boundary.
+- [ ] Complete the outstanding authenticated Chrome smoke for live deployment `4f79b296` when the Chrome control is available.

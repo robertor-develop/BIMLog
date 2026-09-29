@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bf25ebd607e7bc7ab04749129ffb2112d3f0e787bf6964eff2e5ea9296e2ad95",
-  "itemCount": 258,
+  "sourceSha256": "f3be342b2114a0c6649331db7e61d8a272c18b73a580f0ceda1305e69efbc61b",
+  "itemCount": 260,
   "counts": {
-    "ACTIVE": 223,
+    "ACTIVE": 225,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4713,6 +4713,42 @@
       "evidence": [
         "OPEN_LOOP.md:3763",
         "Experience makeover Block 8 — daily operations first — 2026-09-29"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "a41ef118f2bf6b8f",
+      "sourceLine": 3771,
+      "heading": "Experience makeover Block 9 — one file-intake journey — 2026-09-29",
+      "statement": "Complete the exact-head gate and push UX041–UX045 as one block. Do not publish until UX046–UX050 complete the next ten-build boundary.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3771",
+        "Experience makeover Block 9 — one file-intake journey — 2026-09-29"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6f58228b50ced9d2",
+      "sourceLine": 3772,
+      "heading": "Experience makeover Block 9 — one file-intake journey — 2026-09-29",
+      "statement": "Complete the outstanding authenticated Chrome smoke for live deployment `4f79b296` when the Chrome control is available.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3772",
+        "Experience makeover Block 9 — one file-intake journey — 2026-09-29"
       ],
       "currentAuthority": false
     }

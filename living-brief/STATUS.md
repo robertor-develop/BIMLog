@@ -3154,3 +3154,10 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - UX036–UX040 implement task-first daily queues, later staffing with approved member cost, visible next actors and review gates, distinct operational hour definitions, and canonical document create-return linking.
 - Generic future demand, customer APU/billing rates, canonical document authority and existing task history remain preserved.
 - Product commits are `b49eb921`, `d8b4cb19`, `0ec955a3`, `b68f1058`, and `efc819f4`. UX031–UX040 reach the required ten-build publication and authenticated Chrome smoke boundary.
+
+## Experience makeover Block 9 source candidate — 2026-09-29
+
+- UX041–UX045 create one explicit file-intake journey: record-only, retained-evidence and connected-delivery modes; pre-selection Convention resolution with exact return; a review-before-submit preview; exact document/version/source identity; and retry that preserves file and context.
+- The existing endpoint currently proves record-only metadata intake. Retained evidence and connected delivery remain visibly unavailable until governed storage and destination authority exist; the UI does not claim bytes were retained, analyzed or delivered.
+- Product commits are `f1752ba5`, `0b4361fc`, `a2ba7dfd`, `1e6ac6f9`, and `f8fd0b30`. This is the first five-build unpublished block after the live UX031–UX040 release `4f79b296`.
+- Replit publication passed source attestation, database safety, provider build and promotion at source `c3927db05a3b7e6a9b41424529fa77cc5999bfc2`. Authenticated Chrome control remained unavailable after repeated connection attempts, so that post-publication smoke is still open without implying a product failure.
