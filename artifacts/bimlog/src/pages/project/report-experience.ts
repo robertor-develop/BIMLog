@@ -17,3 +17,6 @@ export function reportInputs(key:string):string[]{
   if(["rfi-aging","submittal-status","change-order-log","transmittal-log"].includes(key))return ["canonical register","record status","selected dates when available"];
   return ["project records","selected date range when available","detail choice"];
 }
+export function reportExportPreview(input:{label:string;from:string;to:string;status:string;includeDetails:boolean;visibleRows?:number}){
+  return {scope:input.label,dateRange:input.from||input.to?`${input.from||"Any start"} to ${input.to||"Any end"}`:"All dates",status:input.status,detail:input.includeDetails?"Supporting rows included":"Summary totals only",visibleRows:input.visibleRows??null};
+}

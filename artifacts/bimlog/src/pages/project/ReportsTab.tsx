@@ -470,7 +470,7 @@ const PDF_REPORTS: { key: string; labelEn: string; labelEs: string; scopeEn: str
   { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",       scopeEn: "Content verification report",        scopeEs: "Reporte de verificacion de contenido",     icon: <Search size={20} /> },
 ];
 type ReportLauncherOptions = { from: string; to: string; status: string; includeDetails: boolean };
-import { REPORT_MEASURES, REPORT_QUESTIONS, reportInputs } from "./report-experience";
+import { REPORT_MEASURES, REPORT_QUESTIONS, reportExportPreview, reportInputs } from "./report-experience";
 export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin: boolean }) {
   const { t, lang } = useI18n();
   const tl = (en: string, es: string) => lang === "es" ? es : en;
@@ -629,6 +629,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
     ? tl(`CVR date range: ${from || "Any start"} to ${to || "Any end"}`, `Rango CVR: ${from || "Sin inicio"} a ${to || "Sin fin"}`)
     : tl("CVR date range: All dates", "Rango CVR: Todas las fechas");
   const generatedContext = tl("Generated at download time", "Generado al descargar");
+  const selectedExportPreview=selectedReport?reportExportPreview({label:tl(selectedReport.labelEn,selectedReport.labelEs),...reportOptions,visibleRows:selectedReport.key==="cvr"?report?.issues.length:undefined}):null;
   const sourceScreenExportNote = tl(
     "This hub is the master PDF library and bulk launcher. Current-view PDFs for filtered source screens remain on the source tabs.",
     "Este centro es la biblioteca maestra de PDFs y lanzador general. Los PDFs de vista actual filtrada permanecen en las pestanas de origen."
@@ -759,6 +760,7 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
                 {["project-health", "performance", "audit-certificate", "meeting-minutes", "change-order-log", "transmittal-log", "cvr"].includes(selectedReport.key) && <div className="grid grid-cols-1 gap-2 sm:grid-cols-2"><label style={{ display: "grid", gap: 5, fontSize: 12 }}>{tl("From", "Desde")}<input type="date" value={reportOptions.from} disabled={reportLaunching} max={reportOptions.to || undefined} onChange={(event) => setReportOptions(current => ({ ...current, from: event.target.value }))} /></label><label style={{ display: "grid", gap: 5, fontSize: 12 }}>{tl("To", "Hasta")}<input type="date" value={reportOptions.to} disabled={reportLaunching} min={reportOptions.from || undefined} onChange={(event) => setReportOptions(current => ({ ...current, to: event.target.value }))} /></label></div>}
                 <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}><input type="checkbox" checked={reportOptions.includeDetails} disabled={reportLaunching} onChange={(event) => setReportOptions(current => ({ ...current, includeDetails: event.target.checked }))} />{tl("Include supporting detail table", "Incluir tabla de detalles")}</label>
                 <div style={{ fontSize: 11, color: "#64748B" }}>{tl("Selected filters", "Filtros seleccionados")}: {reportOptions.from || ".."} — {reportOptions.to || ".."} | {reportOptions.status} | {reportOptions.includeDetails ? tl("Details", "Detalles") : tl("Summary only", "Solo resumen")}</div>
+                {selectedExportPreview&&<section className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs" aria-label="Export scope preview"><strong>{tl("Export scope preview","Vista previa del alcance")}</strong><ul><li>{selectedExportPreview.scope}</li><li>{selectedExportPreview.dateRange}</li><li>Status: {selectedExportPreview.status}</li><li>{selectedExportPreview.detail}</li>{selectedExportPreview.visibleRows!==null&&<li>Visible matching rows: {selectedExportPreview.visibleRows}; generated totals use the same filters.</li>}</ul></section>}
                 <div role="alert" aria-live="assertive" className="min-h-5 text-xs text-red-700">{reportLaunchError || ""}</div>
               </div>
               <DialogFooter className="flex-row flex-wrap gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3.5 sm:space-x-0">
