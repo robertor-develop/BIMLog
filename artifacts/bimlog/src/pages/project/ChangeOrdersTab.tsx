@@ -1,5 +1,6 @@
 import { ProjectPartyPicker } from "@/components/ProjectPartyPicker";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useSearch } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { Download, Search, Trash2 } from "lucide-react";
@@ -15,6 +16,18 @@ interface ChangeOrder {
 }
 
 const API = "/api/v1";
+
+export type ChangeOriginContext = { type: string; id: number; label: string; returnTo: string };
+
+export function parseChangeOriginContext(search: string, projectId: number): ChangeOriginContext | null {
+  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const type = params.get("originType")?.trim() ?? "";
+  const idText = params.get("originId") ?? "";
+  const label = params.get("originLabel")?.trim() ?? "";
+  const returnTo = params.get("returnTo") ?? "";
+  if (!type || !/^[1-9]\d*$/.test(idText) || !label || !returnTo.startsWith(`/projects/${projectId}/`)) return null;
+  return { type, id: Number(idText), label, returnTo };
+}
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "#6B7280", pending_approval: "#D97706", approved: "#16A34A",
@@ -67,6 +80,8 @@ const parseContentDispositionFileName = (header: string | null) => {
 export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { lang } = useI18n();
   const { token } = useAuthStore();
+  const searchParams = useSearch();
+  const origin = useMemo(() => parseChangeOriginContext(searchParams, projectId), [searchParams, projectId]);
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
   const [items, setItems] = useState<ChangeOrder[]>([]);
@@ -131,7 +146,9 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true); setError("");
     try {
-      const body: Record<string, unknown> = { title: form.title, description: form.description || undefined, contract_value_impact: form.contract_value_impact || undefined };
+      const originLine = origin ? `[Origin: ${origin.type} #${origin.id} — ${origin.label}]` : "";
+      const description = [originLine, form.description.trim()].filter(Boolean).join("\n\n");
+      const body: Record<string, unknown> = { title: form.title, description: description || undefined, contract_value_impact: form.contract_value_impact || undefined };
       if (form.schedule_impact_days) body.schedule_impact_days = Number(form.schedule_impact_days);
       if (form.initiated_by_company.trim()) body.initiated_by_company = form.initiated_by_company.trim();
       const r = await fetch(`${API}/projects/${projectId}/change-orders`, { method: "POST", headers, body: JSON.stringify(body) });
@@ -347,6 +364,18 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
       {showForm && (
         <div className="card" style={{ marginBottom: 20, padding: 20 }}>
           <h3 style={{ fontWeight: 600, marginBottom: 16 }}>{t("New Change Order", "Nueva Orden de Cambio")}</h3>
+          <div style={{ marginBottom: 14, padding: 12, border: "1px solid #FCD34D", borderRadius: 8, background: "#FFFBEB", color: "#78350F" }}>
+            <strong>{t("Draft change — no approval is created here.", "Cambio en borrador — aquí no se crea ninguna aprobación.")}</strong>
+            <div style={{ marginTop: 4, fontSize: 12 }}>{t("Record the cost and schedule impact for review before using the approval action.", "Registre el impacto de costo y cronograma para revisión antes de usar la acción de aprobación.")}</div>
+          </div>
+          {origin && (
+            <div style={{ marginBottom: 14, padding: 12, border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF" }}>
+              <div style={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase", color: "#1E3A5F" }}>{t("Supporting origin", "Origen de soporte")}</div>
+              <div style={{ marginTop: 4, fontWeight: 800 }}>{origin.label}</div>
+              <div style={{ fontSize: 12, color: "#475569" }}>{origin.type} · ID {origin.id}</div>
+              <a href={origin.returnTo} style={{ display: "inline-block", marginTop: 6, fontSize: 12, fontWeight: 800 }}>{t("Return to source", "Volver al origen")}</a>
+            </div>
+          )}
           {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
           <form onSubmit={save} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             <div style={{ gridColumn: "1 / -1" }}>
@@ -367,7 +396,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
             </div>
             <div style={{ gridColumn: "1 / -1" }}><ProjectPartyPicker projectId={projectId} company={form.initiated_by_company} contacts={false} canCreate={canWrite} tt={t} onSelect={company => setForm(f => ({ ...f, initiated_by_company: company }))} /></div>
             <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8 }}>
-              <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t("Saving…", "Guardando…") : t("Create", "Crear")}</button>
+              <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t("Saving…", "Guardando…") : t("Create draft change", "Crear cambio en borrador")}</button>
               <button className="btn btn-outline" type="button" onClick={() => { setShowForm(false); setError(""); }}>{t("Cancel", "Cancelar")}</button>
             </div>
           </form>
