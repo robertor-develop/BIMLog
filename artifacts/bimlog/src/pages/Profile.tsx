@@ -22,7 +22,7 @@ import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activit
 import { AiControlPlanePanel } from "@/components/ai/AiControlPlanePanel";
 import { NotificationPreferenceCenter } from "@/components/notifications/NotificationPreferenceCenter";
 import { FeaturePolicySettingsPanel } from "@/components/settings/FeaturePolicySettingsPanel";
-import { settingsDestinations } from "./settings-experience";
+import { effectiveRoleLabel, settingsDestinations } from "./settings-experience";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -1104,7 +1104,9 @@ export function Profile() {
             <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>You are not a member of any projects yet.</div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {myProjects.map(proj => (
+              {myProjects.map(proj => {
+                const role = effectiveRoleLabel(proj.userRole);
+                return (
                 <div key={proj.id} style={{
                   display: "flex", alignItems: "center", gap: 12,
                   padding: "10px 14px",
@@ -1118,14 +1120,14 @@ export function Profile() {
                       <span style={{ fontFamily: "monospace" }}>{proj.code}</span>
                     </div>
                   </div>
-                  <Badge variant="outline" style={{ fontSize: 10, flexShrink: 0 }}>{proj.userRole.replace(/_/g, " ")}</Badge>
+                  <div style={{ textAlign: "right", flexShrink: 0 }}><Badge variant="outline" style={{ fontSize: 10 }}>{role.effective}</Badge>{role.legacy && <div title="Stored legacy role is preserved; effective access remains governed by current permissions." style={{ fontSize: 9, marginTop: 3, color: "hsl(var(--muted-foreground))" }}>Legacy label: {role.legacy.replace(/_/g, " ")}</div>}</div>
                   <Button size="sm" variant="outline" style={{ gap: 4, fontSize: 11, flexShrink: 0 }}
                     onClick={() => navigate(`/projects/${proj.id}/analytics`)}>
                     <ExternalLink style={{ width: 11, height: 11 }} />
                     Go to Project
                   </Button>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </SectionCard>
