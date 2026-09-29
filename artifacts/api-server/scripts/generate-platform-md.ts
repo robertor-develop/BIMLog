@@ -419,6 +419,15 @@ ${appRoutes()}
 - The generated disposition inventory classifies every open record, binds ownership and module/route responsibility, and links repeated historical statements to one canonical record.
 - The normal pre-push gate rejects unresolved duplicate statements, competing or missing current markers, unowned records, route-less product work, and stale contradictions classified as active.
 
+## Settings, notifications and reusable libraries - UX071-UX075
+
+- Profile navigation distinguishes personal settings, company configuration and platform administration, and names the role responsible for each scope.
+- Notification Center displays the effective result after global enablement, pause, delivery cadence, connector readiness and channel availability. Existing stored preferences and event/module overrides remain canonical.
+- Integration cards distinguish ready, setup-required and permission-required states with an explicit next action. Status failures state that no external request was sent.
+- Stored project roles are translated into readable effective authority labels. Unknown legacy labels remain visible as preserved history and never broaden permissions.
+- Company pricing and coordination knowledge selection states distinguish loading, unavailable, published options, filter-empty results and authoring-unavailable empty states. Published immutable versions and existing project prices remain unchanged.
+- UX071-UX075 are the first five unpublished builds after the UX061-UX070 release; publication and authenticated Chrome smoke are due at UX080.
+
 ## Connected commercial Intake - UX026-UX030
 
 Activated Intake with a canonical contract displays authoritative saved setup in read-only fields. Browser recovery copies remain preserved without false autosave retries; stage navigation and linked commercial records remain available. Operational activation without a canonical contract retains its existing enrichment path.

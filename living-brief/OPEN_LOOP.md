@@ -1,5 +1,9 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 15 — UX071–UX075 source candidate
+
+The five sequential builds clarify where personal, company and platform settings live; reconcile personal and canonical notification availability; expose connector readiness and administrator handoff; present effective role labels while retaining legacy values; and make published pricing/knowledge reuse and unavailable authoring states actionable. The block changes no permission, provider-send, schema, customer data, immutable template version, project price, Native or installer authority. It is the first five-build unpublished block after UX061–UX070; publication and authenticated Chrome smoke are due at UX080.
+
 ## Experience makeover Block 06 — UX026–UX030 release candidate
 
 B05+B06 were published at exact source 66c8e3f28596b30b6938eba3eb74cefef5805508 (publication 44bbc4e0), after the full nine-command suite passed. All 61 authenticated Chrome routes resolved, but the connected flow exposed an activated Intake recovery defect: an old browser draft was displayed with a false autosave retry while canonical saving was locked. The bounded correction reuses the canonical lock for recovery and form controls, preserves the browser copy, shows saved server data, and keeps stage navigation and commercial return links available. Local bilingual actual-component verification and focused behavior tests pass; the corrected candidate requires the full suite, push, republication and repeated Chrome smoke. No new block starts until that acceptance passes. Schema, production business records, employee pay rules and Replit agents remain untouched.
