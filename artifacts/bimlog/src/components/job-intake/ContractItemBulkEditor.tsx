@@ -122,6 +122,7 @@ export function parseContractItemPaste(source: string) {
 
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
+  const eligibleSnapshots = props.snapshots.filter(snapshot => snapshot.currency === props.currency && (!snapshot.status || snapshot.status === "approved"));
   const eligibleApuVersions = compatibleApuVersions(props.apuVersions, props.currency);
   const update = (index: number, patch: Record<string, unknown>) =>
     props.setItems((items) =>
@@ -305,7 +306,7 @@ export function ContractItemBulkEditor(props: Props) {
           </button>
         )}
       </div>
-      {props.capabilities.budget && props.snapshots.length > 0 && (
+      {props.capabilities.budget && (eligibleSnapshots.length > 0 || props.budgetSnapshotId) && (
         <div className="ji-bulk-budget">
           <label>
             {props.tt(
@@ -321,9 +322,10 @@ export function ContractItemBulkEditor(props: Props) {
               <option value="">
                 {props.tt("Select version", "Seleccione una versión")}
               </option>
-              {props.snapshots.map((snapshot: any) => (
+              {props.budgetSnapshotId && !eligibleSnapshots.some(snapshot => snapshot.id === props.budgetSnapshotId) && <option value={props.budgetSnapshotId}>{props.tt("Saved budget unavailable or incompatible", "Presupuesto guardado no disponible o incompatible")}</option>}
+              {eligibleSnapshots.map((snapshot: any) => (
                 <option key={snapshot.id} value={snapshot.id}>
-                  v{snapshot.budget_version ?? snapshot.budgetVersion ?? snapshot.version} · {snapshot.total} {snapshot.currency ?? props.currency}
+                  {props.tt("Approved budget", "Presupuesto aprobado")} · v{snapshot.budget_version ?? snapshot.budgetVersion ?? snapshot.version} · {snapshot.total} {snapshot.currency ?? props.currency}
                 </option>
               ))}
             </select>
@@ -331,7 +333,7 @@ export function ContractItemBulkEditor(props: Props) {
           <small>{props.tt("Select an approved line for each Contract Item. Activation generates one canonical Job budget account per project cost node and preserves the exact source line association.", "Seleccione una línea aprobada para cada Partida de Contrato. La activación genera una cuenta presupuestaria canónica del Trabajo por nodo de costo del proyecto y conserva la asociación exacta con la línea de origen.")}</small>
         </div>
       )}
-      {props.capabilities.budget && props.snapshots.length === 0 && (
+      {props.capabilities.budget && eligibleSnapshots.length === 0 && (
         <div className="ji-prerequisite-note" role="note">
           <div>
             <strong>{props.tt("Approved budget link (optional)", "Vínculo de presupuesto aprobado (opcional)")}</strong>

@@ -1,3 +1,4 @@
+import { BudgetSourcePicker } from "@/components/commercial/BudgetSourcePicker";
 import { useEffect, useState } from "react";
 import { Link, useRoute } from "wouter";
 import { useAuthStore } from "@/store/auth";
@@ -740,17 +741,7 @@ function Budget({
               }}
             />
           </label>
-          <label>
-            {tt("Authenticated file ID", "ID de archivo autenticado")}
-            <input
-              inputMode="numeric"
-              value={sourceFileId}
-              onChange={(event) => {
-                setSourceFileId(event.target.value);
-                setPreview(null);
-              }}
-            />
-          </label>
+          <BudgetSourcePicker projectId={projectId} token={token} value={sourceFileId} onChange={id => { setSourceFileId(id); setPreview(null); }} tt={tt}/>
           <label>
             {tt("ISO currency", "Moneda ISO")}
             <input

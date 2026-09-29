@@ -620,17 +620,22 @@ export function JobIntakeWorkspace() {
       setBusy(false);
     }
   };
+  const snapshotRequest = useRef(0);
   const selectSnapshot = async (id: string) => {
-    change("commercial", "budgetSnapshotId", id);
-    setBudgetLines([]);
-    if (!id) return;
+    const request = ++snapshotRequest.current;
+    const originProject = projectId;
+    if (id === dataRef.current.commercial.budgetSnapshotId) return;
     try {
-      const detail = await api(
-        `/projects/${projectId}/financial/snapshots/${id}`,
-      );
-      setBudgetLines(detail.snapshot?.lines ?? []);
+      const detail = id ? await api(`/projects/${projectId}/financial/snapshots/${id}`) : null;
+      if (request !== snapshotRequest.current || projectIdRef.current !== originProject) return;
+      setData((old: any) => ({ ...old, commercial: { ...old.commercial, budgetSnapshotId: id },
+        scopeItems: old.scopeItems.map((item: any) => ({ ...item, budgetSnapshotLineId: "", projectCostNodeId: "" })),
+        review: { ...old.review, contractConfirmed: false, pricingConfirmed: false } }));
+      setBudgetLines(detail?.snapshot?.lines ?? []);
+      setNotice(tt("Budget source changed. Select its line for each item; previous line mappings were cleared.", "Cambió el presupuesto. Seleccione su línea para cada partida; se quitaron los vínculos anteriores."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      if (request === snapshotRequest.current && projectIdRef.current === originProject)
+        setError(tt("Budget selection could not be loaded. Your previous selection is unchanged.", "No se pudo cargar el presupuesto. Se conserva la selección anterior."));
     }
   };
   const openMapper = (doc: any) => {
