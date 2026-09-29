@@ -50122,8 +50122,8 @@
     },
     {
       "taskId": "ux-b15-settings-notifications-libraries",
-      "reviewedThroughCommit": "805dd7f64c0b6da81cac7142b2f2cb0db6210313",
-      "reviewedAt": "2026-09-29T19:35:00.000Z",
+      "reviewedThroughCommit": "a86f0c58313bb0d935d413c53bfb0e767e12d728",
+      "reviewedAt": "2026-09-29T19:20:00.000Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -50208,9 +50208,14 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "c0a028192aeea2b3504d27bfd1b286204deae616b0efd3f5ee127bf03c5a3019"
     }
   ]
 }
