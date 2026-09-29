@@ -470,6 +470,7 @@ const PDF_REPORTS: { key: string; labelEn: string; labelEs: string; scopeEn: str
   { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",       scopeEn: "Content verification report",        scopeEs: "Reporte de verificacion de contenido",     icon: <Search size={20} /> },
 ];
 type ReportLauncherOptions = { from: string; to: string; status: string; includeDetails: boolean };
+import { REPORT_MEASURES } from "./report-experience";
 export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin: boolean }) {
   const { t, lang } = useI18n();
   const tl = (en: string, es: string) => lang === "es" ? es : en;
@@ -658,6 +659,11 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           <span className="phasea-scope-pill">{tl("Phase A shell foundation", "Base visual Fase A")}</span>
         </div>
       </div>
+
+      <section className="phasea-card" aria-labelledby="report-measures-heading" style={{marginBottom:20}}>
+        <div className="phasea-card-header"><div><div id="report-measures-heading" className="phasea-card-title">{tl("What these measures mean","Qué significan estas medidas")}</div><div className="phasea-card-subtitle">{tl("Definitions apply before comparing totals or performance.","Las definiciones aplican antes de comparar totales o rendimiento.")}</div></div></div>
+        <div className="phasea-report-grid">{REPORT_MEASURES.map(item=><div key={item.key} className="rounded-lg border p-3"><strong>{item.label}</strong><p className="text-xs">{item.definition}</p><a className="text-xs" href={`/projects/${projectId}/analytics`}>Source: {item.source}</a></div>)}</div>
+      </section>
 
       {/* PDF Reports section: must stay first on Insights & Reports */}
       <div className="phasea-card" style={{ marginBottom: 28, borderColor: "#BFDBFE", boxShadow: "0 12px 28px rgba(37, 99, 235, 0.08)" }}>
