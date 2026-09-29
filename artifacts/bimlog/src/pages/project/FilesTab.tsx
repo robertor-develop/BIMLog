@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown, Inbox, Download } from "lucide-react";
 import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
-import { conventionResolverUrl, documentIdentity, fileIntakeCanSubmit, fileIntakeModeTruth, fileIntakePreview, fileIntakeRequiresConvention, type FileIntakeMode } from "@/lib/file-intake-journey";
+import { conventionResolverUrl, documentIdentity, fileIntakeCanSubmit, fileIntakeModeTruth, fileIntakePreview, fileIntakeRequiresConvention, newFileAttemptKey, type FileIntakeAttemptState, type FileIntakeMode } from "@/lib/file-intake-journey";
 
 interface ValidationDetail {
   field: string;
@@ -1071,6 +1071,9 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [documentRelationship, setDocumentRelationship] = useState<string>("created");
   const [intakeMode, setIntakeMode] = useState<FileIntakeMode>("record_only");
   const [destinationLabel] = useState<string | null>(null);
+  const [attemptKey, setAttemptKey] = useState("");
+  const [attemptState, setAttemptState] = useState<FileIntakeAttemptState>("not_submitted");
+  const [uploadError, setUploadError] = useState("");
   const [aiSuggestLoading, setAiSuggestLoading] = useState(false);
   const [aiSuggestedName, setAiSuggestedName] = useState<string | null>(null);
   const [aiSuggestReason, setAiSuggestReason] = useState<string>("");
@@ -1141,19 +1144,27 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     setSuccess(false);
     setFileName(file.name);
     setFileRef(file);
+    setAttemptKey(newFileAttemptKey());
+    setAttemptState("not_submitted");
+    setUploadError("");
   }, []);
 
   const submitFile = useCallback(async () => {
     if (!fileRef) return;
     const file = fileRef;
     const declaration = documentRelationship || "created";
+    const stableAttemptKey = attemptKey || newFileAttemptKey();
+    if (!attemptKey) setAttemptKey(stableAttemptKey);
     setIsUploading(true);
+    setAttemptState("submitting");
+    setUploadError("");
     try {
       const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
       const formData = new FormData();
       formData.append("file", file);
       formData.append("fileName", file.name);
       formData.append("documentRelationship", declaration);
+      formData.append("idempotencyKey", stableAttemptKey);
       const resp = await fetch(`/api/v1/projects/${projectId}/files`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
@@ -1165,6 +1176,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
       if (resp.status === 422 && data.details) {
         setErrorDetails(data.details);
       } else if (resp.status === 201) {
+        setAttemptState("accepted");
         const cvr = data.contentVerificationResult;
         if ((cvr === "possible_mismatch" || cvr === "clear_mismatch") && data.id) {
           setCvrModalFile({
@@ -1179,14 +1191,18 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
           setTimeout(() => onClose(), 1200);
         }
       } else {
+        setAttemptState("failed_retryable");
+        setUploadError(data?.error || "Upload failed");
         toast({ title: t("common.error"), description: data?.error || "Upload failed", variant: "destructive" });
       }
     } catch {
+      setAttemptState("failed_retryable");
+      setUploadError("The request did not complete. The selected file and settings are preserved.");
       toast({ title: t("common.error"), description: "Upload failed", variant: "destructive" });
     } finally {
       setIsUploading(false);
     }
-  }, [fileRef, projectId, documentRelationship, queryClient, toast, t, onClose]);
+  }, [attemptKey, fileRef, projectId, documentRelationship, queryClient, toast, t, onClose]);
 
   const handleCvrProceed = useCallback(async (reason: string) => {
     if (!cvrModalFile) return;
@@ -1336,8 +1352,9 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
           </dl>
           {intakeMode !== "record_only" && <p role="status">This project has no governed evidence-storage or delivery connection configured. Nothing has been uploaded.</p>}
           <button type="button" disabled={isUploading || !fileIntakeCanSubmit(intakeMode, destinationLabel)} onClick={() => void submitFile()}>
-            {isUploading ? "Uploading…" : intakeMode === "record_only" ? "Create file record" : "Confirm and upload"}
+            {isUploading ? "Submitting…" : attemptState === "failed_retryable" ? "Retry safely" : intakeMode === "record_only" ? "Create file record" : "Confirm and upload"}
           </button>
+          {attemptState === "failed_retryable" && <p role="alert">{uploadError} Retry keeps this file, declaration, mode, destination state, and attempt identity.</p>}
         </section>;
       })()}
 

@@ -7,6 +7,7 @@ import {
   fileIntakePreview,
   fileIntakeCanSubmit,
   documentIdentity,
+  fileIntakeRetryState,
 } from "./file-intake-journey";
 
 assert.match(fileIntakeModeTruth("record_only"), /not retained or delivered/);
@@ -23,5 +24,7 @@ assert.equal(fileIntakeCanSubmit("record_only"), true);
 assert.equal(fileIntakeCanSubmit("retained_evidence"), false);
 assert.deepEqual(documentIdentity({ id: 8, version: 2, parentFileId: 3, source: "system-generated" }), { recordKey: "file:8", familyKey: "file-family:3", label: "Record #8 · Family #3 · V2", source: "system-generated" });
 assert.notEqual(documentIdentity({ id: 8, version: 1 }).familyKey, documentIdentity({ id: 9, version: 1 }).familyKey);
+assert.equal(fileIntakeRetryState({ previous: "failed_retryable", sameFile: true, sameContext: true }), "failed_retryable");
+assert.equal(fileIntakeRetryState({ previous: "failed_retryable", sameFile: false, sameContext: true }), "not_submitted");
 
-console.log("UX041–UX044 intake modes, convention return, preview and exact document identity PASS");
+console.log("UX041–UX045 file intake journey PASS");

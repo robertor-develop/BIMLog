@@ -57,6 +57,13 @@ export function documentIdentity(input: { id: number; rootFileId?: number | null
   };
 }
 
+export type FileIntakeAttemptState = "not_submitted" | "submitting" | "failed_retryable" | "accepted";
+
+export function fileIntakeRetryState(input: { previous: FileIntakeAttemptState; sameFile: boolean; sameContext: boolean }) {
+  if (input.previous !== "failed_retryable" || !input.sameFile || !input.sameContext) return "not_submitted" as const;
+  return "failed_retryable" as const;
+}
+
 export function newFileAttemptKey() {
   return crypto.randomUUID();
 }
