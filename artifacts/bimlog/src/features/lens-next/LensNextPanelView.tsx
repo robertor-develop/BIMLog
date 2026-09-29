@@ -35,6 +35,7 @@ import { summarizeLensNextIssues } from "./lens-next-issue-summary";
 import { lensNextCaptureKey, lensNextImageStatus, type LensNextImageLoad } from "./lens-next-image-state";
 import { useI18n } from "../../lib/i18n";
 import { lensNextPrerequisiteGuidance } from "./lens-next-prerequisite-guidance";
+import { lensNextLinkedItemHref } from "./lens-next-relationship-navigation";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 const STATUS_LABELS_ES: Record<LensNextStatus, string> = {
@@ -1211,7 +1212,7 @@ export function LensNextPanelView({
             <p className="lens-next__section-help">Connect this viewpoint to an existing item in the current BIMLog project.</p>
             {linkedItems === "loading" ? <p role="status">Loading links…</p> : linkedItems && linkedItems.links.length ? (
               <ul>
-                {linkedItems.links.map(item => <li key={item.linkId}><strong>{item.type === "rfi" ? "RFI" : "Submittal"}</strong> {item.displayId} — {item.title} {selectedIssue.publishingAllowed && <button type="button" onClick={() => onRemoveLinkedItem(item.linkId)}>Remove</button>}</li>)}
+                {linkedItems.links.map(item => <li key={item.linkId}><strong>{item.type === "rfi" ? "RFI" : "Submittal"}</strong> <a href={lensNextLinkedItemHref(selectedIssue,item)}>{item.displayId} — {item.title}</a> <small>Returns to {displayCode(selectedIssue)} revision {selectedIssue.identity.revisionNumber}</small> {selectedIssue.publishingAllowed && <button type="button" onClick={() => onRemoveLinkedItem(item.linkId)}>Remove</button>}</li>)}
               </ul>
             ) : <p>No linked BIMLog items.</p>}
             {selectedIssue.publishingAllowed && linkedItems && linkedItems !== "loading" && (
