@@ -48604,7 +48604,7 @@
     {
       "taskId": "ux011-ux015-shared-party-and-catalog-experience",
       "reviewedThroughCommit": "2b49e507c6f6abf04589ca4788e65f9b197e9444",
-      "reviewedAt": "2026-09-29T18:00:00.000Z",
+      "reviewedAt": "2026-09-29T07:27:26.773Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
