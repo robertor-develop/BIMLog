@@ -1,3 +1,4 @@
+import { isDirectoryPlaceholderEmail } from "@workspace/api-zod";
 import sgMail from "@sendgrid/mail";
 import { db } from "@workspace/db";
 import { emailLogTable } from "@workspace/db/schema";
@@ -27,6 +28,7 @@ export async function sendEmail(params: {
   replyTo?: string;
   triggerType?: string;
 }): Promise<"sent" | "skipped" | "failed"> {
+  if (isDirectoryPlaceholderEmail(params.to)) return "failed";
   if (!process.env.SENDGRID_API_KEY) {
     console.warn(`[email] Skipping send to ${params.to} — SENDGRID_API_KEY not set.`);
     setImmediate(async () => {

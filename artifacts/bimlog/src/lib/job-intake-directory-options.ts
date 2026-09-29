@@ -1,3 +1,4 @@
+import { isCompanyOnlyEntry } from "@workspace/api-zod";
 import { projectCompanyNames, projectCompanyIdentities } from "./project-party-options";
 export type JobIntakeDirectoryEntry = {
   id: number | string;
@@ -5,6 +6,7 @@ export type JobIntakeDirectoryEntry = {
   email?: string | null;
   companyName?: string | null;
   companyId?: number | null;
+  role?: string | null;
 };
 
 const text = (value: unknown) => String(value ?? "").trim();
@@ -24,7 +26,7 @@ export function primaryContactOptions(
   const company = text(selectedCompany);
   if (!company) return [];
   return entries
-    .filter((entry) => text(entry.companyName) === company && text(entry.fullName))
+    .filter((entry) => text(entry.companyName) === company && text(entry.fullName) && !isCompanyOnlyEntry(entry))
     .sort((a, b) => text(a.fullName).localeCompare(text(b.fullName)));
 }
 
@@ -40,7 +42,7 @@ export function contactBelongsToCompany(
       contact &&
       entries.some(
         (entry) =>
-          text(entry.companyName) === company && text(entry.fullName) === contact,
+          text(entry.companyName) === company && text(entry.fullName) === contact && !isCompanyOnlyEntry(entry),
       ),
   );
 }

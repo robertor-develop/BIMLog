@@ -1,3 +1,4 @@
+import { isDirectoryRecipientEmail, isDirectoryPlaceholderEmail } from "@workspace/api-zod";
 import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-migration";
@@ -812,6 +813,7 @@ router.post(
       String(req.body?.primary_contact_phone ?? ""),
     );
     const notes = normalizeCompanyName(String(req.body?.notes ?? ""));
+    if (contactEmail && !isDirectoryRecipientEmail(contactEmail)) { res.status(422).json({ error: "real_contact_email_required" }); return; }
     if (!companyName) {
       res.status(400).json({ error: "company_name_required" });
       return;
@@ -987,6 +989,7 @@ router.post(
       .toLowerCase();
     const phone = normalizeCompanyName(String(req.body?.phone ?? ""));
     const notes = normalizeCompanyName(String(req.body?.notes ?? ""));
+    if (email && !isDirectoryRecipientEmail(email)) { res.status(422).json({ error: "real_contact_email_required" }); return; }
     if (!fullName) {
       res.status(400).json({ error: "full_name_required" });
       return;
@@ -1202,6 +1205,7 @@ router.post(
       }
 
       const { email, fullName, role } = entry[0];
+      if (!isDirectoryRecipientEmail(email)) { res.status(422).json({ error: "real_contact_email_required" }); return; }
 
       if (!(await validateConfigValue("member_role", role))) {
         res.status(422).json({ error: `Invalid role: ${role}` });

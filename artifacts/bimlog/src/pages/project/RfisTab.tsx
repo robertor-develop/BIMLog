@@ -1,3 +1,4 @@
+import { isDirectoryRecipientEmail } from "@workspace/api-zod";
 import { ProjectPartyPicker } from "@/components/ProjectPartyPicker";
 import { uniqueRfiPriorities, withCurrentPriority } from "@/lib/rfi-priority-options";
 import { useState, useMemo, useRef, useEffect } from "react";
@@ -1730,7 +1731,7 @@ function RfiDistributionEditor({ entries, contacts, editable, onChange, lang }: 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const uniqueContacts = [...new Map(contacts.filter(contact => contact.email).map(contact => [contact.email.toLowerCase(), contact])).values()];
+  const uniqueContacts = [...new Map(contacts.filter(contact => isDirectoryRecipientEmail(contact.email)).map(contact => [contact.email.toLowerCase(), contact])).values()];
   const add = (entry: string) => onChange(entries.includes(entry) ? entries : [...entries, entry]);
   const remove = (index: number) => onChange(entries.filter((_, itemIndex) => itemIndex !== index));
   return <div style={{ display: "grid", gap: 8 }}>
@@ -1760,7 +1761,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   const { data: files } = useListFiles(projectId);
   const [rfiDirectory, setRfiDirectory] = useState<RfiDirectoryContact[]>([]);
   const memberContacts = useMemo<RfiDirectoryContact[]>(() => members.map(member => ({ fullName: member.userFullName, email: member.userEmail, companyName: member.userCompanyName || null })), [members]);
-  const availableContacts = useMemo(() => [...new Map([...memberContacts, ...rfiDirectory].filter(contact => contact.email).map(contact => [contact.email.toLowerCase(), contact])).values()], [memberContacts, rfiDirectory]);
+  const availableContacts = useMemo(() => [...new Map([...memberContacts, ...rfiDirectory].filter(contact => isDirectoryRecipientEmail(contact.email)).map(contact => [contact.email.toLowerCase(), contact])).values()], [memberContacts, rfiDirectory]);
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     fetch(`/api/v1/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } })
@@ -2464,7 +2465,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // Project Directory for the recipient picker: pick an existing company/person (auto-fills
   // their email) or just type a new one.
   const [rfiDirectory, setRfiDirectory] = useState<RfiDirectoryContact[]>([]);
-  const detailContacts = useMemo(() => [...new Map([...members.map(member => ({ fullName: member.userFullName, email: member.userEmail, companyName: member.userCompanyName || null })), ...rfiDirectory].filter(contact => contact.email).map(contact => [contact.email.toLowerCase(), contact])).values()], [members, rfiDirectory]);
+  const detailContacts = useMemo(() => [...new Map([...members.map(member => ({ fullName: member.userFullName, email: member.userEmail, companyName: member.userCompanyName || null })), ...rfiDirectory].filter(contact => isDirectoryRecipientEmail(contact.email)).map(contact => [contact.email.toLowerCase(), contact])).values()], [members, rfiDirectory]);
   useEffect(() => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
     fetch(`/api/v1/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } })

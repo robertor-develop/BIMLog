@@ -1,3 +1,4 @@
+import { isDirectoryRecipientEmail, isCompanyOnlyEntry } from "@workspace/api-zod";
 import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
@@ -312,7 +313,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
       <tr key={row.key}>
         <td>
           <div style={{ fontWeight: 500 }}>{row.fullName}</div>
-          {pdfOptions.includeEmail && <div style={{ fontSize: 12, color: "#6B7280" }}>{row.email}</div>}
+          {pdfOptions.includeEmail && <div style={{ fontSize: 12, color: "#6B7280" }}>{isDirectoryRecipientEmail(row.email) ? row.email : isCompanyOnlyEntry(row) ? t("Company only — add a contact to invite", "Solo empresa — agregue un contacto para invitar") : t("No delivery email", "Sin correo de entrega")}</div>}
         </td>
         {pdfOptions.includeCompany && <td>{row.companyName || "-"}</td>}
         {pdfOptions.includeRole && <td>{source === "member" ? roleBadge(row.role) : row.role}</td>}
@@ -321,7 +322,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
           <td style={{ textAlign: "right" }}>
             <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
               {canWrite && (contactEntry?.bimlogStatus === "none" || !contactEntry?.bimlogStatus) && (
-                <button className="btn btn-sm btn-outline" onClick={() => contactEntry && invite(contactEntry.id)} disabled={inviting === contactEntry?.id}>
+                <button className="btn btn-sm btn-outline" onClick={() => contactEntry && invite(contactEntry.id)} disabled={inviting === contactEntry?.id || !isDirectoryRecipientEmail(contactEntry?.email)}>
                   {inviting === contactEntry?.id ? t("Inviting...", "Invitando...") : t("Invite", "Invitar")}
                 </button>
               )}

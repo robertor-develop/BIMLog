@@ -1,3 +1,4 @@
+import { isCompanyOnlyEntry, isDirectoryRecipientEmail } from "@workspace/api-zod";
 import { useProjectParties } from "@/hooks/use-project-parties";
 import { projectCompanyNames, projectCompanyIdentities } from "@/lib/project-party-options";
 import { ProjectCompanyCreator } from "./job-intake/ProjectCompanyCreator";
@@ -17,7 +18,7 @@ export function ProjectPartyPicker({ projectId, company, onSelect, tt, contacts 
   const parties = useProjectParties(projectId);
   const matches = projectCompanyIdentities(parties.entries).filter(entry => entry.name === company);
   const selectedIdentity = matches.length === 1 ? matches[0] : undefined;
-  const people = parties.entries.filter(entry => entry.companyName === company && entry.fullName);
+  const people = parties.entries.filter(entry => entry.companyName === company && entry.fullName && !isCompanyOnlyEntry(entry));
   return <fieldset className="project-party-picker">
     <legend>{tt("Project parties", "Participantes del proyecto")}</legend>
     <p>{tt("Reuse companies and contacts connected to this project. Selecting a contact does not invite or email them.", "Reutilice empresas y contactos de este proyecto. Seleccionar un contacto no lo invita ni envía un correo.")}</p>
@@ -30,13 +31,13 @@ export function ProjectPartyPicker({ projectId, company, onSelect, tt, contacts 
       </select></label>
       {contacts && <label>{tt("Project contact", "Contacto del proyecto")}<select value="" disabled={parties.state !== "ready" || !company} onChange={event => {
         const person = people.find(entry => String(entry.id) === event.target.value);
-        if (person) onSelect(company, person.fullName || "", person.email || "");
+        if (person) onSelect(company, person.fullName || "", isDirectoryRecipientEmail(person.email) ? person.email : "");
       }}><option value="">{tt("Select contact", "Seleccione contacto")}</option>{people.map(person => <option key={person.id} value={String(person.id)}>{person.fullName}</option>)}</select></label>}
     </div>
     {parties.state === "ready" && parties.entries.length === 0 && <p role="status">{tt("No companies are connected yet.", "Todavía no hay empresas conectadas.")}</p>}
     {canCreate && parties.state === "ready" && <div className="project-party-create">
       <ProjectCompanyCreator projectId={projectId} request={parties.request} tt={tt} onCreated={created => { onSelect(created.name, "", ""); parties.refresh(); }} />
-      {contacts && <ProjectContactCreator projectId={projectId} companyId={selectedIdentity?.id} companyName={company} request={parties.request} tt={tt} onCreated={created => { onSelect(company, created.fullName, created.email || ""); parties.refresh(); }} />}
+      {contacts && <ProjectContactCreator projectId={projectId} companyId={selectedIdentity?.id} companyName={company} request={parties.request} tt={tt} onCreated={created => { onSelect(company, created.fullName, isDirectoryRecipientEmail(created.email) ? created.email : ""); parties.refresh(); }} />}
     </div>}
   </fieldset>;
 }
