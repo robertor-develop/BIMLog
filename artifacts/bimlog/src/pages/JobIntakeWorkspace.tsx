@@ -913,8 +913,8 @@ export function JobIntakeWorkspace() {
     [
       "pricingConfirmed",
       tt(
-        "APU and billing hourly rates are correct.",
-        "El APU y las tarifas facturables son correctos.",
+        "APU references and Contract Item unit rates are correct.",
+        "Las referencias APU y las tarifas unitarias de las Partidas son correctas.",
       ),
       capabilities.costValuePlanner,
     ],

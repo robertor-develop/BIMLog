@@ -330,6 +330,7 @@ export function ContractItemBulkEditor(props: Props) {
               ))}
             </select>
           </label>
+          <button type="button" onClick={props.onOpenProjectBudget}>{props.tt("Open Project Budget", "Abrir Presupuesto del Proyecto")}</button>
           <small>{props.tt("Select an approved line for each Contract Item. Activation generates one canonical Job budget account per project cost node and preserves the exact source line association.", "Seleccione una línea aprobada para cada Partida de Contrato. La activación genera una cuenta presupuestaria canónica del Trabajo por nodo de costo del proyecto y conserva la asociación exacta con la línea de origen.")}</small>
         </div>
       )}
@@ -358,7 +359,7 @@ export function ContractItemBulkEditor(props: Props) {
                   "Aún no hay versiones APU guardadas. Continúe con una tarifa editable o guarde una versión en Planificador de Costos y Valor.",
                 )}
           </span>
-          {eligibleApuVersions.length === 0 && (
+          { (
             <button type="button" onClick={props.onOpenCostValuePlanner}>
               {props.tt("Open Cost & Value Planner", "Abrir Planificador de Costos y Valor")}
             </button>

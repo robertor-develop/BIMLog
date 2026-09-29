@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 685,
-    "frontendApiReferences": 258,
+    "frontendApiReferences": 259,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -8996,6 +8996,10 @@
     {
       "screen": "artifacts/bimlog/src/components/ai/AiControlPlanePanel.tsx",
       "apiPath": "${API_BASE}/api/v1/ai-control${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/BudgetSourcePicker.tsx",
+      "apiPath": "${import.meta.env.VITE_API_URL ?? \"\"}/api/v1/projects/${projectId}/files"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/ContractPaymentApplicationsPanel.tsx",

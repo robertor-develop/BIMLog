@@ -1,3 +1,4 @@
+import React from "react";
 export function IntakeCommercialReadiness({ capabilities, errors, activated, hasContracts, tt, onRetry }: {
   capabilities: { costValuePlanner: boolean; budget: boolean; contracts: boolean; fullCommercialActivation: boolean };
   errors: string[]; activated: boolean; hasContracts: boolean; tt: (en: string, es: string) => string; onRetry: () => void;

@@ -1,6 +1,7 @@
+import { validatedReturn } from "@/lib/return-context";
 import { BudgetSourcePicker } from "@/components/commercial/BudgetSourcePicker";
 import { useEffect, useState } from "react";
-import { Link, useRoute } from "wouter";
+import { Link, useRoute, useSearch } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
@@ -82,6 +83,8 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
     [, snap] = useRoute("/projects/:id/financial/snapshots/:snapshotId");
   const projectId = Number((snap?.id ?? base?.id) as string),
     snapshotId = snap?.snapshotId;
+  const returnTo = validatedReturn(useSearch(), projectId);
+  const preserveOrigin = (href: string) => returnTo ? `${href}?returnTo=${encodeURIComponent(returnTo)}` : href;
   const [data, setData] = useState<Workspace | null>(null),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true),
@@ -234,18 +237,18 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
         className="fb-nav"
         aria-label={tt("Financial controls", "Controles financieros")}
       >
-        <Link href={`/projects/${projectId}/financial/cost-structure`}>
+        <Link href={preserveOrigin(`/projects/${projectId}/financial/cost-structure`)}>
           {tt("Cost Structure", "Estructura")}
         </Link>
-        <Link href={`/projects/${projectId}/financial/budget`}>
+        <Link href={preserveOrigin(`/projects/${projectId}/financial/budget`)}>
           {tt("Project Budget", "Presupuesto")}
         </Link>
-        <Link href={`/projects/${projectId}/financial/history`}>
+        <Link href={preserveOrigin(`/projects/${projectId}/financial/history`)}>
           {tt("Version History", "Versiones")}
         </Link>
         {current && (
           <Link
-            href={`/projects/${projectId}/financial/snapshots/${current.id}`}
+            href={preserveOrigin(`/projects/${projectId}/financial/snapshots/${current.id}`)}
           >
             {tt("Approved Baseline", "Línea Base")}
           </Link>

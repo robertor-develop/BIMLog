@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 06 — UX026–UX030 release candidate
+
+B05 was tested and pushed at 48e0f841a70bea1907e1257a9945ae6521d7f870; its completion evidence is F:/BIMLog/Evidence/ux-audit-20260928/UX-B05-COMPLETION.md. B04 remains the accepted live release until this ten-build publication passes.
+
+B06 filters APU versions by exact project currency, preserves explicit saved bindings, removes fixed drafting/coordinator rate presets from active Intake and shows quantity × unit rate separately from planned hours and APU totals. Budget import uses named project-file versions; changing approved snapshot clears prior line mappings only after successful loading, with stale-response protection. Contract setup links exact canonical contracts with a validated return. Optional commercial source failures are explicit and do not replace the operational setup with a page error; server authority and commercial activation requirements remain unchanged.
+
+Focused behavior/typecheck and local actual-component Chrome evidence cover EN/ES, 390px and tablet widths, APU selection retaining the 30 unit rate, snapshot remapping, named evidence selection, saved return and recoverable commercial errors. Full release checks, push, publication and full authenticated Chrome smoke remain pending. Ten unpublished planned builds at this boundary; no further block starts before publication acceptance. No Replit agents, schema changes, production business-data writes or employee-pay policy changes. See BLOCK_06_VALIDATION.md.
+
+
 ## Experience makeover Block 05 — UX021–UX025 local candidate
 
 B04 publication dfd138ad was accepted at exact source ad1a33578f7c680d51d81d6da6db0f226008da2d with healthy identity and a repeated 61-route authenticated Chrome smoke. This supersedes the older pending-publication notes below; evidence is F:/BIMLog/Evidence/ux-audit-20260928/UX-B04-COMPLETION.md.

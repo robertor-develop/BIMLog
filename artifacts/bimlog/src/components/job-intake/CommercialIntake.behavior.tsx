@@ -1,0 +1,28 @@
+import assert from "node:assert/strict";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { compatibleApuVersions } from "../../lib/job-intake-apu-default";
+import { exactProduct, selectSavedApuVersion } from "./ContractItemBulkEditor";
+import { eligibleBudgetFiles } from "../commercial/BudgetSourcePicker";
+import { intakeCreatedContracts } from "./IntakeContractConnection";
+import { IntakeCommercialReadiness } from "./IntakeCommercialReadiness";
+
+const versions = [{ version: 1, name: "A", currency: "USD", sellingPrice: "900" }, { version: 2, name: "B", currency: "USD", sellingPrice: "1200" }, { version: 3, currency: "EUR", sellingPrice: "800" }];
+assert.deepEqual(compatibleApuVersions(versions, "USD").map(item => item.version), [1, 2]);
+const item = { id: "S1", billingHourlyRate: "30", quantity: "12", plannedHours: "80" };
+assert.deepEqual({ ...item, ...selectSavedApuVersion(compatibleApuVersions(versions, "USD"), "2") }, { ...item, apuPlanVersion: 2 });
+assert.equal(exactProduct(item.quantity, item.billingHourlyRate), "360");
+assert.equal(exactProduct("0.123456", "1.000001"), "0.123456");
+assert.equal(exactProduct("1e3", "30"), "—");
+assert.deepEqual(eligibleBudgetFiles([{ id: 71, fileName: "Budget.xlsx", version: 2 }, { id: 72, fileName: "Budget.xlsx", version: 1 }, { id: 73, fileName: "drawing.pdf" }]).map(item => item.id), [71, 72]);
+assert.deepEqual(intakeCreatedContracts({ activatedContractId: "C1" }), [{ contractId: "C1" }]);
+assert.deepEqual(intakeCreatedContracts({ activatedContractId: "C1", activationSummary: { contracts: [{ profileId: "P2", contractId: "C2" }] } }), [{ profileId: "P2", contractId: "C2" }]);
+const capabilities = { costValuePlanner: false, budget: false, contracts: false, fullCommercialActivation: false };
+const core = renderToStaticMarkup(<IntakeCommercialReadiness capabilities={capabilities} errors={[]} activated={false} hasContracts={false} tt={en => en} onRetry={() => {}}/>);
+assert.match(core, /Core job activation does not require buying/);
+assert.match(core, /Not enabled for this account/);
+const failed = renderToStaticMarkup(<IntakeCommercialReadiness capabilities={{ ...capabilities, budget: true }} errors={["budget"]} activated={true} hasContracts={false} tt={en => en} onRetry={() => {}}/>);
+assert.match(failed, /operational job is active/);
+assert.match(failed, /saved references are preserved/);
+assert.match(failed, /Retry Commercial sources/);
+console.log("UX026–030 compatible identity, exact pricing, named versions, canonical contracts and optional/error readiness PASS");

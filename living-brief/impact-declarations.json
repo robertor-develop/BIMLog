@@ -48965,6 +48965,118 @@
         "scripts/test-integration-presentation.mjs"
       ],
       "reviewedChangeSha256": "222c757ecfce2655d51411a4ce91b0a76ee45a41aaf985cd772952fdb12750a7"
+    },
+    {
+      "taskId": "ux026-ux030-connected-commercial-intake",
+      "reviewedThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
+      "reviewedAt": "2026-09-29T11:21:48.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "chrome_component_verification"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Commercial Intake exposed fixed rate presets, unfiltered APU choices and raw evidence IDs; B06 connects explicit compatible versions, preserves rates, clears stale budget mappings and makes optional service failures recoverable without changing financial authority.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "customer_impacting_defect",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX026-UX030 connect existing canonical commercial sources, exact amounts, recoverable optional states and publication evidence; no schema, employee-rate approval, Native or doctrine change."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/bimlog/job-intake-block06-harness.html",
+        "artifacts/bimlog/src/components/commercial/BudgetSourcePicker.tsx",
+        "artifacts/bimlog/src/components/job-intake/CommercialIntake.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/job-intake/IntakeCommercialReadiness.tsx",
+        "artifacts/bimlog/src/components/job-intake/IntakeContractConnection.tsx",
+        "artifacts/bimlog/src/job-intake-block06-harness.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.ts",
+        "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.contract-order.behavior.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "docs/experience/ux-program/BLOCK_06_VALIDATION.md",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "c90083003b8d0a3bddefef343a9c59601260e61f28a77ef1bbdc00ea7fc5306a"
     }
   ]
 }
