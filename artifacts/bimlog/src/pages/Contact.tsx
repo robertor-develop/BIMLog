@@ -5,6 +5,8 @@ import { ChevronLeft, Mail, Phone, Globe, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { intentLabel, parseCommercialIntent, rememberCommercialIntent } from "@/lib/commercial-intent";
+import { recordConversionEvent } from "@/lib/conversion-funnel";
+import { useEffect } from "react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -33,6 +35,7 @@ export function Contact() {
   const [form, setForm] = useState({ fullName: "", email: "", companyName: "", country: "", interest: intent ? intentLabel(intent) : "", message: intent?.useCase ? `Primary use case: ${intent.useCase}` : "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  useEffect(()=>{if(intent)recordConversionEvent("contact_started");},[]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,7 +50,7 @@ export function Contact() {
         body: JSON.stringify(form),
       });
       const d = await r.json();
-      if (d.success) { setStatus("sent"); }
+      if (d.success) { recordConversionEvent("contact_submitted"); setStatus("sent"); }
       else { setStatus("error"); setErrorMsg(d.error || "Something went wrong. Please email us directly."); }
     } catch {
       setStatus("error"); setErrorMsg("Could not connect. Please email us at info@ignitesmart.ai.");

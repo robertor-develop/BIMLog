@@ -1,8 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Experience makeover Block 17 — UX081–UX085 source candidate
+## Experience makeover Block 18 — UX086–UX090 publication candidate
 
-UX081–UX085 define the BIMLog/IgniteSmart brand relationship and audience, rebuild the landing story around a connected journey with authenticated state and real product captures, replace unsupported feature promises with role/prerequisite/availability evidence, reconcile storage/retention/trust copy, and preserve the exact originating task through Help and Convention recovery. This is the first five-build unpublished block after the accepted UX071–UX080 release. Push once after the complete gate; publication and authenticated Chrome smoke are due after UX086–UX090.
+UX086–UX090 replace duplicated pricing promises with one bounded offer contract, preserve validated plan/billing/use-case intent into Contact or registration, separate immediate free-account creation from sales-assisted paid-plan consultation, provide editable ROI arithmetic with explicit limitations, and expose a browser-local event-count baseline that sends no identity, free text, document, project, credential or device data. Together with pushed UX081–UX085, this reaches the ten-build publication boundary. Complete the exact-head gate, push once, publish through the established provider path, and run the full authenticated Chrome smoke before beginning UX091.
+
+## Experience makeover Block 17 — UX081–UX085 pushed source
+
+UX081–UX085 define the BIMLog/IgniteSmart brand relationship and audience, rebuild the landing story around a connected journey with authenticated state and real product captures, replace unsupported feature promises with role/prerequisite/availability evidence, reconcile storage/retention/trust copy, and preserve the exact originating task through Help and Convention recovery. Exact source `30138146210c63e60f011d3444a2db4a85eb664f` was pushed after the complete local gate. Publication and authenticated Chrome smoke are now due with UX086–UX090.
 
 ## Experience makeover Block 16 — UX076–UX080 accepted release
 

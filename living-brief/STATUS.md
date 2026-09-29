@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Experience makeover Block 18 — UX086–UX090 publication candidate
+
+The public commercial journey now uses one canonical five-plan offer contract with explicit public-price illustrations, project/member limits, availability boundaries and agreement authority. Pricing selections preserve validated plan, billing and bounded use-case intent into sales-assisted Contact or self-service free registration. Paid-plan actions state that BIMLog must confirm entitlement and onboarding; free registration states that no sales conversation or payment method is required.
+
+The former fixed-result ROI claims are replaced by editable event, time, labor-cost and annual-software-cost assumptions with visible arithmetic and a no-promised-return limitation. Funnel definitions count six bounded events in local browser storage only and expose their definitions in a baseline table; names, emails, company identities, free text, document/project content, credentials, tokens, URLs and device identifiers are not captured or sent.
+
+UX081–UX090 now form the ten-build publication batch. Final status requires the complete exact-head gate, one push, established-provider publication, exact deployed-source verification and full authenticated Chrome smoke. No schema, customer data, permission authority, Native source, installer or provider secret changes are part of the block.
+
 ## Experience makeover Block 06 — UX026–UX030 release candidate
 
 B05+B06 were published at exact source 66c8e3f28596b30b6938eba3eb74cefef5805508 (publication 44bbc4e0), after the full nine-command suite passed. All 61 authenticated Chrome routes resolved, but the connected flow exposed an activated Intake recovery defect: an old browser draft was displayed with a false autosave retry while canonical saving was locked. The bounded correction reuses the canonical lock for recovery and form controls, preserves the browser copy, shows saved server data, and keeps stage navigation and commercial return links available. Local bilingual actual-component verification and focused behavior tests pass; the corrected candidate requires the full suite, push, republication and repeated Chrome smoke. No new block starts until that acceptance passes. Schema, production business records, employee pay rules and Replit agents remain untouched.
