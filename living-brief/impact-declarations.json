@@ -48724,6 +48724,120 @@
         "package.json"
       ],
       "reviewedChangeSha256": "7a3d8fac5afe24fb8140fcdbef414422db1fe1e9c3299bcfe0f93d0a7a400ef6"
+    },
+    {
+      "taskId": "ux016-ux020-connected-project-navigation",
+      "reviewedThroughCommit": "eceedf3af9793b25adbbfdc1c2cd43e6363581b8",
+      "reviewedAt": "2026-09-29T07:58:51.605Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "chrome_component_verification"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Prerequisite navigation lacked Intake return context, contract links did not select their record, and broad search wording exceeded actual scope. The block repairs these boundaries and excludes inactive memberships from search.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "customer_impacting_defect",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX016-UX020 preserve existing destination authorization, financial policy, schema, report authority and Native behavior. Existing UI quality requirements are applied."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX016-UX020 preserve existing destination authorization, financial policy, schema, report authority and Native behavior. Existing UI quality requirements are applied."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX016-UX020 preserve existing destination authorization, financial policy, schema, report authority and Native behavior. Existing UI quality requirements are applied."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX016-UX020 preserve existing destination authorization, financial policy, schema, report authority and Native behavior. Existing UI quality requirements are applied."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records UX016-UX020 navigation, exact record selection, verified role home and scoped search; ten-build publication due."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX016-UX020 preserve existing destination authorization, financial policy, schema, report authority and Native behavior. Existing UI quality requirements are applied."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX016-UX020 preserve existing destination authorization, financial policy, schema, report authority and Native behavior. Existing UI quality requirements are applied."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX016-UX020 preserve existing destination authorization, financial policy, schema, report authority and Native behavior. Existing UI quality requirements are applied."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records UX016-UX020 navigation, exact record selection, verified role home and scoped search; ten-build publication due."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records UX016-UX020 navigation, exact record selection, verified role home and scoped search; ten-build publication due."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX016-UX020 preserve existing destination authorization, financial policy, schema, report authority and Native behavior. Existing UI quality requirements are applied."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/test-ux-search-block.ts",
+        "artifacts/api-server/src/routes/search.ts",
+        "artifacts/bimlog/navigation-harness.html",
+        "artifacts/bimlog/src/components/layout/FinancialProjectShell.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/components/layout/ProjectHome.tsx",
+        "artifacts/bimlog/src/components/layout/ProjectLocation.tsx",
+        "artifacts/bimlog/src/lib/job-intake-workspace-state.ts",
+        "artifacts/bimlog/src/lib/project-home-destination.ts",
+        "artifacts/bimlog/src/lib/return-context.behavior.ts",
+        "artifacts/bimlog/src/lib/return-context.ts",
+        "artifacts/bimlog/src/navigation-harness.tsx",
+        "artifacts/bimlog/src/pages/Dashboard.tsx",
+        "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/ProjectDetail.tsx",
+        "docs/experience/ux-program/BLOCK_04_VALIDATION.md",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "f16f98b41fbca11769332f6e4d1b3719f7d587c98b44e46ce3796e8b7c758f8c"
     }
   ]
 }

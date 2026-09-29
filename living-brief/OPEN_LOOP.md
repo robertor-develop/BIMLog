@@ -1,5 +1,9 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 04 - UX016-UX020 candidate
+
+Shared project location links now span project and commercial workspaces. Intake preserves recovery data and carries a validated same-project stage/item return to prerequisites, including Convention Builder. Contract deep links select an accessible canonical contract or show explicit recovery. Project home routes verified managers to draft Intake or activated Operations, other roles to relevant work, and retains Analytics. Search states its active-membership scope and limits, finds project codes, labels source projects, and opens supported exact document links. UX011-UX015 were pushed at eceedf3af9793b25adbbfdc1c2cd43e6363581b8; UX011-UX020 now reach the ten-build publication boundary. Full local release, exact push/publication and authenticated Chrome smoke are required before claiming live acceptance. See BLOCK_04_VALIDATION.md. No schema, customer data, Native, or provider-send changes.
+
 ## Experience makeover Block 03 - UX011-UX015 candidate
 
 The five sequential builds connect document company choices to the project directory, reuse governed company/contact creation, distinguish company-only placeholders from delivery recipients, expose discipline loading/error/empty states, and separate current account company identity from editable export branding. Local API and actual-component Chrome evidence is in docs/experience/ux-program/BLOCK_03_VALIDATION.md. This is the five-build push checkpoint: five unpublished builds; publication and full authenticated Chrome smoke are due at UX020. No schema, customer data, provider send, or Native change.

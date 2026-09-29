@@ -263,9 +263,9 @@ export function MasterSidebar() {
       setSearchLoading(false);
       return;
     }
+    setSearchLoading(true);
+    setSearchLoadFailed(false);
     searchTimer.current = setTimeout(async () => {
-      setSearchLoading(true);
-      setSearchLoadFailed(false);
       try {
         const r = await fetch(`${API_BASE}/api/v1/search?q=${encodeURIComponent(searchQ)}`, { headers });
         if (!r.ok) throw new Error(`Search request failed (${r.status})`);

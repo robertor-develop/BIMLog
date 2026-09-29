@@ -1503,6 +1503,15 @@ It changes only when the code structure or curated architectural facts change.
 - The generated disposition inventory classifies every open record, binds ownership and module/route responsibility, and links repeated historical statements to one canonical record.
 - The normal pre-push gate rejects unresolved duplicate statements, competing or missing current markers, unowned records, route-less product work, and stale contradictions classified as active.
 
+## Connected project navigation - UX016-UX020
+
+- ProjectLocation shares project/home/Analytics links and a validated same-project Intake return across ProjectDetail and FinancialProjectShell, preserving existing role and code display.
+- Intake prerequisite navigation preserves browser recovery and explicit stage/item context. Invalid external, cross-project and malformed return destinations are ignored. Convention, APU and Budget retain their own save controls and authorization.
+- Contract query links load the selected record only from the authorized register, guard stale responses, and show recovery when unavailable. Historical contracts and financial actions are unchanged.
+- Bare project home resolves verified membership and Intake activation state; explicit Analytics and legacy dashboard links remain available. Unknown setup state has retry, never invented readiness.
+- Search includes project codes/names within active memberships; document results identify source project and supported record destinations. Files/changes explicitly open their registers; people are informational. Five-per-type and excluded contract/model content scope is visible. No cross-project membership expansion.
+- UX020 is the next ten-build publication boundary. Final release and authenticated live smoke receipts remain external to the frozen source.
+
 ## Shared project parties and account identity - UX011-UX015
 
 - RFI, Transmittal and Change Order forms reuse the authenticated project directory for company choices and canonical project company/contact creators. RFI retains authorized active project member recipients; manual delivery fields remain available. Existing selected company labels remain visible without creating records.

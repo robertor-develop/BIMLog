@@ -3,11 +3,11 @@
   "generatedFrom": "tracked source; deterministic",
   "counts": {
     "frontendRoutes": 54,
-    "projectTabs": 18,
+    "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 685,
-    "frontendApiReferences": 258,
+    "frontendApiReferences": 259,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -347,6 +347,11 @@
     }
   ],
   "projectTabs": [
+    {
+      "tab": "home",
+      "component": "ProjectHome",
+      "canonical": true
+    },
     {
       "tab": "command-center",
       "component": "CoordinatorCommandCenter",
@@ -7874,7 +7879,7 @@
         "meetingMinutesTable",
         "actionItemsTable",
         "usersTable",
-        "companiesTable",
+        "projectsTable",
         "projectMembersTable"
       ]
     },
@@ -9093,6 +9098,10 @@
       "apiPath": "${BASE}/api/v1/users/me/company-profile"
     },
     {
+      "screen": "artifacts/bimlog/src/components/layout/ProjectHome.tsx",
+      "apiPath": "${import.meta.env.VITE_API_URL || \"\"}/api/v1/projects/${projectId}/intake"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
       "apiPath": "/api/v1/downloads/sync-agent-windows"
     },
@@ -9984,6 +9993,8 @@
   "findings": {
     "duplicateApiRoutes": [],
     "sidebarTabsWithoutScreen": [],
-    "screensWithoutSidebar": []
+    "screensWithoutSidebar": [
+      "home"
+    ]
   }
 }
