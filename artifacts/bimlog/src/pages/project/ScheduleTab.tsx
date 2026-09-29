@@ -42,6 +42,8 @@ type DirectoryEntry = { id: number; companyName?: string | null; role?: string |
 type LinkOption = { id: number; label: string; title: string; dueDate?: string | null; route: string };
 type RolloverRow = { id: number; fromBucketName: string; toBucketName: string; movedByName?: string | null; movedAt: string };
 type ScheduleViewMode = "calendar" | "board" | "list";
+type ScheduleLayer = "milestone" | "rfi" | "submittal" | "change_order" | "meeting" | "3d_model";
+const ALL_SCHEDULE_LAYERS: ScheduleLayer[] = ["milestone", "rfi", "submittal", "change_order", "meeting", "3d_model"];
 type ScheduleFilterOptions = {
   search: string;
   bucketId: string;
@@ -165,6 +167,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
   const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
   const [itemTypeFilter, setItemTypeFilter] = useState("all");
+  const [visibleLayers, setVisibleLayers] = useState<ScheduleLayer[]>(ALL_SCHEDULE_LAYERS);
   const [includeActionNeededFilter, setIncludeActionNeededFilter] = useState(true);
   const [includeCompletedFilter, setIncludeCompletedFilter] = useState(true);
   const [includeOverdueFilter, setIncludeOverdueFilter] = useState(true);
@@ -631,7 +634,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     includeCompleted: includeCompletedFilter,
     includeOverdue: includeOverdueFilter,
   };
-  const filtered = useMemo(() => applyScheduleFilters(items, visibleFilterOptions), [
+  const filtered = useMemo(() => applyScheduleFilters(items, visibleFilterOptions).filter(item => visibleLayers.includes(scheduleTypeKey(item) as ScheduleLayer)), [
     assignedFilter,
     bucketFilter,
     endDateFilter,
@@ -643,7 +646,12 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
     items,
     searchQuery,
     startDateFilter,
+    visibleLayers,
   ]);
+
+  const toggleLayer = (layer: ScheduleLayer) => {
+    setVisibleLayers(current => current.includes(layer) ? current.filter(value => value !== layer) : [...current, layer]);
+  };
 
   const total = items.length;
   const completed = items.filter(m => isDone(m.status)).length;
@@ -913,6 +921,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
               setStartDateFilter("");
               setEndDateFilter("");
               setItemTypeFilter("all");
+              setVisibleLayers(ALL_SCHEDULE_LAYERS);
               setFilter("all");
               setIncludeActionNeededFilter(true);
               setIncludeCompletedFilter(true);
@@ -923,6 +932,22 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
           </button>
         </div>
         <div style={{ marginTop: 12, borderTop: "1px solid #E5E7EB", paddingTop: 10 }}>
+          <div className="label">{t("Calendar Layers", "Capas del Calendario")}</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8, marginBottom: 12 }}>
+            {[
+              ["milestone", t("Tasks / milestones", "Tareas / hitos")],
+              ["rfi", "RFIs"],
+              ["submittal", t("Submittals", "Entregables")],
+              ["change_order", t("Change orders", "Órdenes de cambio")],
+              ["meeting", t("Meetings", "Reuniones")],
+              ["3d_model", t("3D models", "Modelos 3D")],
+            ].map(([key, label]) => (
+              <label key={key} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 12, fontWeight: 700, color: "#334155" }}>
+                <input type="checkbox" checked={visibleLayers.includes(key as ScheduleLayer)} onChange={() => toggleLayer(key as ScheduleLayer)} />
+                {label}
+              </label>
+            ))}
+          </div>
           <div className="label">{t("Current View Includes", "Vista Actual Incluye")}</div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 8 }}>
             {[
@@ -1111,7 +1136,11 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF", background: "white", border: "1px solid #E5E7EB", borderRadius: 8 }}>
           <Calendar size={42} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
           <div style={{ fontWeight: 700 }}>{t("No schedule dates found", "No hay fechas en el cronograma")}</div>
-          <div style={{ fontSize: 13, marginTop: 4 }}>{t("Add a date required to an RFI/submittal, or create a manual schedule item.", "Agrega fecha requerida a un RFI/entregable, o crea una fecha manual.")}</div>
+          <div style={{ fontSize: 13, marginTop: 4 }}>
+            {visibleLayers.length === 0
+              ? t("No calendar layers are included. Turn on at least one layer above.", "No hay capas incluidas. Active al menos una capa arriba.")
+              : t(`Included layers: ${visibleLayers.join(", ")}. No matching source records have a due date in this view.`, `Capas incluidas: ${visibleLayers.join(", ")}. Ningún registro fuente coincidente tiene fecha límite en esta vista.`)}
+          </div>
         </div>
       )}
 
