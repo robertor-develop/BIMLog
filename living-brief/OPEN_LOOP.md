@@ -1,8 +1,8 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Experience makeover Block 15 — UX071–UX075 source candidate
+## Experience makeover Block 16 — UX076–UX080 release candidate
 
-The five sequential builds clarify where personal, company and platform settings live; reconcile personal and canonical notification availability; expose connector readiness and administrator handoff; present effective role labels while retaining legacy values; and make published pricing/knowledge reuse and unavailable authoring states actionable. The block changes no permission, provider-send, schema, customer data, immutable template version, project price, Native or installer authority. It is the first five-build unpublished block after UX061–UX070; publication and authenticated Chrome smoke are due at UX080.
+UX076–UX080 consolidate shared layout, spacing and semantic status tokens; standardize plain-language English/Spanish product terms; unify responsive header, footer, action and table behavior; harden shared form and dialog accessibility; and bind adopted surfaces to a loading/empty/error/read/edit regression matrix. UX071–UX080 now reach the ten-build publication boundary. Push, publication and full authenticated Chrome smoke are required before this release is accepted. The block changes no permission, workflow authority, provider send, schema, customer data, Native source or installer.
 
 ## Experience makeover Block 06 — UX026–UX030 release candidate
 

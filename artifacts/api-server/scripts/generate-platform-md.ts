@@ -428,6 +428,15 @@ ${appRoutes()}
 - Company pricing and coordination knowledge selection states distinguish loading, unavailable, published options, filter-empty results and authoring-unavailable empty states. Published immutable versions and existing project prices remain unchanged.
 - UX071-UX075 are the first five unpublished builds after the UX061-UX070 release; publication and authenticated Chrome smoke are due at UX080.
 
+## Shared experience system - UX076-UX080
+
+- Shared spacing, panel and semantic status primitives use the existing theme authority in light and dark modes.
+- Plain-language English and Spanish glossary labels keep internal diagnostic identifiers inside expandable technical details.
+- The production header, footer, actions, tables and content padding share responsive behavior for 320, 390, 768 and 1280 widths and compact behavior under zoom.
+- Shared form controls associate help and assertive errors; shared dialogs and alert dialogs remain bounded, scrollable and operable on compact viewports with visible keyboard focus and focus restoration retained by Radix.
+- The tracked regression matrix covers loading, empty, error, read and edit states for Project Setup, Operations, RFI Control, Submittal Control, Personal Settings and Company Library surfaces.
+- UX071-UX080 reach the ten-build publication and authenticated Chrome smoke boundary. Canonical permissions, workflow records, database schema, customer data, Native source, installers and provider sends are unchanged.
+
 ## Connected commercial Intake - UX026-UX030
 
 Activated Intake with a canonical contract displays authoritative saved setup in read-only fields. Browser recovery copies remain preserved without false autosave retries; stage navigation and linked commercial records remain available. Operational activation without a canonical contract retains its existing enrichment path.

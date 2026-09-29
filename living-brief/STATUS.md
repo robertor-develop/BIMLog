@@ -3200,3 +3200,9 @@ Block 9 gate correction: the convention guard now resolves inside the upload for
 - UX071–UX075 separate personal, company and platform settings with a named responsible role; show effective notification availability after pause/readiness/overrides; distinguish connector setup, permission, ready and error states; translate stored roles into effective authority labels without changing access; and give reusable pricing/knowledge libraries truthful loading, error, published-selection and authoring-empty states.
 - Product commits are `56188752`, `eaa1ded9`, `3c33add9`, `25ed81d0` and `a86f0c58`. Existing permissions, notification persistence, connector authorization, legacy role values, published template versions and project prices remain authoritative.
 - This is the first five-build unpublished block after the live UX061–UX070 publication. Publication and authenticated Chrome smoke are due after UX076–UX080.
+
+## Experience makeover Block 16 source candidate — 2026-09-29
+
+- UX076–UX080 add shared layout, spacing and semantic status primitives; a plain-language bilingual product glossary; unified responsive shell/action/table behavior at 320, 390, 768 and 1280 widths; accessible form error and dialog contracts; and an explicit loading/empty/error/read/edit regression matrix for six adopted surfaces.
+- Product commits are `1cc480bf`, `c642224c`, `07d77e4f`, `a4f298eb` and `2ad3ef88`. The production shell, footer, route states, shared forms and shared dialogs consume these contracts directly.
+- UX071–UX080 now reach the required ten-build push, publication and authenticated Chrome smoke boundary. No permission, workflow status, canonical record, database/schema, customer data, Native source, installer or provider-send authority changes in this block.
