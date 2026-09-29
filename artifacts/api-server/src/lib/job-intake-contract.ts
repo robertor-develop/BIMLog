@@ -417,6 +417,7 @@ export function normalizeJobIntakeData(raw: unknown) {
       item.plannedHours,
       `scopeItems[${index}].plannedHours`,
     );
+    const quantity = exact(item.quantity ?? item.plannedHours, `scopeItems[${index}].quantity`);
     const billingHourlyRate = exact(
       item.billingHourlyRate,
       `scopeItems[${index}].billingHourlyRate`,
@@ -464,12 +465,13 @@ export function normalizeJobIntakeData(raw: unknown) {
         2000,
       ),
       plannedHours,
+      quantity,
       billingHourlyRate,
       ...(item.productionAllocation == null || item.productionAllocation === "" ? {} : {
         productionAllocation: exact(item.productionAllocation, `scopeItems[${index}].productionAllocation`),
       }),
       contractValue: decimalFromScaled(
-        (scaledSignedDecimal(plannedHours) *
+        (scaledSignedDecimal(quantity) *
           scaledSignedDecimal(billingHourlyRate) +
           500_000n) /
           1_000_000n,
@@ -954,7 +956,7 @@ export function jobIntakeCompletion(
   const activeDocuments = documents.filter((document) => !document.removedAt);
   const scopeReady =
     data.scopeItems.length > 0 &&
-    data.scopeItems.every((item) => item.name && positive(item.plannedHours));
+    data.scopeItems.every((item) => item.name && positive(item.quantity) && positive(item.plannedHours));
   // Commercial activation promises an EDT-backed Work Item. Its floor/area and
   // permanent trade identity must therefore exist before Intake says "ready".
   const edtSourceRequired = capabilities.fullCommercialActivation && jobIntakeBudgetLinkRequested(data);

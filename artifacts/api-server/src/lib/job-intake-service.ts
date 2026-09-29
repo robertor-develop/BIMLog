@@ -1414,7 +1414,7 @@ export async function activateJobIntake(input: {
               sortOrder: index,
               contractItem: {
                 displayName: item.name,
-                quantity: item.plannedHours,
+                quantity: item.quantity,
                 unit: item.unit,
                 unitRate: item.billingHourlyRate,
                 ...(item.productionAllocation === undefined ? {} : {productionAllocation:item.productionAllocation}),
@@ -1481,7 +1481,7 @@ export async function activateJobIntake(input: {
             displayName: item.name,
             projectCostNodeId: item.projectCostNodeId,
             budgetSnapshotLineId: item.budgetSnapshotLineId,
-            quantity: item.plannedHours,
+            quantity: item.quantity,
             unit: item.unit,
             unitRate: item.billingHourlyRate,
             contractValue: item.contractValue,

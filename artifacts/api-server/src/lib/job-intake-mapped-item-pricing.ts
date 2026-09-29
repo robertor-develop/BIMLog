@@ -33,7 +33,8 @@ export function mergeMappedContractItems(input: {
         workPackages: [],
       }),
       name: mapped.name,
-      plannedHours: mapped.quantity,
+      quantity: mapped.quantity,
+      plannedHours: existing?.plannedHours ?? mapped.quantity,
       provenance: mapped.provenance,
     });
   }
