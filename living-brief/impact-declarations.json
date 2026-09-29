@@ -48847,7 +48847,7 @@
     {
       "taskId": "ux021-ux025-full-intake-resource-planning",
       "reviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
-      "reviewedAt": "2026-09-29T10:02:07.000Z",
+      "reviewedAt": "2026-09-29T10:44:50.000Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48964,7 +48964,7 @@
         "package.json",
         "scripts/test-integration-presentation.mjs"
       ],
-      "reviewedChangeSha256": "0e73c95d8c90c61823508a2dde0236a88f38764353f38aa92be08fdba8e433f1"
+      "reviewedChangeSha256": "9ea7e502b6dc2acd7f3a246d4fb6016792610430c23bcb602659694013440517"
     }
   ]
 }

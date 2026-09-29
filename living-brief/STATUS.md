@@ -6,6 +6,8 @@ B04 publication dfd138ad was accepted at exact source ad1a33578f7c680d51d81d6da6
 
 B05 removes Quick Setup from the active route, retains existing drafts in one six-stage setup, explains inherited identity, separates quantity/unit from labor hours, groups published workflow choices and locations in Delivery with a saved return path, and offers optional generic role budgets without mandatory named staffing. Existing named assignments and authorization checks remain intact. Generic estimates do not implement employee-profile pay approval or the excess-hours policy; those remain later scoped work.
 
+Final recovery checks also cover denied prerequisite pages: the validated return link restores the saved Intake stage without bypassing authorization. Draft owners can explicitly leave a legacy leader or employee assignment pending while retaining the role, scope, hours and estimated cost; activated records cannot use these draft conversion controls. Local Chrome checks passed in English and Spanish, including mobile and tablet layouts; final exact-candidate release checks and push remain pending.
+
 Five sequential builds are implemented; final block regression/Chrome verification and push are being completed. Publication is not due for B05: five unpublished builds after its push, then publish B05+B06 at UX030 and run full authenticated Chrome smoke. No Replit agents. No schema migration or production data write. See docs/experience/ux-program/BLOCK_05_VALIDATION.md for exact proof boundaries.
 
 ## Experience makeover Block 04 - UX016-UX020 candidate

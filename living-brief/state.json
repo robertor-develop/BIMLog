@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "809ebbd57b753e6493259471dcb9164e6c016ccc71a7932b1b2584badd1dc5bb",
+  "bundleSha256": "1fbddd9f0849cf78616da4b54d89ba3b3cb3dc18d34037fbae16f0c59fc7ce51",
   "impact": {
     "baselineCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
     "changedPaths": [
@@ -58,7 +58,7 @@
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "claude",
@@ -70,7 +70,7 @@
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "quality",
@@ -82,7 +82,7 @@
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "vision",
@@ -94,19 +94,19 @@
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "4986e245cb3a87b8f02a8b7a48cd56d9c1725f21b87f41c18737b13de3b6e479",
-      "sourceChangedAt": "2026-09-29T10:02:07.000Z",
+      "sha256": "e57fa355653e8b556cc12b403ef30b5f49adbd1acded076888c87346851e0333",
+      "sourceChangedAt": "2026-09-29T10:44:50.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "plugin",
@@ -118,7 +118,7 @@
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "report_design_system",
@@ -130,7 +130,7 @@
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "standards_register",
@@ -142,31 +142,31 @@
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "07f8004368dd26a26af59905ee131a1c5c82fcbf5798ecabe705e9b645c4510f",
-      "sourceChangedAt": "2026-09-29T10:02:07.000Z",
+      "sha256": "b71341a63a509a3c649615654b81feaac23b1c58bdc9731bc94afcf53f33ca57",
+      "sourceChangedAt": "2026-09-29T10:44:50.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "ed3f282ac8da6fd2a1cf160304aa79a0bfd475cdec023910ec9876efe861b8ab",
-      "sourceChangedAt": "2026-09-29T10:02:07.000Z",
+      "sha256": "990af91ad72f7c51083b48a0f463014d5b68c54fad444eafc51d1d42fbf4ef58",
+      "sourceChangedAt": "2026-09-29T10:44:50.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     },
     {
       "key": "audit",
@@ -178,7 +178,7 @@
       "semanticReviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
       "semanticReviewTask": "ux021-ux025-full-intake-resource-planning",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T10:02:07.000Z"
+      "semanticReviewedAt": "2026-09-29T10:44:50.000Z"
     }
   ]
 }
