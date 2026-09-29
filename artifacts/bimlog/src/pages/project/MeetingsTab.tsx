@@ -649,17 +649,7 @@ export function MeetingsTab({
   const [meetingTime, setMeetingTime] = useState("10:00");
   const [location, setLocation] = useState("");
   const [agendaItems, setAgendaItems] = useMeetingAgendaState();
-  const [attendees, setAttendees] = useState<Attendee[]>([
-    {
-      trade: "",
-      company: "",
-      companyId: null,
-      fullName: "",
-      role: "",
-      email: "",
-      phone: "",
-    },
-  ]);
+  const [attendees, setAttendees] = useState<Attendee[]>([]);
   // Manual rows remain only for imported legacy text; canonical selections
   // persist through meeting_rfi_links.
   const [rfis, setRfis] = useState<RFIRow[]>([]);
@@ -4814,6 +4804,11 @@ export function MeetingsTab({
               padding: 14,
             }}
           >
+            {agendaItems.length === 0 && (
+              <div style={{ marginBottom: 10, color: "#64748B", fontSize: 12 }}>
+                {t("No agenda items yet. Add only the topics this meeting will cover.", "Aún no hay puntos de agenda. Agregue únicamente los temas que tratará esta reunión.")}
+              </div>
+            )}
             {agendaItems.map((item, i) => (
               <div
                 key={i}
@@ -5057,7 +5052,7 @@ export function MeetingsTab({
                               style={selectStyle}
                             >
                               <option value="">
-                                {t("? Select ?", "? Seleccionar ?")}
+                                {t("Select a person", "Seleccionar una persona")}
                               </option>
                               {people.map((m) => (
                                 <option
@@ -5553,6 +5548,11 @@ export function MeetingsTab({
               </tbody>
             </table>
             <div style={{ padding: 10 }}>
+              {attendees.length === 0 && (
+                <div style={{ marginBottom: 10, color: "#64748B", fontSize: 12 }}>
+                  {t("No attendees yet. Select an existing project contact or add a person intentionally.", "Aún no hay asistentes. Seleccione un contacto existente del proyecto o agregue una persona intencionalmente.")}
+                </div>
+              )}
               <button
                 className="btn btn-sm btn-outline"
                 onClick={() =>

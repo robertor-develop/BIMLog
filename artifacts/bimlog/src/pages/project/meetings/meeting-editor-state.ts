@@ -5,7 +5,8 @@ import {
   type SetStateAction,
 } from "react";
 
-const INITIAL_AGENDA = ["", "", "", ""];
+// Rows only exist after the user intentionally adds an agenda topic.
+const INITIAL_AGENDA: string[] = [];
 
 const agendaReducer = (
   current: string[],
