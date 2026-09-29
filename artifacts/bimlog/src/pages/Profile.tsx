@@ -22,6 +22,7 @@ import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activit
 import { AiControlPlanePanel } from "@/components/ai/AiControlPlanePanel";
 import { NotificationPreferenceCenter } from "@/components/notifications/NotificationPreferenceCenter";
 import { FeaturePolicySettingsPanel } from "@/components/settings/FeaturePolicySettingsPanel";
+import { settingsDestinations } from "./settings-experience";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -1279,6 +1280,12 @@ export function Profile() {
             </div>
           )}
         </SectionCard>
+
+        <nav aria-label="Settings scope" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 10 }}>
+          {settingsDestinations.map(item => <Link key={item.scope} href={item.href} style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 12, color: "inherit", textDecoration: "none" }}>
+            <strong>{item.label}</strong><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Responsible: {item.owner}</div><p style={{ fontSize: 12, margin: "6px 0 0" }}>{item.description}</p>
+          </Link>)}
+        </nav>
 
         {/* 6. Notification Preferences */}
         <SectionCard title="Notification Preferences" icon={Bell}>
