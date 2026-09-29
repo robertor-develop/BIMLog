@@ -1,6 +1,7 @@
 import { isDirectoryRecipientEmail } from "@workspace/api-zod";
 import { ProjectPartyPicker } from "@/components/ProjectPartyPicker";
 import { uniqueRfiPriorities, withCurrentPriority } from "@/lib/rfi-priority-options";
+import { rfiWorkflowSummary } from "@/lib/rfi-experience";
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   useListRfis, useCreateRfi, useUpdateRfi, useReviseRfi, useGenerateRfiQuestion,
@@ -3597,6 +3598,16 @@ export function RfiCanonicalForm({
     ...(responseActions.length > 0 && !values.responseText?.trim() ? [w("Official response text is required before saving the response.", "Se requiere respuesta oficial antes de guardar la respuesta.", lang)] : []),
     ...Object.values(validation || {}).filter((message): message is string => !!message),
   ];
+  const workflowSummary = rfiWorkflowSummary({
+    recordState,
+    submittedBy: values.submittedByCompany || values.submittedByContact,
+    submittedTo: values.submittedToCompany || values.submittedToPerson,
+    dueDate: values.dateRequired,
+    canRespond: permissions.canRespond,
+    canClose: permissions.canClose,
+    canReopen: permissions.canReopen,
+    canEdit: permissions.canEdit,
+  }, lang);
   return (
     <div className="rfi-canonical-form" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -3615,6 +3626,11 @@ export function RfiCanonicalForm({
         </div>
         <div style={{ padding: "0 24px 24px" }}>
           {mode === "create" && createGuidance && <div role="note" style={{ marginTop: 14, padding: "10px 12px", border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF", color: "#1E3A5F", fontSize: 12 }}>{createGuidance}</div>}
+          {mode === "view" && <section aria-label={w("RFI next action", "Siguiente accion RFI", lang)} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10, marginTop: 14, padding: "12px 14px", border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF", fontSize: 12 }}>
+            <div><strong>{w("Next actor", "Siguiente responsable", lang)}</strong><span style={{ display: "block", marginTop: 3 }}>{workflowSummary.nextActor}</span></div>
+            <div><strong>{w("Primary lifecycle action", "Accion principal del ciclo", lang)}</strong><span style={{ display: "block", marginTop: 3 }}>{workflowSummary.primaryAction}</span></div>
+            <div><strong>{w("Required by", "Requerido para", lang)}</strong><span style={{ display: "block", marginTop: 3 }}>{values.dateRequired ? fmt(values.dateRequired) : w("No due date recorded", "Sin fecha de vencimiento registrada", lang)}</span></div>
+          </section>}
           <CanonicalSection title={w("1. Header / RFI Status", "1. Encabezado / Estado RFI", lang)}>
             <FormGrid>
               <CanonicalField label={w("RFI number", "Numero RFI", lang)} value={values.number || w("Assigned after save", "Asignado al guardar", lang)} editable={false} />
