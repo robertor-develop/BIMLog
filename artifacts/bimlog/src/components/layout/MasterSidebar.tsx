@@ -16,6 +16,7 @@ interface Notification {
 }
 
 interface SearchResults {
+  projects?: Array<{ id: number; projectId: number; label: string; type: string }>;
   files: Array<{ id: number; projectId: number; name: string; status?: string; type: string }>;
   rfis: Array<{ id: number; projectId: number; label: string; type: string }>;
   submittals: Array<{ id: number; projectId: number; label: string; type: string }>;
@@ -290,16 +291,18 @@ export function MasterSidebar() {
   }, [searchQ, searchRetryKey, token]);
 
   const typeRoutes: Record<string, (item: { id: number; projectId: number }) => string> = {
+    project: (i) => `/projects/${i.id}`,
     file: (i) => `/projects/${i.projectId}/files`,
-    rfi: (i) => `/projects/${i.projectId}/rfis`,
-    submittal: (i) => `/projects/${i.projectId}/submittals`,
-    transmittal: (i) => `/projects/${i.projectId}/transmittals`,
+    rfi: (i) => `/projects/${i.projectId}/rfis?rfi=${i.id}`,
+    submittal: (i) => `/projects/${i.projectId}/submittals?submittal=${i.id}`,
+    transmittal: (i) => `/projects/${i.projectId}/transmittals?transmittal=${i.id}`,
     change_order: (i) => `/projects/${i.projectId}/change-orders`,
-    meeting: (i) => `/projects/${i.projectId}/meetings`,
-    action_item: (i) => `/projects/${i.projectId}/meetings`,
+    meeting: (i) => `/projects/${i.projectId}/meetings?meeting=${i.id}`,
+    action_item: (i) => `/projects/${i.projectId}/meetings?action=${i.id}`,
   };
 
-  const allSearchResults: Array<{ id: number; projectId?: number; label: string; type: string }> = searchResults ? [
+  const allSearchResults: Array<{ id: number; projectId?: number; label: string; type: string; source?: string }> = searchResults ? [
+    ...(searchResults.projects || []),
     ...searchResults.files.map(i => ({ ...i, label: i.name })),
     ...searchResults.rfis,
     ...searchResults.submittals,
@@ -380,9 +383,9 @@ export function MasterSidebar() {
       <SidebarUtilities activeTab="dashboard" collapsed={!isMobile && sidebarCollapsed} onToggleCollapse={!isMobile ? () => setSidebarCollapsed(value => !value) : undefined} />
 
       <div ref={searchRef} style={{ position: "relative", padding: sidebarCollapsed && !isMobile ? "0 8px 10px" : "0 10px 10px" }}>
-        <button type="button" aria-label={t("Search everything", "Buscar todo")} title={t("Search everything", "Buscar todo")} onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); setSearchLoadFailed(false); }} style={{ display: "flex", alignItems: "center", justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start", gap: 6, width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, padding: sidebarCollapsed && !isMobile ? "6px 0" : "6px 10px", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: 11 }}>
+        <button type="button" aria-label={t("Search project records", "Buscar registros de proyectos")} title={t("Search project records", "Buscar registros de proyectos")} onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); setSearchLoadFailed(false); }} style={{ display: "flex", alignItems: "center", justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start", gap: 6, width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, padding: sidebarCollapsed && !isMobile ? "6px 0" : "6px 10px", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: 11 }}>
           <Search style={{ width: 13, height: 13 }} />
-          {(!sidebarCollapsed || isMobile) && t("Search everything…", "Buscar todo…")}
+          {(!sidebarCollapsed || isMobile) && t("Search project records…", "Buscar registros de proyectos…")}
         </button>
 
         {showSearch && (
@@ -398,6 +401,7 @@ export function MasterSidebar() {
                 )}
               </div>
             </div>
+            <p style={{ padding: "0 12px", fontSize: 11, color: "#475569" }}>{t("Active memberships only. Up to 5 results per type: projects, files, RFIs, submittals, transmittals, changes, meetings, actions and people. Contracts and model content are not searched.", "Solo membresías activas. Hasta 5 resultados por tipo: proyectos, archivos, RFIs, submittals, transmisiones, cambios, reuniones, acciones y personas. No incluye contratos ni contenido de modelos.")}</p>
             {searchLoading && (
               <div role="status" aria-live="polite" style={{ padding: 16, textAlign: "center", fontSize: 12, color: "#6B7280" }}>{t("Searching…", "Buscando…")}</div>
             )}
@@ -415,9 +419,9 @@ export function MasterSidebar() {
             {!searchLoading && !searchLoadFailed && allSearchResults.length > 0 && (
               <div style={{ maxHeight: 320, overflowY: "auto" }}>
                 {allSearchResults.map((item, idx) => (
-                <button key={`${item.type}-${item.id}-${idx}`} onClick={() => { if (item.type !== "person" && item.projectId) { const route = typeRoutes[item.type]?.({ id: item.id, projectId: item.projectId }); if (route) setLocation(route); } setShowSearch(false); setMobileOpen(false); }} style={{ display: "flex", alignItems: "flex-start", gap: 10, width: "100%", padding: "8px 12px", background: "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid #F9FAFB" }} onMouseEnter={e => (e.currentTarget.style.background = "#F9FAFB")} onMouseLeave={e => (e.currentTarget.style.background = "none")}>
+                <button disabled={item.type === "person"} key={`${item.type}-${item.id}-${idx}`} onClick={() => { if (item.type !== "person" && item.projectId) { const route = typeRoutes[item.type]?.({ id: item.id, projectId: item.projectId }); if (route) setLocation(route); } setShowSearch(false); setMobileOpen(false); }} style={{ display: "flex", alignItems: "flex-start", gap: 10, width: "100%", padding: "8px 12px", background: "none", border: "none", cursor: "pointer", textAlign: "left", borderBottom: "1px solid #F9FAFB" }} onMouseEnter={e => (e.currentTarget.style.background = "#F9FAFB")} onMouseLeave={e => (e.currentTarget.style.background = "none")}>
                     <span style={{ fontSize: 9, fontWeight: 700, textTransform: "uppercase", color: "#6B7280", paddingTop: 2, minWidth: 60 }}>{item.type.replace(/_/g, " ")}</span>
-                    <span style={{ fontSize: 12, color: "#111", lineHeight: 1.4 }}>{item.label}</span>
+                    <span style={{ fontSize: 12, color: "#111", lineHeight: 1.4 }}>{item.label}<small style={{ display: "block", color: "#64748b" }}>{item.source}{["file", "change_order"].includes(item.type) ? t(" - Opens the register", " - Abre el registro") : item.type === "person" ? t(" - Contact information only", " - Solo información de contacto") : t(" - Open record", " - Abrir registro")}</small></span>
                   </button>
                 ))}
               </div>

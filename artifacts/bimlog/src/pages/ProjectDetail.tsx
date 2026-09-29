@@ -65,6 +65,7 @@ export function ProjectDetail() {
 
   const [, setLocation] = useLocation();
   const { lang, t } = useI18n();
+  const tabLabels: Record<string, string> = {"analytics": t("project.tabs.analytics"), "coordination": t("project.tabs.coordination"), "files": t("project.tabs.files"), "rfis": t("project.tabs.rfis"), "submittals": t("project.tabs.submittals"), "activity": t("project.tabs.activity"), "team": t("project.tabs.team"), "generator": t("project.tabs.generator"), "convention": t("project.tabs.convention"), "reports": t("project.tabs.reports"), "integrations": t("project.tabs.integrations"), "directory": t("project.tabs.directory"), "transmittals": t("project.tabs.transmittals"), "meetings": t("project.tabs.meetings"), "schedule": t("project.tabs.schedule"), "command-center": t("project.tabs.commandCenter"), "change-orders": t("project.tabs.changeOrders"), "clash-reports": t("project.tabs.clashReports")};
   const { user } = useAuthStore();
   const { adminRoles, writeRoles } = useConfig();
 
@@ -176,7 +177,7 @@ export function ProjectDetail() {
 
       <div className="main-area">
         <div className="project-context-bar">
-          <ProjectLocation projectId={projectId} projectName={project.name} location={tab === "home" ? (lang === "es" ? "Inicio del proyecto" : "Project home") : t(`project.tabs.${({ "command-center": "commandCenter", "change-orders": "changeOrders", "clash-reports": "clashReports" } as Record<string,string>)[tab] || tab}`)} />
+          <ProjectLocation projectId={projectId} projectName={project.name} location={tab === "home" ? (lang === "es" ? "Inicio del proyecto" : "Project home") : tabLabels[tab] || (lang === "es" ? "Destino no disponible" : "Unavailable destination")} />
 
           <div className="project-context-actions">
             <span

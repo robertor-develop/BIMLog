@@ -3,7 +3,7 @@ import { db } from "@workspace/db";
 import {
   filesTable, rfisTable, submittalsTable, transmittalsTable,
   changeOrdersTable, meetingMinutesTable, actionItemsTable,
-  usersTable, companiesTable, projectMembersTable,
+  usersTable, projectsTable, projectMembersTable,
 } from "@workspace/db/schema";
 import { eq, and, or, ilike, inArray } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
@@ -14,18 +14,21 @@ const router: Router = Router();
 router.get("/search", authMiddleware, async (req, res) => {
   const q = String(req.query.q ?? "").trim();
   const projectIdParam = req.query.projectId ? Number(req.query.projectId) : null;
-  if (!q || q.length < 2) { res.json({ files: [], rfis: [], submittals: [], transmittals: [], change_orders: [], meetings: [], action_items: [], people: [] }); return; }
+  if (projectIdParam !== null && (!Number.isSafeInteger(projectIdParam) || projectIdParam < 1)) { res.status(400).json({ error: "Invalid project scope." }); return; }
+  if (!q || q.length < 2) { res.json({ projects: [], files: [], rfis: [], submittals: [], transmittals: [], change_orders: [], meetings: [], action_items: [], people: [] }); return; }
 
   try {
     // Get user's project memberships
     const memberships = await db.select({ projectId: projectMembersTable.projectId })
-      .from(projectMembersTable).where(eq(projectMembersTable.userId, req.user!.userId));
+      .from(projectMembersTable).where(and(eq(projectMembersTable.userId, req.user!.userId), eq(projectMembersTable.status, "active")));
     let projectIds = memberships.map(m => m.projectId);
     if (projectIdParam) projectIds = projectIds.filter(id => id === projectIdParam);
-    if (!projectIds.length) { res.json({ files: [], rfis: [], submittals: [], transmittals: [], change_orders: [], meetings: [], action_items: [], people: [] }); return; }
+    if (!projectIds.length) { res.json({ projects: [], files: [], rfis: [], submittals: [], transmittals: [], change_orders: [], meetings: [], action_items: [], people: [] }); return; }
 
     const term = `%${q}%`;
-    const pid  = inArray(filesTable.projectId, projectIds);
+    const scopedProjects = await db.select({ id: projectsTable.id, name: projectsTable.name, code: projectsTable.code }).from(projectsTable).where(inArray(projectsTable.id, projectIds));
+    const projects = scopedProjects.filter(project => `${project.code} ${project.name}`.toLocaleLowerCase().includes(q.toLocaleLowerCase())).slice(0, 5);
+    const source = (projectId: number) => { const project = scopedProjects.find(project => project.id === projectId); return project ? `${project.code} - ${project.name}` : ""; };
 
     const [files, rfis, submittals, txs, cos, meetings, actionItems] = await Promise.all([
       db.select({ id: filesTable.id, projectId: filesTable.projectId, name: filesTable.fileName, status: filesTable.status })
@@ -46,23 +49,24 @@ router.get("/search", authMiddleware, async (req, res) => {
 
     // People search (users in same projects)
     const memberUserIds = await db.select({ userId: projectMembersTable.userId })
-      .from(projectMembersTable).where(inArray(projectMembersTable.projectId, projectIds));
+      .from(projectMembersTable).where(and(inArray(projectMembersTable.projectId, projectIds), eq(projectMembersTable.status, "active")));
     const userIds = [...new Set(memberUserIds.map(m => m.userId))];
     const people = userIds.length ? await db.select({ id: usersTable.id, name: usersTable.fullName, email: usersTable.email })
       .from(usersTable).where(and(inArray(usersTable.id, userIds), or(ilike(usersTable.fullName, term), ilike(usersTable.email, term)))).limit(5) : [];
 
     res.json({
-      files: files.map(f => ({ ...f, type: "file" })),
-      rfis: rfis.map(r => ({ ...r, label: `${r.name} — ${r.sub}`, type: "rfi" })),
-      submittals: submittals.map(s => ({ ...s, label: `${s.name} — ${s.sub}`, type: "submittal" })),
-      transmittals: txs.map(t => ({ ...t, label: `${t.name} — ${t.sub}`, type: "transmittal" })),
-      change_orders: cos.map(c => ({ ...c, label: `${c.name} — ${c.sub}`, type: "change_order" })),
-      meetings: meetings.map(m => ({ ...m, type: "meeting" })),
-      action_items: actionItems.map(a => ({ ...a, type: "action_item" })),
+      projects: projects.map(project => ({ ...project, projectId: project.id, label: `${project.code} - ${project.name}`, type: "project" })),
+      files: files.map(f => ({ ...f, source: source(f.projectId), type: "file" })),
+      rfis: rfis.map(r => ({ ...r, source: source(r.projectId), label: `${r.name} — ${r.sub}`, type: "rfi" })),
+      submittals: submittals.map(s => ({ ...s, source: source(s.projectId), label: `${s.name} — ${s.sub}`, type: "submittal" })),
+      transmittals: txs.map(t => ({ ...t, source: source(t.projectId), label: `${t.name} — ${t.sub}`, type: "transmittal" })),
+      change_orders: cos.map(c => ({ ...c, source: source(c.projectId), label: `${c.name} — ${c.sub}`, type: "change_order" })),
+      meetings: meetings.map(m => ({ ...m, source: source(m.projectId), type: "meeting" })),
+      action_items: actionItems.map(a => ({ ...a, source: source(a.projectId), type: "action_item" })),
       people: people.map(p => ({ ...p, type: "person" })),
     });
   } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
+    res.status(500).json({ error: "Search is temporarily unavailable." });
   }
 });
 
