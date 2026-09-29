@@ -7,6 +7,7 @@ import { logClientError } from "@/lib/client-log";
 import { useAuthStore } from "@/store/auth";
 import { Moon, Sun } from "lucide-react";
 import { BIMLOG_RELEASE_VERSION } from "@workspace/api-zod";
+import { BIMLOG_BRAND } from "@/lib/brand-positioning";
 
 export { BIMLOG_RELEASE_VERSION };
 
@@ -74,7 +75,7 @@ export function Navbar() {
       <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
         <div className="sidebar-logo-mark" style={{ width: 28, height: 28, fontSize: 12 }}>B</div>
         <div style={{display:"grid",lineHeight:1.05}}>
-          <div className="flex items-baseline gap-1.5"><span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "hsl(var(--foreground))" }}>BIMLog</span><span className="app-topbar-byline" style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>by IgniteSmart</span></div>
+          <div className="flex items-baseline gap-1.5"><span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "hsl(var(--foreground))" }}>{BIMLOG_BRAND.product}</span><span className="app-topbar-byline" style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>by {BIMLOG_BRAND.parent}</span></div>
           <span className="app-topbar-version" style={{fontSize:8,color:"hsl(var(--muted-foreground))",letterSpacing:'.04em',marginTop:4,lineHeight:1}}>{BIMLOG_RELEASE_VERSION}</span>
         </div>
       </Link>
