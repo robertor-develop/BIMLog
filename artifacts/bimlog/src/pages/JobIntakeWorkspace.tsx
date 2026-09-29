@@ -1,3 +1,4 @@
+import { withIntakeReturn } from "@/lib/return-context";
 import { intakeReadinessLabel } from "@/lib/intake-readiness-presentation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useRoute } from "wouter";
@@ -140,11 +141,11 @@ export function JobIntakeWorkspace() {
     saveRetryRef = useRef(0),
     autosaveErrorRef = useRef(""),
     saveTimerRef = useRef<number | null>(null);
-  const openCommercialPrerequisite = (destination: string) => {
-    preserveJobIntakeActiveStage(projectId, "scope");
+  const openCommercialPrerequisite = (destination: string, stage: IntakeStage = "scope") => {
+    preserveJobIntakeActiveStage(projectId, stage);
     preserveJobIntakeSetupMode(projectId, "advanced");
     preserveJobIntakeRecovery(projectId, revisionRef.current, dataRef.current);
-    setLocation(destination);
+    setLocation(withIntakeReturn(destination, projectId, stage));
   };
   projectIdRef.current = projectId;
   const headers = useMemo(
@@ -320,9 +321,10 @@ export function JobIntakeWorkspace() {
     if (!intake) return;
     const restored = readJobIntakeActiveStage(projectId);
     setActive(restored);
+    const item = new URLSearchParams(window.location.search).get("item");
+    const target = item && /^ji-[a-zA-Z0-9_-]{1,100}$/.test(item) ? item : `ji-${restored}`;
     const frame = window.requestAnimationFrame(() =>
-      document
-        .getElementById(`ji-${restored}`)
+      (document.getElementById(target) || document.getElementById(`ji-${restored}`))
         ?.scrollIntoView({ block: "start" }),
     );
     return () => window.cancelAnimationFrame(frame);
@@ -2260,6 +2262,7 @@ export function JobIntakeWorkspace() {
                 )}
               </section>
               <section className="ji-card" id="ji-delivery">
+                <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>
                 <h2>6. {stageLabel("delivery")}</h2>
                 <div className="ji-guide" role="status">
                   <strong>{tt("What remains for this section", "Qué falta en esta sección")}</strong>

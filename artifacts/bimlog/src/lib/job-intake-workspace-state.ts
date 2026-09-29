@@ -138,6 +138,8 @@ export function preserveJobIntakeSetupMode(projectId: number, mode: JobIntakeSet
 export function readJobIntakeActiveStage(projectId: number): JobIntakeStage {
   if (!Number.isInteger(projectId) || projectId <= 0) return "documents";
   try {
+    const stage = new URLSearchParams(window.location?.search).get("stage");
+    if (jobIntakeStages.includes(stage as JobIntakeStage)) return stage as JobIntakeStage;
     const saved = window.localStorage.getItem(activeStageKey(projectId));
     return jobIntakeStages.includes(saved as JobIntakeStage) ? saved as JobIntakeStage : "documents";
   } catch {
