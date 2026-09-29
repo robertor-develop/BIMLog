@@ -74,6 +74,16 @@ type RegisterItem = {
   status?: string | null; dateCreated?: string | null;
 };
 
+type PackageDraftSeed = {
+  requirementId: number;
+  title: string;
+  specSection: string;
+  submittalCategory: string;
+  trade: string;
+  responsibleCompany: string;
+  dateRequired: string;
+};
+
 type ViewEvent = {
   id: number; submittalId: number; userId: number;
   userFullName: string; userCompanyName: string; viewedAt: string; eventType: string;
@@ -718,6 +728,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const submittalsQueryClient = useQueryClient();
   const [showNewForm, setShowNewForm] = useState(false);
+  const [packageDraftSeed, setPackageDraftSeed] = useState<PackageDraftSeed | null>(null);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
 
@@ -789,7 +800,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
           )}
           {importMsg && <span style={{ fontSize: 12, color: "#1D4ED8" }}>{importMsg}</span>}
           {canWrite && (
-            <Button size="sm" onClick={() => setShowNewForm(true)} style={{ gap: 5, fontSize: 12 }}>
+            <Button size="sm" onClick={() => { setPackageDraftSeed(null); setShowNewForm(true); }} style={{ gap: 5, fontSize: 12 }}>
               <Plus style={{ width: 13, height: 13 }} />
               {w("New Submittal", "Nuevo Entregable", lang)}
             </Button>
@@ -846,7 +857,18 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
       )}
 
       {view === "register" ? (
-        <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} />
+        <RegisterView projectId={projectId} canWrite={canWrite} lang={lang} onCreatePackage={(requirement) => {
+          setPackageDraftSeed({
+            requirementId: requirement.id,
+            title: requirement.description,
+            specSection: requirement.specSection,
+            submittalCategory: requirement.submittalType || "shop_drawing",
+            trade: requirement.trade || "",
+            responsibleCompany: requirement.responsibleCompany || "",
+            dateRequired: requirement.requiredByDate?.slice(0, 10) || "",
+          });
+          setShowNewForm(true);
+        }} />
       ) : view === "tracking" ? (
         <>
         <SubmittalRegisterCoverage key={projectId} projectId={projectId} lang={lang} canWrite={canWrite}
@@ -880,7 +902,8 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
         <NewSubmittalForm
           projectId={projectId}
           lang={lang}
-          onClose={() => setShowNewForm(false)}
+          seed={packageDraftSeed}
+          onClose={() => { setShowNewForm(false); setPackageDraftSeed(null); }}
         />
       </SlidePanel>
 
@@ -922,7 +945,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
 }
 
 // ─── Register View ────────────────────────────────────────────────────────────
-function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWrite: boolean; lang: string }) {
+function RegisterView({ projectId, canWrite, lang, onCreatePackage }: { projectId: number; canWrite: boolean; lang: string; onCreatePackage: (item: RegisterItem) => void }) {
   const { toast } = useToast();
   const [items, setItems] = useState<RegisterItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1188,6 +1211,14 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
                       {canWrite && (
                         <td style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                           <button
+                            onClick={() => onCreatePackage(item)}
+                            style={{ border: "none", background: "transparent", cursor: "pointer", color: "#15803D", padding: 4 }}
+                            title={w("Create received package from this requirement", "Crear paquete recibido desde este requisito", lang)}
+                            aria-label={w(`Create package for ${item.description}`, `Crear paquete para ${item.description}`, lang)}
+                          >
+                            <Plus style={{ width: 12, height: 12 }} />
+                          </button>
+                          <button
                             onClick={() => {
                               setEditId(item.id);
                               setForm({
@@ -1443,17 +1474,17 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
 }
 
 // ─── New Submittal Form ───────────────────────────────────────────────────────
-function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lang: string; onClose: () => void }) {
+function NewSubmittalForm({ projectId, lang, onClose, seed }: { projectId: number; lang: string; onClose: () => void; seed: PackageDraftSeed | null }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
 
   const [form, setForm] = useState({
-    title: "", specSection: "", submittalCategory: "shop_drawing", submittalType: "shop_drawing",
-    trade: "", floor: "", responsibleCompany: "",
+    title: seed?.title || "", specSection: seed?.specSection || "", submittalCategory: seed?.submittalCategory || "shop_drawing", submittalType: seed?.submittalCategory || "shop_drawing",
+    trade: seed?.trade || "", floor: "", responsibleCompany: seed?.responsibleCompany || "",
     drawingNumber: "", drawingTitle: "",
     dateSubmitted: format(new Date(), "yyyy-MM-dd"),
-    dateRequired: "",
+    dateRequired: seed?.dateRequired || "",
     submittedByCompany: "", submittedByPerson: "", submittedByEmail: "", submittedByPhone: "", submittedByAddress: "",
     submittedToCompany: "", submittedToPerson: "", submittedToEmail: "", submittedToExternal: false,
     manufacturer: "", modelNumber: "", description: "",
@@ -1630,6 +1661,14 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
       });
       if (r.ok) {
         const created = await r.json() as { id: number };
+        if (seed) {
+          const linked = await fetch(`/api/v1/projects/${projectId}/submittal-register/${seed.requirementId}/packages/${created.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
+            body: JSON.stringify({ linked: true }),
+          });
+          if (!linked.ok) toast({ title: w("Package saved; requirement link needs attention in Control.", "Paquete guardado; el vínculo del requisito requiere atención en Control.", lang), variant: "destructive" });
+        }
         setSavedId(created.id);
         queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
         toast({ title: w("Submittal created", "Entregable creado", lang) });
@@ -1645,6 +1684,10 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
 
   return (
     <div style={{ paddingTop: 4 }}>
+      {seed && <div role="note" style={{ padding: 10, marginBottom: 12, border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF", color: "#1E3A5F", fontSize: 12 }}>
+        <strong>{w("Creating the received package for requirement", "Creando el paquete recibido para el requisito", lang)} #{seed.requirementId}.</strong>{" "}
+        {w("Known title, specification, trade, responsible company, type and required date were carried forward. Saving creates one package and links it to the existing requirement.", "El título, especificación, especialidad, empresa responsable, tipo y fecha requerida conocidos se conservaron. Guardar crea un paquete y lo vincula al requisito existente.", lang)}
+      </div>}
       <input
         ref={attachFileRef}
         type="file"
