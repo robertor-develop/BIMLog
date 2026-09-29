@@ -1,3 +1,4 @@
+import { IntakeCommercialReadiness } from "@/components/job-intake/IntakeCommercialReadiness";
 import { IntakeContractConnection } from "@/components/job-intake/IntakeContractConnection";
 import { GenericResourcePlan } from "@/components/job-intake/GenericResourcePlan";
 import { IntakeDeliveryItems } from "@/components/job-intake/IntakeDeliveryItems";
@@ -93,6 +94,7 @@ export function JobIntakeWorkspace() {
     ),
     [apu, setApu] = useState<any>(null),
     [apuVersions, setApuVersions] = useState<any[]>([]),
+    [commercialLoadErrors, setCommercialLoadErrors] = useState<string[]>([]),
     [workspace, setWorkspace] = useState<any>(null),
     [budgetLines, setBudgetLines] = useState<any[]>([]),
     [directoryEntries, setDirectoryEntries] = useState<any[]>([]),
@@ -175,12 +177,14 @@ export function JobIntakeWorkspace() {
         found?.intake === null
           ? await api(`/projects/${projectId}/intake`, { method: "POST" })
           : found;
+      const commercialErrors: string[] = [];
+      const loadCommercial = async (key: string, path: string) => { try { return await api(path); } catch { commercialErrors.push(key); return null; } };
       const [plan, budget, directory, deliveryChoices] = await Promise.all([
         current.capabilities?.costValuePlanner
-          ? api(`/projects/${projectId}/financial/apu`)
+          ? loadCommercial("apu", `/projects/${projectId}/financial/apu`)
           : Promise.resolve(null),
         current.capabilities?.budget
-          ? api(`/projects/${projectId}/financial/workspace`)
+          ? loadCommercial("budget", `/projects/${projectId}/financial/workspace`)
           : Promise.resolve(null),
         api(`/projects/${projectId}/directory`),
         api("/company/delivery-workflows/options"),
@@ -204,7 +208,7 @@ export function JobIntakeWorkspace() {
       );
       const selectedBudget =
         current.capabilities?.budget && selectedBudgetSnapshotId
-          ? await api(
+          ? await loadCommercial("budget",
               `/projects/${projectId}/financial/snapshots/${selectedBudgetSnapshotId}`,
             )
           : null;
@@ -229,6 +233,7 @@ export function JobIntakeWorkspace() {
       setApu(plan?.data?.plan ?? null);
       setApuVersions(availableApuVersions);
       setWorkspace(budget);
+      setCommercialLoadErrors([...new Set(commercialErrors)]);
       setBudgetLines(selectedBudget?.snapshot?.lines ?? []);
       setDirectoryEntries(Array.isArray(directory) ? directory : []);
       setDeliveryWorkflowChoices(deliveryChoices);
@@ -724,6 +729,7 @@ export function JobIntakeWorkspace() {
     setBusy(true);
     setError("");
     try {
+      if (canEnrich && commercialLoadErrors.length) throw new Error(tt("Reload the Commercial sources before creating Commercial records.", "Vuelva a cargar las fuentes comerciales antes de crear registros comerciales."));
       if (canEnrich && !dataRef.current.commercial.budgetSnapshotId)
         throw new Error(tt(
           "Select an approved budget snapshot and map each Contract Item and its saved APU before creating Commercial records. Use Open Project Budget below. Existing operational work is unchanged.",
@@ -2240,6 +2246,7 @@ export function JobIntakeWorkspace() {
                     )}
                   </div>
                 )}
+                <IntakeCommercialReadiness capabilities={capabilities} errors={commercialLoadErrors} activated={intake.status === "activated"} hasContracts={Boolean(intake.activatedContractId)} tt={tt} onRetry={() => void load()}/>
                 <div className="ji-grid">
                   {reviewItems.map(([field, label]) => (
                     <label className="ji-check" key={field}>
