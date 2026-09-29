@@ -1,5 +1,32 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover execution — first block authorized
+
+Roberto authorized UX001–UX005 as the next five-build block, followed by one push. UX006–UX010 is next; publication/full authenticated Chrome smoke is due after UX010, with no more than ten unpublished builds. Implementation and validation live in docs/experience/ux-program. Earlier proposal-only audit wording remains historical; it does not override this authorization. Actual test failures are fixed and rerun before continuing. No additional approval gate is introduced.
+
+
+## Roberto/Ruben September 28 experience requirements — recorded 2026-09-29
+
+Documentation-only requirements capture; no product implementation, rate activation, schema/data change, push or deployment. The full audit proposal is `F:\BIMLog\Evidence\ux-audit-20260928\README.md`; exact requirement/build traceability is `MEETING-REQUIREMENTS.md` in that directory. Current proposal: **UX001–UX150, 30 blocks**. These identifiers do not reopen or extend the completed I/C program and are not implementation approval. Original 100-build proposal preserved under `history-100-build-proposal`.
+
+- [ ] Remove Quick Setup entirely; one full resumable setup, safely retaining prior drafts.
+- [ ] Add multiple project disciplines in context and explicit building/level identities; persist the selected project set across scope, delivery and EDT.
+- [ ] Offer compact pinned/frequent discipline and document-type choices with searchable full eligible catalogs. Status codes derive from the selected published delivery workflow, not usage ranking.
+- [ ] Make shop drawings the primary BIMtech deliverable preset without removing other authorized deliverables.
+- [ ] Provide a discoverable company General APU Library for reuse across authorized projects, preserving project/version/unit/currency provenance.
+- [ ] Repair exact project APU unit-rate lineage. Source-confirmed hard-coded customer profiles 35.47/37.99 can overwrite a scope item's rate from resource planning while APU version remains separate. The reported $30 incident is not yet correlated to its exact project/version.
+- [ ] Remove employee assignment from Intake; plan generic role/hours/cost and allow wholly or partially unassigned future work. Current server readiness requires assignment coverage of planned hours and must change with the UI.
+- [ ] Later Operations assignment automatically resolves the named member's effective approved internal-cost profile. Separate customer unit price, generic planned cost and member actual cost; CEO approval required for applicable cost policy/profile changes.
+- [ ] Record stated BIMtech internal role costs: drafter $5.10/h; coordinator $6.50/h. Roberto explicitly confirmed **$3.50/h only for excess hours beyond the floor estimate**, never retroactively for all floor hours. Define approved baseline versions and mixed-person allocation before implementation; no payroll/payment action implied.
+- [ ] Intake creates/links one canonical draft contract using the same items/APU references; Commitments manages that record without repeated item entry. Existing-contract selection reconciles intentionally. Draft creation does not approve or execute a contract.
+- [ ] Repair the missing canonical Contract-version path for EDT while retaining integrity checks and existing work. Provide a precise remediation/return journey, no duplicate generator or task creation.
+- [ ] Replace unexplained Engagements with clear companies/agreements relationships; return from Convention Builder to the exact Intake stage/item.
+- [ ] Include optional SendGrid/email readiness/configuration in full setup and at send time; restore unsent draft after setup. Secure credential handling, authorized sender scope and real provider outcome remain required.
+- [ ] Execute a controlled seven-floor/19-month browser scenario with $30 APU, generic resource budget, later named assignment, marginal excess-hour cost and exact contract/EDT lineage before acceptance.
+- [ ] R19/R20, subsequent Roberto direction: resolve whole-site journey confusion, including guide/help/manual. Every core flow makes context, next step, saved state, result and return/recovery explicit. Rewrite task guidance to match released screens; test normal work without coaching and blocked-work recovery using help. A module pass is not user-journey acceptance. UX003–005/016–020/077–080/085/096–099/150 carry these gates. The 150-build plan is not a ceiling; expand only for concrete additional outcomes and retain all conversation decisions in requirement/build/test traceability.
+
+Evidence boundary: Chrome remained Roberto Test 1/BIMCorp, administered-project scope. Activity Feed showed 155 events with latest visible September 27; Admin Log showed zero actions. These logs did not identify the September 28 Ruben session. Source/UI mechanisms are confirmed; exact incident is unresolved. Do not fabricate a project match or treat absence from this scoped feed as absence of financial audit events elsewhere.
+
 ## Consolidation Block 19 — customer workspace and service delivery — 2026-09-28
 
 - [x] C091 limits customer landing navigation to same-company approved capabilities.

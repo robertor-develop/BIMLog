@@ -1,0 +1,454 @@
+{
+  "description": "Shipping means route exists, not that every action passed smoke. Gated means authentication, membership, capability or data prerequisites apply. No unavailable promise is promoted to shipping.",
+  "routes": [
+    {
+      "route": "/",
+      "owner": "Landing",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/login",
+      "owner": "Login",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/register",
+      "owner": "Register",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/reset-password",
+      "owner": "ResetPasswordPage",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/privacy",
+      "owner": "Privacy",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/terms",
+      "owner": "Terms",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/disclaimer",
+      "owner": "Disclaimer",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/data-retention",
+      "owner": "DataRetention",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/dashboard",
+      "owner": "Dashboard",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/pending",
+      "owner": "PendingItems",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/lens-next",
+      "owner": "LensNextWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/financial/cost-structure",
+      "owner": "FinancialBudgetWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/financial/budget",
+      "owner": "FinancialBudgetWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/financial/history",
+      "owner": "FinancialBudgetWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/financial/snapshots/:snapshotId",
+      "owner": "FinancialBudgetWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/financial/contracts",
+      "owner": "FinancialContractWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/financial/apu",
+      "owner": "FinancialApuWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/commercial/team-performance",
+      "owner": "TeamPerformanceWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/intake",
+      "owner": "JobIntakeWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/operations",
+      "owner": "JobOperationsWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/submittal-tracker",
+      "owner": "LegacySubmittalTrackerRedirect",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/:tab?",
+      "owner": "ProjectDetail",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/help",
+      "owner": "HelpCenter",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/setup-guide",
+      "owner": "SetupGuideRedirect",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/training/project-setup",
+      "owner": "ProjectSetupTraining",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/profile",
+      "owner": "Profile",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/settings/company-profile",
+      "owner": "CompanyProfile",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/settings/notifications",
+      "owner": "NotificationSettings",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/settings/financial-controls",
+      "owner": "FinancialControlsSettings",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin/feedback",
+      "owner": "AdminPanel",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/company-catalogs",
+      "owner": "CompanyMasterCatalogs",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/company-workflows",
+      "owner": "CompanyDeliveryWorkflows",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/company-workflow-governance",
+      "owner": "CompanyWorkflowGovernance",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/company-pricing-templates",
+      "owner": "CompanyPricingTemplates",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/knowledge",
+      "owner": "CoordinationKnowledgeLibrary",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin",
+      "owner": "AdminPanel",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/feedback",
+      "owner": "Dashboard",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/total-control",
+      "owner": "TotalControl",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/living-brief",
+      "owner": "LivingBrief",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/pricing",
+      "owner": "Pricing",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/features",
+      "owner": "Features",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/about",
+      "owner": "About",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/contact",
+      "owner": "Contact",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/command-center",
+      "owner": "CoordinatorCommandCenter",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/coordination",
+      "owner": "CoordinationHub",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/analytics",
+      "owner": "AnalyticsTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/files",
+      "owner": "FilesTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/rfis",
+      "owner": "RfisTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/submittals",
+      "owner": "SubmittalsTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/activity",
+      "owner": "ActivityTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/team",
+      "owner": "TeamTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/generator",
+      "owner": "NameGenerator",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/convention",
+      "owner": "ConventionBuilderErrorBoundary",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/reports",
+      "owner": "ReportsTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/integrations",
+      "owner": "IntegrationsTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/directory",
+      "owner": "DirectoryTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/transmittals",
+      "owner": "TransmittalsTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/change-orders",
+      "owner": "ChangeOrdersTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/meetings",
+      "owner": "MeetingsTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/schedule",
+      "owner": "ScheduleTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/projects/:id/clash-reports",
+      "owner": "ClashReportsTab",
+      "availability": "gated",
+      "boundary": "project membership and module permissions",
+      "verification": "source tab binding; runtime findings in audit/COVERAGE.md"
+    }
+  ],
+  "unavailable": [
+    {
+      "capability": "Automatic return from all prerequisite editors",
+      "owner": "UX017 / UX021",
+      "evidence": "audit/AUDIT.md F01-F02"
+    },
+    {
+      "capability": "Company-wide reusable APU picker with exact project rate lineage",
+      "owner": "UX111-UX120",
+      "evidence": "audit/MEETING-REQUIREMENTS.md"
+    },
+    {
+      "capability": "Intake activation without named staffing",
+      "owner": "UX121-UX125",
+      "evidence": "audit/MEETING-REQUIREMENTS.md"
+    },
+    {
+      "capability": "Approved member cost with excess-only floor rule",
+      "owner": "UX126-UX135",
+      "evidence": "audit/MEETING-REQUIREMENTS.md"
+    }
+  ]
+}

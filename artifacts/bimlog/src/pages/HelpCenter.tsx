@@ -6,6 +6,7 @@ import { downloadPdfResponse, PrintPdfButton } from "@/components/PrintPdfButton
 import { useAuthStore } from "@/store/auth";
 import { HELP_CATEGORIES, HELP_RELEASES, HELP_TOPICS, HELP_TROUBLESHOOTING, helpTopicForContext, type HelpText } from "@/lib/help-content";
 import { BIMLOG_RELEASE_VERSION } from "@workspace/api-zod";
+import { TaskJourneyGuide } from "@/components/TaskJourneyGuide";
 
 type View = "manual" | "guides" | "troubleshooting" | "releases";
 
@@ -120,7 +121,7 @@ export function HelpCenter() {
 
   const tabs: Array<{ id: View; icon: typeof BookOpen; en: string; es: string }> = [
     { id: "manual", icon: BookOpen, en: "User Manual", es: "Manual del usuario" },
-    { id: "guides", icon: Compass, en: "Quick Guides", es: "Guías rápidas" },
+    { id: "guides", icon: Compass, en: "Task guides", es: "Guías de trabajo" },
     { id: "troubleshooting", icon: Wrench, en: "Troubleshooting", es: "Solución de problemas" },
     { id: "releases", icon: History, en: "What's New", es: "Novedades" },
   ];
@@ -184,7 +185,7 @@ export function HelpCenter() {
           </article>
         </div>}
 
-        {view === "guides" && <section><p className="hc-note">{label("Quick Guides condense each complete manual section into an executable checklist. Open the manual when you need definitions, permissions, calculations, or troubleshooting.", "Las Guías rápidas condensan cada sección en una lista ejecutable. Abra el manual cuando necesite definiciones, permisos, cálculos o solución de problemas.")}</p><div className="hc-guide-list">{filteredTopics.map((item) => <article className="hc-guide" key={item.id}><h3>{text(item.title)}</h3><p>{text(item.quickTip)}</p><ol>{item.steps.map((step, index) => <li key={index}>{text(step.title)}</li>)}</ol><div className="hc-guide-actions"><button className="hc-link-button" onClick={() => selectTopic(item.id)}>{label("Open detailed manual", "Abrir manual detallado")}</button></div></article>)}</div></section>}
+        {view === "guides" && <section><TaskJourneyGuide language={lang === "es" ? "es" : "en"} from={backPath}/><p className="hc-note">{label("Quick Guides condense each complete manual section into an executable checklist. Open the manual when you need definitions, permissions, calculations, or troubleshooting.", "Las Guías rápidas condensan cada sección en una lista ejecutable. Abra el manual cuando necesite definiciones, permisos, cálculos o solución de problemas.")}</p><div className="hc-guide-list">{filteredTopics.map((item) => <article className="hc-guide" key={item.id}><h3>{text(item.title)}</h3><p>{text(item.quickTip)}</p><ol>{item.steps.map((step, index) => <li key={index}>{text(step.title)}</li>)}</ol><div className="hc-guide-actions"><button className="hc-link-button" onClick={() => selectTopic(item.id)}>{label("Open detailed manual", "Abrir manual detallado")}</button></div></article>)}</div></section>}
 
         {view === "troubleshooting" && <section><p className="hc-note"><span className="hc-count">{HELP_TROUBLESHOOTING.length}</span> {label("common situations with direct explanations and links to the governing workflow.", "situaciones comunes con explicación directa y vínculo al flujo correspondiente.")}</p><div className="hc-card-grid">{HELP_TROUBLESHOOTING.map((item, index) => <article className="hc-card" key={index}><h3>{text(item.title)}</h3><p>{text(item.body)}</p><button className="hc-link-button" onClick={() => selectTopic(item.topicId)}>{label("See complete instructions", "Ver instrucciones completas")}</button></article>)}</div></section>}
 

@@ -48369,6 +48369,115 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "744db1be37dd205d0e4655760aaea4f3c0d2d53b8f142d0683d7285e2174f328"
+    },
+    {
+      "taskId": "ux001-ux005-connected-workflow-foundation",
+      "reviewedThroughCommit": "c0e3781c82daa2d3db219afcbbbcae5673be734c",
+      "reviewedAt": "2026-09-29T03:59:27.613Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "chrome_component_verification"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX001–UX005 preserves this existing authority; guidance adds no permissions, financial policy, native behavior or approval semantics."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX001–UX005 preserves this existing authority; guidance adds no permissions, financial policy, native behavior or approval semantics."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX001–UX005 preserves this existing authority; guidance adds no permissions, financial policy, native behavior or approval semantics."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX001–UX005 preserves this existing authority; guidance adds no permissions, financial policy, native behavior or approval semantics."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the authorized UX001–UX005 scope, guide behavior, preservation boundaries and ten-build publication cadence."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX001–UX005 preserves this existing authority; guidance adds no permissions, financial policy, native behavior or approval semantics."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX001–UX005 preserves this existing authority; guidance adds no permissions, financial policy, native behavior or approval semantics."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX001–UX005 preserves this existing authority; guidance adds no permissions, financial policy, native behavior or approval semantics."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the authorized UX001–UX005 scope, guide behavior, preservation boundaries and ten-build publication cadence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the authorized UX001–UX005 scope, guide behavior, preservation boundaries and ten-build publication cadence."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX001–UX005 preserves this existing authority; guidance adds no permissions, financial policy, native behavior or approval semantics."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/bimlog/src/components/TaskJourneyGuide.tsx",
+        "artifacts/bimlog/src/components/task-journey-guide.css",
+        "artifacts/bimlog/src/lib/task-journeys.behavior.ts",
+        "artifacts/bimlog/src/lib/task-journeys.ts",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "artifacts/bimlog/src/task-journey-harness.tsx",
+        "artifacts/bimlog/task-journey-harness.html",
+        "docs/experience/ux-program/BLOCK_01_VALIDATION.md",
+        "docs/experience/ux-program/ENTITY-MAP.md",
+        "docs/experience/ux-program/README.md",
+        "docs/experience/ux-program/ROUTES.json",
+        "docs/experience/ux-program/USABILITY-PROTOCOL.md",
+        "docs/experience/ux-program/audit/AUDIT.md",
+        "docs/experience/ux-program/audit/BLUEPRINT.md",
+        "docs/experience/ux-program/audit/COVERAGE.md",
+        "docs/experience/ux-program/audit/MEETING-REQUIREMENTS.md",
+        "docs/experience/ux-program/audit/MICROBUILDS.md",
+        "docs/experience/ux-program/audit/README.md",
+        "docs/experience/ux-program/audit/history-100-build-proposal/AUDIT.md",
+        "docs/experience/ux-program/audit/history-100-build-proposal/BLUEPRINT.md",
+        "docs/experience/ux-program/audit/history-100-build-proposal/COVERAGE.md",
+        "docs/experience/ux-program/audit/history-100-build-proposal/MICROBUILDS.md",
+        "docs/experience/ux-program/audit/history-100-build-proposal/README.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/ux-route-inventory.mjs"
+      ],
+      "reviewedChangeSha256": "91bda654a0b16e75861726f9424932ee208aa728855090915fefa728f58d611c"
     }
   ]
 }

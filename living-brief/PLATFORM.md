@@ -1501,6 +1501,13 @@ It changes only when the code structure or curated architectural facts change.
 - The generated disposition inventory classifies every open record, binds ownership and module/route responsibility, and links repeated historical statements to one canonical record.
 - The normal pre-push gate rejects unresolved duplicate statements, competing or missing current markers, unowned records, route-less product work, and stale contradictions classified as active.
 
+## Experience makeover foundation — UX001–UX005
+
+- Help > Task guides consumes TaskJourneyGuide and task-journeys.ts for manager setup, coordinator delivery, operator execution and administrator access.
+- Each step identifies an action, completion check and recovery. Valid numeric project context scopes links; absent or invalid context recovers to Dashboard. Destination authorization remains authoritative.
+- URL journey/step persistence stores guidance selection only, never project progress. Setup guidance links Intake → Convention → Intake → Operations; automatic editor draft/step return remains UX017/UX021.
+- The source route inventory, entity/snapshot preservation map, usability protocol and prior audit are in docs/experience/ux-program. No backend authority, schema, provider send, PDF or Native behavior changes.
+
 ## Browser performance and lazy-loading integrity — Build 205
 
 - The production Vite manifest is the machine-readable authority for initial-entry and route-owned browser chunks.

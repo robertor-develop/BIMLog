@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Experience makeover Block 01 — UX001–UX005 candidate
+
+The authorized first five-build block adds the route/ownership inventory, canonical source map, four bilingual task journeys, usability protocol and a connected guidance prototype in Help > Task guides. These are workflow foundations, not a claim that the underlying Intake/APU/staffing defects are repaired. B01 targets one push; publication is due at UX010 with full authenticated Chrome smoke. Five UX builds will be unpublished after this push. See docs/experience/ux-program/README.md and BLOCK_01_VALIDATION.md. No schema, customer records, provider sends or Native changes.
+
+
 ## Consolidation Block 22 — security, privacy and recovery — 2026-09-28
 
 C106–C110 bind the current SharePoint publication path to exact company/project/capability authority, secret-free diagnostics, explicit lifecycle and retention rules, exact restore parity and aggregate acceptance. Cross-tenant and guessed-object access deny; completed/dead-letter/held evidence remains immutable. No production database/schema, customer data, provider binding, credential, Lens Next Native or installer changed. C110 is the scheduled push/publication/authenticated-Chrome boundary.
