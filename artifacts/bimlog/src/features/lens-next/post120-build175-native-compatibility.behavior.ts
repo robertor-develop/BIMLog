@@ -1,0 +1,12 @@
+import assert from "node:assert/strict"; import { readFileSync } from "node:fs";
+const root=new URL("../../../../../",import.meta.url);
+const panel=readFileSync(new URL("./LensNextPanel.tsx",import.meta.url),"utf8");
+const working=readFileSync(new URL("./lens-next-working-view.ts",import.meta.url),"utf8");
+const evidence=JSON.parse(readFileSync(new URL("../../evidence/ux065-native-compatibility-regression.json",import.meta.url),"utf8"));
+const native=readFileSync(new URL("plugins/BIMLogLensNext/native/AutodeskPublishedViewpointAdapter.cs",root),"utf8");
+assert.match(panel,/captureNewIssueNavigationView[\s\S]*apiClient\.createIssue/);
+assert.match(working,/apiClient\.loadVisualState[\s\S]*bridgeClient\.applyPlatformWorkingView/);
+assert.match(native,/LensNextPublished|VisualStateDigest|OperationId/);
+assert.equal(evidence.status,"AUTOMATED_REGRESSION_PASS_FIELD_ACCEPTANCE_PENDING");
+assert.equal(evidence.fieldGates.length,3);
+console.log("PASS UX065 native compatibility regression; field acceptance remains pending");

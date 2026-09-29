@@ -1,0 +1,11 @@
+{
+  "build": "UX065",
+  "status": "AUTOMATED_REGRESSION_PASS_FIELD_ACCEPTANCE_PENDING",
+  "verifiedContracts": ["capture-before-platform-create", "stored-package-working-view", "controlled-publishing", "no-model-save"],
+  "fieldGates": [
+    "Navisworks 2021 affected-model acceptance",
+    "Navisworks 2025 affected-model acceptance",
+    "customer rollout approval after field evidence"
+  ],
+  "statement": "Automated source and contract checks do not satisfy native affected-model field acceptance."
+}
