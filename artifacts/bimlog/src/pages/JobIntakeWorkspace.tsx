@@ -951,7 +951,7 @@ export function JobIntakeWorkspace() {
             : tt("Contract setup", "Configuración contractual"),
         delivery: tt("Delivery workflow", "Flujo de entrega"),
         team: tt("Team & resource plan", "Equipo y plan de recursos"),
-        review: tt("Review & activate", "Revisar y activar"),
+        review: intake.status === "activated" ? tt("Review active setup", "Revisar configuración activa") : tt("Review & activate", "Revisar y activar"),
       }) as any
     )[key];
   const categoryLabel = (value: string) =>
@@ -2732,7 +2732,7 @@ export function JobIntakeWorkspace() {
                 <h2>8. {stageLabel("review")}</h2>
                 {guide && (
                   <div className="ji-guide">
-                    {tt(
+                    {intake.status === "activated" ? tt("This job is active. Review the saved setup here and open the job workspace to continue delivery. Saving setup changes does not approve or execute contracts.", "Este trabajo está activo. Revise aquí la configuración guardada y abra el espacio de trabajo para continuar la entrega. Guardar cambios de configuración no aprueba ni ejecuta contratos.") : tt(
                       "Save first, review each applicable statement, then activate. Core activation creates operational work items, delivery tasks, and resource assignments. With the complete Commercial package it creates one controlled draft per contract profile and its assigned Contract Items; it never approves or executes contracts.",
                       "Guarde primero, revise cada declaraci\u00f3n aplicable y luego active. La activaci\u00f3n b\u00e1sica crea partidas operativas, tareas de entrega y asignaciones de recursos. Con el paquete Comercial completo crea un borrador controlado por perfil de contrato y sus Partidas de Contrato asignadas; nunca aprueba ni ejecuta contratos.",
                     )}

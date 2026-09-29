@@ -2,7 +2,7 @@
 
 ## Experience makeover Block 02 — UX006–UX010 candidate
 
-Legacy dueDate records also populate the editor consistently with detail/export. The generated AI entry-point inventory was refreshed after the release suite detected stale line references.
+Active Intake review headings and instructions now describe an already active job; draft activation guidance remains conditional. Legacy dueDate records also populate the editor consistently with detail/export. The generated AI entry-point inventory was refreshed after the release suite detected stale line references.
 
 Active Intake status and same-job next action now differ from draft readiness. Setup/staffing/commercial coverage labels no longer imply executed progress. RFI priorities render once per stable value, retaining legacy selections. Submittal details open for inspection; explicit Edit, guarded Cancel/close, Save and read-only permissions preserve the selected record. Calendar fields share date-only rendering across editor/detail/control/exports; missing financial effective dates show Not recorded. Historical timestamps and stored records are unchanged. This completes the UX001–UX010 ten-build publication boundary; exact-candidate release gate, push, Replit Shell publication and authenticated Chrome smoke are due. See BLOCK_02_VALIDATION.md.
 
