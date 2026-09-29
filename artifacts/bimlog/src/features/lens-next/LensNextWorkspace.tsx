@@ -11,6 +11,8 @@ import {
 } from "./lens-next-client";
 import {
   lensNextLaunchModeFromSearch,
+  lensNextProjectIdFromSearch,
+  lensNextReturnPathFromSearch,
   resolveLensNextLaunchProject,
 } from "./lens-next-launch-binding";
 import { normalizeLensNextProjects } from "./lens-next-model";
@@ -59,7 +61,9 @@ export function LensNextWorkspace() {
   const routeStateClassName = launchMode === "navisworks"
     ? "lens-next-route-state lens-next-route-state--embedded"
     : "lens-next-route-state";
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const launchProjectId = useMemo(() => lensNextProjectIdFromSearch(window.location.search), []);
+  const returnPath = useMemo(() => lensNextReturnPathFromSearch(window.location.search), []);
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(launchProjectId);
   const [bridgeContext, setBridgeContext] =
     useState<LensNextBridgeProjectContext | null>(null);
   const [bridgeDiscoveryError, setBridgeDiscoveryError] = useState<string | null>(null);
@@ -224,6 +228,16 @@ export function LensNextWorkspace() {
         {bridgeDiscoveryError && <small role="alert">{bridgeDiscoveryError}</small>}
       </main>
     );
+  }
+  if (resolution.status === "select_project") {
+    return <main className={routeStateClassName} aria-live="polite">
+      <strong>Select a BIMLog project</strong><span>{resolution.message}</span>
+      <label htmlFor="lens-next-project-entry">Authorized BIMLog project</label>
+      <select id="lens-next-project-entry" value={selectedProjectId ?? ""} onChange={event => setSelectedProjectId(event.target.value ? Number(event.target.value) : null)}>
+        <option value="">Select a project…</option>{projects.map(project => <option key={project.id} value={project.id}>{project.code ? `${project.code} · ` : ""}{project.name}</option>)}
+      </select>
+      {returnPath && <a href={returnPath}>Return to project</a>}
+    </main>;
   }
 
   return (

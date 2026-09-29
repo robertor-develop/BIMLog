@@ -6,6 +6,7 @@ import type {
 export type LensNextLaunchMode = "browser" | "navisworks";
 export type LensNextLaunchBindingStatus =
   | "browser"
+  | "select_project"
   | "waiting_for_bridge"
   | "unbound_project"
   | "bound"
@@ -25,6 +26,17 @@ function authorized(projectId: number | null, projects: readonly LensNextProject
 export function lensNextLaunchModeFromSearch(search: string): LensNextLaunchMode {
   const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
   return params.get("launch") === "navisworks" ? "navisworks" : "browser";
+}
+
+export function lensNextProjectIdFromSearch(search: string): number | null {
+  const value = new URLSearchParams(search.startsWith("?") ? search : `?${search}`).get("projectId");
+  const projectId = Number(value);
+  return value && Number.isSafeInteger(projectId) && projectId > 0 ? projectId : null;
+}
+
+export function lensNextReturnPathFromSearch(search: string): string | null {
+  const value = new URLSearchParams(search.startsWith("?") ? search : `?${search}`).get("from");
+  return value?.startsWith("/") && !value.startsWith("//") ? value : null;
 }
 
 export function resolveLensNextLaunchProject(
@@ -67,10 +79,14 @@ export function resolveLensNextLaunchProject(
     });
   }
 
+  if (!authorized(currentProjectId, projects)) return Object.freeze({
+    projectId: null,
+    locked: false,
+    status: "select_project" as const,
+    message: "Select an authorized BIMLog project before opening Lens Next.",
+  });
   return Object.freeze({
-    projectId: authorized(currentProjectId, projects)
-      ? currentProjectId
-      : (projects[0]?.id ?? null),
+    projectId: currentProjectId,
     locked: false,
     status: "browser" as const,
     message: null,
