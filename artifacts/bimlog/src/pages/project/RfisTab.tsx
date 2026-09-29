@@ -928,6 +928,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [deleteRfi, setDeleteRfi] = useState<{ id: number; label: string; projectId: number } | null>(null);
   const [exportingRegister, setExportingRegister] = useState(false);
   const [exportingViewPdf, setExportingViewPdf] = useState(false);
+  const [advancedFiltersOpen, setAdvancedFiltersOpen] = useState(false);
   const rfisQueryClient = useQueryClient();
   const currentMember = members?.find(m => m.userId === user?.id || (m.userEmail && user?.email && m.userEmail.toLowerCase() === user.email.toLowerCase()));
   const canManageReportSettings = currentMember?.role === "project_admin" || Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin);
@@ -1431,17 +1432,17 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         </div>
       )}
 
-      {/* Stats strip — Lens-style, clickable to filter */}
+      {/* Summary counts describe the register; the status select below is the only status filter. */}
       <div style={{ display: "flex", alignItems: "center", gap: 18, flexWrap: "wrap", marginBottom: 12, padding: "10px 14px", border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--secondary) / 0.3)" }}>
-        <button onClick={() => setStatusFilter("all")} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 14, fontWeight: 700, color: statusFilter === "all" ? "hsl(var(--primary))" : "hsl(var(--foreground))" }}>
+        <span style={{ fontSize: 14, fontWeight: 700 }}>
           {stats.total} {w("total", "total", lang)}
-        </button>
+        </span>
         {statusOptions.map(o => {
           const n = (rfis || []).filter(r => r.status === o.value).length;
           return (
-            <button key={o.value} onClick={() => setStatusFilter(o.value)} style={{ background: "transparent", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: statusFilter === o.value ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))", display: "inline-flex", alignItems: "center", gap: 5 }}>
+            <span key={o.value} style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--muted-foreground))", display: "inline-flex", alignItems: "center", gap: 5 }}>
               {getLabel("rfi_status", o.value)} <span style={{ fontWeight: 700, color: "hsl(var(--foreground))" }}>{n}</span>
-            </button>
+            </span>
           );
         })}
         {overdueCount > 0 && <span style={{ marginLeft: "auto", fontSize: 12, fontWeight: 700, color: "#BE123C" }}>{overdueCount} {w("overdue", "vencido(s)", lang)}</span>}
@@ -1455,7 +1456,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         <div>
           <div style={{ fontSize: 12, fontWeight: 800 }}>{w("Current view filters", "Filtros de vista actual", lang)}</div>
           <div style={{ marginTop: 2, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-            {w("Search, status, type, responsibility, destination, date range and sort remain visible and define Print PDF.", "Busqueda, estado, tipo, responsable, destino, rango de fechas y orden permanecen visibles y definen Imprimir PDF.", lang)}
+            {w("Search and one status filter stay primary. Advanced controls remain available and every applied value defines exports.", "Busqueda y un filtro de estado permanecen principales. Los controles avanzados siguen disponibles y cada valor aplicado define las exportaciones.", lang)}
           </div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 8, alignItems: "end" }}>
@@ -1463,6 +1464,18 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             {w("Search", "Busqueda", lang)}
             <Input placeholder={w("Search RFI number, subject, company, responsible...", "Buscar numero RFI, asunto, empresa, responsable...", lang)} value={search} onChange={e => setSearch(e.target.value)} style={{ fontSize: 12 }} />
           </label>
+          <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
+            {w("Status", "Estado", lang)}
+            <select className="input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={{ fontSize: 12 }}>
+              <option value="all">{w("All statuses", "Todos los estados", lang)}</option>
+              {statusOptions.map(option => <option key={option.value} value={option.value}>{getLabel("rfi_status", option.value)}</option>)}
+            </select>
+          </label>
+          <Button type="button" variant="outline" size="sm" aria-expanded={advancedFiltersOpen} onClick={() => setAdvancedFiltersOpen(value => !value)}>
+            {advancedFiltersOpen ? w("Hide advanced controls", "Ocultar controles avanzados", lang) : w("Advanced controls", "Controles avanzados", lang)}
+          </Button>
+        </div>
+        {advancedFiltersOpen && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(145px, 1fr))", gap: 8, alignItems: "end" }}>
           <label style={{ display: "grid", gap: 4, fontSize: 11, fontWeight: 700 }}>
             {w("Type", "Tipo", lang)}
             <select className="input" value={typeFilter} onChange={e => setTypeFilter(e.target.value)} style={{ fontSize: 12 }}>
@@ -1516,19 +1529,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
           <Button type="button" variant="outline" size="sm" onClick={() => { setSearch(""); setStatusFilter("all"); setTypeFilter("all"); setBallInCourtFilter("all"); setSentToCompanyFilter("all"); setDateField("required"); setDateFrom(""); setDateTo(""); setSortBy("created_asc"); }}>
             {w("Clear Filters", "Limpiar Filtros", lang)}
           </Button>
-        </div>
-        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-          {["all", ...([...new Set(statusOptions.map(o => o.value))])].map(s => (
-            <button key={s} onClick={() => setStatusFilter(s)} style={{
-              padding: "4px 10px", borderRadius: 6, fontSize: 11, fontWeight: 600, cursor: "pointer",
-              border: statusFilter === s ? "1.5px solid hsl(var(--primary))" : "1px solid hsl(var(--border))",
-              background: statusFilter === s ? "hsl(var(--primary) / 0.08)" : "transparent",
-              color: statusFilter === s ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))",
-            }}>
-              {s === "all" ? w("All", "Todos", lang) : getLabel("rfi_status", s)}
-            </button>
-          ))}
-        </div>
+        </div>}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
           {currentViewSummary.map(part => (
             <span key={part} style={{ display: "inline-flex", padding: "4px 7px", borderRadius: 6, border: "1px solid #BFDBFE", background: "#EFF6FF", color: "#1E3A5F", fontSize: 11, fontWeight: 800 }}>{part}</span>
