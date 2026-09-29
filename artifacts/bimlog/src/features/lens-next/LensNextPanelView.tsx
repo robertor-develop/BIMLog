@@ -1237,15 +1237,20 @@ export function LensNextPanelView({
             </div>
           </details>
           {workingViewUnavailable && (
+            <details className="lens-next__diagnostics" aria-label="Lens diagnostics and repair tools">
+              <summary>Diagnostics &amp; repair · Project Admin</summary>
             <section className="lens-next__visual-repair" aria-label="Repair missing platform visual package">
+              <strong>Missing Visual Package</strong>
               <p className="lens-next__inline-notice">
                 BIMLog is the source of truth, and this Issue has no complete Visual Package. Open Working View is blocked: Lens Next will not search or capture a local Saved Viewpoint automatically. Display the exact original view in Navisworks, then attach the current view to this exact BIMLog Issue once. Upload is handled separately by the governed synchronization workflow.
               </p>
+              <p className="lens-next__inline-error">Consequence: this replaces the stored Working View package for this exact issue and revision. Verify the active project, model, and camera before continuing.</p>
               <button type="button" disabled={visualRepairState === "repairing"} onClick={onRepairCurrentWorkingView}>
                 {visualRepairState === "repairing" ? "Repairing platform package…" : "Repair from current Navisworks view"}
               </button>
               {visualRepairMessage && <p role="status" className={visualRepairState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"}>{visualRepairMessage}</p>}
             </section>
+            </details>
           )}
           <details className="lens-next__publisher lens-next__detail-section lens-next__detail-section--publishing" aria-label="Controlled issue publishing">
             <summary>Publish an issue update</summary>
