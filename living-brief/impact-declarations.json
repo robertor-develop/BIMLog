@@ -48482,7 +48482,7 @@
     {
       "taskId": "ux006-ux010-state-and-trust-repairs",
       "reviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
-      "reviewedAt": "2026-09-29T06:03:05.8609136Z",
+      "reviewedAt": "2026-09-29T06:18:00.2205455Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48505,6 +48505,16 @@
           ],
           "category": "customer_impacting_defect",
           "disposition": "captured_immediately"
+        },
+        {
+          "disposition": "captured_immediately",
+          "summary": "The authenticated broad smoke also found bare /projects/:id links incorrectly requesting project 0 because ProjectDetail required a tab while App allowed it to be omitted. The page now matches the same optional-tab pattern, preserving the existing analytics default, named tabs, project membership checks and permission behavior. Final combined-source validation and republication remain pending.",
+          "category": "customer_impacting_defect",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ]
         }
       ],
       "authorities": [
@@ -48574,6 +48584,7 @@
         "artifacts/bimlog/src/lib/ux-block02.behavior.ts",
         "artifacts/bimlog/src/pages/FinancialControlsSettings.tsx",
         "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/ProjectDetail.tsx",
         "artifacts/bimlog/src/pages/project/RfisTab.tsx",
         "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
         "artifacts/bimlog/src/submittal-presentation-harness.tsx",
@@ -48588,7 +48599,7 @@
         "living-brief/impact-declarations.json",
         "package.json"
       ],
-      "reviewedChangeSha256": "e996a6f1a38d27c9962a7ac36a7e41ed3dbd6d0c103a1e2e0ae73a20d7d30ab7"
+      "reviewedChangeSha256": "1b100978abf2f4c43a978338184cbf57e6d7afea36e8b17fc886181661901254"
     }
   ]
 }

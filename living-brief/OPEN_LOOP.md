@@ -3712,3 +3712,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Do not run focused Navisworks smoke because C076–C080 do not change Native or installer paths.
 
 Post-publication smoke identified Commercial-entitlement authorities using an internal epoch sentinel. Their date label now says Included with Commercial access (Spanish equivalent), while recorded grants retain valid local dates and missing-date handling. Authorization and historical records are unchanged. Regression checks cover entitlement versus recorded epoch dates in four zones; republish and full authenticated smoke remain required.
+
+The authenticated broad smoke also found bare /projects/:id links incorrectly requesting project 0 because ProjectDetail required a tab while App allowed it to be omitted. The page now matches the same optional-tab pattern, preserving the existing analytics default, named tabs, project membership checks and permission behavior. Final combined-source validation and republication remain pending.
