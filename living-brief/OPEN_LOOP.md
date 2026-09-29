@@ -3747,3 +3747,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 Post-publication smoke identified Commercial-entitlement authorities using an internal epoch sentinel. Their date label now says Included with Commercial access (Spanish equivalent), while recorded grants retain valid local dates and missing-date handling. Authorization and historical records are unchanged. Regression checks cover entitlement versus recorded epoch dates in four zones; republish and full authenticated smoke remain required.
 
 The authenticated broad smoke also found bare /projects/:id links incorrectly requesting project 0 because ProjectDetail required a tab while App allowed it to be omitted. The page now matches the same optional-tab pattern, preserving the existing analytics default, named tabs, project membership checks and permission behavior. Final combined-source validation and republication remain pending.
+
+## Experience makeover Block 7 — draft resilience and activation confidence — 2026-09-29
+
+- [x] UX031–UX035 implement truthful save/retry state, exact revision and return-step recovery, linked review blockers with resulting-structure preview, idempotent activation, and explicit active-job change destinations.
+- [x] Preserve pending future staffing as non-blocking generic resource demand; do not require assignment to people who may not yet be hired.
+- [ ] Complete the exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX036–UX040.
+- [x] Do not run focused Navisworks smoke because this block changes Platform/API Intake behavior only.

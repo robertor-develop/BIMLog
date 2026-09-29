@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "b5b5e144652f69c58c9b40f143175d97ea1714582655b5f676d9a3bb6ef7a607",
-  "itemCount": 256,
+  "sourceSha256": "baa9640de964b1b9a65267981cbe25c889b59a0194d3e02a226fc78a4960b646",
+  "itemCount": 257,
   "counts": {
-    "ACTIVE": 221,
+    "ACTIVE": 222,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4677,6 +4677,24 @@
       "evidence": [
         "OPEN_LOOP.md:3744",
         "Consolidation Block 16 — inspections and corrective actions — 2026-09-28"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "b93ae2b391047268",
+      "sourceLine": 3755,
+      "heading": "Experience makeover Block 7 — draft resilience and activation confidence — 2026-09-29",
+      "statement": "Complete the exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX036–UX040.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3755",
+        "Experience makeover Block 7 — draft resilience and activation confidence — 2026-09-29"
       ],
       "currentAuthority": false
     }

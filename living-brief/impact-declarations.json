@@ -49279,6 +49279,99 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "aec07d0c6be28cc53299d1bc8072c021ea9ee480ba1fbcc32dc14b1568766f4e"
+    },
+    {
+      "taskId": "ux-b07-draft-activation-confidence",
+      "reviewedThroughCommit": "f1c6593de664e0533c428b03c7bc1fdfbdd0f9c5",
+      "reviewedAt": "2026-09-29T14:50:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Draft recovery, review preview, activation retry and active-job continuation now form one explicit Intake confidence boundary.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded Intake workflow correction preserves existing product authority and provider boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded Intake workflow correction follows the existing release and acceptance operating contract."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality requirements apply; behavior and regression coverage are strengthened without weakening gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction improves the established coordinator workflow without changing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform now records exact draft recovery, activation preview, idempotency and active-job routing behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Native, bridge, installer, Autodesk or Navisworks-facing behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report renderer, export layout, official record or document design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, legal interpretation or standards mapping changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the completed five-build source candidate and its unpublished release position."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records completed scope and the remaining push and ten-build publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing audit program remains authoritative; this block implements its scheduled UX031–UX035 scope."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c367d7256fd8f4ff8b8176894ca68476ec898f189cabc16f256325d6fde048f4"
     }
   ]
 }

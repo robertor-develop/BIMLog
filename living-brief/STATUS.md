@@ -3142,3 +3142,9 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 Post-publication smoke identified Commercial-entitlement authorities using an internal epoch sentinel. Their date label now says Included with Commercial access (Spanish equivalent), while recorded grants retain valid local dates and missing-date handling. Authorization and historical records are unchanged. Regression checks cover entitlement versus recorded epoch dates in four zones; republish and full authenticated smoke remain required.
 
 The authenticated broad smoke also found bare /projects/:id links incorrectly requesting project 0 because ProjectDetail required a tab while App allowed it to be omitted. The page now matches the same optional-tab pattern, preserving the existing analytics default, named tabs, project membership checks and permission behavior. Final combined-source validation and republication remain pending.
+
+## Experience makeover Block 7 source candidate — 2026-09-29
+
+- UX031–UX035 make failed saves explicit and retryable without losing entered values, resume only an exact current draft and return step, link every review blocker to its owning field, preview the resulting operational structure, and route active-job changes to Operations and controlled Contracts.
+- Core activation is transaction-locked and returns the existing activation for repeat or concurrent non-commercial requests, including jobs with generic resource demand and no named assignees. Activation stays on the completion summary until the user chooses the next workspace.
+- Product commits are `a22ab558`, `8dfc190d`, `b5ced9f5`, `42ab9874`, and `3c3240f8`; acceptance corrections are `5bf52e69` and `f1c6593d`. This is the first five-build unpublished block after UX030. Publication and authenticated Chrome smoke are due after UX036–UX040.

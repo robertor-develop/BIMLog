@@ -748,6 +748,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-empty-commercial-prerequisites.behavior.ts
 - artifacts/api-server/src/lib/job-intake-full-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/job-intake-idempotent-activation.behavior.ts
 - artifacts/api-server/src/lib/job-intake-mapped-item-pricing.behavior.ts
 - artifacts/api-server/src/lib/job-intake-mapped-item-pricing.ts
 - artifacts/api-server/src/lib/job-intake-member-assignment.behavior.ts
