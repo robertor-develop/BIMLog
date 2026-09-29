@@ -1,3 +1,5 @@
+import { projectCompanyNames } from "@/lib/project-party-options";
+import { useProjectParties } from "@/hooks/use-project-parties";
 import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
@@ -66,6 +68,7 @@ const parseContentDispositionFileName = (header: string | null) => {
 export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { lang } = useI18n();
   const { token } = useAuthStore();
+  const parties = useProjectParties(projectId);
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
   const [items, setItems] = useState<ChangeOrder[]>([]);
@@ -374,7 +377,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
               <select className="input" value={form.initiated_by_company} onChange={e => setForm(f => ({ ...f, initiated_by_company: e.target.value }))}
                 style={{ height: 36 }}>
                 <option value="">{t("— Select company —", "— Seleccionar empresa —")}</option>
-                {[...new Set(items.map(i => i.initiatedByCompany).filter(Boolean))].map(c => (
+                {projectCompanyNames(parties.entries, form.initiated_by_company).map(c => (
                   <option key={c as string} value={c as string}>{c as string}</option>
                 ))}
               </select>

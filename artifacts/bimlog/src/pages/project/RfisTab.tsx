@@ -1,3 +1,4 @@
+import { projectCompanyNames } from "@/lib/project-party-options";
 import { uniqueRfiPriorities, withCurrentPriority } from "@/lib/rfi-priority-options";
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
@@ -1733,7 +1734,7 @@ function SubmittedToParticipantEditor({ projectId, contacts, selectedCompany, on
   const [companyEmail, setCompanyEmail] = useState("");
   const [companyPhone, setCompanyPhone] = useState("");
   const [companyAddress, setCompanyAddress] = useState("");
-  const companies = [...new Set(contacts.map(contact => contact.companyName).filter((value): value is string => !!value))].sort();
+  const companies = projectCompanyNames(contacts, selectedCompany);
   const companyContacts = selectedCompany ? contacts.filter(contact => contact.companyName === selectedCompany) : contacts;
 
   const addExternalPerson = () => {

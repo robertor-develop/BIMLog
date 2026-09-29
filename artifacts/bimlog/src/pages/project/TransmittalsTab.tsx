@@ -1,3 +1,5 @@
+import { projectCompanyNames } from "@/lib/project-party-options";
+import { useProjectParties } from "@/hooks/use-project-parties";
 import { useEffect, useMemo, useState } from "react";
 import { useSearch } from "wouter";
 import { useI18n } from "@/lib/i18n";
@@ -30,6 +32,7 @@ const API = "/api/v1";
 export function TransmittalsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { lang } = useI18n();
   const { token } = useAuthStore();
+  const parties = useProjectParties(projectId);
   const searchParams = useSearch();
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
@@ -350,7 +353,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
               <select className="input" value={form.sentTo} onChange={e => setForm(f => ({ ...f, sentTo: e.target.value }))}
                 style={{ height: 36 }}>
                 <option value="">{t("— Select company —", "— Seleccionar empresa —")}</option>
-                {[...new Set(items.flatMap(i => Array.isArray(i.sentTo) ? i.sentTo : []).map((r: any) => r?.name).filter(Boolean))].map(c => (
+                {projectCompanyNames(parties.entries, form.sentTo).map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>

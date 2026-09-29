@@ -1,3 +1,4 @@
+import { projectCompanyNames, projectCompanyIdentities } from "./project-party-options";
 export type JobIntakeDirectoryEntry = {
   id: number | string;
   fullName?: string | null;
@@ -9,19 +10,11 @@ export type JobIntakeDirectoryEntry = {
 const text = (value: unknown) => String(value ?? "").trim();
 
 export function clientCompanyOptions(entries: JobIntakeDirectoryEntry[]) {
-  return Array.from(
-    new Set(entries.map((entry) => text(entry.companyName)).filter(Boolean)),
-  ).sort((a, b) => a.localeCompare(b));
+  return projectCompanyNames(entries);
 }
 
 export function authoritativeCompanyOptions(entries: JobIntakeDirectoryEntry[]) {
-  const companies = new Map<number, string>();
-  for (const entry of entries) {
-    const id = Number(entry.companyId);
-    const name = text(entry.companyName);
-    if (Number.isSafeInteger(id) && id > 0 && name) companies.set(id, name);
-  }
-  return [...companies].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  return projectCompanyIdentities(entries);
 }
 
 export function primaryContactOptions(
