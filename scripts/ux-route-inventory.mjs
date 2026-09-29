@@ -23,6 +23,6 @@ const result = { description: 'Shipping means route exists, not that every actio
 ] };
 const target = 'docs/experience/ux-program/ROUTES.json';
 const serialized = JSON.stringify(result, null, 2) + '\n';
-if (process.argv.includes('--check')) assert.equal(read(target), serialized, 'Route inventory drift; regenerate after reviewing new route ownership.');
+if (process.argv.includes('--check')) assert.equal(read(target).replace(/\r\n?/g, '\n'), serialized, 'Route inventory drift; regenerate after reviewing new route ownership.');
 else fs.writeFileSync(target, serialized);
 console.log(`UX001: ${result.routes.length} route/tab bindings; ${result.unavailable.length} explicit unavailable capability groups.`);
