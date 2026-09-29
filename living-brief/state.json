@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "47a8a5908a9b3e2a47e851650fdf00b1530e3d79893a4d5128941bd82be7b152",
+  "bundleSha256": "210ff5d18b87da19c482f0a1443c34c0991da7f17962d595d69793815572faa9",
   "impact": {
     "baselineCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
     "changedPaths": [
@@ -91,7 +91,7 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "72f76d02941c7da880aba5cb2c10f3a45b5b71b19236e5fc851d653c9f6a95d1",
+      "sha256": "cd9ddc8899eee097d6efd3d74e598e483b35baeb9e9ae260e6bcb5c1d531e91e",
       "sourceChangedAt": "2026-09-29T11:21:48.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
@@ -139,7 +139,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "105da4daacf0a00f80f0a1a8b1693b30cc267d8bdd8a0b5f37025ac99e7bc160",
+      "sha256": "ec88f987eadb79874ae0bd6992a844834d973f63c6c83a5e8395971a5bf843a4",
       "sourceChangedAt": "2026-09-29T11:21:48.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
@@ -151,7 +151,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "fbb97967b8163f32a3496bb0c9c9fd1750a5c4c55366f7e658d560c16eb2ea23",
+      "sha256": "6723032ef80dddfea80ae0e1c6e7bf89ac00d46f2bd4eb126f0570b5337456d5",
       "sourceChangedAt": "2026-09-29T11:21:48.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",

@@ -220,7 +220,9 @@ async function invokeFixture(
       workspaceRoot: fixture.sourceRoot,
       fixtureRequiredRuntimePackages: ["@workspace/api-zod", "@workspace/db"],
       evidenceDir: fixture.evidenceDir,
-      timeoutMs: options.timeoutMs ?? 5_000,
+      // Semantic cases must reach their assertion on slower Windows hosts.
+      // Timeout and cancellation cases supply their own explicit budgets.
+      timeoutMs: options.timeoutMs ?? 30_000,
       signal: options.signal,
       onPhaseChange: options.onPhaseChange,
     });
