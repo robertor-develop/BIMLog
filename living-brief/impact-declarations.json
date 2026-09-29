@@ -50018,8 +50018,13 @@
           "reason": "UX061–UX065 preserve existing project authorization, capture, Working View, publishing, Native and field-acceptance boundaries."
         }
       ],
-      "reviewedChangedPaths": [],
-      "reviewedChangeSha256": "pending"
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4f511443adef7a89058ff98b72a9c10e0b769dc5e2260879b2d8d50dfe117e5f"
     }
   ]
 }
