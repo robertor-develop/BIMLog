@@ -22,7 +22,6 @@ export function Footer() {
 
   return (
     <footer style={{ borderTop: "1px solid hsl(var(--border))", background: "hsl(var(--secondary)/0.4)", marginTop: "auto" }}>
-      <style>{`@media(max-width:720px){.public-footer-inner{padding:32px 20px 24px!important}.public-footer-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:28px 20px!important}.public-footer-brand{grid-column:1/-1}.public-footer-meta{align-items:flex-start!important;flex-direction:column}}@media(max-width:390px){.public-footer-grid{grid-template-columns:minmax(0,1fr)!important}.public-footer-brand{grid-column:auto}}`}</style>
       <div className="public-footer-inner" style={{ maxWidth: 1152, margin: "0 auto", padding: "48px 32px 32px" }}>
         <div className="public-footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: 40, marginBottom: 40 }}>
 

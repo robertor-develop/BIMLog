@@ -71,7 +71,6 @@ export function Navbar() {
 
   return (
     <header className="topbar app-topbar">
-      <style>{`@media (max-width:520px){.app-topbar{padding-left:10px;padding-right:10px;gap:6px}.app-topbar-actions{margin-right:0!important;gap:2px}.app-topbar-byline,.app-topbar-profile-label,.app-topbar-version{display:none}.app-topbar-actions button{padding-left:7px;padding-right:7px}}@media print{.app-topbar,.sidebar,.feedback-widget,[data-print-hidden="true"]{display:none!important}body{background:#fff!important;color:#111!important}.main-area,.financial-page-content{margin:0!important;padding:0!important;max-width:none!important}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}}`}</style>
       <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
         <div className="sidebar-logo-mark" style={{ width: 28, height: 28, fontSize: 12 }}>B</div>
         <div style={{display:"grid",lineHeight:1.05}}>

@@ -150,6 +150,43 @@ iframe[aria-label*="Replit" i],
 .experience-status-success { color: hsl(var(--experience-status-success)); }
 .experience-status-warning { color: hsl(var(--experience-status-warning)); }
 .experience-status-danger { color: hsl(var(--experience-status-danger)); }
+.experience-actions { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: var(--experience-space-sm); }
+.experience-table-region { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; border: 1px solid hsl(var(--border)); border-radius: var(--radius-lg); }
+.experience-table { width: 100%; min-width: 44rem; border-collapse: collapse; }
+.experience-table :is(th, td) { padding: var(--experience-space-md); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.experience-table th { background: hsl(var(--muted)); font-size: 0.75rem; }
+
+@media (max-width: 767px) {
+  .page-content { padding: var(--experience-space-lg); }
+  .experience-panel { padding: var(--experience-space-lg); }
+  .experience-actions { justify-content: flex-start; }
+  .public-footer-inner { padding: 32px 20px 24px !important; }
+  .public-footer-grid { grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important; gap: 28px 20px !important; }
+  .public-footer-brand { grid-column: 1 / -1; }
+  .public-footer-meta { align-items: flex-start !important; flex-direction: column; }
+}
+
+@media (max-width: 520px) {
+  .app-topbar { padding-left: 10px; padding-right: 10px; gap: 6px; }
+  .app-topbar-actions { margin-right: 0 !important; gap: 2px; }
+  .app-topbar-byline, .app-topbar-profile-label, .app-topbar-version { display: none; }
+  .app-topbar-actions button { padding-left: 7px; padding-right: 7px; }
+}
+
+@media (max-width: 390px) {
+  .page-content { padding: var(--experience-space-md); }
+  .experience-actions { display: grid; grid-template-columns: minmax(0,1fr); }
+  .experience-actions > * { width: 100%; min-width: 0; white-space: normal; }
+  .public-footer-grid { grid-template-columns: minmax(0,1fr) !important; }
+  .public-footer-brand { grid-column: auto; }
+}
+
+@media print {
+  .app-topbar, .sidebar, .feedback-widget, [data-print-hidden="true"] { display: none !important; }
+  body { background: #fff !important; color: #111 !important; }
+  .main-area, .financial-page-content { margin: 0 !important; padding: 0 !important; max-width: none !important; }
+  * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
 @media (max-width: 390px) { .route-state { margin: 20px auto; padding: 18px 16px; } .route-state-actions { display: grid; grid-template-columns: 1fr; } }
 
 /*
