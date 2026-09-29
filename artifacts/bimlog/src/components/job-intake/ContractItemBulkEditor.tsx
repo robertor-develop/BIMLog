@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { compatibleApuVersions, type IntakeApuVersion } from "../../lib/job-intake-apu-default";
 import { ArrowUp, ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
@@ -16,7 +17,7 @@ type Props = {
   currency: string;
   defaultRate: string;
   defaultApuVersion: number | null;
-  apuVersions: Array<{ version: number; name: string; sellingPrice: string }>;
+  apuVersions: IntakeApuVersion[];
   defaultWorkflow: string;
   deliveryWorkflowOptions?: Array<{ versionId: string; name: string; source: string; version: number;
     governancePolicy?: { code: string; version: number } | null;
@@ -125,6 +126,7 @@ export function parseContractItemPaste(source: string) {
 
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
+  const eligibleApuVersions = compatibleApuVersions(props.apuVersions, props.currency);
   const update = (index: number, patch: Record<string, unknown>) =>
     props.setItems((items) =>
       items.map((item, i) => (i === index ? { ...item, ...patch } : item)),
@@ -348,17 +350,17 @@ export function ContractItemBulkEditor(props: Props) {
         <div className="ji-apu-history-note">
           <strong>{props.tt("Saved APU version (optional)", "Versión APU guardada (opcional)")}</strong>
           <span>
-            {props.apuVersions.length > 0
+            {eligibleApuVersions.length > 0
               ? props.tt(
-                  `${props.apuVersions.length} immutable version(s) available. A plan's total selling price is not a unit rate. Select a version and enter the Contract Item's unit rate separately.`,
-                  `${props.apuVersions.length} versión(es) inmutable(s) disponibles. El precio de venta total del plan no es una tarifa unitaria. Seleccione una versión e ingrese por separado la tarifa de la Partida de Contrato.`,
+                  `${eligibleApuVersions.length} immutable version(s) available. A plan's total selling price is not a unit rate. Select a version and enter the Contract Item's unit rate separately.`,
+                  `${eligibleApuVersions.length} versión(es) inmutable(s) disponibles. El precio de venta total del plan no es una tarifa unitaria. Seleccione una versión e ingrese por separado la tarifa de la Partida de Contrato.`,
                 )
               : props.tt(
                   "No saved APU versions are available yet. Continue with an editable rate, or save a version in Cost & Value Planner.",
                   "Aún no hay versiones APU guardadas. Continúe con una tarifa editable o guarde una versión en Planificador de Costos y Valor.",
                 )}
           </span>
-          {props.apuVersions.length === 0 && (
+          {eligibleApuVersions.length === 0 && (
             <button type="button" onClick={props.onOpenCostValuePlanner}>
               {props.tt("Open Cost & Value Planner", "Abrir Planificador de Costos y Valor")}
             </button>
@@ -546,7 +548,8 @@ export function ContractItemBulkEditor(props: Props) {
                       )}
                     />
                   </label>
-                  {props.apuVersions.length > 0 ? (
+                  <small>{props.tt(`Choose a saved ${props.currency} version for this item. Selecting a version preserves its unit rate and other items.`, `Elija una versión guardada en ${props.currency} para esta partida. La selección conserva su tarifa y las demás partidas.`)}</small>
+                  {eligibleApuVersions.length > 0 || item.apuPlanVersion != null ? (
                     <label>
                     {props.tt("Saved APU version (optional)", "Versión APU guardada (opcional)")}
                     <select
@@ -559,16 +562,17 @@ export function ContractItemBulkEditor(props: Props) {
                         update(
                           index,
                           selectSavedApuVersion(
-                            props.apuVersions,
+                            eligibleApuVersions,
                             event.target.value,
                           ),
                         );
                       }}
                     >
+                      {item.apuPlanVersion != null && !eligibleApuVersions.some(version => version.version === item.apuPlanVersion) && <option value={item.apuPlanVersion}>{props.tt("Saved version unavailable or incompatible", "Versión guardada no disponible o incompatible")} · v{item.apuPlanVersion}</option>}
                       <option value="">
                         {props.tt("Select saved APU version", "Seleccione una versión APU guardada")}
                       </option>
-                      {props.apuVersions.map((version) => (
+                      {eligibleApuVersions.map((version) => (
                         <option key={version.version} value={version.version}>
                           v{version.version} · {version.name} · {props.tt("plan total", "total del plan")} {version.sellingPrice} {props.currency}
                         </option>

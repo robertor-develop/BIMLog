@@ -1,12 +1,16 @@
 export type IntakeApuVersion = { version: number; name?: string; sellingPrice: string; currency: string };
 
 export function soleCompatibleApuVersion(versions: IntakeApuVersion[], currency: string) {
-  const valid = versions.filter((item) =>
+  const valid = compatibleApuVersions(versions, currency);
+  return valid.length === 1 ? valid[0] : null;
+}
+
+export function compatibleApuVersions(versions: IntakeApuVersion[], currency: string) {
+  return versions.filter((item) =>
     Number.isSafeInteger(Number(item.version)) && Number(item.version) > 0 &&
     item.currency === currency &&
     /^\d+(?:\.\d{1,6})?$/.test(String(item.sellingPrice ?? "").trim()),
   );
-  return valid.length === 1 ? valid[0] : null;
 }
 
 export function applySoleApuToUnboundItems(items: any[], versions: IntakeApuVersion[], currency: string) {
