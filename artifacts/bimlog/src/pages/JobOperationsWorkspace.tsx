@@ -35,7 +35,7 @@ import {
   type OperationsClassificationFilters,
   type OperationsClassificationKind,
 } from "@/lib/job-operations-classification";
-import { buildDailyWorkQueues, focusTask, taskCostBinding } from "@/lib/job-operations-daily-work";
+import { buildDailyWorkQueues, focusTask, nextTaskAction, taskCostBinding } from "@/lib/job-operations-daily-work";
 
 const API_BASE =
   (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env
@@ -2141,6 +2141,8 @@ export function JobOperationsWorkspace() {
                 {filteredTasksFor(item.id).map((task: any) => {
                   const draft = drafts[task.id] ?? task;
                   const costBinding = taskCostBinding(task, data.assignments ?? [], data.members ?? []);
+                  const linkedPackages = (data.packageTasks ?? []).filter((link: any) => link.taskId === task.id).map((link: any) => (data.packages ?? []).find((candidate: any) => candidate.id === link.packageId)).filter(Boolean);
+                  const nextAction = nextTaskAction(task, linkedPackages, Number(user?.id), data.canManage === true);
                   return (
                     <article className="jo-task" key={task.id} id={`jo-task-${task.id}`} tabIndex={-1}>
                       <div className="jo-task-head">
@@ -2154,6 +2156,9 @@ export function JobOperationsWorkspace() {
                               : costBinding.operationalOnly
                                 ? tt("Operational assignee only. Bind a priced resource when staffing is confirmed; the customer APU rate will not change.", "Solo responsable operativo. Vincule un recurso valorizado cuando se confirme el personal; la tarifa APU del cliente no cambiará.")
                                 : tt("Assignment may remain pending until staffing is known.", "La asignación puede quedar pendiente hasta conocer el personal.")}
+                          </p>
+                          <p className={nextAction.eligible ? "jo-ok" : "jo-permission"}>
+                            <strong>{tt("Next actor", "Próximo actor")}:</strong> {tt(nextAction.actor, nextAction.actor === "Independent reviewer" ? "Revisor independiente" : nextAction.actor === "Project leader" ? "Líder del proyecto" : nextAction.actor === "Assigned member" ? "Miembro asignado" : "Responsable o líder del proyecto")} · {nextAction.eligible ? tt("You can act here", "Puede actuar aquí") : tt("This action is gated by the current assignment or review role", "Esta acción depende de la asignación o rol de revisión actual")}
                           </p>
                           <span className="jo-muted">
                             {statusLabel(task.status)} ·{" "}

@@ -54,3 +54,13 @@ export function taskCostBinding(task: DailyTask, assignments: DailyAssignment[],
     operationalOnly: Boolean(task.assigneeUserId) && !priced,
   };
 }
+
+export function nextTaskAction(task: DailyTask, packages: Array<{ status: string; responsibleUserId?: number | string | null }>, currentUserId: number, canManage: boolean) {
+  if (task.status === "complete") return { key: "review", actor: "Independent reviewer", eligible: false };
+  if (task.status === "blocked") return { key: "unblock", actor: task.assigneeUserId ? "Assignee or project leader" : "Project leader", eligible: Boolean(task.canControl || canManage) };
+  if (!task.assigneeUserId) return { key: "assign", actor: "Project leader", eligible: canManage };
+  if (packages.some((item) => ["internal_review", "submitted"].includes(item.status))) {
+    return { key: "review", actor: "Independent reviewer", eligible: canManage && !packages.some((item) => person(item.responsibleUserId) === currentUserId) };
+  }
+  return { key: "work", actor: "Assigned member", eligible: Boolean(task.canControl) };
+}
