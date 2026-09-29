@@ -357,6 +357,7 @@ type RfiCanonicalFormProps = {
   values: RfiCanonicalValues;
   permissions: RfiCanonicalPermissions;
   validation?: Record<string, string | undefined>;
+  createGuidance?: string;
   references: string[];
   attachments: string[];
   attachmentFiles?: ProjectFile[];
@@ -2146,7 +2147,8 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
 
   const handleSubmit = () => {
     if (!subject.trim()) {
-      toast({ title: w("Subject is required", "El asunto es requerido", lang), variant: "destructive" }); return;
+      document.querySelector<HTMLElement>('[data-rfi-field="subject"] input')?.focus();
+      toast({ title: w("Add the RFI subject to create this draft.", "Agregue el asunto del RFI para crear este borrador.", lang), variant: "destructive" }); return;
     }
     const data = {
       subject, priority,
@@ -2239,6 +2241,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
         lang={lang}
         mode="create"
         recordState="new"
+        createGuidance={w("Only the subject is required to create a draft. Reuse project parties and evidence now, or complete them before issue.", "Solo el asunto es obligatorio para crear un borrador. Reutilice participantes y evidencia del proyecto ahora, o completelos antes de emitir.", lang)}
         values={{
           subject,
           status: "draft",
@@ -3501,7 +3504,7 @@ export function RfiActionBar({ actions, handlers, loading }: { actions: RfiActio
   );
 }
 
-function CanonicalField({ label, value, editable, onChange, full, multiline, type = "text", options }: {
+function CanonicalField({ label, value, editable, onChange, full, multiline, type = "text", options, fieldName }: {
   label: string;
   value: string;
   editable: boolean;
@@ -3510,9 +3513,10 @@ function CanonicalField({ label, value, editable, onChange, full, multiline, typ
   multiline?: boolean;
   type?: string;
   options?: RfiCanonicalOption[];
+  fieldName?: string;
 }) {
   return (
-    <div className={full ? "rfi-field full" : "rfi-field"} style={{ gridColumn: full ? "1 / -1" : undefined }}>
+    <div data-rfi-field={fieldName} className={full ? "rfi-field full" : "rfi-field"} style={{ gridColumn: full ? "1 / -1" : undefined }}>
       <label style={{ display: "block", fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{label}</label>
       {editable ? (
         options ? (
@@ -3545,7 +3549,7 @@ export function RfiCanonicalForm({
   loading, options, cloudAttachmentActions = [], imageAttachmentActions = [], pendingImagePreview, onAttachPendingImage, onCancelPendingImage, imagePresentationContent,
   actions, onChange, onAddReference, onRemoveReference, onOpenReference = () => undefined, onUploadFile, onGenerateQuestionAi, onGenerateEmailAi,
   onCopyEmail, emailCopied, statusContent, submittedByDirectoryContent, submittedToDirectoryContent, distributionContent, referenceContent, impactContent, responseContent,
-  onTogglePackageItem, onMovePackageItem, onToggleViewpointImage, onClearImageCrop, actionMatrix,
+  onTogglePackageItem, onMovePackageItem, onToggleViewpointImage, onClearImageCrop, actionMatrix, createGuidance,
 }: RfiCanonicalFormProps) {
   const editable = mode === "create" || mode === "edit";
   const matrix = actionMatrix ?? getRfiCanonicalActionMatrix({ mode, recordState, permissions, lang });
@@ -3610,12 +3614,13 @@ export function RfiCanonicalForm({
           <RfiActionBar actions={headerActions} handlers={actions} loading={!!loading?.saving} />
         </div>
         <div style={{ padding: "0 24px 24px" }}>
+          {mode === "create" && createGuidance && <div role="note" style={{ marginTop: 14, padding: "10px 12px", border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF", color: "#1E3A5F", fontSize: 12 }}>{createGuidance}</div>}
           <CanonicalSection title={w("1. Header / RFI Status", "1. Encabezado / Estado RFI", lang)}>
             <FormGrid>
               <CanonicalField label={w("RFI number", "Numero RFI", lang)} value={values.number || w("Assigned after save", "Asignado al guardar", lang)} editable={false} />
               {values.projectName && <CanonicalField label={w("Project", "Proyecto", lang)} value={values.projectName} editable={false} />}
               {(editable || values.projectAddress) && <CanonicalField label={w("Project Address", "Direccion del Proyecto", lang)} value={values.projectAddress || ""} editable={editable} onChange={v => onChange("projectAddress", v)} full />}
-              <CanonicalField label={w("Subject/title", "Asunto/titulo", lang)} value={values.subject} editable={editable} onChange={v => onChange("subject", v)} full />
+              <CanonicalField fieldName="subject" label={w("Subject/title", "Asunto/titulo", lang)} value={values.subject} editable={editable} onChange={v => onChange("subject", v)} full />
               {editable && !values.subject.trim() && <div style={{ gridColumn: "1 / -1", color: "#B91C1C", fontSize: 11, fontWeight: 700 }}>{w("Subject/title is required before Save can complete.", "Asunto/titulo es requerido antes de completar Guardar.", lang)}</div>}
               <CanonicalField label={w("Status", "Estado", lang)} value={values.status} editable={false} />
               <CanonicalField label={w("Priority", "Prioridad", lang)} value={values.priority} editable={editable} onChange={v => onChange("priority", v)} options={priorityOptions} />
