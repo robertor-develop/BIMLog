@@ -75,3 +75,13 @@ export function operationalHourMetrics(plannedValue: unknown, actualValue: unkno
   const estimatedRemaining = progressPercent >= 100 ? 0 : estimatedAtCompletion == null ? null : Math.max(0, estimatedAtCompletion - actual);
   return { planned, actual, unused, progressPercent, estimatedAtCompletion, estimatedRemaining };
 }
+
+export function canonicalDocumentLauncher(projectId: number, taskId: string, entityType: "rfi" | "file_revision" | "transmittal") {
+  const returnTo = `/projects/${projectId}/operations?taskId=${encodeURIComponent(taskId)}`;
+  const routes = {
+    rfi: `/projects/${projectId}/rfis?create=1&operationTaskId=${encodeURIComponent(taskId)}&returnTo=${encodeURIComponent(returnTo)}`,
+    file_revision: `/projects/${projectId}/files?operationTaskId=${encodeURIComponent(taskId)}&returnTo=${encodeURIComponent(returnTo)}`,
+    transmittal: `/projects/${projectId}/transmittals?operationTaskId=${encodeURIComponent(taskId)}&returnTo=${encodeURIComponent(returnTo)}`,
+  };
+  return routes[entityType];
+}

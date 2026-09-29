@@ -931,6 +931,13 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const rfisQueryClient = useQueryClient();
   const currentMember = members?.find(m => m.userId === user?.id || (m.userEmail && user?.email && m.userEmail.toLowerCase() === user.email.toLowerCase()));
   const canManageReportSettings = currentMember?.role === "project_admin" || Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin);
+  const launcher = (() => {
+    const search = new URLSearchParams(window.location.search);
+    const taskId = search.get("operationTaskId");
+    const returnTo = search.get("returnTo");
+    const validReturn = returnTo?.startsWith(`/projects/${projectId}/operations?taskId=`) ? returnTo : null;
+    return taskId && validReturn ? { taskId, returnTo: validReturn } : null;
+  })();
 
   // Prefill a new RFI from query params (e.g. navigated from a Lens viewpoint).
   useEffect(() => {
@@ -942,6 +949,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     const rfiParam = sp.get("rfi");
     const returnTab = sp.get("returnTab");
     const meetingDraft = sp.get("meetingDraft");
+    if (sp.get("create") === "1" && launcher) setShowCreate(true);
 
     // Deep-link straight to an existing RFI's detail panel (the plugin opens the
     // browser after creating an RFI from a viewpoint). Fetch by id rather than
@@ -1276,7 +1284,8 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         members={members || []}
         user={user}
         lang={lang}
-        onClose={() => { setShowCreate(false); setCreatePreload(undefined); }}
+        onClose={() => { if (launcher) { window.location.href = launcher.returnTo; return; } setShowCreate(false); setCreatePreload(undefined); }}
+        onCreated={(rfiId) => { if (launcher) window.location.href = `${launcher.returnTo}&linkEntityType=rfi&linkEntityId=${encodeURIComponent(String(rfiId))}`; }}
       />
     );
   }
@@ -1741,7 +1750,7 @@ function RfiDistributionEditor({ entries, contacts, editable, onChange, lang }: 
   </div>;
 }
 
-function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang, onClose }: {
+function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang, onClose, onCreated }: {
   projectId: number;
   prefill?: { subject?: string; question?: string; location?: string };
   existingRfis: Rfi[];
@@ -1749,6 +1758,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   user: { fullName: string; companyName: string; email: string } | null;
   lang: string;
   onClose: () => void;
+  onCreated?: (rfiId: number) => void;
 }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -2051,11 +2061,12 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
 
   const { mutate: createRfi, isPending } = useCreateRfi({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (created: any) => {
         stagedFileIds.current.clear();
         queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
         toast({ title: w("RFI created", "RFI creado", lang) });
-        onClose();
+        const createdId = Number(created?.id);
+        if (onCreated && Number.isSafeInteger(createdId) && createdId > 0) onCreated(createdId); else onClose();
       },
       onError: (error: any) => {
         const data = error?.response?.data ?? error?.data ?? {};

@@ -35,7 +35,7 @@ import {
   type OperationsClassificationFilters,
   type OperationsClassificationKind,
 } from "@/lib/job-operations-classification";
-import { buildDailyWorkQueues, focusTask, nextTaskAction, operationalHourMetrics, taskCostBinding } from "@/lib/job-operations-daily-work";
+import { buildDailyWorkQueues, canonicalDocumentLauncher, focusTask, nextTaskAction, operationalHourMetrics, taskCostBinding } from "@/lib/job-operations-daily-work";
 
 const API_BASE =
   (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env
@@ -926,6 +926,19 @@ export function JobOperationsWorkspace() {
   useEffect(() => {
     void load();
   }, [load]);
+  useEffect(() => {
+    if (!data || !projectId) return;
+    const search = new URLSearchParams(window.location.search);
+    const taskId = search.get("taskId");
+    const entityType = search.get("linkEntityType");
+    const entityId = Number(search.get("linkEntityId"));
+    if (!taskId || !["rfi", "file_revision", "transmittal"].includes(entityType || "") || !Number.isSafeInteger(entityId) || entityId < 1) return;
+    search.delete("linkEntityType"); search.delete("linkEntityId");
+    window.history.replaceState({}, "", `${window.location.pathname}?${search.toString()}`);
+    void mutate(`/projects/${projectId}/operations/document-connections`, json({ connectionId: crypto.randomUUID(), targetType: "task", targetId: taskId, entityType, entityId, note: "Created from task document launcher" }), tt("Canonical document created and linked once.", "Documento canónico creado y vinculado una vez."));
+  // The return payload is consumed once; mutate/load are intentionally excluded.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, projectId]);
 
   const mutate = async (path: string, init: RequestInit, message: string) => {
     setBusy(true);
@@ -2166,6 +2179,12 @@ export function JobOperationsWorkspace() {
                             <strong>{tt("Next actor", "Próximo actor")}:</strong> {tt(nextAction.actor, nextAction.actor === "Independent reviewer" ? "Revisor independiente" : nextAction.actor === "Project leader" ? "Líder del proyecto" : nextAction.actor === "Assigned member" ? "Miembro asignado" : "Responsable o líder del proyecto")} · {nextAction.eligible ? tt("You can act here", "Puede actuar aquí") : tt("This action is gated by the current assignment or review role", "Esta acción depende de la asignación o rol de revisión actual")}
                           </p>
                           <p className="jo-muted">{tt("Hours", "Horas")}: {money(taskHours.planned)} {tt("planned", "planificadas")} · {money(taskHours.actual)} {tt("recorded", "registradas")} · {money(taskHours.unused)} {tt("unused", "sin usar")} · {taskHours.estimatedRemaining == null ? "—" : money(taskHours.estimatedRemaining)} {tt("estimated remaining", "restantes estimadas")}</p>
+                          <div className="jo-actions" aria-label={tt("Create and link canonical document", "Crear y vincular documento canónico")}>
+                            <Link href={canonicalDocumentLauncher(projectId, task.id, "rfi")}>{tt("Create RFI", "Crear RFI")}</Link>
+                            <Link href={canonicalDocumentLauncher(projectId, task.id, "file_revision")}>{tt("Upload file", "Cargar archivo")}</Link>
+                            <Link href={canonicalDocumentLauncher(projectId, task.id, "transmittal")}>{tt("Issue transmittal", "Emitir transmisión")}</Link>
+                            <span className="jo-muted">{tt("Cancel returns without changing this task.", "Cancelar regresa sin cambiar esta tarea.")}</span>
+                          </div>
                           <span className="jo-muted">
                             {statusLabel(task.status)} ·{" "}
                             {money(task.actualHours)} /{" "}
