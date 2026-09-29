@@ -7,11 +7,22 @@ export type ProductionSourceCandidate = {
   remoteMasterTree?: string;
   remoteMasterIsAncestor?: boolean;
   replitEnvironment: boolean;
+  headSubject?: string;
+  parentCommit?: string;
+  parentTree?: string;
 };
 
 export function resolveProductionSourceCommit(candidate: ProductionSourceCandidate): string {
   const headCommit = candidate.headCommit.trim().toLowerCase();
   if (!SHA40.test(headCommit)) throw new Error("Build source commit is not a full Git commit.");
+  if (candidate.headSubject?.trim() === "Published your App") {
+    const parentCommit = candidate.parentCommit?.trim().toLowerCase() ?? "";
+    if (!SHA40.test(parentCommit)) throw new Error("Replit publish wrapper requires an exact parent commit.");
+    if (candidate.headTree.trim().toLowerCase() !== candidate.parentTree?.trim().toLowerCase()) {
+      throw new Error("Replit publish wrapper changes the verified parent source tree.");
+    }
+    return parentCommit;
+  }
   if (!candidate.replitEnvironment) return headCommit;
 
   const remoteCommit = candidate.remoteMasterCommit?.trim().toLowerCase() ?? "";

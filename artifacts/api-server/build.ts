@@ -162,6 +162,9 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
   const sourceCommit = resolveProductionSourceCommit({
     headCommit,
     headTree: git("rev-parse", "HEAD^{tree}"),
+    headSubject: git("show", "-s", "--format=%s", "HEAD"),
+    parentCommit: git("rev-parse", "HEAD^"),
+    parentTree: git("rev-parse", "HEAD^1^{tree}"),
     remoteMasterCommit,
     remoteMasterTree,
     remoteMasterIsAncestor,
