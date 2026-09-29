@@ -31,6 +31,22 @@ export function conventionResolverUrl(projectId: number) {
   return `/projects/${projectId}/generator?returnTo=${encodeURIComponent(returnTo)}`;
 }
 
+export function fileIntakePreview(input: { fileName: string; mode: FileIntakeMode; destinationLabel?: string | null; aiRequested?: boolean }) {
+  return {
+    fileName: input.fileName,
+    retainsBytes: input.mode !== "record_only",
+    destination: input.mode === "connected_delivery" ? input.destinationLabel ?? null : null,
+    delivers: input.mode === "connected_delivery" && !!input.destinationLabel,
+    ai: input.aiRequested ? { requested: true, estimate: "Shown before separate confirmation" } : { requested: false, estimate: "No AI cost" },
+  } as const;
+}
+
+export function fileIntakeCanSubmit(mode: FileIntakeMode, destinationLabel?: string | null) {
+  if (mode === "record_only") return true;
+  if (mode === "connected_delivery") return !!destinationLabel && false;
+  return false;
+}
+
 export function newFileAttemptKey() {
   return crypto.randomUUID();
 }

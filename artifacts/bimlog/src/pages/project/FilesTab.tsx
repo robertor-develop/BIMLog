@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown, Inbox, Download } from "lucide-react";
 import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
-import { conventionResolverUrl, fileIntakeModeTruth, fileIntakeRequiresConvention, type FileIntakeMode } from "@/lib/file-intake-journey";
+import { conventionResolverUrl, fileIntakeCanSubmit, fileIntakeModeTruth, fileIntakePreview, fileIntakeRequiresConvention, type FileIntakeMode } from "@/lib/file-intake-journey";
 
 interface ValidationDetail {
   field: string;
@@ -1066,6 +1066,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [copiedSuggestion, setCopiedSuggestion] = useState(false);
   const [documentRelationship, setDocumentRelationship] = useState<string>("created");
   const [intakeMode, setIntakeMode] = useState<FileIntakeMode>("record_only");
+  const [destinationLabel] = useState<string | null>(null);
   const [aiSuggestLoading, setAiSuggestLoading] = useState(false);
   const [aiSuggestedName, setAiSuggestedName] = useState<string | null>(null);
   const [aiSuggestReason, setAiSuggestReason] = useState<string>("");
@@ -1131,11 +1132,16 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     }
   };
 
-  const handleFile = useCallback(async (file: File) => {
+  const handleFile = useCallback((file: File) => {
     setErrorDetails([]);
     setSuccess(false);
     setFileName(file.name);
     setFileRef(file);
+  }, []);
+
+  const submitFile = useCallback(async () => {
+    if (!fileRef) return;
+    const file = fileRef;
     const declaration = documentRelationship || "created";
     setIsUploading(true);
     try {
@@ -1176,7 +1182,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
     } finally {
       setIsUploading(false);
     }
-  }, [projectId, documentRelationship, queryClient, toast, t, onClose]);
+  }, [fileRef, projectId, documentRelationship, queryClient, toast, t, onClose]);
 
   const handleCvrProceed = useCallback(async (reason: string) => {
     if (!cvrModalFile) return;
@@ -1313,6 +1319,23 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
           {fileIntakeModeTruth(intakeMode)}
         </div>
       </div>
+
+      {fileRef && (() => {
+        const preview = fileIntakePreview({ fileName: fileRef.name, mode: intakeMode, destinationLabel, aiRequested: false });
+        return <section aria-label="File intake preview" style={{ marginTop: 12, padding: 12, border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF" }}>
+          <strong>Review before upload</strong>
+          <dl style={{ display: "grid", gridTemplateColumns: "max-content 1fr", gap: "5px 10px", margin: "8px 0" }}>
+            <dt>Name</dt><dd style={{ wordBreak: "break-all" }}>{preview.fileName}</dd>
+            <dt>Storage</dt><dd>{preview.retainsBytes ? "File bytes retained as project evidence" : "Metadata record only; file bytes not retained"}</dd>
+            <dt>Destination</dt><dd>{intakeMode === "connected_delivery" ? preview.destination ?? "No connected destination is available" : "No external delivery"}</dd>
+            <dt>Optional AI</dt><dd>{preview.ai.estimate}</dd>
+          </dl>
+          {intakeMode !== "record_only" && <p role="status">This project has no governed evidence-storage or delivery connection configured. Nothing has been uploaded.</p>}
+          <button type="button" disabled={isUploading || !fileIntakeCanSubmit(intakeMode, destinationLabel)} onClick={() => void submitFile()}>
+            {isUploading ? "Uploading…" : intakeMode === "record_only" ? "Create file record" : "Confirm and upload"}
+          </button>
+        </section>;
+      })()}
 
       {/* Validation result — restructured */}
       {errorDetails.length > 0 && (
