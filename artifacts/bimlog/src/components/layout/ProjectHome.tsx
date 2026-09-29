@@ -9,7 +9,7 @@ export function ProjectHome({ projectId, role }: { projectId: number; role: stri
   const [retry, setRetry] = useState(0);
   const manager = role === "project_admin";
   useEffect(() => {
-    if (!manager) return <Redirect key={`${projectId}-${role}`} to={projectHomeDestination(projectId, role)!} />;
+    if (!manager) return;
     let current = true; setState("loading");
     fetch(`${import.meta.env.VITE_API_URL || ""}/api/v1/projects/${projectId}/intake`, { headers: { Authorization: `Bearer ${token}` } })
       .then(async response => { if (!response.ok) throw new Error("unavailable"); return response.json(); })
@@ -17,7 +17,7 @@ export function ProjectHome({ projectId, role }: { projectId: number; role: stri
       .catch(() => { if (current) setState("error"); });
     return () => { current = false; };
   }, [manager, projectId, token, retry]);
-  if (!manager) return <Redirect key={`${projectId}-${role}`} to={`/projects/${projectId}/${role === "read_only" ? "analytics" : role === "discipline_lead" || role === "convention_manager" ? "coordination" : "operations"}`} />;
+  if (!manager) return <Redirect key={`${projectId}-${role}`} to={projectHomeDestination(projectId, role)!} />;
   if (state === "draft") return <Redirect key={`${projectId}-draft`} to={`/projects/${projectId}/intake`} />;
   if (state === "active") return <Redirect key={`${projectId}-active`} to={`/projects/${projectId}/operations`} />;
   return <section role={state === "error" ? "alert" : "status"}>
