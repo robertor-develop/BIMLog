@@ -554,11 +554,18 @@ async function assembleRuntimeFromInstalledGraph(
           await walk(entryPath);
         } else if (stats.isFile()) {
           digest.update(`F\0${relative}\0${stats.size}\0`);
-          const stream = createReadStream(entryPath, { signal });
           try {
-            for await (const chunk of stream) {
+            if (stats.size <= 8 * 1024 * 1024) {
+              // Preserve the ordered byte digest without a stream lifecycle per tiny file.
+              const bytes = await readFile(entryPath, { signal });
               assertNotCancelled();
-              digest.update(chunk as Buffer);
+              digest.update(bytes);
+            } else {
+              const stream = createReadStream(entryPath, { signal });
+              for await (const chunk of stream) {
+                assertNotCancelled();
+                digest.update(chunk as Buffer);
+              }
             }
           } catch (error) {
             if (signal?.aborted) throw new Error("Runtime graph hashing was cancelled.");
@@ -613,10 +620,27 @@ async function assembleRuntimeFromInstalledGraph(
     const destination = path.join(destinationRoot, relative);
     if (resolvedStats.isDirectory()) {
       await mkdir(destination, { recursive: true });
+      let fileBatch: Promise<void>[] = [];
+      const finishBatch = async () => {
+        const results = await Promise.allSettled(fileBatch);
+        fileBatch = [];
+        const failed = results.find(result => result.status === "rejected");
+        if (failed?.status === "rejected") throw failed.reason;
+        assertNotCancelled();
+      };
       for (const entry of (await readdir(resolvedSource, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
         if (entry.name === "node_modules") continue;
-        await copyRegularTree(sourceRoot, destinationRoot, path.join(resolvedSource, entry.name));
+        // Only regular-file siblings run together; directories and links remain serial.
+        // Settle every write before propagating failure or cleaning a rejected closure.
+        if (entry.isFile()) {
+          fileBatch.push(copyRegularTree(sourceRoot, destinationRoot, path.join(resolvedSource, entry.name)));
+          if (fileBatch.length === 8) await finishBatch();
+        } else {
+          await finishBatch();
+          await copyRegularTree(sourceRoot, destinationRoot, path.join(resolvedSource, entry.name));
+        }
       }
+      await finishBatch();
       return;
     }
     if (!resolvedStats.isFile()) {

@@ -48992,6 +48992,16 @@
           ],
           "category": "customer_impacting_defect",
           "disposition": "captured_immediately"
+        },
+        {
+          "summary": "A final local build reached the runtime-package timeout despite passing behavioral tests. The assembler now batches at most eight independent regular sibling files and hashes small files without per-file streams; ordered byte fingerprints, lockfile binding, link containment, cancellation and the existing timeout remain unchanged. Focused runtime regression and full release verification are required before publication.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "customer_impacting_defect",
+          "disposition": "captured_immediately"
         }
       ],
       "authorities": [
@@ -49052,7 +49062,9 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/build.ts",
         "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/test-deploy-runtime-closure.ts",
         "artifacts/bimlog/job-intake-block06-harness.html",
         "artifacts/bimlog/src/components/commercial/BudgetSourcePicker.tsx",
         "artifacts/bimlog/src/components/job-intake/CommercialIntake.behavior.tsx",
@@ -49076,7 +49088,7 @@
         "living-brief/impact-declarations.json",
         "package.json"
       ],
-      "reviewedChangeSha256": "d8cbcede3bbea0172728d16fb8dcd1de497f374a27d956f52d3ffc7ab6676ac0"
+      "reviewedChangeSha256": "3a18dc3c9e1df81f5054d364edf7dc83968497266991d4f436b716402f71b05b"
     }
   ]
 }

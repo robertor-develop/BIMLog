@@ -268,6 +268,15 @@ if (process.argv[2] === "--child-nonzero") {
 const results: Array<Record<string, unknown>> = [];
 
 const success = await createFixture("success");
+const batchNames = Array.from({ length: 20 }, (_, index) => `batch-${String(index).padStart(2, "0")}.bin`);
+for (const [index, name] of batchNames.entries()) {
+  await writeFixtureFile(success.externalPackage, name, Buffer.alloc(index + 1, index));
+}
+const expectedMaterialDigest = createHash("sha256");
+for (const name of [...batchNames, "index.js", "package.json"].sort((a, b) => a.localeCompare(b))) {
+  const bytes = await readFile(path.join(success.externalPackage, name));
+  expectedMaterialDigest.update(`F\0${name}\0${bytes.length}\0`).update(bytes).update("\n");
+}
 const storeSentinel = path.join(success.storeDir, "v11", "index.db");
 const storeBefore = await sha256(storeSentinel);
 const lockBefore = await sha256(success.lockPath);
@@ -295,6 +304,10 @@ const transitiveBinding = successReceipt.assembly.graphBindings.find(
   (binding: { name: string }) => binding.name === "fixture-transitive",
 );
 assert.equal(externalBinding.version, "1.0.0");
+assert.equal(externalBinding.contentSha256, expectedMaterialDigest.digest("hex"));
+for (const name of batchNames) {
+  assert.deepEqual(await readFile(path.join(success.runtimeDir, "node_modules", "fixture-external", name)), await readFile(path.join(success.externalPackage, name)));
+}
 assert.equal(externalBinding.declaredSpec, "1.0.0");
 assert.equal(externalBinding.lockKey, "fixture-external@1.0.0");
 assert.equal(externalBinding.sourceRealpath, await realpath(success.externalPackage));

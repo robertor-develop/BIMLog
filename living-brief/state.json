@@ -2,11 +2,13 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "22ef64e7f4f6a7726f13dad4b5aa0df994ae12d04fbdf0dd548df37f5dd26579",
+  "bundleSha256": "47a8a5908a9b3e2a47e851650fdf00b1530e3d79893a4d5128941bd82be7b152",
   "impact": {
     "baselineCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
     "changedPaths": [
+      "artifacts/api-server/build.ts",
       "artifacts/api-server/scripts/generate-platform-md.ts",
+      "artifacts/api-server/scripts/test-deploy-runtime-closure.ts",
       "artifacts/bimlog/job-intake-block06-harness.html",
       "artifacts/bimlog/src/components/commercial/BudgetSourcePicker.tsx",
       "artifacts/bimlog/src/components/job-intake/CommercialIntake.behavior.tsx",
@@ -89,7 +91,7 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "e6453bc009d8805f5f30b7a82eca9016765ad39c23bb226bf9df6d70cb7cb0e3",
+      "sha256": "72f76d02941c7da880aba5cb2c10f3a45b5b71b19236e5fc851d653c9f6a95d1",
       "sourceChangedAt": "2026-09-29T11:21:48.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
@@ -137,7 +139,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "21b669f04df3de4b87ad72ab7219daf7cae8752eb042e0f5e89d5cc6ff40aaeb",
+      "sha256": "105da4daacf0a00f80f0a1a8b1693b30cc267d8bdd8a0b5f37025ac99e7bc160",
       "sourceChangedAt": "2026-09-29T11:21:48.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
@@ -149,7 +151,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "f31b93d2ed3438f1257c528947f567e0cf051ab026f28adf0e147387d3e6202b",
+      "sha256": "fbb97967b8163f32a3496bb0c9c9fd1750a5c4c55366f7e658d560c16eb2ea23",
       "sourceChangedAt": "2026-09-29T11:21:48.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
