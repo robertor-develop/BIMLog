@@ -1810,7 +1810,7 @@ function NewSubmittalForm({ projectId, lang, onClose, seed }: { projectId: numbe
         </Field>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-        <Field label={w("Add Existing Project File", "Agregar Archivo Existente", lang)}>
+        <Field label={w("Evidence file from this project", "Archivo de evidencia de este proyecto", lang)}>
           <FieldSelect value="" onChange={e => addAttachmentName(e.target.value)}>
             <option value="">{projectFiles.length ? w("Select file to attach", "Seleccione archivo", lang) : w("No project files uploaded", "Sin archivos del proyecto", lang)}</option>
             {projectFiles.map(file => (
@@ -1860,8 +1860,13 @@ function NewSubmittalForm({ projectId, lang, onClose, seed }: { projectId: numbe
         </div>
       </Field>
 
-      {/* Section 5: Reference Documents */}
-      <PanelSection title={w("5. Reference Documents", "5. Documentos de Referencia", lang)} />
+      {/* Section 5: Relationships and evidence */}
+      <PanelSection title={w("5. Relationships and Evidence", "5. Relaciones y Evidencia", lang)} />
+      <div role="note" style={{ margin: "0 0 10px", padding: 9, borderRadius: 7, background: "#F8FAFC", color: "#475569", fontSize: 11, lineHeight: 1.45 }}>
+        {w(
+          "Choose the primary RFI that explains why this package exists and attach the exact project files that support it. After saving, Linked Records can retain additional RFIs, requirements and files without replacing this package.",
+          "Elige el RFI principal que explica por qué existe este paquete y adjunta los archivos exactos del proyecto que lo respaldan. Después de guardar, Registros Vinculados puede conservar RFIs, requisitos y archivos adicionales sin reemplazar este paquete.", lang)}
+      </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Field label={w("Drawing Number", "Número de Plano", lang)}>
           <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
@@ -1877,7 +1882,7 @@ function NewSubmittalForm({ projectId, lang, onClose, seed }: { projectId: numbe
           </div>
           <p style={{ fontSize: 10, color: "#9CA3AF", marginTop: 2 }}>{w("For reference only - enter the drawing number exactly as it appears on the project drawing set. This does not validate against uploaded files.", "Solo referencia - ingrese el número tal como aparece en el juego de planos. No valida contra archivos subidos.", lang)}</p>
         </Field>
-        <Field label={w("Related RFI", "RFI Relacionado", lang)}>
+        <Field label={w("Primary related RFI", "RFI relacionado principal", lang)}>
           <FieldSelect value={form.linkedRfiId} onChange={e => set("linkedRfiId", e.target.value)}>
             <option value="">{rfis.length === 0 ? w("No RFIs on this project yet", "Sin RFIs en este proyecto aún", lang) : w("- None -", "- Ninguno -", lang)}</option>
             {rfis.map(rfi => (
@@ -2697,7 +2702,7 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
             <Field label={w("Drawing Title", "Titulo de Plano", lang)}>
               <FieldInput value={editForm.drawingTitle} onChange={e => setEdit("drawingTitle", e.target.value)} />
             </Field>
-            <Field label={w("Linked RFI", "RFI Relacionado", lang)}>
+            <Field label={w("Primary related RFI", "RFI relacionado principal", lang)}>
               <FieldSelect value={editForm.linkedRfiId} onChange={e => setEdit("linkedRfiId", e.target.value)}>
                 <option value="">{w("No linked RFI", "Sin RFI relacionado", lang)}</option>
                 {rfis.map(rfi => (
@@ -2794,6 +2799,10 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
       )}
 
       {/* Linked Items */}
+      <PanelSection title={w("Relationships and Evidence", "Relaciones y Evidencia", lang)} />
+      <p style={{ margin: "0 0 8px", color: "#64748B", fontSize: 11, lineHeight: 1.45 }}>
+        {w("These links explain the package context. Multiple legitimate relationships stay attached to this canonical package; linking never copies or approves another record.", "Estos vínculos explican el contexto del paquete. Varias relaciones legítimas permanecen adjuntas a este paquete canónico; vincular nunca copia ni aprueba otro registro.", lang)}
+      </p>
       <LinkedItemsPanel projectId={projectId} entityType="submittal" entityId={submittal.id} canWrite={canWrite} />
 
       {/* Submittal details */}
@@ -2806,7 +2815,7 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
       <InfoRow label={w("Drawing Title", "Título de Plano", lang)} value={submittal.drawingTitle} />
       <InfoRow label={w("Date Submitted", "Fecha de Envío", lang)} value={formatCalendarDate(submittal.dateSubmitted)} />
       <InfoRow label={w("Date Required", "Fecha Requerida", lang)} value={formatCalendarDate(submittal.dateRequired || submittal.dueDate)} />
-      <InfoRow label={w("Linked RFI", "RFI Relacionado", lang)} value={submittal.linkedRfiId ? `RFI #${submittal.linkedRfiId}` : null} />
+      <InfoRow label={w("Primary related RFI", "RFI relacionado principal", lang)} value={submittal.linkedRfiId ? `RFI #${submittal.linkedRfiId}` : null} />
       {submittal.linkedRfiId && (
         <button
           onClick={() => window.location.href = `/projects/${projectId}/rfis?rfi=${submittal.linkedRfiId}`}
