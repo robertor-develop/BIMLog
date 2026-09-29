@@ -27,3 +27,9 @@ export function jobIntakeActivationPreview(data: any, completion: any, commercia
     contractDrafts: commercial ? (data?.commercial?.contracts?.length ?? 0) : 0,
   };
 }
+
+export function jobIntakeActivationMatches(expected: ReturnType<typeof jobIntakeActivationPreview>, activation: any) {
+  return expected.workItems === (activation?.workItems?.length ?? 0)
+    && expected.tasks === (activation?.tasks?.length ?? 0)
+    && expected.resourcePlans === (activation?.assignments?.length ?? 0);
+}

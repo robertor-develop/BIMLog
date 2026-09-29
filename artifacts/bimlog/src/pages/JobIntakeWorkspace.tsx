@@ -27,9 +27,8 @@ import { ProjectContactCreator, type CreatedProjectContact } from "@/components/
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
-import { expectedIntakeTaskCount } from "@/lib/intake-activation-task-count";
 import { jobIntakeSaveConfidence, type JobIntakeSaveState } from "@/lib/job-intake-save-confidence";
-import { jobIntakeActivationPreview, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
+import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
   authoritativeCompanyOptions,
@@ -130,6 +129,7 @@ export function JobIntakeWorkspace() {
     savePromiseRef = useRef<Promise<any> | null>(null),
     saveRetryRef = useRef(0),
     autosaveErrorRef = useRef(""),
+    activationInFlightRef = useRef(false),
     saveTimerRef = useRef<number | null>(null);
   const openCommercialPrerequisite = (destination: string, stage: IntakeStage = "scope", item = `ji-${stage}`) => {
     preserveJobIntakeActiveStage(projectId, stage);
@@ -737,6 +737,8 @@ export function JobIntakeWorkspace() {
     }
   };
   const activate = async () => {
+    if (activationInFlightRef.current) return;
+    activationInFlightRef.current = true;
     setBusy(true);
     setError("");
     try {
@@ -774,7 +776,9 @@ export function JobIntakeWorkspace() {
           "No se crearon registros comerciales. Seleccione un presupuesto aprobado, vincule cada Partida de Contrato y su APU guardado, y vuelva a intentar. El trabajo operativo existente no cambió.",
         ));
       setNotice(
-        createdContracts > 0
+        result.idempotent
+          ? tt("This activation was already completed. BIMlog verified and reused the existing job structure.", "Esta activación ya estaba completa. BIMlog verificó y reutilizó la estructura existente del trabajo.")
+          : createdContracts > 0
           ? tt(
               `Job activated with ${createdContracts} Commercial contract(s).`,
               `Trabajo activado con ${createdContracts} contrato(s) comercial(es).`,
@@ -785,22 +789,19 @@ export function JobIntakeWorkspace() {
             ),
       );
       const activated = await load();
-      const expectedWorkItems = dataRef.current.scopeItems.length;
-      const expectedTasks = expectedIntakeTaskCount(dataRef.current.scopeItems, dataRef.current.team.assignments);
-      const expectedAssignments = dataRef.current.team.assignments.length;
+      const expected = jobIntakeActivationPreview(dataRef.current, saved.completion, canEnrich);
       const actualWorkItems = activated?.activation?.workItems?.length ?? 0;
       const actualTasks = activated?.activation?.tasks?.length ?? 0;
       const actualAssignments = activated?.activation?.assignments?.length ?? 0;
-      if (actualWorkItems !== expectedWorkItems || actualTasks !== expectedTasks || actualAssignments !== expectedAssignments)
+      if (!jobIntakeActivationMatches(expected, activated?.activation))
         throw new Error(tt(
-          `Activation verification failed: expected ${expectedWorkItems} work items, ${expectedTasks} tasks, and ${expectedAssignments} assignments; received ${actualWorkItems}, ${actualTasks}, and ${actualAssignments}.`,
-          `Falló la verificación de activación: se esperaban ${expectedWorkItems} partidas, ${expectedTasks} tareas y ${expectedAssignments} asignaciones; se recibieron ${actualWorkItems}, ${actualTasks} y ${actualAssignments}.`,
+          `Activation verification failed: expected ${expected.workItems} work items, ${expected.tasks} tasks, and ${expected.resourcePlans} resource plans; received ${actualWorkItems}, ${actualTasks}, and ${actualAssignments}.`,
+          `Falló la verificación de activación: se esperaban ${expected.workItems} partidas, ${expected.tasks} tareas y ${expected.resourcePlans} planes de recursos; se recibieron ${actualWorkItems}, ${actualTasks} y ${actualAssignments}.`,
         ));
-      const firstTaskId = activated.activation.assignments?.[0]?.taskId ?? activated.activation.tasks?.[0]?.id;
-      setLocation(`/projects/${projectId}/operations${firstTaskId ? `?taskId=${encodeURIComponent(firstTaskId)}` : ""}`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
+      activationInFlightRef.current = false;
       setBusy(false);
     }
   };

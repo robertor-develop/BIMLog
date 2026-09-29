@@ -1277,7 +1277,7 @@ export async function activateJobIntake(input: {
     }
     if (
       intake.status === "activated" &&
-      !capabilities.fullCommercialActivation
+      (!capabilities.fullCommercialActivation || input.requireCommercial !== true)
     ) {
       await client.query("COMMIT");
       return {
