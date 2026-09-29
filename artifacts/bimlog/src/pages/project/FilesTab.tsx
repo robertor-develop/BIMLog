@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown, Inbox, Download } from "lucide-react";
 import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
-import { fileIntakeModeTruth, type FileIntakeMode } from "@/lib/file-intake-journey";
+import { conventionResolverUrl, fileIntakeModeTruth, fileIntakeRequiresConvention, type FileIntakeMode } from "@/lib/file-intake-journey";
 
 interface ValidationDetail {
   field: string;
@@ -124,6 +124,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const search = useSearch();
   const { data: files, isLoading, isError } = useListFiles(projectId);
   const { data: convention } = useGetConvention(projectId);
+  const conventionBlocked = fileIntakeRequiresConvention(intakeMode) && !convention?.isActive;
   const [showUpload] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [expandedRejected, setExpandedRejected] = useState<Set<number>>(new Set());
@@ -1207,9 +1208,13 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
+    if (conventionBlocked) {
+      setLocation(conventionResolverUrl(projectId));
+      return;
+    }
     const file = e.dataTransfer.files[0];
     if (file) handleFile(file);
-  }, [handleFile]);
+  }, [conventionBlocked, handleFile, projectId, setLocation]);
 
   const handleBrowse = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1230,6 +1235,13 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
           </label>
         ))}
       </fieldset>
+      {conventionBlocked && (
+        <div role="alert" style={{ marginBottom: 12, padding: 12, borderRadius: 8, background: "#FFF7ED", color: "#9A3412" }}>
+          <strong>Complete the naming convention before selecting a file.</strong>
+          <p style={{ margin: "4px 0 8px" }}>Your selected file has not been uploaded. Convention Builder will return here to continue this intake.</p>
+          <button type="button" onClick={() => setLocation(conventionResolverUrl(projectId))}>Resolve convention and return</button>
+        </div>
+      )}
       {/* Document Relationship Declaration — inline pills */}
       <div style={{ marginBottom: 10, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>
@@ -1277,7 +1289,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
         onDragOver={e => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
+        onClick={() => conventionBlocked ? setLocation(conventionResolverUrl(projectId)) : fileInputRef.current?.click()}
         style={{
           marginTop: 10,
           padding: "20px 16px",
@@ -1295,7 +1307,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
       >
         <Upload style={{ width: 20, height: 20, color: dragOver ? "#2563EB" : "hsl(var(--muted-foreground))" }} />
         <div style={{ fontSize: 12, fontWeight: 600, color: dragOver ? "#1D4ED8" : "hsl(var(--foreground))" }}>
-          {isUploading ? "Uploading…" : "Drag and drop your file here or click to browse"}
+          {conventionBlocked ? "Resolve the convention to continue" : isUploading ? "Uploading…" : "Drag and drop your file here or click to browse"}
         </div>
         <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
           {fileIntakeModeTruth(intakeMode)}

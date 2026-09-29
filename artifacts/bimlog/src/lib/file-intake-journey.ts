@@ -22,6 +22,15 @@ export function fileIntakeRequiresDestination(mode: FileIntakeMode) {
   return mode === "connected_delivery";
 }
 
+export function fileIntakeRequiresConvention(mode: FileIntakeMode) {
+  return mode !== "record_only";
+}
+
+export function conventionResolverUrl(projectId: number) {
+  const returnTo = `/projects/${projectId}/files?resume=file-intake`;
+  return `/projects/${projectId}/generator?returnTo=${encodeURIComponent(returnTo)}`;
+}
+
 export function newFileAttemptKey() {
   return crypto.randomUUID();
 }
