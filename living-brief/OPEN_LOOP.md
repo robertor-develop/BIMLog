@@ -3754,3 +3754,10 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Preserve pending future staffing as non-blocking generic resource demand; do not require assignment to people who may not yet be hired.
 - [ ] Complete the exact-head pre-push gate and push normally to `origin/master`. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX036–UX040.
 - [x] Do not run focused Navisworks smoke because this block changes Platform/API Intake behavior only.
+
+## Experience makeover Block 8 — daily operations first — 2026-09-29
+
+- [x] Put assigned work and blockers before setup/reporting and give managers a separate unassigned queue.
+- [x] Keep future tasks assignable later; when a priced resource is reassigned, apply the member's approved internal profile cost without changing the customer rate.
+- [x] Show the next actor, review restriction, reconciled hour definitions and a canonical RFI create-return-link path that leaves the task unchanged on cancel.
+- [ ] Pass the complete exact-head pre-push gate, push the five-build block, publish the accumulated UX031–UX040 ten-build set, and complete authenticated Chrome smoke.

@@ -3148,3 +3148,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - UX031–UX035 make failed saves explicit and retryable without losing entered values, resume only an exact current draft and return step, link every review blocker to its owning field, preview the resulting operational structure, and route active-job changes to Operations and controlled Contracts.
 - Core activation is transaction-locked and returns the existing activation for repeat or concurrent non-commercial requests, including jobs with generic resource demand and no named assignees. Activation stays on the completion summary until the user chooses the next workspace.
 - Product commits are `a22ab558`, `8dfc190d`, `b5ced9f5`, `42ab9874`, and `3c3240f8`; acceptance corrections are `5bf52e69` and `f1c6593d`. This is the first five-build unpublished block after UX030. Publication and authenticated Chrome smoke are due after UX036–UX040.
+
+## Experience makeover Block 8 source candidate — 2026-09-29
+
+- UX036–UX040 implement task-first daily queues, later staffing with approved member cost, visible next actors and review gates, distinct operational hour definitions, and canonical document create-return linking.
+- Generic future demand, customer APU/billing rates, canonical document authority and existing task history remain preserved.
+- Product commits are `b49eb921`, `d8b4cb19`, `0ec955a3`, `b68f1058`, and `efc819f4`. UX031–UX040 reach the required ten-build publication and authenticated Chrome smoke boundary.

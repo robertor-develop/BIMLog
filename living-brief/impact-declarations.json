@@ -49372,6 +49372,99 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c367d7256fd8f4ff8b8176894ca68476ec898f189cabc16f256325d6fde048f4"
+    },
+    {
+      "taskId": "ux-b08-daily-operations-first",
+      "reviewedThroughCommit": "efc819f468c5145e306abf62385ae8bc1b69b681",
+      "reviewedAt": "2026-09-29T15:30:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "authenticated_browser_smoke"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Daily Operations now begins with actionable work and preserves staffing, cost, review and canonical-document authority boundaries.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Operations correction preserves established product and provider authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows the existing build, release and acceptance contract."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality gates apply and gain focused UX regression coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The task-first experience advances the established BIM coordinator product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform records daily queues, staffing cost binding, next-actor gates, hour definitions and canonical document return linking."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Native, bridge, installer, Autodesk or Navisworks-facing behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report renderer, export layout, official record or document design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, legal interpretation or standards mapping changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the completed five-build source candidate and ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records completed scope and remaining push, publication and smoke gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing audit program remains authoritative; this block implements UX036–UX040."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "998bb8cd554fe0eeeb977efcb62e34602bf88c46570f2a073e1725afa3be6670"
     }
   ]
 }
