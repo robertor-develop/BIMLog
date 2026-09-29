@@ -19,7 +19,7 @@ const CONTENT = {
       },
       {
         heading: "3. Timestamp Integrity",
-        body: "All timestamps recorded by BIMLog reflect the actual date and time of each recorded event as registered by BIMLog servers in Coordinated Universal Time (UTC). Timestamps are recorded server-side and cannot be modified by users. BIMLog certifies that all audit trail entries are append-only and cannot be altered after recording.",
+        body: "BIMLog reports server-observed event times in Coordinated Universal Time (UTC) and the provenance available to the configured workflow. Platform records and reports are informational project evidence; they are not independent legal or technical certification.",
       },
       {
         heading: "4. SHA-256 Document Integrity",
@@ -54,7 +54,7 @@ const CONTENT = {
       },
       {
         heading: "3. Integridad de las Marcas de Tiempo",
-        body: "Todas las marcas de tiempo registradas por BIMLog reflejan la fecha y hora reales de cada evento registrado tal como lo registran los servidores de BIMLog en Tiempo Universal Coordinado (UTC). Las marcas de tiempo se registran del lado del servidor y no pueden ser modificadas por los usuarios. BIMLog certifica que todas las entradas del registro de auditoría son de solo anexión y no pueden ser alteradas después del registro.",
+        body: "BIMLog informa las horas de eventos observadas por el servidor en Tiempo Universal Coordinado (UTC) y la procedencia disponible para el flujo configurado. Los registros e informes son evidencia informativa del proyecto; no constituyen certificación legal o técnica independiente.",
       },
       {
         heading: "4. Integridad de Documentos SHA-256",
