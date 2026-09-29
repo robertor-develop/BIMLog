@@ -12,6 +12,7 @@ import {
 
 import { cn } from "@/lib/utils"
 import { Label } from "@/components/ui/label"
+import { accessibleFieldIds, describedBy } from "@/lib/accessible-form"
 
 const Form = FormProvider
 
@@ -53,13 +54,14 @@ const useFormField = () => {
   const fieldState = getFieldState(fieldContext.name, formState)
 
   const { id } = itemContext
+  const ids = accessibleFieldIds(id)
 
   return {
     id,
     name: fieldContext.name,
-    formItemId: `${id}-form-item`,
-    formDescriptionId: `${id}-form-item-description`,
-    formMessageId: `${id}-form-item-message`,
+    formItemId: ids.controlId,
+    formDescriptionId: ids.descriptionId,
+    formMessageId: ids.errorId,
     ...fieldState,
   }
 }
@@ -111,11 +113,7 @@ const FormControl = React.forwardRef<
     <Slot
       ref={ref}
       id={formItemId}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
+      aria-describedby={describedBy({ controlId: formItemId, descriptionId: formDescriptionId, errorId: formMessageId }, !!error)}
       aria-invalid={!!error}
       {...props}
     />
@@ -155,6 +153,8 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
+      role="alert"
+      aria-live="assertive"
       className={cn("text-[0.8rem] font-medium text-destructive", className)}
       {...props}
     >
