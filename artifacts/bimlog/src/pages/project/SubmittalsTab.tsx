@@ -36,6 +36,7 @@ import {
   submittalToEditorForm,
 } from "@/lib/submittal-editor-contract";
 import { createSubmittalHistoryScope, createSubmittalPresentationScope, submittalDisplayDate } from "@/lib/submittal-presentation-scope";
+import { submittalReviewAction, submittalRevisionFamily } from "@/lib/submittal-experience";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type AiCheckResult = {
@@ -923,6 +924,8 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
             canWrite={canWrite}
             onClose={() => setSelectedSubmittal(null)}
             onUpdated={(updated) => setSelectedSubmittal(updated)}
+            revisionFamily={submittalRevisionFamily(submittals, selectedSubmittal)}
+            onOpenRevision={(revision) => setSelectedSubmittal(revision)}
           />
         )}
       </SlidePanel>
@@ -2124,9 +2127,10 @@ function AiCheckDisplay({ result, lang }: { result: AiCheckResult; lang: string 
 }
 
 // ─── Submittal Detail ─────────────────────────────────────────────────────────
-export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpdated, closeRequestRef }: {
+export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpdated, closeRequestRef, revisionFamily, onOpenRevision }: {
   projectId: number; submittal: Submittal; lang: string; canWrite: boolean;
   onClose: () => void; onUpdated: (s: Submittal) => void;
+  revisionFamily: Submittal[]; onOpenRevision: (s: Submittal) => void;
   closeRequestRef?: React.MutableRefObject<(() => void) | null>;
 }) {
   const { toast } = useToast();
@@ -2521,6 +2525,11 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
         <Button variant="outline" onClick={() => setDiscardTarget(null)}>{w("Keep editing", "Seguir editando", lang)}</Button>{" "}
         <Button variant="outline" onClick={() => { const closePanel = discardTarget === "panel"; finishEditing(); if (closePanel) onClose(); }}>{w("Discard changes", "Descartar cambios", lang)}</Button>
       </div>}
+      <section aria-label={w("Current review action", "Acción de revisión actual", lang)} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 140px), 1fr))", gap: 8, padding: 12, marginBottom: 12, border: "1px solid #CBD5E1", borderRadius: 9, background: "#F8FAFC" }}>
+        <div><strong style={{ display: "block", fontSize: 10, color: "#64748B" }}>{w("Current revision", "Revisión actual", lang)}</strong><span>R{submittal.revisionNumber ?? 0}</span></div>
+        <div><strong style={{ display: "block", fontSize: 10, color: "#64748B" }}>{w("Review state", "Estado de revisión", lang)}</strong><span>{submittalStatusLabel(submittal.status, lang)}</span></div>
+        <div><strong style={{ display: "block", fontSize: 10, color: "#64748B" }}>{w("Next action", "Próxima acción", lang)}</strong><span>{submittalReviewAction(submittal) === "complete" ? w("Review complete", "Revisión completada", lang) : submittalReviewAction(submittal) === "revise" ? w("Prepare a new revision", "Preparar una nueva revisión", lang) : w("Record the authorized review decision", "Registrar la decisión de revisión autorizada", lang)}</span></div>
+      </section>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
         {canWrite && (
           <Button ref={editButtonRef} disabled={editSaving || uploadingAttachment} variant={editOpen ? "default" : "outline"} size="sm" style={{ fontSize: 11, gap: 5 }} onClick={() => { if (editOpen) { if (editDirty) setDiscardTarget("edit"); else finishEditing(); } else { setEditForm(submittalToEditorForm(submittal)); setEditOpen(true); } }}>
@@ -2973,11 +2982,15 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
       )}
 
       {/* Version History */}
-      {(submittal.revisionNumber || 0) > 0 && (
+      {revisionFamily.length > 0 && (
         <>
           <PanelSection title={w("Version History", "Historial de Versiones", lang)} />
-          <div style={{ padding: "6px 8px", background: "#F8FAFC", borderRadius: 6, fontSize: 11, color: "#6B7280" }}>
-            {w("Revision", "Revisión", lang)} {submittal.revisionNumber} - {w("Parent ID", "ID Padre", lang)}: {submittal.parentSubmittalId}
+          <p style={{ fontSize: 11, color: "#64748B", margin: "0 0 7px" }}>{w("Previous revisions are immutable review records. Open one to read it; changes belong in a new revision.", "Las revisiones anteriores son registros de revisión inmutables. Abre una para leerla; los cambios pertenecen a una nueva revisión.", lang)}</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+            {revisionFamily.map(revision => <button key={revision.id} type="button" onClick={() => onOpenRevision(revision)} disabled={revision.id === submittal.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "7px 9px", border: "1px solid #E2E8F0", borderRadius: 6, background: revision.id === submittal.id ? "#EFF6FF" : "white", color: "#1E293B", cursor: revision.id === submittal.id ? "default" : "pointer", textAlign: "left", fontSize: 11 }}>
+              <span><strong>R{revision.revisionNumber ?? 0}</strong> · {revision.number}</span>
+              <span>{revision.id === submittal.id ? w("Current", "Actual", lang) : submittalStatusLabel(revision.status, lang)}</span>
+            </button>)}
           </div>
         </>
       )}
