@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { pricingErrorMessage } from "./company-pricing-errors";
+import { librarySelectionState } from "./settings-experience";
 import { economicPoolKeys, type EconomicPoolNodes, type EconomicPoolKey } from "@workspace/api-zod";
 import "./CompanyPricingTemplates.css";
 
@@ -53,6 +54,8 @@ export function CompanyPricingTemplates() {
   const original = selected ? { code: selected.provenance.code, definition: selected.provenance.definition } : { code: "", definition: initial };
   const hasUnsavedChanges = JSON.stringify({ code, definition }) !== JSON.stringify(original);
   const confirmDiscard = () => !hasUnsavedChanges || window.confirm(t("Discard unsaved pricing changes?", "¿Descartar los cambios de precios sin guardar?"));
+  const publishedCount = items.filter(item => item.status === "published").length;
+  const selectionState = librarySelectionState({ loading, error: listError, count: publishedCount, canAuthor: canManage });
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -167,10 +170,14 @@ export function CompanyPricingTemplates() {
       {loading && <p role="status">{t("Loading pricing templates…", "Cargando plantillas de precios…")}</p>}
       {error && <div role="alert" style={{ color: "#991B1B", padding: 12, border: "1px solid #FCA5A5" }}>{error} {listError && <button type="button" onClick={() => void reload()}>{t("Retry", "Reintentar")}</button>}</div>}
       {notice && <p role="status" style={{ color: "#166534" }}>{notice}</p>}
+      <section aria-label={t("Published template selection", "Selección de plantillas publicadas")} data-library-state={selectionState.state} style={{ marginBottom: 16, padding: 12, border: "1px solid #BFDBFE", borderRadius: 9, background: "#EFF6FF" }}>
+        <strong>{t(selectionState.title, selectionState.state === "ready" ? `${publishedCount} opción${publishedCount === 1 ? "" : "es"} publicada${publishedCount === 1 ? "" : "s"} disponible${publishedCount === 1 ? "" : "s"}` : selectionState.state === "loading" ? "Cargando biblioteca publicada…" : selectionState.state === "error" ? "Biblioteca no disponible" : "Aún no hay opciones publicadas")}</strong>
+        <div style={{ fontSize: 12, marginTop: 4 }}>{selectionState.action ? t(selectionState.action, selectionState.action === "Retry" ? "Reintentar" : canManage ? "Crear un borrador gobernado" : "Solicite a un administrador de empresa que publique una opción") : t("Published templates can be selected and previewed without changing their immutable versions.", "Las plantillas publicadas se pueden seleccionar y previsualizar sin cambiar sus versiones inmutables.")}</div>
+      </section>
       {!loading && !listError && <div className="company-pricing-layout" style={{ display: "grid", gap: 20 }}>
         <section aria-label={t("Template list", "Lista de plantillas")} style={{ minWidth: 0 }}>
           <h2>{t("Company templates", "Plantillas de empresa")}</h2>
-          {!items.length && <p>{t("No pricing templates yet.", "Todavía no hay plantillas de precios.")}</p>}
+          {!items.length && <p>{canManage ? t("No pricing templates yet. Create a governed draft, preview it, then publish an immutable version.", "Todavía no hay plantillas. Cree un borrador gobernado, previsualícelo y publique una versión inmutable.") : t("No published pricing templates are available. Ask a company PMO administrator to publish one; your existing project prices remain unchanged.", "No hay plantillas publicadas disponibles. Solicite a un administrador PMO de la empresa que publique una; los precios existentes del proyecto no cambian.")}</p>}
           {items.map(item => <button type="button" key={item.templateId} onClick={() => void open(item)} style={{ display: "block", width: "100%", textAlign: "left", marginBottom: 8, padding: 12, border: selected?.templateId === item.templateId ? "2px solid #2563EB" : "1px solid #CBD5E1", borderRadius: 8, background: "white" }}>
             <strong>{item.provenance.code} · {item.provenance.definition.name}</strong><br />v{item.version} · {statusText(item.status)}
           </button>)}
