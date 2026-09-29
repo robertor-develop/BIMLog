@@ -1,5 +1,9 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 02 — UX006–UX010
+
+UX006–UX010 implement immediate state, choice, read/edit and calendar-date repairs. Local behavioral and Chrome component verification are recorded in docs/experience/ux-program/BLOCK_02_VALIDATION.md. Publication is due now for UX001–UX010; production acceptance is not claimed before the deployed receipt and authenticated smoke. Later Intake/APU/staffing/contract redesign remains open in the existing program.
+
 ## Experience makeover execution — first block authorized
 
 Roberto authorized UX001–UX005 as the next five-build block, followed by one push. UX006–UX010 is next; publication/full authenticated Chrome smoke is due after UX010, with no more than ten unpublished builds. Implementation and validation live in docs/experience/ux-program. Earlier proposal-only audit wording remains historical; it does not override this authorization. Actual test failures are fixed and rerun before continuing. No additional approval gate is introduced.

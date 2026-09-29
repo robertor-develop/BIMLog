@@ -1,3 +1,4 @@
+import { calendarDate, formatCalendarDate } from "@workspace/api-zod";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@workspace/db";
 import {
@@ -145,9 +146,7 @@ function trackerTypeMatches(filter: string, actual: string): boolean {
 
 function trackerDateValue(s: typeof submittalsTable.$inferSelect): string {
   const raw = s.reviewedAt || s.dateRequired || s.dueDate || s.dateSubmitted || s.createdAt;
-  if (!raw) return "";
-  const d = new Date(raw);
-  return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+  return calendarDate(raw) ?? "";
 }
 
 function trackerDateLabel(s: typeof submittalsTable.$inferSelect): string {
@@ -498,7 +497,7 @@ router.post("/projects/:projectId/submittals", authMiddleware, requirePermission
           const prefs = recipientUser[0]?.notificationPreferences;
           if (!notifEnabled(prefs, "submittal_assigned")) return;
           const lang = getUserLang(prefs);
-          const dueStr = submittal.dateRequired ? new Date(submittal.dateRequired).toLocaleDateString("en-US") : null;
+          const dueStr = submittal.dateRequired ? formatCalendarDate(submittal.dateRequired) : null;
           await sendEmail({
             to: submittal.submittedToEmail!,
             subject: lang === "es"
@@ -541,7 +540,7 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
     }
     const filterSummary = submittalLogFilterSummary(req, filteredSubs.length, subs.length);
     const projectLabel = project ? `${project.name}${project.code ? ` (${project.code})` : ""}` : `Project ${projectId}`;
-    const fmt = (value: Date | string | null | undefined) => value ? new Date(value).toLocaleDateString("en-US") : "";
+    const fmt = (value: Date | string | null | undefined) => formatCalendarDate(value, "en-US", "");
     const daysOutstanding = (value: Date | string | null | undefined) => {
       if (!value) return "";
       return Math.ceil((new Date(value).getTime() - Date.now()) / 86400000);
@@ -561,7 +560,7 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
       "Submitted To Company": s.submittedToCompany || "",
       "Submitted To Contact": s.submittedToPerson || "",
       "Submitted To Email": s.submittedToEmail || "",
-      "Date Submitted": fmt(s.dateSubmitted || s.createdAt),
+      "Date Submitted": fmt(s.dateSubmitted),
       "Date Required": fmt(s.dateRequired || s.dueDate),
       "Days Outstanding": daysOutstanding(s.dateRequired || s.dueDate),
       "Ball in Court": s.ballInCourt || "",
@@ -718,8 +717,8 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
         rawStatus.replace(/_/g, " "),
         sub.submittedByCompany || "-",
         sub.submittedToCompany || "-",
-        sub.dateSubmitted ? new Date(sub.dateSubmitted).toLocaleDateString() : "-",
-        sub.dateRequired ? new Date(sub.dateRequired).toLocaleDateString() : "-",
+        formatCalendarDate(sub.dateSubmitted),
+        formatCalendarDate(sub.dateRequired || sub.dueDate),
         daysStr,
         sub.ballInCourt || "-",
       ];
@@ -1557,7 +1556,7 @@ router.get("/projects/:projectId/submittals/:submittalId/export", authMiddleware
     row2("Title", sub.title, "Category", (sub.submittalCategory || sub.submittalType || "").replace(/_/g, " ").toUpperCase());
     row2("Spec Section", sub.specSection || "—", "Drawing No.", sub.drawingNumber || "—");
     row2("Drawing Title", sub.drawingTitle || "—", "Status", (sub.status || "—").replace(/_/g, " ").toUpperCase());
-    row2("Date Submitted", fmtD(sub.dateSubmitted || sub.createdAt), "Date Required", fmtD(sub.dateRequired || sub.dueDate));
+    row2("Date Submitted", formatCalendarDate(sub.dateSubmitted), "Date Required", formatCalendarDate(sub.dateRequired || sub.dueDate));
     row2("Review Decision", sub.reviewDecision ? sub.reviewDecision.replace(/_/g, " ").toUpperCase() : "Pending", "Reviewed", fmtD(sub.reviewedAt));
     y += 6;
 
@@ -1679,7 +1678,7 @@ table{border-collapse:collapse;width:100%;margin-bottom:12px}
 <h1>SUBMITTAL TRANSMITTAL</h1>
 <p style="color:#64748B;margin-top:0">${project?.name || ""} · ${sub.number} · Generated ${new Date().toLocaleDateString()}</p>
 <h2>Header</h2>
-<table>${row("Number", sub.number)}${row("Title", sub.title)}${row("Status", sub.status)}${row("Spec Section", sub.specSection || "")}${row("Category", (sub.submittalCategory || sub.submittalType || "").replace(/_/g, " "))}${row("Date Submitted", sub.dateSubmitted ? new Date(sub.dateSubmitted).toLocaleDateString() : "")}${row("Date Required", sub.dateRequired ? new Date(sub.dateRequired).toLocaleDateString() : "")}${row("Ball in Court", sub.ballInCourt || "")}</table>
+<table>${row("Number", sub.number)}${row("Title", sub.title)}${row("Status", sub.status)}${row("Spec Section", sub.specSection || "")}${row("Category", (sub.submittalCategory || sub.submittalType || "").replace(/_/g, " "))}${row("Date Submitted", formatCalendarDate(sub.dateSubmitted, "en-US", ""))}${row("Date Required", formatCalendarDate(sub.dateRequired, "en-US", ""))}${row("Ball in Court", sub.ballInCourt || "")}</table>
 <h2>Submitted By</h2>
 <table>${row("Company", sub.submittedByCompany || "")}${row("Contact", sub.submittedByPerson || "")}${row("Email", sub.submittedByEmail || "")}${row("Phone", sub.submittedByPhone || "")}</table>
 <h2>Submitted To</h2>
@@ -1776,7 +1775,7 @@ router.get("/projects/:projectId/submittals/:submittalId/audit-certificate", aut
     drawAuditRow("Submittal No.", sub.number, "Project", project?.name || "—");
     drawAuditRow("Title", sub.title);
     drawAuditRow("Status", (sub.status || "").replace(/_/g, " "), "Review Decision", sub.reviewDecision || "Pending");
-    drawAuditRow("Date Created", fmtD(sub.createdAt), "Date Required", fmtD(sub.dateRequired || sub.dueDate));
+    drawAuditRow("Date Created", fmtD(sub.createdAt), "Date Required", formatCalendarDate(sub.dateRequired || sub.dueDate));
     drawAuditRow("Reviewer", sub.reviewerName || "—", "Date Reviewed", fmtD(sub.reviewedAt));
     if (sub.rapidApprovalFlag) {
       doc.rect(MARGIN, y, CONTENT_W, 16).fill("#FEF3C7");

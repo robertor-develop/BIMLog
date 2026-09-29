@@ -1,3 +1,4 @@
+import { formatCalendarDate } from "@workspace/api-zod";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
@@ -80,7 +81,7 @@ const card = {
 
 export function FinancialControlsSettings() {
   const { token } = useAuthStore(),
-    { tt } = useI18n(),
+    { tt, lang } = useI18n(),
     { toast } = useToast();
   const [state, setState] = useState<OwnState | null>(null),
     [admin, setAdmin] = useState<AdminState | null>(null),
@@ -346,7 +347,7 @@ export function FinancialControlsSettings() {
                     <b>{tt("Currency context", "Contexto monetario")}</b>
                     <div style={{ fontSize: 12, marginTop: 8 }}>
                       {state.context
-                        ? `${state.context.baseCurrency} · ${state.context.reportingCurrency} · v${state.context.version} · ${new Date(state.context.effectiveFrom).toLocaleDateString()}${state.context.effectiveTo ? ` – ${new Date(state.context.effectiveTo).toLocaleDateString()}` : ""}`
+                        ? `${state.context.baseCurrency} · ${state.context.reportingCurrency} · v${state.context.version} · ${formatCalendarDate(state.context.effectiveFrom, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}${state.context.effectiveTo ? ` – ${formatCalendarDate(state.context.effectiveTo, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}` : ""}`
                         : tt("Not configured", "No configurado")}
                     </div>
                     {state.context && (
@@ -394,9 +395,9 @@ export function FinancialControlsSettings() {
                         <Badge key={a.grantId} variant="outline">
                           {authorityLabel(a.authority)} ·{" "}
                           {scopeLabel(a.scopeType)} ·{" "}
-                          {new Date(a.effectiveFrom).toLocaleDateString()}
+                          {formatCalendarDate(a.effectiveFrom, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}
                           {a.effectiveTo
-                            ? ` – ${new Date(a.effectiveTo).toLocaleDateString()}`
+                            ? ` – ${formatCalendarDate(a.effectiveTo, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}`
                             : ""}
                         </Badge>
                       ))

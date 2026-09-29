@@ -1,3 +1,4 @@
+import { calendarDate } from "@workspace/api-zod";
 export type SubmittalEditorSource = {
   title?: string | null;
   status?: string | null;
@@ -52,8 +53,8 @@ export function submittalToEditorForm(submittal: SubmittalEditorSource) {
     ballInCourt: submittal.ballInCourt || "",
     drawingNumber: submittal.drawingNumber || "",
     drawingTitle: submittal.drawingTitle || "",
-    dateSubmitted: submittal.dateSubmitted ? submittal.dateSubmitted.slice(0, 10) : "",
-    dateRequired: submittal.dateRequired ? submittal.dateRequired.slice(0, 10) : "",
+    dateSubmitted: calendarDate(submittal.dateSubmitted) ?? "",
+    dateRequired: calendarDate(submittal.dateRequired) ?? "",
     linkedRfiId: submittal.linkedRfiId ? String(submittal.linkedRfiId) : "",
     description: submittal.description || "",
     attachmentsText: (submittal.attachmentsJson || []).join("\n"),

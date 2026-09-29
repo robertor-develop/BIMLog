@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Experience makeover Block 02 — UX006–UX010 candidate
+
+Active Intake status and same-job next action now differ from draft readiness. Setup/staffing/commercial coverage labels no longer imply executed progress. RFI priorities render once per stable value, retaining legacy selections. Submittal details open for inspection; explicit Edit, guarded Cancel/close, Save and read-only permissions preserve the selected record. Calendar fields share date-only rendering across editor/detail/control/exports; missing financial effective dates show Not recorded. Historical timestamps and stored records are unchanged. This completes the UX001–UX010 ten-build publication boundary; exact-candidate release gate, push, Replit Shell publication and authenticated Chrome smoke are due. See BLOCK_02_VALIDATION.md.
+
 ## Experience makeover Block 01 — UX001–UX005 candidate
 
 The authorized first five-build block adds the route/ownership inventory, canonical source map, four bilingual task journeys, usability protocol and a connected guidance prototype in Help > Task guides. These are workflow foundations, not a claim that the underlying Intake/APU/staffing defects are repaired. B01 targets one push; publication is due at UX010 with full authenticated Chrome smoke. Five UX builds will be unpublished after this push. See docs/experience/ux-program/README.md and BLOCK_01_VALIDATION.md. No schema, customer records, provider sends or Native changes.

@@ -1,3 +1,4 @@
+import { intakeReadinessLabel } from "@/lib/intake-readiness-presentation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useRoute } from "wouter";
 import {
@@ -913,6 +914,7 @@ export function JobIntakeWorkspace() {
     missing: [],
     totals: {},
   };
+  const readinessLabel = intakeReadinessLabel(intake.status, Boolean(completion.ready), saveState, language);
   const configurationPolicy = intake.configurationPolicy ?? { source: "bimlog_default", enforcementMode: "optional" };
   const readiness = completion.readinessSummary ?? {
     setup: { percent: completion.percent ?? 0, ready: false, missingRequiredCount: completion.missingItems?.length ?? 0 },
@@ -1090,7 +1092,7 @@ export function JobIntakeWorkspace() {
         for (const assignment of data.team?.assignments ?? []) rows.push([tt("Team", "Equipo"), String(assignment.name || assignment.role || assignment.userId || "—"), `${assignment.plannedHours ?? "—"}h`, String(assignment.scopeItemId || "—")]);
       }
       if (pdfSections.review) rows.push(
-        [tt("Review", "Revisión"), tt("Completion", "Avance"), `${completion.percent}%`, firstMissing || tt("Ready to activate", "Listo para activar")],
+        [tt("Review", "Revisión"), tt("Setup coverage", "Cobertura de configuración"), `${completion.percent}%`, intake.status === "activated" ? readinessLabel : firstMissing || readinessLabel],
         [tt("Review", "Revisión"), tt("Status", "Estado"), String(intake.status || "draft"), intake.activation ? tt("Activated", "Activado") : tt("Not activated", "No activado")],
       );
       await downloadGovernedCurrentViewPdf(projectId, token, {
@@ -1122,7 +1124,7 @@ export function JobIntakeWorkspace() {
               )}
             </p>
             <div className="ji-actions">
-              <PrintPdfButton lang={language} selectionMode loading={exportingPdf} disabled={!token} disabledReason={selectedPdfSections === 0 ? tt("Select at least one PDF section.", "Seleccione al menos una sección del PDF.") : undefined} configurationInvalid={selectedPdfSections === 0} options={pdfOptions} currentViewSummary={[`${tt("Job", "Trabajo")}: ${data.identity?.jobName || projectId}`, `${tt("Completion", "Avance")}: ${completion.percent}%`]} onClick={() => void exportIntakePdf()}/>
+              <PrintPdfButton lang={language} selectionMode loading={exportingPdf} disabled={!token} disabledReason={selectedPdfSections === 0 ? tt("Select at least one PDF section.", "Seleccione al menos una sección del PDF.") : undefined} configurationInvalid={selectedPdfSections === 0} options={pdfOptions} currentViewSummary={[`${tt("Job", "Trabajo")}: ${data.identity?.jobName || projectId}`, `${tt("Setup coverage", "Cobertura de configuración")}: ${completion.percent}%`]} onClick={() => void exportIntakePdf()}/>
               <span className="ji-paid">
                 {tt("Core included", "Funciones básicas incluidas")}
               </span>
@@ -1144,12 +1146,13 @@ export function JobIntakeWorkspace() {
             </div>
           </div>
           <div className="ji-progress">
-            <strong>{completion.percent}%</strong> {tt("complete", "completo")}
+            {intake.status === "activated" && <Link href={`/projects/${projectId}/operations`}>{tt("Open job workspace", "Abrir espacio de trabajo")}</Link>}
+            <strong>{completion.percent}%</strong> {tt("setup coverage", "cobertura de configuración")}
             <div className="ji-bar" role="progressbar" aria-label={tt("Setup readiness", "Preparación de la configuración")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={completion.percent}>
               <span style={{ width: `${completion.percent}%` }} />
             </div>
             <div className="ji-small">
-              {firstMissing || tt("Ready to activate", "Listo para activar")}
+              {intake.status === "activated" ? readinessLabel : firstMissing || readinessLabel}
             </div>
           </div>
         </div>
@@ -1157,13 +1160,13 @@ export function JobIntakeWorkspace() {
           <div className="ji-readiness-card">
             <h2>{tt("Setup readiness", "Preparación de configuración")}</h2>
             <strong>{readiness.setup.percent}%</strong>
-            <p>{readiness.setup.ready ? tt("Ready to activate", "Listo para activar") : tt(`${readiness.setup.missingRequiredCount} required item(s) remaining`, `${readiness.setup.missingRequiredCount} elemento(s) obligatorio(s) pendiente(s)`)}</p>
+            <p>{intake.status === "activated" || readiness.setup.ready ? readinessLabel : tt(`${readiness.setup.missingRequiredCount} required item(s) remaining`, `${readiness.setup.missingRequiredCount} elemento(s) obligatorio(s) pendiente(s)`)}</p>
           </div>
           {quickMode && (
             <div className="ji-readiness-card">
               <h2>{tt("Setup details", "Detalles de configuración")}</h2>
               <button type="button" aria-expanded={showReadinessDetails} aria-controls="job-intake-readiness-details" onClick={() => setShowReadinessDetails(value => !value)}>
-                {showReadinessDetails ? tt("Hide details", "Ocultar detalles") : tt("Show optional, work and financial progress", "Mostrar progreso opcional, laboral y financiero")}
+                {showReadinessDetails ? tt("Hide details", "Ocultar detalles") : tt("Show optional setup and coverage", "Mostrar configuración opcional y cobertura")}
               </button>
               <p>{tt("The two-minute setup stays focused on required information.", "La configuración de dos minutos se mantiene enfocada en la información obligatoria.")}</p>
             </div>
@@ -1175,17 +1178,17 @@ export function JobIntakeWorkspace() {
             <p>{readiness.optionalItemsRemaining ? readiness.optionalItems.map((item: any) => tt(item.en, item.es)).join(" · ") : tt("No optional setup gaps", "No faltan datos opcionales")}</p>
           </div>
           <div className="ji-readiness-card">
-            <h2>{tt("Work progress", "Progreso del trabajo")}</h2>
+            <h2>{tt("Staffing coverage", "Cobertura de personal")}</h2>
             <strong>{readiness.work.assignmentCoveragePercent}%</strong>
             <p>{tt(`${readiness.work.assignedHours} of ${readiness.work.plannedHours} planned hours assigned`, `${readiness.work.assignedHours} de ${readiness.work.plannedHours} horas planificadas asignadas`)}</p>
           </div>
           <div className="ji-readiness-card">
-            <h2>{tt("Financial progress", "Progreso financiero")}</h2>
+            <h2>{tt("Commercial setup coverage", "Cobertura de configuración comercial")}</h2>
             <strong>{readiness.financial.applicable ? `${readiness.financial.setupPercent}%` : tt("Not enabled", "No habilitado")}</strong>
             <p>{readiness.financial.applicable ? tt("APU, rate, and budget setup coverage", "Cobertura de APU, tarifas y presupuesto") : tt("Commercial financial setup is optional for this project", "La configuración financiera comercial es opcional para este proyecto")}</p>
           </div>
           </div>
-          {guide && <div className="ji-readiness-help">{tt("These figures describe Intake configuration only. Work progress measures assigned planned hours, not completed field work. Financial progress measures configured APU, rate, and budget references, not earned or paid value.", "Estas cifras describen solamente la configuración de Ingreso. El progreso del trabajo mide horas planificadas asignadas, no trabajo de campo terminado. El progreso financiero mide referencias configuradas de APU, tarifas y presupuesto, no valor ganado ni pagado.")}</div>}
+          {guide && <div className="ji-readiness-help">{tt("These figures describe Intake configuration only. Staffing coverage measures assigned planned hours, not completed field work. Commercial setup coverage measures configured APU, rate, and budget references, not earned or paid value.", "Estas cifras describen solamente la configuración de Ingreso. La cobertura de personal mide horas planificadas asignadas, no trabajo de campo terminado. La cobertura de configuración comercial mide referencias configuradas de APU, tarifas y presupuesto, no valor ganado ni pagado.")}</div>}
         </section>
         {error && (
           <div className="ji-error" role="alert">
@@ -2806,7 +2809,7 @@ export function JobIntakeWorkspace() {
               <div className="ji-footer">
                 <span>
                   <strong>{completion.percent}%</strong> ·{" "}
-                  {firstMissing || tt("Ready", "Listo")} ·{" "}
+                  {intake.status === "activated" ? readinessLabel : firstMissing || readinessLabel} ·{" "}
                   <span
                     className={`ji-save-state ${saveState}`}
                     role="status"

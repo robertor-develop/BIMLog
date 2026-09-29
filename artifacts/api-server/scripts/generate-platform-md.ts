@@ -419,6 +419,14 @@ ${appRoutes()}
 - The generated disposition inventory classifies every open record, binds ownership and module/route responsibility, and links repeated historical statements to one canonical record.
 - The normal pre-push gate rejects unresolved duplicate statements, competing or missing current markers, unowned records, route-less product work, and stale contradictions classified as active.
 
+## Experience makeover state and trust repairs — UX006–UX010
+
+- Intake distinguishes active jobs from draft readiness and labels configuration as setup, staffing and commercial coverage. The active next action opens the same job workspace.
+- RFI create/edit choices deduplicate stable values and retain legacy selections without mutating configuration.
+- Submittal detail is read-first, with explicit Edit and dirty Cancel/close protection. Save preserves revision validation and exits to inspection; denied saves retain edits.
+- Shared calendarDate/formatCalendarDate normalize calendar fields for editor/detail/control and export. Missing financial effective dates remain absent; audit/event instants and historical rows are unchanged.
+- UX010 is the ten-build publication boundary; exact release evidence is external until completed.
+
 ## Experience makeover foundation — UX001–UX005
 
 - Help > Task guides consumes TaskJourneyGuide and task-journeys.ts for manager setup, coordinator delivery, operator execution and administrator access.

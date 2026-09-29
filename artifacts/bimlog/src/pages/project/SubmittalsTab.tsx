@@ -1,3 +1,4 @@
+import { calendarDate, formatCalendarDate } from "@workspace/api-zod";
 import { useState, useEffect, useRef, Fragment, useMemo, useId, createContext, useContext } from "react";
 import { useListSubmittals, useCreateSubmittal } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -166,6 +167,7 @@ function daysOut(d: string | null | undefined) {
 function SlidePanel({ open, onClose, children, title, width = 680 }: {
   open: boolean; onClose: () => void; children: React.ReactNode; title: string; width?: number;
 }) {
+  const { lang } = useI18n();
   if (!open) return null;
   return (
     <>
@@ -174,7 +176,7 @@ function SlidePanel({ open, onClose, children, title, width = 680 }: {
         style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 1000 }}
       />
       <div style={{
-        position: "fixed", right: 0, top: 0, bottom: 0, width, zIndex: 1001,
+        position: "fixed", right: 0, top: 0, bottom: 0, width, maxWidth: "100vw", zIndex: 1001,
         background: "white", boxShadow: "-4px 0 32px rgba(0,0,0,0.18)",
         display: "flex", flexDirection: "column", overflow: "hidden",
       }}>
@@ -184,7 +186,7 @@ function SlidePanel({ open, onClose, children, title, width = 680 }: {
           background: "#1E3A5F", color: "white",
         }}>
           <span style={{ fontWeight: 700, fontSize: 14 }}>{title}</span>
-          <button onClick={onClose} style={{ border: "none", background: "transparent", color: "white", cursor: "pointer", padding: 4 }}>
+          <button aria-label={w("Close submittal panel", "Cerrar panel de entregable", lang)} onClick={onClose} style={{ border: "none", background: "transparent", color: "white", cursor: "pointer", padding: 4 }}>
             <X style={{ width: 16, height: 16 }} />
           </button>
         </div>
@@ -430,7 +432,7 @@ function SubmittalTrackingList({ projectId, submittals, lang, onGoSubmittals }: 
 
   function trackerDateRaw(s: Submittal): string {
     const raw = s.reviewedAt || s.dateRequired || s.dueDate || s.dateSubmitted || s.createdAt;
-    return raw ? String(raw).slice(0, 10) : "";
+    return calendarDate(raw) ?? "";
   }
 
   function trackerDateLabel(raw: string): string {
@@ -712,6 +714,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
   const { toast } = useToast();
   const [view, setView] = useState<"register" | "submittals" | "tracking">(initialView);
   const [selectedSubmittal, setSelectedSubmittal] = useState<Submittal | null>(null);
+  const detailCloseRequest = useRef<(() => void) | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; label: string } | null>(null);
   const submittalsQueryClient = useQueryClient();
   const [showNewForm, setShowNewForm] = useState(false);
@@ -872,7 +875,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
       {/* Submittal Detail Slide-out */}
       <SlidePanel
         open={!!selectedSubmittal}
-        onClose={() => setSelectedSubmittal(null)}
+        onClose={() => detailCloseRequest.current?.()}
         title={selectedSubmittal ? `${selectedSubmittal.number} - ${selectedSubmittal.title}` : ""}
         width={720}
       >
@@ -880,6 +883,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
           <SubmittalDetail
             projectId={projectId}
             submittal={selectedSubmittal}
+            closeRequestRef={detailCloseRequest}
             lang={lang}
             canWrite={canWrite}
             onClose={() => setSelectedSubmittal(null)}
@@ -1028,7 +1032,7 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
           item.description,
           item.trade || "-",
           item.submittalType || "-",
-          item.requiredByDate ? fmtDate(item.requiredByDate) : "-",
+          item.requiredByDate ? formatCalendarDate(item.requiredByDate) : "-",
           item.status || "-",
         ]),
         emptyMessage: w("No required submittals are recorded.", "No hay entregables requeridos registrados.", lang),
@@ -1156,7 +1160,7 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
                       <td style={{ fontSize: 12 }}>{item.description}</td>
                       <td style={{ fontSize: 11, color: "#6B7280" }}>{item.trade || "-"}</td>
                       <td style={{ fontSize: 11, color: "#6B7280" }}>{item.submittalType ? (CATEGORY_OPTIONS.find(o => o.value === item.submittalType)?.[lang === "es" ? "labelEs" : "label"] || item.submittalType) : "-"}</td>
-                      <td style={{ fontSize: 11 }}>{item.requiredByDate ? fmtDate(item.requiredByDate) : "-"}</td>
+                      <td style={{ fontSize: 11 }}>{item.requiredByDate ? formatCalendarDate(item.requiredByDate) : "-"}</td>
                       <td style={{ fontSize: 11 }}>{item.leadTimeDays ? `${item.leadTimeDays}d` : "-"}</td>
                       <td style={{ fontSize: 11 }}>{item.responsibleCompany || "-"}</td>
                       <td>
@@ -1380,7 +1384,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
                     <td style={{ fontSize: 11, color: "#6B7280" }}>{sub.specSection || "-"}</td>
                     <td style={{ fontSize: 11 }}>{sub.submittedByCompany || sub.submittedByName || "-"}</td>
                     <td style={{ fontSize: 11 }}>{sub.submittedToCompany || "-"}</td>
-                    <td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{fmtDate(sub.dateRequired || sub.dueDate)}</td>
+                    <td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{formatCalendarDate(sub.dateRequired || sub.dueDate)}</td>
                     <td style={{ textAlign: "center" }}>
                       {days !== null && (
                         <span style={{ fontSize: 11, fontWeight: 600, color: isUrgent ? "#DC2626" : days > 7 ? "#D97706" : "#15803D" }}>
@@ -1436,7 +1440,7 @@ function NewSubmittalForm({ projectId, lang, onClose }: { projectId: number; lan
     title: "", specSection: "", submittalCategory: "shop_drawing", submittalType: "shop_drawing",
     trade: "", floor: "", responsibleCompany: "",
     drawingNumber: "", drawingTitle: "",
-    dateSubmitted: new Date().toISOString().slice(0, 10),
+    dateSubmitted: format(new Date(), "yyyy-MM-dd"),
     dateRequired: "",
     submittedByCompany: "", submittedByPerson: "", submittedByEmail: "", submittedByPhone: "", submittedByAddress: "",
     submittedToCompany: "", submittedToPerson: "", submittedToEmail: "", submittedToExternal: false,
@@ -2060,9 +2064,10 @@ function AiCheckDisplay({ result, lang }: { result: AiCheckResult; lang: string 
 }
 
 // ─── Submittal Detail ─────────────────────────────────────────────────────────
-function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpdated }: {
+export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpdated, closeRequestRef }: {
   projectId: number; submittal: Submittal; lang: string; canWrite: boolean;
   onClose: () => void; onUpdated: (s: Submittal) => void;
+  closeRequestRef?: React.MutableRefObject<(() => void) | null>;
 }) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -2082,8 +2087,15 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const [aiEmailDraft, setAiEmailDraft] = useState<{ subject: string; body: string } | null>(null);
   const [exportLoading, setExportLoading] = useState(false);
   const [auditLoading, setAuditLoading] = useState(false);
-  const [editOpen, setEditOpen] = useState(canWrite);
+  const [editOpen, setEditOpen] = useState(false);
+  const editButtonRef = useRef<HTMLButtonElement>(null);
+  const [discardTarget, setDiscardTarget] = useState<"edit" | "panel" | null>(null);
   const [editSaving, setEditSaving] = useState(false);
+  const wasEditing = useRef(false);
+  useEffect(() => {
+    if (!editOpen && !editSaving && wasEditing.current) editButtonRef.current?.focus();
+    wasEditing.current = editOpen;
+  }, [editOpen, editSaving]);
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [rfis, setRfis] = useState<RFI[]>([]);
   const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([]);
@@ -2093,7 +2105,8 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const respondRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setEditOpen(canWrite);
+    setEditOpen(false);
+    setDiscardTarget(null);
     setEditForm(submittalToEditorForm(submittal));
   }, [submittal.id, canWrite]);
 
@@ -2124,6 +2137,20 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     }).then(r => r.ok ? r.json() : []).then(data => setDirectory(data as DirectoryEntry[]));
   }, [submittal.id, projectId]);
 
+  const editDirty = editOpen && JSON.stringify(editForm) !== JSON.stringify(submittalToEditorForm(submittal));
+  function finishEditing() {
+    setEditForm(submittalToEditorForm(submittal));
+    setEditOpen(false); setDiscardTarget(null);
+    editButtonRef.current?.focus();
+  }
+  useEffect(() => {
+    if (!closeRequestRef) return;
+    closeRequestRef.current = () => {
+      if (editSaving || uploadingAttachment) return;
+      if (editDirty) setDiscardTarget("panel"); else onClose();
+    };
+    return () => { closeRequestRef.current = null; };
+  }, [closeRequestRef, editDirty, editSaving, uploadingAttachment, onClose]);
   const setEdit = (key: string, value: string) => setEditForm(f => ({ ...f, [key]: value }));
   const companyOptions = uniqSorted([
     ...directory.map(d => d.companyName),
@@ -2214,7 +2241,9 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       const updated = await r.json() as Submittal;
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
       onUpdated({ ...submittal, ...updated });
+      setEditForm(submittalToEditorForm({ ...submittal, ...updated }));
       setEditOpen(false);
+      setDiscardTarget(null); editButtonRef.current?.focus();
       toast({ title: w("Submittal updated", "Entregable actualizado", lang) });
     } catch (error) {
       toast({ title: error instanceof Error ? error.message : w("Failed to save", "Error al guardar", lang), variant: "destructive" });
@@ -2427,11 +2456,16 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
         {responsibleOptions.map(value => <option key={value} value={value} />)}
       </datalist>
       {/* Action buttons */}
+      {discardTarget && <div role="alert" style={{ padding: 12, border: "1px solid #d97706", borderRadius: 8, marginBottom: 12 }}>
+        <p>{w("You have unsaved changes. Discard them?", "Tiene cambios sin guardar. ¿Desea descartarlos?", lang)}</p>
+        <Button variant="outline" onClick={() => setDiscardTarget(null)}>{w("Keep editing", "Seguir editando", lang)}</Button>{" "}
+        <Button variant="outline" onClick={() => { const closePanel = discardTarget === "panel"; finishEditing(); if (closePanel) onClose(); }}>{w("Discard changes", "Descartar cambios", lang)}</Button>
+      </div>}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
         {canWrite && (
-          <Button variant={editOpen ? "default" : "outline"} size="sm" style={{ fontSize: 11, gap: 5 }} onClick={() => setEditOpen(v => !v)}>
+          <Button ref={editButtonRef} disabled={editSaving || uploadingAttachment} variant={editOpen ? "default" : "outline"} size="sm" style={{ fontSize: 11, gap: 5 }} onClick={() => { if (editOpen) { if (editDirty) setDiscardTarget("edit"); else finishEditing(); } else { setEditForm(submittalToEditorForm(submittal)); setEditOpen(true); } }}>
             <Pencil style={{ width: 12, height: 12 }} />
-            {editOpen ? w("Close Edit", "Cerrar Edicion", lang) : w("Edit Submittal", "Editar Entregable", lang)}
+            {editOpen ? w("Cancel editing", "Cancelar edición", lang) : w("Edit Submittal", "Editar Entregable", lang)}
           </Button>
         )}
         <Button
@@ -2715,8 +2749,8 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       <InfoRow label={w("Category", "Categoría", lang)} value={CATEGORY_OPTIONS.find(o => o.value === (submittal.submittalCategory || submittal.submittalType))?.[lang === "es" ? "labelEs" : "label"] || submittal.submittalCategory} />
       <InfoRow label={w("Drawing No.", "Número de Plano", lang)} value={submittal.drawingNumber} />
       <InfoRow label={w("Drawing Title", "Título de Plano", lang)} value={submittal.drawingTitle} />
-      <InfoRow label={w("Date Submitted", "Fecha de Envío", lang)} value={fmtDate(submittal.dateSubmitted || submittal.createdAt)} />
-      <InfoRow label={w("Date Required", "Fecha Requerida", lang)} value={fmtDate(submittal.dateRequired || submittal.dueDate)} />
+      <InfoRow label={w("Date Submitted", "Fecha de Envío", lang)} value={formatCalendarDate(submittal.dateSubmitted)} />
+      <InfoRow label={w("Date Required", "Fecha Requerida", lang)} value={formatCalendarDate(submittal.dateRequired || submittal.dueDate)} />
       <InfoRow label={w("Linked RFI", "RFI Relacionado", lang)} value={submittal.linkedRfiId ? `RFI #${submittal.linkedRfiId}` : null} />
       {submittal.linkedRfiId && (
         <button

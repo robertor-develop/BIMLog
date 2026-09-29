@@ -48478,6 +48478,104 @@
         "scripts/ux-route-inventory.mjs"
       ],
       "reviewedChangeSha256": "b5353364a85d0b015ffe72cf3341c7b1a05fe4e48318d70565c757e7b0ada607"
+    },
+    {
+      "taskId": "ux006-ux010-state-and-trust-repairs",
+      "reviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
+      "reviewedAt": "2026-09-29T04:50:53.420Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "chrome_component_verification"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX006–UX010 preserve existing permissions, financial policy, event history, report structure and Native behavior; presentation and calendar-field formatting implement existing meaning."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX006–UX010 preserve existing permissions, financial policy, event history, report structure and Native behavior; presentation and calendar-field formatting implement existing meaning."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX006–UX010 preserve existing permissions, financial policy, event history, report structure and Native behavior; presentation and calendar-field formatting implement existing meaning."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX006–UX010 preserve existing permissions, financial policy, event history, report structure and Native behavior; presentation and calendar-field formatting implement existing meaning."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records UX006–UX010 state, edit, choice and date repairs and the ten-build publication boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX006–UX010 preserve existing permissions, financial policy, event history, report structure and Native behavior; presentation and calendar-field formatting implement existing meaning."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX006–UX010 preserve existing permissions, financial policy, event history, report structure and Native behavior; presentation and calendar-field formatting implement existing meaning."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX006–UX010 preserve existing permissions, financial policy, event history, report structure and Native behavior; presentation and calendar-field formatting implement existing meaning."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records UX006–UX010 state, edit, choice and date repairs and the ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records UX006–UX010 state, edit, choice and date repairs and the ten-build publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX006–UX010 preserve existing permissions, financial policy, event history, report structure and Native behavior; presentation and calendar-field formatting implement existing meaning."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/bimlog/src/lib/intake-readiness-presentation.ts",
+        "artifacts/bimlog/src/lib/rfi-priority-options.ts",
+        "artifacts/bimlog/src/lib/submittal-editor-contract.ts",
+        "artifacts/bimlog/src/lib/ux-block02.behavior.ts",
+        "artifacts/bimlog/src/pages/FinancialControlsSettings.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+        "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
+        "artifacts/bimlog/src/submittal-presentation-harness.tsx",
+        "docs/experience/ux-program/BLOCK_02_VALIDATION.md",
+        "lib/api-zod/src/calendar-date.ts",
+        "lib/api-zod/src/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "37aba349b5bcb82ca7f8aa845d3143db76f75200652d110c143e479a0f03dfa3"
     }
   ]
 }

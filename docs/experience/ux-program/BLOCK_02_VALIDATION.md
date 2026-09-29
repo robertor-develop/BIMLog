@@ -1,0 +1,11 @@
+# UX006–UX010 validation
+
+- UX006: active versus draft labels, incomplete setup, active unsaved/error states and Spanish pass behavioral checks. Active next action targets the existing same-project Operations workspace.
+- UX007: affected header, review and optional coverage summaries explicitly describe setup, staffing and commercial setup coverage; underlying execution/completion data is unchanged.
+- UX008: repeated stable priority values collapse without mutating configuration, first canonical labels and distinct legacy values remain, and retired current selections stay editable. Behavior tests cover both locale labels.
+- UX009: actual production SubmittalsTab in Chrome with synthetic transport opens read-only; explicit Edit reveals fields; Keep editing retains data; Discard restores source and keyboard focus; panel close also protects dirty changes. Save persists across reload. Synthetic rejected save retains fields and retry availability. Read-only permission hides Edit. Spanish edit/discard flow passes at observed 390 CSS pixels, document width 390. The panel now respects viewport width and has a named close control.
+- UX010: shared calendar fields pass four-zone tests (New York, Honolulu, Kiritimati, UTC), legacy ISO and offset strings, Date objects, invalid/null values, Spanish output and editor/save round trips. Chrome detail and editor agree on September 26/30. API Excel/PDF/HTML/email calendar rendering shares the formatter. Event/audit timestamp rendering is preserved and no historical rows are rewritten.
+- Full workspace typecheck passed after rebuilding shared library declarations. Initial direct frontend typecheck saw stale declarations; the normal dependency-ordered workspace check resolved them.
+- Screenshot capture timed out twice in the browser backend; DOM and actual interactions above were verified. This is not a claim of screenshot review or production acceptance.
+
+Local fixtures never contact production or deliver emails. The clean-commit release gate, exact pushed source, Replit publication and authenticated Chrome results are recorded externally under F:/BIMLog/Evidence/ux-audit-20260928/UX-B02-* after this source is committed. Publication is due now for UX001–UX010; absence of a passing receipt means release acceptance is incomplete.

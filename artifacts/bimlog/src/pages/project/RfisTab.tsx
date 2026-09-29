@@ -1,3 +1,4 @@
+import { uniqueRfiPriorities, withCurrentPriority } from "@/lib/rfi-priority-options";
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   useListRfis, useCreateRfi, useUpdateRfi, useReviseRfi, useGenerateRfiQuestion,
@@ -1812,7 +1813,7 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { getOptions } = useConfig();
-  const priorityOptions = getOptions("rfi_priority");
+  const priorityOptions = uniqueRfiPriorities(getOptions("rfi_priority"));
   const configuredRfiTypes = getOptions("rfi_type");
   const rfiTypeOptions = configuredRfiTypes.length
     ? configuredRfiTypes.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }))
@@ -2422,7 +2423,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const toggleRfiWatch=async()=>{if(!notificationContext)return;setNotificationSaving(true);try{const token=JSON.parse(localStorage.getItem("bimlog-auth")||"{}").state?.token;const response=await fetch(`/api/v1/projects/${projectId}/rfis/${rfi.id}/notification-watch`,{method:"PUT",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({enabled:!notificationContext.watched})});const data=await response.json();if(!response.ok)throw new Error(data.error);setNotificationContext(data);toast({title:data.watched?w("Watching this RFI","Siguiendo este RFI",lang):w("RFI notifications stopped","Notificaciones del RFI detenidas",lang)});}catch(error){toast({title:error instanceof Error?error.message:w("Notification setting could not be saved.","No se pudo guardar la configuración.",lang),variant:"destructive"});}finally{setNotificationSaving(false);}};
   const { getLabel, getOptions } = useConfig();
   const { data: files } = useListFiles(projectId);
-  const priorityOptions = getOptions("rfi_priority").map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }));
+  const priorityOptions = uniqueRfiPriorities(getOptions("rfi_priority")).map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }));
   const configuredRfiTypes = getOptions("rfi_type");
   const rfiTypeOptions = configuredRfiTypes.length
     ? configuredRfiTypes.map(o => ({ value: o.value, label: lang === "es" ? o.labelEs : o.label }))
@@ -3607,12 +3608,12 @@ export function RfiCanonicalForm({
   const headerActions = editable ? [] : matrix.filter(action => action.key !== "save-response");
   const responseActions = matrix.filter(action => action.key === "save-response");
   const stickyActions = editable && responseContent == null ? matrix.filter(action => action.key !== "save-response") : matrix;
-  const priorityOptions = options?.priorities?.length ? options.priorities : [
+  const priorityOptions = withCurrentPriority(options?.priorities?.length ? options.priorities : [
     { value: "low", label: w("Low", "Baja", lang) },
     { value: "medium", label: w("Medium", "Media", lang) },
     { value: "high", label: w("High", "Alta", lang) },
     { value: "critical", label: w("Critical", "Critica", lang) },
-  ];
+  ], values.priority);
   const typeOptions = options?.rfiTypes?.length ? options.rfiTypes : DEFAULT_RFI_TYPES.map(type => ({ value: type, label: type }));
   const costOptions = options?.costImpact?.length ? options.costImpact : [
     { value: "No Cost Impact", label: w("No Cost Impact", "Sin Impacto en Costo", lang) },
