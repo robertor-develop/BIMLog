@@ -1,3 +1,4 @@
+import { IntakeDeliveryItems } from "@/components/job-intake/IntakeDeliveryItems";
 import { withIntakeReturn } from "@/lib/return-context";
 import { intakeReadinessLabel } from "@/lib/intake-readiness-presentation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -1830,6 +1831,7 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
                 <ContractItemBulkEditor
+                  showDeliveryControls={false}
                   items={data.scopeItems}
                   setItems={setScopeItems}
                   currency={data.identity.currency}
@@ -1862,7 +1864,7 @@ export function JobIntakeWorkspace() {
                 />
                 {(data.scopeItems || []).map((item:any, index:number)=><div className="ji-row" key={`owner-${item.id}`}><strong>{item.name || item.id}</strong><div className="ji-grid"><label>{tt("Responsible company", "Empresa responsable")}<select value={item.responsibleParticipantId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,responsibleParticipantId:event.target.value}:candidate))}><option value="">{tt("Unassigned", "Sin asignar")}</option>{(data.relationships?.participants || []).map((participant:any)=><option key={participant.id} value={participant.id}>{participant.companyName}</option>)}</select></label><label>{tt("Authoritative agreement", "Acuerdo autorizado")}<select value={item.contractId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,contractId:event.target.value}:candidate))}>{(data.commercial.contracts || []).map((contract:any)=><option key={contract.id} value={contract.id}>{contract.title || contract.contractNumber || contract.id}</option>)}</select></label></div></div>)}
                 <LegacyProjectClassificationNotice data={data} setData={setData} tt={tt} />
-                <WorkPackageBuilder items={data.scopeItems || []} setItems={setScopeItems} tt={tt} request={api} projectId={projectId} defaultClassification={data.classification}/>
+
               </section>
               <section className="ji-card" id="ji-contract">
                 <h2>
@@ -2233,6 +2235,11 @@ export function JobIntakeWorkspace() {
               <section className="ji-card" id="ji-delivery">
                 <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>
                 <h2>4. {stageLabel("delivery")}</h2>
+                <p className="ji-small">{tt("Only eligible published workflows appear below. If none match, an authorized company administrator must publish one; your draft is saved before leaving and you can return to this step.", "Solo aparecen flujos publicados elegibles. Si ninguno corresponde, un administrador autorizado debe publicar uno; el borrador se guarda antes de salir y puede volver a este paso.")}</p>
+                <button type="button" onClick={() => openCommercialPrerequisite("/company-workflows", "delivery")}>{tt("Open company workflows and return here", "Abrir flujos de empresa y volver aquí")}</button>
+                <IntakeDeliveryItems items={data.scopeItems || []} setItems={setScopeItems} tt={tt} defaultWorkflow={data.delivery.workflowTemplate} deliveryWorkflowOptions={deliveryWorkflowChoices.options ?? []} deliveryWorkflowMode={deliveryWorkflowChoices.mode}/>
+                <h3>{tt("Delivery locations and work packages", "Ubicaciones de entrega y paquetes de trabajo")}</h3>
+                <WorkPackageBuilder items={data.scopeItems || []} setItems={setScopeItems} tt={tt} request={api} projectId={projectId} defaultClassification={data.classification}/>
                 <div className="ji-guide" role="status">
                   <strong>{tt("What remains for this section", "Qué falta en esta sección")}</strong>
                   {missingForStage("delivery").length ? (

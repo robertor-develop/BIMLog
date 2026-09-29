@@ -1,3 +1,4 @@
+import { validatedReturn } from "@/lib/return-context";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
@@ -9,6 +10,8 @@ export function CompanyDeliveryWorkflows() {
   const { token } = useAuthStore();
   const [, setLocation] = useLocation();
   const { lang } = useI18n();
+  const returnProjectId = Number(new URLSearchParams(window.location.search).get("returnTo")?.match(/^\/projects\/(\d+)\/intake\?/)?.[1]);
+  const intakeReturn = validatedReturn(window.location.search, returnProjectId);
   if (!token) return null;
   return (
     <div style={{ display: "flex", minHeight: "100vh", minWidth: 0 }}>
@@ -24,6 +27,7 @@ export function CompanyDeliveryWorkflows() {
         <button type="button" onClick={() => setLocation("/dashboard")}>
           {lang === "es" ? "Volver a la Sede" : "Back to Headquarters"}
         </button>
+        {intakeReturn && <button type="button" onClick={() => setLocation(intakeReturn)}>{lang === "es" ? "Volver a la entrega del ingreso" : "Return to Intake delivery"}</button>}
         <CompanyDeliveryWorkflowsTab token={token} spanish={lang === "es"} />
       </main>
     </div>
