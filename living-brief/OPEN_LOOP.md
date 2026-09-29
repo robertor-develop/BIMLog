@@ -3796,3 +3796,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX061–UX065 implement project-aware entry/return, truthful bridge/model guidance, identity-preserving linked-record navigation, separated Project Admin diagnostics and Native contract regression evidence.
 - [x] Preserve existing capture, Working View, controlled publishing, project authorization and no-model-save contracts; automated checks do not close Navisworks 2021/2025 affected-model field acceptance.
 - [ ] Complete the exact-head gate and push UX061–UX065 once. Do not publish until UX066–UX070 complete the next ten-build boundary.
+
+## Experience makeover Block 14 — reports, metrics and evidence navigation — 2026-09-29
+
+- [x] UX066–UX070 define measures and sources, organize report intent and inputs, preview export scope, preserve source-owned histories and label evidence sufficiency.
+- [x] Preserve canonical workflow records, immutable histories, report endpoints, permissions and approval authority; coverage never implies approval and assumptions never imply measured performance.
+- [ ] Complete the exact-head gate, push UX066–UX070 once, publish accumulated UX061–UX070 without Replit Agents, and run full authenticated Chrome smoke.

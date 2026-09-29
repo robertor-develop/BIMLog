@@ -3188,3 +3188,9 @@ Block 9 gate correction: the convention guard now resolves inside the upload for
 - UX061–UX065 retain an explicit project and safe return path at Lens entry, explain bridge/model prerequisites, preserve exact Lens identity across linked BIMLog records, isolate repair tools behind an explicit Project Admin diagnostics boundary, and seal the unchanged Native capture/Working View/publishing contracts with field acceptance still pending.
 - Product commits are `94b63a66`, `8575cbe1`, `8b55176c`, `b4a66608` and `da61c055`. No Native, bridge, Autodesk, installer, schema or customer-data mutation is included.
 - This is the first five-build unpublished block after the live UX051–UX060 publication. Publication and authenticated Chrome smoke are due after UX066–UX070.
+
+## Experience makeover Block 14 source candidate — 2026-09-29
+
+- UX066–UX070 define count, coverage, completion and value measures; organize governed reports by business question and declared inputs; preview exact selected export scope; link back to distinct immutable source histories; and distinguish unrated, assumed and measured evidence.
+- Product commits are `f485d09c`, `33975d12`, `2838a9f0`, `88ff02dd` and `506d3ad7`. Existing report endpoints, source workflow histories, permissions and approval authorities remain canonical.
+- UX061–UX070 now reach the required ten-build push, Replit publication and authenticated Chrome smoke boundary.
