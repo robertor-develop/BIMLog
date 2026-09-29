@@ -3175,3 +3175,9 @@ Block 9 gate correction: the convention guard now resolves inside the upload for
 - UX051–UX055 rename the Submittals workspace around Required, Received and Control; create received packages from inherited requirement context; explain primary and additional evidence relationships; expose the current review action with readable immutable revision history; and align revision identity across list and exports.
 - Coverage remains a relationship between one existing requirement and existing package revisions. It does not create a second requirement, duplicate a package, or imply review approval.
 - Product commits are `5d7bfced`, `05c18c60`, `94f61ab3`, `294a5c21` and `7173dc59`. This first five-build block remains unpublished until UX056–UX060 reach the next ten-build publication boundary.
+
+## Experience makeover Block 12 source candidate — 2026-09-29
+
+- UX056–UX060 connect selected evidence to draft transmittals with exact version and return context, retain a structured source on draft changes, remove blank meeting boilerplate, explain the single canonical meeting-follow-up task, and expose independent canonical calendar layers.
+- Existing Transmittal, Change Order, Meeting, Schedule and My Work records remain authoritative. The experience creates no parallel task, invented approval, duplicate evidence record or second status authority.
+- Product commits are `a006a7bd`, `35a782ba`, `2e3108ef`, `31d39092` and `4c73e323`. UX051–UX060 now reach the required ten-build publication and authenticated Chrome smoke boundary.

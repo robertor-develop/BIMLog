@@ -3783,3 +3783,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX051–UX055 distinguish Required, Received and Control; inherit requirement context into one received package; clarify RFI/requirement/file relationship meaning; expose current review action and immutable revision history; and align revision identity across list, detail, editor, control and exports.
 - [x] Preserve canonical requirement/package records, many-to-many linked-record support, authorized review behavior and the rule that coverage never implies approval.
 - [ ] Complete the exact-head gate and push UX051–UX055 as one block. Do not publish until UX056–UX060 complete the next ten-build boundary.
+
+## Experience makeover Block 12 — coordination continuity — 2026-09-29
+
+- [x] UX056–UX060 connect exact evidence, draft changes, intentional meetings, canonical follow-up work and independent schedule layers without duplicating source records.
+- [x] Preserve existing record identity, status, due dates, approval authority, project scope and historical records.
+- [ ] Complete the exact-head gate, push UX056–UX060 once, publish the accumulated UX051–UX060 set without Replit Agents, and run full authenticated Chrome smoke.

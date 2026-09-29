@@ -48728,7 +48728,7 @@
     {
       "taskId": "ux016-ux020-connected-project-navigation",
       "reviewedThroughCommit": "eceedf3af9793b25adbbfdc1c2cd43e6363581b8",
-      "reviewedAt": "2026-09-29T08:54:22.480Z",
+      "reviewedAt": "2026-09-29T08:54:22.48Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48847,7 +48847,7 @@
     {
       "taskId": "ux021-ux025-full-intake-resource-planning",
       "reviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
-      "reviewedAt": "2026-09-29T10:44:50.000Z",
+      "reviewedAt": "2026-09-29T10:44:50Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48969,7 +48969,7 @@
     {
       "taskId": "ux026-ux030-connected-commercial-intake",
       "reviewedThroughCommit": "48e0f841a70bea1907e1257a9945ae6521d7f870",
-      "reviewedAt": "2026-09-29T11:21:48.000Z",
+      "reviewedAt": "2026-09-29T11:21:48Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -49093,7 +49093,7 @@
     {
       "taskId": "amendment-0021-canonical-bootstrap-reference",
       "reviewedThroughCommit": "66c8e3f28596b30b6938eba3eb74cefef5805508",
-      "reviewedAt": "2026-09-29T13:04:31.000Z",
+      "reviewedAt": "2026-09-29T13:04:31Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -49283,7 +49283,7 @@
     {
       "taskId": "ux-b07-draft-activation-confidence",
       "reviewedThroughCommit": "f1c6593de664e0533c428b03c7bc1fdfbdd0f9c5",
-      "reviewedAt": "2026-09-29T14:50:00.000Z",
+      "reviewedAt": "2026-09-29T14:50:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -49376,7 +49376,7 @@
     {
       "taskId": "ux-b08-daily-operations-first",
       "reviewedThroughCommit": "efc819f468c5145e306abf62385ae8bc1b69b681",
-      "reviewedAt": "2026-09-29T15:30:00.000Z",
+      "reviewedAt": "2026-09-29T15:30:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -49469,7 +49469,7 @@
     {
       "taskId": "ux-b09-file-intake-journey",
       "reviewedThroughCommit": "9b17f47c3b27859cd44f38b1d9c4c333e1266745",
-      "reviewedAt": "2026-09-29T16:18:00.000Z",
+      "reviewedAt": "2026-09-29T16:18:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -49655,7 +49655,7 @@
     {
       "taskId": "ux-b11-submittal-experience",
       "reviewedThroughCommit": "7173dc593f0be71828ae5cf8eea17f919bb30d64",
-      "reviewedAt": "2026-09-29T17:08:00.000Z",
+      "reviewedAt": "2026-09-29T17:08:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -49744,6 +49744,99 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "53c84a1b0c5f890ef7929e1b2ac4d06c6ba0dff728e242ed83cd820bad3492e2"
+    },
+    {
+      "taskId": "ux-b12-coordination-continuity",
+      "reviewedThroughCommit": "4c73e32398cf956228a3fa5eadebc0c112d91d48",
+      "reviewedAt": "2026-09-29T17:32:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "authenticated_chrome_smoke"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Coordination handoffs now retain exact source context and canonical task identity across transmittals, changes, meetings and schedule layers.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records UX056–UX060 and the ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records the completed block and required publication and authenticated smoke."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX056–UX060 preserve existing canonical record, permission, evidence, approval, reporting and Native boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ab8a5c7aeac61624a3fddf9d6882234988dcf639cf0df0b0a7b5cd49bfcfa22f"
     }
   ]
 }

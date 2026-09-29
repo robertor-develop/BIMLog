@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "6b5f54c384c850ee27641f7facaa41cc6ceb747c159584ec645332fbf0d9b261",
-  "itemCount": 262,
+  "sourceSha256": "52761f2e9bd1fec2ecdf3d1a3c0a0e55a2f9d989f160ca0af32b16ae69424a07",
+  "itemCount": 263,
   "counts": {
-    "ACTIVE": 227,
+    "ACTIVE": 228,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4785,6 +4785,24 @@
       "evidence": [
         "OPEN_LOOP.md:3785",
         "Experience makeover Block 11 — submittal requirements, packages and review — 2026-09-29"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "923616c55c893680",
+      "sourceLine": 3791,
+      "heading": "Experience makeover Block 12 — coordination continuity — 2026-09-29",
+      "statement": "Complete the exact-head gate, push UX056–UX060 once, publish the accumulated UX051–UX060 set without Replit Agents, and run full authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3791",
+        "Experience makeover Block 12 — coordination continuity — 2026-09-29"
       ],
       "currentAuthority": false
     }
