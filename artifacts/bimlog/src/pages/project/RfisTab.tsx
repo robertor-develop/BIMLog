@@ -1,4 +1,4 @@
-import { projectCompanyNames } from "@/lib/project-party-options";
+import { ProjectPartyPicker } from "@/components/ProjectPartyPicker";
 import { uniqueRfiPriorities, withCurrentPriority } from "@/lib/rfi-priority-options";
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
@@ -1722,69 +1722,7 @@ function SubmittedToParticipantEditor({ projectId, contacts, selectedCompany, on
   onDirectoryAdded: (contact: RfiDirectoryContact) => void;
   lang: string;
 }) {
-  const { toast } = useToast();
-  const [showExternalPerson, setShowExternalPerson] = useState(false);
-  const [showCompany, setShowCompany] = useState(false);
-  const [savingCompany, setSavingCompany] = useState(false);
-  const [externalName, setExternalName] = useState("");
-  const [externalEmail, setExternalEmail] = useState("");
-  const [externalPhone, setExternalPhone] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [companyContact, setCompanyContact] = useState("");
-  const [companyEmail, setCompanyEmail] = useState("");
-  const [companyPhone, setCompanyPhone] = useState("");
-  const [companyAddress, setCompanyAddress] = useState("");
-  const companies = projectCompanyNames(contacts, selectedCompany);
-  const companyContacts = selectedCompany ? contacts.filter(contact => contact.companyName === selectedCompany) : contacts;
-
-  const addExternalPerson = () => {
-    if (!externalName.trim() || !externalEmail.trim()) return;
-    const entry = encodeExternalDistributionEntry(externalName, externalEmail, externalPhone);
-    onSelect(selectedCompany, externalName.trim(), externalEmail.trim());
-    onAddDistribution(entry);
-    setExternalName(""); setExternalEmail(""); setExternalPhone(""); setShowExternalPerson(false);
-  };
-
-  const addCompany = async () => {
-    if (!companyName.trim() || !companyContact.trim() || !companyEmail.trim()) {
-      toast({ title: w("Company, contact, and email are required.", "Empresa, contacto y correo son obligatorios.", lang), variant: "destructive" });
-      return;
-    }
-    setSavingCompany(true);
-    try {
-      const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
-      const response = await fetch(`/api/v1/projects/${projectId}/directory`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          full_name: companyContact.trim(), email: companyEmail.trim(), company_name: companyName.trim(), role: "External Company",
-          notes: [companyPhone.trim() && `Phone: ${companyPhone.trim()}`, companyAddress.trim() && `Address: ${companyAddress.trim()}`].filter(Boolean).join(" | ") || undefined,
-        }),
-      });
-      const data = await response.json().catch(() => ({})) as RfiDirectoryContact;
-      if (!response.ok) throw new Error(response.status === 403 ? w("You do not have permission to add project directory companies.", "No tiene permiso para agregar empresas al directorio del proyecto.", lang) : w("Company could not be added.", "No se pudo agregar la empresa.", lang));
-      const contact = { fullName: data.fullName || companyContact.trim(), email: data.email || companyEmail.trim(), companyName: data.companyName || companyName.trim() };
-      onDirectoryAdded(contact);
-      onSelect(contact.companyName || "", contact.fullName, contact.email);
-      onAddDistribution(contact.email);
-      setCompanyName(""); setCompanyContact(""); setCompanyEmail(""); setCompanyPhone(""); setCompanyAddress(""); setShowCompany(false);
-      toast({ title: w("Company added to the project directory.", "Empresa agregada al directorio del proyecto.", lang) });
-    } catch (error) {
-      toast({ title: error instanceof Error ? error.message : w("Company could not be added.", "No se pudo agregar la empresa.", lang), variant: "destructive" });
-    } finally {
-      setSavingCompany(false);
-    }
-  };
-
-  return <div style={{ marginTop: 10, display: "grid", gap: 8 }}>
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
-      <label style={{ fontSize: 11, fontWeight: 700 }}>{w("Project company", "Empresa del proyecto", lang)}<select value={selectedCompany} onChange={event => onSelect(event.target.value, "", "")} style={{ width: "100%", height: 36, marginTop: 4, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select company...", "Seleccionar empresa...", lang)}</option>{companies.map(company => <option key={company} value={company}>{company}</option>)}</select></label>
-      <label style={{ fontSize: 11, fontWeight: 700 }}>{w("Project contact", "Contacto del proyecto", lang)}<select value="" onChange={event => { const contact = contacts.find(item => item.email === event.target.value); if (contact) onSelect(contact.companyName || "", contact.fullName, contact.email); }} style={{ width: "100%", height: 36, marginTop: 4, border: "1px solid hsl(var(--border))", borderRadius: 6, background: "hsl(var(--background))", padding: "0 8px", fontSize: 12 }}><option value="">{w("Select contact...", "Seleccionar contacto...", lang)}</option>{companyContacts.map(contact => <option key={contact.email} value={contact.email}>{contact.fullName} - {contact.email}</option>)}</select></label>
-    </div>
-    <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}><Button type="button" size="sm" variant="outline" onClick={() => setShowExternalPerson(value => !value)}><UserPlus style={{ width: 12, height: 12, marginRight: 4 }} />{w("Add person not in list", "Agregar persona fuera de lista", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowCompany(value => !value)}><Plus style={{ width: 12, height: 12, marginRight: 4 }} />{w("Add company not in list", "Agregar empresa fuera de lista", lang)}</Button></div>
-    {showExternalPerson && <div style={{ padding: 10, border: "1px solid hsl(var(--border))", borderRadius: 8 }}><strong style={{ fontSize: 11 }}>{w("External person (RFI only, not a project member)", "Persona externa (solo RFI, no es miembro del proyecto)", lang)}</strong><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginTop: 8 }}><Input value={externalName} onChange={event => setExternalName(event.target.value)} placeholder={w("Name *", "Nombre *", lang)} /><Input value={externalEmail} onChange={event => setExternalEmail(event.target.value)} placeholder={w("Email *", "Correo *", lang)} /><Input value={externalPhone} onChange={event => setExternalPhone(event.target.value)} placeholder={w("Phone", "Telefono", lang)} /></div><div style={{ display: "flex", gap: 6, marginTop: 8 }}><Button type="button" size="sm" onClick={addExternalPerson} disabled={!externalName.trim() || !externalEmail.trim()}>{w("Add and Select", "Agregar y Seleccionar", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowExternalPerson(false)}>{w("Cancel", "Cancelar", lang)}</Button></div></div>}
-    {showCompany && <div style={{ padding: 10, border: "1px solid hsl(var(--border))", borderRadius: 8 }}><strong style={{ fontSize: 11 }}>{w("Add company to the project directory", "Agregar empresa al directorio del proyecto", lang)}</strong><div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 8 }}><Input value={companyName} onChange={event => setCompanyName(event.target.value)} placeholder={w("Company *", "Empresa *", lang)} /><Input value={companyContact} onChange={event => setCompanyContact(event.target.value)} placeholder={w("Contact person *", "Persona de contacto *", lang)} /><Input value={companyEmail} onChange={event => setCompanyEmail(event.target.value)} placeholder={w("Email *", "Correo *", lang)} /><Input value={companyPhone} onChange={event => setCompanyPhone(event.target.value)} placeholder={w("Phone", "Telefono", lang)} /><Input value={companyAddress} onChange={event => setCompanyAddress(event.target.value)} placeholder={w("Address", "Direccion", lang)} style={{ gridColumn: "1 / -1" }} /></div><div style={{ display: "flex", gap: 6, marginTop: 8 }}><Button type="button" size="sm" onClick={() => void addCompany()} disabled={savingCompany}>{savingCompany ? w("Adding...", "Agregando...", lang) : w("Add Company", "Agregar Empresa", lang)}</Button><Button type="button" size="sm" variant="outline" onClick={() => setShowCompany(false)}>{w("Cancel", "Cancelar", lang)}</Button></div></div>}
-  </div>;
+  return <ProjectPartyPicker projectId={projectId} company={selectedCompany} canCreate tt={(en, es) => w(en, es, lang)} onSelect={onSelect} />;
 }
 
 function RfiDistributionEditor({ entries, contacts, editable, onChange, lang }: { entries: string[]; contacts: RfiDirectoryContact[]; editable: boolean; onChange: (entries: string[]) => void; lang: string }) {

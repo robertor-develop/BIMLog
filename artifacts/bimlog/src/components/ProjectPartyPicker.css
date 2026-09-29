@@ -1,0 +1,11 @@
+.project-party-picker{min-width:0;border:1px solid hsl(var(--border));border-radius:10px;padding:12px;margin:8px 0;color:hsl(var(--foreground));background:hsl(var(--background))}
+.project-party-picker p{font-size:12px;color:hsl(var(--muted-foreground));margin:6px 0 10px}
+.project-party-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.project-party-picker label{display:grid;gap:5px;font-size:12px;font-weight:600;min-width:0}
+.project-party-picker input,.project-party-picker select{width:100%;min-width:0;min-height:36px;border:1px solid hsl(var(--border));border-radius:6px;background:hsl(var(--background));color:inherit;padding:6px}
+.project-party-create{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.project-party-picker button{white-space:normal;border:1px solid hsl(var(--border));border-radius:6px;padding:7px 10px}
+.project-party-picker .ji-company-create{width:100%;min-width:0}
+.project-party-picker .ji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.project-party-picker .ji-actions,.project-party-picker .ji-company-create-head{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:10px}
+@media(max-width:600px){.project-party-fields,.project-party-picker .ji-grid{grid-template-columns:1fr}}
