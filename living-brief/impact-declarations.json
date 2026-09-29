@@ -49178,6 +49178,107 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f1d27021d277e959d6016c5680a131c4e2ec374c920507fa8978c045c82e9132"
+    },
+    {
+      "taskId": "ux-b06-activated-recovery-correction",
+      "reviewedThroughCommit": "4cf605b3f68cade8fcb772c371e708bae90cb627",
+      "reviewedAt": "2026-09-29T13:33:36.106Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "chrome_component_verification"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Published smoke found false autosave recovery on canonical activated Intake; preserve browser copy while displaying authoritative read-only setup and retaining connected navigation.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded canonical Intake recovery correction; existing server authority, no new data entity, schema, employee pay policy or provider behavior."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/job-intake-block06-harness.tsx",
+        "artifacts/bimlog/src/lib/job-intake-workspace-state.ts",
+        "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "docs/experience/ux-program/BLOCK_06_VALIDATION.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "aec07d0c6be28cc53299d1bc8072c021ea9ee480ba1fbcc32dc14b1568766f4e"
     }
   ]
 }

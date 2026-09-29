@@ -82,16 +82,21 @@ export type JobIntakeRecovery<T = any> = {
   preservedAt?: string;
 };
 
+export function jobIntakeIsCanonicalReadOnly(intake: { status?: string; activatedContractId?: unknown } | null | undefined) {
+  return Boolean(intake?.status === "activated" && intake.activatedContractId);
+}
+
 export function resolveJobIntakeRecovery<T>(
   serverRevision: number,
   serverData: T,
   recovered: JobIntakeRecovery<T> | null,
+  readOnly = false,
 ) {
-  const resume = recovered?.revision === serverRevision && JSON.stringify(recovered.data) !== JSON.stringify(serverData);
+  const resume = !readOnly && recovered?.revision === serverRevision && JSON.stringify(recovered.data) !== JSON.stringify(serverData);
   return {
     resume,
     data: resume ? recovered!.data : serverData,
-    discardStale: Boolean(recovered && recovered.revision < serverRevision),
+    discardStale: Boolean(!readOnly && recovered && recovered.revision < serverRevision),
   };
 }
 

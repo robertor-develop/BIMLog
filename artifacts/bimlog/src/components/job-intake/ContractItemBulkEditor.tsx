@@ -27,6 +27,7 @@ type Props = {
   budgetLines: any[];
   onBudgetSnapshotChange: (id: string) => void;
   snapshots: any[];
+  readOnlyNavigation?: { budgetHref: string; apuHref: string };
   onOpenCostValuePlanner: () => void;
   onOpenProjectBudget: () => void;
   tt: Translate;
@@ -330,7 +331,7 @@ export function ContractItemBulkEditor(props: Props) {
               ))}
             </select>
           </label>
-          <button type="button" onClick={props.onOpenProjectBudget}>{props.tt("Open Project Budget", "Abrir Presupuesto del Proyecto")}</button>
+          {props.readOnlyNavigation ? <a className="ji-navigation-link" href={props.readOnlyNavigation.budgetHref}>{props.tt("Open Project Budget", "Abrir Presupuesto del Proyecto")}</a> : <button type="button" onClick={props.onOpenProjectBudget}>{props.tt("Open Project Budget", "Abrir Presupuesto del Proyecto")}</button>}
           <small>{props.tt("Select an approved line for each Contract Item. Activation generates one canonical Job budget account per project cost node and preserves the exact source line association.", "Seleccione una línea aprobada para cada Partida de Contrato. La activación genera una cuenta presupuestaria canónica del Trabajo por nodo de costo del proyecto y conserva la asociación exacta con la línea de origen.")}</small>
         </div>
       )}
@@ -340,9 +341,11 @@ export function ContractItemBulkEditor(props: Props) {
             <strong>{props.tt("Approved budget link (optional)", "Vínculo de presupuesto aprobado (opcional)")}</strong>
             <span>{props.tt("No approved budget snapshots are available yet. Continue Intake without a budget link, or create one in Project Budget.", "Aún no hay instantáneas de presupuesto aprobadas. Continúe el Ingreso sin vínculo de presupuesto o cree una en Presupuesto del Proyecto.")}</span>
           </div>
-          <button type="button" onClick={props.onOpenProjectBudget}>
+          {props.readOnlyNavigation ? <a className="ji-navigation-link" href={props.readOnlyNavigation.budgetHref}>
             {props.tt("Open Project Budget", "Abrir Presupuesto del Proyecto")}
-          </button>
+          </a> : <button type="button" onClick={props.onOpenProjectBudget}>
+            {props.tt("Open Project Budget", "Abrir Presupuesto del Proyecto")}
+          </button>}
         </div>
       )}
       {props.capabilities.costValuePlanner && (
@@ -359,11 +362,11 @@ export function ContractItemBulkEditor(props: Props) {
                   "Aún no hay versiones APU guardadas. Continúe con una tarifa editable o guarde una versión en Planificador de Costos y Valor.",
                 )}
           </span>
-          { (
-            <button type="button" onClick={props.onOpenCostValuePlanner}>
+          {props.readOnlyNavigation ? <a className="ji-navigation-link" href={props.readOnlyNavigation.apuHref}>
               {props.tt("Open Cost & Value Planner", "Abrir Planificador de Costos y Valor")}
-            </button>
-          )}
+            </a> : <button type="button" onClick={props.onOpenCostValuePlanner}>
+              {props.tt("Open Cost & Value Planner", "Abrir Planificador de Costos y Valor")}
+            </button>}
         </div>
       )}
       <div className="ji-bulk-head" aria-hidden="true">

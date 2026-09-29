@@ -47,6 +47,7 @@ import {
   readJobIntakeRecovery,
   removeJobIntakeRecovery,
   resolveJobIntakeRecovery,
+  jobIntakeIsCanonicalReadOnly,
   type JobIntakeStage,
 } from "@/lib/job-intake-workspace-state";
 import {
@@ -66,8 +67,8 @@ type IntakeStage = JobIntakeStage;
 const blank = blankJobIntakeData;
 
 const css = `
-.ji-workspace{border:0;padding:0;margin:0;min-width:0}
-.ji{max-width:1180px;margin:0 auto;padding:24px 0 80px}.ji *{box-sizing:border-box}.ji-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px}.ji h1{font-size:30px;margin:4px 0}.ji p{color:#536174}.ji-progress{min-width:260px;padding:16px;border:1px solid #d9e1ec;border-radius:14px;background:#fff}.ji-progress strong{font-size:26px}.ji-bar{height:9px;background:#e8edf5;border-radius:99px;overflow:hidden;margin-top:8px}.ji-bar span{display:block;height:100%;background:#2563eb}.ji-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px}.ji-nav{position:sticky;top:16px;align-self:start;background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:10px}.ji-nav button{width:100%;border:0;background:transparent;padding:10px;border-radius:9px;text-align:left;display:flex;justify-content:space-between;cursor:pointer}.ji-nav button.on{background:#eaf1ff;color:#1649ad;font-weight:700}.ji-stages{display:flex;flex-direction:column}.ji-stages>.ji-advanced-return{order:0}.ji-stages>.ji-field-legend{order:1}.ji-stages>.ji-actions{order:2}.ji-stages>#ji-documents{order:4}.ji-stages>#ji-identity{order:3}.ji-stages>#ji-contract{order:5}.ji-stages>#ji-scope{order:6}.ji-stages>#ji-delivery{order:7}.ji-stages>#ji-team{order:8}.ji-stages>#ji-review{order:9}.ji-stages>.ji-footer{order:10}.ji-card{background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:20px;margin-bottom:16px;scroll-margin-top:20px}.ji-card h2{margin:0 0 4px;font-size:19px}.ji-guide{background:#eff6ff;border-left:4px solid #2563eb;padding:12px;margin:12px 0;border-radius:6px;color:#334155}.ji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ji-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.ji label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#475569}.ji input,.ji select,.ji textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:#fff;color:#0f172a}.ji textarea{min-height:78px;resize:vertical}.ji button{border:1px solid #cbd5e1;border-radius:8px;padding:9px 12px;background:#fff;cursor:pointer}.ji button.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8;font-weight:700}.ji button.danger{color:#b42318}.ji button:disabled{opacity:.5;cursor:not-allowed}.ji-row{border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-top:10px}.ji-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.ji-rate{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin:12px 0}.ji-rate strong{display:block;color:#166534}.ji-total{font-size:15px;font-weight:800;color:#0f3f9f}.ji-missing{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px}.ji-check{display:flex!important;grid-template-columns:18px 1fr!important;align-items:flex-start;gap:8px!important;font-size:14px!important}.ji-check input{width:auto;margin-top:2px}.ji-doc{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e2e8f0;padding:10px 0}.ji-footer{position:sticky;bottom:10px;display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid #cbd5e1;background:rgba(255,255,255,.96);border-radius:12px;box-shadow:0 8px 30px rgba(15,23,42,.12)}.ji-save-state{font-size:12px;font-weight:700;color:#475569}.ji-save-state.saving,.ji-save-state.unsaved{color:#9a3412}.ji-save-state.error{color:#b42318}.ji-error{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3;padding:12px;border-radius:10px;margin-bottom:12px}.ji-ok{background:#ecfdf5;color:#166534;padding:10px;border-radius:9px}.ji-small{font-size:12px;color:#64748b}.ji-upload{display:grid;grid-template-columns:1fr 160px 140px auto;gap:8px;align-items:end}.ji-paid{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#fff7ed;color:#9a3412;font-size:10px;font-weight:800;margin-left:8px}.ji-lock{background:#f8fafc;border:1px dashed #94a3b8;border-radius:10px;padding:14px;color:#475569;margin:10px 0}.ji-activation{background:#ecfdf5;border:1px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px}.ji-activation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.ji-stat{background:#fff;border:1px solid #d1fae5;border-radius:8px;padding:10px}.ji-nav em{font-size:9px;color:#9a3412;font-style:normal}@media(max-width:900px){.ji-layout{grid-template-columns:1fr}.ji-nav{position:static;display:flex;overflow:auto}.ji-nav button{min-width:145px}.ji-grid,.ji-grid.three,.ji-activation-grid{grid-template-columns:1fr}.ji-upload{grid-template-columns:1fr}.ji-head{display:block}.ji-progress{margin-top:12px}}
+.ji-navigation-link{display:inline-flex;align-items:center;border:1px solid #cbd5e1;border-radius:8px;padding:9px 12px;margin:4px 8px 4px 0;color:#1d4ed8;background:#fff;text-decoration:underline}.ji-workspace{border:0;padding:0;margin:0;min-width:0}
+.ji{max-width:1180px;margin:0 auto;padding:24px 0 80px}.ji *{box-sizing:border-box}.ji-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px}.ji h1{font-size:30px;margin:4px 0}.ji p{color:#536174}.ji-progress{min-width:260px;padding:16px;border:1px solid #d9e1ec;border-radius:14px;background:#fff}.ji-progress strong{font-size:26px}.ji-bar{height:9px;background:#e8edf5;border-radius:99px;overflow:hidden;margin-top:8px}.ji-bar span{display:block;height:100%;background:#2563eb}.ji-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px}.ji-nav{position:sticky;top:16px;align-self:start;background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:10px}.ji-nav button{width:100%;border:0;background:transparent;padding:10px;border-radius:9px;text-align:left;display:flex;justify-content:space-between;cursor:pointer}.ji-nav button.on{background:#eaf1ff;color:#1649ad;font-weight:700}.ji-stages{display:flex;flex-direction:column}.ji-stages>.ji-advanced-return{order:0}.ji-stages>.ji-field-legend{order:1}.ji-stages>.ji-actions{order:2}.ji-fields>#ji-documents{order:4}.ji-fields>#ji-identity{order:3}.ji-fields>#ji-contract{order:5}.ji-fields>#ji-scope{order:6}.ji-fields>#ji-delivery{order:7}.ji-fields>#ji-team{order:8}.ji-fields>#ji-review{order:9}.ji-stages>.ji-footer{order:10}.ji-card{background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:20px;margin-bottom:16px;scroll-margin-top:20px}.ji-card h2{margin:0 0 4px;font-size:19px}.ji-guide{background:#eff6ff;border-left:4px solid #2563eb;padding:12px;margin:12px 0;border-radius:6px;color:#334155}.ji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ji-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.ji label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#475569}.ji input,.ji select,.ji textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:#fff;color:#0f172a}.ji textarea{min-height:78px;resize:vertical}.ji button{border:1px solid #cbd5e1;border-radius:8px;padding:9px 12px;background:#fff;cursor:pointer}.ji button.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8;font-weight:700}.ji button.danger{color:#b42318}.ji button:disabled{opacity:.5;cursor:not-allowed}.ji-row{border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-top:10px}.ji-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.ji-rate{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin:12px 0}.ji-rate strong{display:block;color:#166534}.ji-total{font-size:15px;font-weight:800;color:#0f3f9f}.ji-missing{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px}.ji-check{display:flex!important;grid-template-columns:18px 1fr!important;align-items:flex-start;gap:8px!important;font-size:14px!important}.ji-check input{width:auto;margin-top:2px}.ji-doc{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e2e8f0;padding:10px 0}.ji-footer{position:sticky;bottom:10px;display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid #cbd5e1;background:rgba(255,255,255,.96);border-radius:12px;box-shadow:0 8px 30px rgba(15,23,42,.12)}.ji-save-state{font-size:12px;font-weight:700;color:#475569}.ji-save-state.saving,.ji-save-state.unsaved{color:#9a3412}.ji-save-state.error{color:#b42318}.ji-error{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3;padding:12px;border-radius:10px;margin-bottom:12px}.ji-ok{background:#ecfdf5;color:#166534;padding:10px;border-radius:9px}.ji-small{font-size:12px;color:#64748b}.ji-upload{display:grid;grid-template-columns:1fr 160px 140px auto;gap:8px;align-items:end}.ji-paid{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#fff7ed;color:#9a3412;font-size:10px;font-weight:800;margin-left:8px}.ji-lock{background:#f8fafc;border:1px dashed #94a3b8;border-radius:10px;padding:14px;color:#475569;margin:10px 0}.ji-activation{background:#ecfdf5;border:1px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px}.ji-activation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.ji-stat{background:#fff;border:1px solid #d1fae5;border-radius:8px;padding:10px}.ji-nav em{font-size:9px;color:#9a3412;font-style:normal}@media(max-width:900px){.ji-layout{grid-template-columns:1fr}.ji-nav{position:static;display:flex;overflow:auto}.ji-nav button{min-width:145px}.ji-grid,.ji-grid.three,.ji-activation-grid{grid-template-columns:1fr}.ji-upload{grid-template-columns:1fr}.ji-head{display:block}.ji-progress{margin-top:12px}}
 .ji-mapper{margin:14px 0;padding:16px;border:1px solid #93c5fd;border-radius:12px;background:#f8fbff}.ji-mapper-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.ji-mapper-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.ji-preview{overflow:auto;margin-top:12px}.ji-preview table{width:100%;border-collapse:collapse;font-size:12px}.ji-preview th,.ji-preview td{padding:7px;border:1px solid #dbe4f0;text-align:left}.ji-preview th{background:#eaf1ff}.ji-issues{color:#9f1239;font-weight:700}@media(max-width:900px){.ji-mapper-grid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.ji-mapper-grid{grid-template-columns:1fr}.ji-mapper-head{display:block}}
 .ji-quick{background:#fff;border:1px solid #d9e1ec;border-radius:16px;padding:22px}.ji-quick-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.ji-quick-head h2{margin:5px 0}.ji-quick-head button,.ji-quick-question button,.ji-quick-nav button{display:inline-flex;gap:7px;align-items:center}.ji-quick-kicker{color:#1d4ed8;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.ji-quick-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}.ji-quick-steps button{display:flex;align-items:center;gap:8px;text-align:left}.ji-quick-steps button span{display:grid;place-items:center;width:23px;height:23px;border-radius:99px;background:#e2e8f0}.ji-quick-steps button.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}.ji-quick-steps button.done span{background:#dcfce7;color:#166534}.ji-quick-question{min-height:260px;border:1px solid #e2e8f0;border-radius:12px;padding:20px}.ji-quick-question h3{margin-top:0}.ji-quick-summary{display:grid;gap:9px;margin:14px 0}.ji-quick-summary div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px}.ji-quick-summary span{color:#64748b}.ji-quick-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.ji-advanced-return{margin-bottom:12px}.ji-advanced-return button{display:inline-flex;gap:7px;align-items:center}@media(max-width:700px){.ji-quick-head{display:block}.ji-quick-head>button{margin-top:10px}.ji-quick-steps{grid-template-columns:1fr}.ji-quick-question{min-height:0}.ji-quick-summary div{grid-template-columns:1fr}.ji-quick-nav span{display:none}}
 .ji-field-legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #d9e1ec;border-radius:10px;background:#f8fafc;font-size:12px}.ji-field-legend strong{color:#9f1239}.ji-nav-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}.ji-nav-status.complete{color:#15803d}.ji-nav-status.required{color:#b45309}.ji-nav-status.optional{color:#64748b}
@@ -191,7 +192,7 @@ export function JobIntakeWorkspace() {
       ]);
       if (projectIdRef.current !== projectId) return;
       const recovered = readJobIntakeRecovery(projectId);
-      const recovery = resolveJobIntakeRecovery(current.revision, current.data, recovered);
+      const recovery = resolveJobIntakeRecovery(current.revision, current.data, recovered, jobIntakeIsCanonicalReadOnly(current));
       const canRecover = recovery.resume;
       let loadedData = recovery.data;
       const availableApuVersions = Array.isArray(plan?.data?.history) ? plan.data.history : [];
@@ -228,6 +229,11 @@ export function JobIntakeWorkspace() {
             "Se recuperaron Partidas de Contrato no guardadas de este navegador. El guardado autom\u00e1tico se reintenta ahora.",
           ),
         );
+      else if (jobIntakeIsCanonicalReadOnly(current) && recovered)
+        setNotice(tt(
+          "Your browser draft is preserved. This activated setup is read-only and shows the saved version. Continue work in Job Operations or the linked commercial records.",
+          "Se conserva el borrador del navegador. Esta configuración activada es de solo lectura y muestra la versión guardada. Continúe en Operaciones del Trabajo o en los registros comerciales vinculados.",
+        ));
       else if (recovery.discardStale)
         removeJobIntakeRecovery(projectId);
       setApu(plan?.data?.plan ?? null);
@@ -321,8 +327,7 @@ export function JobIntakeWorkspace() {
       const currentIntake = intakeRef.current;
       if (
         !currentIntake ||
-        (currentIntake.status === "activated" &&
-          currentIntake.activatedContractId)
+        jobIntakeIsCanonicalReadOnly(currentIntake)
       )
         return currentIntake;
       pendingSaveRef.current = snapshot;
@@ -400,7 +405,7 @@ export function JobIntakeWorkspace() {
     if (
       !intake ||
       JSON.stringify(data) === lastSavedRef.current ||
-      (intake.status === "activated" && intake.activatedContractId)
+      jobIntakeIsCanonicalReadOnly(intake)
     )
       return;
     setSaveState("unsaved");
@@ -831,6 +836,7 @@ export function JobIntakeWorkspace() {
     anyCommercial: false,
     fullCommercialActivation: false,
   };
+  const canonicalReadOnly = jobIntakeIsCanonicalReadOnly(intake);
   const canEnrich =
     intake.status === "activated" &&
     !intake.activatedContractId &&
@@ -1191,6 +1197,8 @@ export function JobIntakeWorkspace() {
                     : tt("Show guide", "Mostrar guía")}
                 </button>
               </div>
+              {canonicalReadOnly && <p role="status" className="ji-lock">{tt("Activated setup — read-only. Use Job Operations and the linked commercial records to continue work.", "Configuración activada — solo lectura. Continúe en Operaciones del Trabajo y en los registros comerciales vinculados.")}</p>}
+              <fieldset className="ji-fields" disabled={canonicalReadOnly} style={{ display: "contents" }}>
               <details className="ji-card" id="ji-documents">
                 <summary>{tt("Source documents (optional)", "Documentos fuente (opcional)")}</summary>
                 {guide && (
@@ -2101,6 +2109,10 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
                 <ContractItemBulkEditor
+                  readOnlyNavigation={canonicalReadOnly ? {
+                    budgetHref: withIntakeReturn(`/projects/${projectId}/financial/budget`, projectId, "scope"),
+                    apuHref: withIntakeReturn(`/projects/${projectId}/financial/apu`, projectId, "scope"),
+                  } : undefined}
                   showDeliveryControls={false}
                   items={data.scopeItems}
                   setItems={setScopeItems}
@@ -2137,10 +2149,10 @@ export function JobIntakeWorkspace() {
 
               </section>
               <section className="ji-card" id="ji-delivery">
-                <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>
+                {canonicalReadOnly ? <Link className="ji-navigation-link" href={withIntakeReturn(`/projects/${projectId}/convention`, projectId, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</Link> : <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>}
                 <h2>4. {stageLabel("delivery")}</h2>
                 <p className="ji-small">{tt("Only eligible published workflows appear below. If none match, an authorized company administrator must publish one; your draft is saved before leaving and you can return to this step.", "Solo aparecen flujos publicados elegibles. Si ninguno corresponde, un administrador autorizado debe publicar uno; el borrador se guarda antes de salir y puede volver a este paso.")}</p>
-                <button type="button" onClick={() => openCommercialPrerequisite("/company-workflows", "delivery")}>{tt("Open company workflows and return here", "Abrir flujos de empresa y volver aquí")}</button>
+                {canonicalReadOnly ? <Link className="ji-navigation-link" href={withIntakeReturn("/company-workflows", projectId, "delivery")}>{tt("Open company workflows and return here", "Abrir flujos de empresa y volver aquí")}</Link> : <button type="button" onClick={() => openCommercialPrerequisite("/company-workflows", "delivery")}>{tt("Open company workflows and return here", "Abrir flujos de empresa y volver aquí")}</button>}
                 <IntakeDeliveryItems items={data.scopeItems || []} setItems={setScopeItems} tt={tt} defaultWorkflow={data.delivery.workflowTemplate} deliveryWorkflowOptions={deliveryWorkflowChoices.options ?? []} deliveryWorkflowMode={deliveryWorkflowChoices.mode}/>
                 <h3>{tt("Delivery locations and work packages", "Ubicaciones de entrega y paquetes de trabajo")}</h3>
                 <WorkPackageBuilder items={data.scopeItems || []} setItems={setScopeItems} tt={tt} request={api} projectId={projectId} defaultClassification={data.classification}/>
@@ -2298,6 +2310,7 @@ export function JobIntakeWorkspace() {
                   </button>
                 </div>
               </section>
+              </fieldset>
               <div className="ji-footer">
                 <span>
                   <strong>{completion.percent}%</strong> ·{" "}

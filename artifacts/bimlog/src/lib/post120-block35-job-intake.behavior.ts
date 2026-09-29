@@ -17,6 +17,7 @@ import {
   blankJobIntakeData,
   jobIntakeStages,
   resolveJobIntakeRecovery,
+  jobIntakeIsCanonicalReadOnly,
 } from "./job-intake-workspace-state";
 
 assert.deepEqual(jobIntakeStages, ["documents", "identity", "contract", "scope", "delivery", "team", "review"]);
@@ -30,6 +31,16 @@ assert.deepEqual(resolveJobIntakeRecovery(4, server, { revision: 4, data: partia
 });
 assert.equal(resolveJobIntakeRecovery(5, server, { revision: 4, data: partial }).discardStale, true);
 assert.equal(resolveJobIntakeRecovery(4, server, { revision: 4, data: server }).resume, false);
+
+for (const revision of [3, 4, 5]) {
+  assert.deepEqual(resolveJobIntakeRecovery(4, server, { revision, data: partial }, true), {
+    resume: false, data: server, discardStale: false,
+  });
+}
+assert.equal(jobIntakeIsCanonicalReadOnly({ status: "activated", activatedContractId: "canonical" }), true);
+assert.equal(jobIntakeIsCanonicalReadOnly({ status: "activated", activatedContractId: null }), false);
+assert.equal(jobIntakeIsCanonicalReadOnly({ status: "draft", activatedContractId: "canonical" }), false);
+assert.equal(jobIntakeIsCanonicalReadOnly(null), false);
 
 const spreadsheet = {
   id: "doc-1",
@@ -48,7 +59,7 @@ assert.throws(() => assertVisibleAiCostGate({ operation: "file_read", fundingSou
 assert.equal(assertVisibleAiCostGate({ operation: "text_assist", fundingSourceVisible: true, estimateVisible: true, confirmationGranted: true }).operation, "text_assist");
 
 const workspace = readFileSync(new URL("../pages/JobIntakeWorkspace.tsx", import.meta.url), "utf8");
-assert.match(workspace, /resolveJobIntakeRecovery\(current\.revision, current\.data, recovered\)/);
+assert.match(workspace, /resolveJobIntakeRecovery\(current\.revision, current\.data, recovered, jobIntakeIsCanonicalReadOnly\(current\)\)/);
 assert.match(workspace, /preserveJobIntakeRecovery\(projectId, revisionRef\.current, data\)/);
 assert.match(workspace, /pendingSaveRef\.current = dataRef\.current/);
 assert.match(workspace, /setSaveState\("error"\)/);

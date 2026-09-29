@@ -1507,6 +1507,8 @@ It changes only when the code structure or curated architectural facts change.
 
 ## Connected commercial Intake - UX026-UX030
 
+Activated Intake with a canonical contract displays authoritative saved setup in read-only fields. Browser recovery copies remain preserved without false autosave retries; stage navigation and linked commercial records remain available. Operational activation without a canonical contract retains its existing enrichment path.
+
 - APU selection filters exact compatible project-currency versions, preserves unavailable saved references, and never replaces an item unit rate with the plan total. Active Intake no longer offers hardcoded rate presets.
 - Item calculations show quantity, unit, rate, currency and exact total independently of labor hours. Help describes the same calculation.
 - Approved budget changes load before changing the draft, clear old line mappings and ignore stale responses. The controlled import selects named registered CSV/XLSX versions; backend authorization and evidence verification remain canonical.
