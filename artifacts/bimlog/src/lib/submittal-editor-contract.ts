@@ -23,6 +23,7 @@ export type SubmittalEditorSource = {
   drawingTitle?: string | null;
   dateSubmitted?: string | null;
   dateRequired?: string | null;
+  dueDate?: string | null;
   linkedRfiId?: number | null;
   description?: string | null;
   attachmentsJson?: string[] | null;
@@ -54,7 +55,7 @@ export function submittalToEditorForm(submittal: SubmittalEditorSource) {
     drawingNumber: submittal.drawingNumber || "",
     drawingTitle: submittal.drawingTitle || "",
     dateSubmitted: calendarDate(submittal.dateSubmitted) ?? "",
-    dateRequired: calendarDate(submittal.dateRequired) ?? "",
+    dateRequired: calendarDate(submittal.dateRequired || submittal.dueDate) ?? "",
     linkedRfiId: submittal.linkedRfiId ? String(submittal.linkedRfiId) : "",
     description: submittal.description || "",
     attachmentsText: (submittal.attachmentsJson || []).join("\n"),

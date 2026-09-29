@@ -424,7 +424,7 @@ ${appRoutes()}
 - Intake distinguishes active jobs from draft readiness and labels configuration as setup, staffing and commercial coverage. The active next action opens the same job workspace.
 - RFI create/edit choices deduplicate stable values and retain legacy selections without mutating configuration.
 - Submittal detail is read-first, with explicit Edit and dirty Cancel/close protection. Save preserves revision validation and exits to inspection; denied saves retain edits.
-- Shared calendarDate/formatCalendarDate normalize calendar fields for editor/detail/control and export. Missing financial effective dates remain absent; audit/event instants and historical rows are unchanged.
+- Shared calendarDate/formatCalendarDate normalize calendar fields for editor/detail/control and export, including the legacy dueDate editor fallback. Missing financial effective dates remain absent; audit/event instants and historical rows are unchanged.
 - UX010 is the ten-build publication boundary; exact release evidence is external until completed.
 
 ## Experience makeover foundation — UX001–UX005

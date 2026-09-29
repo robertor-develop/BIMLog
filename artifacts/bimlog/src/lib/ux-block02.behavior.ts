@@ -30,5 +30,6 @@ for (const zone of ["America/New_York","Pacific/Honolulu","Pacific/Kiritimati","
   assert.equal(payload.dateRequired,"2026-09-30");
   assert.equal(payload.expectedUpdatedAt,"2026-09-29T12:01:00Z");
   assert.equal(submittalToEditorForm({dateSubmitted:null}).dateSubmitted,"");
+  assert.equal(submittalToEditorForm({dateRequired:null,dueDate:"2026-09-30T00:00:00Z"}).dateRequired,"2026-09-30");
 }
 console.log("UX block 02: readiness, stable priorities, calendar/editor round trip and null dates PASS (four time zones)");

@@ -2,6 +2,8 @@
 
 ## Experience makeover Block 02 — UX006–UX010
 
+Legacy dueDate records also populate the editor consistently with detail/export. The generated AI entry-point inventory was refreshed after the release suite detected stale line references.
+
 UX006–UX010 implement immediate state, choice, read/edit and calendar-date repairs. Local behavioral and Chrome component verification are recorded in docs/experience/ux-program/BLOCK_02_VALIDATION.md. Publication is due now for UX001–UX010; production acceptance is not claimed before the deployed receipt and authenticated smoke. Later Intake/APU/staffing/contract redesign remains open in the existing program.
 
 ## Experience makeover execution — first block authorized

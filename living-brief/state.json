@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "5670b4a86c16b26372751c1264841a6814ceb57932fcf7b28a8525fef30c658d",
+  "bundleSha256": "0ecff9b0451a6d4249d46ada870bbcc762e400151f59da0fc53d366a90165605",
   "impact": {
     "baselineCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
     "changedPaths": [
@@ -18,6 +18,7 @@
       "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
       "artifacts/bimlog/src/submittal-presentation-harness.tsx",
       "docs/experience/ux-program/BLOCK_02_VALIDATION.md",
+      "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
       "lib/api-zod/src/calendar-date.ts",
       "lib/api-zod/src/index.ts",
       "living-brief/OPEN_LOOP.md",
@@ -46,7 +47,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "claude",
@@ -58,7 +59,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "quality",
@@ -70,7 +71,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "vision",
@@ -82,19 +83,19 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "cf51671cab2e914862d7efd7469f5a95aa2e41b2227017698b013aea0616969f",
-      "sourceChangedAt": "2026-09-29T04:52:39.661Z",
+      "sha256": "9f5439e81c5217d9faff5be2802943a15518c1ac7ab9db776e7030e576308548",
+      "sourceChangedAt": "2026-09-29T05:01:45.697Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "plugin",
@@ -106,7 +107,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "report_design_system",
@@ -118,7 +119,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "standards_register",
@@ -130,31 +131,31 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "4a076f746749157ef2a2eae16efbfd5b0bee7bce19c67641c051b66874603604",
-      "sourceChangedAt": "2026-09-29T04:52:39.661Z",
+      "sha256": "d8b57182a44deaa8b254f3111de0049e0b04abfd800b03f486a570f9bf021448",
+      "sourceChangedAt": "2026-09-29T05:01:45.697Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "ae5e337fb47a2b430f10ff441e601c7ace76cf28b7eab034dee574bd4cb0bb38",
-      "sourceChangedAt": "2026-09-29T04:52:39.661Z",
+      "sha256": "7472dea33a53b62b36ee7e1325a00abe6bdcbfe2f8bac0b054a39ee59bcd2bb9",
+      "sourceChangedAt": "2026-09-29T05:01:45.697Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     },
     {
       "key": "audit",
@@ -166,7 +167,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T04:50:53.420Z"
+      "semanticReviewedAt": "2026-09-29T05:00:58.221Z"
     }
   ]
 }

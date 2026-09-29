@@ -48482,7 +48482,7 @@
     {
       "taskId": "ux006-ux010-state-and-trust-repairs",
       "reviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
-      "reviewedAt": "2026-09-29T04:50:53.420Z",
+      "reviewedAt": "2026-09-29T05:00:58.221Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48566,6 +48566,7 @@
         "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
         "artifacts/bimlog/src/submittal-presentation-harness.tsx",
         "docs/experience/ux-program/BLOCK_02_VALIDATION.md",
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
         "lib/api-zod/src/calendar-date.ts",
         "lib/api-zod/src/index.ts",
         "living-brief/OPEN_LOOP.md",
@@ -48575,7 +48576,7 @@
         "living-brief/impact-declarations.json",
         "package.json"
       ],
-      "reviewedChangeSha256": "37aba349b5bcb82ca7f8aa845d3143db76f75200652d110c143e479a0f03dfa3"
+      "reviewedChangeSha256": "8faae95fac2c745644b37dacbd0705fb7d70c31203612ec56ff9ce550a556239"
     }
   ]
 }

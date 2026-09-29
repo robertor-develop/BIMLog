@@ -360,7 +360,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/submittals.ts",
-      "line": 1285,
+      "line": 1284,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -370,7 +370,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/submittals.ts",
-      "line": 1347,
+      "line": 1346,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -380,7 +380,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/submittals.ts",
-      "line": 1424,
+      "line": 1423,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -390,7 +390,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/submittals.ts",
-      "line": 1978,
+      "line": 1977,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -400,7 +400,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/submittals.ts",
-      "line": 2031,
+      "line": 2030,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -410,7 +410,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/submittals.ts",
-      "line": 2110,
+      "line": 2109,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -420,7 +420,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/submittals.ts",
-      "line": 2131,
+      "line": 2130,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
