@@ -3161,3 +3161,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - The existing endpoint currently proves record-only metadata intake. Retained evidence and connected delivery remain visibly unavailable until governed storage and destination authority exist; the UI does not claim bytes were retained, analyzed or delivered.
 - Product commits are `f1752ba5`, `0b4361fc`, `a2ba7dfd`, `1e6ac6f9`, and `f8fd0b30`. This is the first five-build unpublished block after the live UX031–UX040 release `4f79b296`.
 - Replit publication passed source attestation, database safety, provider build and promotion at source `c3927db05a3b7e6a9b41424529fa77cc5999bfc2`. Authenticated Chrome control remained unavailable after repeated connection attempts, so that post-publication smoke is still open without implying a product failure.
+
+Block 9 gate correction: the convention guard now resolves inside the upload form that owns the intake mode. The complete frontend type check passes after the scope correction.

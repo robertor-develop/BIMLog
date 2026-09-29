@@ -3770,3 +3770,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Show exact document, family, version and source identity and preserve retry context with a stable attempt identity.
 - [ ] Complete the exact-head gate and push UX041–UX045 as one block. Do not publish until UX046–UX050 complete the next ten-build boundary.
 - [ ] Complete the outstanding authenticated Chrome smoke for live deployment `4f79b296` when the Chrome control is available.
+- [x] UX045 gate correction scopes the Convention guard to the upload form and passes the complete frontend type check.

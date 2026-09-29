@@ -49468,8 +49468,8 @@
     },
     {
       "taskId": "ux-b09-file-intake-journey",
-      "reviewedThroughCommit": "f8fd0b30778c9a072169fb9e6034a34262dbc51d",
-      "reviewedAt": "2026-09-29T16:02:00.000Z",
+      "reviewedThroughCommit": "9b17f47c3b27859cd44f38b1d9c4c333e1266745",
+      "reviewedAt": "2026-09-29T16:18:00.000Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -49557,7 +49557,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "46399e8ff56db7c135dc4065948f55e943bfc3980dc962f63ca78db4a01278e4"
+      "reviewedChangeSha256": "1be1c22b7086e11311599c3bc011cbe22b5a3fd29527a582efcbcffa91892b9f"
     }
   ]
 }
