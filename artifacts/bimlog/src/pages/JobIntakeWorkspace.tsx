@@ -28,7 +28,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { jobIntakeSaveConfidence, type JobIntakeSaveState } from "@/lib/job-intake-save-confidence";
-import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
+import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
   authoritativeCompanyOptions,
@@ -891,6 +891,7 @@ export function JobIntakeWorkspace() {
         label: item,
       }));
   const activationPreview = jobIntakeActivationPreview(data, completion, canEnrich || (intake.status !== "activated" && capabilities.fullCommercialActivation));
+  const activeChangeDestinations = jobIntakeActiveChangeDestinations(projectId, capabilities.contracts);
   const openBlocker = (code: string) => {
     const destination = jobIntakeBlockerDestination(code);
     setActive(destination.stage);
@@ -1167,6 +1168,14 @@ export function JobIntakeWorkspace() {
                 )}
               </div>
             )}
+            <div className="ji-row">
+              <strong>{tt("Continue the active job", "Continuar el trabajo activo")}</strong>
+              <p>{tt("This page preserves the setup used to create the job. Update assignments, schedules, and delivery work in Job Operations. Manage commercial terms through controlled contract records.", "Esta página conserva la configuración usada para crear el trabajo. Actualice asignaciones, cronogramas y entregas en Operaciones del Trabajo. Gestione los términos comerciales mediante registros contractuales controlados.")}</p>
+              <div className="ji-actions">
+                <Link className="ji-navigation-link" href={activeChangeDestinations.operations}>{tt("Open Job Operations", "Abrir Operaciones del Trabajo")}</Link>
+                {activeChangeDestinations.contracts && <Link className="ji-navigation-link" href={activeChangeDestinations.contracts}>{tt("Open Contracts & Commitments", "Abrir Contratos y Compromisos")}</Link>}
+              </div>
+            </div>
           </section>
         )}
         <fieldset className="ji-workspace" disabled={busy}>

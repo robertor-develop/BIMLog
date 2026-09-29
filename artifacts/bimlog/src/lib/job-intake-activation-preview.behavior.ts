@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeBlockerDestination } from "./job-intake-activation-preview";
+import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "./job-intake-activation-preview";
 
 assert.deepEqual(jobIntakeBlockerDestination("job_name"), { stage: "identity", item: "ji-identity" });
 assert.deepEqual(jobIntakeBlockerDestination("budget_mapping"), { stage: "contract", item: "ji-contract" });
@@ -13,4 +13,6 @@ assert.equal(preview.unassignedHours, "18");
 assert.equal(preview.contractDrafts, 2);
 assert.equal(jobIntakeActivationMatches(preview, { workItems: [{}], tasks: [{}], assignments: [{}, {}] }), true);
 assert.equal(jobIntakeActivationMatches(preview, { workItems: [{}, {}], tasks: [{}], assignments: [{}, {}] }), false);
+assert.deepEqual(jobIntakeActiveChangeDestinations(41, true), { operations: "/projects/41/operations", contracts: "/projects/41/financial/contracts" });
+assert.equal(jobIntakeActiveChangeDestinations(41, false).contracts, null);
 console.log("job intake activation preview behavior: PASS");

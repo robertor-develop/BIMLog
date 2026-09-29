@@ -33,3 +33,10 @@ export function jobIntakeActivationMatches(expected: ReturnType<typeof jobIntake
     && expected.tasks === (activation?.tasks?.length ?? 0)
     && expected.resourcePlans === (activation?.assignments?.length ?? 0);
 }
+
+export function jobIntakeActiveChangeDestinations(projectId: number, contractsEnabled: boolean) {
+  return {
+    operations: `/projects/${projectId}/operations`,
+    contracts: contractsEnabled ? `/projects/${projectId}/financial/contracts` : null,
+  };
+}
