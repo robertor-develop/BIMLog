@@ -13,7 +13,10 @@ assert.equal(journeyDestination("/projects/26/intake", "//evil.test"), "/dashboa
 for (const journey of TASK_JOURNEYS) {
   for (const [index, step] of journey.steps.entries()) {
     assert(HELP_TOPICS.some(t => t.id === step.topic), `Missing manual topic: ${step.topic}`);
-    assert.equal(journeyDestination("/projects/26/intake", step.destination), `/projects/26/${step.destination}`);
+    const expected = step.destination === "convention"
+      ? "/projects/26/convention?returnTo=%2Fprojects%2F26%2Fintake"
+      : `/projects/26/${step.destination}`;
+    assert.equal(journeyDestination("/projects/26/intake", step.destination), expected);
     const selected = journeySelection(`?journey=${journey.id}&step=${index}`);
     assert.equal(selected.journey.id, journey.id); assert.equal(selected.index, index);
     for (const value of [step.title, step.action, step.completion, step.recovery]) assert(value.en.trim() && value.es.trim());

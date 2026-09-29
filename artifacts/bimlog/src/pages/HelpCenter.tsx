@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth";
 import { HELP_CATEGORIES, HELP_RELEASES, HELP_TOPICS, HELP_TROUBLESHOOTING, helpTopicForContext, type HelpText } from "@/lib/help-content";
 import { BIMLOG_RELEASE_VERSION } from "@workspace/api-zod";
 import { TaskJourneyGuide } from "@/components/TaskJourneyGuide";
+import { safeHelpReturn } from "@/lib/task-journeys";
 
 type View = "manual" | "guides" | "troubleshooting" | "releases";
 
@@ -19,8 +20,7 @@ function queryValue(name: string) {
 }
 
 function safeBackPath() {
-  const value = queryValue("from");
-  return value.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
+  return safeHelpReturn(queryValue("from"));
 }
 
 function normalize(value: string) {
@@ -135,7 +135,7 @@ export function HelpCenter() {
         @media print{.hc-page{background:#fff}.hc-back,.hc-hero,.hc-tabs,.hc-nav,.hc-article-actions,.hc-footer-note{display:none!important}.hc-shell{max-width:none;padding:0}.hc-layout{display:block}.hc-article{border:0;padding:0}.hc-definition,.hc-step,.hc-result,.hc-example,.hc-issue{break-inside:avoid}.hc-article h2{font-size:22pt}}
       `}</style>
       <main className="hc-shell">
-        <Link href={backPath} className="hc-back"><ArrowLeft size={15}/>{label("Back", "Volver")}</Link>
+        <Link href={backPath} className="hc-back"><ArrowLeft size={15}/>{backPath === "/dashboard" ? label("Back to Dashboard", "Volver al Panel") : label("Return to the exact task", "Volver a la tarea exacta")}</Link>
         <header className="hc-hero">
             <div className="hc-hero-row">
             <div><div className="hc-kicker">BIMLog {label("Support", "Soporte")}</div><h1>{label("Help Center", "Centro de ayuda")}</h1><p>{label("One place for quick reminders, guided workflows, the complete user manual, troubleshooting, and release information.", "Un solo lugar para recordatorios, flujos guiados, el manual completo, solución de problemas e información de versiones.")}</p></div>

@@ -50507,6 +50507,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f53d55ec0b17667ebdc75c56e0878612cd17962e3145d176ff89b0d9716af426"
+    },
+    {
+      "taskId": "ux-b17-public-trust-help-continuity-20260929",
+      "reviewedThroughCommit": "c265cf19b0c3e9989c3d1de830124230f4e2fb27",
+      "reviewedAt": "2026-09-29T22:15:00.000Z",
+      "status": "source_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "Public positioning, capability claims, retention language, and Help navigation needed one verified product narrative with exact task return continuity.",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "category": "product_experience",
+          "disposition": "implemented_gate_pending"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/test-invitation-lifecycle.ts",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a015e8445199bdf14c4fc041583062fcbb73e5eb9563966cd7381a41c5a9244a"
     }
   ]
 }

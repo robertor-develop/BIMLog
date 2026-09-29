@@ -153,6 +153,8 @@ try {
   console.log('I007 PostgreSQL: current inviter authority, invalid role denial, normalized recipient, resend rotation, no premature membership PASS');
   console.log('I009 PostgreSQL: existing role preserved, all-or-nothing rollback, concurrent resend rotation, conflicting company-join denial PASS');
 } finally {
+  server.closeIdleConnections();
+  server.closeAllConnections();
   await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve()));
   await pool.end();
   await admin.query(`DROP SCHEMA ${schema} CASCADE`);await admin.end();

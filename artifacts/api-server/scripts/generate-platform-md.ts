@@ -438,6 +438,14 @@ ${appRoutes()}
 - The tracked regression matrix covers loading, empty, error, read and edit states for Project Setup, Operations, RFI Control, Submittal Control, Personal Settings and Company Library surfaces.
 - UX071-UX080 reach the ten-build publication and authenticated Chrome smoke boundary. Canonical permissions, workflow records, database schema, customer data, Native source, installers and provider sends are unchanged.
 
+## Public experience, trust and task continuity - UX081-UX085
+
+- BIMLog is the product and IgniteSmart is the parent technology brand. Public copy identifies BIM coordinators, BIM managers, project administrators and delivery teams as the primary audience.
+- The landing page uses repository-held product captures and sends authenticated users to their projects; public visitors retain registration, sign-in and workflow-review paths.
+- The Features page groups released capabilities by user role and states membership, permission, entitlement and configuration prerequisites instead of presenting unqualified feature or plan promises.
+- Public trust copy treats file storage, retention, deletion, hosting, encryption, backups and production access as deployment/customer-policy facts. BIMLog reports remain informational project records rather than independent certification.
+- Help validates a same-project origin, preserves the exact path and query, and sends Convention setup back to that origin. Hostile, malformed or cross-project origins fall back to Dashboard.
+
 ## Connected commercial Intake - UX026-UX030
 
 Activated Intake with a canonical contract displays authoritative saved setup in read-only fields. Browser recovery copies remain preserved without false autosave retries; stage navigation and linked commercial records remain available. Operational activation without a canonical contract retains its existing enrichment path.

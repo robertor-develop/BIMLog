@@ -1,8 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Experience makeover Block 16 — UX076–UX080 release candidate
+## Experience makeover Block 17 — UX081–UX085 source candidate
 
-UX076–UX080 consolidate shared layout, spacing and semantic status tokens; standardize plain-language English/Spanish product terms; unify responsive header, footer, action and table behavior; harden shared form and dialog accessibility; and bind adopted surfaces to a loading/empty/error/read/edit regression matrix. UX071–UX080 now reach the ten-build publication boundary. Push, publication and full authenticated Chrome smoke are required before this release is accepted. The block changes no permission, workflow authority, provider send, schema, customer data, Native source or installer.
+UX081–UX085 define the BIMLog/IgniteSmart brand relationship and audience, rebuild the landing story around a connected journey with authenticated state and real product captures, replace unsupported feature promises with role/prerequisite/availability evidence, reconcile storage/retention/trust copy, and preserve the exact originating task through Help and Convention recovery. This is the first five-build unpublished block after the accepted UX071–UX080 release. Push once after the complete gate; publication and authenticated Chrome smoke are due after UX086–UX090.
+
+## Experience makeover Block 16 — UX076–UX080 accepted release
+
+UX076–UX080 consolidate shared layout, spacing and semantic status tokens; standardize plain-language English/Spanish product terms; unify responsive header, footer, action and table behavior; harden shared form and dialog accessibility; and bind adopted surfaces to a loading/empty/error/read/edit regression matrix. UX071–UX080 were pushed, published with exact parent-source attestation, and passed the 60-route authenticated Chrome smoke. The block changes no permission, workflow authority, provider send, schema, customer data, Native source or installer.
 
 ## Experience makeover Block 06 — UX026–UX030 release candidate
 
@@ -3812,4 +3816,10 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Reject the first publication because runtime `sourceCommit` named Replit's automatic empty publish wrapper instead of the reviewed pushed commit.
 - [x] Bind Replit production assembly to `origin/master` only when it is an ancestor of `HEAD` and both commits have the exact same tree; fail closed on every mismatch and preserve ordinary local `HEAD` identity.
 - [x] Account for the provider pushing its exact empty `Published your App` wrapper before build by requiring that exact subject, a valid first parent, and identical wrapper/parent trees before parent attribution.
-- [ ] Push the corrective attestation commit, resynchronize Replit without Agents, republish, verify exact live source identity, and rerun the complete authenticated Chrome smoke before accepting UX071–UX080.
+- [x] Push the corrective attestation commit, resynchronize Replit without Agents, republish, verify exact live source identity, and rerun the complete authenticated Chrome smoke before accepting UX071–UX080.
+
+## Experience makeover Block 17 — public story, trust and help continuity — 2026-09-29
+
+- [x] UX081–UX085 implement canonical brand architecture, state-aware landing proof, verified role capability presentation, consistent deployment-specific trust copy and exact task return through Help.
+- [x] Remove unsupported fixed retention, storage-routing and independent-certification claims from the affected public surfaces.
+- [ ] Pass the complete exact-head gate and push UX081–UX085 once. Do not publish until UX086–UX090 reach the ten-build boundary.
