@@ -74,6 +74,7 @@ export const blankJobIntakeData = {
 
 const recoveryKey = (projectId: number) => `bimlog:job-intake-recovery:${projectId}`;
 const activeStageKey = (projectId: number) => `bimlog:job-intake-active-stage:${projectId}`;
+const activeItemKey = (projectId: number) => `bimlog:job-intake-active-item:${projectId}`;
 const setupModeKey = (projectId: number) => `bimlog:job-intake-setup-mode:${projectId}`;
 
 export type JobIntakeRecovery<T = any> = {
@@ -92,11 +93,15 @@ export function resolveJobIntakeRecovery<T>(
   recovered: JobIntakeRecovery<T> | null,
   readOnly = false,
 ) {
-  const resume = !readOnly && recovered?.revision === serverRevision && JSON.stringify(recovered.data) !== JSON.stringify(serverData);
+  const sameRevision = recovered?.revision === serverRevision;
+  const sameData = Boolean(recovered && JSON.stringify(recovered.data) === JSON.stringify(serverData));
+  const resume = Boolean(!readOnly && recovered && sameRevision && !sameData);
   return {
     resume,
     data: resume ? recovered!.data : serverData,
     discardStale: Boolean(!readOnly && recovered && recovered.revision < serverRevision),
+    retainNewer: Boolean(!readOnly && recovered && recovered.revision > serverRevision),
+    reason: readOnly && recovered ? "read_only" : !recovered ? "none" : resume ? "same_revision_draft" : recovered.revision < serverRevision ? "stale_server_wins" : recovered.revision > serverRevision ? "newer_draft_retained" : "already_saved",
   };
 }
 
@@ -155,4 +160,20 @@ export function readJobIntakeActiveStage(projectId: number): JobIntakeStage {
 export function preserveJobIntakeActiveStage(projectId: number, stage: JobIntakeStage) {
   if (!Number.isInteger(projectId) || projectId <= 0) return;
   try { window.localStorage.setItem(activeStageKey(projectId), stage); } catch { /* navigation stays usable */ }
+}
+
+export function readJobIntakeActiveItem(projectId: number) {
+  try {
+    const fromUrl = new URLSearchParams(window.location?.search).get("item");
+    if (fromUrl && /^ji-[a-zA-Z0-9_-]{1,100}$/.test(fromUrl)) return fromUrl;
+    const saved = window.localStorage.getItem(activeItemKey(projectId));
+    return saved && /^ji-[a-zA-Z0-9_-]{1,100}$/.test(saved) ? saved : null;
+  } catch {
+    return null;
+  }
+}
+
+export function preserveJobIntakeActiveItem(projectId: number, item: string | null) {
+  if (!Number.isInteger(projectId) || projectId <= 0 || !item || !/^ji-[a-zA-Z0-9_-]{1,100}$/.test(item)) return;
+  try { window.localStorage.setItem(activeItemKey(projectId), item); } catch { /* navigation stays usable */ }
 }

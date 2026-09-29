@@ -28,6 +28,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { expectedIntakeTaskCount } from "@/lib/intake-activation-task-count";
+import { jobIntakeSaveConfidence, type JobIntakeSaveState } from "@/lib/job-intake-save-confidence";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
   authoritativeCompanyOptions,
@@ -41,9 +42,11 @@ import {
   clearMatchingJobIntakeRecovery,
   jobIntakeStages,
   preserveJobIntakeActiveStage,
+  preserveJobIntakeActiveItem,
   preserveJobIntakeRecovery,
   preserveJobIntakeSetupMode,
   readJobIntakeActiveStage,
+  readJobIntakeActiveItem,
   readJobIntakeRecovery,
   removeJobIntakeRecovery,
   resolveJobIntakeRecovery,
@@ -108,9 +111,7 @@ export function JobIntakeWorkspace() {
     }),
     [mappingPreview, setMappingPreview] = useState<any>(null),
     [mappingBusy, setMappingBusy] = useState(false),
-    [saveState, setSaveState] = useState<
-      "saved" | "unsaved" | "saving" | "error"
-    >("saved");
+    [saveState, setSaveState] = useState<JobIntakeSaveState>("saved");
   const [approvedClientIds, setApprovedClientIds] = useState<number[] | null | undefined>(undefined);
   const [clientCatalogError, setClientCatalogError] = useState(false);
   const [deliveryWorkflowChoices, setDeliveryWorkflowChoices] = useState<any>({ mode: "defaults_allowed", options: [] });
@@ -129,11 +130,12 @@ export function JobIntakeWorkspace() {
     saveRetryRef = useRef(0),
     autosaveErrorRef = useRef(""),
     saveTimerRef = useRef<number | null>(null);
-  const openCommercialPrerequisite = (destination: string, stage: IntakeStage = "scope") => {
+  const openCommercialPrerequisite = (destination: string, stage: IntakeStage = "scope", item = `ji-${stage}`) => {
     preserveJobIntakeActiveStage(projectId, stage);
+    preserveJobIntakeActiveItem(projectId, item);
     preserveJobIntakeSetupMode(projectId, "advanced");
     preserveJobIntakeRecovery(projectId, revisionRef.current, dataRef.current);
-    setLocation(withIntakeReturn(destination, projectId, stage));
+    setLocation(withIntakeReturn(destination, projectId, stage, item));
   };
   projectIdRef.current = projectId;
   const headers = useMemo(
@@ -236,6 +238,8 @@ export function JobIntakeWorkspace() {
         ));
       else if (recovery.discardStale)
         removeJobIntakeRecovery(projectId);
+      else if (recovery.retainNewer)
+        setNotice(tt("A newer browser draft is retained separately. The saved server revision is shown so it cannot be overwritten by stale data.", "Se conserva por separado un borrador más reciente del navegador. Se muestra la revisión guardada del servidor para evitar que datos obsoletos la sobrescriban."));
       setApu(plan?.data?.plan ?? null);
       setApuVersions(availableApuVersions);
       setWorkspace(budget);
@@ -305,7 +309,8 @@ export function JobIntakeWorkspace() {
     const restored = readJobIntakeActiveStage(projectId);
     setActive(restored === "documents" ? "identity" : restored);
     if (restored === "documents") document.getElementById("ji-documents")?.setAttribute("open", "");
-    const item = new URLSearchParams(window.location.search).get("item");
+    const item = readJobIntakeActiveItem(projectId);
+    preserveJobIntakeActiveItem(projectId, item);
     const target = item && /^ji-[a-zA-Z0-9_-]{1,100}$/.test(item) ? item : `ji-${restored}`;
     const frame = window.requestAnimationFrame(() =>
       (document.getElementById(target) || document.getElementById(`ji-${restored}`))
@@ -819,6 +824,7 @@ export function JobIntakeWorkspace() {
     missing: [],
     totals: {},
   };
+  const saveConfidence = jobIntakeSaveConfidence(saveState);
   const readinessLabel = intakeReadinessLabel(intake.status, Boolean(completion.ready), saveState, language);
   const configurationPolicy = intake.configurationPolicy ?? { source: "bimlog_default", enforcementMode: "optional" };
   const readiness = completion.readinessSummary ?? {
@@ -1090,6 +1096,7 @@ export function JobIntakeWorkspace() {
         {error && (
           <div className="ji-error" role="alert">
             {error}
+            {saveState === "error" && <div className="ji-small">{tt("Your entered values remain in this browser. Retry the save when the connection is available.", "Los valores ingresados permanecen en este navegador. Reintente el guardado cuando la conexión esté disponible.")}</div>}
           </div>
         )}
         {notice && (
@@ -2320,19 +2327,7 @@ export function JobIntakeWorkspace() {
                     role="status"
                     aria-live="polite"
                   >
-                    {saveState === "saving"
-                      ? tt("Saving...", "Guardando...")
-                      : saveState === "unsaved"
-                        ? tt("Changes pending", "Cambios pendientes")
-                        : saveState === "error"
-                          ? tt(
-                              "Save needs attention",
-                              "El guardado requiere atención",
-                            )
-                          : tt(
-                              "All changes saved",
-                              "Todos los cambios guardados",
-                            )}
+                    {tt(saveConfidence.en, saveConfidence.es)}
                   </span>
                 </span>
                 <button
@@ -2344,7 +2339,7 @@ export function JobIntakeWorkspace() {
                   }
                   onClick={save}
                 >
-                  <Save size={15} /> {tt("Save now", "Guardar ahora")}
+                  <Save size={15} /> {saveConfidence.canRetry ? tt("Retry save", "Reintentar guardado") : tt("Save now", "Guardar ahora")}
                 </button>
               </div>
             </div>
