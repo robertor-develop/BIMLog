@@ -1511,6 +1511,7 @@ It changes only when the code structure or curated architectural facts change.
 - Bare project home resolves verified membership and Intake activation state; explicit Analytics and legacy dashboard links remain available. Unknown setup state has retry, never invented readiness.
 - Search includes project codes/names within active memberships; document results identify source project and supported record destinations. Files/changes explicitly open their registers; people are informational. Five-per-type and excluded contract/model content scope is visible. No cross-project membership expansion.
 - Acceptance corrections explicitly parse internal return paths, refresh role-based redirects, classify the shared project entry router separately from workspace tabs, and inventory 62 accessibility surfaces.
+- Live-smoke correction: Profile project policy choices collapse duplicate identities without widening permissions; project policy requests are scoped to the project tab, with explicit binding and membership prerequisites.
 - UX020 is the next ten-build publication boundary. Final release and authenticated live smoke receipts remain external to the frozen source.
 
 ## Shared project parties and account identity - UX011-UX015

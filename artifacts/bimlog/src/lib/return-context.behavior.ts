@@ -15,3 +15,17 @@ assert.equal(projectHomeDestination(7,"discipline_lead"),"/projects/7/coordinati
 assert.equal(projectHomeDestination(7,"member"),"/projects/7/operations");
 assert.equal(projectHomeDestination(7,"unknown"),"/projects/7/analytics");
 console.log("UX019 verified-state role routing and malformed-state recovery PASS");
+
+import {policyProjectOptions, initialPolicyProject} from "./policy-project-options";
+const policyRows=policyProjectOptions([
+ {id:1,name:"Legacy",active:true,bindingRequired:true,canConfigure:false},
+ {id:1,name:"Legacy",active:true,bindingRequired:true,canConfigure:false},
+ {id:2,name:"Bound",active:true,bindingRequired:false,canConfigure:true},
+ {id:2,name:"Bound",active:true,bindingRequired:false,canConfigure:true},
+]);
+assert.equal(policyRows.length,2);
+assert.equal(initialPolicyProject(policyRows),2);
+assert.equal(initialPolicyProject(policyRows.slice(0,1)),null);
+assert.equal(policyProjectOptions([{...policyRows[1],canConfigure:true},{...policyRows[1],canConfigure:false}])[0].canConfigure,false);
+assert.equal(initialPolicyProject(policyProjectOptions([{...policyRows[1]},{...policyRows[1],bindingRequired:true}])),null);
+console.log("Profile policy project options: duplicate identities collapsed, binding prerequisite explicit, conflicting authority never widened PASS");

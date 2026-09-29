@@ -48728,7 +48728,7 @@
     {
       "taskId": "ux016-ux020-connected-project-navigation",
       "reviewedThroughCommit": "eceedf3af9793b25adbbfdc1c2cd43e6363581b8",
-      "reviewedAt": "2026-09-29T08:25:23.071Z",
+      "reviewedAt": "2026-09-29T08:54:22.480Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48819,7 +48819,9 @@
         "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
         "artifacts/bimlog/src/components/layout/ProjectHome.tsx",
         "artifacts/bimlog/src/components/layout/ProjectLocation.tsx",
+        "artifacts/bimlog/src/components/settings/FeaturePolicySettingsPanel.tsx",
         "artifacts/bimlog/src/lib/job-intake-workspace-state.ts",
+        "artifacts/bimlog/src/lib/policy-project-options.ts",
         "artifacts/bimlog/src/lib/project-home-destination.ts",
         "artifacts/bimlog/src/lib/return-context.behavior.ts",
         "artifacts/bimlog/src/lib/return-context.ts",
@@ -48840,7 +48842,7 @@
         "scripts/route-interconnection-graph.mjs",
         "scripts/test-post120-block37.mjs"
       ],
-      "reviewedChangeSha256": "26f6fe1ca1ab251bd7e5b735f2f8c0f92285d5d6050dd21dcd3b09c1340527bc"
+      "reviewedChangeSha256": "2e1ac056284c1dd05bc9719041fb8d42debde7dda73856a7f7da855c6638a52a"
     }
   ]
 }
