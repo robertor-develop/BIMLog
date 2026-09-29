@@ -35,7 +35,7 @@ import {
   type OperationsClassificationFilters,
   type OperationsClassificationKind,
 } from "@/lib/job-operations-classification";
-import { buildDailyWorkQueues, focusTask } from "@/lib/job-operations-daily-work";
+import { buildDailyWorkQueues, focusTask, taskCostBinding } from "@/lib/job-operations-daily-work";
 
 const API_BASE =
   (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env
@@ -1759,8 +1759,9 @@ export function JobOperationsWorkspace() {
                             <th>{tt("Planned", "Planificadas")}</th>
                             <th>{tt("Actual", "Reales")}</th>
                             {data.capabilities?.budget && (
-                              <th>{tt("Internal cost", "Costo interno")}</th>
+                              <th>{tt("Approved member cost", "Costo aprobado del miembro")}</th>
                             )}
+                            {data.capabilities?.cost_value_planner && <th>{tt("Customer rate", "Tarifa al cliente")}</th>}
                             {data.canManage && (
                               <th>{tt("Reassign", "Reasignar")}</th>
                             )}
@@ -1774,8 +1775,9 @@ export function JobOperationsWorkspace() {
                               <td>{money(assignment.plannedHours)}h</td>
                               <td>{money(assignment.actualHours)}h</td>
                               {data.capabilities?.budget && (
-                                <td>{money(assignment.plannedInternalCost)}</td>
+                                <td>{money(assignment.internalHourlyRate)}/h<br/><small>{money(assignment.plannedInternalCost)} {tt("planned", "previsto")}</small></td>
                               )}
+                              {data.capabilities?.cost_value_planner && <td>{money(assignment.billingHourlyRate)}/h<br/><small>{tt("Preserved on reassignment", "Se conserva al reasignar")}</small></td>}
                               {data.canManage && (
                                 <td>
                                   <select
@@ -2138,6 +2140,7 @@ export function JobOperationsWorkspace() {
                 </div>
                 {filteredTasksFor(item.id).map((task: any) => {
                   const draft = drafts[task.id] ?? task;
+                  const costBinding = taskCostBinding(task, data.assignments ?? [], data.members ?? []);
                   return (
                     <article className="jo-task" key={task.id} id={`jo-task-${task.id}`} tabIndex={-1}>
                       <div className="jo-task-head">
@@ -2145,6 +2148,13 @@ export function JobOperationsWorkspace() {
                           <h3>
                             {language === "es" ? task.nameEs : task.nameEn}
                           </h3>
+                          <p className="jo-muted">
+                            {costBinding.assignment
+                              ? tt(`Costed resource: ${costBinding.assignment.personName || "assigned member"}${data.capabilities?.budget ? ` · ${money(costBinding.assignment.internalHourlyRate)}/h internal` : ""}. Customer APU rate remains separate.`, `Recurso valorizado: ${costBinding.assignment.personName || "miembro asignado"}${data.capabilities?.budget ? ` · ${money(costBinding.assignment.internalHourlyRate)}/h interno` : ""}. La tarifa APU del cliente permanece separada.`)
+                              : costBinding.operationalOnly
+                                ? tt("Operational assignee only. Bind a priced resource when staffing is confirmed; the customer APU rate will not change.", "Solo responsable operativo. Vincule un recurso valorizado cuando se confirme el personal; la tarifa APU del cliente no cambiará.")
+                                : tt("Assignment may remain pending until staffing is known.", "La asignación puede quedar pendiente hasta conocer el personal.")}
+                          </p>
                           <span className="jo-muted">
                             {statusLabel(task.status)} ·{" "}
                             {money(task.actualHours)} /{" "}

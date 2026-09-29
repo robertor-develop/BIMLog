@@ -44,3 +44,13 @@ export function focusTask(taskId: string) {
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
   element?.focus({ preventScroll: true });
 }
+
+export function taskCostBinding(task: DailyTask, assignments: DailyAssignment[], members: Array<{ id: number | string; profileInternalHourlyRate?: number | string | null }>) {
+  const priced = assignments.find((assignment) => assignment.taskId === task.id && assignment.internalHourlyRate != null);
+  const member = members.find((candidate) => person(candidate.id) === person(task.assigneeUserId));
+  return {
+    assignment: priced ?? null,
+    approvedProfileRate: member?.profileInternalHourlyRate ?? null,
+    operationalOnly: Boolean(task.assigneeUserId) && !priced,
+  };
+}
