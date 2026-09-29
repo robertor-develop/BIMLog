@@ -40,6 +40,7 @@ It changes only when the code structure or curated architectural facts change.
 - Any future database diagnostics must confirm PROD_DATABASE_URL is the connection target before drawing any conclusions.
 - Replit currently documents that development structural changes may be applied to production at Publish. No supported repository configuration is proven to disable that managed migration authority. Every Publish remains human-gated; a root build cannot stop a migration Replit may apply before the build.
 - Authoritative source is the explicitly fetched remote master ref, not the older remote default main. Before Helium sync or Publish, the clean Replit workspace, local master, origin/master, and freshly read remote master must match exactly and pass the commit-bound publication-source attestation.
+- Replit may add an automatic empty publish-wrapper commit. Production assembly attributes that wrapper to `origin/master` only when the remote commit is an ancestor of `HEAD` and both commits resolve to the exact same tree; any ancestry or tree mismatch fails closed. Outside Replit, production assembly remains bound to `HEAD`.
 
 ## Monorepo shape
 - pnpm workspaces.
@@ -858,6 +859,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procurement-lead-time-risk.ts
 - artifacts/api-server/src/lib/procurement-readiness-chain.behavior.ts
 - artifacts/api-server/src/lib/procurement-readiness-chain.ts
+- artifacts/api-server/src/lib/production-source-commit.behavior.ts
+- artifacts/api-server/src/lib/production-source-commit.ts
 - artifacts/api-server/src/lib/professional-report-layout.behavior.ts
 - artifacts/api-server/src/lib/professional-report-layout.ts
 - artifacts/api-server/src/lib/professional-report-package.behavior.ts

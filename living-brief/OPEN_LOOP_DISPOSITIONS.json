@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bddf6be2f97de33eeaaff5821cde1772df0c6c131897a4ab6f0f8323b3a7ddb5",
-  "itemCount": 265,
+  "sourceSha256": "a67f226e68d3d4676bbe7f459e6af9d380b415cdf450c4382ac42df149bb40c9",
+  "itemCount": 266,
   "counts": {
-    "ACTIVE": 230,
+    "ACTIVE": 231,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4839,6 +4839,24 @@
       "evidence": [
         "OPEN_LOOP.md:3808",
         "Experience makeover Block 14 — reports, metrics and evidence navigation — 2026-09-29"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "601b5575dec2a416",
+      "sourceLine": 3814,
+      "heading": "UX071–UX080 publication identity retry — 2026-09-29",
+      "statement": "Push the corrective attestation commit, resynchronize Replit without Agents, republish, verify exact live source identity, and rerun the complete authenticated Chrome smoke before accepting UX071–UX080.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3814",
+        "UX071–UX080 publication identity retry — 2026-09-29"
       ],
       "currentAuthority": false
     }

@@ -3806,3 +3806,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX066–UX070 define measures and sources, organize report intent and inputs, preview export scope, preserve source-owned histories and label evidence sufficiency.
 - [x] Preserve canonical workflow records, immutable histories, report endpoints, permissions and approval authority; coverage never implies approval and assumptions never imply measured performance.
 - [ ] Complete the exact-head gate, push UX066–UX070 once, publish accumulated UX061–UX070 without Replit Agents, and run full authenticated Chrome smoke.
+
+## UX071–UX080 publication identity retry — 2026-09-29
+
+- [x] Reject the first publication because runtime `sourceCommit` named Replit's automatic empty publish wrapper instead of the reviewed pushed commit.
+- [x] Bind Replit production assembly to `origin/master` only when it is an ancestor of `HEAD` and both commits have the exact same tree; fail closed on every mismatch and preserve ordinary local `HEAD` identity.
+- [ ] Push the corrective attestation commit, resynchronize Replit without Agents, republish, verify exact live source identity, and rerun the complete authenticated Chrome smoke before accepting UX071–UX080.

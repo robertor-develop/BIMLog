@@ -50313,6 +50313,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "92eab48215bedcd986baa2b5b4f0139f1be889038103f6df9d4e95b3a7a37d50"
+    },
+    {
+      "taskId": "ux-b16-replit-publication-source-attestation",
+      "reviewedThroughCommit": "c5f83e4ae184911f98189fcab1210d04bb1db8f6",
+      "reviewedAt": "2026-09-29T20:22:27.000Z",
+      "status": "corrective_candidate",
+      "captureTiming": "same_task_post_failure",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "Replit automatic publish wrappers require exact remote-master attribution without accepting wrapper history.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "publication_identity",
+          "disposition": "implemented_gate_pending"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication-identity correction binds an automatic empty Replit publish wrapper to origin/master only after exact ancestry and tree equality; all mismatches fail closed, local builds remain HEAD-bound, and no product workflow, permission, schema, customer data, Native, installer or provider setting changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "39d996ad90e8f2e18e679cf3dffe05be242080fd3a87493494540b7ad8e04a05"
     }
   ]
 }
