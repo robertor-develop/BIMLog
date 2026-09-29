@@ -8,6 +8,7 @@
     "changedPaths": [
       "artifacts/api-server/scripts/generate-platform-md.ts",
       "artifacts/api-server/src/lib/job-intake-contract.ts",
+      "artifacts/api-server/src/lib/job-intake-mapped-item-pricing.behavior.ts",
       "artifacts/api-server/src/lib/job-intake-mapped-item-pricing.ts",
       "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
       "artifacts/api-server/src/lib/job-intake-service.ts",

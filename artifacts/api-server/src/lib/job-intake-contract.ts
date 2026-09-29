@@ -1109,8 +1109,8 @@ export function jobIntakeCompletion(
     },
     !scopeReady && {
       code: "scope",
-      en: "Add scope items with planned hours.",
-      es: "Agregue partidas de alcance con horas planificadas.",
+      en: "Give each scope item a name, positive quantity and positive planned labor hours.",
+      es: "Complete cada partida con nombre, cantidad positiva y horas de trabajo previstas positivas.",
     },
     !edtSourceReady && {
       code: "edt_source",
@@ -1120,7 +1120,7 @@ export function jobIntakeCompletion(
     capabilities.costValuePlanner &&
       !pricingReady && {
         code: "pricing",
-        en: "Enter a positive billing hourly rate for every scope item.",
+      en: "Enter a positive unit rate for every scope item.",
         es: "Ingrese una tarifa facturable positiva para cada partida.",
       },
     capabilities.budget &&

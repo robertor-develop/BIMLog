@@ -48932,6 +48932,7 @@
       "reviewedChangedPaths": [
         "artifacts/api-server/scripts/generate-platform-md.ts",
         "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-mapped-item-pricing.behavior.ts",
         "artifacts/api-server/src/lib/job-intake-mapped-item-pricing.ts",
         "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
         "artifacts/api-server/src/lib/job-intake-service.ts",
@@ -48960,7 +48961,7 @@
         "package.json",
         "scripts/test-integration-presentation.mjs"
       ],
-      "reviewedChangeSha256": "72c1ab5aca9e9d89ef660b1fb25d947748b33c8ac8a02c54e78db78f8517afae"
+      "reviewedChangeSha256": "a4310275c756c754bd9770b99c51094fcb875eb065a02130a4e32b4475d33c52"
     }
   ]
 }

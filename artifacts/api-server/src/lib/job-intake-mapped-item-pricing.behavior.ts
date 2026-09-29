@@ -14,11 +14,13 @@ const base = {
 };
 const result = mergeMappedContractItems(base);
 assert.equal(result[0].billingHourlyRate, "75");
-assert.equal(result[0].plannedHours, "80");
+assert.equal(result[0].quantity, "80");
+assert.equal(result[0].plannedHours, "40", "Updating imported quantity preserves the labor estimate");
+assert.equal(result[1].plannedHours, "20", "New Hours rows retain their initial labor estimate");
 assert.equal(result[1].billingHourlyRate, "0");
 assert.equal(result[1].apuPlanVersion, 1);
 assert.equal(result[1].contractValue, "0");
-assert.equal(result[0].plannedHours * Number(result[0].billingHourlyRate), 6000);
+assert.equal(Number(result[0].quantity) * Number(result[0].billingHourlyRate), 6000);
 assert.equal(mergeMappedContractItems({ ...base, candidatePlans: [base.candidatePlans[0], { version: 2, content: { currency: "USD" } }] })[1].apuPlanVersion, null);
 assert.equal(mergeMappedContractItems({ ...base, currency: "BOB" })[1].apuPlanVersion, null);
 const service = fs.readFileSync(new URL("./job-intake-service.ts", import.meta.url), "utf8");
