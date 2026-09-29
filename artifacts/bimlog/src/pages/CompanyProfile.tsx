@@ -1,3 +1,4 @@
+import { useI18n } from "@/lib/i18n";
 import { useState, useEffect, useRef } from "react";
 import { useLocation, Link } from "wouter";
 import { useAuthStore } from "@/store/auth";
@@ -12,6 +13,8 @@ const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 interface CompanyProfileData {
   userId: number;
+  canonicalCompanyId: number;
+  canonicalCompanyName: string;
   companyName: string | null;
   companyRole: string | null;
   logoUrl: string | null;
@@ -23,6 +26,10 @@ interface CompanyProfileData {
 
 export function CompanyProfile() {
   const { token } = useAuthStore();
+  const { lang } = useI18n();
+  const t = (en: string, es: string) => lang === "es" ? es : en;
+  const [loadError, setLoadError] = useState(false);
+  const [retry, setRetry] = useState(0);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [data, setData] = useState<CompanyProfileData | null>(null);
@@ -33,14 +40,17 @@ export function CompanyProfile() {
 
   useEffect(() => {
     if (!token) { setLocation("/login"); return; }
+    let current = true;
+    setLoading(true); setLoadError(false); setData(null);
     fetch(`${API_BASE}/api/v1/users/me/company-profile`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then(r => r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`)))
-      .then((d: CompanyProfileData) => setData(d))
-      .catch(() => toast({ title: "Failed to load company profile", variant: "destructive" }))
-      .finally(() => setLoading(false));
-  }, [token, setLocation, toast]);
+      .then((d: CompanyProfileData) => { if (current) setData(d); })
+      .catch(() => { if (current) setLoadError(true); })
+      .finally(() => { if (current) setLoading(false); });
+    return () => { current = false; };
+  }, [token, setLocation, retry]);
 
   const handleSave = async () => {
     if (!data) return;
@@ -112,13 +122,18 @@ export function CompanyProfile() {
             <h1 style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: 0 }}>Company Profile</h1>
           </div>
           <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 20 }}>
-            Your company branding appears in project headers, on dashboards, and on shared exports.
+            {t("Your account company is read from your current membership. Document branding is separate and does not change membership or stored document parties.", "La empresa de su cuenta corresponde a su membresía actual. La marca documental es independiente y no cambia la membresía ni los participantes guardados.")}
           </div>
 
+          {loadError && <div role="alert">{t("Company profile could not be loaded.", "No se pudo cargar el perfil de empresa.")} <Button variant="outline" onClick={() => setRetry(n => n + 1)}>{t("Retry", "Reintentar")}</Button></div>}
           {loading ? (
             <div className="skeleton" style={{ height: 200, borderRadius: 10 }} />
           ) : data && (
             <>
+              <section aria-label={t("Account company", "Empresa de la cuenta")} style={{ padding: 16, marginBottom: 18, border: "1px solid hsl(var(--border))", borderRadius: 10 }}>
+                <strong>{t("Account company", "Empresa de la cuenta")}: {data.canonicalCompanyName}</strong>
+                <p>{t("Changing branding below does not rename this company or change project access. Saved document party snapshots remain unchanged; future exports may use the current branding.", "Cambiar la marca abajo no renombra esta empresa ni cambia el acceso a proyectos. Los participantes guardados de documentos permanecen iguales; las exportaciones futuras pueden usar la marca actual.")}</p>
+              </section>
               {/* Logo card */}
               <div style={{ background: "white", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "18px 20px", marginBottom: 18 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -174,9 +189,9 @@ export function CompanyProfile() {
                   Company Details
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 14 }}>
                   <div>
-                    <Label htmlFor="companyName" style={{ fontSize: 11 }}>Company name</Label>
+                    <Label htmlFor="companyName" style={{ fontSize: 11 }}>{t("Document branding name", "Nombre de marca documental")}</Label>
                     <Input id="companyName" value={data.companyName ?? ""} onChange={e => setData(d => d ? { ...d, companyName: e.target.value } : d)} />
                   </div>
                   <div>

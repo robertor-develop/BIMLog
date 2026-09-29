@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { companyProfilesTable } from "@workspace/db/schema";
+import { companyProfilesTable, companiesTable, usersTable } from "@workspace/db/schema";
+import { companyProfilePresentation } from "../lib/company-profile-presentation";
 import { eq } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { singleFileUpload } from "../middlewares/multipart";
@@ -11,25 +12,25 @@ const uploadMiddleware = singleFileUpload({ fileSize: 2 * 1024 * 1024 }, "logo")
 
 const ALLOWED_MIME = new Set(["image/jpeg", "image/jpg", "image/png", "image/svg+xml"]);
 
+async function currentCompany(userId: number) {
+  const [binding] = await db.select({ company: companiesTable }).from(usersTable)
+    .innerJoin(companiesTable, eq(usersTable.companyId, companiesTable.id))
+    .where(eq(usersTable.id, userId)).limit(1);
+  return binding?.company;
+}
+
 router.get("/users/me/company-profile", authMiddleware, async (req, res) => {
   try {
     const userId = req.user!.userId;
+    const company = await currentCompany(userId);
+    if (!company) { res.status(403).json({ error: "company_binding_unavailable" }); return; }
     const rows = await db.select().from(companyProfilesTable).where(eq(companyProfilesTable.userId, userId)).limit(1);
     if (rows.length === 0) {
-      res.json({
-        userId,
-        companyName: null,
-        companyRole: null,
-        logoUrl: null,
-        website: null,
-        phone: null,
-        city: null,
-        country: null,
-      });
+      res.json(companyProfilePresentation(userId, company));
       return;
     }
     const r = rows[0];
-    res.json({ ...r, updatedAt: r.updatedAt.toISOString() });
+    res.json(companyProfilePresentation(userId, company, { ...r, updatedAt: r.updatedAt.toISOString() }));
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Internal error" });
   }
@@ -38,6 +39,8 @@ router.get("/users/me/company-profile", authMiddleware, async (req, res) => {
 router.post("/users/me/company-profile", authMiddleware, async (req, res) => {
   try {
     const userId = req.user!.userId;
+    const company = await currentCompany(userId);
+    if (!company) { res.status(403).json({ error: "company_binding_unavailable" }); return; }
     const body = req.body as Partial<{
       companyName: string | null;
       companyRole: string | null;
@@ -59,10 +62,10 @@ router.post("/users/me/company-profile", authMiddleware, async (req, res) => {
     };
     if (existing.length === 0) {
       const [row] = await db.insert(companyProfilesTable).values({ userId, ...values }).returning();
-      res.json({ ...row, updatedAt: row.updatedAt.toISOString() });
+      res.json(companyProfilePresentation(userId, company, { ...row, updatedAt: row.updatedAt.toISOString() }));
     } else {
       const [row] = await db.update(companyProfilesTable).set(values).where(eq(companyProfilesTable.userId, userId)).returning();
-      res.json({ ...row, updatedAt: row.updatedAt.toISOString() });
+      res.json(companyProfilePresentation(userId, company, { ...row, updatedAt: row.updatedAt.toISOString() }));
     }
   } catch (e) {
     res.status(500).json({ error: e instanceof Error ? e.message : "Internal error" });

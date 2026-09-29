@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import { companyProfilePresentation } from "./company-profile-presentation";
+const issued = Object.freeze({companyName:"Original issued company",companyId:31});
+const binding={id:31,name:"BIMTECH"};
+assert.equal(companyProfilePresentation(7,binding).companyName,"BIMTECH");
+const profile=companyProfilePresentation(7,binding,{companyName:"Export branding",canonicalCompanyId:999});
+assert.equal(profile.canonicalCompanyId,31);
+assert.equal(profile.canonicalCompanyName,"BIMTECH");
+assert.equal(profile.companyName,"Export branding");
+assert.deepEqual(issued,{companyName:"Original issued company",companyId:31});
+console.log("Company profile binding presentation: PASS (no historical mutation)");
