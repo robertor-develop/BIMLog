@@ -1,4 +1,4 @@
-import { formatCalendarDate } from "@workspace/api-zod";
+import { formatOptionalInstantDate } from "@workspace/api-zod";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
@@ -347,7 +347,7 @@ export function FinancialControlsSettings() {
                     <b>{tt("Currency context", "Contexto monetario")}</b>
                     <div style={{ fontSize: 12, marginTop: 8 }}>
                       {state.context
-                        ? `${state.context.baseCurrency} · ${state.context.reportingCurrency} · v${state.context.version} · ${formatCalendarDate(state.context.effectiveFrom, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}${state.context.effectiveTo ? ` – ${formatCalendarDate(state.context.effectiveTo, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}` : ""}`
+                        ? `${state.context.baseCurrency} · ${state.context.reportingCurrency} · v${state.context.version} · ${formatOptionalInstantDate(state.context.effectiveFrom, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}${state.context.effectiveTo ? ` – ${formatOptionalInstantDate(state.context.effectiveTo, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}` : ""}`
                         : tt("Not configured", "No configurado")}
                     </div>
                     {state.context && (
@@ -395,9 +395,9 @@ export function FinancialControlsSettings() {
                         <Badge key={a.grantId} variant="outline">
                           {authorityLabel(a.authority)} ·{" "}
                           {scopeLabel(a.scopeType)} ·{" "}
-                          {formatCalendarDate(a.effectiveFrom, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}
+                          {formatOptionalInstantDate(a.effectiveFrom, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}
                           {a.effectiveTo
-                            ? ` – ${formatCalendarDate(a.effectiveTo, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}`
+                            ? ` – ${formatOptionalInstantDate(a.effectiveTo, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}`
                             : ""}
                         </Badge>
                       ))

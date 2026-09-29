@@ -48482,7 +48482,7 @@
     {
       "taskId": "ux006-ux010-state-and-trust-repairs",
       "reviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
-      "reviewedAt": "2026-09-29T05:14:07.521Z",
+      "reviewedAt": "2026-09-29T05:28:06.953Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48576,7 +48576,7 @@
         "living-brief/impact-declarations.json",
         "package.json"
       ],
-      "reviewedChangeSha256": "a6d608c6a69146fd81ebafccb7f89b18354aaa44c5fde9c44c0263c26264ffeb"
+      "reviewedChangeSha256": "3f41b764eed3ead009e1d7bac741f61414a314edfb9c11d9418e661d68ff0d4c"
     }
   ]
 }

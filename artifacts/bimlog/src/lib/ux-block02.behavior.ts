@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { calendarDate, formatCalendarDate } from "../../../../lib/api-zod/src/calendar-date";
+import { calendarDate, formatCalendarDate, formatOptionalInstantDate } from "../../../../lib/api-zod/src/calendar-date";
 import { intakeReadinessLabel } from "./intake-readiness-presentation";
 import { uniqueRfiPriorities, withCurrentPriority } from "./rfi-priority-options";
 import { submittalToEditorForm, buildSubmittalUpdateRequest } from "./submittal-editor-contract";
@@ -18,6 +18,10 @@ assert.deepEqual(withCurrentPriority(priorities,"retired").map(x=>x.value),["low
 assert.equal(withCurrentPriority(priorities,"low").length,3);
 for (const zone of ["America/New_York","Pacific/Honolulu","Pacific/Kiritimati","UTC"]) {
   process.env.TZ=zone;
+  const localDay = ["America/New_York", "Pacific/Honolulu"].includes(zone) ? 25 : 26;
+  assert.equal(formatOptionalInstantDate("2026-09-26T00:00:00Z"), `9/${localDay}/2026`);
+  assert.equal(formatOptionalInstantDate("2026-09-26T00:00:00Z", "es"), `${localDay}/9/2026`);
+  for (const absent of [null, undefined, "", 0, "bad", new Date(NaN)]) assert.equal(formatOptionalInstantDate(absent,"en-US","Not recorded"),"Not recorded");
   for (const value of ["2026-09-26","2026-09-26T00:00:00.000Z","2026-09-26T23:00:00-04:00",new Date("2026-09-26T00:00:00Z")]) {
     assert.equal(calendarDate(value),"2026-09-26");
     assert.equal(formatCalendarDate(value),"Sep 26, 2026");

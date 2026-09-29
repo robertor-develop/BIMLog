@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "c916ca55a23d43a025efb0631d4960b51c9e267f134e6adef8715da9c92adf8f",
+  "bundleSha256": "7c475a4dafbe856b7061a089c5eae8edb04e202b352fdf944e663ee717273c53",
   "impact": {
     "baselineCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
     "changedPaths": [
@@ -47,7 +47,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "claude",
@@ -59,7 +59,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "quality",
@@ -71,7 +71,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "vision",
@@ -83,19 +83,19 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "2c0ceafccf59386c5632f953014cb12082add655d8bd208af33ea700e84c7bf3",
-      "sourceChangedAt": "2026-09-29T05:14:07.562Z",
+      "sha256": "7e3c40521932c9df39a9db5a2a3075f7bdd1350043a0f28fd8fc6fffb934b4f7",
+      "sourceChangedAt": "2026-09-29T05:28:38.177Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "plugin",
@@ -107,7 +107,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "report_design_system",
@@ -119,7 +119,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "standards_register",
@@ -131,31 +131,31 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "670fcb9852632d83e4f31bca859c5a65d2cda8bbbb8728e03a691bc27e62ae7c",
-      "sourceChangedAt": "2026-09-29T05:14:07.562Z",
+      "sha256": "b00feb8e9c351da3515b9d86944039e995986bb217e3f44b92e2506ebd932f1f",
+      "sourceChangedAt": "2026-09-29T05:28:38.177Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "d03cb05dca6d0d2d79cb3d79610161b73244f8cd77efdf40797076b8b42fadc1",
-      "sourceChangedAt": "2026-09-29T05:14:07.562Z",
+      "sha256": "84a8a631719f40c7edf15c92edf7a181c0a9b771e767111093299b3ba1f49073",
+      "sourceChangedAt": "2026-09-29T05:28:38.177Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     },
     {
       "key": "audit",
@@ -167,7 +167,7 @@
       "semanticReviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
       "semanticReviewTask": "ux006-ux010-state-and-trust-repairs",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-29T05:14:07.521Z"
+      "semanticReviewedAt": "2026-09-29T05:28:06.953Z"
     }
   ]
 }

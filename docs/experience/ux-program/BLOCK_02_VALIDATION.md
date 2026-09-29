@@ -9,3 +9,5 @@
 - Screenshot capture timed out twice in the browser backend; DOM and actual interactions above were verified. This is not a claim of screenshot review or production acceptance.
 
 Local fixtures never contact production or deliver emails. The clean-commit release gate, exact pushed source, Replit publication and authenticated Chrome results are recorded externally under F:/BIMLog/Evidence/ux-audit-20260928/UX-B02-* after this source is committed. Publication is due now for UX001–UX010; absence of a passing receipt means release acceptance is incomplete.
+
+Preservation review: financial effective-from/to values are instants, so valid values retain their local-day display through formatOptionalInstantDate. Four-zone checks distinguish that behavior from Submittal calendar days and reject null/invalid epoch coercion. Final local Save also returns focus to Edit. Final release receipt uses a unique path bound to its exact commit; older PASS receipts are historical only.
