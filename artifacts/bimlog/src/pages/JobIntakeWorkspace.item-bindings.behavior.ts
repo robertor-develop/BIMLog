@@ -18,7 +18,9 @@ assert.match(source, /IntakeDeliveryItems/);
 assert.match(source, /<WorkPackageBuilder/);
 assert.doesNotMatch(source, /Add assignment|Specific Work Package/);
 assert.match(source, /Activation verification failed/);
-assert.match(source, /operations\$\{firstTaskId/);
+assert.match(source, /Open Job Operations/);
+assert.match(source, /activeChangeDestinations\.operations/);
+assert.doesNotMatch(source, /setLocation\(`\/projects\/\$\{projectId\}\/operations/);
 
 console.log(
   "PASS Intake reloads authoritative APU versions and persisted budget-line options while retaining company and agreement bindings",

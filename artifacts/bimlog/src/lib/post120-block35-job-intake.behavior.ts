@@ -28,13 +28,15 @@ assert.deepEqual(resolveJobIntakeRecovery(4, server, { revision: 4, data: partia
   resume: true,
   data: partial,
   discardStale: false,
+  retainNewer: false,
+  reason: "same_revision_draft",
 });
 assert.equal(resolveJobIntakeRecovery(5, server, { revision: 4, data: partial }).discardStale, true);
 assert.equal(resolveJobIntakeRecovery(4, server, { revision: 4, data: server }).resume, false);
 
 for (const revision of [3, 4, 5]) {
   assert.deepEqual(resolveJobIntakeRecovery(4, server, { revision, data: partial }, true), {
-    resume: false, data: server, discardStale: false,
+    resume: false, data: server, discardStale: false, retainNewer: false, reason: "read_only",
   });
 }
 assert.equal(jobIntakeIsCanonicalReadOnly({ status: "activated", activatedContractId: "canonical" }), true);
