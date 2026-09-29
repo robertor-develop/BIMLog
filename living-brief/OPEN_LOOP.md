@@ -2,6 +2,8 @@
 
 ## Experience makeover Block 04 - UX016-UX020 candidate
 
+Acceptance corrections: return links use an explicit internal-path parser; project-home redirects refresh when roles change; the route graph distinguishes the shared entry router from workspace tabs; the accessibility matrix now covers 62 surfaces and 186 viewport cases. Local role-routing Chrome checks and route regressions pass. Final full-suite and live publication acceptance remain pending.
+
 Shared project location links now span project and commercial workspaces. Intake preserves recovery data and carries a validated same-project stage/item return to prerequisites, including Convention Builder. Contract deep links select an accessible canonical contract or show explicit recovery. Project home routes verified managers to draft Intake or activated Operations, other roles to relevant work, and retains Analytics. Search states its active-membership scope and limits, finds project codes, labels source projects, and opens supported exact document links. UX011-UX015 were pushed at eceedf3af9793b25adbbfdc1c2cd43e6363581b8; UX011-UX020 now reach the ten-build publication boundary. Full local release, exact push/publication and authenticated Chrome smoke are required before claiming live acceptance. See BLOCK_04_VALIDATION.md. No schema, customer data, Native, or provider-send changes.
 
 ## Experience makeover Block 03 - UX011-UX015 candidate

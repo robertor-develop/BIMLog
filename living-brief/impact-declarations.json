@@ -48728,7 +48728,7 @@
     {
       "taskId": "ux016-ux020-connected-project-navigation",
       "reviewedThroughCommit": "eceedf3af9793b25adbbfdc1c2cd43e6363581b8",
-      "reviewedAt": "2026-09-29T07:58:51.605Z",
+      "reviewedAt": "2026-09-29T08:25:23.071Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48840,7 +48840,7 @@
         "scripts/route-interconnection-graph.mjs",
         "scripts/test-post120-block37.mjs"
       ],
-      "reviewedChangeSha256": "e571c50fe4e9f90134c398f831d7b1dccaff67845643d05c03e74d4c2706b4ce"
+      "reviewedChangeSha256": "26f6fe1ca1ab251bd7e5b735f2f8c0f92285d5d6050dd21dcd3b09c1340527bc"
     }
   ]
 }
