@@ -48288,6 +48288,87 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "consolidation-c116-c120-final-release-acceptance",
+      "reviewedThroughCommit": "aca80a379ec36e8881b806dc7099a0bc748efe49",
+      "reviewedAt": "2026-09-29T00:55:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "visible_provider_publication",
+          "authenticated_live_smoke"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Final consolidation acceptance preserves the unified product and existing ownership boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing build, publication, Chrome and no-Replit-Agent procedures remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing security, database, complete-suite and live acceptance gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new product promise or customer workflow is introduced by the acceptance layer."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Platform source is unchanged except for executable acceptance contracts and evidence."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers and package bytes are unchanged in C116 through C120."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing bilingual Help and printable guide presentation contracts are only verified."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, registration or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 24 acceptance evidence is stored outside the narrative status authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Ruben's physical Navisworks 2025 confirmation remains deferred post-closure evidence."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing audit baseline remains enforced without suppressing unexpected findings."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "744db1be37dd205d0e4655760aaea4f3c0d2d53b8f142d0683d7285e2174f328"
     }
   ]
 }

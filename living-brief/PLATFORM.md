@@ -325,6 +325,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/connector-validation-operations-postgres-store.ts
 - artifacts/api-server/src/lib/connector-validation-operations.behavior.ts
 - artifacts/api-server/src/lib/connector-validation-operations.ts
+- artifacts/api-server/src/lib/consolidation-build116-role-isolation.behavior.ts
+- artifacts/api-server/src/lib/consolidation-build117-workflow-reconciliation.behavior.ts
+- artifacts/api-server/src/lib/consolidation-build118-connected-boundary.behavior.ts
+- artifacts/api-server/src/lib/consolidation-build119-guide-acceptance.behavior.ts
+- artifacts/api-server/src/lib/consolidation-build120-final-release.behavior.ts
 - artifacts/api-server/src/lib/construction-coordination-records.ts
 - artifacts/api-server/src/lib/contract-economic-pool-service.ts
 - artifacts/api-server/src/lib/contract-item-workflow-contract.ts
