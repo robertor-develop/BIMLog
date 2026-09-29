@@ -27,14 +27,14 @@ export function createMemoryUpload(profile: MultipartProfile) {
   const fields = profile.fields ?? 0;
   const parts = profile.parts ?? files + fields;
   const limits: NonNullable<multer.Options["limits"]> & { fieldNestingDepth: number } = {
-    // Multer 2.3.0 supports this option; @types/multer 2.1.0 has not yet added it.
+    // Multer 2.4.0 supports this option; @types/multer 2.1.0 has not yet added it.
     fieldNestingDepth: MULTIPART_LIMITS.fieldNestingDepth,
     fieldNameSize: MULTIPART_LIMITS.fieldNameSize,
     headerPairs: MULTIPART_LIMITS.headerPairs,
     fields,
     files,
-    // Busboy's parts limit event also fires at the configured count.
-    parts: parts + 1,
+    // Multer 2.4.0 accepts exactly this many parts and rejects the next part.
+    parts,
     // Busboy reports truncation when the configured count is reached. Permit
     // one parser byte beyond the inclusive BIMLog maximum, then enforce the
     // exact governed limit after parsing below.

@@ -40,7 +40,7 @@ const patchedResolutions = [
   "drizzle-orm@0.45.2",
   "form-data@4.0.6",
   "lodash@4.18.1",
-  "multer@2.3.0",
+  "multer@2.4.0",
   "nanoid@5.1.16",
   "path-to-regexp@8.4.0",
   "picomatch@2.3.2",
