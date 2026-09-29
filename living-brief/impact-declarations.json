@@ -50029,7 +50029,7 @@
     {
       "taskId": "ux-b14-reports-evidence",
       "reviewedThroughCommit": "506d3ad7e02ba513d182f31a37912dedde1beff9",
-      "reviewedAt": "2026-09-29T18:41:02.000Z",
+      "reviewedAt": "2026-09-29T18:41:02Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -50123,7 +50123,7 @@
     {
       "taskId": "ux-b15-settings-notifications-libraries",
       "reviewedThroughCommit": "a86f0c58313bb0d935d413c53bfb0e767e12d728",
-      "reviewedAt": "2026-09-29T19:20:00.000Z",
+      "reviewedAt": "2026-09-29T19:20:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -50317,7 +50317,7 @@
     {
       "taskId": "ux-b16-replit-publication-source-attestation",
       "reviewedThroughCommit": "c5f83e4ae184911f98189fcab1210d04bb1db8f6",
-      "reviewedAt": "2026-09-29T20:22:27.000Z",
+      "reviewedAt": "2026-09-29T20:22:27Z",
       "status": "corrective_candidate",
       "captureTiming": "same_task_post_failure",
       "capabilityPreflight": {
@@ -50414,7 +50414,7 @@
     {
       "taskId": "ux-b16-replit-wrapper-parent-attestation",
       "reviewedThroughCommit": "c5ccc0e2c51eee0f4c020d3a0a9420d89f4c486e",
-      "reviewedAt": "2026-09-29T20:54:00.000Z",
+      "reviewedAt": "2026-09-29T20:54:00Z",
       "status": "corrective_candidate",
       "captureTiming": "same_task_post_failure",
       "capabilityPreflight": {
@@ -50510,8 +50510,8 @@
     },
     {
       "taskId": "ux-b17-public-trust-help-continuity-20260929",
-      "reviewedThroughCommit": "c265cf19b0c3e9989c3d1de830124230f4e2fb27",
-      "reviewedAt": "2026-09-29T22:15:00.000Z",
+      "reviewedThroughCommit": "99ee0faa1829e191c777fc6949f1dcd9f39b12e3",
+      "reviewedAt": "2026-09-29T22:45:00Z",
       "status": "source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -50562,7 +50562,7 @@
         },
         {
           "key": "platform",
-          "result": "updated",
+          "result": "reviewed_no_semantic_change",
           "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
         },
         {
@@ -50582,12 +50582,12 @@
         },
         {
           "key": "status",
-          "result": "updated",
+          "result": "reviewed_no_semantic_change",
           "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
         },
         {
           "key": "open_loop",
-          "result": "updated",
+          "result": "reviewed_no_semantic_change",
           "reason": "UX081-UX085 establish BIMLog brand architecture, truthful role-based product proof, deployment-specific trust copy, and exact Help return continuity while preserving authentication, canonical project records, permissions, customer data, Native, installer, and provider configuration boundaries."
         },
         {
@@ -50597,11 +50597,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/scripts/generate-platform-md.ts",
-        "artifacts/api-server/scripts/test-invitation-lifecycle.ts",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a015e8445199bdf14c4fc041583062fcbb73e5eb9563966cd7381a41c5a9244a"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
