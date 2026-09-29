@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { readInvitationToken, invitationError } from "@/lib/invitation-ui";
+import { intentLabel, parseCommercialIntent, rememberCommercialIntent } from "@/lib/commercial-intent";
 
 export function Register() {
   const { t, tt } = useI18n();
@@ -18,6 +19,8 @@ export function Register() {
   const [inviteLoading,setInviteLoading]=useState(Boolean(inviteToken));
   const [accepting,setAccepting]=useState(false);
   const [journey,setJourney]=useState("create");
+  const commercialIntent=parseCommercialIntent(window.location.search);
+  useEffect(()=>rememberCommercialIntent(commercialIntent),[]);
   const invitedEmail =
     new URLSearchParams(window.location.search)
       .get("email")
@@ -96,6 +99,7 @@ export function Register() {
         </>
       }
     >
+      {commercialIntent && <div role="status" className="mb-4 rounded-lg border p-3 text-sm"><strong>{tt("Selected offer","Oferta seleccionada")}:</strong> {intentLabel(commercialIntent)}{commercialIntent.useCase?` · ${commercialIntent.useCase}`:""}. {tt("Your selection will remain available during onboarding.","Su selección permanecerá disponible durante la incorporación.")}</div>}
       {error && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive text-sm mb-4">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />

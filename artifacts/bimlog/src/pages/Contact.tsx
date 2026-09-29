@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft, Mail, Phone, Globe, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { intentLabel, parseCommercialIntent, rememberCommercialIntent } from "@/lib/commercial-intent";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -28,7 +29,8 @@ const CONTACT_INFO = [
 ];
 
 export function Contact() {
-  const [form, setForm] = useState({ fullName: "", email: "", companyName: "", country: "", interest: "", message: "" });
+  const intent = parseCommercialIntent(window.location.search);
+  const [form, setForm] = useState({ fullName: "", email: "", companyName: "", country: "", interest: intent ? intentLabel(intent) : "", message: intent?.useCase ? `Primary use case: ${intent.useCase}` : "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -37,7 +39,7 @@ export function Contact() {
     if (!form.fullName || !form.email || !form.companyName || !form.country || !form.interest || !form.message) {
       setErrorMsg("All fields are required."); return;
     }
-    setStatus("sending"); setErrorMsg("");
+    rememberCommercialIntent(intent); setStatus("sending"); setErrorMsg("");
     try {
       const r = await fetch(`${API_BASE}/api/v1/contact`, {
         method: "POST",
@@ -67,6 +69,7 @@ export function Contact() {
         <p style={{ fontSize: 15, color: "hsl(var(--muted-foreground))", marginBottom: 48, lineHeight: 1.7 }}>
           Questions about pricing, a custom proposal, or the Founding Partner program — we respond to every inquiry within one business day.
         </p>
+        {intent && <div role="status" style={{marginBottom:24,padding:14,border:"1px solid hsl(var(--border))",borderRadius:8}}><strong>Selected from Pricing:</strong> {intentLabel(intent)}{intent.useCase?` · ${intent.useCase}`:""}. You can change it below.</div>}
 
         <div style={{ display: "flex", gap: 48, flexWrap: "wrap", alignItems: "flex-start" }}>
           {/* Contact info — left */}
@@ -140,6 +143,7 @@ export function Contact() {
                     style={{ width: "100%", padding: "8px 12px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: form.interest ? "hsl(var(--foreground))" : "hsl(var(--muted-foreground))", fontSize: 14, cursor: "pointer" }}
                   >
                     <option value="">Select an option...</option>
+                    {intent && !INTEREST_OPTIONS.includes(intentLabel(intent)) && <option value={intentLabel(intent)}>{intentLabel(intent)}</option>}
                     {INTEREST_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </div>
