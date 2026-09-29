@@ -34,6 +34,7 @@ import { lensNextSelectionTarget, type LensNextSelectionDirection } from "./lens
 import { summarizeLensNextIssues } from "./lens-next-issue-summary";
 import { lensNextCaptureKey, lensNextImageStatus, type LensNextImageLoad } from "./lens-next-image-state";
 import { useI18n } from "../../lib/i18n";
+import { lensNextPrerequisiteGuidance } from "./lens-next-prerequisite-guidance";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 const STATUS_LABELS_ES: Record<LensNextStatus, string> = {
@@ -622,6 +623,7 @@ export function LensNextPanelView({
     : -1;
   const issueSummary = React.useMemo(() => summarizeLensNextIssues(filteredIssues), [filteredIssues]);
   const activeProject = authorizedProjects.find(project => project.id === selectedProjectId);
+  const prerequisite = lensNextPrerequisiteGuidance(bridgeState, bridgeDisplayName);
   const navigateSelectedIssue = (direction: LensNextSelectionDirection) => {
     const target = direction === "previous" ? previousIssue : nextIssue;
     if (!target) return;
@@ -693,6 +695,7 @@ export function LensNextPanelView({
           <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,listCollapsed:!current.listCollapsed}))}>{workspaceLayout.listCollapsed?"Show issue list":"Hide issue list"}</button>
         </div>
       </div>
+      <p className={`lens-next__prerequisite lens-next__prerequisite--${prerequisite.state}`} role="status">{prerequisite.message}</p>
 
       <section className="lens-next__record-summary" aria-label={tt("BIMLog issue record summary", "Resumen de incidencias BIMLog")}>
         <strong>{activeIssueCount} {tt("active BIMLog issues", "incidencias BIMLog activas")}</strong>
