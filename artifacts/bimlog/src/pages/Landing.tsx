@@ -3,9 +3,12 @@ import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/layout/Footer";
 import { FileCheck2, ShieldCheck, FileSpreadsheet, Users, ArrowRight, CheckCircle2, UserPlus, FolderPlus, Settings2, Upload, MessageSquare, BarChart2, Camera, Link2, FileOutput } from "lucide-react";
+import { useAuthStore } from "@/store/auth";
+import { BIMLOG_BRAND } from "@/lib/brand-positioning";
 
 export function Landing() {
-  const { t, tt } = useI18n();
+  const { t, tt, lang } = useI18n();
+  const { user } = useAuthStore();
 
   return (
     <div className="min-h-screen bg-background">
@@ -15,7 +18,7 @@ export function Landing() {
         <div className="max-w-3xl">
           <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-blue-700 text-sm font-medium rounded-full px-4 py-1.5 mb-8">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            {tt("Construction coordination with accountable project records", "Coordinación de construcción con registros de proyecto responsables")}
+            {BIMLOG_BRAND.promise[lang === "es" ? "es" : "en"]}
           </div>
 
           <h1 className="font-display text-5xl md:text-6xl font-bold text-foreground leading-[1.1] mb-6">
@@ -30,17 +33,17 @@ export function Landing() {
           </p>
 
           <div className="flex flex-wrap gap-3">
-            <Link href="/register">
+            <Link href={user ? "/dashboard" : "/register"}>
               <Button size="lg" className="gap-2 text-base px-6">
-                {t('landing.hero.cta')}
+                {user ? tt("Continue to your projects", "Continuar a sus proyectos") : t('landing.hero.cta')}
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </Link>
-            <Link href="/login">
+            {!user && <Link href="/login">
               <Button size="lg" variant="outline" className="text-base px-6">
                 {t('auth.login')}
               </Button>
-            </Link>
+            </Link>}
             <Link href="/features">
               <Button size="lg" variant="ghost" className="gap-2 text-base px-6">
                 {tt("See the product workflow", "Ver el flujo del producto")}
@@ -96,6 +99,16 @@ export function Landing() {
               </li>
             ))}
           </ol>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6" aria-label={tt("Actual BIMLog product screens", "Pantallas reales del producto BIMLog")}>
+            <figure className="card overflow-hidden">
+              <img src="/images/product-proof/project-dashboard.png" alt={tt("BIMLog project dashboard showing connected project workspaces", "Panel de proyecto BIMLog mostrando espacios de trabajo conectados")} className="w-full aspect-video object-cover object-top" loading="lazy" />
+              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Actual product screen: open a project and move between its governed workspaces.", "Pantalla real del producto: abra un proyecto y navegue entre sus espacios controlados.")}</figcaption>
+            </figure>
+            <figure className="card overflow-hidden">
+              <img src="/images/product-proof/project-controls.png" alt={tt("BIMLog project controls with status and progress records", "Controles de proyecto BIMLog con registros de estado y avance")} className="w-full aspect-video object-cover object-top" loading="lazy" />
+              <figcaption className="p-4 text-sm text-muted-foreground">{tt("Actual product screen: review status, responsibility, and the next project action.", "Pantalla real del producto: revise estado, responsabilidad y la próxima acción del proyecto.")}</figcaption>
+            </figure>
+          </div>
           <Link href="/features" className="inline-flex min-h-11 items-center gap-2 mt-6 font-semibold text-primary hover:underline underline-offset-4">
             {tt("Review capabilities and boundaries", "Revisar capacidades y límites")}
             <ArrowRight className="w-4 h-4" />
