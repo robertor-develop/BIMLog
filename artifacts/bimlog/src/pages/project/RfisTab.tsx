@@ -1,7 +1,7 @@
 import { isDirectoryRecipientEmail } from "@workspace/api-zod";
 import { ProjectPartyPicker } from "@/components/ProjectPartyPicker";
 import { uniqueRfiPriorities, withCurrentPriority } from "@/lib/rfi-priority-options";
-import { rfiTimingPresentation, rfiWorkflowSummary } from "@/lib/rfi-experience";
+import { rfiTimingPresentation, rfiWorkflowSummary, safeRfiReturnTarget } from "@/lib/rfi-experience";
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   useListRfis, useCreateRfi, useUpdateRfi, useReviseRfi, useGenerateRfiQuestion,
@@ -920,6 +920,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [reportRequest, setReportRequest] = useState<RfiReportRequest | null>(null);
   const [selectedRfi, setSelectedRfi] = useState<Rfi | null>(null);
   const [meetingDraftReturn, setMeetingDraftReturn] = useState<string | null>(null);
+  const [detailReturnTo, setDetailReturnTo] = useState<string | null>(null);
   const [createPreload, setCreatePreload] = useState<{ subject?: string; question?: string; location?: string } | undefined>(undefined);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
@@ -952,6 +953,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     const rfiParam = sp.get("rfi");
     const returnTab = sp.get("returnTab");
     const meetingDraft = sp.get("meetingDraft");
+    const safeReturnTo = safeRfiReturnTarget(projectId, sp.get("returnTo"));
     if (sp.get("create") === "1" && launcher) setShowCreate(true);
 
     // Deep-link straight to an existing RFI's detail panel (the plugin opens the
@@ -960,7 +962,8 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     if (rfiParam) {
       const rfiId = Number(rfiParam);
       setMeetingDraftReturn(returnTab === "meetings" && meetingDraft ? meetingDraft : null);
-      if (!(returnTab === "meetings" && meetingDraft)) window.history.replaceState({}, "", `/projects/${projectId}/rfis`);
+      setDetailReturnTo(safeReturnTo);
+      if (!(returnTab === "meetings" && meetingDraft) && !safeReturnTo) window.history.replaceState({}, "", `/projects/${projectId}/rfis`);
       if (Number.isFinite(rfiId)) {
         (async () => {
           const r = await fetch(`/api/v1/projects/${projectId}/rfis/${rfiId}`, {
@@ -1252,7 +1255,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
           lang={lang}
           members={members || []}
           user={user}
-          onClose={() => setSelectedRfi(null)}
+          onClose={() => { if (detailReturnTo) { window.location.assign(detailReturnTo); return; } setSelectedRfi(null); }}
           onRevise={setSelectedRfi}
           onExportPdf={handleExportPdf}
           onExportCompletePdf={handleExportCompletePdf}

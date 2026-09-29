@@ -50,3 +50,10 @@ export function rfiTimingPresentation(input: {
   if (delta === 0) return { kind: "due" as const, isOverdue: false, ageDays, label: es ? "Vence hoy" : "Due today" };
   return { kind: "due" as const, isOverdue: false, ageDays, label: es ? `Vence en ${delta} d` : `Due in ${delta}d` };
 }
+
+export function safeRfiReturnTarget(projectId: number, value: string | null | undefined) {
+  if (!value) return null;
+  const prefix = `/projects/${projectId}/`;
+  if (!value.startsWith(prefix) || value.startsWith("//") || value.includes("\\")) return null;
+  return value;
+}
