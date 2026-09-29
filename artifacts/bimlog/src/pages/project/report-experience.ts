@@ -6,3 +6,14 @@ export const REPORT_MEASURES = [
 ] as const;
 export type ReportMeasureKey=(typeof REPORT_MEASURES)[number]["key"];
 export function reportMeasure(key:ReportMeasureKey){return REPORT_MEASURES.find(item=>item.key===key)!;}
+export const REPORT_QUESTIONS=[
+  {key:"health",label:"Is the project under control?",reports:["project-health","compliance","audit-certificate"]},
+  {key:"workflow",label:"Which records need attention?",reports:["rfi-aging","submittal-status","meeting-minutes","change-order-log","transmittal-log"]},
+  {key:"performance",label:"How is the team responding?",reports:["performance"]},
+  {key:"verification",label:"What content requires verification?",reports:["cvr"]},
+] as const;
+export function reportInputs(key:string):string[]{
+  if(key==="cvr")return ["CVR findings","selected date range","detail choice"];
+  if(["rfi-aging","submittal-status","change-order-log","transmittal-log"].includes(key))return ["canonical register","record status","selected dates when available"];
+  return ["project records","selected date range when available","detail choice"];
+}

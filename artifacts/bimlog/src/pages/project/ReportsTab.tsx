@@ -470,7 +470,7 @@ const PDF_REPORTS: { key: string; labelEn: string; labelEs: string; scopeEn: str
   { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",       scopeEn: "Content verification report",        scopeEs: "Reporte de verificacion de contenido",     icon: <Search size={20} /> },
 ];
 type ReportLauncherOptions = { from: string; to: string; status: string; includeDetails: boolean };
-import { REPORT_MEASURES } from "./report-experience";
+import { REPORT_MEASURES, REPORT_QUESTIONS, reportInputs } from "./report-experience";
 export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin: boolean }) {
   const { t, lang } = useI18n();
   const tl = (en: string, es: string) => lang === "es" ? es : en;
@@ -720,8 +720,8 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           {sourceScreenExportNote}
         </div>
 
-        <div className="phasea-report-grid">
-          {PDF_REPORTS.map(r => (
+        {REPORT_QUESTIONS.map(group=><section key={group.key} className="mb-4" aria-labelledby={`report-question-${group.key}`}><h3 id={`report-question-${group.key}`} className="mb-2 text-sm font-semibold">{group.label}</h3><div className="phasea-report-grid">
+          {PDF_REPORTS.filter(r=>(group.reports as readonly string[]).includes(r.key)).map(r => (
             <button
               key={r.key}
               title={tl(`Download ${r.labelEn} PDF - ${r.scopeEn}`, `Descargar PDF: ${r.labelEs} - ${r.scopeEs}`)}
@@ -739,11 +739,11 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
               <span style={{ display: "flex", alignItems: "center" }}>{r.icon}</span>
               <div>
                 <div>{tl(r.labelEn, r.labelEs)}</div>
-                <div style={{ fontSize: 10, fontWeight: 400, color: "hsl(var(--muted-foreground))", marginTop: 1 }}>{tl(r.scopeEn, r.scopeEs)}</div>
+                <div style={{ fontSize: 10, fontWeight: 400, color: "hsl(var(--muted-foreground))", marginTop: 1 }}>{tl(r.scopeEn, r.scopeEs)}</div><div style={{fontSize:10,fontWeight:400,marginTop:3}}>Inputs: {reportInputs(r.key).join(" · ")}</div>
               </div>
             </button>
           ))}
-        </div>
+        </div></section>)}
         <Dialog open={Boolean(selectedReport)} onOpenChange={(nextOpen) => { if (!nextOpen) closeReportLauncher(); }}>
           {selectedReport && (
             <DialogContent className="max-h-[calc(100vh-32px)] w-[calc(100vw-32px)] max-w-[560px] gap-0 overflow-y-auto p-0">
