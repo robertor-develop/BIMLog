@@ -470,7 +470,7 @@ const PDF_REPORTS: { key: string; labelEn: string; labelEs: string; scopeEn: str
   { key: "cvr",               labelEn: "CVR Full Report",      labelEs: "Reporte CVR Completo",       scopeEn: "Content verification report",        scopeEs: "Reporte de verificacion de contenido",     icon: <Search size={20} /> },
 ];
 type ReportLauncherOptions = { from: string; to: string; status: string; includeDetails: boolean };
-import { REPORT_MEASURES, REPORT_QUESTIONS, reportExportPreview, reportInputs } from "./report-experience";
+import { EVIDENCE_HISTORY_SOURCES, REPORT_MEASURES, REPORT_QUESTIONS, evidenceHistoryHref, reportExportPreview, reportInputs } from "./report-experience";
 export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin: boolean }) {
   const { t, lang } = useI18n();
   const tl = (en: string, es: string) => lang === "es" ? es : en;
@@ -773,6 +773,8 @@ export function ReportsTab({ projectId, isAdmin }: { projectId: number; isAdmin:
           )}
         </Dialog>
       </div>
+
+      <section className="phasea-card" aria-labelledby="evidence-history-heading" style={{marginBottom:20}}><div className="phasea-card-header"><div><div id="evidence-history-heading" className="phasea-card-title">{tl("Evidence history navigator","Navegador del historial de evidencia")}</div><div className="phasea-card-subtitle">{tl("Open each immutable source history. This navigator does not merge or rewrite their authority.","Abre cada historial de origen inmutable. Este navegador no combina ni reescribe su autoridad.")}</div></div></div><ol className="grid gap-2 md:grid-cols-2">{EVIDENCE_HISTORY_SOURCES.map(source=><li key={source.key} className="rounded-lg border p-3"><a href={evidenceHistoryHref(projectId,source.path)}><strong>{source.label}</strong></a><div className="text-xs text-slate-600">Authority: {source.authority}</div></li>)}</ol></section>
 
 
       {/* Project Intelligence Layer */}

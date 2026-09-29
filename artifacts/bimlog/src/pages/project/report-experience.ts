@@ -20,3 +20,12 @@ export function reportInputs(key:string):string[]{
 export function reportExportPreview(input:{label:string;from:string;to:string;status:string;includeDetails:boolean;visibleRows?:number}){
   return {scope:input.label,dateRange:input.from||input.to?`${input.from||"Any start"} to ${input.to||"Any end"}`:"All dates",status:input.status,detail:input.includeDetails?"Supporting rows included":"Summary totals only",visibleRows:input.visibleRows??null};
 }
+export const EVIDENCE_HISTORY_SOURCES=[
+  {key:"files",label:"File versions",path:"files",authority:"Document and evidence custody"},
+  {key:"rfis",label:"RFI responses and revisions",path:"rfis",authority:"RFI workflow history"},
+  {key:"submittals",label:"Submittal package revisions",path:"submittals",authority:"Submittal review history"},
+  {key:"meetings",label:"Meeting records",path:"meetings",authority:"Meeting record history"},
+  {key:"changes",label:"Change records",path:"change-orders",authority:"Commercial change history"},
+  {key:"transmittals",label:"Transmittal records",path:"transmittals",authority:"Delivery history"},
+] as const;
+export function evidenceHistoryHref(projectId:number,path:string){return `/projects/${projectId}/${path}?from=${encodeURIComponent(`/projects/${projectId}/reports`)}`;}
