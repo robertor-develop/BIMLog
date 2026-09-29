@@ -50119,6 +50119,98 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6fa2caf38865e0da104211eb000935b5c2c527b2cbd57ad9bb7bd480393f04af"
+    },
+    {
+      "taskId": "ux-b15-settings-notifications-libraries",
+      "reviewedThroughCommit": "805dd7f64c0b6da81cac7142b2f2cb0db6210313",
+      "reviewedAt": "2026-09-29T19:35:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "UX071–UX075 make settings scope and effective availability understandable while preserving canonical authority.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "experience_makeover",
+          "disposition": "implemented_gate_pending"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX071–UX075 clarify settings, notification, connector, role and reusable-library presentation without changing permissions, provider sends, stored role authority, immutable templates, project prices, schema, Native or installers."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
