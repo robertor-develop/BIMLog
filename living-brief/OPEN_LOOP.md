@@ -3789,3 +3789,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX056–UX060 connect exact evidence, draft changes, intentional meetings, canonical follow-up work and independent schedule layers without duplicating source records.
 - [x] Preserve existing record identity, status, due dates, approval authority, project scope and historical records.
 - [ ] Complete the exact-head gate, push UX056–UX060 once, publish the accumulated UX051–UX060 set without Replit Agents, and run full authenticated Chrome smoke.
+- [x] Correct the authenticated-smoke defect where legacy browser drafts restored blank meeting agenda and attendee rows; repeat the full gate, push, publication and smoke before UX061.

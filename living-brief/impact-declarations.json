@@ -49748,7 +49748,7 @@
     {
       "taskId": "ux-b12-coordination-continuity",
       "reviewedThroughCommit": "4c73e32398cf956228a3fa5eadebc0c112d91d48",
-      "reviewedAt": "2026-09-29T17:32:00.000Z",
+      "reviewedAt": "2026-09-29T17:32:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -49837,6 +49837,99 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ab8a5c7aeac61624a3fddf9d6882234988dcf639cf0df0b0a7b5cd49bfcfa22f"
+    },
+    {
+      "taskId": "ux-b12-meeting-empty-correction",
+      "reviewedThroughCommit": "7ae1be830d327dcc4e082c925bd8e36f3658bc61",
+      "reviewedAt": "2026-09-29T18:02:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_smoke_correction",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "authenticated_chrome_smoke"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Legacy local meeting drafts restored blank agenda and attendee boilerplate despite new intentional-empty defaults.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "production_defect",
+          "disposition": "corrected_and_regressed"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX058 smoke correction removes blank legacy meeting editor rows without changing canonical meeting, evidence, permission, reporting or Native authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b637af6b3ae0bb91c7c031e7773f5f37d2df37b34936ff97fa884489c371ea07"
     }
   ]
 }
