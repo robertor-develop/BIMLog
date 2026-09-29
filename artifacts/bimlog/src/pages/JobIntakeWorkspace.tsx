@@ -1,3 +1,4 @@
+import { GenericResourcePlan } from "@/components/job-intake/GenericResourcePlan";
 import { IntakeDeliveryItems } from "@/components/job-intake/IntakeDeliveryItems";
 import { withIntakeReturn } from "@/lib/return-context";
 import { intakeReadinessLabel } from "@/lib/intake-readiness-presentation";
@@ -24,7 +25,6 @@ import { ProjectContactCreator, type CreatedProjectContact } from "@/components/
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
-import { selectableTeamRoles } from "@/lib/team-role-options";
 import { expectedIntakeTaskCount } from "@/lib/intake-activation-task-count";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
@@ -32,11 +32,7 @@ import {
   contactBelongsToCompany,
   primaryContactOptions as buildPrimaryContactOptions,
 } from "@/lib/job-intake-directory-options";
-import {
-  applyAssignmentApuRate,
-  profileForApuRate,
-  rateForApuProfile,
-} from "@/lib/job-intake-apu-rates";
+
 import { applySoleApuToUnboundItems, contractApuCoverage, soleCompatibleApuVersion } from "@/lib/job-intake-apu-default";
 import {
   blankJobIntakeData,
@@ -82,8 +78,6 @@ export function JobIntakeWorkspace() {
   const { token } = useAuthStore();
   const { language, tt } = useI18n();
   const { getOptions } = useConfig();
-  const projectMemberRoles = selectableTeamRoles(getOptions("member_role"), "");
-  const [projectMemberRole, setProjectMemberRole] = useState("");
   const [, route] = useRoute("/projects/:id/intake");
   const [, setLocation] = useLocation();
   const projectId = Number(route?.id);
@@ -101,9 +95,6 @@ export function JobIntakeWorkspace() {
     [workspace, setWorkspace] = useState<any>(null),
     [budgetLines, setBudgetLines] = useState<any[]>([]),
     [directoryEntries, setDirectoryEntries] = useState<any[]>([]),
-    [eligibleProjectUsers, setEligibleProjectUsers] = useState<any[] | null>(null),
-    [eligibleProjectUserId, setEligibleProjectUserId] = useState(""),
-    [addingProjectMember, setAddingProjectMember] = useState(false),
     [mappingDocument, setMappingDocument] = useState<any>(null),
     [mappingForm, setMappingForm] = useState<JobIntakeMappingForm>({
       sheetName: "",
@@ -123,7 +114,6 @@ export function JobIntakeWorkspace() {
   const [pricingTemplateOptionsError, setPricingTemplateOptionsError] = useState(false);
   const [pricingTemplateOptionsLoading, setPricingTemplateOptionsLoading] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
-  const [packageCreation, setPackageCreation] = useState<{ assignmentIndex: number; title: string; dimensionType: string; dimensionValue: string } | null>(null);
   const [pdfSections, setPdfSections] = useState({ identity: true, scope: true, contracts: true, delivery: true, team: true, review: true });
   const revisionRef = useRef(0),
     projectIdRef = useRef(projectId),
@@ -194,17 +184,6 @@ export function JobIntakeWorkspace() {
         api(`/projects/${projectId}/directory`),
         api("/company/delivery-workflows/options"),
       ]);
-      const eligibleResponse = await fetch(
-        `${API_BASE}/api/v1/projects/${projectId}/members/eligible`,
-        { headers },
-      );
-      const eligibleUsers = eligibleResponse.ok
-        ? await eligibleResponse.json()
-        : eligibleResponse.status === 403
-          ? null
-          : await eligibleResponse.json().then((payload) => {
-              throw new Error(payload?.error || tt("Project member list failed to load.", "No se pudo cargar la lista de miembros del proyecto."));
-            });
       if (projectIdRef.current !== projectId) return;
       const recovered = readJobIntakeRecovery(projectId);
       const recovery = resolveJobIntakeRecovery(current.revision, current.data, recovered);
@@ -252,8 +231,6 @@ export function JobIntakeWorkspace() {
       setBudgetLines(selectedBudget?.snapshot?.lines ?? []);
       setDirectoryEntries(Array.isArray(directory) ? directory : []);
       setDeliveryWorkflowChoices(deliveryChoices);
-      setEligibleProjectUsers(Array.isArray(eligibleUsers) ? eligibleUsers : null);
-      setEligibleProjectUserId("");
       if (soleApu && JSON.stringify(loadedData) !== JSON.stringify(current.data))
         setNotice(tt(
           `The only compatible saved APU version (v${soleApu.version}) was applied to unbound Contract Items.`,
@@ -517,33 +494,6 @@ export function JobIntakeWorkspace() {
     });
     setNotice(tt("Client company added to this project and selected.", "La empresa cliente se agregó a este proyecto y quedó seleccionada."));
   };
-  const addExistingProjectMember = async () => {
-    const selected = eligibleProjectUsers?.find(
-      (candidate: any) => String(candidate.id) === eligibleProjectUserId,
-    );
-    if (!selected || addingProjectMember || !projectMemberRoles.some(role => role.value === projectMemberRole)) return;
-    setAddingProjectMember(true);
-    setError("");
-    try {
-      await persist(dataRef.current);
-      await api(`/projects/${projectId}/members`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: selected.email, role: projectMemberRole }),
-      });
-      await load();
-      setNotice(
-        tt(
-          `${selected.fullName || selected.email} is now a project member and can be assigned below.`,
-          `${selected.fullName || selected.email} ahora es miembro del proyecto y puede asignarse abajo.`,
-        ),
-      );
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-    } finally {
-      setAddingProjectMember(false);
-    }
-  };
   const setScopeItems = (updater: (items: any[]) => any[]) =>
     setData((old: any) => ({
       ...old,
@@ -551,6 +501,7 @@ export function JobIntakeWorkspace() {
       review: {
         ...old.review,
         scopeConfirmed: false,
+        deliveryConfirmed: false,
         pricingConfirmed: false,
       },
     }));
@@ -620,66 +571,6 @@ export function JobIntakeWorkspace() {
     setContracts((contracts) =>
       contracts.filter((contract) => contract.id !== contractId),
     );
-  };
-  const assignmentChange = (index: number, field: string, value: unknown) =>
-    setData((old: any) => ({
-      ...old,
-      team: {
-        ...old.team,
-        assignments: old.team.assignments.map((item: any, i: number) =>
-          i === index ? { ...item, [field]: value } : item,
-        ),
-      },
-    }));
-  const assignmentCustomerRateChange = (
-    index: number,
-    rate: string,
-    role?: string,
-  ) => setData((old: any) => applyAssignmentApuRate(old, index, rate, role));
-  const createAndSelectWorkPackage = async () => {
-    if (!packageCreation) return;
-    const assignment = dataRef.current.team.assignments[packageCreation.assignmentIndex];
-    if (!assignment?.scopeItemId || !packageCreation.title.trim() || !packageCreation.dimensionValue.trim()) {
-      setError(tt("Name the Work Package and enter its control value before saving.", "Asigne un nombre al Paquete de trabajo e ingrese su valor de control antes de guardar."));
-      return;
-    }
-    const packageId = `WP-${crypto.randomUUID()}`;
-    const workPackage = {
-      id: packageId,
-      packageCode: packageId.slice(0, 11),
-      title: packageCreation.title.trim(),
-      dimensionType: packageCreation.dimensionType,
-      dimensionValue: packageCreation.dimensionValue.trim(),
-      packageType: "deliverable",
-      tasks: [],
-    };
-    const next = {
-      ...dataRef.current,
-      scopeItems: dataRef.current.scopeItems.map((item: any) => item.id === assignment.scopeItemId ? { ...item, workPackages: [...(item.workPackages || []), workPackage] } : item),
-      team: {
-        ...dataRef.current.team,
-        assignments: dataRef.current.team.assignments.map((item: any, index: number) => index === packageCreation.assignmentIndex ? { ...item, assignmentTargetType: "work_package", workPackageId: packageId, workPackageTaskId: "" } : item),
-      },
-      review: { ...dataRef.current.review, scopeConfirmed: false, teamConfirmed: false },
-    };
-    setBusy(true);
-    setError("");
-    try {
-      dataRef.current = next;
-      setData(next);
-      const saved = await persist(next, true);
-      const verifiedPackage = saved?.data?.scopeItems?.find((item: any) => item.id === assignment.scopeItemId)?.workPackages?.find((item: any) => item.id === packageId);
-      const verifiedAssignment = saved?.data?.team?.assignments?.[packageCreation.assignmentIndex];
-      if (!verifiedPackage || verifiedAssignment?.workPackageId !== packageId)
-        throw new Error(tt("BIMLog could not verify the saved Work Package assignment.", "BIMLog no pudo verificar la asignación guardada del Paquete de trabajo."));
-      setPackageCreation(null);
-      setNotice(tt(`Work Package ${verifiedPackage.title} was saved and selected.`, `El Paquete de trabajo ${verifiedPackage.title} se guardó y seleccionó.`));
-      window.requestAnimationFrame(() => document.getElementById(`ji-assignment-${packageCreation.assignmentIndex}`)?.scrollIntoView({ block: "center" }));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
-    } finally {
-      setBusy(false);
-    }
   };
   const latestRate = "0",
     latestApuVersion = soleCompatibleApuVersion(apuVersions, data.identity.currency)?.version ?? null;
@@ -947,7 +838,7 @@ export function JobIntakeWorkspace() {
             ? tt("Budget mapping", "Vinculación presupuestaria")
             : tt("Contract setup", "Configuración contractual"),
         delivery: tt("Delivery workflow", "Flujo de entrega"),
-        team: tt("Team & resource plan", "Equipo y plan de recursos"),
+        team: tt("Resource budget", "Presupuesto de recursos"),
         review: intake.status === "activated" ? tt("Review active setup", "Revisar configuración activa") : tt("Review & activate", "Revisar y activar"),
       }) as any
     )[key];
@@ -1037,12 +928,12 @@ export function JobIntakeWorkspace() {
       "teamConfirmed",
       capabilities.budget
         ? tt(
-            "Assignments, hours, and internal hourly costs are correct.",
-            "Las asignaciones, horas y costos horarios internos son correctos.",
+            "The optional resource budget is reviewed; pending staffing is understood.",
+            "El presupuesto opcional de recursos está revisado; se reconoce el personal pendiente.",
           )
         : tt(
-            "Assignments and planned hours are correct.",
-            "Las asignaciones y horas planificadas son correctas.",
+            "Planned hours are reviewed; people may be assigned later.",
+            "Las horas previstas están revisadas; el personal puede asignarse después.",
           ),
       true,
     ],
@@ -2326,386 +2217,10 @@ export function JobIntakeWorkspace() {
                 </div>
               </section>
               <section className="ji-card" id="ji-team">
-                <h2>5. {stageLabel("team")}</h2>
-                <div className="ji-rate">
-                  <strong>
-                    {tt(
-                      "Planned hours connect each person to the work they will deliver.",
-                      "Las horas planificadas conectan a cada persona con el trabajo que entregará.",
-                    )}
-                  </strong>
-                  {capabilities.budget
-                    ? tt(
-                        "Assigned hours × internal hourly cost = planned labor cost. This connects workload, staffing cost, margin, and future performance.",
-                        "Horas asignadas × costo horario interno = costo laboral planificado. Así se conectan la carga de trabajo, el costo del personal, el margen y el desempeño futuro.",
-                      )
-                    : tt(
-                        "Assign members, roles, scope, and planned hours. Internal hourly costs are an optional Budget feature.",
-                        "Asigne miembros, roles, alcance y horas planificadas. Los costos horarios internos son una función opcional de Presupuesto.",
-                      )}
-                </div>
-                {eligibleProjectUsers !== null && (
-                  <div className="ji-row">
-                    <strong>{tt("Add an existing BIMLog user to this project", "Agregar un usuario existente de BIMLog a este proyecto")}</strong>
-                    <p className="ji-small">
-                      {tt(
-                        "Only users from companies already connected to this project are listed. Adding a member does not assign work until you select them in an assignment below.",
-                        "Solo se muestran usuarios de empresas ya conectadas a este proyecto. Agregar un miembro no asigna trabajo hasta seleccionarlo en una asignación abajo.",
-                      )}
-                    </p>
-                    <div className="ji-company-row">
-                      <select
-                        aria-label={tt("Existing BIMLog user", "Usuario existente de BIMLog")}
-                        value={eligibleProjectUserId}
-                        onChange={(event) => setEligibleProjectUserId(event.target.value)}
-                      >
-                        <option value="">
-                          {eligibleProjectUsers.length
-                            ? tt("Select an existing user", "Seleccione un usuario existente")
-                            : tt("No additional connected users", "No hay usuarios conectados adicionales")}
-                        </option>
-                        {eligibleProjectUsers.map((candidate: any) => (
-                          <option key={candidate.id} value={candidate.id}>
-                            {candidate.fullName || candidate.email} — {candidate.companyName}
-                          </option>
-                        ))}
-                      </select>
-                      <label>
-                        {tt("Project membership role", "Rol de membresía del proyecto")}
-                        <select value={projectMemberRole} onChange={event => setProjectMemberRole(event.target.value)}>
-                          <option value="">{tt("Select a configured role", "Seleccione un rol configurado")}</option>
-                          {projectMemberRoles.map(role => <option key={role.value} value={role.value}>{language === "es" ? role.labelEs || role.label : role.label}</option>)}
-                        </select>
-                      </label>
-                      <button
-                        type="button"
-                        disabled={!eligibleProjectUserId || addingProjectMember || !projectMemberRoles.some(role => role.value === projectMemberRole)}
-                        onClick={() => void addExistingProjectMember()}
-                      >
-                        <Plus size={14} /> {addingProjectMember
-                          ? tt("Adding…", "Agregando…")
-                          : tt("Add project member", "Agregar miembro al proyecto")}
-                      </button>
-                    </div>
-                  </div>
-                )}
-                <label>
-                  {tt("Project leader", "Líder del proyecto")}
-                  <select
-                    value={data.team.projectLeaderUserId ?? ""}
-                    onChange={(e) =>
-                      change(
-                        "team",
-                        "projectLeaderUserId",
-                        e.target.value ? Number(e.target.value) : null,
-                      )
-                    }
-                  >
-                    <option value="">
-                      {tt("Select leader", "Seleccione un líder")}
-                    </option>
-                    {intake.members?.map((m: any) => (
-                      <option key={m.id} value={m.id}>
-                        {m.fullName || m.email}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                {(intake.assignmentEligibility?.excluded?.length ?? 0) > 0 && <div className="ji-missing"><strong>{tt("Not eligible for assignment", "No elegibles para asignación")}</strong>{intake.assignmentEligibility.excluded.map((member:any)=><div key={member.id}>{member.fullName || member.email} — {tt("project membership is not active", "la membresía del proyecto no está activa")}</div>)}</div>}
-                {data.team.assignments.map((assignment: any, index: number) => (
-                  <div className="ji-row" id={`ji-assignment-${index}`} key={assignment.id}>
-                    <div className="ji-grid three">
-                      <label>
-                        {tt("Team member", "Miembro del equipo")}
-                        <select
-                          value={assignment.userId ?? ""}
-                          onChange={(e) => {
-                            const m = intake.members.find(
-                              (x: any) => String(x.id) === e.target.value,
-                            );
-                            assignmentChange(
-                              index,
-                              "userId",
-                              e.target.value ? Number(e.target.value) : null,
-                            );
-                            assignmentChange(
-                              index,
-                              "personName",
-                              m?.fullName || m?.email || "",
-                            );
-                          }}
-                        >
-                          <option value="">
-                            {tt("Select member", "Seleccione un miembro")}
-                          </option>
-                          {intake.members?.map((m: any) => (
-                            <option key={m.id} value={m.id}>
-                              {m.fullName || m.email}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        {tt("Role", "Rol")}
-                        <input
-                          value={assignment.role}
-                          onChange={(e) =>
-                            assignmentChange(index, "role", e.target.value)
-                          }
-                        />
-                      </label>
-                      <label>
-                        {tt("Contract", "Contrato")}
-                        <select
-                          value={
-                            assignment.contractId ||
-                            data.scopeItems.find(
-                              (item: any) => item.id === assignment.scopeItemId,
-                            )?.contractId ||
-                            data.commercial.contracts?.[0]?.id ||
-                            ""
-                          }
-                          onChange={(e) => {
-                            const contractId = e.target.value;
-                            const selectedScope = data.scopeItems.find(
-                              (item: any) => item.id === assignment.scopeItemId,
-                            );
-                            setData((old: any) => ({
-                              ...old,
-                              team: {
-                                ...old.team,
-                                assignments: old.team.assignments.map(
-                                  (item: any, i: number) =>
-                                    i === index
-                                      ? {
-                                          ...item,
-                                          contractId,
-                                          scopeItemId:
-                                            selectedScope?.contractId === contractId
-                                              ? item.scopeItemId
-                                              : "",
-                                        }
-                                      : item,
-                                ),
-                              },
-                            }));
-                          }}
-                        >
-                          {(data.commercial.contracts || []).map((contract: any) => (
-                            <option key={contract.id} value={contract.id}>
-                              {contract.title || contract.contractNumber || contract.id}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                      <label>
-                        {tt("Scope item", "Partida de alcance")}
-                        <select
-                          value={assignment.scopeItemId}
-                          onChange={(e) =>
-                            setData((old: any) => ({
-                              ...old,
-                              team: {
-                                ...old.team,
-                                assignments: old.team.assignments.map(
-                                  (item: any, i: number) =>
-                                    i === index
-                                      ? {
-                                          ...item,
-                                          scopeItemId: e.target.value,
-                                          assignmentTargetType: "contract_item",
-                                          workPackageId: "",
-                                          workPackageTaskId: "",
-                                        }
-                                      : item,
-                                ),
-                              },
-                            }))
-                          }
-                        >
-                          <option value="">
-                            {tt("Select scope", "Seleccione el alcance")}
-                          </option>
-                          {data.scopeItems
-                            .filter(
-                              (s: any) =>
-                                s.contractId ===
-                                (assignment.contractId ||
-                                  data.scopeItems.find(
-                                    (item: any) => item.id === assignment.scopeItemId,
-                                  )?.contractId ||
-                                  data.commercial.contracts?.[0]?.id),
-                            )
-                            .map((s: any) => (
-                            <option key={s.id} value={s.id}>
-                              {s.name || s.id}
-                            </option>
-                            ))}
-                        </select>
-                      </label>
-                      <label>
-                        {tt("Assigned hours", "Horas asignadas")}
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          value={assignment.plannedHours}
-                          onChange={(e) =>
-                            assignmentChange(
-                              index,
-                              "plannedHours",
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                      <label>
-                        {tt("Customer/APU rate profile", "Perfil de tarifa Cliente/APU")}
-                        <select
-                          disabled={!assignment.scopeItemId}
-                          value={profileForApuRate(data.scopeItems.find((item: any) => item.id === assignment.scopeItemId)?.billingHourlyRate)}
-                          onChange={(event) => {
-                            const profile = event.target.value;
-                            const rate = rateForApuProfile(profile);
-                            if (!rate) return;
-                            assignmentCustomerRateChange(index, rate, profile === "drafting" ? "Drafting" : "BIM Coordinator");
-                          }}
-                        >
-                          <option value="">{tt("Custom", "Personalizada")}</option>
-                          <option value="drafting">Drafting — 35.47</option>
-                          <option value="bim_coordinator">BIM Coordinator — 37.99</option>
-                        </select>
-                      </label>
-                      <label>
-                        {tt("Customer/APU unit rate (Contract Item)", "Tarifa unitaria Cliente/APU (Partida de Contrato)")}
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          disabled={!assignment.scopeItemId}
-                          value={data.scopeItems.find((item: any) => item.id === assignment.scopeItemId)?.billingHourlyRate || ""}
-                          placeholder={assignment.scopeItemId ? "0.00" : tt("Select a Contract Item first", "Seleccione primero una Partida de Contrato")}
-                          onChange={(event) => assignmentCustomerRateChange(index, event.target.value)}
-                        />
-                      </label>
-                      <div className="ji-lock">
-                        {assignment.scopeItemId
-                          ? tt("This customer/APU rate belongs to the selected Contract Item and is shared by assignments using it. Internal hourly cost and incentive remain separate per assignment.", "Esta tarifa Cliente/APU pertenece a la Partida de Contrato seleccionada y se comparte entre las asignaciones que la usan. El costo horario interno y el incentivo permanecen separados por asignación.")
-                          : tt("Select a Contract Item to set its customer/APU rate. Internal hourly cost remains independently editable.", "Seleccione una Partida de Contrato para establecer su tarifa Cliente/APU. El costo horario interno sigue siendo editable de forma independiente.")}
-                      </div>
-                      <label>{tt("Assignment target", "Destino de la asignación")}<select value={assignment.assignmentTargetType || (assignment.workPackageId ? "work_package" : "contract_item")} disabled={!assignment.scopeItemId} onChange={(e)=>setData((old:any)=>({...old,team:{...old.team,assignments:old.team.assignments.map((item:any,i:number)=>i===index?{...item,assignmentTargetType:e.target.value,workPackageId:e.target.value==="contract_item"?"":item.workPackageId,workPackageTaskId:e.target.value==="contract_item"?"":item.workPackageTaskId}:item)}}))}><option value="contract_item">{tt("Entire Contract Item", "Partida de Contrato completa")}</option><option value="work_package">{tt("Specific Work Package", "Paquete de trabajo específico")}</option></select></label>
-                      {(assignment.assignmentTargetType === "work_package" || assignment.workPackageId) && <label>{tt("Work Package", "Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>setData((old:any)=>({...old,team:{...old.team,assignments:old.team.assignments.map((item:any,i:number)=>i===index?{...item,workPackageId:e.target.value,workPackageTaskId:""}:item)}}))}><option value="">{tt("Select or create a Work Package", "Seleccione o cree un Paquete de trabajo")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{workPackage.title||workPackage.packageCode}{workPackage.dimensionValue ? ` — ${workPackage.dimensionValue}` : ""}</option>)}</select></label>}
-                      {assignment.workPackageId && ((data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).find((workPackage:any)=>workPackage.id===assignment.workPackageId)?.tasks?.length || 0) > 0 && <label>{tt("Exact operational task", "Tarea operativa exacta")}<select value={assignment.workPackageTaskId || ""} onChange={(event)=>assignmentChange(index,"workPackageTaskId",event.target.value)}><option value="">{tt("Select task", "Seleccione una tarea")}</option>{((data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).find((workPackage:any)=>workPackage.id===assignment.workPackageId)?.tasks||[]).map((task:any)=><option key={task.id} value={task.id}>{task.name || task.taskCode}</option>)}</select></label>}
-                      {(assignment.assignmentTargetType === "work_package" || assignment.workPackageId) && !assignment.workPackageId && <div className="ji-lock"><strong>{tt("Work Package required", "Paquete de trabajo requerido")}</strong><p>{tt("Create it here. BIMLog preserves this assignment, saves the package, verifies it, and returns with it selected.", "Créelo aquí. BIMLog conserva esta asignación, guarda y verifica el paquete, y regresa con el paquete seleccionado.")}</p><button type="button" onClick={()=>setPackageCreation({assignmentIndex:index,title:"",dimensionType:"deliverable",dimensionValue:""})}><Plus size={14}/> {tt("Create required Work Package", "Crear Paquete de trabajo requerido")}</button></div>}
-                      {packageCreation?.assignmentIndex === index && <div className="ji-row"><strong>{tt("Create and verify Work Package", "Crear y verificar Paquete de trabajo")}</strong><div className="ji-grid three"><label>{tt("Package name", "Nombre del paquete")}<input autoFocus value={packageCreation.title} onChange={(event)=>setPackageCreation({...packageCreation,title:event.target.value})}/></label><label>{tt("Control dimension", "Dimensión de control")}<select value={packageCreation.dimensionType} onChange={(event)=>setPackageCreation({...packageCreation,dimensionType:event.target.value})}><option value="building">{tt("Building","Edificio")}</option><option value="floor">{tt("Floor","Piso")}</option><option value="zone">{tt("Zone","Zona")}</option><option value="deliverable">{tt("Deliverable","Entregable")}</option><option value="task">{tt("Task","Tarea")}</option></select></label><label>{tt("Control value", "Valor de control")}<input value={packageCreation.dimensionValue} onChange={(event)=>setPackageCreation({...packageCreation,dimensionValue:event.target.value})}/></label></div><div className="ji-actions"><button type="button" className="primary" disabled={busy} onClick={()=>void createAndSelectWorkPackage()}>{tt("Save package and return", "Guardar paquete y regresar")}</button><button type="button" onClick={()=>setPackageCreation(null)}>{tt("Cancel", "Cancelar")}</button></div></div>}
-                      <div className="ji-lock">{tt("The selected scope activates as a real Job Operations task. Choosing a Work Package assigns this resource directly to that package task; choosing the Contract Item uses its delivery task.", "El alcance seleccionado se activa como una tarea real de Operaciones del Trabajo. Elegir un Paquete de trabajo asigna este recurso directamente a la tarea del paquete; elegir la Partida de Contrato utiliza su tarea de entrega.")}</div>
-                      <div className="ji-lock">{tt("Authoritative scope", "Alcance autorizado")}: {assignment.engagementId || "—"} → {assignment.contractId || "—"} → APU {data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.apuPlanVersion || "—"}</div>
-                      {capabilities.budget && (
-                        <>
-                          <label>
-                            {tt(
-                              "Internal hourly cost",
-                              "Costo horario interno",
-                            )}
-                            <input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              value={assignment.internalHourlyRate}
-                              onChange={(e) =>
-                                assignmentChange(
-                                  index,
-                                  "internalHourlyRate",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </label>
-                          <label>{tt("Incentive / bonus allocation", "Asignación de incentivo / bono")}<input type="number" min="0" step="0.01" value={assignment.incentiveAmount || "0"} onChange={(e)=>assignmentChange(index,"incentiveAmount",e.target.value)}/></label>
-                          <div className="ji-lock">{tt("Separate rate layers", "Capas de tarifa separadas")}: {tt("Internal", "Interna")} {assignment.internalHourlyRate || "0"} · {tt("Customer", "Cliente")} {data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.billingHourlyRate || "0"} · APU v{data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.apuPlanVersion || "—"} · {tt("Budgeted hours", "Horas presupuestadas")} {assignment.plannedHours || "0"}</div>
-                          <label>
-                            {tt(
-                              "Planned labor cost",
-                              "Costo laboral planificado",
-                            )}
-                            <input
-                              readOnly
-                              value={money(
-                                assignment.plannedHours,
-                                assignment.internalHourlyRate,
-                              )}
-                            />
-                          </label>
-                        </>
-                      )}
-                    </div>
-                    <button
-                      className="danger"
-                      onClick={() =>
-                        setData((old: any) => ({
-                          ...old,
-                          team: {
-                            ...old.team,
-                            assignments: old.team.assignments.filter(
-                              (_: any, i: number) => i !== index,
-                            ),
-                          },
-                        }))
-                      }
-                    >
-                      <Trash2 size={14} /> {tt("Remove", "Eliminar")}
-                    </button>
-                  </div>
-                ))}
-                {!capabilities.budget && (
-                  <div className="ji-lock">
-                    {tt(
-                      "Project Budget is not enabled. Team assignments and hours remain available; internal cost fields stay hidden.",
-                      "Presupuesto del proyecto no está habilitado. Las asignaciones y horas permanecen disponibles; los campos de costo interno quedan ocultos.",
-                    )}
-                  </div>
-                )}
-                <div className="ji-actions">
-                  <button
-                    onClick={() =>
-                      setData((old: any) => ({
-                        ...old,
-                        team: {
-                          ...old.team,
-                          assignments: [
-                            ...old.team.assignments,
-                            {
-                              id: crypto.randomUUID(),
-                              userId: null,
-                              personName: "",
-                              role: "",
-                              contractId:
-                                old.commercial.contracts?.[0]?.id || "PRIMARY",
-                              employmentType: "employee",
-                              scopeItemId: "",
-                              assignmentTargetType: "contract_item",
-                              workPackageId: "",
-                              workPackageTaskId: "",
-                              plannedHours: "0.00",
-                              internalHourlyRate: "0.00",
-                            },
-                          ],
-                        },
-                      }))
-                    }
-                  >
-                    <Plus size={14} />{" "}
-                    {tt("Add assignment", "Agregar asignación")}
-                  </button>
-                  <span className="ji-total">
-                    {tt("Planned", "Planificadas")}:{" "}
-                    {completion.totals.plannedHours}h ·{" "}
-                    {tt("Assigned", "Asignadas")}:{" "}
-                    {completion.totals.assignedHours}h ·{" "}
-                    {tt("Unassigned", "Sin asignar")}:{" "}
-                    {completion.totals.unassignedHours}h
-                  </span>
-                </div>
+                <h2>5. {tt("Resource budget", "Presupuesto de recursos")}</h2>
+                <GenericResourcePlan assignments={data.team.assignments} scopeItems={data.scopeItems} currency={data.identity.currency} budgetEnabled={capabilities.budget} tt={tt}
+                  onChange={assignments => setData((old: any) => ({ ...old, team: { ...old.team, assignments }, review: { ...old.review, teamConfirmed: false } }))}/>
+                <p className="ji-small">{tt("Unassigned scope hours remain pending for later staffing. They do not prevent activation.", "Las horas sin personal quedan pendientes para asignarlas después. No impiden la activación.")}</p>
               </section>
               <section className="ji-card" id="ji-review">
                 <h2>6. {stageLabel("review")}</h2>

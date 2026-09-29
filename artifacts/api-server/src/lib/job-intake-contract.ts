@@ -979,16 +979,14 @@ export function jobIntakeCompletion(
     (sum, item) => sum + scaledSignedDecimal(item.plannedHours),
     0n,
   );
-  const assignedHours = data.team.assignments.reduce(
+  const assignedHours = data.team.assignments.filter((assignment: any) => assignment.userId != null || assignment.personName).reduce(
     (sum: bigint, assignment: any) =>
       sum + scaledSignedDecimal(assignment.plannedHours),
     0n,
   );
   const teamReady =
-    data.team.assignments.length > 0 &&
     data.team.assignments.every(
       (assignment: any) =>
-        (assignment.userId != null || assignment.personName) &&
         assignment.role &&
         assignment.scopeItemId &&
         data.scopeItems.some((item) => item.id === assignment.scopeItemId) &&
@@ -1039,10 +1037,8 @@ export function jobIntakeCompletion(
       data.review.deliveryConfirmed,
     ],
     team: [
-      data.team.projectLeaderUserId != null,
       teamReady,
       ...(capabilities.budget ? [teamRatesReady] : []),
-      assignedHours >= plannedHours && plannedHours > 0n,
       data.review.teamConfirmed,
     ],
     review: [
@@ -1176,15 +1172,10 @@ export function jobIntakeCompletion(
       en: "Describe the Submittal delivery strategy.",
       es: "Describa la estrategia de entrega de submittals.",
     },
-    data.team.projectLeaderUserId == null && {
-      code: "leader",
-      en: "Assign a project leader.",
-      es: "Asigne un líder del proyecto.",
-    },
     !teamReady && {
       code: "team",
-      en: "Assign every team member to a scope item with planned hours.",
-      es: "Asigne cada miembro a una partida con horas planificadas.",
+      en: "Complete each resource plan row with a role, scope item and planned hours, or remove it.",
+      es: "Complete cada fila del plan con rol, partida y horas previstas, o elimínela.",
     },
     capabilities.budget &&
       !teamRatesReady && {
@@ -1192,11 +1183,6 @@ export function jobIntakeCompletion(
         en: "Enter internal hourly costs for the resource plan.",
         es: "Ingrese los costos horarios internos del plan de recursos.",
       },
-    assignedHours < plannedHours && {
-      code: "hours",
-      en: "Assign all planned scope hours to the team.",
-      es: "Asigne al equipo todas las horas planificadas.",
-    },
     !(
       (!activeDocuments.length || data.review.sourceConfirmed) &&
       data.review.scopeConfirmed &&

@@ -16,8 +16,8 @@ const read = (relative: string) =>
 const operationsService = read("./job-operations-service.ts");
 const operationsUi = read("../../../bimlog/src/pages/JobOperationsWorkspace.tsx");
 const intakeUi = read("../../../bimlog/src/pages/JobIntakeWorkspace.tsx");
-assert.match(intakeUi, /Assignment target/);
-assert.match(intakeUi, /Specific Work Package/);
+assert.match(intakeUi, /GenericResourcePlan/);
+assert.doesNotMatch(intakeUi, /Add an existing BIMLog user to this project/);
 assert.match(read(".\/job-intake-contract.ts"), /JOB_INTAKE_ASSIGNMENT_PACKAGE_REQUIRED/);
 const data = normalizeJobIntakeData({
   identity: {
@@ -406,7 +406,7 @@ assert.match(app, /startJobIntakeMigration\(\)/);
 assert.match(app, /await waitForJobIntakeMigration\(\)/);
 assert.match(ui, /Core included/);
 assert.match(ui, /La Cantidad conecta cada Partida de Contrato/);
-assert.match(ui, /Los costos horarios internos son una función opcional/);
+assert.match(read("../../../bimlog/src/components/job-intake/GenericResourcePlan.tsx"), /budgetEnabled/);
 assert.match(ui, /Cómputo de cantidades/);
 assert.match(ui, /Aún falta/);
 assert.match(ui, /missingItems\.map/);
@@ -426,7 +426,7 @@ assert.doesNotMatch(ui, /financial\/workspace`\)\.catch\(\(\) => null\)/);
 assert.match(ui, /saveState === "error"/);
 assert.match(read("../../../bimlog/src/lib/job-intake-workspace-state.ts"), /bimlog:job-intake-recovery/);
 assert.match(ui, /projectIdRef\.current !== projectId/);
-assert.match(ui, /setQuickMode\(readJobIntakeSetupMode\(projectId\) === "quick"\)/);
+assert.doesNotMatch(ui, /setQuickMode|<QuickJobIntake/);
 assert.match(ui, /setActive\(readJobIntakeActiveStage\(projectId\)\)/);
 assert.match(ui, /setMappingDocument\(null\)/);
 assert.match(ui, /setMappingPreview\(null\)/);
@@ -461,7 +461,7 @@ assert.match(service, /if \(row\.status === "activated" && row\.activated_contra
 assert.match(routes, /router\.use\("\/projects\/:projectId\/intake", authMiddleware\)/);
 assert.match(service, /JOB_INTAKE_LEADER_INELIGIBLE/);
 assert.match(service, /assignmentEligibility/);
-assert.match(ui, /Not eligible for assignment/);
+assert.match(read("../../../bimlog/src/components/job-intake/GenericResourcePlan.tsx"), /Existing assignment preserved/);
 assert.match(service, /parentContractProfileId: contract\.parentContractId/);
 assert.match(service, /clientCompanyId: data\.identity\.clientCompanyId/);
 assert.match(operationsService, /reportingContracts/);
@@ -484,8 +484,8 @@ assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(ui, /Setup readiness/);
 assert.match(ui, /Optional items remaining/);
-assert.match(ui, /Work progress/);
-assert.match(ui, /Financial progress/);
+assert.match(ui, /Staffing coverage/);
+assert.match(ui, /Commercial setup coverage/);
 assert.match(ui, /role="progressbar"/);
 assert.match(ui, /focus-visible/);
 assert.equal(completion.readinessSummary.setup.percent, completion.percent);

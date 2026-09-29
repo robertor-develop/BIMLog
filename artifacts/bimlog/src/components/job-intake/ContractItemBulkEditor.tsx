@@ -91,7 +91,7 @@ function scaled(value: unknown) {
   return BigInt(whole) * 1_000_000n + BigInt(fraction.padEnd(6, "0"));
 }
 
-function exactProduct(quantity: unknown, rate: unknown) {
+export function exactProduct(quantity: unknown, rate: unknown) {
   const q = scaled(quantity),
     r = scaled(rate);
   if (q == null || r == null) return "—";
