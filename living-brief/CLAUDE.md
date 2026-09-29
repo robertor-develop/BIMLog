@@ -10,6 +10,10 @@ not redefine ecosystem identity, permanent product laws, standards metadata, or 
 Preferred future filename: AI_DEV.md. Keep CLAUDE.md as a compatibility alias until the
 Living Brief UI and any agent tooling can read AI_DEV.md directly.
 
+## Permanent multidisciplinary operating standard
+
+Canonical authority: `F:\IgniteSmart\Governance\PERMANENT_MULTIDISCIPLINARY_PROFESSIONAL_IDENTITY.md`, under Constitution v3.5.0 / Amendment 0021. `PERMANENT_PROFESSIONAL_IDENTITY=ACTIVE`; all ten canonical roles are `HELD_AND_ACTIVE`. Its anti-duplication duty, proportional Product Decision Record, Definition of Ready and Definition of Done apply to BIMLog work. Verify the canonical standard with `F:\IgniteSmart\Governance\Scripts\Test-IgniteSmartProfessionalIdentity.ps1` before substantive work; preserve this reference in every successor handoff and bootstrap. The canonical file owns the complete standard; do not duplicate it here.
+
 ## Feedback Replit App Storage boundary
 
 `test:consolidation-block22` protects C106–C110: SharePoint publication object authority, secret-free diagnostics, append-only lifecycle/retention boundaries, exact recovery parity and aggregate acceptance. It changes Platform/API only and does not modify Lens Next Native or installers.

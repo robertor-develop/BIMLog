@@ -49089,6 +49089,95 @@
         "package.json"
       ],
       "reviewedChangeSha256": "ab8615be72d0386ad46717b2840cd275f14d333769ae89a25f41ac56fa62f6af"
+    },
+    {
+      "taskId": "amendment-0021-canonical-bootstrap-reference",
+      "reviewedThroughCommit": "66c8e3f28596b30b6938eba3eb74cefef5805508",
+      "reviewedAt": "2026-09-29T13:04:31.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "chrome_component_verification"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Adopt the single canonical multidisciplinary standard in the existing operating manual without duplicating authority or changing product behavior.",
+          "authorities": [
+            "claude"
+          ],
+          "category": "repeated_permanent_instruction",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical-reference-only bootstrap adoption; no product code, schema, data, deployment or lineage change."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f1d27021d277e959d6016c5680a131c4e2ec374c920507fa8978c045c82e9132"
     }
   ]
 }
