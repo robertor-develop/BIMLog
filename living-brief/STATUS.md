@@ -3182,3 +3182,9 @@ Block 9 gate correction: the convention guard now resolves inside the upload for
 - Existing Transmittal, Change Order, Meeting, Schedule and My Work records remain authoritative. The experience creates no parallel task, invented approval, duplicate evidence record or second status authority.
 - Product commits are `a006a7bd`, `35a782ba`, `2e3108ef`, `31d39092` and `4c73e323`. UX051–UX060 now reach the required ten-build publication and authenticated Chrome smoke boundary.
 - Authenticated production smoke found legacy local meeting drafts could restore the removed blank agenda and attendee boilerplate. Corrective commit `7ae1be83` filters blank restored rows and keeps new, reset and existing-meeting editors intentionally empty unless saved content exists; the concurrency regression now enforces that contract.
+
+## Experience makeover Block 13 source candidate — 2026-09-29
+
+- UX061–UX065 retain an explicit project and safe return path at Lens entry, explain bridge/model prerequisites, preserve exact Lens identity across linked BIMLog records, isolate repair tools behind an explicit Project Admin diagnostics boundary, and seal the unchanged Native capture/Working View/publishing contracts with field acceptance still pending.
+- Product commits are `94b63a66`, `8575cbe1`, `8b55176c`, `b4a66608` and `da61c055`. No Native, bridge, Autodesk, installer, schema or customer-data mutation is included.
+- This is the first five-build unpublished block after the live UX051–UX060 publication. Publication and authenticated Chrome smoke are due after UX066–UX070.

@@ -3790,3 +3790,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Preserve existing record identity, status, due dates, approval authority, project scope and historical records.
 - [ ] Complete the exact-head gate, push UX056–UX060 once, publish the accumulated UX051–UX060 set without Replit Agents, and run full authenticated Chrome smoke.
 - [x] Correct the authenticated-smoke defect where legacy browser drafts restored blank meeting agenda and attendee rows; repeat the full gate, push, publication and smoke before UX061.
+
+## Experience makeover Block 13 — Lens continuity and boundaries — 2026-09-29
+
+- [x] UX061–UX065 implement project-aware entry/return, truthful bridge/model guidance, identity-preserving linked-record navigation, separated Project Admin diagnostics and Native contract regression evidence.
+- [x] Preserve existing capture, Working View, controlled publishing, project authorization and no-model-save contracts; automated checks do not close Navisworks 2021/2025 affected-model field acceptance.
+- [ ] Complete the exact-head gate and push UX061–UX065 once. Do not publish until UX066–UX070 complete the next ten-build boundary.
