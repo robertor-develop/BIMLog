@@ -1660,6 +1660,8 @@ export function JobIntakeWorkspace() {
               </details>
               <section className="ji-card" id="ji-identity">
                 <h2>1. {stageLabel("identity")}</h2>
+                <p className="ji-guide">{tt("Existing project details are reused below. Change them only when this job needs a deliberate override; saving never creates a second project. Client selection reuses the project directory and clears a contact that belongs to another company.", "Los datos existentes del proyecto se reutilizan abajo. Cámbielos solo cuando este trabajo requiera una excepción deliberada; guardar nunca crea otro proyecto. La selección de cliente reutiliza el directorio y borra un contacto de otra empresa.")}</p>
+                <p className="ji-small">{tt("Current project", "Proyecto actual")}: {intake.project?.name} · {intake.project?.code}</p>
                 <p className="ji-small">{tt("The client is selected for the project and its contracts. Floors belong to work-package and task locations; do not assign a client per floor.", "El cliente se selecciona para el proyecto y sus contratos. Los pisos corresponden a ubicaciones de paquetes y tareas; no se asigna un cliente por piso.")}</p>
                 {guide && (
                   <div className="ji-guide">
@@ -1685,7 +1687,6 @@ export function JobIntakeWorkspace() {
                       />
                     </label>
                   ))}
-                  <label>{tt("Client", "Cliente")}<input value={data.identity.clientCompany || data.identity.clientName || ""} readOnly aria-readonly="true" /></label>
                   {clientCatalogError && <p role="alert">{tt("Client catalog could not be loaded; client selection is paused.", "No se pudo cargar el catÃ¡logo de clientes; la selecciÃ³n de cliente estÃ¡ en pausa.")}</p>}
                   <label>
                     {tt("Client company", "Empresa cliente")}
@@ -1777,7 +1778,7 @@ export function JobIntakeWorkspace() {
                     />
                   </label>
                 </div>
-                <CompanyJobMap data={data} companies={authoritativeCompanies} contacts={directoryEntries} setData={setData} tt={tt}/>
+                <details><summary>{tt("Companies and agreements (optional advanced setup)", "Empresas y acuerdos (configuración avanzada opcional)")}</summary><CompanyJobMap data={data} companies={authoritativeCompanies} contacts={directoryEntries} setData={setData} tt={tt}/></details>
               </section>
               <section className="ji-card" id="ji-scope">
                 <h2>
