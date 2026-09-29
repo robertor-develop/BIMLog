@@ -127,8 +127,8 @@ export function removeJobIntakeRecovery(projectId: number) {
 }
 
 export function readJobIntakeSetupMode(projectId: number): JobIntakeSetupMode {
-  try { return window.localStorage.getItem(setupModeKey(projectId)) === "advanced" ? "advanced" : "quick"; }
-  catch { return "quick"; }
+  // Legacy quick drafts use the same payload; always resume in the full setup.
+  return "advanced";
 }
 
 export function preserveJobIntakeSetupMode(projectId: number, mode: JobIntakeSetupMode) {
@@ -136,14 +136,14 @@ export function preserveJobIntakeSetupMode(projectId: number, mode: JobIntakeSet
 }
 
 export function readJobIntakeActiveStage(projectId: number): JobIntakeStage {
-  if (!Number.isInteger(projectId) || projectId <= 0) return "documents";
+  if (!Number.isInteger(projectId) || projectId <= 0) return "identity";
   try {
     const stage = new URLSearchParams(window.location?.search).get("stage");
     if (jobIntakeStages.includes(stage as JobIntakeStage)) return stage as JobIntakeStage;
     const saved = window.localStorage.getItem(activeStageKey(projectId));
-    return jobIntakeStages.includes(saved as JobIntakeStage) ? saved as JobIntakeStage : "documents";
+    return jobIntakeStages.includes(saved as JobIntakeStage) ? saved as JobIntakeStage : "identity";
   } catch {
-    return "documents";
+    return "identity";
   }
 }
 

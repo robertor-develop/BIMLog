@@ -5,7 +5,6 @@ import { Link, useLocation, useRoute } from "wouter";
 import {
   ArrowLeft,
   CheckCircle2,
-  ChevronLeft,
   FileUp,
   HelpCircle,
   Plus,
@@ -16,7 +15,6 @@ import {
 import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell";
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { ContractItemBulkEditor } from "@/components/job-intake/ContractItemBulkEditor";
-import { QuickJobIntake } from "@/components/job-intake/QuickJobIntake";
 import { LegacyProjectClassificationNotice } from "@/components/job-intake/LegacyProjectClassificationNotice";
 import { CompanyJobMap } from "@/components/job-intake/CompanyJobMap";
 import { WorkPackageBuilder } from "@/components/job-intake/WorkPackageBuilder";
@@ -48,7 +46,6 @@ import {
   preserveJobIntakeSetupMode,
   readJobIntakeActiveStage,
   readJobIntakeRecovery,
-  readJobIntakeSetupMode,
   removeJobIntakeRecovery,
   resolveJobIntakeRecovery,
   type JobIntakeStage,
@@ -65,13 +62,13 @@ import {
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const reportIntakeWorkflowFailure = (code: "JOB_INTAKE_AUTOSAVE_RETRY_FAILED" | "JOB_INTAKE_AUTOSAVE_FAILED") =>
   console.error(JSON.stringify({ event: "bimlog_workflow_failure", code }));
-const stages = jobIntakeStages;
+const stages = jobIntakeStages.filter(stage => stage !== "documents");
 type IntakeStage = JobIntakeStage;
 const blank = blankJobIntakeData;
 
 const css = `
 .ji-workspace{border:0;padding:0;margin:0;min-width:0}
-.ji{max-width:1180px;margin:0 auto;padding:24px 0 80px}.ji *{box-sizing:border-box}.ji-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px}.ji h1{font-size:30px;margin:4px 0}.ji p{color:#536174}.ji-progress{min-width:260px;padding:16px;border:1px solid #d9e1ec;border-radius:14px;background:#fff}.ji-progress strong{font-size:26px}.ji-bar{height:9px;background:#e8edf5;border-radius:99px;overflow:hidden;margin-top:8px}.ji-bar span{display:block;height:100%;background:#2563eb}.ji-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px}.ji-nav{position:sticky;top:16px;align-self:start;background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:10px}.ji-nav button{width:100%;border:0;background:transparent;padding:10px;border-radius:9px;text-align:left;display:flex;justify-content:space-between;cursor:pointer}.ji-nav button.on{background:#eaf1ff;color:#1649ad;font-weight:700}.ji-stages{display:flex;flex-direction:column}.ji-stages>.ji-advanced-return{order:0}.ji-stages>.ji-field-legend{order:1}.ji-stages>.ji-actions{order:2}.ji-stages>#ji-documents{order:3}.ji-stages>#ji-identity{order:4}.ji-stages>#ji-contract{order:5}.ji-stages>#ji-scope{order:6}.ji-stages>#ji-delivery{order:7}.ji-stages>#ji-team{order:8}.ji-stages>#ji-review{order:9}.ji-stages>.ji-footer{order:10}.ji-card{background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:20px;margin-bottom:16px;scroll-margin-top:20px}.ji-card h2{margin:0 0 4px;font-size:19px}.ji-guide{background:#eff6ff;border-left:4px solid #2563eb;padding:12px;margin:12px 0;border-radius:6px;color:#334155}.ji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ji-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.ji label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#475569}.ji input,.ji select,.ji textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:#fff;color:#0f172a}.ji textarea{min-height:78px;resize:vertical}.ji button{border:1px solid #cbd5e1;border-radius:8px;padding:9px 12px;background:#fff;cursor:pointer}.ji button.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8;font-weight:700}.ji button.danger{color:#b42318}.ji button:disabled{opacity:.5;cursor:not-allowed}.ji-row{border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-top:10px}.ji-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.ji-rate{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin:12px 0}.ji-rate strong{display:block;color:#166534}.ji-total{font-size:15px;font-weight:800;color:#0f3f9f}.ji-missing{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px}.ji-check{display:flex!important;grid-template-columns:18px 1fr!important;align-items:flex-start;gap:8px!important;font-size:14px!important}.ji-check input{width:auto;margin-top:2px}.ji-doc{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e2e8f0;padding:10px 0}.ji-footer{position:sticky;bottom:10px;display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid #cbd5e1;background:rgba(255,255,255,.96);border-radius:12px;box-shadow:0 8px 30px rgba(15,23,42,.12)}.ji-save-state{font-size:12px;font-weight:700;color:#475569}.ji-save-state.saving,.ji-save-state.unsaved{color:#9a3412}.ji-save-state.error{color:#b42318}.ji-error{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3;padding:12px;border-radius:10px;margin-bottom:12px}.ji-ok{background:#ecfdf5;color:#166534;padding:10px;border-radius:9px}.ji-small{font-size:12px;color:#64748b}.ji-upload{display:grid;grid-template-columns:1fr 160px 140px auto;gap:8px;align-items:end}.ji-paid{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#fff7ed;color:#9a3412;font-size:10px;font-weight:800;margin-left:8px}.ji-lock{background:#f8fafc;border:1px dashed #94a3b8;border-radius:10px;padding:14px;color:#475569;margin:10px 0}.ji-activation{background:#ecfdf5;border:1px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px}.ji-activation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.ji-stat{background:#fff;border:1px solid #d1fae5;border-radius:8px;padding:10px}.ji-nav em{font-size:9px;color:#9a3412;font-style:normal}@media(max-width:900px){.ji-layout{grid-template-columns:1fr}.ji-nav{position:static;display:flex;overflow:auto}.ji-nav button{min-width:145px}.ji-grid,.ji-grid.three,.ji-activation-grid{grid-template-columns:1fr}.ji-upload{grid-template-columns:1fr}.ji-head{display:block}.ji-progress{margin-top:12px}}
+.ji{max-width:1180px;margin:0 auto;padding:24px 0 80px}.ji *{box-sizing:border-box}.ji-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px}.ji h1{font-size:30px;margin:4px 0}.ji p{color:#536174}.ji-progress{min-width:260px;padding:16px;border:1px solid #d9e1ec;border-radius:14px;background:#fff}.ji-progress strong{font-size:26px}.ji-bar{height:9px;background:#e8edf5;border-radius:99px;overflow:hidden;margin-top:8px}.ji-bar span{display:block;height:100%;background:#2563eb}.ji-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px}.ji-nav{position:sticky;top:16px;align-self:start;background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:10px}.ji-nav button{width:100%;border:0;background:transparent;padding:10px;border-radius:9px;text-align:left;display:flex;justify-content:space-between;cursor:pointer}.ji-nav button.on{background:#eaf1ff;color:#1649ad;font-weight:700}.ji-stages{display:flex;flex-direction:column}.ji-stages>.ji-advanced-return{order:0}.ji-stages>.ji-field-legend{order:1}.ji-stages>.ji-actions{order:2}.ji-stages>#ji-documents{order:4}.ji-stages>#ji-identity{order:3}.ji-stages>#ji-contract{order:5}.ji-stages>#ji-scope{order:6}.ji-stages>#ji-delivery{order:7}.ji-stages>#ji-team{order:8}.ji-stages>#ji-review{order:9}.ji-stages>.ji-footer{order:10}.ji-card{background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:20px;margin-bottom:16px;scroll-margin-top:20px}.ji-card h2{margin:0 0 4px;font-size:19px}.ji-guide{background:#eff6ff;border-left:4px solid #2563eb;padding:12px;margin:12px 0;border-radius:6px;color:#334155}.ji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ji-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.ji label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#475569}.ji input,.ji select,.ji textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:#fff;color:#0f172a}.ji textarea{min-height:78px;resize:vertical}.ji button{border:1px solid #cbd5e1;border-radius:8px;padding:9px 12px;background:#fff;cursor:pointer}.ji button.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8;font-weight:700}.ji button.danger{color:#b42318}.ji button:disabled{opacity:.5;cursor:not-allowed}.ji-row{border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-top:10px}.ji-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.ji-rate{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin:12px 0}.ji-rate strong{display:block;color:#166534}.ji-total{font-size:15px;font-weight:800;color:#0f3f9f}.ji-missing{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px}.ji-check{display:flex!important;grid-template-columns:18px 1fr!important;align-items:flex-start;gap:8px!important;font-size:14px!important}.ji-check input{width:auto;margin-top:2px}.ji-doc{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e2e8f0;padding:10px 0}.ji-footer{position:sticky;bottom:10px;display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid #cbd5e1;background:rgba(255,255,255,.96);border-radius:12px;box-shadow:0 8px 30px rgba(15,23,42,.12)}.ji-save-state{font-size:12px;font-weight:700;color:#475569}.ji-save-state.saving,.ji-save-state.unsaved{color:#9a3412}.ji-save-state.error{color:#b42318}.ji-error{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3;padding:12px;border-radius:10px;margin-bottom:12px}.ji-ok{background:#ecfdf5;color:#166534;padding:10px;border-radius:9px}.ji-small{font-size:12px;color:#64748b}.ji-upload{display:grid;grid-template-columns:1fr 160px 140px auto;gap:8px;align-items:end}.ji-paid{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#fff7ed;color:#9a3412;font-size:10px;font-weight:800;margin-left:8px}.ji-lock{background:#f8fafc;border:1px dashed #94a3b8;border-radius:10px;padding:14px;color:#475569;margin:10px 0}.ji-activation{background:#ecfdf5;border:1px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px}.ji-activation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.ji-stat{background:#fff;border:1px solid #d1fae5;border-radius:8px;padding:10px}.ji-nav em{font-size:9px;color:#9a3412;font-style:normal}@media(max-width:900px){.ji-layout{grid-template-columns:1fr}.ji-nav{position:static;display:flex;overflow:auto}.ji-nav button{min-width:145px}.ji-grid,.ji-grid.three,.ji-activation-grid{grid-template-columns:1fr}.ji-upload{grid-template-columns:1fr}.ji-head{display:block}.ji-progress{margin-top:12px}}
 .ji-mapper{margin:14px 0;padding:16px;border:1px solid #93c5fd;border-radius:12px;background:#f8fbff}.ji-mapper-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.ji-mapper-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.ji-preview{overflow:auto;margin-top:12px}.ji-preview table{width:100%;border-collapse:collapse;font-size:12px}.ji-preview th,.ji-preview td{padding:7px;border:1px solid #dbe4f0;text-align:left}.ji-preview th{background:#eaf1ff}.ji-issues{color:#9f1239;font-weight:700}@media(max-width:900px){.ji-mapper-grid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.ji-mapper-grid{grid-template-columns:1fr}.ji-mapper-head{display:block}}
 .ji-quick{background:#fff;border:1px solid #d9e1ec;border-radius:16px;padding:22px}.ji-quick-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.ji-quick-head h2{margin:5px 0}.ji-quick-head button,.ji-quick-question button,.ji-quick-nav button{display:inline-flex;gap:7px;align-items:center}.ji-quick-kicker{color:#1d4ed8;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.ji-quick-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}.ji-quick-steps button{display:flex;align-items:center;gap:8px;text-align:left}.ji-quick-steps button span{display:grid;place-items:center;width:23px;height:23px;border-radius:99px;background:#e2e8f0}.ji-quick-steps button.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}.ji-quick-steps button.done span{background:#dcfce7;color:#166534}.ji-quick-question{min-height:260px;border:1px solid #e2e8f0;border-radius:12px;padding:20px}.ji-quick-question h3{margin-top:0}.ji-quick-summary{display:grid;gap:9px;margin:14px 0}.ji-quick-summary div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px}.ji-quick-summary span{color:#64748b}.ji-quick-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.ji-advanced-return{margin-bottom:12px}.ji-advanced-return button{display:inline-flex;gap:7px;align-items:center}@media(max-width:700px){.ji-quick-head{display:block}.ji-quick-head>button{margin-top:10px}.ji-quick-steps{grid-template-columns:1fr}.ji-quick-question{min-height:0}.ji-quick-summary div{grid-template-columns:1fr}.ji-quick-nav span{display:none}}
 .ji-field-legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #d9e1ec;border-radius:10px;background:#f8fafc;font-size:12px}.ji-field-legend strong{color:#9f1239}.ji-nav-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}.ji-nav-status.complete{color:#15803d}.ji-nav-status.required{color:#b45309}.ji-nav-status.optional{color:#64748b}
@@ -118,16 +115,12 @@ export function JobIntakeWorkspace() {
     [saveState, setSaveState] = useState<
       "saved" | "unsaved" | "saving" | "error"
     >("saved");
-  const [quickMode, setQuickMode] = useState(() => readJobIntakeSetupMode(projectId) === "quick");
   const [approvedClientIds, setApprovedClientIds] = useState<number[] | null | undefined>(undefined);
   const [clientCatalogError, setClientCatalogError] = useState(false);
   const [deliveryWorkflowChoices, setDeliveryWorkflowChoices] = useState<any>({ mode: "defaults_allowed", options: [] });
   const [pricingTemplateOptions, setPricingTemplateOptions] = useState<any[]>([]);
   const [pricingTemplateOptionsError, setPricingTemplateOptionsError] = useState(false);
   const [pricingTemplateOptionsLoading, setPricingTemplateOptionsLoading] = useState(false);
-  const [showReadinessDetails, setShowReadinessDetails] = useState(false);
-  const showQuickMode = () => { preserveJobIntakeSetupMode(projectId, "quick"); setQuickMode(true); };
-  const showAdvancedMode = () => { preserveJobIntakeSetupMode(projectId, "advanced"); setQuickMode(false); };
   const [exportingPdf, setExportingPdf] = useState(false);
   const [packageCreation, setPackageCreation] = useState<{ assignmentIndex: number; title: string; dimensionType: string; dimensionValue: string } | null>(null);
   const [pdfSections, setPdfSections] = useState({ identity: true, scope: true, contracts: true, delivery: true, team: true, review: true });
@@ -282,7 +275,7 @@ export function JobIntakeWorkspace() {
     pendingSaveRef.current = null;
     autosaveErrorRef.current = "";
     setActive(readJobIntakeActiveStage(projectId));
-    setQuickMode(readJobIntakeSetupMode(projectId) === "quick");
+    preserveJobIntakeSetupMode(projectId, "advanced");
     setMappingDocument(null);
     setMappingPreview(null);
     setMappingForm({ sheetName: "", headerRow: 1, nameColumn: 0, quantityColumn: 1 });
@@ -320,7 +313,8 @@ export function JobIntakeWorkspace() {
   useEffect(() => {
     if (!intake) return;
     const restored = readJobIntakeActiveStage(projectId);
-    setActive(restored);
+    setActive(restored === "documents" ? "identity" : restored);
+    if (restored === "documents") document.getElementById("ji-documents")?.setAttribute("open", "");
     const item = new URLSearchParams(window.location.search).get("item");
     const target = item && /^ji-[a-zA-Z0-9_-]{1,100}$/.test(item) ? item : `ji-${restored}`;
     const frame = window.requestAnimationFrame(() =>
@@ -1164,16 +1158,7 @@ export function JobIntakeWorkspace() {
             <strong>{readiness.setup.percent}%</strong>
             <p>{intake.status === "activated" || readiness.setup.ready ? readinessLabel : tt(`${readiness.setup.missingRequiredCount} required item(s) remaining`, `${readiness.setup.missingRequiredCount} elemento(s) obligatorio(s) pendiente(s)`)}</p>
           </div>
-          {quickMode && (
-            <div className="ji-readiness-card">
-              <h2>{tt("Setup details", "Detalles de configuración")}</h2>
-              <button type="button" aria-expanded={showReadinessDetails} aria-controls="job-intake-readiness-details" onClick={() => setShowReadinessDetails(value => !value)}>
-                {showReadinessDetails ? tt("Hide details", "Ocultar detalles") : tt("Show optional setup and coverage", "Mostrar configuración opcional y cobertura")}
-              </button>
-              <p>{tt("The two-minute setup stays focused on required information.", "La configuración de dos minutos se mantiene enfocada en la información obligatoria.")}</p>
-            </div>
-          )}
-          <div id="job-intake-readiness-details" hidden={quickMode && !showReadinessDetails} style={{ display: quickMode && !showReadinessDetails ? undefined : "contents" }}>
+          <div id="job-intake-readiness-details" style={{ display: "contents" }}>
           <div className="ji-readiness-card">
             <h2>{tt("Optional items remaining", "Elementos opcionales pendientes")}</h2>
             <strong>{readiness.optionalItemsRemaining}</strong>
@@ -1258,22 +1243,6 @@ export function JobIntakeWorkspace() {
           </section>
         )}
         <fieldset className="ji-workspace" disabled={busy}>
-          {quickMode ? (
-            <QuickJobIntake
-              data={data}
-              setData={setData}
-              companies={selectableClientCompanies}
-              contacts={primaryContactOptions}
-              defaultRate={capabilities.costValuePlanner ? latestRate : "0"}
-              defaultApuVersion={capabilities.costValuePlanner ? latestApuVersion : null}
-              projectId={projectId}
-              tt={tt}
-              onAdvanced={showAdvancedMode}
-              request={api}
-              onCompanyCreated={acceptCreatedCompany}
-              onContactCreated={acceptCreatedContact}
-            />
-          ) : (
           <div className="ji-layout">
             <aside className="ji-nav">
               {stages.map((key) => {
@@ -1302,7 +1271,6 @@ export function JobIntakeWorkspace() {
               })}
             </aside>
             <div className="ji-stages">
-              <div className="ji-advanced-return"><button type="button" onClick={showQuickMode}><ChevronLeft size={15} />{tt("Back to quick setup", "Volver al inicio rápido")}</button></div>
               <div className="ji-field-legend" role="note"><span><strong>{tt("Required", "Obligatorio")}</strong> — {tt("must be complete before activation", "debe completarse antes de activar")}</span><span>{tt("Optional", "Opcional")} — {tt("add only when it applies", "agregue solo cuando corresponda")}</span></div>
               <div
                 className="ji-actions"
@@ -1319,8 +1287,8 @@ export function JobIntakeWorkspace() {
                     : tt("Show guide", "Mostrar guía")}
                 </button>
               </div>
-              <section className="ji-card" id="ji-documents">
-                <h2>1. {stageLabel("documents")}</h2>
+              <details className="ji-card" id="ji-documents">
+                <summary>{tt("Source documents (optional)", "Documentos fuente (opcional)")}</summary>
                 {guide && (
                   <div className="ji-guide">
                     {tt(
@@ -1689,9 +1657,9 @@ export function JobIntakeWorkspace() {
                     )}
                   </div>
                 )}
-              </section>
+              </details>
               <section className="ji-card" id="ji-identity">
-                <h2>2. {stageLabel("identity")}</h2>
+                <h2>1. {stageLabel("identity")}</h2>
                 <p className="ji-small">{tt("The client is selected for the project and its contracts. Floors belong to work-package and task locations; do not assign a client per floor.", "El cliente se selecciona para el proyecto y sus contratos. Los pisos corresponden a ubicaciones de paquetes y tareas; no se asigna un cliente por piso.")}</p>
                 {guide && (
                   <div className="ji-guide">
@@ -1813,7 +1781,7 @@ export function JobIntakeWorkspace() {
               </section>
               <section className="ji-card" id="ji-scope">
                 <h2>
-                  4–5. {stageLabel("scope")} + {stageLabel("pricing")}
+                  3. {stageLabel("scope")} + {stageLabel("pricing")}
                 </h2>
                 <div className="ji-rate">
                   <strong>
@@ -1897,7 +1865,7 @@ export function JobIntakeWorkspace() {
               </section>
               <section className="ji-card" id="ji-contract">
                 <h2>
-                  3. {stageLabel("contract")}
+                  2. {stageLabel("contract")}
                   {!capabilities.contracts && (
                     <span className="ji-paid">
                       {tt(
@@ -2263,7 +2231,7 @@ export function JobIntakeWorkspace() {
               </section>
               <section className="ji-card" id="ji-delivery">
                 <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>
-                <h2>6. {stageLabel("delivery")}</h2>
+                <h2>4. {stageLabel("delivery")}</h2>
                 <div className="ji-guide" role="status">
                   <strong>{tt("What remains for this section", "Qué falta en esta sección")}</strong>
                   {missingForStage("delivery").length ? (
@@ -2350,7 +2318,7 @@ export function JobIntakeWorkspace() {
                 </div>
               </section>
               <section className="ji-card" id="ji-team">
-                <h2>7. {stageLabel("team")}</h2>
+                <h2>5. {stageLabel("team")}</h2>
                 <div className="ji-rate">
                   <strong>
                     {tt(
@@ -2732,7 +2700,7 @@ export function JobIntakeWorkspace() {
                 </div>
               </section>
               <section className="ji-card" id="ji-review">
-                <h2>8. {stageLabel("review")}</h2>
+                <h2>6. {stageLabel("review")}</h2>
                 {guide && (
                   <div className="ji-guide">
                     {intake.status === "activated" ? tt("This job is active. Review the saved setup here and open the job workspace to continue delivery. Saving setup changes does not approve or execute contracts.", "Este trabajo está activo. Revise aquí la configuración guardada y abra el espacio de trabajo para continuar la entrega. Guardar cambios de configuración no aprueba ni ejecuta contratos.") : tt(
@@ -2847,7 +2815,6 @@ export function JobIntakeWorkspace() {
               </div>
             </div>
           </div>
-          )}
         </fieldset>
       </main>
     </FinancialProjectShell>
