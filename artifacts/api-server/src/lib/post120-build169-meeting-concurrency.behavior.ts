@@ -46,6 +46,8 @@ assert.match(route, /if \(!row\) throw new MeetingClashLinkError\(409, "meeting_
 const ui = await readFile(new URL("../../../bimlog/src/pages/project/MeetingsTab.tsx", import.meta.url), "utf8");
 assert.match(ui, /Idempotency-Key/);
 assert.match(route, /legacyAgendaItems: parseMeetingLegacyAgendaItems\(meeting\.notes\)/);
-assert.match(ui, /detail\.legacyAgendaItems\?\.length/);
+assert.match(ui, /detail\.legacyAgendaItems \?\? \[\]/);
+assert.match(ui, /filter\(item => item\.trim\(\)\.length > 0\)/);
+assert.doesNotMatch(ui, /\[\.\.\.detail\.legacyAgendaItems, "", "", "", ""\]/);
 
 console.log("POST120_BUILD169=PASS retries=idempotent concurrent_updates=atomic stale_writes=denied");

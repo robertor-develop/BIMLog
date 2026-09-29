@@ -1038,19 +1038,8 @@ export function MeetingsTab({
     setMeetingDate("");
     setMeetingTime("10:00");
     setLocation("");
-    setAgendaItems(["", "", "", ""]);
-    setAttendees([
-      {
-        trade: "",
-        company: "",
-        companyId: null,
-        directoryEntryId: null,
-        fullName: "",
-        role: "",
-        email: "",
-        phone: "",
-      },
-    ]);
+    setAgendaItems([]);
+    setAttendees([]);
     setRfis([]);
     setSelectedRfis([]);
     setSelectedSubmittals([]);
@@ -1128,9 +1117,9 @@ export function MeetingsTab({
     setMeetingTime(String(payload.meetingTime || "10:00"));
     setLocation(String(payload.location || ""));
     if (Array.isArray(payload.agendaItems))
-      setAgendaItems(payload.agendaItems as string[]);
+      setAgendaItems(payload.agendaItems.filter((item): item is string => typeof item === "string" && item.trim().length > 0));
     if (Array.isArray(payload.attendees))
-      setAttendees(payload.attendees as Attendee[]);
+      setAttendees((payload.attendees as Attendee[]).filter(attendee => Boolean(attendee.fullName?.trim() || attendee.company?.trim() || attendee.email?.trim())));
     if (Array.isArray(payload.rfis)) setRfis(payload.rfis as RFIRow[]);
     if (Array.isArray(payload.selectedRfis))
       setSelectedRfis(payload.selectedRfis as LinkedRfi[]);
@@ -1331,11 +1320,7 @@ export function MeetingsTab({
       Number.isNaN(when.getTime()) ? "10:00" : when.toTimeString().slice(0, 5),
     );
     setLocation(detail.location || "");
-    setAgendaItems(
-      detail.legacyAgendaItems?.length
-        ? [...detail.legacyAgendaItems, "", "", "", ""].slice(0, 4)
-        : ["", "", "", ""],
-    );
+    setAgendaItems((detail.legacyAgendaItems ?? []).filter(item => item.trim().length > 0));
     setAttendees(
       detail.attendees?.length
         ? detail.attendees.map((attendee) => ({
@@ -1348,18 +1333,7 @@ export function MeetingsTab({
             email: attendee.externalEmail || "",
             phone: "",
           }))
-        : [
-            {
-              trade: "",
-              company: "",
-              companyId: null,
-              directoryEntryId: null,
-              fullName: "",
-              role: "",
-              email: "",
-              phone: "",
-            },
-          ],
+        : [],
     );
     setRfis([]);
     setSelectedRfis(detail.linkedRfis ?? []);
