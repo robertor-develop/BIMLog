@@ -24,3 +24,5 @@ assert.deepEqual(coverage[0], { contractId: "C1", label: "Base", itemCount: 2, b
 assert.equal(coverage[1].status, "incomplete");
 assert.equal(coverage[2].status, "empty");
 console.log("job-intake-apu-default: PASS");
+
+assert.equal(soleCompatibleApuVersion([{version: 8, currency: "EUR", sellingPrice: "30"}], "USD"), null);
