@@ -1,7 +1,7 @@
 import { isDirectoryRecipientEmail } from "@workspace/api-zod";
 import { ProjectPartyPicker } from "@/components/ProjectPartyPicker";
 import { uniqueRfiPriorities, withCurrentPriority } from "@/lib/rfi-priority-options";
-import { rfiWorkflowSummary } from "@/lib/rfi-experience";
+import { rfiTimingPresentation, rfiWorkflowSummary } from "@/lib/rfi-experience";
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   useListRfis, useCreateRfi, useUpdateRfi, useReviseRfi, useGenerateRfiQuestion,
@@ -1217,13 +1217,8 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   }), [rfis]);
 
   const overdueCount = useMemo(() =>
-    rfis?.filter(r => {
-      if (r.status === "closed") return false;
-      const due = r.dateRequired || r.dueDate;
-      if (due) return parseRfiCalendarDate(due) < new Date();
-      return differenceInDays(new Date(), new Date(r.createdAt)) > 14;
-    }).length ?? 0
-  , [rfis]);
+    rfis?.filter(r => rfiTimingPresentation({ status: r.status, createdAt: r.createdAt, dueDate: r.dateRequired || r.dueDate, sentAt: r.sentAt, sendStatus: r.sendStatus }, lang).isOverdue).length ?? 0
+  , [lang, rfis]);
 
   const handleExportPdf = (rfi: Rfi) => setReportRequest({ rfi, kind: "pdf" });
   const handleExportCompletePdf = (rfi: Rfi) => setReportRequest({ rfi, kind: "complete-pdf" });
@@ -1566,15 +1561,15 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                 <th>{w("Ball in Court", "Responsable", lang)}</th>
                 <th>{w("Submitted By", "Enviado por", lang)}</th>
                 <th style={{ width: 100 }}>{w("Date Req.", "Fecha Req.", lang)}</th>
-                <th style={{ width: 80 }}>{w("Days Out", "Días", lang)}</th>
+                <th style={{ width: 150 }}>{w("Timing", "Plazo", lang)}</th>
                 <th style={{ width: 110, textAlign: "right" }}></th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(rfi => {
                 const due = rfi.dateRequired || rfi.dueDate;
-                const isOverdue = rfi.status !== "closed" && due ? parseRfiCalendarDate(due) < new Date() : false;
-                const days = differenceInDays(new Date(), new Date(rfi.createdAt));
+                const timing = rfiTimingPresentation({ status: rfi.status, createdAt: rfi.createdAt, dueDate: due, sentAt: rfi.sentAt, sendStatus: rfi.sendStatus }, lang);
+                const isOverdue = timing.isOverdue;
                 const bic = getBallInCourt(rfi);
                 return (
                   <tr key={rfi.id} style={{ cursor: "pointer" }} onClick={() => setSelectedRfi(rfi)}>
@@ -1604,7 +1599,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
                     <td><span style={{ fontSize: 12 }}>{rfi.submittedByCompany || rfi.createdByName || "—"}</span></td>
                     <td style={{ fontSize: 11, color: isOverdue ? "#DC2626" : "hsl(var(--muted-foreground))", fontWeight: isOverdue ? 700 : 400, whiteSpace: "nowrap" }}>{fmt(due)}</td>
                     <td>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: daysColor(days, isOverdue) }}>{days}d</span>
+                      <span style={{ fontSize: 11, fontWeight: 700, color: isOverdue ? "#DC2626" : "hsl(var(--muted-foreground))" }}>{timing.label}</span>
                       {rfi.scheduleImpact && rfi.scheduleImpact !== "No Schedule Impact" && (
                         <span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 9, color: "#D97706" }}><AlertTriangle size={8} /> {w("Sched.", "Prog.", lang)}</span>
                       )}
