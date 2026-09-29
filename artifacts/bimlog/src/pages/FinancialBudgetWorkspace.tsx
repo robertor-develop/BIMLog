@@ -963,6 +963,7 @@ function History({
   projectId: number;
   budgets: any[];
 }) {
+  const returnTo = validatedReturn(useSearch(), projectId);
   return (
     <section className="fb-panel">
       <h2>
@@ -995,7 +996,7 @@ function History({
                     {" "}
                     ·{" "}
                     <Link
-                      href={`/projects/${projectId}/financial/snapshots/${b.approved_snapshot_id}`}
+                      href={`/projects/${projectId}/financial/snapshots/${b.approved_snapshot_id}${returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`}
                     >
                       {tt("Open snapshot", "Abrir instantánea")}
                     </Link>

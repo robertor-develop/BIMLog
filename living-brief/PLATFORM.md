@@ -1510,7 +1510,7 @@ It changes only when the code structure or curated architectural facts change.
 - APU selection filters exact compatible project-currency versions, preserves unavailable saved references, and never replaces an item unit rate with the plan total. Active Intake no longer offers hardcoded rate presets.
 - Item calculations show quantity, unit, rate, currency and exact total independently of labor hours. Help describes the same calculation.
 - Approved budget changes load before changing the draft, clear old line mappings and ignore stale responses. The controlled import selects named registered CSV/XLSX versions; backend authorization and evidence verification remain canonical.
-- Contract setup opens exact created contracts and retains validated Intake return context. Budget navigation also preserves that origin.
+- Contract setup opens exact created contracts and retains validated Intake return context. Budget navigation and individual History snapshot links also preserve that origin.
 - Optional commercial service failures expose retry while preserving core Intake and saved references. Commercial creation still requires authoritative access and existing validation.
 - Local responsive fixtures wrap their diagnostic destination independently of production layout.
 - UX030 is the B05+B06 ten-build publication boundary; live acceptance requires exact source and authenticated Chrome smoke.
