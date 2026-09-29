@@ -9,7 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown, Inbox, Download } from "lucide-react";
 import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
-import { conventionResolverUrl, fileIntakeCanSubmit, fileIntakeModeTruth, fileIntakePreview, fileIntakeRequiresConvention, type FileIntakeMode } from "@/lib/file-intake-journey";
+import { conventionResolverUrl, documentIdentity, fileIntakeCanSubmit, fileIntakeModeTruth, fileIntakePreview, fileIntakeRequiresConvention, type FileIntakeMode } from "@/lib/file-intake-journey";
 
 interface ValidationDetail {
   field: string;
@@ -502,6 +502,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
               <tbody>
                 {visibleFamilies.map(({ root, versions }) => {
                   const latest = versions[versions.length - 1];
+                  const latestIdentity = documentIdentity(latest);
                   const isMulti = versions.length > 1;
                   const isExp = expanded.has(root.id);
                   const isRejected = latest.status === "rejected";
@@ -610,6 +611,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                               }}>
                                 V{latest.version} latest
                               </span>
+                              <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{latestIdentity.label} · Source: {latestIdentity.source}</span>
                             </div>
                           ) : (
                             <span style={{
@@ -929,6 +931,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
 
                       {/* ── Version history rows (expanded) ── */}
                       {isExp && versions.map((ver, idx) => {
+                        const identity = documentIdentity(ver);
                         const isVerRejected = ver.status === "rejected";
                         const isOriginal = idx === 0;
                         const isLatestVer = idx === versions.length - 1;
@@ -957,6 +960,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                 }}>
                                   V{ver.version}
                                 </span>
+                                <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{identity.label} · Source: {identity.source}</span>
                                 <div>
                                   <div style={{ fontSize: 11, color: "hsl(var(--foreground))", fontWeight: 500 }}>
                                     {isOriginal ? "Original document" : isLatestVer ? "Latest response" : `Response v${ver.version}`}

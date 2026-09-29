@@ -47,6 +47,16 @@ export function fileIntakeCanSubmit(mode: FileIntakeMode, destinationLabel?: str
   return false;
 }
 
+export function documentIdentity(input: { id: number; rootFileId?: number | null; parentFileId?: number | null; version: number; source?: string | null }) {
+  const familyId = input.rootFileId ?? input.parentFileId ?? input.id;
+  return {
+    recordKey: `file:${input.id}`,
+    familyKey: `file-family:${familyId}`,
+    label: `Record #${input.id} · Family #${familyId} · V${input.version}`,
+    source: input.source?.trim() || "project upload",
+  };
+}
+
 export function newFileAttemptKey() {
   return crypto.randomUUID();
 }

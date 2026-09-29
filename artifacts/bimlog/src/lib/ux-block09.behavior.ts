@@ -6,6 +6,7 @@ import {
   conventionResolverUrl,
   fileIntakePreview,
   fileIntakeCanSubmit,
+  documentIdentity,
 } from "./file-intake-journey";
 
 assert.match(fileIntakeModeTruth("record_only"), /not retained or delivered/);
@@ -20,5 +21,7 @@ assert.deepEqual(fileIntakePreview({ fileName: "A.pdf", mode: "record_only" }), 
 assert.equal(fileIntakePreview({ fileName: "A.pdf", mode: "connected_delivery", destinationLabel: null }).delivers, false);
 assert.equal(fileIntakeCanSubmit("record_only"), true);
 assert.equal(fileIntakeCanSubmit("retained_evidence"), false);
+assert.deepEqual(documentIdentity({ id: 8, version: 2, parentFileId: 3, source: "system-generated" }), { recordKey: "file:8", familyKey: "file-family:3", label: "Record #8 · Family #3 · V2", source: "system-generated" });
+assert.notEqual(documentIdentity({ id: 8, version: 1 }).familyKey, documentIdentity({ id: 9, version: 1 }).familyKey);
 
-console.log("UX041–UX043 intake modes, convention return and truthful preview PASS");
+console.log("UX041–UX044 intake modes, convention return, preview and exact document identity PASS");
