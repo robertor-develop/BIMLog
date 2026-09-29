@@ -2218,7 +2218,8 @@ export function JobIntakeWorkspace() {
               </section>
               <section className="ji-card" id="ji-team">
                 <h2>5. {tt("Resource budget", "Presupuesto de recursos")}</h2>
-                <GenericResourcePlan assignments={data.team.assignments} scopeItems={data.scopeItems} currency={data.identity.currency} budgetEnabled={capabilities.budget} tt={tt}
+                {data.team.projectLeaderUserId != null && <div className="ji-row"><p>{tt("The project leader from the saved setup is preserved. If that person is no longer available, leave the leader pending and choose one later in project administration.", "Se conserva el líder de la configuración guardada. Si ya no está disponible, déjelo pendiente y elíjalo después en la administración del proyecto.")}</p>{intake.status !== "activated" && <button type="button" onClick={() => change("team", "projectLeaderUserId", null)}>{tt("Leave project leader pending", "Dejar líder del proyecto pendiente")}</button>}</div>}
+                <GenericResourcePlan assignments={data.team.assignments} scopeItems={data.scopeItems} currency={data.identity.currency} budgetEnabled={capabilities.budget} canReleaseLegacyAssignment={intake.status !== "activated"} tt={tt}
                   onChange={assignments => setData((old: any) => ({ ...old, team: { ...old.team, assignments }, review: { ...old.review, teamConfirmed: false } }))}/>
                 <p className="ji-small">{tt("Unassigned scope hours remain pending for later staffing. They do not prevent activation.", "Las horas sin personal quedan pendientes para asignarlas después. No impiden la activación.")}</p>
               </section>

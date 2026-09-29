@@ -1,7 +1,7 @@
 import React from "react";
 import { exactProduct } from "./ContractItemBulkEditor";
-type Props = { assignments: any[]; scopeItems: any[]; currency: string; budgetEnabled: boolean; tt: (en: string, es: string) => string; onChange: (rows: any[]) => void };
-export function GenericResourcePlan({ assignments, scopeItems, currency, budgetEnabled, tt, onChange }: Props) {
+type Props = { assignments: any[]; scopeItems: any[]; currency: string; budgetEnabled: boolean; canReleaseLegacyAssignment?: boolean; tt: (en: string, es: string) => string; onChange: (rows: any[]) => void };
+export function GenericResourcePlan({ assignments, scopeItems, currency, budgetEnabled, canReleaseLegacyAssignment = false, tt, onChange }: Props) {
  const update = (id: string, patch: any) => onChange(assignments.map(row => row.id === id ? {...row, ...patch} : row));
  return <div>
   <p>{tt("Plan the work by role without choosing employees. This is an optional estimate, not an approved employee pay rate. Assign people later in Job Operations when staffing is known.", "Planifique el trabajo por rol sin elegir empleados. Es una estimación opcional, no una tarifa salarial aprobada. Asigne personas después en Operaciones cuando conozca el personal disponible.")}</p>
@@ -9,6 +9,7 @@ export function GenericResourcePlan({ assignments, scopeItems, currency, budgetE
   {assignments.map((row, index) => row.userId != null || row.personName ? <div className="ji-row" key={row.id}>
     <strong>{tt("Existing assignment preserved", "Asignación existente conservada")}: {row.personName || tt("Project member", "Miembro del proyecto")}</strong>
     <p>{row.role} · {row.plannedHours}h · {tt("Manage named assignments in Job Operations.", "Administre las asignaciones de personas en Operaciones.")}</p>
+    {canReleaseLegacyAssignment && <button type="button" onClick={() => update(row.id, {userId:null,personName:""})}>{tt("Leave staffing pending; keep this plan", "Dejar personal pendiente; conservar este plan")}</button>}
    </div> : <div className="ji-row" key={row.id}>
     <div className="ji-grid three">
      <label>{tt("Planned role", "Rol previsto")}<input aria-label={tt(`Planned role ${index + 1}`, `Rol previsto ${index + 1}`)} value={row.role} placeholder={tt("e.g. BIM coordinator", "p. ej. Coordinador BIM")} onChange={event => update(row.id, {role:event.target.value})}/></label>
