@@ -799,9 +799,9 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
 
       <div style={{ display: "flex", gap: 18, borderBottom: "1px solid #E5E7EB", marginBottom: 16 }}>
         {[
-          ["submittals", w("Submittal Packages", "Paquetes de Entregables", lang)],
-          ["register", w("Register", "Registro", lang)],
-          ["tracking", w("Shop Drawing Control", "Control de Shop Drawings", lang)],
+          ["register", w("Required", "Requeridos", lang)],
+          ["submittals", w("Received", "Recibidos", lang)],
+          ["tracking", w("Control", "Control", lang)],
         ].map(([key, label]) => (
           <button
             key={key}
@@ -820,6 +820,18 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
             {label}
           </button>
         ))}
+      </div>
+
+      <div role="note" style={{ margin: "-6px 0 14px", color: "#64748B", fontSize: 12, lineHeight: 1.45 }}>
+        {view === "register" && w(
+          "Required lists what the contract or specification expects. A requirement is not a received package or an approval.",
+          "Requeridos enumera lo que exige el contrato o la especificación. Un requisito no es un paquete recibido ni una aprobación.", lang)}
+        {view === "submittals" && w(
+          "Received contains the actual package revisions submitted for review. Open a package to review its current revision and history.",
+          "Recibidos contiene las revisiones reales de paquetes enviadas para revisión. Abre un paquete para revisar su revisión actual e historial.", lang)}
+        {view === "tracking" && w(
+          "Control connects requirements to received package revisions. Coverage means linked evidence; it never means approved.",
+          "Control conecta requisitos con revisiones de paquetes recibidos. Cobertura significa evidencia vinculada; nunca significa aprobado.", lang)}
       </div>
 
       {/* Action needed banner */}
