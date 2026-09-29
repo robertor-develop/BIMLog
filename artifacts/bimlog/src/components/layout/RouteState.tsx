@@ -16,7 +16,7 @@ export function RouteState({ kind, code, title, detail, onRetry }: { kind: Route
   const intakeReturn = intakePrerequisiteReturn(useSearch());
   const message = copy[kind];
   const loading = kind === "loading";
-  return <section className={`route-state route-state-${kind}`} role={loading ? "status" : "alert"} aria-live={loading ? "polite" : "assertive"} aria-busy={loading || undefined}>
+  return <section className={`route-state route-state-${kind}`} data-experience-state={kind} role={loading ? "status" : "alert"} aria-live={loading ? "polite" : "assertive"} aria-busy={loading || undefined}>
     <h1>{title ?? message.title}</h1>
     <p>{detail ?? message.detail}</p>
     {code && <details className="route-state-technical"><summary>{productLabel("technicalDetails", "en")} / {productLabel("technicalDetails", "es")}</summary><code>{readableTechnicalCode(code)} · {code}</code></details>}
