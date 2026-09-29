@@ -85,7 +85,7 @@ ${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
 - Any future database diagnostics must confirm PROD_DATABASE_URL is the connection target before drawing any conclusions.
 - Replit currently documents that development structural changes may be applied to production at Publish. No supported repository configuration is proven to disable that managed migration authority. Every Publish remains human-gated; a root build cannot stop a migration Replit may apply before the build.
 - Authoritative source is the explicitly fetched remote master ref, not the older remote default main. Before Helium sync or Publish, the clean Replit workspace, local master, origin/master, and freshly read remote master must match exactly and pass the commit-bound publication-source attestation.
-- Replit may add an automatic empty publish-wrapper commit. Production assembly attributes that wrapper to \`origin/master\` only when the remote commit is an ancestor of \`HEAD\` and both commits resolve to the exact same tree; any ancestry or tree mismatch fails closed. Outside Replit, production assembly remains bound to \`HEAD\`.
+- Replit may add and push an automatic empty publish-wrapper commit before build. Production assembly attributes only the exact \`Published your App\` wrapper to its first parent and only when both commits resolve to the exact same tree. When Replit environment identity is available, \`origin/master\` must also be an ancestor with that exact tree. Missing parent, changed tree, changed subject or failed ancestry fails closed; ordinary local commits remain bound to \`HEAD\`.
 
 ## Monorepo shape
 - pnpm workspaces.

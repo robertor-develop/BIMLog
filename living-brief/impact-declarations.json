@@ -50410,6 +50410,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "39d996ad90e8f2e18e679cf3dffe05be242080fd3a87493494540b7ad8e04a05"
+    },
+    {
+      "taskId": "ux-b16-replit-wrapper-parent-attestation",
+      "reviewedThroughCommit": "c5ccc0e2c51eee0f4c020d3a0a9420d89f4c486e",
+      "reviewedAt": "2026-09-29T20:54:00.000Z",
+      "status": "corrective_candidate",
+      "captureTiming": "same_task_post_failure",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "Replit pushes its empty publish wrapper before build, so exact subject, parent and tree proof are required.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "publication_identity",
+          "disposition": "implemented_gate_pending"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The final publication attestation recognizes only an exact empty Published your App wrapper with a valid first parent and identical trees, while preserving the remote-master defense when provider environment identity exists; all other commits remain HEAD-bound and no product, permission, schema, data, Native, installer or provider setting changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f53d55ec0b17667ebdc75c56e0878612cd17962e3145d176ff89b0d9716af426"
     }
   ]
 }

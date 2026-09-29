@@ -3811,4 +3811,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 
 - [x] Reject the first publication because runtime `sourceCommit` named Replit's automatic empty publish wrapper instead of the reviewed pushed commit.
 - [x] Bind Replit production assembly to `origin/master` only when it is an ancestor of `HEAD` and both commits have the exact same tree; fail closed on every mismatch and preserve ordinary local `HEAD` identity.
+- [x] Account for the provider pushing its exact empty `Published your App` wrapper before build by requiring that exact subject, a valid first parent, and identical wrapper/parent trees before parent attribution.
 - [ ] Push the corrective attestation commit, resynchronize Replit without Agents, republish, verify exact live source identity, and rerun the complete authenticated Chrome smoke before accepting UX071–UX080.

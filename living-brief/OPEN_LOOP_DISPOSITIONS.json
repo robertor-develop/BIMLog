@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a67f226e68d3d4676bbe7f459e6af9d380b415cdf450c4382ac42df149bb40c9",
+  "sourceSha256": "fea804cb5dc702542c89ca2c26bae0589cf956851d66151e47f5c661bdeb2da2",
   "itemCount": 266,
   "counts": {
     "ACTIVE": 231,
@@ -4844,7 +4844,7 @@
     },
     {
       "id": "601b5575dec2a416",
-      "sourceLine": 3814,
+      "sourceLine": 3815,
       "heading": "UX071–UX080 publication identity retry — 2026-09-29",
       "statement": "Push the corrective attestation commit, resynchronize Replit without Agents, republish, verify exact live source identity, and rerun the complete authenticated Chrome smoke before accepting UX071–UX080.",
       "classification": "ACTIVE",
@@ -4855,7 +4855,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3814",
+        "OPEN_LOOP.md:3815",
         "UX071–UX080 publication identity retry — 2026-09-29"
       ],
       "currentAuthority": false
