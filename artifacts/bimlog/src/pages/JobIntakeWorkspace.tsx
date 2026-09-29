@@ -2142,10 +2142,10 @@ export function JobIntakeWorkspace() {
                   onBudgetSnapshotChange={(id) => void selectSnapshot(id)}
                   snapshots={workspace?.snapshots ?? []}
                   onOpenCostValuePlanner={() =>
-                    openCommercialPrerequisite(`/projects/${projectId}/financial/apu`)
+                    openCommercialPrerequisite(`/projects/${projectId}/financial/apu`, "scope", "ji-scope")
                   }
                   onOpenProjectBudget={() =>
-                    openCommercialPrerequisite(`/projects/${projectId}/financial/budget`)
+                    openCommercialPrerequisite(`/projects/${projectId}/financial/budget`, "contract", "ji-contract")
                   }
                   tt={tt}
                   onError={setError}
@@ -2156,10 +2156,10 @@ export function JobIntakeWorkspace() {
 
               </section>
               <section className="ji-card" id="ji-delivery">
-                {canonicalReadOnly ? <Link className="ji-navigation-link" href={withIntakeReturn(`/projects/${projectId}/convention`, projectId, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</Link> : <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>}
+                {canonicalReadOnly ? <Link className="ji-navigation-link" href={withIntakeReturn(`/projects/${projectId}/convention`, projectId, "delivery", "ji-delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</Link> : <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery", "ji-delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>}
                 <h2>4. {stageLabel("delivery")}</h2>
                 <p className="ji-small">{tt("Only eligible published workflows appear below. If none match, an authorized company administrator must publish one; your draft is saved before leaving and you can return to this step.", "Solo aparecen flujos publicados elegibles. Si ninguno corresponde, un administrador autorizado debe publicar uno; el borrador se guarda antes de salir y puede volver a este paso.")}</p>
-                {canonicalReadOnly ? <Link className="ji-navigation-link" href={withIntakeReturn("/company-workflows", projectId, "delivery")}>{tt("Open company workflows and return here", "Abrir flujos de empresa y volver aquí")}</Link> : <button type="button" onClick={() => openCommercialPrerequisite("/company-workflows", "delivery")}>{tt("Open company workflows and return here", "Abrir flujos de empresa y volver aquí")}</button>}
+                {canonicalReadOnly ? <Link className="ji-navigation-link" href={withIntakeReturn("/company-workflows", projectId, "delivery", "ji-delivery")}>{tt("Open company workflows and return here", "Abrir flujos de empresa y volver aquí")}</Link> : <button type="button" onClick={() => openCommercialPrerequisite("/company-workflows", "delivery", "ji-delivery")}>{tt("Open company workflows and return here", "Abrir flujos de empresa y volver aquí")}</button>}
                 <IntakeDeliveryItems items={data.scopeItems || []} setItems={setScopeItems} tt={tt} defaultWorkflow={data.delivery.workflowTemplate} deliveryWorkflowOptions={deliveryWorkflowChoices.options ?? []} deliveryWorkflowMode={deliveryWorkflowChoices.mode}/>
                 <h3>{tt("Delivery locations and work packages", "Ubicaciones de entrega y paquetes de trabajo")}</h3>
                 <WorkPackageBuilder items={data.scopeItems || []} setItems={setScopeItems} tt={tt} request={api} projectId={projectId} defaultClassification={data.classification}/>
