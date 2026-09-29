@@ -1,3 +1,4 @@
+import { IntakeContractConnection } from "@/components/job-intake/IntakeContractConnection";
 import { GenericResourcePlan } from "@/components/job-intake/GenericResourcePlan";
 import { IntakeDeliveryItems } from "@/components/job-intake/IntakeDeliveryItems";
 import { withIntakeReturn } from "@/lib/return-context";
@@ -1689,6 +1690,7 @@ export function JobIntakeWorkspace() {
                     </span>
                   )}
                 </h2>
+                <IntakeContractConnection intake={intake} profiles={data.commercial.contracts || []} projectId={projectId} tt={tt}/>
                 {capabilities.contracts ? (
                   <>
                     <div className="ji-guide" role="status">
@@ -2287,23 +2289,6 @@ export function JobIntakeWorkspace() {
                           "Activar trabajo operativo",
                         )}
                   </button>
-                  {(
-                    intake.activationSummary?.contracts || [
-                      { contractId: intake.activatedContractId },
-                    ]
-                  )
-                    .filter((contract: any) => contract.contractId)
-                    .map((contract: any, index: number) => (
-                      <Link
-                        key={contract.contractId}
-                        href={`/projects/${projectId}/financial/contracts?contractId=${contract.contractId}`}
-                      >
-                        {tt(
-                          `Open created contract ${index + 1}`,
-                          `Abrir contrato creado ${index + 1}`,
-                        )}
-                      </Link>
-                    ))}
                 </div>
               </section>
               <div className="ji-footer">
