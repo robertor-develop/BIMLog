@@ -1512,6 +1512,7 @@ It changes only when the code structure or curated architectural facts change.
 - Approved budget changes load before changing the draft, clear old line mappings and ignore stale responses. The controlled import selects named registered CSV/XLSX versions; backend authorization and evidence verification remain canonical.
 - Contract setup opens exact created contracts and retains validated Intake return context. Budget navigation also preserves that origin.
 - Optional commercial service failures expose retry while preserving core Intake and saved references. Commercial creation still requires authoritative access and existing validation.
+- Local responsive fixtures wrap their diagnostic destination independently of production layout.
 - UX030 is the B05+B06 ten-build publication boundary; live acceptance requires exact source and authenticated Chrome smoke.
 
 ## One full Job Intake setup - UX021-UX025
