@@ -22,6 +22,7 @@ import {
   writeFile,
 } from "fs/promises";
 import { generatePlatformMd } from "./scripts/generate-platform-md";
+import { resolveProductionSourceCommit } from "./src/lib/production-source-commit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -138,12 +139,34 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
   if (calculatedBundleSha256 !== state.bundleSha256) {
     throw new Error("Living Brief bundle hash does not match state.json.");
   }
-  const sourceCommit = execFileSync(
+  const git = (...args: string[]) => execFileSync(
     "git",
-    ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "rev-parse", "HEAD"],
+    ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, ...args],
     { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
   ).trim().toLowerCase();
-  if (!/^[0-9a-f]{40}$/.test(sourceCommit)) throw new Error("Build source commit is not a full Git commit.");
+  const headCommit = git("rev-parse", "HEAD");
+  const replitEnvironment = Boolean(process.env.REPL_ID || process.env.REPL_SLUG);
+  let remoteMasterCommit: string | undefined;
+  let remoteMasterTree: string | undefined;
+  let remoteMasterIsAncestor: boolean | undefined;
+  if (replitEnvironment) {
+    remoteMasterCommit = git("rev-parse", "origin/master");
+    remoteMasterTree = git("rev-parse", "origin/master^{tree}");
+    try {
+      execFileSync("git", ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "merge-base", "--is-ancestor", "origin/master", "HEAD"], { stdio: "ignore" });
+      remoteMasterIsAncestor = true;
+    } catch {
+      remoteMasterIsAncestor = false;
+    }
+  }
+  const sourceCommit = resolveProductionSourceCommit({
+    headCommit,
+    headTree: git("rev-parse", "HEAD^{tree}"),
+    remoteMasterCommit,
+    remoteMasterTree,
+    remoteMasterIsAncestor,
+    replitEnvironment,
+  });
   try {
     execFileSync(
       "git",
