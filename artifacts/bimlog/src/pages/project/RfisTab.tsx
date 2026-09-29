@@ -1723,7 +1723,7 @@ function SubmittedToParticipantEditor({ projectId, contacts, selectedCompany, on
   onDirectoryAdded: (contact: RfiDirectoryContact) => void;
   lang: string;
 }) {
-  return <ProjectPartyPicker projectId={projectId} company={selectedCompany} canCreate tt={(en, es) => w(en, es, lang)} onSelect={onSelect} />;
+  return <ProjectPartyPicker projectId={projectId} company={selectedCompany} additionalContacts={contacts} canCreate tt={(en, es) => w(en, es, lang)} onSelect={onSelect} />;
 }
 
 function RfiDistributionEditor({ entries, contacts, editable, onChange, lang }: { entries: string[]; contacts: RfiDirectoryContact[]; editable: boolean; onChange: (entries: string[]) => void; lang: string }) {

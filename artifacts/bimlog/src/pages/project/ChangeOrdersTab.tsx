@@ -75,10 +75,6 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
   const [loaded, setLoaded] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ title: "", description: "", contract_value_impact: "", schedule_impact_days: "", initiated_by_company: "" });
-  const [showAddCoCompany, setShowAddCoCompany] = useState(false);
-  const [newCoCompany, setNewCoCompany] = useState("");
-  const [newCoContact, setNewCoContact] = useState("");
-  const [newCoEmail, setNewCoEmail] = useState("");
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
 
@@ -143,7 +139,6 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
       await load();
       setShowForm(false);
       setForm({ title: "", description: "", contract_value_impact: "", schedule_impact_days: "", initiated_by_company: "" });
-      setShowAddCoCompany(false); setNewCoCompany("");
     } finally { setSaving(false); }
   };
 

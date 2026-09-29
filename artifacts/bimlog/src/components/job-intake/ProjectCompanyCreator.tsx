@@ -18,9 +18,10 @@ type Props = {
   projectId: number;
   onCreated: (company: CreatedProjectCompany) => void;
   tt: (en: string, es: string) => string;
+  label?: string;
 };
 
-export function ProjectCompanyCreator({ request, projectId, onCreated, tt }: Props) {
+export function ProjectCompanyCreator({ request, projectId, onCreated, tt, label }: Props) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [contactName, setContactName] = useState("");
@@ -85,7 +86,7 @@ export function ProjectCompanyCreator({ request, projectId, onCreated, tt }: Pro
   };
 
   if (!open) {
-    return <button type="button" className="ji-company-create-button" onClick={() => setOpen(true)}><Plus size={14} />{tt("Add client company", "Agregar empresa cliente")}</button>;
+    return <button type="button" className="ji-company-create-button" onClick={() => setOpen(true)}><Plus size={14} />{label ?? tt("Add client company", "Agregar empresa cliente")}</button>;
   }
 
   return <div className="ji-company-create" aria-label={tt("Add client company", "Agregar empresa cliente")}>

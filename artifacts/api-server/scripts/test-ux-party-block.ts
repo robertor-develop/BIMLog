@@ -1,0 +1,62 @@
+import assert from "node:assert/strict";
+import { createRequire } from "node:module";
+import { randomUUID } from "node:crypto";
+const { Client } = createRequire(import.meta.url)("pg");
+const schema = `ux_party_${randomUUID().replaceAll("-", "")}`;
+const fixture = new Client({host:"127.0.0.1",port:55469,user:"postgres",database:"bimlog_rfi_test",connectionTimeoutMillis:3000});
+await fixture.connect();
+await fixture.query(`CREATE SCHEMA ${schema}`);
+await fixture.query(`SET search_path TO ${schema}`);
+for (const table of ["companies","users","projects","project_members","project_directory","company_profiles","config_options","activity_log","company_master_catalog_administrators","company_master_catalog_policies","company_master_catalog_entries","project_company_binding_versions"]) {
+  await fixture.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
+}
+process.env.PROD_DATABASE_URL = `postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test?options=${encodeURIComponent('-csearch_path='+schema)}`;
+delete process.env.SENDGRID_API_KEY;
+const {pool} = await import("@workspace/db");
+const {default:express} = await import("express");
+const {default:directory} = await import("../src/routes/project_directory");
+const {default:profile} = await import("../src/routes/company-profile");
+const {signToken} = await import("../src/middlewares/auth");
+const app=express(); app.use(express.json()); app.use(directory); app.use(profile);
+const server=app.listen(0,"127.0.0.1");
+await new Promise<void>(resolve=>server.once("listening",resolve));
+const address=server.address(); if (!address || typeof address === "string") throw new Error("Fixture listener missing");
+const request=async(path:string,token:string,body?:unknown)=>{
+  const response=await fetch(`http://127.0.0.1:${address.port}${path}`,{method:body===undefined?"GET":"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},...(body===undefined?{}:{body:JSON.stringify(body)})});
+  return {status:response.status,body:await response.json()};
+};
+try {
+  await fixture.query(`INSERT INTO config_options(category,value,label,label_es,meta) VALUES ('member_role','project_admin','Admin','Admin','{"permission":"admin"}'),('member_role','read_only','Read','Lectura','{"permission":"read"}')`);
+  const company=(await fixture.query("INSERT INTO companies(name) VALUES('TEST UX owner') RETURNING id")).rows[0].id;
+  const otherCompany=(await fixture.query("INSERT INTO companies(name) VALUES('TEST UX unrelated') RETURNING id")).rows[0].id;
+  const owner=(await fixture.query("INSERT INTO users(email,password_hash,full_name,company_id) VALUES('ux-owner@example.test','unused','UX owner',$1) RETURNING id",[company])).rows[0].id;
+  const outsider=(await fixture.query("INSERT INTO users(email,password_hash,full_name,company_id) VALUES('ux-outsider@example.test','unused','UX outsider',$1) RETURNING id",[otherCompany])).rows[0].id;
+  const project=(await fixture.query("INSERT INTO projects(name,code,status,created_by_id) VALUES('TEST UX parties','TEST-UX-P','active',$1) RETURNING id",[owner])).rows[0].id;
+  await fixture.query("INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active')",[project,owner]);
+  const token=signToken({userId:owner,email:"ux-owner@example.test",companyId:company,companyName:"stale token name",fullName:"UX owner"});
+  const foreign=signToken({userId:outsider,email:"ux-outsider@example.test",companyId:otherCompany,companyName:"Unrelated",fullName:"UX outsider"});
+  const root=`/projects/${project}/directory`;
+  assert.equal((await request(root,foreign)).status,403);
+  assert.equal((await request(`${root}/companies`,foreign,{company_name:"Forbidden"})).status,403);
+  const created=await request(`${root}/companies`,token,{company_name:"TEST UX client"});
+  assert.equal(created.status,201,JSON.stringify(created.body));
+  const reused=await request(`${root}/companies`,token,{company_name:"TEST UX client"});
+  assert.equal(reused.status,200); assert.equal(reused.body.id,created.body.id);
+  const companyEntry=created.body.directoryEntry;
+  assert.equal((await request(`${root}/${companyEntry.id}/invite`,token,{})).status,422);
+  const contactBody={company_id:created.body.id,company_name:created.body.name,full_name:"Test coordinator",email:"ux-contact@example.test"};
+  const contact=await request(`${root}/contacts`,token,contactBody);
+  assert.equal(contact.status,201,JSON.stringify(contact.body));
+  const sameContact=await request(`${root}/contacts`,token,contactBody);
+  assert.equal(sameContact.status,200); assert.equal(sameContact.body.id,contact.body.id);
+  const visible=await request(root,token); assert.equal(visible.body.length,2);
+  const initial=await request("/users/me/company-profile",token);
+  assert.equal(initial.body.companyName,"TEST UX owner"); assert.equal(initial.body.canonicalCompanyId,company);
+  const branding=await request("/users/me/company-profile",token,{companyName:"Custom branding",canonicalCompanyId:otherCompany});
+  assert.equal(branding.body.canonicalCompanyId,company); assert.equal(branding.body.companyName,"Custom branding");
+  const reloaded=await request("/users/me/company-profile",token); assert.equal(reloaded.body.companyName,"Custom branding");
+  assert.equal((await fixture.query("SELECT company_id FROM users WHERE id=$1",[owner])).rows[0].company_id,company);
+  assert.equal((await fixture.query("SELECT name FROM companies WHERE id=$1",[company])).rows[0].name,"TEST UX owner");
+  assert.equal((await fixture.query("SELECT company_name FROM project_directory WHERE id=$1",[companyEntry.id])).rows[0].company_name,"TEST UX client");
+  console.log(`UX_PARTY_API=PASS schema=${schema}: canonical reuse, contact reuse, outsider denied, placeholder invitation denied, profile persistence and binding preservation`);
+} finally { await new Promise<void>((resolve,reject)=>server.close(error=>error?reject(error):resolve())); await pool.end(); await fixture.end(); }

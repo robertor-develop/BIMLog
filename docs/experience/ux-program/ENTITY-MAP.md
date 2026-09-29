@@ -30,3 +30,8 @@ Company → Project → one Intake scope → exact APU versions / draft Contract
 - The specific Ruben $30 incident is not proven by available logs. The observed rate-default source defect is documented separately; no fabricated incident attribution.
 - Existing tenant/permission checks, approvals, immutable issued history, commercial units/precision, retained quick drafts, optional sharing boundaries and Lens Native behavior are preserved.
 - No destructive migration, schema change, external send, financial repricing or production data write belongs to B01.
+
+
+## UX011-UX015 implementation boundary
+
+Document company eligibility now uses the project directory. RFI also preserves its authorized active project members. Company/contact creation reuses existing governed endpoints and canonical IDs; company-only placeholders cannot become delivery recipients. Saved document labels remain snapshots. Company Profile reads current account binding separately from personal export branding; no company, user binding or issued record is rewritten by a branding save.

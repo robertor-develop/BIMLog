@@ -1,4 +1,4 @@
-import { isDirectoryRecipientEmail, isDirectoryPlaceholderEmail } from "@workspace/api-zod";
+import { isDirectoryRecipientEmail } from "@workspace/api-zod";
 import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-migration";

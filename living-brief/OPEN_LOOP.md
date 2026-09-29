@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 03 - UX011-UX015 candidate
+
+The five sequential builds connect document company choices to the project directory, reuse governed company/contact creation, distinguish company-only placeholders from delivery recipients, expose discipline loading/error/empty states, and separate current account company identity from editable export branding. Local API and actual-component Chrome evidence is in docs/experience/ux-program/BLOCK_03_VALIDATION.md. This is the five-build push checkpoint: five unpublished builds; publication and full authenticated Chrome smoke are due at UX020. No schema, customer data, provider send, or Native change.
+
+UX001-UX010 publication is closed at source 2b49e507c6f6abf04589ca4788e65f9b197e9444, publisher 0d160cd3, with final authenticated Chrome smoke PASS. Exact external receipt: F:/BIMLog/Evidence/ux-audit-20260928/UX-B02-COMPLETION.md. Earlier candidate/publication-due wording below is historical.
+
 ## Experience makeover Block 02 — UX006–UX010
 
 Active Intake review headings and instructions now describe an already active job; draft activation guidance remains conditional. Valid financial effective timestamps retain their original local-day display; only absent or invalid values use Not recorded. Legacy dueDate records also populate the editor consistently with detail/export. The generated AI entry-point inventory was refreshed after the release suite detected stale line references.

@@ -419,6 +419,14 @@ ${appRoutes()}
 - The generated disposition inventory classifies every open record, binds ownership and module/route responsibility, and links repeated historical statements to one canonical record.
 - The normal pre-push gate rejects unresolved duplicate statements, competing or missing current markers, unowned records, route-less product work, and stale contradictions classified as active.
 
+## Shared project parties and account identity - UX011-UX015
+
+- RFI, Transmittal and Change Order forms reuse the authenticated project directory for company choices and canonical project company/contact creators. RFI retains authorized active project member recipients; manual delivery fields remain available. Existing selected company labels remain visible without creating records.
+- Company-only internal placeholder emails are excluded from recipient choices, rejected by directory invitations and blocked by the central email sender. Existing directory and document history is not rewritten.
+- Intake discipline choices distinguish loading, denied/unavailable, genuine empty and approved-company scope, with retry and preserved legacy selection.
+- Current account company identity is read from the database binding. Personal company-profile branding remains editable and cannot rebind the account or rewrite stored party names.
+- UX001-UX010 are published at source 2b49e507c6f6abf04589ca4788e65f9b197e9444 with authenticated Chrome smoke PASS. UX011-UX015 are the next push-only block; publication is due at UX020.
+
 ## Experience makeover state and trust repairs — UX006–UX010
 
 - Intake distinguishes active jobs from draft readiness and labels configuration as setup, staffing and commercial coverage. The active next action opens the same job workspace; active review headings and guidance no longer request initial activation.

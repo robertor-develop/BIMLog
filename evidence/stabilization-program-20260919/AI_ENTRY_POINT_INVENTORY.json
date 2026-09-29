@@ -240,7 +240,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/project_directory.ts",
-      "line": 1347,
+      "line": 1351,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -250,7 +250,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/project_directory.ts",
-      "line": 1389,
+      "line": 1393,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",

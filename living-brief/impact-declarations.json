@@ -48600,6 +48600,130 @@
         "package.json"
       ],
       "reviewedChangeSha256": "1b100978abf2f4c43a978338184cbf57e6d7afea36e8b17fc886181661901254"
+    },
+    {
+      "taskId": "ux011-ux015-shared-party-and-catalog-experience",
+      "reviewedThroughCommit": "2b49e507c6f6abf04589ca4788e65f9b197e9444",
+      "reviewedAt": "2026-09-29T18:00:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "chrome_component_verification"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Document company lists diverged and internal company placeholders could be treated as recipients. Shared directory selection and delivery guards repair these boundaries without rewriting history.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "customer_impacting_defect",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX011-UX015 preserve existing company/project authorization, financial policy, schema, report authority and Native behavior. Local tests and UI evidence apply existing quality requirements."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX011-UX015 preserve existing company/project authorization, financial policy, schema, report authority and Native behavior. Local tests and UI evidence apply existing quality requirements."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX011-UX015 preserve existing company/project authorization, financial policy, schema, report authority and Native behavior. Local tests and UI evidence apply existing quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX011-UX015 preserve existing company/project authorization, financial policy, schema, report authority and Native behavior. Local tests and UI evidence apply existing quality requirements."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records UX011-UX015 shared parties, directory delivery safety, discipline states and current account identity; publication due UX020."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX011-UX015 preserve existing company/project authorization, financial policy, schema, report authority and Native behavior. Local tests and UI evidence apply existing quality requirements."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX011-UX015 preserve existing company/project authorization, financial policy, schema, report authority and Native behavior. Local tests and UI evidence apply existing quality requirements."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX011-UX015 preserve existing company/project authorization, financial policy, schema, report authority and Native behavior. Local tests and UI evidence apply existing quality requirements."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records UX011-UX015 shared parties, directory delivery safety, discipline states and current account identity; publication due UX020."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records UX011-UX015 shared parties, directory delivery safety, discipline states and current account identity; publication due UX020."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX011-UX015 preserve existing company/project authorization, financial policy, schema, report authority and Native behavior. Local tests and UI evidence apply existing quality requirements."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/test-ux-party-block.ts",
+        "artifacts/api-server/src/lib/company-profile-presentation.behavior.ts",
+        "artifacts/api-server/src/lib/company-profile-presentation.ts",
+        "artifacts/api-server/src/lib/email.ts",
+        "artifacts/api-server/src/routes/company-profile.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/bimlog/project-party-harness.html",
+        "artifacts/bimlog/src/components/ProjectPartyPicker.css",
+        "artifacts/bimlog/src/components/ProjectPartyPicker.tsx",
+        "artifacts/bimlog/src/components/job-intake/MasterClassificationSelectors.tsx",
+        "artifacts/bimlog/src/components/job-intake/ProjectCompanyCreator.tsx",
+        "artifacts/bimlog/src/hooks/use-project-parties.ts",
+        "artifacts/bimlog/src/lib/directory-email.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-directory-options.ts",
+        "artifacts/bimlog/src/lib/project-party-options.behavior.ts",
+        "artifacts/bimlog/src/lib/project-party-options.ts",
+        "artifacts/bimlog/src/pages/CompanyProfile.tsx",
+        "artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx",
+        "artifacts/bimlog/src/pages/project/DirectoryTab.tsx",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+        "artifacts/bimlog/src/pages/project/TransmittalsTab.tsx",
+        "artifacts/bimlog/src/project-party-harness.tsx",
+        "docs/experience/ux-program/BLOCK_03_VALIDATION.md",
+        "docs/experience/ux-program/ENTITY-MAP.md",
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/api-zod/src/directory-email.ts",
+        "lib/api-zod/src/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "7a3d8fac5afe24fb8140fcdbef414422db1fe1e9c3299bcfe0f93d0a7a400ef6"
     }
   ]
 }

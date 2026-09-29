@@ -71,9 +71,9 @@ export function CompanyProfile() {
       if (!r.ok) throw new Error(await r.text());
       const next = await r.json();
       setData(next);
-      toast({ title: "Company profile saved" });
+      toast({ title: t("Company profile saved", "Perfil de empresa guardado") });
     } catch (e) {
-      toast({ title: "Failed to save", description: e instanceof Error ? e.message : "Unknown", variant: "destructive" });
+      toast({ title: t("Company profile could not be saved", "No se pudo guardar el perfil de empresa"), variant: "destructive" });
     } finally {
       setSaving(false);
     }
@@ -92,9 +92,9 @@ export function CompanyProfile() {
       if (!r.ok) throw new Error(await r.text());
       const out = await r.json();
       setData(d => d ? { ...d, logoUrl: out.logoUrl } : d);
-      toast({ title: "Logo uploaded" });
+      toast({ title: t("Logo uploaded", "Logotipo cargado") });
     } catch (e) {
-      toast({ title: "Logo upload failed", description: e instanceof Error ? e.message : "Unknown", variant: "destructive" });
+      toast({ title: t("Logo upload failed", "No se pudo cargar el logotipo"), variant: "destructive" });
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -109,20 +109,20 @@ export function CompanyProfile() {
           <div className="breadcrumb">
             <Link href="/profile" style={{ display: "flex", alignItems: "center", gap: 4, color: "hsl(var(--muted-foreground))", textDecoration: "none" }}>
               <ChevronLeft style={{ width: 14, height: 14 }} />
-              Profile
+              {t("Profile", "Perfil")}
             </Link>
             <span style={{ color: "hsl(var(--border))" }}>/</span>
-            <span className="breadcrumb-active">Company Profile</span>
+            <span className="breadcrumb-active">{t("Company Profile", "Perfil de Empresa")}</span>
           </div>
         </div>
 
         <div className="page-content" style={{ padding: "20px 28px 60px", maxWidth: 760, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 6 }}>
             <Building2 style={{ width: 20, height: 20, color: "#1D4ED8" }} />
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: 0 }}>Company Profile</h1>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: 0 }}>{t("Company Profile", "Perfil de Empresa")}</h1>
           </div>
           <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 20 }}>
-            {t("Your account company is read from your current membership. Document branding is separate and does not change membership or stored document parties.", "La empresa de su cuenta corresponde a su membres�a actual. La marca documental es independiente y no cambia la membres�a ni los participantes guardados.")}
+            {t("Your account company is read from your current membership. Document branding is separate and does not change membership or stored document parties.", "La empresa de su cuenta corresponde a su membresía actual. La marca documental es independiente y no cambia la membresía ni los participantes guardados.")}
           </div>
 
           {loadError && <div role="alert">{t("Company profile could not be loaded.", "No se pudo cargar el perfil de empresa.")} <Button variant="outline" onClick={() => setRetry(n => n + 1)}>{t("Retry", "Reintentar")}</Button></div>}
@@ -137,7 +137,7 @@ export function CompanyProfile() {
               {/* Logo card */}
               <div style={{ background: "white", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "18px 20px", marginBottom: 18 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  Company Logo
+                  {t("Company Logo", "Logotipo de empresa")}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                   <div style={{
@@ -164,7 +164,7 @@ export function CompanyProfile() {
                       style={{ gap: 6 }}
                     >
                       <Upload style={{ width: 13, height: 13 }} />
-                      {uploading ? "Uploading…" : data.logoUrl ? "Replace logo" : "Upload logo"}
+                      {uploading ? t("Uploading…", "Cargando…") : data.logoUrl ? t("Replace logo", "Reemplazar logotipo") : t("Upload logo", "Cargar logotipo")}
                     </Button>
                     {data.logoUrl && (
                       <Button
@@ -173,11 +173,11 @@ export function CompanyProfile() {
                         style={{ gap: 6, marginLeft: 6, color: "#DC2626" }}
                       >
                         <Trash2 style={{ width: 13, height: 13 }} />
-                        Remove
+                        {t("Remove", "Quitar")}
                       </Button>
                     )}
                     <div style={{ fontSize: 11, color: "#6B7280", marginTop: 6 }}>
-                      PNG, JPG, or SVG · up to 2 MB · square or wide format works best.
+                      {t("PNG, JPG, or SVG · up to 2 MB · square or wide format works best.", "PNG, JPG o SVG · hasta 2 MB · se recomienda formato cuadrado o ancho.")}
                     </div>
                   </div>
                 </div>
@@ -186,7 +186,7 @@ export function CompanyProfile() {
               {/* Details card */}
               <div style={{ background: "white", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "18px 20px" }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  Company Details
+                  {t("Company Details", "Datos de empresa")}
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))", gap: 14 }}>
@@ -195,36 +195,36 @@ export function CompanyProfile() {
                     <Input id="companyName" value={data.companyName ?? ""} onChange={e => setData(d => d ? { ...d, companyName: e.target.value } : d)} />
                   </div>
                   <div>
-                    <Label htmlFor="companyRole" style={{ fontSize: 11 }}>Role in projects</Label>
+                    <Label htmlFor="companyRole" style={{ fontSize: 11 }}>{t("Role in projects", "Rol en proyectos")}</Label>
                     <Input id="companyRole" placeholder="e.g. General Contractor, Architect" value={data.companyRole ?? ""} onChange={e => setData(d => d ? { ...d, companyRole: e.target.value } : d)} />
                   </div>
                   <div>
                     <Label htmlFor="website" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
-                      <Globe style={{ width: 11, height: 11 }} /> Website
+                      <Globe style={{ width: 11, height: 11 }} /> {t("Website", "Sitio web")}
                     </Label>
                     <Input id="website" placeholder="https://" value={data.website ?? ""} onChange={e => setData(d => d ? { ...d, website: e.target.value } : d)} />
                   </div>
                   <div>
                     <Label htmlFor="phone" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
-                      <Phone style={{ width: 11, height: 11 }} /> Phone
+                      <Phone style={{ width: 11, height: 11 }} /> {t("Phone", "Teléfono")}
                     </Label>
                     <Input id="phone" value={data.phone ?? ""} onChange={e => setData(d => d ? { ...d, phone: e.target.value } : d)} />
                   </div>
                   <div>
                     <Label htmlFor="city" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
-                      <MapPin style={{ width: 11, height: 11 }} /> City
+                      <MapPin style={{ width: 11, height: 11 }} /> {t("City", "Ciudad")}
                     </Label>
                     <Input id="city" value={data.city ?? ""} onChange={e => setData(d => d ? { ...d, city: e.target.value } : d)} />
                   </div>
                   <div>
-                    <Label htmlFor="country" style={{ fontSize: 11 }}>Country</Label>
+                    <Label htmlFor="country" style={{ fontSize: 11 }}>{t("Country", "País")}</Label>
                     <Input id="country" value={data.country ?? ""} onChange={e => setData(d => d ? { ...d, country: e.target.value } : d)} />
                   </div>
                 </div>
 
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}>
                   <Button onClick={handleSave} disabled={saving}>
-                    {saving ? "Saving…" : "Save changes"}
+                    {saving ? t("Saving…", "Guardando…") : t("Save changes", "Guardar cambios")}
                   </Button>
                 </div>
               </div>

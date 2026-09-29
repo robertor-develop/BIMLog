@@ -313,7 +313,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
       <tr key={row.key}>
         <td>
           <div style={{ fontWeight: 500 }}>{row.fullName}</div>
-          {pdfOptions.includeEmail && <div style={{ fontSize: 12, color: "#6B7280" }}>{isDirectoryRecipientEmail(row.email) ? row.email : isCompanyOnlyEntry(row) ? t("Company only — add a contact to invite", "Solo empresa — agregue un contacto para invitar") : t("No delivery email", "Sin correo de entrega")}</div>}
+          {pdfOptions.includeEmail && <div style={{ fontSize: 12, color: "#6B7280" }}>{isDirectoryRecipientEmail(row.email) ? row.email : isCompanyOnlyEntry(row) ? t("Company only - add a contact to invite", "Solo empresa - agregue un contacto para invitar") : t("No delivery email", "Sin correo de entrega")}</div>}
         </td>
         {pdfOptions.includeCompany && <td>{row.companyName || "-"}</td>}
         {pdfOptions.includeRole && <td>{source === "member" ? roleBadge(row.role) : row.role}</td>}

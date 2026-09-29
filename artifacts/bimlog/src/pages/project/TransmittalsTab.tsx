@@ -41,11 +41,6 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   const [showForm, setShowForm] = useState(false);
   const [selected, setSelected] = useState<Transmittal | null>(null);
   const [form, setForm] = useState({ title: "", purpose: "", sentTo: "", sentToEmail: "", sentToPhone: "" });
-  const [showAddTxCompany, setShowAddTxCompany] = useState(false);
-  const [newTxCompany, setNewTxCompany] = useState("");
-  const [newTxContactPerson, setNewTxContactPerson] = useState("");
-  const [newTxEmail, setNewTxEmail] = useState("");
-  const [newTxPhone, setNewTxPhone] = useState("");
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
   const [search, setSearch] = useState("");
@@ -113,7 +108,6 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
       await load();
       setShowForm(false);
       setForm({ title: "", purpose: "", sentTo: "", sentToEmail: "", sentToPhone: "" });
-      setShowAddTxCompany(false); setNewTxCompany("");
     } finally { setSaving(false); }
   };
 
@@ -347,6 +341,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
               <textarea className="input" rows={3} value={form.purpose} onChange={e => setForm(f => ({ ...f, purpose: e.target.value }))} style={{ resize: "vertical" }} />
             </div>
             <ProjectPartyPicker projectId={projectId} company={form.sentTo} canCreate={canWrite} tt={t} onSelect={(company, person, email) => setForm(f => ({ ...f, sentTo: company, sentToEmail: email, sentToPhone: "" }))} />
+            <label>{t("Recipient phone", "Teléfono del destinatario")}<input className="input" type="tel" value={form.sentToPhone} onChange={e => setForm(f => ({ ...f, sentToPhone: e.target.value }))} /></label>
             <label>{t("Recipient email", "Correo del destinatario")}<input className="input" type="email" value={form.sentToEmail} onChange={e => setForm(f => ({ ...f, sentToEmail: e.target.value }))} /></label>
             <div style={{ display: "flex", gap: 8 }}>
               <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t("Saving…", "Guardando…") : t("Create", "Crear")}</button>
