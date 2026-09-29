@@ -1,9 +1,11 @@
 import assert from "node:assert/strict";
-import { intakeOrigin, validatedReturn, withIntakeReturn } from "./return-context";
+import { intakeOrigin, validatedReturn, withIntakeReturn, intakePrerequisiteReturn } from "./return-context";
 const link=withIntakeReturn("/projects/7/convention",7,"delivery","ji-assignment-2");
 assert.equal(validatedReturn(link.split("?")[1],7),intakeOrigin(7,"delivery","ji-assignment-2"));
 for(const bad of ["https://evil.test/projects/7/intake","//evil.test/projects/7/intake","/projects/8/intake?stage=scope","/projects/7/intake?stage=nope","/projects/7/intake?token=secret"]) assert.equal(validatedReturn("returnTo="+encodeURIComponent(bad),7),null);
 console.log("UX017 exact same-project return context and unsafe-origin denial PASS");
+assert.equal(intakePrerequisiteReturn("returnTo="+encodeURIComponent("/projects/7/intake?stage=delivery")), "/projects/7/intake?stage=delivery");
+for (const bad of ["https://evil.test", "//evil.test/projects/7/intake", "/projects/0/intake", "/projects/7/intake?token=secret", "/projects/7/intake?stage=nope"]) assert.equal(intakePrerequisiteReturn("returnTo="+encodeURIComponent(bad)), null);
 
 import {projectHomeDestination} from "./project-home-destination";
 assert.equal(projectHomeDestination(7,"project_admin",{status:"activated"}),"/projects/7/operations");

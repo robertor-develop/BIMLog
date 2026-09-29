@@ -48945,9 +48945,12 @@
         "artifacts/bimlog/src/components/job-intake/GenericResourcePlan.tsx",
         "artifacts/bimlog/src/components/job-intake/IntakeDeliveryItems.tsx",
         "artifacts/bimlog/src/components/job-intake/QuickJobIntake.behavior.tsx",
+        "artifacts/bimlog/src/components/layout/RouteState.tsx",
         "artifacts/bimlog/src/job-intake-block05-harness.tsx",
         "artifacts/bimlog/src/lib/help-content.ts",
         "artifacts/bimlog/src/lib/job-intake-workspace-state.ts",
+        "artifacts/bimlog/src/lib/return-context.behavior.ts",
+        "artifacts/bimlog/src/lib/return-context.ts",
         "artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx",
         "artifacts/bimlog/src/pages/JobIntakeWorkspace.item-bindings.behavior.ts",
         "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
@@ -48961,7 +48964,7 @@
         "package.json",
         "scripts/test-integration-presentation.mjs"
       ],
-      "reviewedChangeSha256": "a4310275c756c754bd9770b99c51094fcb875eb065a02130a4e32b4475d33c52"
+      "reviewedChangeSha256": "0cc64eddbfe86cbf28366e6da9ad666986078504062a2fb4719688de860eac9c"
     }
   ]
 }

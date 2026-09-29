@@ -19,3 +19,10 @@ export function validatedReturn(search: string, projectId: number): string | nul
 export function withIntakeReturn(destination: string, projectId: number, stage: string, item?: string) {
   return `${destination}${destination.includes("?") ? "&" : "?"}returnTo=${encodeURIComponent(intakeOrigin(projectId, stage, item))}`;
 }
+
+/** Recovery on company-level prerequisites; the destination still enforces project access. */
+export function intakePrerequisiteReturn(search: string): string | null {
+  const raw = new URLSearchParams(search).get("returnTo");
+  const projectId = Number(raw?.match(/^\/projects\/(\d+)\/intake(?:\?|$)/)?.[1]);
+  return validatedReturn(search, projectId);
+}

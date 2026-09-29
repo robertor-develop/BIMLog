@@ -1,4 +1,5 @@
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
+import { intakePrerequisiteReturn } from "../../lib/return-context";
 
 type RouteStateKind = "loading" | "empty" | "denied" | "offline" | "error";
 
@@ -11,6 +12,7 @@ const copy: Record<RouteStateKind, { title: string; detail: string }> = {
 };
 
 export function RouteState({ kind, code, title, detail, onRetry }: { kind: RouteStateKind; code?: string; title?: string; detail?: string; onRetry?: () => void }) {
+  const intakeReturn = intakePrerequisiteReturn(useSearch());
   const message = copy[kind];
   const loading = kind === "loading";
   return <section className={`route-state route-state-${kind}`} role={loading ? "status" : "alert"} aria-live={loading ? "polite" : "assertive"} aria-busy={loading || undefined}>
@@ -18,6 +20,7 @@ export function RouteState({ kind, code, title, detail, onRetry }: { kind: Route
     <p>{detail ?? message.detail}</p>
     {code && <code>{code}</code>}
     {!loading && <div className="route-state-actions">
+      {intakeReturn && <Link href={intakeReturn} className="btn">Return to Intake / Volver al ingreso</Link>}
       {onRetry && <button type="button" className="btn btn-primary" onClick={onRetry}>Try again / Intentar de nuevo</button>}
       <Link href="/dashboard" className="btn">Return to headquarters / Volver a la sede</Link>
     </div>}

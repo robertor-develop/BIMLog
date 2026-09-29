@@ -1,5 +1,5 @@
-import { validatedReturn } from "@/lib/return-context";
-import { useLocation } from "wouter";
+import { intakePrerequisiteReturn } from "@/lib/return-context";
+import { useLocation, useSearch } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
@@ -10,8 +10,7 @@ export function CompanyDeliveryWorkflows() {
   const { token } = useAuthStore();
   const [, setLocation] = useLocation();
   const { lang } = useI18n();
-  const returnProjectId = Number(new URLSearchParams(window.location.search).get("returnTo")?.match(/^\/projects\/(\d+)\/intake\?/)?.[1]);
-  const intakeReturn = validatedReturn(window.location.search, returnProjectId);
+  const intakeReturn = intakePrerequisiteReturn(useSearch());
   if (!token) return null;
   return (
     <div style={{ display: "flex", minHeight: "100vh", minWidth: 0 }}>

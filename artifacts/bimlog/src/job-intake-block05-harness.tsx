@@ -1,3 +1,5 @@
+import { RouteState } from "./components/layout/RouteState";
+import { CompanyDeliveryWorkflows } from "./pages/CompanyDeliveryWorkflows";
 import { createRoot } from 'react-dom/client';
 import { useState } from 'react';
 import { Router } from 'wouter';
@@ -21,10 +23,10 @@ window.fetch=async(input,init)=>{const path=String(input);
  if(path.endsWith('/directory'))return Response.json([{id:1,companyId:1,companyName:'Fixture client',type:'company'}]);
  if(path.includes('/master-catalogs'))return Response.json({governed:false,entries:[]});
  if(path.endsWith('/company/delivery-workflows/options'))return Response.json({mode:'approved_only',options:[{versionId:'WF-PUBLISHED',name:'Shop drawing review',source:'company',version:2,definition:{deliverableTypes:['SHOP_DRAWING'],phases:[{name:'Prepare',tasks:[{}]},{name:'Review',tasks:[{}]}]}}]});
- if(path.includes('/access-profile'))return Response.json({decisions:{}});
+ if(path.includes('/access-profile'))return Response.json({decisions:{project_administration:{allow:false},company_catalogs:{allow:false},total_control:{allow:false}}});
  if(path.includes('/financial/'))return Response.json({snapshots:[]});
  if(path.includes('/config'))return Response.json({member_role:[{value:'admin',label:'Admin',labelEs:'Admin',meta:{permission:'admin'}}]});
  return Response.json([]);
 };
-function Harness(){const {lang,setLang}=useI18n();const [destination,setDestination]=useState('/projects/505/intake');return <><div style={{padding:12,background:'#eff6ff'}}><strong>Local actual Intake component — synthetic transport, not production acceptance</strong><button onClick={()=>setLang(lang==='es'?'en':'es')}>English / Español</button><output aria-label="Destination">{destination}</output></div><Router hook={()=>[destination,setDestination]}><JobIntakeWorkspace/></Router></>}
+function Harness(){const {lang,setLang}=useI18n();const [destination,setDestination]=useState('/projects/505/intake'); const [companyAccess,setCompanyAccess]=useState(true);return <><div style={{padding:12,background:'#eff6ff'}}><strong>Local actual Intake component — synthetic transport, not production acceptance</strong><button onClick={()=>setLang(lang==='es'?'en':'es')}>English / Español</button><button onClick={()=>setCompanyAccess(value=>!value)}>Company access: {companyAccess ? "allowed" : "denied"}</button><output aria-label="Destination">{destination}</output></div><Router hook={()=>[destination.split("?")[0],setDestination]} searchHook={()=>destination.split("?")[1] || ""}>{destination.startsWith("/company-workflows") ? companyAccess ? <CompanyDeliveryWorkflows/> : <RouteState kind="denied"/> : <JobIntakeWorkspace/>}</Router></>}
 createRoot(document.getElementById('root')!).render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><I18nProvider><ConfigProvider><Harness/></ConfigProvider></I18nProvider></QueryClientProvider>);
