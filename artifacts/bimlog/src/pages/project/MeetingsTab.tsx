@@ -4357,6 +4357,12 @@ export function MeetingsTab({
                   {schedulePreview.summary.skipped} {t("skipped", "omitidas")},{" "}
                   {schedulePreview.summary.conflicts}{" "}
                   {t("need review", "requieren revision")}.
+                  <div style={{ marginTop: 8, paddingTop: 8, borderTop: "1px solid #BFDBFE", fontSize: 12, color: "#1E3A5F" }}>
+                    {t(
+                      "Each follow-up keeps one canonical schedule record. Assigned work appears in My Work from that same record; BIMLog does not create a second task copy.",
+                      "Cada seguimiento conserva un solo registro canónico de planificación. El trabajo asignado aparece en Mi trabajo desde ese mismo registro; BIMLog no crea una segunda copia de la tarea.",
+                    )}
+                  </div>
                 </div>
               )}
               <div
