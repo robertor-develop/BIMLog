@@ -24,6 +24,7 @@ assert.ok(graph.apiRoutes.every(route => route.tables.every(table => !/[\r\n]|\b
 assert.deepEqual(graph.findings.duplicateApiRoutes, [], "no API method/path is owned by multiple route modules");
 assert.deepEqual(graph.findings.sidebarTabsWithoutScreen, [], "every project sidebar tab resolves to a screen");
 assert.deepEqual(graph.findings.screensWithoutSidebar, [], "every canonical project tab is reachable from navigation");
+assert.ok(graph.projectTabs.some(item => item.tab === "home" && item.component === "ProjectHome" && !item.canonical), "shared project context exposes the role-aware entry router separately from workspace tabs");
 
 const specificRoutes = [
   "/projects/:id/financial/cost-structure",

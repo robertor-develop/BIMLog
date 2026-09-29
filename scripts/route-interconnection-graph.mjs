@@ -16,6 +16,7 @@ export function buildRouteInterconnectionGraph() {
   const app = read("artifacts/bimlog/src/App.tsx");
   const projectDetail = read("artifacts/bimlog/src/pages/ProjectDetail.tsx");
   const projectSidebar = read("artifacts/bimlog/src/components/layout/ProjectSidebar.tsx");
+  const projectLocation = read("artifacts/bimlog/src/components/layout/ProjectLocation.tsx");
   const frontendFiles = walk(path.join(root, "artifacts/bimlog/src")).filter(file => /\.(?:ts|tsx)$/.test(file));
   const apiFiles = walk(path.join(root, "artifacts/api-server/src/routes")).filter(file => file.endsWith(".ts"));
 
@@ -30,7 +31,10 @@ export function buildRouteInterconnectionGraph() {
   const projectTabs = [...projectDetail.matchAll(/\{tab === "([^"]+)"\s*&&/g)]
     .map(match => {
       const component = projectDetail.slice(match.index, match.index + 360).match(/<([A-Z][A-Za-z0-9]+)/)?.[1] ?? "Unknown";
-      return { tab: match[1], component, canonical: true };
+      // Project home is the shared entry router, not a workspace sidebar tab.
+      const entryRouter = match[1] === "home" && component === "ProjectHome" &&
+        projectLocation.includes('href={`/projects/${projectId}`}');
+      return { tab: match[1], component, canonical: !entryRouter };
     });
   const sidebarTabs = [...projectSidebar.matchAll(/\{ id: "([^"]+)", label: "project\.tabs\.[^"]+"/g)].map(match => match[1]);
   const sidebarLinks = [...projectSidebar.matchAll(/href:\s*`([^`]+)`/g)].map(match => match[1].replace("${projectId}", ":id"));

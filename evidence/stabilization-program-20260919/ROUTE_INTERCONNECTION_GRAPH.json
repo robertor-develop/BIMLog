@@ -350,7 +350,7 @@
     {
       "tab": "home",
       "component": "ProjectHome",
-      "canonical": true
+      "canonical": false
     },
     {
       "tab": "command-center",
@@ -9993,8 +9993,6 @@
   "findings": {
     "duplicateApiRoutes": [],
     "sidebarTabsWithoutScreen": [],
-    "screensWithoutSidebar": [
-      "home"
-    ]
+    "screensWithoutSidebar": []
   }
 }
