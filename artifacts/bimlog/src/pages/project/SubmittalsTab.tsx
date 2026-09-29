@@ -1391,6 +1391,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
             <thead>
               <tr>
                 <th style={{ width: 80 }}>{w("Number", "Número", lang)}</th>
+                <th style={{ width: 54 }}>{w("Revision", "Revisión", lang)}</th>
                 <th>{w("Title", "Título", lang)}</th>
                 <th style={{ width: 110 }}>{w("Category", "Categoría", lang)}</th>
                 <th style={{ width: 120 }}>{w("Status", "Estado", lang)}</th>
@@ -1416,6 +1417,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
                         {sub.number}
                       </span>
                     </td>
+                    <td style={{ fontSize: 11, fontWeight: 700, color: "#475569" }}>R{sub.revisionNumber ?? 0}</td>
                     <td>
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         {isUrgent && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#D97706", flexShrink: 0 }} />}

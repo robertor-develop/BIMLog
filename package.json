@@ -178,6 +178,7 @@
     "test:ux-block08": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/ux-block08.behavior.ts",
     "test:ux-block09": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/ux-block09.behavior.ts",
     "test:ux-block10": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/ux-block10.behavior.ts"
+    ,"test:ux-block11": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/ux-block11.behavior.ts"
   },
   "private": true,
   "devDependencies": {

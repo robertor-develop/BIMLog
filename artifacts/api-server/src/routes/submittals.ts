@@ -547,6 +547,7 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
     };
     const rows = filteredSubs.map(s => ({
       "Number": s.number,
+      "Revision": s.revisionNumber ?? 0,
       "Title": s.title,
       "Trade": s.trade || "",
       "Floor": s.floor || "",
@@ -578,7 +579,7 @@ router.get("/projects/:projectId/submittals/export-excel", authMiddleware, requi
     ]);
     XLSX.utils.sheet_add_json(worksheet, rows, { origin: "A5" });
     const headers = Object.keys(rows[0] || {
-      "Number": "", "Title": "", "Trade": "", "Floor": "", "Responsible Company": "", "Type": "", "Status": "", "Spec Section": "",
+      "Number": "", "Revision": "", "Title": "", "Trade": "", "Floor": "", "Responsible Company": "", "Type": "", "Status": "", "Spec Section": "",
       "Submitted By Company": "", "Submitted By Contact": "", "Submitted By Email": "", "Submitted To Company": "", "Submitted To Contact": "",
       "Submitted To Email": "", "Date Submitted": "", "Date Required": "", "Days Outstanding": "", "Ball in Court": "", "Linked RFI": "",
       "Attachments": "", "Description": "",
@@ -649,7 +650,8 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
     // Column defs (landscape 792-72=720 content)
     const COLS = [
       { label: "Number",         w: 54 },
-      { label: "Title",          w: 128 },
+      { label: "Rev",            w: 34 },
+      { label: "Title",          w: 94 },
       { label: "Type",           w: 58 },
       { label: "Status",         w: 62 },
       { label: "Submitted By",   w: 72 },
@@ -712,6 +714,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
       const rawStatus = sub.status || "-";
       const vals = [
         sub.number,
+        `R${sub.revisionNumber ?? 0}`,
         sub.title,
         (sub.submittalCategory || sub.submittalType || "").replace(/_/g, " "),
         rawStatus.replace(/_/g, " "),
@@ -725,7 +728,7 @@ router.get("/projects/:projectId/submittals/export-all", authMiddleware, require
 
       cx = LOG_MARGIN;
       COLS.forEach((col, ci) => {
-        const color = ci === 3 ? (STATUS_COLORS[rawStatus] || "#374151") : "#374151";
+        const color = ci === 4 ? (STATUS_COLORS[rawStatus] || "#374151") : "#374151";
         doc.fillColor(color).fontSize(6.5).font(ci === 0 ? "Helvetica-Bold" : "Helvetica")
           .text(String(vals[ci] ?? "-"), cx + 3, y + 4, {
             width: col.w - 6,
