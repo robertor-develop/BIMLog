@@ -3777,3 +3777,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX046–UX050 implement one primary status filter with advanced controls, contextual draft guidance, read-first lifecycle ownership, truthful timing and safe same-project return continuity.
 - [x] Preserve exact current-view export scope, canonical parties/evidence, immutable response/revision/close history and optional sharing as a separate action.
 - [ ] Pass the exact-head gate, push UX046–UX050 as one block, publish accumulated UX041–UX050 without Replit Agents, and complete full authenticated Chrome smoke.
+
+## Experience makeover Block 11 — submittal requirements, packages and review — 2026-09-29
+
+- [x] UX051–UX055 distinguish Required, Received and Control; inherit requirement context into one received package; clarify RFI/requirement/file relationship meaning; expose current review action and immutable revision history; and align revision identity across list, detail, editor, control and exports.
+- [x] Preserve canonical requirement/package records, many-to-many linked-record support, authorized review behavior and the rule that coverage never implies approval.
+- [ ] Complete the exact-head gate and push UX051–UX055 as one block. Do not publish until UX056–UX060 complete the next ten-build boundary.

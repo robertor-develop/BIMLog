@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 685,
-    "frontendApiReferences": 259,
+    "frontendApiReferences": 260,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -9888,6 +9888,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/submittals/${savedId}/ai-check"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/submittal-register/${seed.requirementId}/packages/${created.id}"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",

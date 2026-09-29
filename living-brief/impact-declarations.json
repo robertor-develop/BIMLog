@@ -49651,6 +49651,99 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6682667d9f93ebde1f144c4b26ce25147d9d30ea490c21ba94fc17e6a2bb18cc"
+    },
+    {
+      "taskId": "ux-b11-submittal-experience",
+      "reviewedThroughCommit": "7173dc593f0be71828ae5cf8eea17f919bb30d64",
+      "reviewedAt": "2026-09-29T17:08:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Submittal navigation and relationships now distinguish requirements, received revisions, coverage and review authority without duplicating canonical records.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX051–UX055 preserve canonical submittal authority, evidence history, review permissions and linked-record boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX051–UX055 follow the approved experience roadmap and existing implementation and evidence requirements."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX051–UX055 improve workflow clarity and export parity without changing the governing quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX051–UX055 advance the existing integrated submittal direction without changing product strategy."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX051–UX055 use existing submittal, coverage, linked-record and export architecture without schema changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX051–UX055 do not change Navisworks plugin behavior, packaging, identity or synchronization."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX055 adds revision identity to existing exports without changing report design authority or layout doctrine."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX051–UX055 make no new standards, certification, compliance or legal interpretation claims."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the five-build Submittals source candidate and exact publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records completed scope, the push gate and the next ten-build publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The append-only audit authority remains unchanged; this block records current implementation status elsewhere."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "53c84a1b0c5f890ef7929e1b2ac4d06c6ba0dff728e242ed83cd820bad3492e2"
     }
   ]
 }

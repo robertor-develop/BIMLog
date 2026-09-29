@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "861efac7d0d2b389242d5077d2a2ea331a1515354f4b2ff389463e5498b7747d",
-  "itemCount": 261,
+  "sourceSha256": "6b5f54c384c850ee27641f7facaa41cc6ceb747c159584ec645332fbf0d9b261",
+  "itemCount": 262,
   "counts": {
-    "ACTIVE": 226,
+    "ACTIVE": 227,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4767,6 +4767,24 @@
       "evidence": [
         "OPEN_LOOP.md:3779",
         "Experience makeover Block 10 — RFI experience — 2026-09-29"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "dbf39dcb1b5c6b78",
+      "sourceLine": 3785,
+      "heading": "Experience makeover Block 11 — submittal requirements, packages and review — 2026-09-29",
+      "statement": "Complete the exact-head gate and push UX051–UX055 as one block. Do not publish until UX056–UX060 complete the next ten-build boundary.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3785",
+        "Experience makeover Block 11 — submittal requirements, packages and review — 2026-09-29"
       ],
       "currentAuthority": false
     }

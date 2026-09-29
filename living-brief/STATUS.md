@@ -3169,3 +3169,9 @@ Block 9 gate correction: the convention guard now resolves inside the upload for
 - UX046–UX050 simplify the RFI register around one primary status filter, clarify minimum draft requirements and reused project parties/evidence, add a read-first lifecycle summary, distinguish age from actual overdue status, and preserve safe same-project return context through response, revision and close.
 - Existing RFI records, permissions, response history, audit history, exports and explicit optional sharing remain authoritative. Unsent drafts and issued RFIs without due dates are no longer presented as overdue.
 - Product commits are `e6f17182`, `1fbb5d31`, `545261a7`, `86935379` and `4bcb446f`. UX041–UX050 reach the required ten-build publication and authenticated Chrome smoke boundary.
+
+## Experience makeover Block 11 source candidate — 2026-09-29
+
+- UX051–UX055 rename the Submittals workspace around Required, Received and Control; create received packages from inherited requirement context; explain primary and additional evidence relationships; expose the current review action with readable immutable revision history; and align revision identity across list and exports.
+- Coverage remains a relationship between one existing requirement and existing package revisions. It does not create a second requirement, duplicate a package, or imply review approval.
+- Product commits are `5d7bfced`, `05c18c60`, `94f61ab3`, `294a5c21` and `7173dc59`. This first five-build block remains unpublished until UX056–UX060 reach the next ten-build publication boundary.
