@@ -415,7 +415,7 @@ assert.match(ui, /capabilities\.budget/);
 assert.match(ui, /capabilities\.contracts/);
 assert.match(ui, /Add contract profile/);
 assert.match(ui, /Reassign this contract's Contract Items/);
-assert.match(ui, /All changes saved/);
+assert.match(read("../../../bimlog/src/lib/job-intake-save-confidence.ts"), /All changes saved/);
 assert.match(ui, /window\.setTimeout\([\s\S]*void persist\(dataRef\.current\)/);
 assert.doesNotMatch(
   ui,
