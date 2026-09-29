@@ -13,13 +13,10 @@ assert.match(source, /financial\/snapshots\/\$\{selectedBudgetSnapshotId\}/);
 assert.match(source, /setBudgetLines\(selectedBudget\?\.snapshot\?\.lines \?\? \[\]\)/);
 assert.match(source, /responsibleParticipantId/);
 assert.match(source, /Authoritative agreement/);
-assert.match(source, /Assignment target/);
-assert.match(source, /Entire Contract Item/);
-assert.match(source, /Specific Work Package/);
-assert.match(source, /assignmentTargetType: "contract_item"/);
-assert.match(source, /Create required Work Package/);
-assert.match(source, /Save package and return/);
-assert.match(source, /could not verify the saved Work Package assignment/);
+assert.match(source, /GenericResourcePlan/);
+assert.match(source, /IntakeDeliveryItems/);
+assert.match(source, /<WorkPackageBuilder/);
+assert.doesNotMatch(source, /Add assignment|Specific Work Package/);
 assert.match(source, /Activation verification failed/);
 assert.match(source, /operations\$\{firstTaskId/);
 

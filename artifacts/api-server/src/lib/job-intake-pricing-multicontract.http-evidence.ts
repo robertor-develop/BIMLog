@@ -232,14 +232,20 @@ try {
   await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'admin','active'),($1,$3,'member','active')`,[coreProjectId,actor.id,checker.id]);
   const corePath=`/projects/${coreProjectId}/intake`;
   const coreInitial=await request('POST',corePath);
-  const coreData={...data,commercial:{...data.commercial,budgetSnapshotId:'',contracts:data.commercial.contracts.map(({pricingTemplateVersionId,...contract})=>contract)},
-    scopeItems:data.scopeItems.map(({apuPlanVersion,budgetSnapshotLineId,projectCostNodeId,...item})=>({...item,workPackages:item.workPackages.map(pkg=>({...pkg,id:`CORE-${pkg.id}`,packageCode:`CORE-${pkg.packageCode}`}))}))};
+  const coreData={...data,team:{...data.team,projectLeaderUserId:null,assignments:data.team.assignments.map(a=>({...a,userId:null,personName:"",plannedHours:"1"}))},commercial:{...data.commercial,budgetSnapshotId:'',contracts:data.commercial.contracts.map(({pricingTemplateVersionId,...contract})=>contract)},
+    scopeItems:data.scopeItems.map(({apuPlanVersion,budgetSnapshotLineId,projectCostNodeId,...item})=>({...item,quantity:"12",unit:"Drawings",workPackages:item.workPackages.map(pkg=>({...pkg,id:`CORE-${pkg.id}`,packageCode:`CORE-${pkg.packageCode}`}))}))};
   const coreSaved=await request('PUT',corePath,{expectedRevision:coreInitial.body.revision,data:coreData});
   assert.equal(coreSaved.status,200,JSON.stringify(coreSaved.body));
   const coreRequest={expectedRevision:coreSaved.body.revision,confirmationFingerprint:coreSaved.body.completion.fingerprint};
   const coreActivated=await request('POST',`${corePath}/activate`,coreRequest);
   assert.equal(coreActivated.status,200,JSON.stringify(coreActivated.body));
   assert.equal(coreActivated.body.activationMode,'core');
+  const pendingResourceRows=(await pool.query('SELECT user_id, person_name, billing_hourly_rate, planned_billable_value FROM job_activation_resource_assignments WHERE intake_id=$1',[coreInitial.body.id])).rows;
+  assert.ok(pendingResourceRows.length > 0);
+  assert.ok(pendingResourceRows.every(row=>row.user_id === null && row.person_name === 'Unassigned resource'));
+  assert.ok(pendingResourceRows.every(row=>row.billing_hourly_rate === null && row.planned_billable_value === null), 'Drawing unit price must not become hourly revenue');
+  assert.equal(coreSaved.body.completion.totals.assignedHours,'0');
+  console.log('UX025 real HTTP/database: generic roles save/reopen and activate with partial hours, no leader or employee identity PASS');
   const coreBefore=await request('GET',corePath);
   const rejectedEnrichment=await request('POST',`${corePath}/activate`,{expectedRevision:coreBefore.body.revision,confirmationFingerprint:coreBefore.body.completion.fingerprint,requireCommercial:true});
   assert.equal(rejectedEnrichment.status,409,JSON.stringify(rejectedEnrichment.body));

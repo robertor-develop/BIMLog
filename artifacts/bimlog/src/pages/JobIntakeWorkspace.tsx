@@ -1672,91 +1672,6 @@ export function JobIntakeWorkspace() {
                 </div>
                 <details><summary>{tt("Companies and agreements (optional advanced setup)", "Empresas y acuerdos (configuración avanzada opcional)")}</summary><CompanyJobMap data={data} companies={authoritativeCompanies} contacts={directoryEntries} setData={setData} tt={tt}/></details>
               </section>
-              <section className="ji-card" id="ji-scope">
-                <h2>
-                  3. {stageLabel("scope")} + {stageLabel("pricing")}
-                </h2>
-                <div className="ji-rate">
-                  <strong>
-                    {tt(
-                      "Quantity connects each Contract Item to its inherited unit, staffing plan, and Commercial value.",
-                      "La Cantidad conecta cada Partida de Contrato con su unidad heredada, el plan de personal y el valor comercial.",
-                    )}
-                  </strong>
-                  {capabilities.costValuePlanner
-                    ? tt(
-                        "Quantity × the Contract Item unit rate = calculated value. A saved Cost & Value plan can be linked, but its total selling price never becomes a unit rate.",
-                        "Cantidad × tarifa unitaria de la Partida de Contrato = valor calculado. Puede vincular un plan de Costo y Valor, pero su precio de venta total nunca se convierte en tarifa unitaria.",
-                      )
-                    : tt(
-                        "Every user can define Contract Item Name and Quantity. Rates and APU links are optional Commercial features.",
-                        "Todo usuario puede definir Nombre y Cantidad de la Partida de Contrato. Las tarifas y los vínculos APU son funciones comerciales opcionales.",
-                      )}
-                </div>
-                {guide && (
-                  <div className="ji-guide">
-                    {capabilities.costValuePlanner
-                      ? tt(
-                          "Each draft row has a stable Contract Item ID. Activation creates the shared operational item and, when entitled, its APU-backed Commercial snapshot without a duplicate Intake store.",
-                          "Cada fila del borrador tiene un ID estable de Partida de Contrato. La activación crea la partida operativa compartida y, cuando corresponde, su instantánea Comercial respaldada por APU sin duplicar el almacén de Ingreso.",
-                        )
-                      : tt(
-                          "Add one Contract Item per deliverable or work package. Activation creates operational work items even without paid Commercial features.",
-                          "Agregue una Partida de Contrato por cada entregable o paquete de trabajo. La activación crea partidas operativas aun sin funciones comerciales pagadas.",
-                        )}
-                  </div>
-                )}
-                {capabilities.costValuePlanner && (
-                  <div className="ji-row" aria-label={tt("APU coverage by contract", "Cobertura APU por contrato")}>
-                    <strong>{tt("APU coverage by contract", "Cobertura APU por contrato")}</strong>
-                    <p className="ji-small">{tt(
-                      "BIMLog automatically uses a saved APU only when exactly one compatible version exists. Multiple versions always require an explicit selection; existing selections are never overwritten.",
-                      "BIMLog usa automáticamente un APU guardado solo cuando existe exactamente una versión compatible. Varias versiones siempre requieren una selección explícita; las selecciones existentes nunca se sobrescriben.",
-                    )}</p>
-                    {apuCoverage.map((entry) => (
-                      <div key={entry.contractId} className={entry.status === "incomplete" ? "ji-missing" : "ji-lock"}>
-                        <b>{entry.label}</b> — {entry.boundCount}/{entry.itemCount} {tt("Contract Items linked", "Partidas de Contrato vinculadas")}
-                        {entry.versions.length ? ` · APU ${entry.versions.map((version) => `v${version}`).join(", ")}` : ""}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <ContractItemBulkEditor
-                  showDeliveryControls={false}
-                  items={data.scopeItems}
-                  setItems={setScopeItems}
-                  currency={data.identity.currency}
-                  defaultRate={capabilities.costValuePlanner ? latestRate : "0"}
-                  defaultApuVersion={
-                    capabilities.costValuePlanner ? latestApuVersion : null
-                  }
-                  apuVersions={capabilities.costValuePlanner ? apuVersions : []}
-                  defaultWorkflow={data.delivery.workflowTemplate}
-                  deliveryWorkflowOptions={deliveryWorkflowChoices.options ?? []}
-                  deliveryWorkflowMode={deliveryWorkflowChoices.mode ?? "defaults_allowed"}
-                  capabilities={capabilities}
-                  contracts={data.commercial.contracts || []}
-                  defaultContractId={
-                    data.commercial.contracts?.[0]?.id || "PRIMARY"
-                  }
-                  budgetSnapshotId={data.commercial.budgetSnapshotId}
-                  budgetLines={budgetLines}
-                  onBudgetSnapshotChange={(id) => void selectSnapshot(id)}
-                  snapshots={workspace?.snapshots ?? []}
-                  onOpenCostValuePlanner={() =>
-                    openCommercialPrerequisite(`/projects/${projectId}/financial/apu`)
-                  }
-                  onOpenProjectBudget={() =>
-                    openCommercialPrerequisite(`/projects/${projectId}/financial/budget`)
-                  }
-                  tt={tt}
-                  onError={setError}
-                  onNotice={setNotice}
-                />
-                {(data.scopeItems || []).map((item:any, index:number)=><div className="ji-row" key={`owner-${item.id}`}><strong>{item.name || item.id}</strong><div className="ji-grid"><label>{tt("Responsible company", "Empresa responsable")}<select value={item.responsibleParticipantId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,responsibleParticipantId:event.target.value}:candidate))}><option value="">{tt("Unassigned", "Sin asignar")}</option>{(data.relationships?.participants || []).map((participant:any)=><option key={participant.id} value={participant.id}>{participant.companyName}</option>)}</select></label><label>{tt("Authoritative agreement", "Acuerdo autorizado")}<select value={item.contractId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,contractId:event.target.value}:candidate))}>{(data.commercial.contracts || []).map((contract:any)=><option key={contract.id} value={contract.id}>{contract.title || contract.contractNumber || contract.id}</option>)}</select></label></div></div>)}
-                <LegacyProjectClassificationNotice data={data} setData={setData} tt={tt} />
-
-              </section>
               <section className="ji-card" id="ji-contract">
                 <h2>
                   2. {stageLabel("contract")}
@@ -2122,6 +2037,91 @@ export function JobIntakeWorkspace() {
                     )}
                   </div>
                 )}
+              </section>
+              <section className="ji-card" id="ji-scope">
+                <h2>
+                  3. {stageLabel("scope")} + {stageLabel("pricing")}
+                </h2>
+                <div className="ji-rate">
+                  <strong>
+                    {tt(
+                      "Quantity and unit describe what you sell. Planned labor hours describe the work needed to deliver it.",
+                      "La cantidad y la unidad describen lo que vende. Las horas previstas describen el trabajo necesario para entregarlo.",
+                    )}
+                  </strong>
+                  {capabilities.costValuePlanner
+                    ? tt(
+                        "Quantity × the Contract Item unit rate = calculated value. A saved Cost & Value plan can be linked, but its total selling price never becomes a unit rate.",
+                        "Cantidad × tarifa unitaria de la Partida de Contrato = valor calculado. Puede vincular un plan de Costo y Valor, pero su precio de venta total nunca se convierte en tarifa unitaria.",
+                      )
+                    : tt(
+                        "Every user can define Contract Item Name and Quantity. Rates and APU links are optional Commercial features.",
+                        "Todo usuario puede definir Nombre y Cantidad de la Partida de Contrato. Las tarifas y los vínculos APU son funciones comerciales opcionales.",
+                      )}
+                </div>
+                {guide && (
+                  <div className="ji-guide">
+                    {capabilities.costValuePlanner
+                      ? tt(
+                          "Each draft row has a stable Contract Item ID. Activation creates the shared operational item and, when entitled, its APU-backed Commercial snapshot without a duplicate Intake store.",
+                          "Cada fila del borrador tiene un ID estable de Partida de Contrato. La activación crea la partida operativa compartida y, cuando corresponde, su instantánea Comercial respaldada por APU sin duplicar el almacén de Ingreso.",
+                        )
+                      : tt(
+                          "Add one Contract Item per deliverable or work package. Activation creates operational work items even without paid Commercial features.",
+                          "Agregue una Partida de Contrato por cada entregable o paquete de trabajo. La activación crea partidas operativas aun sin funciones comerciales pagadas.",
+                        )}
+                  </div>
+                )}
+                {capabilities.costValuePlanner && (
+                  <div className="ji-row" aria-label={tt("APU coverage by contract", "Cobertura APU por contrato")}>
+                    <strong>{tt("APU coverage by contract", "Cobertura APU por contrato")}</strong>
+                    <p className="ji-small">{tt(
+                      "BIMLog automatically uses a saved APU only when exactly one compatible version exists. Multiple versions always require an explicit selection; existing selections are never overwritten.",
+                      "BIMLog usa automáticamente un APU guardado solo cuando existe exactamente una versión compatible. Varias versiones siempre requieren una selección explícita; las selecciones existentes nunca se sobrescriben.",
+                    )}</p>
+                    {apuCoverage.map((entry) => (
+                      <div key={entry.contractId} className={entry.status === "incomplete" ? "ji-missing" : "ji-lock"}>
+                        <b>{entry.label}</b> — {entry.boundCount}/{entry.itemCount} {tt("Contract Items linked", "Partidas de Contrato vinculadas")}
+                        {entry.versions.length ? ` · APU ${entry.versions.map((version) => `v${version}`).join(", ")}` : ""}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <ContractItemBulkEditor
+                  showDeliveryControls={false}
+                  items={data.scopeItems}
+                  setItems={setScopeItems}
+                  currency={data.identity.currency}
+                  defaultRate={capabilities.costValuePlanner ? latestRate : "0"}
+                  defaultApuVersion={
+                    capabilities.costValuePlanner ? latestApuVersion : null
+                  }
+                  apuVersions={capabilities.costValuePlanner ? apuVersions : []}
+                  defaultWorkflow={data.delivery.workflowTemplate}
+                  deliveryWorkflowOptions={deliveryWorkflowChoices.options ?? []}
+                  deliveryWorkflowMode={deliveryWorkflowChoices.mode ?? "defaults_allowed"}
+                  capabilities={capabilities}
+                  contracts={data.commercial.contracts || []}
+                  defaultContractId={
+                    data.commercial.contracts?.[0]?.id || "PRIMARY"
+                  }
+                  budgetSnapshotId={data.commercial.budgetSnapshotId}
+                  budgetLines={budgetLines}
+                  onBudgetSnapshotChange={(id) => void selectSnapshot(id)}
+                  snapshots={workspace?.snapshots ?? []}
+                  onOpenCostValuePlanner={() =>
+                    openCommercialPrerequisite(`/projects/${projectId}/financial/apu`)
+                  }
+                  onOpenProjectBudget={() =>
+                    openCommercialPrerequisite(`/projects/${projectId}/financial/budget`)
+                  }
+                  tt={tt}
+                  onError={setError}
+                  onNotice={setNotice}
+                />
+                {(data.scopeItems || []).map((item:any, index:number)=><div className="ji-row" key={`owner-${item.id}`}><strong>{item.name || item.id}</strong><div className="ji-grid"><label>{tt("Responsible company", "Empresa responsable")}<select value={item.responsibleParticipantId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,responsibleParticipantId:event.target.value}:candidate))}><option value="">{tt("Unassigned", "Sin asignar")}</option>{(data.relationships?.participants || []).map((participant:any)=><option key={participant.id} value={participant.id}>{participant.companyName}</option>)}</select></label><label>{tt("Authoritative agreement", "Acuerdo autorizado")}<select value={item.contractId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,contractId:event.target.value}:candidate))}>{(data.commercial.contracts || []).map((contract:any)=><option key={contract.id} value={contract.id}>{contract.title || contract.contractNumber || contract.id}</option>)}</select></label></div></div>)}
+                <LegacyProjectClassificationNotice data={data} setData={setData} tt={tt} />
+
               </section>
               <section className="ji-card" id="ji-delivery">
                 <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>

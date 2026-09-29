@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 685,
-    "frontendApiReferences": 259,
+    "frontendApiReferences": 258,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -9380,10 +9380,6 @@
     {
       "screen": "artifacts/bimlog/src/pages/HelpCenter.tsx",
       "apiPath": "/api/v1/help/manual/pdf"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/members/eligible"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Profile.tsx",

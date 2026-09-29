@@ -1,0 +1,30 @@
+import { createRoot } from 'react-dom/client';
+import { useState } from 'react';
+import { Router } from 'wouter';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { I18nProvider, useI18n } from './lib/i18n';
+import { ConfigProvider } from './lib/config-context';
+import { useAuthStore } from './store/auth';
+import { blankJobIntakeData } from './lib/job-intake-workspace-state';
+import { JobIntakeWorkspace } from './pages/JobIntakeWorkspace';
+import './index.css';
+if (!import.meta.env.DEV || !['localhost','127.0.0.1'].includes(location.hostname)) throw new Error('Local fixture only');
+const capabilities={package:false,budget:true,contracts:false,costValuePlanner:false,anyCommercial:true,fullCommercialActivation:false};
+let data:any={...structuredClone(blankJobIntakeData),identity:{...blankJobIntakeData.identity,jobName:'Seven floor shop drawing project',jobCode:'UX-B05',clientName:'Fixture client',clientCompany:'Fixture client',clientCompanyId:1},scopeItems:[{id:'SCOPE-A',name:'Shop drawings',quantity:'12',unit:'Drawings',plannedHours:'80',billingHourlyRate:'30',contractId:'PRIMARY',deliverableType:'SHOP_DRAWING',workPackages:[],workflowTemplate:'bim-submittal',deliveryWorkflowVersionId:''}],relationships:{participants:[],engagements:[]}};
+let revision=1;
+const snapshot=()=>({id:'LOCAL-B05',project:{id:505,name:'Seven floor shop drawing project',code:'UX-B05'},status:'draft',revision,data,capabilities,documents:[],members:[],events:[],completion:{percent:25,ready:false,stages:[],missingItems:[],totals:{plannedHours:'80',assignedHours:'0',unassignedHours:'80',contractValue:'360',plannedLaborCost:'0'}}});
+useAuthStore.setState({token:'local-only',user:{id:1,fullName:'Fixture manager',email:'fixture@example.test',companyName:'Fixture BIM'} as any});
+window.fetch=async(input,init)=>{const path=String(input);
+ if(path.includes('/intake')) {if(init?.method==='PUT'){data=JSON.parse(String(init.body)).data;revision++;}return Response.json(snapshot());}
+ if(path.endsWith('/projects/505'))return Response.json({id:505,name:data.identity.jobName,code:'UX-B05'});
+ if(path.endsWith('/members'))return Response.json([{userId:1,role:'admin',userFullName:'Fixture manager'}]);
+ if(path.endsWith('/directory'))return Response.json([{id:1,companyId:1,companyName:'Fixture client',type:'company'}]);
+ if(path.includes('/master-catalogs'))return Response.json({governed:false,entries:[]});
+ if(path.endsWith('/company/delivery-workflows/options'))return Response.json({mode:'approved_only',options:[{versionId:'WF-PUBLISHED',name:'Shop drawing review',source:'company',version:2,definition:{deliverableTypes:['SHOP_DRAWING'],phases:[{name:'Prepare',tasks:[{}]},{name:'Review',tasks:[{}]}]}}]});
+ if(path.includes('/access-profile'))return Response.json({decisions:{}});
+ if(path.includes('/financial/'))return Response.json({snapshots:[]});
+ if(path.includes('/config'))return Response.json({member_role:[{value:'admin',label:'Admin',labelEs:'Admin',meta:{permission:'admin'}}]});
+ return Response.json([]);
+};
+function Harness(){const {lang,setLang}=useI18n();const [destination,setDestination]=useState('/projects/505/intake');return <><div style={{padding:12,background:'#eff6ff'}}><strong>Local actual Intake component — synthetic transport, not production acceptance</strong><button onClick={()=>setLang(lang==='es'?'en':'es')}>English / Español</button><output aria-label="Destination">{destination}</output></div><Router hook={()=>[destination,setDestination]}><JobIntakeWorkspace/></Router></>}
+createRoot(document.getElementById('root')!).render(<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}><I18nProvider><ConfigProvider><Harness/></ConfigProvider></I18nProvider></QueryClientProvider>);

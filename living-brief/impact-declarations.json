@@ -48843,6 +48843,123 @@
         "scripts/test-post120-block37.mjs"
       ],
       "reviewedChangeSha256": "2e1ac056284c1dd05bc9719041fb8d42debde7dda73856a7f7da855c6638a52a"
+    },
+    {
+      "taskId": "ux021-ux025-full-intake-resource-planning",
+      "reviewedThroughCommit": "ad1a33578f7c680d51d81d6da6db0f226008da2d",
+      "reviewedAt": "2026-09-29T10:02:07.000Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_build_acceptance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push",
+          "chrome_component_verification"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "summary": "Quick/full duplication, quantity-to-hours conflation, dispersed delivery settings and full staffing requirements interrupted Intake. B05 repairs these with legacy draft/assignment preservation and optional role planning; no new cost approval policy.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "customer_impacting_defect",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX021-UX025 apply existing product and quality rules: one canonical draft, optional commercial layers, immutable accepted operations, no new authority or schema, no employee cost approval changes, no Native changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX021-UX025 apply existing product and quality rules: one canonical draft, optional commercial layers, immutable accepted operations, no new authority or schema, no employee cost approval changes, no Native changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX021-UX025 apply existing product and quality rules: one canonical draft, optional commercial layers, immutable accepted operations, no new authority or schema, no employee cost approval changes, no Native changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX021-UX025 apply existing product and quality rules: one canonical draft, optional commercial layers, immutable accepted operations, no new authority or schema, no employee cost approval changes, no Native changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records five implemented Intake builds, prior B04 live acceptance, bounded B05 proof and publication due at UX030."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX021-UX025 apply existing product and quality rules: one canonical draft, optional commercial layers, immutable accepted operations, no new authority or schema, no employee cost approval changes, no Native changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX021-UX025 apply existing product and quality rules: one canonical draft, optional commercial layers, immutable accepted operations, no new authority or schema, no employee cost approval changes, no Native changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX021-UX025 apply existing product and quality rules: one canonical draft, optional commercial layers, immutable accepted operations, no new authority or schema, no employee cost approval changes, no Native changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records five implemented Intake builds, prior B04 live acceptance, bounded B05 proof and publication due at UX030."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records five implemented Intake builds, prior B04 live acceptance, bounded B05 proof and publication due at UX030."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX021-UX025 apply existing product and quality rules: one canonical draft, optional commercial layers, immutable accepted operations, no new authority or schema, no employee cost approval changes, no Native changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-mapped-item-pricing.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/api-server/src/lib/ux-intake-quantity.behavior.ts",
+        "artifacts/api-server/src/lib/ux-intake-resource-plan.behavior.ts",
+        "artifacts/bimlog/job-intake-block05-harness.html",
+        "artifacts/bimlog/src/components/job-intake/CompanyJobMap.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/job-intake/GenericResourcePlan.tsx",
+        "artifacts/bimlog/src/components/job-intake/IntakeDeliveryItems.tsx",
+        "artifacts/bimlog/src/components/job-intake/QuickJobIntake.behavior.tsx",
+        "artifacts/bimlog/src/job-intake-block05-harness.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/lib/job-intake-workspace-state.ts",
+        "artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.item-bindings.behavior.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "docs/experience/ux-program/BLOCK_05_VALIDATION.md",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "bb2a313d86b193d42351d5a751a50830e9a62205a95a7cc1db53fa58dd8501dc"
     }
   ]
 }

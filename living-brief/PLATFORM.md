@@ -999,6 +999,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/trade-file-submission-review.ts
 - artifacts/api-server/src/lib/unified-action-contract.behavior.ts
 - artifacts/api-server/src/lib/unified-action-contract.ts
+- artifacts/api-server/src/lib/ux-intake-quantity.behavior.ts
+- artifacts/api-server/src/lib/ux-intake-resource-plan.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-approval-progress.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.ts
@@ -1502,6 +1504,14 @@ It changes only when the code structure or curated architectural facts change.
 - Exactly one marked section in `living-brief/OPEN_LOOP.md` owns current open-loop truth; historical sections remain evidence and cannot become current by heading text alone.
 - The generated disposition inventory classifies every open record, binds ownership and module/route responsibility, and links repeated historical statements to one canonical record.
 - The normal pre-push gate rejects unresolved duplicate statements, competing or missing current markers, unowned records, route-less product work, and stale contradictions classified as active.
+
+## One full Job Intake setup - UX021-UX025
+
+- Active Intake has six stages; historical Quick Setup drafts resume in the same full draft.
+- Scope quantity and unit are separate from planned labor hours. Legacy quantity falls back to previous hours; canonical contract lines use quantity. Non-hour unit prices do not create fictitious hourly resource revenue.
+- Delivery contains eligible published workflow versions and work-package locations. Convention Builder and company workflows preserve a validated return to the saved Intake stage.
+- Optional generic role budgets can activate without named employees, a leader or full staffing coverage. Existing assignments remain preserved; employee-profile cost approval and excess-hours policy are not enabled by this block.
+- B05 is five unpublished builds after push; publication and full authenticated Chrome smoke are due with B06 at UX030.
 
 ## Connected project navigation - UX016-UX020
 

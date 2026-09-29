@@ -15,12 +15,12 @@ assert.match(component, /First Contract Item — required/);
 assert.match(component, /Customer contact — optional now/);
 assert.match(component, /Contracts, APUs, documents, delivery, and staffing remain available in Advanced setup/);
 assert.match(component, /scopeItems: \[\{ \.\.\.existing, \.\.\.patch \}/);
-assert.match(workspace, /const \[quickMode, setQuickMode\] = useState\(\(\) => readJobIntakeSetupMode\(projectId\) === "quick"\)/);
-assert.match(workspace, /quickMode \? \(/);
-assert.match(workspace, /Back to quick setup/);
+assert.doesNotMatch(workspace, /<QuickJobIntake|quickMode|Back to quick setup/);
+assert.match(workspace, /jobIntakeStages.filter\(stage => stage !== "documents"\)/);
+assert.match(workspaceState, /return "advanced"/);
 assert.match(component, /bimlog:job-intake-quick-step:\$\{projectId\}/);
 assert.match(workspaceState, /bimlog:job-intake-setup-mode:\$\{projectId\}/);
 assert.match(workspace, /Needs info/);
 assert.match(workspace, /must be complete before activation/);
 
-console.log("quick-job-intake.behavior: PASS three-section default with preserved advanced setup");
+console.log("quick-job-intake.behavior: PASS retired quick entry with legacy draft preservation and one full setup");

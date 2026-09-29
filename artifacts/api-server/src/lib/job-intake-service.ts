@@ -1176,6 +1176,9 @@ async function createCoreActivationWithClient(
     const item = input.data.scopeItems.find(
       (candidate) => candidate.id === assignment.scopeItemId,
     )!;
+    // A price per drawing/floor is not an hourly billing rate. Do not fabricate
+    // resource revenue by multiplying labor hours by a non-hour unit price.
+    const hourlyBilling = new Set(["h", "hr", "hrs", "hour", "hours", "hora", "horas"]).has(item.unit.trim().toLowerCase());
     const scopedTaskId = assignment.workPackageId ? packageTaskById.get(assignment.workPackageTaskId ? `${assignment.workPackageId}:${assignment.workPackageTaskId}` : assignment.workPackageId) : linked.taskId;
     if (!scopedTaskId) throw new FinancialControlError(400, "JOB_ACTIVATION_ASSIGNMENT_PACKAGE_INVALID", "The assignment Work Package was not activated for its Contract Item.");
     const inserted = (
@@ -1195,9 +1198,9 @@ async function createCoreActivationWithClient(
           assignment.employmentType,
           assignment.plannedHours,
           input.capabilities.budget ? assignment.internalHourlyRate : null,
-          input.capabilities.costValuePlanner ? item.billingHourlyRate : null,
+          input.capabilities.costValuePlanner && hourlyBilling ? item.billingHourlyRate : null,
           input.capabilities.budget ? assignment.plannedLaborCost : null,
-          input.capabilities.costValuePlanner
+          input.capabilities.costValuePlanner && hourlyBilling
             ? decimalProduct(assignment.plannedHours, item.billingHourlyRate)
             : null,
           input.actorUserId,

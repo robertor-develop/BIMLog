@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 05 — UX021–UX025 local candidate
+
+B04 publication dfd138ad was accepted at exact source ad1a33578f7c680d51d81d6da6db0f226008da2d with healthy identity and a repeated 61-route authenticated Chrome smoke. This supersedes the older pending-publication notes below; evidence is F:/BIMLog/Evidence/ux-audit-20260928/UX-B04-COMPLETION.md.
+
+B05 removes Quick Setup from the active route, retains existing drafts in one six-stage setup, explains inherited identity, separates quantity/unit from labor hours, groups published workflow choices and locations in Delivery with a saved return path, and offers optional generic role budgets without mandatory named staffing. Existing named assignments and authorization checks remain intact. Generic estimates do not implement employee-profile pay approval or the excess-hours policy; those remain later scoped work.
+
+Five sequential builds are implemented; final block regression/Chrome verification and push are being completed. Publication is not due for B05: five unpublished builds after its push, then publish B05+B06 at UX030 and run full authenticated Chrome smoke. No Replit agents. No schema migration or production data write. See docs/experience/ux-program/BLOCK_05_VALIDATION.md for exact proof boundaries.
+
 ## Experience makeover Block 04 - UX016-UX020 candidate
 
 Live release 962b6e3b was published as 0fa9287f with exact healthy identity. The 61-route smoke found an existing Profile policy UX defect: duplicate project choices and a background request for an unbound project surfaced an unrelated error on personal preferences. The corrective candidate deduplicates project options conservatively, requests project policy only on the Project Controls tab, selects a bound active project, and explains unbound/inactive prerequisites without requesting denied controls. Local behavioral tests, typecheck and actual-component Chrome checks pass. Corrective publication and repeated live smoke remain required.

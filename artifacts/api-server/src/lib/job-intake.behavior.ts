@@ -405,7 +405,7 @@ assert.match(contract, /internalHourlyRate/);
 assert.match(app, /startJobIntakeMigration\(\)/);
 assert.match(app, /await waitForJobIntakeMigration\(\)/);
 assert.match(ui, /Core included/);
-assert.match(ui, /La Cantidad conecta cada Partida de Contrato/);
+assert.match(ui, /La cantidad y la unidad describen lo que vende/);
 assert.match(read("../../../bimlog/src/components/job-intake/GenericResourcePlan.tsx"), /budgetEnabled/);
 assert.match(ui, /Cómputo de cantidades/);
 assert.match(ui, /Aún falta/);
