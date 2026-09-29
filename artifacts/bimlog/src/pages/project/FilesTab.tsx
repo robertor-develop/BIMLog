@@ -124,7 +124,6 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const search = useSearch();
   const { data: files, isLoading, isError } = useListFiles(projectId);
   const { data: convention } = useGetConvention(projectId);
-  const conventionBlocked = fileIntakeRequiresConvention(intakeMode) && !convention?.isActive;
   const [showUpload] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [expandedRejected, setExpandedRejected] = useState<Set<number>>(new Set());
@@ -1084,6 +1083,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: convention } = useGetConvention(projectId);
+  const conventionBlocked = fileIntakeRequiresConvention(intakeMode) && !convention?.isActive;
 
   // Build suggested compliant name from the active convention
   const suggestedName = (() => {
