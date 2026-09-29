@@ -29,3 +29,9 @@ export const EVIDENCE_HISTORY_SOURCES=[
   {key:"transmittals",label:"Transmittal records",path:"transmittals",authority:"Delivery history"},
 ] as const;
 export function evidenceHistoryHref(projectId:number,path:string){return `/projects/${projectId}/${path}?from=${encodeURIComponent(`/projects/${projectId}/reports`)}`;}
+export type EvidenceSufficiency="unrated"|"assumed"|"measured";
+export function evidenceSufficiency(input:{measuredValue?:number|null;assumption?:string|null}):{state:EvidenceSufficiency;label:string;meaning:string}{
+  if(typeof input.measuredValue==="number"&&Number.isFinite(input.measuredValue))return {state:"measured",label:"Measured",meaning:"Calculated from identified source records in the selected scope."};
+  if(input.assumption?.trim())return {state:"assumed",label:"Assumed",meaning:"Scenario value supplied as an assumption; it is not observed performance."};
+  return {state:"unrated",label:"Unrated",meaning:"Evidence is insufficient; no outcome or performance rating is stated."};
+}
