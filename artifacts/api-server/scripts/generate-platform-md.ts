@@ -425,6 +425,7 @@ ${appRoutes()}
 - RFI create/edit choices deduplicate stable values and retain legacy selections without mutating configuration.
 - Submittal detail is read-first, with explicit Edit and dirty Cancel/close protection. Save preserves revision validation and exits to inspection; denied saves retain edits.
 - Shared calendarDate/formatCalendarDate normalize calendar fields for editor/detail/control and export, including the legacy dueDate editor fallback. Missing financial effective dates remain absent; valid effective timestamps retain local-day display through a separate guarded instant formatter. Audit/event instants and historical rows are unchanged.
+- Commercial-entitlement authority dates show Included with Commercial access instead of exposing the internal epoch sentinel; recorded grant dates and authorization semantics are unchanged.
 - UX010 is the ten-build publication boundary; exact release evidence is external until completed.
 
 ## Experience makeover foundation — UX001–UX005

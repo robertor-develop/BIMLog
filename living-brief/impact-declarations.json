@@ -44563,7 +44563,7 @@
     {
       "taskId": "consolidation-c010-live-calendar-date-repair",
       "reviewedThroughCommit": "08ecb065710f6903f486e22fb0a7c4f855758767",
-      "reviewedAt": "2026-09-26T22:07:42.220Z",
+      "reviewedAt": "2026-09-26T22:07:42.22Z",
       "status": "local_candidate",
       "captureTiming": "immediate_same_task_chain",
       "capabilityPreflight": {
@@ -46314,7 +46314,7 @@
     {
       "taskId": "consolidation-c036-c040-reusable-saved-views",
       "reviewedThroughCommit": "ef30979a73b150db0633be3a1d8100510af520f6",
-      "reviewedAt": "2026-09-28T12:55:00.000Z",
+      "reviewedAt": "2026-09-28T12:55:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_before_final_gate_push_publication",
       "capabilityPreflight": {
@@ -46411,7 +46411,7 @@
     {
       "taskId": "consolidation-c041-c045-weekly-reporting-baselines",
       "reviewedThroughCommit": "e310fbe98644230df4a184ee002926b7a26707c0",
-      "reviewedAt": "2026-09-28T13:44:35.000Z",
+      "reviewedAt": "2026-09-28T13:44:35Z",
       "status": "local_candidate",
       "captureTiming": "same_task_before_final_gate_and_push",
       "capabilityPreflight": {
@@ -46502,7 +46502,7 @@
     {
       "taskId": "consolidation-c041-c045-final-state-seal",
       "reviewedThroughCommit": "5eaa8d8e746bbef16225dff8fe91101525d97366",
-      "reviewedAt": "2026-09-28T14:00:01.000Z",
+      "reviewedAt": "2026-09-28T14:00:01Z",
       "status": "local_candidate",
       "captureTiming": "same_task_after_generated_inventory_before_final_gate",
       "capabilityPreflight": {
@@ -46592,7 +46592,7 @@
     {
       "taskId": "consolidation-c046-c050-final-generated-state-reconciliation",
       "reviewedThroughCommit": "7f7962c70356abd40818a1ee9cb6af5b043bfe09",
-      "reviewedAt": "2026-09-28T14:35:00.000Z",
+      "reviewedAt": "2026-09-28T14:35:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_after_product_and_generated_inventory_before_final_gate",
       "capabilityPreflight": {
@@ -46673,7 +46673,7 @@
     {
       "taskId": "consolidation-c051-c055-block11-reconciliation",
       "reviewedThroughCommit": "e0308ace464d5145749e5eade09ce1f4730ac9a2",
-      "reviewedAt": "2026-09-28T15:10:00.000Z",
+      "reviewedAt": "2026-09-28T15:10:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_after_five_bounded_implementation_commits_before_full_gate",
       "capabilityPreflight": {
@@ -46755,7 +46755,7 @@
     {
       "taskId": "consolidation-c051-c055-final-state-seal",
       "reviewedThroughCommit": "1ca5e6374e388b5bbf2235e45b5d6e387a4ece82",
-      "reviewedAt": "2026-09-28T15:18:00.000Z",
+      "reviewedAt": "2026-09-28T15:18:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_after_narrative_and_generated_inventory_before_full_gate",
       "capabilityPreflight": {
@@ -47893,7 +47893,7 @@
     {
       "taskId": "consolidation-c101-c105-final-state-seal-2",
       "reviewedThroughCommit": "3e75c7cefd3b9b9d8690ff6b870afe9818e27048",
-      "reviewedAt": "2026-09-28T22:57:04.000Z",
+      "reviewedAt": "2026-09-28T22:57:04Z",
       "status": "local_candidate",
       "captureTiming": "same_task_final_generated_state_seal",
       "capabilityPreflight": {
@@ -47973,7 +47973,7 @@
     {
       "taskId": "consolidation-c106-c110-publication-boundary",
       "reviewedThroughCommit": "59be08007ece898c0f426858b06be48a52177b06",
-      "reviewedAt": "2026-09-28T23:06:52.000Z",
+      "reviewedAt": "2026-09-28T23:06:52Z",
       "status": "local_candidate",
       "captureTiming": "same_task_after_five_bounded_commits_before_exact_head_gate",
       "capabilityPreflight": {
@@ -48054,7 +48054,7 @@
     {
       "taskId": "consolidation-c106-c110-final-state-seal",
       "reviewedThroughCommit": "33fb12f38767ea6cd39425fb447b9ecd2375404d",
-      "reviewedAt": "2026-09-28T23:07:38.000Z",
+      "reviewedAt": "2026-09-28T23:07:38Z",
       "status": "local_candidate",
       "captureTiming": "same_task_final_generated_state_seal",
       "capabilityPreflight": {
@@ -48134,7 +48134,7 @@
     {
       "taskId": "consolidation-c111-c115-state-seal",
       "reviewedThroughCommit": "c0bcaa99e71ea2c9427a22a415f531add29369f8",
-      "reviewedAt": "2026-09-29T00:07:22.120Z",
+      "reviewedAt": "2026-09-29T00:07:22.12Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_state_seal",
       "capabilityPreflight": {
@@ -48214,7 +48214,7 @@
     {
       "taskId": "consolidation-c111-c115-final-generated-state-seal",
       "reviewedThroughCommit": "46cb9741c44d97dc7afdd1b5920be4ff8c18b35f",
-      "reviewedAt": "2026-09-29T00:12:00.000Z",
+      "reviewedAt": "2026-09-29T00:12:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_final_generated_state_seal",
       "capabilityPreflight": {
@@ -48292,7 +48292,7 @@
     {
       "taskId": "consolidation-c116-c120-final-release-acceptance",
       "reviewedThroughCommit": "aca80a379ec36e8881b806dc7099a0bc748efe49",
-      "reviewedAt": "2026-09-29T00:55:00.000Z",
+      "reviewedAt": "2026-09-29T00:55:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48482,7 +48482,7 @@
     {
       "taskId": "ux006-ux010-state-and-trust-repairs",
       "reviewedThroughCommit": "58304d9a9efdf86e2be6774fdbb7559af8f18b65",
-      "reviewedAt": "2026-09-29T05:28:06.953Z",
+      "reviewedAt": "2026-09-29T06:03:05.8609136Z",
       "status": "local_candidate",
       "captureTiming": "same_task_post_build_acceptance",
       "capabilityPreflight": {
@@ -48495,7 +48495,18 @@
         ],
         "operatorOnly": []
       },
-      "immediateFindings": [],
+      "immediateFindings": [
+        {
+          "summary": "Post-publication smoke identified Commercial-entitlement authorities using an internal epoch sentinel. Their date label now says Included with Commercial access (Spanish equivalent), while recorded grants retain valid local dates and missing-date handling. Authorization and historical records are unchanged. Regression checks cover entitlement versus recorded epoch dates in four zones; republish and full authenticated smoke remain required.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "customer_impacting_defect",
+          "disposition": "captured_immediately"
+        }
+      ],
       "authorities": [
         {
           "key": "ecosystem_doctrine",
@@ -48556,6 +48567,7 @@
       "reviewedChangedPaths": [
         "artifacts/api-server/scripts/generate-platform-md.ts",
         "artifacts/api-server/src/routes/submittals.ts",
+        "artifacts/bimlog/src/lib/financial-authority-presentation.ts",
         "artifacts/bimlog/src/lib/intake-readiness-presentation.ts",
         "artifacts/bimlog/src/lib/rfi-priority-options.ts",
         "artifacts/bimlog/src/lib/submittal-editor-contract.ts",
@@ -48576,7 +48588,7 @@
         "living-brief/impact-declarations.json",
         "package.json"
       ],
-      "reviewedChangeSha256": "3f41b764eed3ead009e1d7bac741f61414a314edfb9c11d9418e661d68ff0d4c"
+      "reviewedChangeSha256": "e996a6f1a38d27c9962a7ac36a7e41ed3dbd6d0c103a1e2e0ae73a20d7d30ab7"
     }
   ]
 }

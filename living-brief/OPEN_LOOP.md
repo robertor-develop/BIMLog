@@ -3710,3 +3710,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Preserve daily records, Files custody, project access and canonical action identities; do not claim statutory certification, fabricate evidence, allow executor self-closure or expose internal custody IDs to client reports.
 - [ ] Pass the complete exact-head pre-push gate, push normally to `origin/master`, publish C071–C080 through Replit Shell without Replit Agents, and complete exact-identity authenticated visible-Chrome smoke.
 - [x] Do not run focused Navisworks smoke because C076–C080 do not change Native or installer paths.
+
+Post-publication smoke identified Commercial-entitlement authorities using an internal epoch sentinel. Their date label now says Included with Commercial access (Spanish equivalent), while recorded grants retain valid local dates and missing-date handling. Authorization and historical records are unchanged. Regression checks cover entitlement versus recorded epoch dates in four zones; republish and full authenticated smoke remain required.

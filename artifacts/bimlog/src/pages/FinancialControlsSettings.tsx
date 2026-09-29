@@ -1,4 +1,5 @@
 import { formatOptionalInstantDate } from "@workspace/api-zod";
+import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import {
@@ -395,7 +396,7 @@ export function FinancialControlsSettings() {
                         <Badge key={a.grantId} variant="outline">
                           {authorityLabel(a.authority)} ·{" "}
                           {scopeLabel(a.scopeType)} ·{" "}
-                          {formatOptionalInstantDate(a.effectiveFrom, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}
+                          {financialAuthorityDate(a, lang)}
                           {a.effectiveTo
                             ? ` – ${formatOptionalInstantDate(a.effectiveTo, lang === "es" ? "es" : "en-US", tt("Not recorded", "Sin registrar"))}`
                             : ""}
