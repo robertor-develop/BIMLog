@@ -48829,6 +48829,7 @@
         "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
         "artifacts/bimlog/src/pages/ProjectDetail.tsx",
         "docs/experience/ux-program/BLOCK_04_VALIDATION.md",
+        "evidence/stabilization-program-20260919/ACCESSIBILITY_RESPONSIVE_MATRIX.json",
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -48839,7 +48840,7 @@
         "scripts/route-interconnection-graph.mjs",
         "scripts/test-post120-block37.mjs"
       ],
-      "reviewedChangeSha256": "fe404c9863ec525351513bb8ceedff1cd735b5ca4c95e9bb1d9a0b6d742f868b"
+      "reviewedChangeSha256": "e571c50fe4e9f90134c398f831d7b1dccaff67845643d05c03e74d4c2706b4ce"
     }
   ]
 }

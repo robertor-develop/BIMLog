@@ -3,9 +3,9 @@
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
     "routeTemplates": 42,
-    "projectSurfaces": 19,
-    "customerSurfaces": 61,
-    "viewportCases": 183
+    "projectSurfaces": 20,
+    "customerSurfaces": 62,
+    "viewportCases": 186
   },
   "viewports": [
     {
@@ -997,6 +997,29 @@
       "target": "ProjectDetail",
       "projectTab": "overview",
       "samplePath": "/projects/1",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "path": "/projects/:id/home",
+      "guard": "project",
+      "target": "ProjectHome",
+      "projectTab": "home",
+      "samplePath": "/projects/1/home",
       "routeKind": "customer-surface",
       "themes": [
         "light",
