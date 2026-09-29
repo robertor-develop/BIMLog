@@ -50216,6 +50216,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c0a028192aeea2b3504d27bfd1b286204deae616b0efd3f5ee127bf03c5a3019"
+    },
+    {
+      "taskId": "ux-b16-shared-experience-system",
+      "reviewedThroughCommit": "2ad3ef883f409e13b7252ea873187cb0f3751331",
+      "reviewedAt": "2026-09-29T19:53:37.609Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "UX076–UX080 establish the shared experience system and regression matrix used by production shell and controls.",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "category": "experience_makeover",
+          "disposition": "implemented_gate_pending"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX076–UX080 consolidate shared visual, language, responsive and accessibility presentation contracts without changing permissions, workflow authority, schema, customer data, Native, installers or provider sends."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "92eab48215bedcd986baa2b5b4f0139f1be889038103f6df9d4e95b3a7a37d50"
     }
   ]
 }
