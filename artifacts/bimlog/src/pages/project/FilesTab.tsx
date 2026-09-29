@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, Copy, ChevronDown, ChevronRight, History, Clock, ThumbsUp, ThumbsDown, Inbox, Download } from "lucide-react";
 import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
+import { fileIntakeModeTruth, type FileIntakeMode } from "@/lib/file-intake-journey";
 
 interface ValidationDetail {
   field: string;
@@ -1063,6 +1064,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const [dragOver, setDragOver] = useState(false);
   const [copiedSuggestion, setCopiedSuggestion] = useState(false);
   const [documentRelationship, setDocumentRelationship] = useState<string>("created");
+  const [intakeMode, setIntakeMode] = useState<FileIntakeMode>("record_only");
   const [aiSuggestLoading, setAiSuggestLoading] = useState(false);
   const [aiSuggestedName, setAiSuggestedName] = useState<string | null>(null);
   const [aiSuggestReason, setAiSuggestReason] = useState<string>("");
@@ -1217,6 +1219,17 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
   return (
     <div className="inline-form" style={{ marginBottom: 16 }}>
+      <fieldset style={{ marginBottom: 12, border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 12 }}>
+        <legend style={{ fontWeight: 700, padding: "0 6px" }}>What should BIMLog do with this file?</legend>
+        {([[
+          "record_only", "Record only"
+        ], ["retained_evidence", "Retain as evidence"], ["connected_delivery", "Connected delivery"]] as const).map(([value, label]) => (
+          <label key={value} style={{ display: "flex", gap: 8, alignItems: "flex-start", marginTop: 8 }}>
+            <input type="radio" name="file-intake-mode" value={value} checked={intakeMode === value} onChange={() => setIntakeMode(value)} />
+            <span><strong>{label}</strong><small style={{ display: "block", color: "hsl(var(--muted-foreground))" }}>{fileIntakeModeTruth(value)}</small></span>
+          </label>
+        ))}
+      </fieldset>
       {/* Document Relationship Declaration — inline pills */}
       <div style={{ marginBottom: 10, display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))", textTransform: "uppercase", letterSpacing: "0.06em" }}>
@@ -1285,7 +1298,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
           {isUploading ? "Uploading…" : "Drag and drop your file here or click to browse"}
         </div>
         <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-          Only the file name is validated — no content is stored
+          {fileIntakeModeTruth(intakeMode)}
         </div>
       </div>
 
