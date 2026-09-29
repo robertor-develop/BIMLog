@@ -3163,3 +3163,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - Replit publication passed source attestation, database safety, provider build and promotion at source `c3927db05a3b7e6a9b41424529fa77cc5999bfc2`. Authenticated Chrome control remained unavailable after repeated connection attempts, so that post-publication smoke is still open without implying a product failure.
 
 Block 9 gate correction: the convention guard now resolves inside the upload form that owns the intake mode. The complete frontend type check passes after the scope correction.
+
+## Experience makeover Block 10 source candidate — 2026-09-29
+
+- UX046–UX050 simplify the RFI register around one primary status filter, clarify minimum draft requirements and reused project parties/evidence, add a read-first lifecycle summary, distinguish age from actual overdue status, and preserve safe same-project return context through response, revision and close.
+- Existing RFI records, permissions, response history, audit history, exports and explicit optional sharing remain authoritative. Unsent drafts and issued RFIs without due dates are no longer presented as overdue.
+- Product commits are `e6f17182`, `1fbb5d31`, `545261a7`, `86935379` and `4bcb446f`. UX041–UX050 reach the required ten-build publication and authenticated Chrome smoke boundary.

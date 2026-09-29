@@ -3771,3 +3771,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [ ] Complete the exact-head gate and push UX041–UX045 as one block. Do not publish until UX046–UX050 complete the next ten-build boundary.
 - [ ] Complete the outstanding authenticated Chrome smoke for live deployment `4f79b296` when the Chrome control is available.
 - [x] UX045 gate correction scopes the Convention guard to the upload form and passes the complete frontend type check.
+
+## Experience makeover Block 10 — RFI experience — 2026-09-29
+
+- [x] UX046–UX050 implement one primary status filter with advanced controls, contextual draft guidance, read-first lifecycle ownership, truthful timing and safe same-project return continuity.
+- [x] Preserve exact current-view export scope, canonical parties/evidence, immutable response/revision/close history and optional sharing as a separate action.
+- [ ] Pass the exact-head gate, push UX046–UX050 as one block, publish accumulated UX041–UX050 without Replit Agents, and complete full authenticated Chrome smoke.

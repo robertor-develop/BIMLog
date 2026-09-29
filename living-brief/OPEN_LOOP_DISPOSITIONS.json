@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4704a856ad6d937609f0b9454eafaec564880c422c1dfec1d0c23e7d0cd143c4",
-  "itemCount": 260,
+  "sourceSha256": "861efac7d0d2b389242d5077d2a2ea331a1515354f4b2ff389463e5498b7747d",
+  "itemCount": 261,
   "counts": {
-    "ACTIVE": 225,
+    "ACTIVE": 226,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4749,6 +4749,24 @@
       "evidence": [
         "OPEN_LOOP.md:3772",
         "Experience makeover Block 9 — one file-intake journey — 2026-09-29"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5f041813908d7855",
+      "sourceLine": 3779,
+      "heading": "Experience makeover Block 10 — RFI experience — 2026-09-29",
+      "statement": "Pass the exact-head gate, push UX046–UX050 as one block, publish accumulated UX041–UX050 without Replit Agents, and complete full authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3779",
+        "Experience makeover Block 10 — RFI experience — 2026-09-29"
       ],
       "currentAuthority": false
     }
