@@ -33,7 +33,8 @@
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
-      "package.json"
+      "package.json",
+      "scripts/test-integration-presentation.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",

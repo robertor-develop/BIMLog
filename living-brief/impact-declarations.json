@@ -48957,9 +48957,10 @@
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-integration-presentation.mjs"
       ],
-      "reviewedChangeSha256": "bb2a313d86b193d42351d5a751a50830e9a62205a95a7cc1db53fa58dd8501dc"
+      "reviewedChangeSha256": "72c1ab5aca9e9d89ef660b1fb25d947748b33c8ac8a02c54e78db78f8517afae"
     }
   ]
 }
