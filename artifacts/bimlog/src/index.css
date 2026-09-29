@@ -136,6 +136,9 @@ iframe[aria-label*="Replit" i],
 .route-state h1 { margin: 0; font-size: 22px; line-height: 1.25; }
 .route-state p { margin: 10px 0 0; color: hsl(var(--muted-foreground)); line-height: 1.55; }
 .route-state code { display: inline-block; margin-top: 12px; overflow-wrap: anywhere; }
+.route-state-technical { margin-top: var(--experience-space-md); color: hsl(var(--muted-foreground)); }
+.route-state-technical summary { width: fit-content; cursor: pointer; font-size: 0.8rem; font-weight: 700; }
+.route-state-technical code { display: block; font-size: 0.75rem; }
 .route-state-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .experience-stack { display: grid; gap: var(--experience-space-lg); min-width: 0; }
 .experience-panel { min-width: 0; padding: var(--experience-space-xl); border: 1px solid hsl(var(--border)); border-radius: var(--radius-lg); background: hsl(var(--card)); color: hsl(var(--card-foreground)); }

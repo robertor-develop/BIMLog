@@ -1,5 +1,6 @@
 import { Link, useSearch } from "wouter";
 import { intakePrerequisiteReturn } from "../../lib/return-context";
+import { productLabel, readableTechnicalCode } from "@/lib/product-glossary";
 
 type RouteStateKind = "loading" | "empty" | "denied" | "offline" | "error";
 
@@ -18,7 +19,7 @@ export function RouteState({ kind, code, title, detail, onRetry }: { kind: Route
   return <section className={`route-state route-state-${kind}`} role={loading ? "status" : "alert"} aria-live={loading ? "polite" : "assertive"} aria-busy={loading || undefined}>
     <h1>{title ?? message.title}</h1>
     <p>{detail ?? message.detail}</p>
-    {code && <code>{code}</code>}
+    {code && <details className="route-state-technical"><summary>{productLabel("technicalDetails", "en")} / {productLabel("technicalDetails", "es")}</summary><code>{readableTechnicalCode(code)} · {code}</code></details>}
     {!loading && <div className="route-state-actions">
       {intakeReturn && <Link href={intakeReturn} className="btn">Return to Intake / Volver al ingreso</Link>}
       {onRetry && <button type="button" className="btn btn-primary" onClick={onRetry}>Try again / Intentar de nuevo</button>}
