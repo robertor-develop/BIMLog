@@ -118,3 +118,5 @@ assert.match(populatedStateMarkup, /v2 · 100 USD/);
 assert.match(populatedStateMarkup, /PL · Plumbing · 100/);
 
 console.log("ContractItemBulkEditor.behavior: PASS");
+
+assert.doesNotMatch(emptyStateMarkup, /APU rate profile/);

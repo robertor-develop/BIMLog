@@ -3,10 +3,6 @@ import { compatibleApuVersions, type IntakeApuVersion } from "../../lib/job-inta
 import { ArrowUp, ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
-import {
-  profileForApuRate,
-  rateForApuProfile,
-} from "../../lib/job-intake-apu-rates";
 
 type Translate = (en: string, es: string) => string;
 
@@ -443,6 +439,7 @@ export function ContractItemBulkEditor(props: Props) {
           >
             <Trash2 size={14} />
           </button>
+          {props.capabilities.costValuePlanner && <output className="ji-advanced" aria-label={props.tt(`Price calculation row ${index + 1}`, `Cálculo del precio fila ${index + 1}`)}>{item.quantity ?? item.plannedHours} {item.unit} × {item.billingHourlyRate || "0"} {props.currency}/{item.unit} = {exactProduct(item.quantity ?? item.plannedHours, item.billingHourlyRate)} {props.currency}<small style={{display:"block"}}>{props.tt("Contract value uses quantity, not labor hours. Values retain up to six decimal places; saved APU plan totals are separate.", "El valor contractual usa cantidad, no horas de trabajo. Los valores conservan hasta seis decimales; los totales del plan APU son independientes.")}</small></output>}
           <details className="ji-advanced">
             <summary>
               {props.tt(
@@ -486,44 +483,16 @@ export function ContractItemBulkEditor(props: Props) {
               {props.capabilities.costValuePlanner && (
                 <>
                   <label>
-                    {props.tt("APU rate profile", "Perfil de tarifa APU")}
-                    <select
-                      value={profileForApuRate(item.billingHourlyRate)}
-                      aria-label={props.tt(
-                        `APU rate profile row ${index + 1}`,
-                        `Perfil de tarifa APU fila ${index + 1}`,
-                      )}
-                      onChange={(event) => {
-                        const rate = rateForApuProfile(event.target.value);
-                        if (rate != null)
-                          update(index, { billingHourlyRate: rate });
-                      }}
-                    >
-                      <option value="">
-                        {props.tt("Custom editable rate", "Tarifa editable personalizada")}
-                      </option>
-                      <option value="drafting">
-                        {props.tt("Drafting — 35.47", "Dibujo — 35.47")}
-                      </option>
-                      <option value="bim_coordinator">
-                        {props.tt(
-                          "BIM Coordinator — 37.99",
-                          "Coordinador BIM — 37.99",
-                        )}
-                      </option>
-                    </select>
-                  </label>
-                  <label>
                     {props.tt(
-                      "Inherited APU unit rate",
-                      "Tarifa unitaria APU heredada",
+                      "Contract Item unit rate",
+                      "Tarifa unitaria de la Partida",
                     )}
                     <input
                       inputMode="decimal"
                       value={item.billingHourlyRate}
                       aria-label={props.tt(
-                        `Inherited APU unit rate row ${index + 1}`,
-                        `Tarifa unitaria APU heredada fila ${index + 1}`,
+                        `Contract Item unit rate row ${index + 1}`,
+                        `Tarifa unitaria de la Partida fila ${index + 1}`,
                       )}
                       onChange={(event) =>
                         update(index, { billingHourlyRate: event.target.value })
