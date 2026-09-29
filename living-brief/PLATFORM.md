@@ -1535,6 +1535,15 @@ It changes only when the code structure or curated architectural facts change.
 - Public trust copy treats file storage, retention, deletion, hosting, encryption, backups and production access as deployment/customer-policy facts. BIMLog reports remain informational project records rather than independent certification.
 - Help validates a same-project origin, preserves the exact path and query, and sends Convention setup back to that origin. Hostile, malformed or cross-project origins fall back to Dashboard.
 
+## Pricing and conversion continuity - UX086-UX090
+
+- One canonical offer contract owns public plan names, price illustrations, project/member limits, availability boundaries and the self-service or sales-assisted next step. Customer entitlement and signed agreements remain authoritative.
+- Validated plan, billing and bounded use-case intent follows the visitor into Contact or free registration without requiring re-entry. Unknown plan or billing values are discarded.
+- Free registration and paid-plan consultation use distinct labels, destinations and expectations. No paid entitlement is implied by submitting Contact.
+- The ROI illustration uses editable event, time, loaded-cost and annual-software-cost assumptions, shows its arithmetic and explicitly promises no realized saving or return.
+- The funnel baseline stores event-name counts locally in the browser and displays its definitions. It sends no identity, free text, document/project content, credential, token, URL or device data.
+- UX081-UX090 reach the ten-build publication and authenticated Chrome smoke boundary. No schema, customer data, permission authority, Native source, installer or provider-secret change is included.
+
 ## Connected commercial Intake - UX026-UX030
 
 Activated Intake with a canonical contract displays authoritative saved setup in read-only fields. Browser recovery copies remain preserved without false autosave retries; stage navigation and linked commercial records remain available. Operational activation without a canonical contract retains its existing enrichment path.

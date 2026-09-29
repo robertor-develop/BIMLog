@@ -50600,6 +50600,100 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "ux-b18-pricing-conversion-continuity-20260929",
+      "reviewedThroughCommit": "58a9c6da652a26a7c77a40e66cf7758d2bd7953b",
+      "reviewedAt": "2026-09-29T23:25:00.000Z",
+      "status": "source_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "Duplicated pricing claims, lost selection intent, undifferentiated CTAs, fixed-result ROI language and undefined funnel events required one truthful conversion contract.",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "category": "product_experience",
+          "disposition": "implemented_gate_pending"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX086-UX090 replace duplicated public pricing claims with one bounded commercial-offer contract, preserve validated intent into the correct onboarding journey, provide editable non-promissory ROI arithmetic, and define browser-local content-free funnel counts without changing schema, customer data, permissions, Native, installers, provider secrets, or external delivery."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b00d8a5c9e25a1a8b42e4cfe7a11c65c3f5bbda98653a172ae4452211ef4d2d2"
     }
   ]
 }
