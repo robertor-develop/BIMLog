@@ -26,6 +26,26 @@ export function parseExactTransmittalDeepLink(search: string): ExactTransmittalD
   return Number.isSafeInteger(id) ? { kind: "valid", id } : { kind: "invalid" };
 }
 
+export type TransmittalEvidenceContext = {
+  sourceType: string;
+  sourceId: number;
+  sourceLabel: string;
+  sourceVersion: string;
+  returnTo: string;
+};
+
+export function parseTransmittalEvidenceContext(search: string, projectId: number): TransmittalEvidenceContext | null {
+  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const sourceType = params.get("sourceType")?.trim() ?? "";
+  const sourceIdText = params.get("sourceId") ?? "";
+  const sourceLabel = params.get("sourceLabel")?.trim() ?? "";
+  const sourceVersion = params.get("sourceVersion")?.trim() ?? "";
+  const returnTo = params.get("returnTo") ?? "";
+  if (!sourceType || !/^[1-9]\d*$/.test(sourceIdText) || !sourceLabel || !sourceVersion) return null;
+  if (!returnTo.startsWith(`/projects/${projectId}/`)) return null;
+  return { sourceType, sourceId: Number(sourceIdText), sourceLabel, sourceVersion, returnTo };
+}
+
 const API = "/api/v1";
 
 export function TransmittalsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
@@ -77,6 +97,16 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   const [error, setError] = useState("");
   const [exportError, setExportError] = useState("");
   const [filter, setFilter] = useState("all");
+  const evidenceContext = useMemo(() => parseTransmittalEvidenceContext(searchParams, projectId), [searchParams, projectId]);
+
+  useEffect(() => {
+    if (!evidenceContext) return;
+    setShowForm(true);
+    setForm(current => ({
+      ...current,
+      title: current.title || evidenceContext.sourceLabel,
+    }));
+  }, [evidenceContext]);
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
@@ -98,6 +128,12 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
     e.preventDefault(); setSaving(true); setError("");
     try {
       const body: Record<string, unknown> = { title: form.title, purpose: form.purpose };
+      if (evidenceContext) {
+        body.items = [{
+          description: `${evidenceContext.sourceType}: ${evidenceContext.sourceLabel}`,
+          revision: evidenceContext.sourceVersion,
+        }];
+      }
       if (form.sentTo.trim()) {
         body.sent_to = [{ name: form.sentTo.trim(), email: form.sentToEmail.trim() || undefined, phone: form.sentToPhone.trim() || undefined }];
       }
@@ -330,6 +366,15 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
       {showForm && (
         <div className="card" style={{ marginBottom: 20, padding: 20 }}>
           <h3 style={{ fontWeight: 600, marginBottom: 16 }}>{t("New Transmittal", "Nueva Transmisión")}</h3>
+          {evidenceContext && (
+            <div style={{ marginBottom: 14, padding: 12, border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF" }}>
+              <div style={{ fontSize: 11, fontWeight: 900, color: "#1E3A5F", textTransform: "uppercase" }}>{t("Selected evidence", "Evidencia seleccionada")}</div>
+              <div style={{ marginTop: 4, fontWeight: 800 }}>{evidenceContext.sourceLabel}</div>
+              <div style={{ marginTop: 2, fontSize: 12, color: "#475569" }}>{t("Exact version", "Versión exacta")}: {evidenceContext.sourceVersion} · ID {evidenceContext.sourceId}</div>
+              <div style={{ marginTop: 6, fontSize: 12, color: "#475569" }}>{t("This evidence will be attached to the draft. Review the recipient below before issuing it.", "Esta evidencia se adjuntará al borrador. Revise el destinatario antes de emitirlo.")}</div>
+              <a href={evidenceContext.returnTo} style={{ display: "inline-block", marginTop: 8, fontSize: 12, fontWeight: 800 }}>{t("Return to source", "Volver al origen")}</a>
+            </div>
+          )}
           {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
           <form onSubmit={save} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div>
@@ -344,7 +389,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
             <label>{t("Recipient phone", "Teléfono del destinatario")}<input className="input" type="tel" value={form.sentToPhone} onChange={e => setForm(f => ({ ...f, sentToPhone: e.target.value }))} /></label>
             <label>{t("Recipient email", "Correo del destinatario")}<input className="input" type="email" value={form.sentToEmail} onChange={e => setForm(f => ({ ...f, sentToEmail: e.target.value }))} /></label>
             <div style={{ display: "flex", gap: 8 }}>
-              <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t("Saving…", "Guardando…") : t("Create", "Crear")}</button>
+              <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t("Saving…", "Guardando…") : t("Create draft", "Crear borrador")}</button>
               <button className="btn btn-outline" type="button" onClick={() => { setShowForm(false); setError(""); }}>{t("Cancel", "Cancelar")}</button>
             </div>
           </form>
