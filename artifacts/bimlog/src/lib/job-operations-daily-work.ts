@@ -64,3 +64,14 @@ export function nextTaskAction(task: DailyTask, packages: Array<{ status: string
   }
   return { key: "work", actor: "Assigned member", eligible: Boolean(task.canControl) };
 }
+
+const numeric = (value: unknown) => Number(value ?? 0);
+export function operationalHourMetrics(plannedValue: unknown, actualValue: unknown, progressValue: unknown) {
+  const planned = Math.max(0, numeric(plannedValue));
+  const actual = Math.max(0, numeric(actualValue));
+  const progressPercent = Math.min(100, Math.max(0, numeric(progressValue)));
+  const unused = Math.max(0, planned - actual);
+  const estimatedAtCompletion = progressPercent > 0 ? actual / (progressPercent / 100) : null;
+  const estimatedRemaining = progressPercent >= 100 ? 0 : estimatedAtCompletion == null ? null : Math.max(0, estimatedAtCompletion - actual);
+  return { planned, actual, unused, progressPercent, estimatedAtCompletion, estimatedRemaining };
+}

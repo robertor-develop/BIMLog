@@ -35,7 +35,7 @@ import {
   type OperationsClassificationFilters,
   type OperationsClassificationKind,
 } from "@/lib/job-operations-classification";
-import { buildDailyWorkQueues, focusTask, nextTaskAction, taskCostBinding } from "@/lib/job-operations-daily-work";
+import { buildDailyWorkQueues, focusTask, nextTaskAction, operationalHourMetrics, taskCostBinding } from "@/lib/job-operations-daily-work";
 
 const API_BASE =
   (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env
@@ -1279,7 +1279,6 @@ export function JobOperationsWorkspace() {
       </FinancialProjectShell>
     );
   const total = data.totals ?? {};
-  const remaining = Math.max(0, n(total.plannedHours) - n(total.actualHours));
   const progress = data.tasks?.length
     ? Math.round(
         data.tasks.reduce(
@@ -1288,6 +1287,7 @@ export function JobOperationsWorkspace() {
         ) / data.tasks.length,
       )
     : 0;
+  const hourMetrics = operationalHourMetrics(total.plannedHours, total.actualHours, progress);
   const dailyQueues = buildDailyWorkQueues(
     data.tasks ?? [],
     data.assignments ?? [],
@@ -1538,11 +1538,15 @@ export function JobOperationsWorkspace() {
               </div>
               <div className="jo-stat">
                 <strong>{money(total.actualHours)}h</strong>
-                <span>{tt("Actual hours", "Horas reales")}</span>
+                <span title={tt("Time recorded to date; approval state is shown in Time approval.", "Tiempo registrado hasta hoy; el estado de aprobación se muestra en Aprobación de tiempo.")}>{tt("Recorded actual hours", "Horas reales registradas")}</span>
               </div>
               <div className="jo-stat">
-                <strong>{money(remaining)}h</strong>
-                <span>{tt("Remaining", "Restantes")}</span>
+                <strong>{money(hourMetrics.unused)}h</strong>
+                <span title={tt("Planned hours minus recorded actual hours, never below zero.", "Horas planificadas menos horas reales registradas, nunca menor que cero.")}>{tt("Unused planned hours", "Horas planificadas sin usar")}</span>
+              </div>
+              <div className="jo-stat">
+                <strong>{hourMetrics.estimatedRemaining == null ? "—" : `${money(hourMetrics.estimatedRemaining)}h`}</strong>
+                <span title={tt("Progress-based estimate. It is unavailable until progress is recorded.", "Estimación basada en avance. No está disponible hasta registrar avance.")}>{tt("Estimated hours remaining", "Horas restantes estimadas")}</span>
               </div>
               <div className="jo-stat">
                 <strong>{progress}%</strong>
@@ -2143,6 +2147,7 @@ export function JobOperationsWorkspace() {
                   const costBinding = taskCostBinding(task, data.assignments ?? [], data.members ?? []);
                   const linkedPackages = (data.packageTasks ?? []).filter((link: any) => link.taskId === task.id).map((link: any) => (data.packages ?? []).find((candidate: any) => candidate.id === link.packageId)).filter(Boolean);
                   const nextAction = nextTaskAction(task, linkedPackages, Number(user?.id), data.canManage === true);
+                  const taskHours = operationalHourMetrics(task.plannedHours, task.actualHours, task.progressPercent);
                   return (
                     <article className="jo-task" key={task.id} id={`jo-task-${task.id}`} tabIndex={-1}>
                       <div className="jo-task-head">
@@ -2160,6 +2165,7 @@ export function JobOperationsWorkspace() {
                           <p className={nextAction.eligible ? "jo-ok" : "jo-permission"}>
                             <strong>{tt("Next actor", "Próximo actor")}:</strong> {tt(nextAction.actor, nextAction.actor === "Independent reviewer" ? "Revisor independiente" : nextAction.actor === "Project leader" ? "Líder del proyecto" : nextAction.actor === "Assigned member" ? "Miembro asignado" : "Responsable o líder del proyecto")} · {nextAction.eligible ? tt("You can act here", "Puede actuar aquí") : tt("This action is gated by the current assignment or review role", "Esta acción depende de la asignación o rol de revisión actual")}
                           </p>
+                          <p className="jo-muted">{tt("Hours", "Horas")}: {money(taskHours.planned)} {tt("planned", "planificadas")} · {money(taskHours.actual)} {tt("recorded", "registradas")} · {money(taskHours.unused)} {tt("unused", "sin usar")} · {taskHours.estimatedRemaining == null ? "—" : money(taskHours.estimatedRemaining)} {tt("estimated remaining", "restantes estimadas")}</p>
                           <span className="jo-muted">
                             {statusLabel(task.status)} ·{" "}
                             {money(task.actualHours)} /{" "}
