@@ -1,3 +1,4 @@
+import { ProjectLocation } from "./ProjectLocation";
 import type { ReactNode } from "react";
 import { Link } from "wouter";
 import { ChevronLeft, Shield } from "lucide-react";
@@ -85,19 +86,7 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
       />
       <div className="main-area">
         <div className="project-context-bar">
-          <div className="breadcrumb">
-            <Link
-              href={`/projects/${projectId}/analytics`}
-              style={{ display: "flex", alignItems: "center", gap: 4, color: "hsl(var(--muted-foreground))", textDecoration: "none" }}
-            >
-              <ChevronLeft style={{ width: 14, height: 14 }} />
-              {project.name}
-            </Link>
-            <span style={{ color: "hsl(var(--border))" }}>/</span>
-            <span>{activeTab === "intake" || activeTab === "operations" ? (lang === "es" ? "Comando" : "Command") : (lang === "es" ? "Comercial" : "Commercial")}</span>
-            <span style={{ color: "hsl(var(--border))" }}>/</span>
-            <span className="breadcrumb-active">{activeLabel}</span>
-          </div>
+          <ProjectLocation projectId={projectId} projectName={project.name} location={activeLabel} />
           <div className="project-context-actions">
             <span className="context-chip context-chip-mono">
               <span className="context-chip-label">{lang === "es" ? "CÓDIGO" : "CODE"}</span>

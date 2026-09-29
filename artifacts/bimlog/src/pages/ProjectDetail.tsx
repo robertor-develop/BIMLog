@@ -1,3 +1,4 @@
+import { ProjectLocation } from "@/components/layout/ProjectLocation";
 import React from "react";
 import { Link, useRoute, useLocation } from "wouter";
 import { useGetProject, useListMembers } from "@workspace/api-client-react";
@@ -174,14 +175,7 @@ export function ProjectDetail() {
 
       <div className="main-area">
         <div className="project-context-bar">
-          <div className="breadcrumb">
-            <Link href="/dashboard" style={{ display: "flex", alignItems: "center", gap: 4, color: "hsl(var(--muted-foreground))", textDecoration: "none" }}>
-              <ChevronLeft style={{ width: 14, height: 14 }} />
-              {lang === "es" ? "Sede BIMLog" : "Dashboard"}
-            </Link>
-            <span style={{ color: "hsl(var(--border))" }}>/</span>
-            <span className="breadcrumb-active">{project.name}</span>
-          </div>
+          <ProjectLocation projectId={projectId} projectName={project.name} location={t(`project.tabs.${({ "command-center": "commandCenter", "change-orders": "changeOrders", "clash-reports": "clashReports" } as Record<string,string>)[tab] || tab}`)} />
 
           <div className="project-context-actions">
             <span
