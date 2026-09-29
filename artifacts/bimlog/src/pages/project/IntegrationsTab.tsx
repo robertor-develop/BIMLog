@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { FolderWizardImportPanel } from "./FolderWizardImportPanel";
+import { connectorReadinessCopy, type ConnectorReadiness } from "../settings-experience";
 
 interface IntegrationsTabProps {
   projectId: number;
@@ -246,6 +247,8 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                   ? tr("Setup required", "Configuración requerida")
                   : tr("Review required", "Revisión requerida");
             const Icon = provider.category === "file_source" ? FolderOpen : FileInput;
+            const readinessState: ConnectorReadiness = isConnected ? "ready" : provider.availability === "review_required" ? "permission_required" : "setup_required";
+            const readiness = connectorReadinessCopy(readinessState);
             return (
               <article key={provider.key} style={{ border: "1px solid hsl(var(--border))", borderRadius: 11, background: "hsl(var(--card))", padding: 17 }}>
                 <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
@@ -258,21 +261,18 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14 }}>
-                  <div style={{ fontSize: 10, fontWeight: 750, color: available ? "#1D4ED8" : "#92400E" }}>
-                    <span>{status}</span>
+                  <div style={{ fontSize: 10, fontWeight: 750, color: readinessState === "ready" ? "#15803D" : "#92400E" }}>
+                    <span>{tr(readiness.label, readinessState === "ready" ? "Listo" : readinessState === "permission_required" ? "Permiso requerido" : "Configuración requerida")}</span>
                     {provider.oauthParam && <div style={{ marginTop: 4, color: isConnected ? "#15803D" : "hsl(var(--muted-foreground))" }}>
                       {isConnected ? tr("Account connected", "Cuenta conectada") : tr("Account not connected", "Cuenta no conectada")}
                     </div>}
+                    <div style={{ marginTop: 4, maxWidth: 190, fontWeight: 500, lineHeight: 1.4 }}>{tr(readiness.detail, readinessState === "ready" ? "La conexión y el permiso requerido están verificados." : readinessState === "permission_required" ? "La integración existe, pero su rol no puede usarla ni configurarla." : "Un administrador debe configurar esta integración antes de usarla.")}</div>
                   </div>
                   <button
                     onClick={() => openProvider(provider)}
                     style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
                   >
-                    {provider.route
-                      ? tr("Open", "Abrir")
-                      : available
-                        ? tr("Manage", "Administrar")
-                        : tr("Request review", "Solicitar revisión")}
+                    {tr(readiness.action, readinessState === "ready" ? "Usar integración" : readinessState === "permission_required" ? "Contactar administrador" : "Abrir configuración")}
                   </button>
                 </div>
               </article>
