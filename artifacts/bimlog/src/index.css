@@ -68,6 +68,19 @@ iframe[aria-label*="Replit" i],
   --radius: 0.625rem;
   --sidebar: 220 30% 8%;
   --sidebar-border: rgba(255,255,255,0.07);
+  --experience-space-xs: 0.25rem;
+  --experience-space-sm: 0.5rem;
+  --experience-space-md: 0.75rem;
+  --experience-space-lg: 1rem;
+  --experience-space-xl: 1.5rem;
+  --experience-space-xxl: 2rem;
+  --experience-content-wide: 90rem;
+  --experience-reading-width: 72ch;
+  --experience-status-neutral: 215 16% 47%;
+  --experience-status-info: 221 83% 53%;
+  --experience-status-success: 142 72% 29%;
+  --experience-status-warning: 32 95% 35%;
+  --experience-status-danger: 0 72% 45%;
 }
 
 .dark {
@@ -85,6 +98,11 @@ iframe[aria-label*="Replit" i],
   --border: 218 18% 24%;
   --input: 218 18% 24%;
   --sidebar: 222 34% 7%;
+  --experience-status-neutral: 215 16% 72%;
+  --experience-status-info: 213 94% 68%;
+  --experience-status-success: 142 71% 55%;
+  --experience-status-warning: 38 92% 58%;
+  --experience-status-danger: 0 91% 71%;
 }
 
 @layer base {
@@ -119,6 +137,16 @@ iframe[aria-label*="Replit" i],
 .route-state p { margin: 10px 0 0; color: hsl(var(--muted-foreground)); line-height: 1.55; }
 .route-state code { display: inline-block; margin-top: 12px; overflow-wrap: anywhere; }
 .route-state-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.experience-stack { display: grid; gap: var(--experience-space-lg); min-width: 0; }
+.experience-panel { min-width: 0; padding: var(--experience-space-xl); border: 1px solid hsl(var(--border)); border-radius: var(--radius-lg); background: hsl(var(--card)); color: hsl(var(--card-foreground)); }
+.experience-panel > :first-child { margin-top: 0; }
+.experience-panel > :last-child { margin-bottom: 0; }
+.experience-status { display: inline-flex; align-items: center; min-height: 24px; max-width: 100%; padding: 2px 8px; border: 1px solid currentColor; border-radius: 999px; font-size: 0.75rem; font-weight: 700; line-height: 1.25; overflow-wrap: anywhere; }
+.experience-status-neutral { color: hsl(var(--experience-status-neutral)); }
+.experience-status-info { color: hsl(var(--experience-status-info)); }
+.experience-status-success { color: hsl(var(--experience-status-success)); }
+.experience-status-warning { color: hsl(var(--experience-status-warning)); }
+.experience-status-danger { color: hsl(var(--experience-status-danger)); }
 @media (max-width: 390px) { .route-state { margin: 20px auto; padding: 18px 16px; } .route-state-actions { display: grid; grid-template-columns: 1fr; } }
 
 /*
