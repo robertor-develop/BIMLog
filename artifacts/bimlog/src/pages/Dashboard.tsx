@@ -1003,7 +1003,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
 
   return (
     <div style={{ position: "relative", paddingBottom: isAdmin ? 34 : 0 }}>
-      <Link href={`/projects/${project.id}/analytics`} aria-label={`${lang === "es" ? "Abrir proyecto" : "Open project"}: ${project.name} (${project.code})`} className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-lg" style={{ textDecoration: "none", display: "block" }}>
+      <Link href={`/projects/${project.id}`} aria-label={`${lang === "es" ? "Abrir proyecto" : "Open project"}: ${project.name} (${project.code})`} className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-lg" style={{ textDecoration: "none", display: "block" }}>
         <div
           className="card"
           style={{

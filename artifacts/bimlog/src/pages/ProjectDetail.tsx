@@ -1,3 +1,4 @@
+import { ProjectHome } from "@/components/layout/ProjectHome";
 import { ProjectLocation } from "@/components/layout/ProjectLocation";
 import React from "react";
 import { Link, useRoute, useLocation } from "wouter";
@@ -59,8 +60,8 @@ export function ProjectDetail() {
   const [, params] = useRoute("/projects/:id/:tab?");
   const projectId = params?.id ? parseInt(params.id) : 0;
   // Older project links use /dashboard for the analytics landing page.
-  const tab = params?.tab === "dashboard" ? "analytics" : params?.tab || "analytics";
-  const isKnownTab = PROJECT_TABS.has(tab);
+  const tab = params?.tab === "dashboard" ? "analytics" : params?.tab || "home";
+  const isKnownTab = tab === "home" || PROJECT_TABS.has(tab);
 
   const [, setLocation] = useLocation();
   const { lang, t } = useI18n();
@@ -175,7 +176,7 @@ export function ProjectDetail() {
 
       <div className="main-area">
         <div className="project-context-bar">
-          <ProjectLocation projectId={projectId} projectName={project.name} location={t(`project.tabs.${({ "command-center": "commandCenter", "change-orders": "changeOrders", "clash-reports": "clashReports" } as Record<string,string>)[tab] || tab}`)} />
+          <ProjectLocation projectId={projectId} projectName={project.name} location={tab === "home" ? (lang === "es" ? "Inicio del proyecto" : "Project home") : t(`project.tabs.${({ "command-center": "commandCenter", "change-orders": "changeOrders", "clash-reports": "clashReports" } as Record<string,string>)[tab] || tab}`)} />
 
           <div className="project-context-actions">
             <span
@@ -220,6 +221,7 @@ export function ProjectDetail() {
               </div>
             )}
           >
+          {tab === "home" && <ProjectHome projectId={projectId} role={memberRole} />}
           {!isKnownTab && (
             <section
               role="alert"
