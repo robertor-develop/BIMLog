@@ -19,7 +19,7 @@ assert.equal(jobIntakeCompletion(legacy,[],core).totals.assignedHours,'10');
 assert.equal(jobIntakeCompletion(legacy,[],core).ready,true);
 console.log('UX025 unstaffed activation / optional role budget / exact costs / legacy staff preservation PASS');
 
-const released = normalizeJobIntakeData({...legacy,team:{...legacy.team,projectLeaderUserId:null,assignments:legacy.team.assignments.map(row=>({...row,userId:null,personName:""}))}});
+const released = normalizeJobIntakeData({...legacy,team:{...legacy.team,projectLeaderUserId:null,assignments:[{...legacy.team.assignments[0],userId:null,personName:""}]}});
 assert.equal(released.team.projectLeaderUserId,null);
 assert.equal(released.team.assignments[0].id,'OLD');
 assert.equal(released.team.assignments[0].scopeItemId,'S1');

@@ -1511,6 +1511,7 @@ It changes only when the code structure or curated architectural facts change.
 - Scope quantity and unit are separate from planned labor hours. Legacy quantity falls back to previous hours; canonical contract lines use quantity. Non-hour unit prices do not create fictitious hourly resource revenue.
 - Delivery contains eligible published workflow versions and work-package locations. Convention Builder and company workflows preserve a validated return to the saved Intake stage.
 - Optional generic role budgets can activate without named employees, a leader or full staffing coverage. Existing assignments remain preserved; employee-profile cost approval and excess-hours policy are not enabled by this block.
+- Legacy staffing release has a focused regression asserting preserved row identity, scope, hours and cost.
 - Denied prerequisite pages retain the validated Intake return without granting access. Draft-only controls can release legacy named staffing or leader selections to pending while retaining the underlying generic plan; activated records do not expose these conversions.
 - B05 is five unpublished builds after push; publication and full authenticated Chrome smoke are due with B06 at UX030.
 
