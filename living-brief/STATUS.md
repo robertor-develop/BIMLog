@@ -3270,3 +3270,4 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Focused contract, production component, activation-preview and TypeScript checks pass. This is the first unpublished five-build block in UX121–UX130; production publication and Chrome smoke are not due until UX130.
 - The full-gate PostgreSQL fixture now rejects the retired fake pending-assignment behavior and verifies the generic demand survives save, activation and reload in the Intake source.
 - The release gate now runs Coordination Knowledge Build 272 against the established guarded loopback `bimlog_rfi_test` fixture. The test verifies exact local database identity and unchanged project/viewpoint counts; no production database is used.
+- The artifact-proof gate now supplies the verified local fixture identity and F-rooted private custody path itself, while the existing helper continues to enforce loopback database identity, complete schema, UTF-8 and private ACLs.

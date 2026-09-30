@@ -3872,4 +3872,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Preserve legacy named assignments while preventing new generic rows from creating fake `Unassigned resource` records.
 - [x] Correct the real PostgreSQL activation fixture so it proves generic demand remains in Intake while the person-assignment table stays empty.
 - [x] Route Coordination Knowledge Build 272 through the established guarded loopback `bimlog_rfi_test` fixture so the exact pre-push gate can execute its required database proof.
+- [x] Bind the artifact-proof check to the existing verified F-rooted private proof directory and guarded loopback database; preserve its identity, schema and ACL checks.
 - [ ] Pass the complete exact-head gate and push UX121–UX125 once. Do not publish until UX126–UX130 complete the next ten-build boundary.

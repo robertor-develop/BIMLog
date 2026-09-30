@@ -51585,8 +51585,8 @@
     },
     {
       "taskId": "ux-b25-generic-resource-demand-20260930",
-      "reviewedThroughCommit": "ad277862a1f393e854da835c3e345455543d9268",
-      "reviewedAt": "2026-09-30T08:31:00.000Z",
+      "reviewedThroughCommit": "4e678b599163a6f1a68fbb386cfc08a50115653f",
+      "reviewedAt": "2026-09-30T08:43:00.000Z",
       "status": "local_source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -51666,7 +51666,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b84c578eadecea898d50e37802d58fba1b80e9e0462b2df2ed87705afe072445"
+      "reviewedChangeSha256": "54d7fb2e9c9a9baa67d31a945d42cefe5d747b2158d73fb26cae8e80c7b549e2"
     }
   ]
 }
