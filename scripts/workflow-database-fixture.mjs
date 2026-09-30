@@ -12,7 +12,6 @@ export const workflowFixtureNames = Object.freeze([
   "economic_allocation_test",
   "bimlog_intake_integration_test",
   "company_pricing_template_test",
-  "coordination_knowledge_test",
 ]);
 
 export function validateWorkflowFixture(name, adminUrl) {
@@ -56,7 +55,7 @@ async function main() {
     const command = separator >= 0 ? process.argv[separator + 1] : undefined;
     const args = separator >= 0 ? process.argv.slice(separator + 2) : [];
     if (!command) throw new Error("--run requires a command after --.");
-    const result = spawnSync(command, args, { cwd: root, env: { ...process.env, PROD_DATABASE_URL: targetUrl, ...(name === "coordination_knowledge_test" ? { BIMLOG_COORDINATION_KNOWLEDGE_TEST_DATABASE_URL: targetUrl } : {}) }, stdio: 'inherit', windowsHide: true });
+    const result = spawnSync(command, args, { cwd: root, env: { ...process.env, PROD_DATABASE_URL: targetUrl }, stdio: 'inherit', windowsHide: true });
     if (result.error) throw result.error;
     if (result.status !== 0) throw new Error(`Workflow proof command failed with exit ${result.status}.`);
     console.log(`WORKFLOW_FIXTURE_RUN=PASS database=${name}`);

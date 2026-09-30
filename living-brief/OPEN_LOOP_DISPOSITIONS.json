@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "6d1676131955fce643791a2f2eaaee16e6cedcdb97acefd0642fe22979272360",
+  "sourceSha256": "519282efb7325191918bb420d73684115154d89df56f145c9a5ebe93a0942a14",
   "itemCount": 272,
   "counts": {
     "ACTIVE": 237,
@@ -4952,7 +4952,7 @@
     },
     {
       "id": "ff3402467e656503",
-      "sourceLine": 3874,
+      "sourceLine": 3875,
       "heading": "Experience makeover Block 25 — generic resource budgets and future staffing — 2026-09-30",
       "statement": "Pass the complete exact-head gate and push UX121–UX125 once. Do not publish until UX126–UX130 complete the next ten-build boundary.",
       "classification": "ACTIVE",
@@ -4963,7 +4963,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3874",
+        "OPEN_LOOP.md:3875",
         "Experience makeover Block 25 — generic resource budgets and future staffing — 2026-09-30"
       ],
       "currentAuthority": false

@@ -102,7 +102,7 @@
     "test:coordination-knowledge-build273": "pnpm --filter @workspace/api-server run test:coordination-knowledge-build273",
     "test:coordination-knowledge-build274": "pnpm --filter @workspace/api-server run test:coordination-knowledge-build274",
     "test:coordination-knowledge-build275": "pnpm --filter @workspace/api-server run test:coordination-knowledge-build275",
-    "test:coordination-knowledge-block10": "node scripts/workflow-database-fixture.mjs --run coordination_knowledge_test -- pnpm --filter @workspace/api-server run test:coordination-knowledge-block10",
+    "test:coordination-knowledge-block10": "node scripts/test-coordination-knowledge-block10.mjs",
     "test:coordination-knowledge-regression": "pnpm --filter @workspace/api-server run test:coordination-knowledge-regression",
     "test:edt-engine-block01": "node scripts/test-edt-engine-block01.mjs",
     "test:edt-engine-block02": "node scripts/test-edt-engine-block02.mjs",

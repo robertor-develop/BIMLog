@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { validateWorkflowFixture, workflowFixtureNames } from "./workflow-database-fixture.mjs";
 
 const admin = "postgresql://fixture:fixture@127.0.0.1:55449/postgres";
-assert.deepEqual(workflowFixtureNames, ["delivery_template_test", "delivery_runtime_test", "economic_allocation_test", "bimlog_intake_integration_test", "company_pricing_template_test", "coordination_knowledge_test"]);
+assert.deepEqual(workflowFixtureNames, ["delivery_template_test", "delivery_runtime_test", "economic_allocation_test", "bimlog_intake_integration_test", "company_pricing_template_test"]);
 for (const name of workflowFixtureNames) assert.equal(new URL(validateWorkflowFixture(name, admin)).pathname, `/${name}`);
 assert.throws(() => validateWorkflowFixture("production", admin), /not approved/);
 assert.throws(() => validateWorkflowFixture("company_pricing_template_test_production", admin), /not approved/);
@@ -13,5 +13,4 @@ const source = fs.readFileSync(new URL("./workflow-database-fixture.mjs", import
 assert.match(source, /finally\s*\{[\s\S]*mode === '--run'[\s\S]*await drop\(\)/);
 assert.match(source, /CREATE DATABASE/);
 assert.match(source, /DROP DATABASE IF EXISTS/);
-assert.match(source, /BIMLOG_COORDINATION_KNOWLEDGE_TEST_DATABASE_URL/);
 console.log(`WORKFLOW_DATABASE_FIXTURE=PASS names=${workflowFixtureNames.length} create_run_remove=bounded loopback=55449`);
