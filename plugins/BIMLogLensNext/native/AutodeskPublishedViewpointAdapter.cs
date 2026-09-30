@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Web.Script.Serialization;
 using Autodesk.Navisworks.Api;
 
@@ -53,7 +54,11 @@ namespace BIMLogLensNext.Native
                     "Current Navisworks viewpoint could not be captured for publishing."
                 );
 
-            var detached = new SavedViewpoint(current);
+            var redlineSource = _document.SavedViewpoints.CurrentSavedViewpoint as SavedViewpoint;
+            var hasRedline = HasCurrentSavedViewpointRedlines();
+            var detached = hasRedline
+                ? CreateUniqueRedlineCopy(redlineSource)
+                : new SavedViewpoint(current);
             detached.DisplayName = request.DisplayName.Trim();
 
             _document.SavedViewpoints.AddCopy(detached);
@@ -90,6 +95,8 @@ namespace BIMLogLensNext.Native
             {
                 Published = true,
                 UpdatedExisting = false,
+                HasRedline = hasRedline,
+                RedlinePersistence = hasRedline ? "native-saved-viewpoint-copy" : "not-present",
                 NavisworksGuid = exact.Guid.ToString("D"),
                 DisplayName = exact.DisplayName,
                 Message =
@@ -170,6 +177,8 @@ namespace BIMLogLensNext.Native
             {
                 Published = true,
                 UpdatedExisting = true,
+                HasRedline = HasRedlines(exact),
+                RedlinePersistence = HasRedlines(exact) ? "native-saved-viewpoint" : "not-present",
                 NavisworksGuid = exact.Guid.ToString("D"),
                 DisplayName = exact.DisplayName,
                 Message =
@@ -196,6 +205,8 @@ namespace BIMLogLensNext.Native
                     request.IssueIdentity.ModelFingerprint,
                 operationId = request.OperationId,
                 visualDigest = request.ExpectedVisualDigest,
+                hasRedline = HasRedlines(viewpoint),
+                redlinePersistence = HasRedlines(viewpoint) ? "native-saved-viewpoint-copy" : "not-present",
                 confirmationReason = request.ConfirmationReason,
                 publishedAt = DateTimeOffset.UtcNow.ToString("o")
             });
@@ -204,6 +215,29 @@ namespace BIMLogLensNext.Native
                 viewpoint,
                 new Comment(marker, CommentStatus.New)
             );
+        }
+
+        private static SavedViewpoint CreateUniqueRedlineCopy(SavedViewpoint source)
+        {
+            if (source == null || !HasRedlines(source))
+                throw new InvalidOperationException("A native redline Saved Viewpoint is required before publishing a redline-bearing BIMLog viewpoint.");
+            var method = source.GetType().GetMethod("CreateUniqueCopy", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
+            if (method == null)
+                throw new InvalidOperationException("This Navisworks version cannot create a redline-preserving Saved Viewpoint copy.");
+            var copy = method.Invoke(source, null) as SavedViewpoint;
+            if (copy == null || ReferenceEquals(copy, source))
+                throw new InvalidOperationException("Navisworks did not return an independent redline-preserving Saved Viewpoint copy.");
+            if (!HasRedlines(copy))
+                throw new InvalidOperationException("The copied Saved Viewpoint did not preserve its native redline markup.");
+            return copy;
+        }
+
+        private static bool HasRedlines(SavedViewpoint viewpoint)
+        {
+            if (viewpoint == null) return false;
+            var property = viewpoint.GetType().GetProperty("ContainsRedlines") ?? viewpoint.GetType().GetProperty("HasRedlines");
+            var value = property == null ? null : property.GetValue(viewpoint, null);
+            return value is bool && (bool)value;
         }
     }
 }

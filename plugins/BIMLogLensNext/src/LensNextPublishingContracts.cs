@@ -56,6 +56,8 @@ namespace BIMLogLensNext
     {
         public bool Published { get; set; }
         public bool UpdatedExisting { get; set; }
+        public bool HasRedline { get; set; }
+        public string RedlinePersistence { get; set; }
         public string NavisworksGuid { get; set; }
         public string DisplayName { get; set; }
         public string Message { get; set; }
