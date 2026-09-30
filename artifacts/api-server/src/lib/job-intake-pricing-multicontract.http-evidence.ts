@@ -666,7 +666,7 @@ try {
   try {
     await namingProof.query('BEGIN');
     const before = (await namingProof.query('SELECT * FROM job_bonus_proposals ORDER BY id')).rows;
-    await namingProof.query(`ALTER TABLE job_bonus_proposals ADD CONSTRAINT job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key UNIQUE USING INDEX job_bonus_proposals_idempotency_uidx`);
+    await namingProof.query(`ALTER TABLE job_bonus_proposals RENAME CONSTRAINT job_bonus_proposals_idempotency_uidx TO job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key`);
     const indexOid = (await namingProof.query(`SELECT conindid FROM pg_constraint WHERE conrelid='job_bonus_proposals'::regclass AND conname='job_bonus_proposals_project_id_maker_user_id_idempotency_ke_key'`)).rows[0].conindid;
     await namingProof.query(EDT_ENGINE_ECONOMIC_SQL);
     await namingProof.query(EDT_ENGINE_ECONOMIC_SQL);
