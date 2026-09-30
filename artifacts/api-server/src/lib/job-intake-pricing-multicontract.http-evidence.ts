@@ -241,9 +241,11 @@ try {
   assert.equal(coreActivated.status,200,JSON.stringify(coreActivated.body));
   assert.equal(coreActivated.body.activationMode,'core');
   const pendingResourceRows=(await pool.query('SELECT user_id, person_name, billing_hourly_rate, planned_billable_value FROM job_activation_resource_assignments WHERE intake_id=$1',[coreInitial.body.id])).rows;
-  assert.ok(pendingResourceRows.length > 0);
-  assert.ok(pendingResourceRows.every(row=>row.user_id === null && row.person_name === 'Unassigned resource'));
-  assert.ok(pendingResourceRows.every(row=>row.billing_hourly_rate === null && row.planned_billable_value === null), 'Drawing unit price must not become hourly revenue');
+  assert.equal(pendingResourceRows.length,0,'Generic demand must not create fake person assignments');
+  const activatedDemand=(await request('GET',corePath)).body.data.team.assignments;
+  assert.ok(activatedDemand.length>0);
+  assert.ok(activatedDemand.every((row:any)=>row.userId===null&&row.personName===''));
+  assert.ok(activatedDemand.every((row:any)=>row.customerHourlyRate==='25'||row.customerHourlyRate==='42.5'), 'Drawing price remains a Contract Item mirror, never an assignment row');
   assert.equal(coreSaved.body.completion.totals.assignedHours,'0');
   console.log('UX025 real HTTP/database: generic roles save/reopen and activate with partial hours, no leader or employee identity PASS');
   const coreBefore=await request('GET',corePath);
