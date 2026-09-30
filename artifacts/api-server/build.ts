@@ -1217,9 +1217,18 @@ async function buildAll() {
   const reusableRuntime = existingDeploymentSource?.sourceCommit === livingBrief.sourceCommit &&
     existingDeploymentSource.livingBriefCatalogSha256 === livingBrief.catalogSha256 &&
     existingDeploymentSource.livingBriefBundleSha256 === livingBrief.bundleSha256;
+  let reusedRuntime = false;
   if (reusableRuntime) {
-    await deployRuntimeClosure(runtimeDir, externalSpecifiers, { livingBrief, reuseExisting: true });
-  } else {
+    try {
+      await deployRuntimeClosure(runtimeDir, externalSpecifiers, { livingBrief, reuseExisting: true });
+      reusedRuntime = true;
+    } catch (error) {
+      console.warn(
+        `existing source-matched runtime closure failed validation and will be rebuilt: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+  if (!reusedRuntime) {
     const retiredRuntime = await lstat(runtimeDir)
       .then(async () => {
         const target = path.join(distDir, `runtime-retired-${Date.now()}`);
