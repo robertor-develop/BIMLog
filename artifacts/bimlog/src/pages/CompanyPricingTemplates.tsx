@@ -164,7 +164,7 @@ export function CompanyPricingTemplates() {
     <main className="company-pricing-main" style={{ flex: 1, minWidth: 0, padding: "clamp(16px,3vw,36px)" }}>
       <button type="button" onClick={() => { if (confirmDiscard()) setLocation("/dashboard"); }}>{t("Back to Headquarters", "Volver a la Sede")}</button>
       <header style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center", margin: "20px 0" }}>
-        <div><h1>{t("APU / Pricing Templates", "Plantillas APU / Precios")}</h1><p>{t("Company pricing definitions. Commercial remains the source of contract prices.", "Definiciones de precios de la empresa. Comercial sigue siendo la fuente de precios contractuales.")}</p></div>
+        <div><h1>{t("APU Library", "Biblioteca APU")}</h1><p>{t("Find, preview, and govern reusable company APU definitions. Commercial remains the source of contract prices.", "Busque, previsualice y gobierne definiciones APU reutilizables de la empresa. Comercial sigue siendo la fuente de precios contractuales.")}</p></div>
         <button type="button" onClick={newTemplate} disabled={!canManage || busy}>{t("New template", "Nueva plantilla")}</button>
       </header>
       {loading && <p role="status">{t("Loading pricing templates…", "Cargando plantillas de precios…")}</p>}

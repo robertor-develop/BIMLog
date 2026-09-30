@@ -110,7 +110,7 @@ async function insertVersion(connection: Connection, input: {
 
 router.get("/company/pricing-templates", authMiddleware, async (req, res) => {
   try {
-    const actor = await actorFor(req,res,true); if (!actor) return;
+    const actor = await actorFor(req,res,false); if (!actor) return;
     const result = await pool.query(`SELECT DISTINCT ON(template_id) id "versionId",template_id "templateId",version,
       name,industry,status,currency,content_fingerprint "recordFingerprint",provenance,created_at "createdAt"
       FROM generic_apu_template_versions WHERE company_id=$1 AND project_id IS NULL
@@ -121,7 +121,7 @@ router.get("/company/pricing-templates", authMiddleware, async (req, res) => {
 
 router.get("/company/pricing-templates/options", authMiddleware, async (req, res) => {
   try {
-    const actor = await actorFor(req,res,true); if (!actor) return;
+    const actor = await actorFor(req,res,false); if (!actor) return;
     const result = await pool.query(`SELECT * FROM (SELECT DISTINCT ON(template_id) id "versionId",template_id "templateId",version,
       name,industry,currency,status,content_fingerprint fingerprint,provenance
       FROM generic_apu_template_versions WHERE company_id=$1 AND project_id IS NULL AND status IN('published','retired')
@@ -132,7 +132,7 @@ router.get("/company/pricing-templates/options", authMiddleware, async (req, res
 
 router.get("/company/pricing-templates/:templateId", authMiddleware, async (req, res) => {
   try {
-    const actor = await actorFor(req,res,true); if (!actor) return;
+    const actor = await actorFor(req,res,false); if (!actor) return;
     const result = await pool.query(`SELECT v.id "versionId",v.template_id "templateId",v.version,v.name,v.industry,
       v.status,v.currency,v.reason,v.content_fingerprint "recordFingerprint",v.provenance,
       v.created_by_id "createdById",v.published_by_id "publishedById",v.created_at "createdAt",v.published_at "publishedAt"
