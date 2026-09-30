@@ -1,4 +1,4 @@
-import { boolean, check, date, foreignKey, index, integer, jsonb, numeric, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { boolean, check, date, foreignKey, index, integer, jsonb, numeric, pgTable, text, timestamp, unique, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { companiesTable, usersTable } from "./users";
 import { projectsTable } from "./projects";
@@ -15,7 +15,7 @@ export const jobContractEconomicPoolsTable = pgTable("job_contract_economic_pool
   currency: text("currency").notNull(), sourceSnapshot: jsonb("source_snapshot").$type<Record<string, unknown>>().notNull(),
   sourceFingerprint: text("source_fingerprint").notNull(), createdById: integer("created_by_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [uniqueIndex("job_contract_economic_pools_contract_id_key").on(table.contractId),
+}, table => [unique("job_contract_economic_pools_contract_id_key").on(table.contractId),
   index("job_contract_economic_pools_scope_idx").on(table.companyId,table.projectId),
   check("job_contract_economic_pools_currency_check",sql`${table.currency} ~ '^[A-Z]{3}$'`),
   check("job_contract_economic_pools_source_fingerprint_check",sql`${table.sourceFingerprint} ~ '^[a-f0-9]{64}$'`)]);
@@ -29,7 +29,7 @@ export const jobBonusProposalsTable = pgTable("job_bonus_proposals", {
   idempotencyKey: text("idempotency_key").notNull(), proposal: jsonb("proposal").$type<Record<string, unknown>>().notNull(),
   fingerprint: text("fingerprint").notNull(), amount: numeric("amount", { precision: 30, scale: 6 }).notNull(), currency: text("currency").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [uniqueIndex("job_bonus_proposals_idempotency_uidx").on(table.projectId, table.makerUserId, table.idempotencyKey),
+}, table => [unique("job_bonus_proposals_idempotency_uidx").on(table.projectId, table.makerUserId, table.idempotencyKey),
   index("job_bonus_proposals_funding_idx").on(table.fundingId),
   index("job_bonus_proposals_contract_funding_idx").on(table.contractFundingId),
   check("job_bonus_proposals_one_funding_chk",sql`(${table.fundingId} IS NULL) <> (${table.contractFundingId} IS NULL)`),
