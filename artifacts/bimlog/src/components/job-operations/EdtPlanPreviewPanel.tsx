@@ -1,10 +1,23 @@
 import { useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
 
 type PlanNode = { kind: "project" | "contract" | "deliverable" | "location"; sourceIdentity: string; name: string; code: string };
 type PlanWorkItem = { id: string; displayCode: string; tradeIdentity: string; locationIdentity: string };
 export type EdtPlanPreview = { nodes: PlanNode[]; workItems: PlanWorkItem[]; sourceFingerprint: string; activationEvidence?: {
   workflowCount: number; governanceVerified: true; commercialVerified: true;
 } };
+
+export function edtReadinessRepair(code: string, projectId: number) {
+  if (["EDT_CONTRACT_SOURCE_MISSING", "EDT_CONTRACT_SOURCE_MISMATCH"].includes(code))
+    return { missing: "Contract version", href: `/projects/${projectId}/financial/contracts?returnTo=job-operations` };
+  if (["EDT_WORKFLOW_SOURCE_MISSING", "EDT_WORKFLOW_SOURCE_MISMATCH"].includes(code))
+    return { missing: "Delivery Workflow binding", href: `/company-workflows?projectId=${projectId}&returnTo=job-operations` };
+  if (["EDT_GOVERNANCE_SOURCE_MISSING", "EDT_ACTIVATION_SOURCE_INCOMPLETE"].includes(code))
+    return { missing: "Governance source", href: `/projects/${projectId}/job-intake?stage=review&returnTo=job-operations` };
+  if (["EDT_LOCATION_AMBIGUOUS", "EDT_PLAN_COVERAGE_MISMATCH", "EDT_TRADE_SOURCE_MISMATCH", "EDT_SOURCE_AMBIGUOUS", "EDT_SOURCE_NOT_ACTIVATED"].includes(code))
+    return { missing: "Intake scope", href: `/projects/${projectId}/job-intake?stage=scope&returnTo=job-operations` };
+  return null;
+}
 
 export function describeEdtPreviewError(cause: unknown, tt: (english: string, spanish: string) => string): string {
   const code = cause && typeof cause === "object" && "code" in cause ? String(cause.code ?? "") : "";
@@ -70,19 +83,20 @@ export function EdtPlanPreviewPanel({ projectId, intakeId, loadPlan, tt }: {
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [plan, setPlan] = useState<EdtPlanPreview | null>(null);
   const [error, setError] = useState("");
+  const [errorCode, setErrorCode] = useState("");
   const generation = useRef(0);
-  useEffect(() => { generation.current += 1; setStatus("idle"); setPlan(null); setError("");
+  useEffect(() => { generation.current += 1; setStatus("idle"); setPlan(null); setError(""); setErrorCode("");
     return () => { generation.current += 1; }; }, [projectId, intakeId]);
   const preview = async () => {
     const current = ++generation.current;
-    setStatus("loading"); setError("");
+    setStatus("loading"); setError(""); setErrorCode("");
     try {
       const next = parseEdtPlanPreview(await loadPlan());
       if (current !== generation.current) return;
       setPlan(next); setStatus("ready");
     } catch (cause) {
       if (current !== generation.current) return;
-      setPlan(null); setError(describeEdtPreviewError(cause, tt)); setStatus("error");
+      setPlan(null); setError(describeEdtPreviewError(cause, tt)); setErrorCode(cause && typeof cause === "object" && "code" in cause ? String(cause.code ?? "") : ""); setStatus("error");
     }
   };
   return <section className="jo-card" aria-labelledby="edt-preview-title">
@@ -96,7 +110,7 @@ export function EdtPlanPreviewPanel({ projectId, intakeId, loadPlan, tt }: {
     </div>
     <div id="edt-preview-result">
       {status === "loading" && <p role="status">{tt("Verifying saved source records…", "Verificando registros guardados…")}</p>}
-      {status === "error" && <p className="jo-error" role="alert">{error}</p>}
+      {status === "error" && <div className="jo-error" role="alert"><p>{error}</p>{edtReadinessRepair(errorCode, projectId) && <p><strong>{tt("Missing source", "Origen faltante")}:</strong> {edtReadinessRepair(errorCode, projectId)?.missing}. <Link href={edtReadinessRepair(errorCode, projectId)!.href}>{tt("Repair this source and return", "Reparar este origen y regresar")}</Link></p>}</div>}
       {status === "ready" && plan && <div role="status">
         <p>{tt("Verified read-only preview", "Vista previa verificada de solo lectura")}: {plan.nodes.length} {tt("nodes", "nodos")}, {plan.workItems.length} {tt("work items", "elementos de trabajo")}.</p>
         {plan.activationEvidence && <p className="jo-muted">{tt("Frozen Governance and Commercial sources verified; Delivery Workflow bindings", "Orígenes congelados de Gobernanza y Comercial verificados; vínculos de flujo de entrega")}: {plan.activationEvidence.workflowCount}. {tt("Governed EDT activation is not yet enabled.", "La activación gobernada de la EDT aún no está habilitada.")}</p>}
