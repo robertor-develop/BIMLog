@@ -52108,6 +52108,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2aed2d5e9bc20775034593272c6089d64388f734242c8191cb20687ef7795b33"
+    },
+    {
+      "taskId": "ux-block29-shop-drawing-delivery",
+      "reviewedThroughCommit": "e9ff42244e03481f4d0ceaaad0ba984677657873",
+      "reviewedAt": "2026-09-30T15:55:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 reuse existing Intake, Operations, workflow, file and RFI structures; the generated platform inventory has no structural change, while STATUS and OPEN_LOOP record the new user behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX141-UX145 add a configurable shop-drawing-first BIMtech journey, bounded floor and discipline packages, published-workflow state projection, canonical evidence continuity, and a coordinator delivery overview without changing external standards, reports, Native plugins, or approval authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "df91e13afdadb680ee243f0d951641756aa04912bcc04cdbcf7f6c269a881c4b"
     }
   ]
 }

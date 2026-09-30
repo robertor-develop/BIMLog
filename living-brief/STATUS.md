@@ -3300,3 +3300,9 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Repeated activation returns stable Contract and version lineage. Deterministic Intake-item fingerprints prevent retry drift; failed activation remains transactionally unchanged.
 - Product commits are `bdd009cb`, `07622e0f`, `765379e6`, `34e7a49e`, and `73b3d4f4`. Focused UX136–UX140 behavior and API/UI TypeScript checks pass. UX131–UX140 now reach the required ten-build publication and authenticated Chrome smoke boundary.
 - The first publication attempt was cancelled before promotion when Replit proposed dropping populated internal-cost assignment columns. After the development schema was brought to the exact candidate, a second preview exposed four existing production objects represented with different declarative shapes. Corrective commit `45df29c1` preserves the two production uniqueness constraints as constraints and the established effective-index ordering; no production schema or data changed during either cancelled attempt.
+
+## Experience makeover Block 29 — shop-drawing-first delivery — 2026-09-30
+
+- UX141–UX145 give eligible BIMtech jobs a configurable shop-drawing lead, generate only the explicitly selected floor and discipline package combinations, and keep each package bound to its published Delivery Workflow rather than inventing a second status list.
+- Operations projects each shop-drawing package's canonical tasks, linked submittal/file evidence and relevant RFI connections, then shows floor, discipline, state, progress, evidence, next action and unassigned future work in one coordinator overview.
+- Product commits are `b74a64ff`, `d174e7fb`, `dda9bc01`, `2f879e29`, and `e9ff4224`. This is the first unpublished five-build block after the accepted UX131–UX140 publication; publication and authenticated Chrome smoke are due after UX146–UX150.
