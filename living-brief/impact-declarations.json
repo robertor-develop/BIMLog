@@ -50894,8 +50894,8 @@
     },
     {
       "taskId": "ux-b21-project-scope-20260930",
-      "reviewedThroughCommit": "1eed49fe544403ac22cde289a9cda7df679562b5",
-      "reviewedAt": "2026-09-30T02:45:49.8767151Z",
+      "reviewedThroughCommit": "cf1f285e4947fa46df521731e517c1f9f12d3424",
+      "reviewedAt": "2026-09-30T03:22:16.3976916Z",
       "status": "source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -50921,74 +50921,82 @@
           ],
           "category": "product_experience",
           "disposition": "captured_immediately"
+        },
+        {
+          "summary": "The release gate found production brace-expansion denial-of-service advisories; patched integrity-bound overrides and the provenance assertion were updated immediately.",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "category": "defensive_security",
+          "disposition": "captured_immediately"
         }
       ],
       "authorities": [
         {
           "key": "ecosystem_doctrine",
           "result": "reviewed_no_semantic_change",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "claude",
           "result": "reviewed_no_semantic_change",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "quality",
-          "result": "reviewed_no_semantic_change",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "result": "updated",
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "vision",
           "result": "reviewed_no_semantic_change",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "platform",
           "result": "updated",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "plugin",
           "result": "reviewed_no_semantic_change",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "report_design_system",
           "result": "reviewed_no_semantic_change",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "standards_register",
           "result": "reviewed_no_semantic_change",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "status",
           "result": "updated",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         },
         {
           "key": "audit",
           "result": "reviewed_no_semantic_change",
-          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+          "reason": "UX101-UX105 establish stable project discipline and location identity with compatibility and in-use protection; the release gate also required patched integrity-bound brace-expansion overrides. No schema, customer-data, permission, Native, installer, provider-secret, or production mutation is included."
         }
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "package.json"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "5b19101759e68a04c125e0ea0ae7bd2dc50a11d3998b5ccb2289deba6d4c57cb"
+      "reviewedChangeSha256": "c39a0ce688d2877eab283b0b32912e64d67cde5410119c3b9f5085d146efee72"
     }
   ]
 }

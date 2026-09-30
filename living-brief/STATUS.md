@@ -6,6 +6,8 @@ UX101–UX105 replace Intake's single-discipline and free-text floor assumptions
 
 UX091–UX100 were published at exact source `ea90b36845aa38be31a50342e1a5ead00a39cdc5`; the local release gate, provider publication, exact live identity and all 61 authenticated Chrome routes passed with zero console errors.
 
+The UX101–UX105 release gate detected newly published `brace-expansion` denial-of-service advisories in production transitive dependencies. Both supported major lines are now pinned to patched integrity-bound releases, the supply-chain assertion follows those exact versions, and the production audit reports no known vulnerabilities.
+
 ## Experience makeover Block 20 candidate — 2026-09-30
 
 UX096–UX100 add executable final-acceptance contracts for the exact transactional golden journey, recoverable failure and tenant-isolation behavior, complete mobile/keyboard/locale journey coverage, truthful representative-user evidence, and exact release/rollback handoff. These contracts do not fabricate Roberto, Ruben, Native, publication, or production acceptance: missing observations remain blocked or explicitly deferred. This is the second five-build block after UX091–UX095, so the exact-head gate, push, publication and full authenticated Chrome smoke are due before UX101 begins.
