@@ -5,6 +5,7 @@ import { projectsTable } from "./projects";
 import { filesTable } from "./files";
 import { financialContractsTable, financialContractVersionsTable } from "./financial-contracts";
 import { projectCostNodesTable } from "./financial-budgets";
+import { companyInternalCostPolicyVersionsTable, memberInternalCostProfileVersionsTable } from "./internal-cost-governance";
 
 export const jobContractEconomicPoolsTable = pgTable("job_contract_economic_pools", {
   id: text("id").primaryKey(), companyId: integer("company_id").notNull().references(() => companiesTable.id),
@@ -137,7 +138,7 @@ export const jobActivationTasksTable = pgTable("job_activation_tasks", {
 
 export const jobActivationResourceAssignmentsTable = pgTable("job_activation_resource_assignments", {
   id: text("id").primaryKey(), intakeId: text("intake_id").notNull().references(() => jobIntakesTable.id), workItemId: text("work_item_id").notNull().references(() => jobActivationWorkItemsTable.id), taskId: text("task_id").notNull().references(() => jobActivationTasksTable.id), sourceAssignmentId: text("source_assignment_id").notNull(),
-  userId: integer("user_id").references(() => usersTable.id), personName: text("person_name").notNull(), role: text("role").notNull(), employmentType: text("employment_type").notNull(), plannedHours: numeric("planned_hours", { precision: 30, scale: 6 }).notNull(), internalHourlyRate: numeric("internal_hourly_rate", { precision: 30, scale: 6 }), billingHourlyRate: numeric("billing_hourly_rate", { precision: 30, scale: 6 }), plannedInternalCost: numeric("planned_internal_cost", { precision: 30, scale: 6 }), plannedBillableValue: numeric("planned_billable_value", { precision: 30, scale: 6 }), version: integer("version").notNull().default(1),
+  userId: integer("user_id").references(() => usersTable.id), personName: text("person_name").notNull(), role: text("role").notNull(), employmentType: text("employment_type").notNull(), plannedHours: numeric("planned_hours", { precision: 30, scale: 6 }).notNull(), internalHourlyRate: numeric("internal_hourly_rate", { precision: 30, scale: 6 }), billingHourlyRate: numeric("billing_hourly_rate", { precision: 30, scale: 6 }), plannedInternalCost: numeric("planned_internal_cost", { precision: 30, scale: 6 }), plannedBillableValue: numeric("planned_billable_value", { precision: 30, scale: 6 }), internalCostProfileVersionId: text("internal_cost_profile_version_id").references(() => memberInternalCostProfileVersionsTable.id), internalCostPolicyVersionId: text("internal_cost_policy_version_id").references(() => companyInternalCostPolicyVersionsTable.id), internalCostEffectiveDate: date("internal_cost_effective_date"), version: integer("version").notNull().default(1),
   createdById: integer("created_by_id").notNull().references(() => usersTable.id), createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [uniqueIndex("job_activation_resource_uidx").on(table.intakeId, table.sourceAssignmentId), index("job_activation_resource_work_item_idx").on(table.workItemId, table.userId), check("job_activation_resource_hours_chk", sql`${table.plannedHours} > 0`), check("job_activation_resource_version_chk", sql`${table.version} > 0`)]);
 

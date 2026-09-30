@@ -1091,6 +1091,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/financial-controls.ts
 - lib/db/src/schema/generic-apu.ts
 - lib/db/src/schema/index.ts
+- lib/db/src/schema/internal-cost-governance.ts
 - lib/db/src/schema/invitations.ts
 - lib/db/src/schema/job-intakes.ts
 - lib/db/src/schema/lens-imports.ts

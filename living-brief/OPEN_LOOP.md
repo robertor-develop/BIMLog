@@ -3882,3 +3882,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Replace the editable capacity-profile fallback in resource reassignment. Missing approved member cost now remains explicitly unresolved and blocks priced assignment instead of preserving or fabricating a rate.
 - [x] Preserve the customer APU/billing rate independently from internal member cost and preserve historical work against later policy changes.
 - [ ] Pass the exact-head release gate, push UX126–UX130, publish accumulated UX121–UX130 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.
+- [x] Correct the first full-gate database-safety finding by declaring both internal-cost authority tables and assignment snapshot references in the canonical Drizzle schema; the focused database-safety gate now passes.

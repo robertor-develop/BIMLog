@@ -59,6 +59,7 @@ export * from "./delivery-workflows";
 export * from "./workflow-governance-policies";
 export * from "./contract-item-workflows";
 export * from "./team-resource-planning";
+export * from "./internal-cost-governance";
 export * from "./enterprise-identity";
 export * from "./connector-foundation";
 export * from "./coordination-knowledge";
