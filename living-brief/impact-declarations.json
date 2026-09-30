@@ -50997,6 +50997,105 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c39a0ce688d2877eab283b0b32912e64d67cde5410119c3b9f5085d146efee72"
+    },
+    {
+      "taskId": "ux-b22-smart-choices-20260930",
+      "reviewedThroughCommit": "e9954d51d5845a6844e58315c364b7965bb4ed68",
+      "reviewedAt": "2026-09-30T03:55:31.5327204Z",
+      "status": "source_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "The active Intake discipline selector required compact preferred choices with full eligible access and lifecycle-safe preference behavior.",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "category": "product_experience",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX106-UX110 add permission-preserving pinned, frequent, recent, searchable, workflow-valid and resettable choice presentation with compact bilingual Intake UI without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "cf2cc29e9d2a1da6833d355d8ce46e12e5274d012cba58b24a4794cb10707d6c"
     }
   ]
 }

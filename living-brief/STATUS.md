@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Experience makeover Block 22 candidate — 2026-09-30
+
+UX106–UX110 add compact, permission-preserving choice presentation for disciplines and document types. User and company pins are intersected with the eligible catalog; deterministic frequency and recency ranking never hides current or historical project selections; uncommon document types remain searchable and authorized additions remain explicit; status favorites are filtered through the exact workflow version, current state and role; and reset is isolated to the same user and company with predictable English/Spanish labels.
+
+The active Intake discipline selector now shows eight preferred choices by default, keeps any saved choice visible, and provides keyboard-accessible search and full-catalog expansion. UX101–UX110 reach the required ten-build publication boundary. Existing catalog authority, workflow lifecycle, historical records, schema, customer data and Native behavior remain unchanged.
+
 ## Experience makeover Block 21 candidate — 2026-09-30
 
 UX101–UX105 replace Intake's single-discipline and free-text floor assumptions with a shared selected-discipline set and canonical building/level structure. Authorized users can add a catalog discipline in context; stable building, level and discipline identities persist through save/reload; Work Packages retain compatible display text while carrying canonical location references for EDT and schedule use; and referenced scope values cannot be removed. The seven-floor regression passes. This is the first five-build unpublished block after the accepted UX091–UX100 publication, so publication and authenticated Chrome smoke remain due after UX106–UX110.

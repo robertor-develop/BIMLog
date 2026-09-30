@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 22 — compact relevant choices — 2026-09-30
+
+- [x] UX106–UX110 implement eligible pins, deterministic use ranking, searchable document types, workflow-valid status choices, isolated reset, bilingual labels and compact keyboard-accessible Intake selection.
+- [x] Preserve selected and historical values while ensuring favorites never widen catalog permissions or workflow transitions.
+- [ ] Pass the complete exact-head gate, push once, publish UX101–UX110 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.
+
 ## Experience makeover Block 21 — project disciplines and levels — 2026-09-30
 
 - [x] UX101–UX105 implement multi-discipline persistence, authorized in-context discipline creation, stable naturally ordered buildings and levels, shared canonical location references, save/reload compatibility, and in-use removal protection.

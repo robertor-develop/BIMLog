@@ -974,6 +974,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/sharepoint-publication-security.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.ts
+- artifacts/api-server/src/lib/smart-choice-preferences.behavior.ts
+- artifacts/api-server/src/lib/smart-choice-preferences.ts
 - artifacts/api-server/src/lib/specification-procurement-readiness-view.behavior.ts
 - artifacts/api-server/src/lib/specification-procurement-readiness-view.ts
 - artifacts/api-server/src/lib/specification-requirement-preview.behavior.ts
