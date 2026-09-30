@@ -1,24 +1,19 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
+  "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "5a73674733d9198ddc20376f71c651e0bcedc90f2d3b1a590fef38d587df36ac",
+  "bundleSha256": "9a1de01a8de22b8e8a9981aab998605662a8e04f7132a48dd06a4676e58aeb39",
   "impact": {
-    "baselineCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
+    "baselineCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
     "changedPaths": [
-      "artifacts/api-server/scripts/generate-platform-md.ts",
-      "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-      "living-brief/PLATFORM.md",
-      "living-brief/PLUGIN.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -29,11 +24,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "claude",
@@ -41,11 +36,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "quality",
@@ -53,11 +48,11 @@
       "sha256": "b6cced2db201c506cda5eb1ac6f7d03167c8893de71f880eda4ccef3b51d2829",
       "sourceChangedAt": "2026-09-21T09:39:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "vision",
@@ -65,35 +60,35 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "13227a44d3f0df08c274251a43855abf0f08c851c33a48e8ea5d4028de323029",
-      "sourceChangedAt": "2026-09-30T19:30:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "sourceChangedAt": "2026-09-30T15:52:35-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "plugin",
       "file": "PLUGIN.md",
       "sha256": "be5e33372ab848654cd7c934f265249b608700ed8d3e52601d1703713559744a",
-      "sourceChangedAt": "2026-09-30T19:30:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "sourceChangedAt": "2026-09-30T15:52:35-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "report_design_system",
@@ -101,11 +96,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "standards_register",
@@ -113,35 +108,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "d36862b1eaabe1a0bdbca6bc9090975d945dcf7c54e1e00f135aba29193b799e",
-      "sourceChangedAt": "2026-09-30T19:30:00.000Z",
+      "sha256": "8850394c8e6252b8deb37b1a01abc7f38a2ddb4eb20745404b847f51c74854db",
+      "sourceChangedAt": "2026-09-30T20:15:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "ac938a4803b1697c6b80ac3f714a10638b9e926c101e3b5ff6b671e2db2c0e8f",
-      "sourceChangedAt": "2026-09-30T19:30:00.000Z",
+      "sha256": "101818af0b9d651477096c27cd9df0192d6506d916dd69616a465e64b7b9cdb1",
+      "sourceChangedAt": "2026-09-30T20:15:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     },
     {
       "key": "audit",
@@ -149,11 +144,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
-      "semanticReviewTask": "ux-block31-redline-xml-v2",
+      "reconciledThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "semanticReviewTask": "ux-block31-build219-historical-gate-repair",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-30T19:30:00Z"
+      "semanticReviewedAt": "2026-09-30T20:15:00Z"
     }
   ]
 }

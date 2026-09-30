@@ -3918,4 +3918,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX151–UX155 preserve native redline/markup state through Saved Viewpoint publication and report the preservation method without changing existing non-redline publication behavior.
 - [x] Export the current filtered authoritative Lens Next set as XML V2 and organize imported Navisworks viewpoints into deterministic Open and Resolved folders.
 - [x] Update focused core, dual-year native, frontend source-contract and in-product guide coverage for the exact workflow.
+- [x] Correct the stale Build 219 historical gate so its no-Native-change assertion remains bound to the original frozen commit range rather than rejecting later authorized Native blocks.
 - [ ] Pass the complete exact-head pre-push gate and push UX151–UX155 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX156–UX160.

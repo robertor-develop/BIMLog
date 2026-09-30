@@ -52408,6 +52408,90 @@
       ],
       "reviewedChangeSha256": "44d64e4d54c6660662f41246a4cb3af3aa166a002287216b6b11801641d21630",
       "reason": "Ruben reported these two Lens Next deliverables as still missing; this block implements them without claiming publication or field acceptance."
+    },
+    {
+      "taskId": "ux-block31-build219-historical-gate-repair",
+      "reviewedThroughCommit": "e0288d95696a107f88c173f5e0779868e27a36ee",
+      "reviewedAt": "2026-09-30T20:15:00Z",
+      "status": "candidate",
+      "immediateFindings": [
+        {
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The full gate incorrectly extended Build 219 historical scope through current HEAD; the test now evaluates the immutable original commit range."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate correction freezes the historical Build 219 diff at its original terminal commit so its no-Native-change claim remains true without rejecting later authorized Native blocks. Product behavior, authority, schema, customer data, standards, and reports are unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "998004638ece90bfb78f7befaad31af6a90ab65368a72b57846017df869c8632",
+      "reason": "The complete gate found and the same work cycle corrected a stale historical-range assumption."
     }
   ]
 }

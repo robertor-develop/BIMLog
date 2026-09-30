@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ac938a4803b1697c6b80ac3f714a10638b9e926c101e3b5ff6b671e2db2c0e8f",
+  "sourceSha256": "101818af0b9d651477096c27cd9df0192d6506d916dd69616a465e64b7b9cdb1",
   "itemCount": 275,
   "counts": {
     "ACTIVE": 240,
@@ -5006,7 +5006,7 @@
     },
     {
       "id": "2975ef4a1dcccec0",
-      "sourceLine": 3921,
+      "sourceLine": 3922,
       "heading": "Experience makeover Block 31 — redline persistence and XML V2 organization — 2026-09-30",
       "statement": "Pass the complete exact-head pre-push gate and push UX151–UX155 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX156–UX160.",
       "classification": "ACTIVE",
@@ -5017,7 +5017,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3921",
+        "OPEN_LOOP.md:3922",
         "Experience makeover Block 31 — redline persistence and XML V2 organization — 2026-09-30"
       ],
       "currentAuthority": false
