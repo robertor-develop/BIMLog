@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BILLING_TERMS, CATALOG_PRICES, COMMERCIAL_ADDONS, IMPLEMENTATION_SERVICES, addonsForPlan, implementationService, priceSnapshot, publishedPriceFor, quotedTerm } from "./commercial-catalog";
+import { BILLING_TERMS, CATALOG_PRICES, COMMERCIAL_ADDONS, CURRENCY_TAX_MODEL, IMPLEMENTATION_SERVICES, addonsForPlan, commercialCatalogSummary, implementationService, priceSnapshot, publishedPriceFor, quotedTerm } from "./commercial-catalog";
 
 assert.equal(CATALOG_PRICES.length, 5);
 assert.deepEqual(CATALOG_PRICES.map((price) => price.planId), ["free", "professional", "team", "business", "enterprise"]);
@@ -22,5 +22,10 @@ assert.deepEqual(IMPLEMENTATION_SERVICES.map((service) => service.id), ["guided_
 assert.ok(IMPLEMENTATION_SERVICES.every((service) => service.scopeAuthority === "signed_statement_of_work"));
 assert.match(implementationService("guided_launch").outcome.en, /first-project setup/);
 assert.ok(implementationService("connector_setup").excludes.includes("provider fees"));
+assert.equal(CURRENCY_TAX_MODEL.publicCurrency, "USD");
+assert.equal(CURRENCY_TAX_MODEL.publicPriceTaxTreatment, "exclusive_when_applicable");
+assert.equal(commercialCatalogSummary("professional", "annual", "2026-10-01").term.amount, 1490);
+assert.equal(commercialCatalogSummary("enterprise", "annual", "2026-10-01").taxTreatment, "agreement_defined");
+assert.match(commercialCatalogSummary("team", "monthly", "2026-10-01").authority.es, /formulario de pedido final/);
 
-console.log("Commercial catalog Builds 006-009 prices, terms, add-ons and implementation services: PASS");
+console.log("Commercial catalog Builds 006-010 complete catalog authority: PASS");

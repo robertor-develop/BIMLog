@@ -143,3 +143,29 @@ export function implementationService(id: ImplementationServiceId): Implementati
   if (!service) throw new Error(`Unknown implementation service: ${id}`);
   return service;
 }
+
+export type TaxTreatment = "exclusive_when_applicable" | "agreement_defined";
+export const CURRENCY_TAX_MODEL = {
+  publicCurrency: "USD" as const,
+  publicPriceTaxTreatment: "exclusive_when_applicable" as TaxTreatment,
+  enterpriseTaxTreatment: "agreement_defined" as TaxTreatment,
+  requiredBillingInputs: ["legal name", "billing address", "country", "tax identifier when applicable"] as const,
+  authority: {
+    en: "The final order form, applicable tax rules and issued billing document control the amount due.",
+    es: "El formulario de pedido final, las reglas fiscales aplicables y el documento de facturación emitido controlan el monto adeudado.",
+  },
+} as const;
+
+export function commercialCatalogSummary(planId: CommercialPlanId, cycle: CatalogBillingCycle, asOf: string) {
+  const term = quotedTerm(planId, cycle, asOf);
+  return Object.freeze({
+    term,
+    addons: addonsForPlan(planId),
+    implementationServices: IMPLEMENTATION_SERVICES,
+    currency: CURRENCY_TAX_MODEL.publicCurrency,
+    taxTreatment: planId === "enterprise"
+      ? CURRENCY_TAX_MODEL.enterpriseTaxTreatment
+      : CURRENCY_TAX_MODEL.publicPriceTaxTreatment,
+    authority: CURRENCY_TAX_MODEL.authority,
+  });
+}
