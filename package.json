@@ -141,7 +141,7 @@
     "publication:database-receipt": "node scripts/publication-database-operator.mjs",
     "test:publication-database-operator": "node scripts/test-publication-database-operator.mjs",
     "prepare:artifact-proof-fixture": "node scripts/prepare-artifact-proof-fixture.mjs --prepare",
-    "check:artifact-proof-fixture": "node scripts/prepare-artifact-proof-fixture.mjs --check",
+    "check:artifact-proof-fixture": "node scripts/check-local-artifact-proof-fixture.mjs",
     "test:artifact-proof-fixture-guard": "node scripts/test-artifact-proof-fixture-guard.mjs",
     "test:artifact-proof-fixture-repeatability": "node scripts/test-artifact-proof-fixture-repeatability.mjs",
     "attest:publication-source": "node scripts/check-database-safety.mjs --attest-source",
