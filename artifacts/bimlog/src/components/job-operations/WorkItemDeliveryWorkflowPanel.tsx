@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useAuthStore } from "@/store/auth";
 import { governanceDecisionMessage, workflowActionError } from "@/lib/workflow-governance-decision-message";
+import { governedDeliveryState } from "@/lib/shop-drawing-delivery";
 
 type Translate = (en: string, es: string) => string;
 type Runtime = {
@@ -146,6 +147,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
   const canReopen =
     runtime?.definition && actor === role(runtime.definition.reopen.role);
   const check = runtime?.checks.find((entry) => entry.phaseId === current?.id);
+  const governedState = runtime ? governedDeliveryState(runtime) : null;
   return (
     <section
       style={{
@@ -179,6 +181,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
           {loading && (
             <p role="status">{tt("Loading workflow…", "Cargando flujo…")}</p>
           )}
+          {governedState && <p role="status"><strong>{tt("Governed delivery state", "Estado de entrega gobernado")}:</strong> {governedState.phaseName || governedState.state} · {governedState.completed}/{governedState.total} · {tt("Next", "Siguiente")}: {governedState.nextAction}</p>}
           {error && (
             <p role="alert" style={{ color: "#991b1b" }}>
               {error}

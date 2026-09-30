@@ -30,3 +30,13 @@ export function deriveShopDrawingPackages(input: { scopeItemId: string; existing
   }
   return [...existing, ...created];
 }
+
+export function governedDeliveryState(runtime: any) {
+  const phases = runtime?.definition?.phases ?? [];
+  const index = Math.max(0, Number(runtime?.phaseIndex ?? 1) - 1);
+  const phase = phases[index] ?? null;
+  const steps = (runtime?.steps ?? []).filter((step: any) => step.phaseId === phase?.id);
+  return { state: runtime?.status ?? "unavailable", phaseId: phase?.id ?? null, phaseName: phase?.name ?? null,
+    completed: steps.filter((step:any) => step.status === "complete").length, total: steps.length,
+    nextAction: runtime?.status === "complete" ? "complete" : steps.some((step:any) => step.status !== "complete") ? "prepare" : phase?.qcRequired ? "review" : phase?.approvalRequired ? "approve" : "advance" };
+}
