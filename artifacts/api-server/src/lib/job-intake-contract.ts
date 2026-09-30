@@ -426,6 +426,19 @@ export function normalizeJobIntakeData(raw: unknown) {
       item.billingHourlyRate,
       `scopeItems[${index}].billingHourlyRate`,
     );
+    const rawRateSource = item.rateSource && typeof item.rateSource === "object" && !Array.isArray(item.rateSource) ? item.rateSource : null;
+    const rateSource = rawRateSource ? {
+      kind: ["manual_contract_rate", "saved_apu_rate"].includes(String(rawRateSource.kind)) ? String(rawRateSource.kind) : "manual_contract_rate",
+      sourceId: optionalText(rawRateSource.sourceId, `scopeItems[${index}].rateSource.sourceId`, 100),
+      sourceLabel: optionalText(rawRateSource.sourceLabel, `scopeItems[${index}].rateSource.sourceLabel`, 200),
+      unitRate: exact(rawRateSource.unitRate, `scopeItems[${index}].rateSource.unitRate`),
+      unit: optionalText(rawRateSource.unit, `scopeItems[${index}].rateSource.unit`, 40) || "Hours",
+      currency: contractCurrency(rawRateSource.currency || identity.currency),
+      apuPlanVersion: optionalId(rawRateSource.apuPlanVersion, `scopeItems[${index}].rateSource.apuPlanVersion`),
+      apuFingerprint: optionalText(rawRateSource.apuFingerprint, `scopeItems[${index}].rateSource.apuFingerprint`, 128) || null,
+    } : null;
+    if (rateSource && scaledSignedDecimal(rateSource.unitRate) !== scaledSignedDecimal(billingHourlyRate))
+      throw new FinancialControlError(400, "JOB_INTAKE_RATE_SOURCE_MISMATCH", "The selected rate source must match the Contract Item unit rate.");
     const id = optionalText(item.id, `scopeItems[${index}].id`, 100);
     if (!id)
       throw new FinancialControlError(
@@ -472,6 +485,7 @@ export function normalizeJobIntakeData(raw: unknown) {
       plannedHours,
       quantity,
       billingHourlyRate,
+      rateSource,
       ...(item.productionAllocation == null || item.productionAllocation === "" ? {} : {
         productionAllocation: exact(item.productionAllocation, `scopeItems[${index}].productionAllocation`),
       }),

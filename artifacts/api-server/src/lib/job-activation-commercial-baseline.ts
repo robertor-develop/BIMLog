@@ -4,7 +4,7 @@ import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contr
 
 export type ActivatedContractBaselineInput = {
   profileId: string; contractId: string; contractVersionId: string; contractNumber: string; currency: string;
-  items: Array<{ stableLineId: string; displayName: string; projectCostNodeId: string; budgetSnapshotLineId: string; quantity: string; unit: string; unitRate: string; contractValue: string; productionAllocation?: string; apuPlanVersion?: number | null; workflowTemplate: string }>;
+  items: Array<{ stableLineId: string; displayName: string; projectCostNodeId: string; budgetSnapshotLineId: string; quantity: string; unit: string; unitRate: string; contractValue: string; productionAllocation?: string; apuPlanVersion?: number | null; rateSource?: Record<string, unknown> | null; workflowTemplate: string }>;
 };
 function canonical(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
@@ -22,7 +22,7 @@ export function buildActivatedCommercialBaseline(input: { intakeId: string; proj
     const budgetAccountId = `budget-account:${input.projectId}:${item.projectCostNodeId}`;
     const account = accounts.get(budgetAccountId) ?? { amount: 0n, contractIds: new Set<string>(), lineIds: [] };
     account.amount += scaledSignedDecimal(item.contractValue); account.contractIds.add(contract.contractId); account.lineIds.push(item.stableLineId); accounts.set(budgetAccountId, account);
-    const pricingSnapshot = { quantity:item.quantity, unit:item.unit, unitRate:item.unitRate, contractValue:item.contractValue, apuPlanVersion:item.apuPlanVersion ?? null,
+    const pricingSnapshot = { quantity:item.quantity, unit:item.unit, unitRate:item.unitRate, contractValue:item.contractValue, apuPlanVersion:item.apuPlanVersion ?? null, rateSource:item.rateSource ?? null,
       ...(item.productionAllocation === undefined ? {} : {productionAllocation:item.productionAllocation}) };
     return { id:`contract-item-baseline:${contract.contractVersionId}:${item.stableLineId}`, contractId:contract.contractId, contractVersionId:contract.contractVersionId, contractNumber:contract.contractNumber, stableLineId:item.stableLineId, displayName:item.displayName, projectCostNodeId:item.projectCostNodeId, budgetAccountId, budgetSnapshotLineId:item.budgetSnapshotLineId, workflowTemplate:item.workflowTemplate, pricingSnapshot, snapshotFingerprint:activationFingerprint(pricingSnapshot) };
   }));

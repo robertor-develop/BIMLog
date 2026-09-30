@@ -68,6 +68,7 @@ export type ContractItemSnapshot = {
   workflowTemplate: string;
   industryTemplate: string;
   sourceProvenance: Record<string, unknown> | null;
+  rateSource: Record<string, unknown> | null;
   status: "draft";
 };
 
@@ -273,6 +274,7 @@ export function normalizeContractLines(
             )
           : "legacy",
         sourceProvenance: normalizeSourceProvenance(item?.sourceProvenance),
+        rateSource: item?.rateSource && typeof item.rateSource === "object" && !Array.isArray(item.rateSource) ? { ...(item.rateSource as Record<string, unknown>) } : null,
         status: "draft",
       },
       sortOrder: Number.isSafeInteger(Number(r.sortOrder))

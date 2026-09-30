@@ -1420,6 +1420,7 @@ export async function activateJobIntake(input: {
                 quantity: item.quantity,
                 unit: item.unit,
                 unitRate: item.billingHourlyRate,
+                rateSource: item.rateSource,
                 ...(item.productionAllocation === undefined ? {} : {productionAllocation:item.productionAllocation}),
                 apuPlanVersion: item.apuPlanVersion,
                 workflowTemplate:
@@ -1490,6 +1491,7 @@ export async function activateJobIntake(input: {
             contractValue: item.contractValue,
             ...(item.productionAllocation === undefined ? {} : {productionAllocation:item.productionAllocation}),
             apuPlanVersion: item.apuPlanVersion,
+            rateSource: item.rateSource,
             workflowTemplate: item.workflowTemplate || data.delivery.workflowTemplate,
           })),
         };
