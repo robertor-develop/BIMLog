@@ -8,6 +8,7 @@ import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contr
 import { canonicalJobOperationId } from "./job-operations-id";
 import { reconcileResourceDemand, splitResourcePlan } from "./resource-demand-contract";
 import { getInternalCostGovernance, resolveApprovedMemberInternalCost, waitForInternalCostGovernanceMigration } from "./internal-cost-governance";
+import { protectInternalCostAssignment } from "./internal-cost-contract";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
@@ -383,7 +384,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
       LEFT JOIN LATERAL (SELECT SUM(hours) actual_hours FROM job_activation_time_entries WHERE task_id=t.id) e ON true
       LEFT JOIN LATERAL (SELECT COUNT(*) deliverable_count FROM job_activation_task_deliverables WHERE task_id=t.id) d ON true
       WHERE w.intake_id=$1 ORDER BY t.work_item_id,t.sequence,t.id`, [access.intakeId]),
-    pool.query(`SELECT r.id,r.work_item_id "workItemId",r.task_id "taskId",r.user_id "userId",r.person_name "personName",r.role,r.employment_type "employmentType",r.planned_hours "plannedHours",r.internal_hourly_rate "internalHourlyRate",r.billing_hourly_rate "billingHourlyRate",r.planned_internal_cost "plannedInternalCost",r.planned_billable_value "plannedBillableValue",r.version,COALESCE(SUM(e.hours),0)::text "actualHours" FROM job_activation_resource_assignments r LEFT JOIN job_activation_time_entries e ON e.assignment_id=r.id WHERE r.intake_id=$1 GROUP BY r.id ORDER BY r.created_at,r.id`, [access.intakeId]),
+    pool.query(`SELECT r.id,r.work_item_id "workItemId",r.task_id "taskId",r.user_id "userId",r.person_name "personName",r.role,r.employment_type "employmentType",r.planned_hours "plannedHours",r.internal_hourly_rate "internalHourlyRate",r.billing_hourly_rate "billingHourlyRate",r.planned_internal_cost "plannedInternalCost",r.planned_billable_value "plannedBillableValue",r.internal_cost_profile_version_id "internalCostProfileVersionId",r.internal_cost_policy_version_id "internalCostPolicyVersionId",r.internal_cost_effective_date "internalCostEffectiveDate",r.version,COALESCE(SUM(e.hours),0)::text "actualHours" FROM job_activation_resource_assignments r LEFT JOIN job_activation_time_entries e ON e.assignment_id=r.id WHERE r.intake_id=$1 GROUP BY r.id ORDER BY r.created_at,r.id`, [access.intakeId]),
     pool.query(`SELECT e.id,e.task_id "taskId",e.assignment_id "assignmentId",e.user_id "userId",u.full_name "userName",e.work_date "workDate",e.hours::text,e.note,e.created_at "createdAt" FROM job_activation_time_entries e JOIN users u ON u.id=e.user_id WHERE e.intake_id=$1 ORDER BY e.work_date DESC,e.created_at DESC,e.id DESC LIMIT 500`, [access.intakeId]),
     pool.query(`SELECT d.id,d.task_id "taskId",d.work_item_id "workItemId",d.file_id "fileId",f.file_name "fileName",d.deliverable_type "deliverableType",d.note,d.linked_by_id "linkedById",d.linked_at "linkedAt" FROM job_activation_task_deliverables d JOIN files f ON f.id=d.file_id JOIN job_activation_work_items w ON w.id=d.work_item_id WHERE w.intake_id=$1 ORDER BY d.linked_at DESC,d.id`, [access.intakeId]),
     pool.query(`SELECT p.id,p.work_item_id "workItemId",p.package_code "packageCode",p.title,p.description,p.package_type "packageType",p.status,p.responsible_user_id "responsibleUserId",u.full_name "responsibleName",p.due_date "dueDate",p.version,p.discipline_id "disciplineId",p.discipline_code "disciplineCode",p.discipline_name "disciplineName",p.service_id "serviceId",p.service_code "serviceCode",p.service_name "serviceName",p.phase_id "phaseId",p.phase_code "phaseCode",p.phase_name "phaseName",p.created_at "createdAt",p.updated_at "updatedAt",
@@ -449,13 +450,13 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     billingHourlyRate: showPlanner ? row.billingHourlyRate : null,
     plannedBillableValue: showPlanner ? row.plannedBillableValue : null,
   }));
-  const safeAssignments = assignments.rows.map((row) => ({
+  const safeAssignments = assignments.rows.map((sourceRow) => {
+    const row = protectInternalCostAssignment(sourceRow, showBudget);
+    return ({
     ...row,
-    internalHourlyRate: showBudget ? row.internalHourlyRate : null,
-    plannedInternalCost: showBudget ? row.plannedInternalCost : null,
     billingHourlyRate: showPlanner ? row.billingHourlyRate : null,
     plannedBillableValue: showPlanner ? row.plannedBillableValue : null,
-  }));
+  }); });
   const resourceReconciliation = reconcileResourceDemand({ demands:resourceDemands, workItems:workItems.rows, assignments:assignments.rows, timeEntries:timeEntries.rows });
   const safeTasks = tasks.rows.map((row) => ({
     ...row,
@@ -511,7 +512,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     latestActivityAt: operationEvents.rows[0]?.createdAt ?? null,
   };
   const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
-  const safeMembers = members.rows.map((row) => ({ ...row, profileInternalHourlyRate: showBudget ? row.profileInternalHourlyRate : null }));
+  const safeMembers = members.rows.map((row) => ({ ...row, profileInternalHourlyRate: null }));
   return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity, financialAuthority, internalCostGovernance, operationalProjection, activity: operationEvents.rows, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, resourceDemands, resourceReconciliation, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: safeMembers, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
 }
 

@@ -20,3 +20,8 @@ export function canonicalInternalCostRole(value: unknown): InternalCostRole {
 export function internalCostFingerprint(value: unknown) {
   return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
+
+export function protectInternalCostAssignment<T extends Record<string, any>>(row: T, canViewInternalCost: boolean) {
+  if (canViewInternalCost) return { ...row };
+  return { ...row, internalHourlyRate: null, plannedInternalCost: null, internalCostProfileVersionId: null, internalCostPolicyVersionId: null, internalCostEffectiveDate: null };
+}

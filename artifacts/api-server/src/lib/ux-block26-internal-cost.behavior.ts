@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { canonicalInternalCostRate, canonicalInternalCostRole } from "./internal-cost-contract";
+import { canonicalInternalCostRate, canonicalInternalCostRole, protectInternalCostAssignment } from "./internal-cost-contract";
 
 assert.equal(canonicalInternalCostRate("5.10"), "5.1");
 assert.equal(canonicalInternalCostRate("6.50"), "6.5");
@@ -26,3 +26,10 @@ console.log("UX128 CEO approval workflow and immutable decision identity: PASS")
 assert.match(operations, /internalCostGovernance/);
 for (const phrase of ["Internal cost governance", "Gobernanza del costo interno", "Job Intake cannot edit or bypass this authority", "aprobación del CEO"]) assert.match(page, new RegExp(phrase));
 console.log("UX129 permission-appropriate project governance view: PASS");
+const snapshot = { internalHourlyRate:"5.1",plannedInternalCost:"51",internalCostProfileVersionId:"profile-v1",internalCostPolicyVersionId:"policy-v1",internalCostEffectiveDate:"2026-09-30",billingHourlyRate:"30" };
+assert.deepEqual(protectInternalCostAssignment(snapshot,false),{...snapshot,internalHourlyRate:null,plannedInternalCost:null,internalCostProfileVersionId:null,internalCostPolicyVersionId:null,internalCostEffectiveDate:null});
+assert.deepEqual(protectInternalCostAssignment(snapshot,true),snapshot);
+assert.match(operations, /SUM\(e\.hours\*r\.internal_hourly_rate\)/);
+assert.match(operations, /internal_cost_profile_version_id "internalCostProfileVersionId"/);
+assert.match(operations, /customerBillingRateChanged: false/);
+console.log("UX130 sensitive access and historical assignment snapshots: PASS");
