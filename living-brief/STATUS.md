@@ -6,6 +6,8 @@ UX111–UX115 establish the General APU Library as a readable company workspace 
 
 Applying an APU pins the exact published version and fingerprint into a new immutable project-specific lineage. Two projects using the same library version receive different project APU identities. Later library publication never changes prior project records, and retirement keeps history readable while preventing every version in that retired lineage from new selection. This is the first five-build block after the UX101–UX110 publication; publication and authenticated Chrome smoke are due at UX120.
 
+The block gate also removed silent failure handling from library loading and transaction rollback. Load failures now remain visible to the user, and rollback failures are logged before the original operation error is returned.
+
 ## Experience makeover Block 22 candidate — 2026-09-30
 
 UX106–UX110 add compact, permission-preserving choice presentation for disciplines and document types. User and company pins are intersected with the eligible catalog; deterministic frequency and recency ranking never hides current or historical project selections; uncommon document types remain searchable and authorized additions remain explicit; status favorites are filtered through the exact workflow version, current state and role; and reset is isolated to the same user and company with predictable English/Spanish labels.

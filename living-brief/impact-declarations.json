@@ -51195,6 +51195,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ce5d05ac1b130f1cd3b617ed3bfdd08e22ab33a821353a120b82bc38893ce26f"
+    },
+    {
+      "taskId": "ux-b23-apu-library-gate-fix-20260930",
+      "reviewedThroughCommit": "f98384320abbec7f5d6bbe39beb16e153b3bcdc0",
+      "reviewedAt": "2026-09-30T04:50:00.737Z",
+      "status": "source_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "The blocking platform audit detected silent failure handling in the new APU Library load and rollback paths; both failures now surface explicitly.",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "category": "product_experience",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate correction surfaces APU Library load failures and rollback failures without changing the UX111-UX115 product scope, schema, authority, customer data, Native source, installer, provider secrets, or production records."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b88308fdd84f4732eefdc191120ff80eaa03433b35f1136ee760f0e54bfad0a4"
     }
   ]
 }
