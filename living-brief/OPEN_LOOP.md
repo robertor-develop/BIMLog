@@ -3870,4 +3870,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 
 - [x] UX121–UX125 separate generic demand from person assignments, budget role/location/quantity/hours before hiring, permit activation with future work unassigned, expose phased staffing in Operations and reconcile baseline/assigned/actual hours without rewriting the approved plan.
 - [x] Preserve legacy named assignments while preventing new generic rows from creating fake `Unassigned resource` records.
+- [x] Correct the real PostgreSQL activation fixture so it proves generic demand remains in Intake while the person-assignment table stays empty.
 - [ ] Pass the complete exact-head gate and push UX121–UX125 once. Do not publish until UX126–UX130 complete the next ten-build boundary.
