@@ -10,6 +10,7 @@ import {
   contractCurrency,
   exactPositiveAmount,
 } from "./financial-contract-contract";
+import { normalizeProjectDisciplines, primaryDiscipline } from "./project-scope-structure";
 
 export const JOB_INTAKE_STAGES = [
   "documents",
@@ -250,6 +251,8 @@ export function normalizeJobIntakeData(raw: unknown) {
       ? input.commercial
       : {};
   const classification = input.classification && typeof input.classification === "object" && !Array.isArray(input.classification) ? input.classification : {};
+  const projectDisciplines = normalizeProjectDisciplines(input.projectDisciplines, classification);
+  const primaryProjectDiscipline = primaryDiscipline(projectDisciplines, classification);
   const classificationSnapshot = (source: any = {}) => ({
     disciplineId: optionalText(source.disciplineId ?? classification.disciplineId, "classification.disciplineId", 100),
     disciplineCode: optionalText(source.disciplineCode ?? classification.disciplineCode, "classification.disciplineCode", 64),
@@ -725,9 +728,9 @@ export function normalizeJobIntakeData(raw: unknown) {
   }
   return {
     classification: {
-      disciplineId: optionalText(classification.disciplineId, "classification.disciplineId", 100),
-      disciplineCode: optionalText(classification.disciplineCode, "classification.disciplineCode", 64),
-      disciplineName: optionalText(classification.disciplineName, "classification.disciplineName", 200),
+      disciplineId: optionalText(primaryProjectDiscipline.id, "classification.disciplineId", 100),
+      disciplineCode: optionalText(primaryProjectDiscipline.code, "classification.disciplineCode", 64),
+      disciplineName: optionalText(primaryProjectDiscipline.name, "classification.disciplineName", 200),
       serviceId: optionalText(classification.serviceId, "classification.serviceId", 100),
       serviceCode: optionalText(classification.serviceCode, "classification.serviceCode", 64),
       serviceName: optionalText(classification.serviceName, "classification.serviceName", 200),
@@ -735,6 +738,7 @@ export function normalizeJobIntakeData(raw: unknown) {
       phaseCode: optionalText(classification.phaseCode, "classification.phaseCode", 64),
       phaseName: optionalText(classification.phaseName, "classification.phaseName", 200),
     },
+    projectDisciplines,
     identity: {
       jobName: optionalText(identity.jobName, "identity.jobName", 300),
       jobCode: optionalText(identity.jobCode, "identity.jobCode", 60),
