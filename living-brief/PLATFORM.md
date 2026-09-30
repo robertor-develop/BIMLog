@@ -1003,8 +1003,18 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/trade-file-submission-review.ts
 - artifacts/api-server/src/lib/unified-action-contract.behavior.ts
 - artifacts/api-server/src/lib/unified-action-contract.ts
+- artifacts/api-server/src/lib/ux-financial-reconciliation.behavior.ts
+- artifacts/api-server/src/lib/ux-financial-reconciliation.ts
 - artifacts/api-server/src/lib/ux-intake-quantity.behavior.ts
 - artifacts/api-server/src/lib/ux-intake-resource-plan.behavior.ts
+- artifacts/api-server/src/lib/ux-migration-identity.behavior.ts
+- artifacts/api-server/src/lib/ux-migration-identity.ts
+- artifacts/api-server/src/lib/ux-record-reconciliation.behavior.ts
+- artifacts/api-server/src/lib/ux-record-reconciliation.ts
+- artifacts/api-server/src/lib/ux-reversible-rollout.behavior.ts
+- artifacts/api-server/src/lib/ux-reversible-rollout.ts
+- artifacts/api-server/src/lib/ux-rollout-cohorts.behavior.ts
+- artifacts/api-server/src/lib/ux-rollout-cohorts.ts
 - artifacts/api-server/src/lib/workflow-governance-approval-progress.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.ts
@@ -1543,6 +1553,15 @@ It changes only when the code structure or curated architectural facts change.
 - The ROI illustration uses editable event, time, loaded-cost and annual-software-cost assumptions, shows its arithmetic and explicitly promises no realized saving or return.
 - The funnel baseline stores event-name counts locally in the browser and displays its definitions. It sends no identity, free text, document/project content, credential, token, URL or device data.
 - UX081-UX090 reach the ten-build publication and authenticated Chrome smoke boundary. No schema, customer data, permission authority, Native source, installer or provider-secret change is included.
+
+## Migration and reversible rollout - UX091-UX095
+
+- Identity reconciliation is a zero-write dry run. Stable identities or explicit reviewed mappings are required; names and filenames never merge records.
+- Before/after reconciliation covers record IDs, attachments, assignments and historical links. Every missing or new identity requires an explicit reviewed disposition.
+- Financial reconciliation compares exact six-decimal totals, currency, immutable version and approval identities, and role grants against the accepted baseline.
+- Compatibility preview covers canonical legacy web destinations and the existing Native 2021/2025 upload route. Rollback restores route and cohort exposure without rewinding legitimate business events.
+- Rollout cohorts require explicit reviewed customer, synthetic, demo or training metadata and explicit enrollment. Unclassified projects remain excluded; name-based classification is prohibited.
+- UX091-UX095 are the first five unpublished builds after the UX081-UX090 publication. No database row, schema, customer record, permission grant, Native source, installer or provider secret is changed.
 
 ## Connected commercial Intake - UX026-UX030
 

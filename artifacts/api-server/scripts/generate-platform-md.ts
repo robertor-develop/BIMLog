@@ -455,6 +455,15 @@ ${appRoutes()}
 - The funnel baseline stores event-name counts locally in the browser and displays its definitions. It sends no identity, free text, document/project content, credential, token, URL or device data.
 - UX081-UX090 reach the ten-build publication and authenticated Chrome smoke boundary. No schema, customer data, permission authority, Native source, installer or provider-secret change is included.
 
+## Migration and reversible rollout - UX091-UX095
+
+- Identity reconciliation is a zero-write dry run. Stable identities or explicit reviewed mappings are required; names and filenames never merge records.
+- Before/after reconciliation covers record IDs, attachments, assignments and historical links. Every missing or new identity requires an explicit reviewed disposition.
+- Financial reconciliation compares exact six-decimal totals, currency, immutable version and approval identities, and role grants against the accepted baseline.
+- Compatibility preview covers canonical legacy web destinations and the existing Native 2021/2025 upload route. Rollback restores route and cohort exposure without rewinding legitimate business events.
+- Rollout cohorts require explicit reviewed customer, synthetic, demo or training metadata and explicit enrollment. Unclassified projects remain excluded; name-based classification is prohibited.
+- UX091-UX095 are the first five unpublished builds after the UX081-UX090 publication. No database row, schema, customer record, permission grant, Native source, installer or provider secret is changed.
+
 ## Connected commercial Intake - UX026-UX030
 
 Activated Intake with a canonical contract displays authoritative saved setup in read-only fields. Browser recovery copies remain preserved without false autosave retries; stage navigation and linked commercial records remain available. Operational activation without a canonical contract retains its existing enrichment path.

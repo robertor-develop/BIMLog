@@ -1,8 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Experience makeover Block 18 — UX086–UX090 publication candidate
+## Experience makeover Block 19 — UX091–UX095 source candidate
 
-UX086–UX090 replace duplicated pricing promises with one bounded offer contract, preserve validated plan/billing/use-case intent into Contact or registration, separate immediate free-account creation from sales-assisted paid-plan consultation, provide editable ROI arithmetic with explicit limitations, and expose a browser-local event-count baseline that sends no identity, free text, document, project, credential or device data. Together with pushed UX081–UX085, this reaches the ten-build publication boundary. Complete the exact-head gate, push once, publish through the established provider path, and run the full authenticated Chrome smoke before beginning UX091.
+UX091–UX095 provide zero-write dry-run contracts for identity mapping, record/relationship reconciliation, exact financial/snapshot/permission comparison, legacy web and Native compatibility, reversible route/cohort exposure, and explicit rollout classification. Names and filenames never establish identity; every unexplained delta blocks acceptance; rollback preserves legitimate business events; unclassified projects remain excluded. Run the complete exact-head gate and push once. Do not publish until UX096–UX100 reach the next ten-build boundary.
+
+## Experience makeover Block 18 — UX086–UX090 accepted release
+
+UX086–UX090 replace duplicated pricing promises with one bounded offer contract, preserve validated plan/billing/use-case intent into Contact or registration, separate immediate free-account creation from sales-assisted paid-plan consultation, provide editable ROI arithmetic with explicit limitations, and expose a browser-local event-count baseline that sends no identity, free text, document, project, credential or device data. UX081–UX090 were published at exact canonical source `5162ac2674a70efaf6655a7a2d9d595908e29f27`; pre/post database receipts and the repeated 61-route authenticated Chrome smoke passed after correcting Founding Partner intent continuity.
 
 ## Experience makeover Block 17 — UX081–UX085 pushed source
 

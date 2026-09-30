@@ -1,12 +1,18 @@
 # STATUS.md - Current Accepted Platform State
 
-## Experience makeover Block 18 — UX086–UX090 publication candidate
+## Experience makeover Block 19 — UX091–UX095 source candidate
+
+UX091–UX095 add read-only preservation contracts before any data-affecting rollout. Identity dry runs map only stable identities or explicit reviewed decisions; matching names and filenames never merge records. Record reconciliation compares IDs, attachments, assignments and historical links and requires an explicit disposition for every delta. Financial reconciliation uses exact six-decimal arithmetic and preserves accepted versions, approvals and role grants.
+
+Compatibility preview covers canonical legacy web destinations and the existing Native 2021/2025 upload route. Rollback restores route and cohort exposure while retaining newer legitimate business events. Rollout preparation requires explicit reviewed customer, synthetic, demo or training metadata plus explicit enrollment; name-based classification is prohibited. All five contracts perform zero writes. This is the first five-build unpublished block after the accepted UX081–UX090 publication; push is due after the complete exact-head gate and publication remains due after UX096–UX100.
+
+## Experience makeover Block 18 — UX086–UX090 accepted release
 
 The public commercial journey now uses one canonical five-plan offer contract with explicit public-price illustrations, project/member limits, availability boundaries and agreement authority. Pricing selections preserve validated plan, billing and bounded use-case intent into sales-assisted Contact or self-service free registration. Paid-plan actions state that BIMLog must confirm entitlement and onboarding; free registration states that no sales conversation or payment method is required.
 
 The former fixed-result ROI claims are replaced by editable event, time, labor-cost and annual-software-cost assumptions with visible arithmetic and a no-promised-return limitation. Funnel definitions count six bounded events in local browser storage only and expose their definitions in a baseline table; names, emails, company identities, free text, document/project content, credentials, tokens, URLs and device identifiers are not captured or sent.
 
-UX081–UX090 now form the ten-build publication batch. Final status requires the complete exact-head gate, one push, established-provider publication, exact deployed-source verification and full authenticated Chrome smoke. No schema, customer data, permission authority, Native source, installer or provider secret changes are part of the block.
+UX081–UX090 were pushed and published at exact canonical source `5162ac2674a70efaf6655a7a2d9d595908e29f27`. The provider wrapper was byte-identical to the canonical tree, the complete gate and pre/post database receipts passed, and all 61 authenticated Chrome routes passed with zero stuck loaders, application errors or console errors. The live smoke exposed one Founding Partner intent-continuity defect; the correction was gated, republished and retested before acceptance. No schema, customer data, permission authority, Native source, installer or provider secret changed.
 
 ## Experience makeover Block 06 — UX026–UX030 release candidate
 
