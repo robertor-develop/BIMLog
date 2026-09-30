@@ -3863,4 +3863,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Add exact save/reload, multi-APU and activation-snapshot regression evidence for the $30 continuity case.
 - [ ] Pass the complete exact-head gate, push UX116–UX120 once, publish accumulated UX111–UX120 without Replit Agents, verify live source identity, and run the full authenticated Chrome smoke.
 - [x] Reject publication `fd5613a0` because stacked empty publication wrappers reported a wrapper parent instead of the canonical pushed source.
+- [x] Reject publication `c844b728` because the provider advanced `origin/master` to another empty wrapper before assembly; the runtime still reported a wrapper rather than canonical source.
 - [ ] Gate and push the bounded source-attestation correction, republish, require exact live `origin/master` identity, and complete the 61-route authenticated Chrome smoke before starting UX121.

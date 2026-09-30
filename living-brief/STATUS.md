@@ -2,7 +2,7 @@
 
 ## Experience makeover Block 24 publication correction — 2026-09-30
 
-UX116–UX120 passed the complete exact-head gate and were pushed with UX111–UX115 for the required ten-build publication. The first publication was rejected because consecutive empty Replit publication wrappers caused the runtime to report the immediate wrapper parent instead of canonical `origin/master`. Production assembly now validates the current wrapper and its unchanged parent tree, then resolves the release identity to the exact ancestral `origin/master` commit only when the complete tree matches. A corrected gate, push, republication and full authenticated Chrome smoke are required before the block is accepted.
+UX116–UX120 passed the complete exact-head gate and were pushed with UX111–UX115 for the required ten-build publication. Two publications were rejected because consecutive empty Replit publication wrappers caused the runtime to report a wrapper instead of the canonical source. Production assembly now walks the bounded first-parent wrapper chain, validates every adjacent tree as identical, and resolves the release identity to the first non-wrapper commit. A corrected gate, push, republication and full authenticated Chrome smoke are required before the block is accepted.
 
 ## Experience makeover Block 23 candidate — 2026-09-30
 

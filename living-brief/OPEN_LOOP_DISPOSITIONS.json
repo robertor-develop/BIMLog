@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "d3687c12e35654e5e17556be445357b6423a1992daa504c02a522bca57f4530f",
+  "sourceSha256": "77dca89a2f81af72373191902a46c8282e431806188e613475e2d513421ff55e",
   "itemCount": 272,
   "counts": {
     "ACTIVE": 237,
@@ -4952,7 +4952,7 @@
     },
     {
       "id": "4874e8783d5c92f2",
-      "sourceLine": 3866,
+      "sourceLine": 3867,
       "heading": "Experience makeover Block 24 — APU rate continuity — 2026-09-30",
       "statement": "Gate and push the bounded source-attestation correction, republish, require exact live `origin/master` identity, and complete the 61-route authenticated Chrome smoke before starting UX121.",
       "classification": "ACTIVE",
@@ -4963,7 +4963,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3866",
+        "OPEN_LOOP.md:3867",
         "Experience makeover Block 24 — APU rate continuity — 2026-09-30"
       ],
       "currentAuthority": false
