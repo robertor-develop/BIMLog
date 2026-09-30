@@ -9,6 +9,7 @@ import { authorizeFinancialOperation } from "../lib/financial-control-service";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import { PricingTemplateError, validatePricingTemplate, type PricingTemplateDefinition } from "../lib/company-pricing-template-contract";
 import { GenericApuEvaluationError } from "../lib/generic-apu-engine";
+import { projectPlanToLibraryDefinition } from "../lib/apu-library-reuse";
 
 const router = Router();
 const codePattern = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -74,6 +75,7 @@ async function insertVersion(connection: Connection, input: {
   actor: Actor; templateId: string; version: number; definition: PricingTemplateDefinition;
   fingerprint: string; status: "draft" | "published" | "retired"; authorId: number; reason: string;
   sourceVersionId?: string; code: string;
+  source?: Record<string, unknown>;
 }) {
   const id = randomUUID();
   // Drafts have an immutable, version-specific record identity; only a published
@@ -87,7 +89,7 @@ async function insertVersion(connection: Connection, input: {
     id,input.templateId,input.actor.companyId,input.version,input.definition.name,input.definition.industry,
     input.status,input.definition.currency,input.reason,recordFingerprint,input.sourceVersionId ?? null,
     JSON.stringify({ action: input.status === "published" ? "published" : input.status === "retired" ? "retired" : "draft_saved", code: input.code,
-      definition: input.definition, definitionFingerprint: input.fingerprint, sourceVersionId: input.sourceVersionId ?? null }),
+      definition: input.definition, definitionFingerprint: input.fingerprint, sourceVersionId: input.sourceVersionId ?? null, ...(input.source ? { source: input.source } : {}) }),
     input.authorId,input.status !== "draft" ? input.actor.userId : null,
     input.status !== "draft" ? new Date().toISOString() : null,
   ]);
@@ -172,6 +174,37 @@ router.post("/company/pricing-templates", authMiddleware, async (req, res) => {
       const version = await insertVersion(connection,{ actor,templateId,version:1,definition,fingerprint,status:"draft",authorId:actor.userId,reason,code });
       await connection.query("COMMIT");
       res.status(201).json({ templateId,versionId:version.id,version:1,status:"draft" });
+    } catch (error) { await connection.query("ROLLBACK"); throw error; }
+    finally { connection.release(); }
+  } catch (error) { respondError(error,res); }
+});
+
+router.post("/projects/:projectId/apu-library/drafts", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const actor = await actorFor(req,res,true); if (!actor) return;
+    const projectId = Number(parameter(req.params.projectId));
+    const code = String(req.body?.code ?? "").trim().toUpperCase();
+    const name = String(req.body?.name ?? "").trim();
+    const reason = boundedReason(req.body?.reason);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || !codePattern.test(code) || !name || name.length > 120 || !reason) {
+      res.status(400).json({ code: "APU_LIBRARY_REUSE_INPUT_INVALID" }); return;
+    }
+    const source = (await pool.query(`SELECT p.company_id,v.version,v.content,v.content_fingerprint
+      FROM projects p JOIN generic_cost_value_plan_versions v ON v.project_id=p.id
+      WHERE p.id=$1 AND p.company_id=$2 ORDER BY v.version DESC LIMIT 1`, [projectId,actor.companyId])).rows[0];
+    if (!source) { res.status(404).json({ code: "APU_LIBRARY_SOURCE_NOT_FOUND" }); return; }
+    const { definition, fingerprint } = validatePricingTemplate(projectPlanToLibraryDefinition(source.content,name));
+    const connection = await pool.connect();
+    try {
+      await connection.query("BEGIN");
+      await connection.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`pricing:${actor.companyId}:${code}`]);
+      const existing = await connection.query(`SELECT 1 FROM generic_apu_template_versions WHERE company_id=$1 AND project_id IS NULL AND version=1 AND provenance->>'code'=$2`, [actor.companyId,code]);
+      if (existing.rows.length) { await connection.query("ROLLBACK"); res.status(409).json({ code: "PRICING_TEMPLATE_CODE_EXISTS" }); return; }
+      const templateId = randomUUID();
+      const version = await insertVersion(connection,{ actor,templateId,version:1,definition,fingerprint,status:"draft",authorId:actor.userId,reason,code,
+        source:{ kind:"project_apu",projectId,planVersion:Number(source.version),planFingerprint:String(source.content_fingerprint) } });
+      await connection.query("COMMIT");
+      res.status(201).json({ templateId,versionId:version.id,version:1,status:"draft",source:{ projectId,planVersion:Number(source.version) } });
     } catch (error) { await connection.query("ROLLBACK"); throw error; }
     finally { connection.release(); }
   } catch (error) { respondError(error,res); }
