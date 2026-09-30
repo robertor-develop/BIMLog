@@ -10,7 +10,7 @@ import {
   contractCurrency,
   exactPositiveAmount,
 } from "./financial-contract-contract";
-import { normalizeProjectDisciplines, primaryDiscipline } from "./project-scope-structure";
+import { normalizeProjectDisciplines, normalizeProjectLocations, primaryDiscipline } from "./project-scope-structure";
 
 export const JOB_INTAKE_STAGES = [
   "documents",
@@ -253,6 +253,7 @@ export function normalizeJobIntakeData(raw: unknown) {
   const classification = input.classification && typeof input.classification === "object" && !Array.isArray(input.classification) ? input.classification : {};
   const projectDisciplines = normalizeProjectDisciplines(input.projectDisciplines, classification);
   const primaryProjectDiscipline = primaryDiscipline(projectDisciplines, classification);
+  const scopeStructure = normalizeProjectLocations(input.scopeStructure ?? {});
   const classificationSnapshot = (source: any = {}) => ({
     disciplineId: optionalText(source.disciplineId ?? classification.disciplineId, "classification.disciplineId", 100),
     disciplineCode: optionalText(source.disciplineCode ?? classification.disciplineCode, "classification.disciplineCode", 64),
@@ -739,6 +740,7 @@ export function normalizeJobIntakeData(raw: unknown) {
       phaseName: optionalText(classification.phaseName, "classification.phaseName", 200),
     },
     projectDisciplines,
+    scopeStructure,
     identity: {
       jobName: optionalText(identity.jobName, "identity.jobName", 300),
       jobCode: optionalText(identity.jobCode, "identity.jobCode", 60),
