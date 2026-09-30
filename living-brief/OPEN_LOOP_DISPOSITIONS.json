@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "03c07f21361dfbc2f04af15bc82cc1307c5e0db490f3cb1e5c346564bd835b32",
-  "itemCount": 275,
+  "sourceSha256": "3541a113d794b2f03449fb267109cda523034b6f43853ca15b70982654d2bf80",
+  "itemCount": 276,
   "counts": {
-    "ACTIVE": 240,
+    "ACTIVE": 241,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5019,6 +5019,24 @@
       "evidence": [
         "OPEN_LOOP.md:3922",
         "Experience makeover Block 31 — redline persistence and XML V2 organization — 2026-09-30"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "47a2ce1dfb3a3346",
+      "sourceLine": 3939,
+      "heading": "Commercial readiness Block 2 — commercial catalog — 2026-09-30",
+      "statement": "Pass the complete exact-head gate and push Builds 006–010 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 011–015.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3939",
+        "Commercial readiness Block 2 — commercial catalog — 2026-09-30"
       ],
       "currentAuthority": false
     }

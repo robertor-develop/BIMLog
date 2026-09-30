@@ -3928,3 +3928,12 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Pass the complete exact-head gate and push the five-build block once. Reviewed source `8390e106` passed with receipt SHA-256 `9742e847eeaf6047b477aaade055721e7fd1468033f8de886e39da62916a5cf5`.
 - [x] Publish the accumulated ten-build set with UX151–UX155 without Replit Agents and complete the full authenticated Chrome smoke before starting Commercial readiness Block 2. Production reports identity-bound empty Replit wrapper `8f542a3b`; its tree is identical to reviewed source `8390e106`, and Pricing, Headquarters, the authorized project-58 route matrix, hard reload and two-tab continuity passed.
 - [x] Correct the full-gate reused-fixture failure by renaming the existing bonus constraint inside the rollback-scoped legacy-spelling proof instead of trying to reuse an already owned index; focused real-PostgreSQL Intake activation passes.
+
+## Commercial readiness Block 2 — commercial catalog — 2026-09-30
+
+- [x] Build 006 creates effective-dated, immutable public price versions and quote snapshots for all five plans.
+- [x] Build 007 defines monthly and annual service periods, advance charging, automatic renewal and term-end cancellation presentation.
+- [x] Build 008 catalogs review-gated add-ons without promising availability or inventing a self-service purchase path.
+- [x] Build 009 catalogs guided launch, controlled migration and approved-connector implementation services under a signed statement of work.
+- [x] Build 010 establishes USD public presentation, applicable-tax disclosure, billing identity inputs and signed-order authority on Pricing.
+- [ ] Pass the complete exact-head gate and push Builds 006–010 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 011–015.
