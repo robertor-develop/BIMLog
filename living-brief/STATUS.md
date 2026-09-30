@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Experience makeover Block 21 candidate — 2026-09-30
+
+UX101–UX105 replace Intake's single-discipline and free-text floor assumptions with a shared selected-discipline set and canonical building/level structure. Authorized users can add a catalog discipline in context; stable building, level and discipline identities persist through save/reload; Work Packages retain compatible display text while carrying canonical location references for EDT and schedule use; and referenced scope values cannot be removed. The seven-floor regression passes. This is the first five-build unpublished block after the accepted UX091–UX100 publication, so publication and authenticated Chrome smoke remain due after UX106–UX110.
+
+UX091–UX100 were published at exact source `ea90b36845aa38be31a50342e1a5ead00a39cdc5`; the local release gate, provider publication, exact live identity and all 61 authenticated Chrome routes passed with zero console errors.
+
 ## Experience makeover Block 20 candidate — 2026-09-30
 
 UX096–UX100 add executable final-acceptance contracts for the exact transactional golden journey, recoverable failure and tenant-isolation behavior, complete mobile/keyboard/locale journey coverage, truthful representative-user evidence, and exact release/rollback handoff. These contracts do not fabricate Roberto, Ruben, Native, publication, or production acceptance: missing observations remain blocked or explicitly deferred. This is the second five-build block after UX091–UX095, so the exact-head gate, push, publication and full authenticated Chrome smoke are due before UX101 begins.

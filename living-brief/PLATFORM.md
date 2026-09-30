@@ -885,6 +885,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-retirement.ts
 - artifacts/api-server/src/lib/project-role-readiness.behavior.ts
 - artifacts/api-server/src/lib/project-role-readiness.ts
+- artifacts/api-server/src/lib/project-scope-structure.behavior.ts
+- artifacts/api-server/src/lib/project-scope-structure.ts
 - artifacts/api-server/src/lib/project-setup-readiness.behavior.ts
 - artifacts/api-server/src/lib/project-setup-readiness.ts
 - artifacts/api-server/src/lib/protected-provider-probe-executor.behavior.ts

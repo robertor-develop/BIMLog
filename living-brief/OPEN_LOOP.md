@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 21 — project disciplines and levels — 2026-09-30
+
+- [x] UX101–UX105 implement multi-discipline persistence, authorized in-context discipline creation, stable naturally ordered buildings and levels, shared canonical location references, save/reload compatibility, and in-use removal protection.
+- [x] Preserve the legacy primary discipline and Work Package dimension text as compatibility projections while canonical IDs become available to Intake, EDT and schedule consumers.
+- [ ] Pass the complete exact-head gate and push UX101–UX105 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX106–UX110.
+
 ## Experience makeover Block 20 — final acceptance — 2026-09-30
 
 - [x] UX096–UX100 implement exact golden-journey, failure/isolation, inclusive journey, representative-user evidence and release-handoff contracts.

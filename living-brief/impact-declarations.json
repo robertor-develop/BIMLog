@@ -50604,7 +50604,7 @@
     {
       "taskId": "ux-b18-pricing-conversion-continuity-20260929",
       "reviewedThroughCommit": "ed1cffa40ec3e9e089e8438ca69d9ab0bbe86739",
-      "reviewedAt": "2026-09-29T23:57:16.000Z",
+      "reviewedAt": "2026-09-29T23:57:16Z",
       "status": "source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -50891,6 +50891,104 @@
         "package.json"
       ],
       "reviewedChangeSha256": "73593153a57517171fa0212df430d255da8a41fd547613be3488aa5cd5d37c46"
+    },
+    {
+      "taskId": "ux-b21-project-scope-20260930",
+      "reviewedThroughCommit": "1eed49fe544403ac22cde289a9cda7df679562b5",
+      "reviewedAt": "2026-09-30T02:45:49.8767151Z",
+      "status": "source_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "Job Intake required canonical multi-discipline and building-level scope identities with compatibility and in-use removal protection.",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "category": "product_experience",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX101-UX105 replace single-discipline and free-text location assumptions with stable project discipline, building, level, and shared location identities; preserve legacy compatibility; and prevent removal of referenced scope without schema, customer-data, permission, Native, installer, provider-secret, or production mutation changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "5b19101759e68a04c125e0ea0ae7bd2dc50a11d3998b5ccb2289deba6d4c57cb"
     }
   ]
 }
