@@ -52111,7 +52111,7 @@
     },
     {
       "taskId": "ux-block29-shop-drawing-delivery",
-      "reviewedThroughCommit": "e9ff42244e03481f4d0ceaaad0ba984677657873",
+      "reviewedThroughCommit": "7515335829a71b06a07a3da188dd074f3f0aee94",
       "reviewedAt": "2026-09-30T15:55:00.000Z",
       "status": "candidate",
       "authorities": [
@@ -52172,14 +52172,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/package.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "package.json"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "df91e13afdadb680ee243f0d951641756aa04912bcc04cdbcf7f6c269a881c4b"
+      "reviewedChangeSha256": "7a45cb19479f2d1de6b881aa3ade082b7103a9cb4d45e4cbfca0950963e6c5c3"
     }
   ]
 }
