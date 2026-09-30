@@ -11,11 +11,12 @@ import { ContractProductionAllocationReview } from "@/components/commercial/Cont
 import { ContractPoolPreparation } from "@/components/commercial/ContractPoolPreparation";
 import { ContractRecordAccess } from "@/components/commercial/ContractRecordAccess";
 import { isIndependentContractActor } from "@/lib/contract-review-controls";
+import { emptyFinancialContractItem } from "@/lib/contract-item-rate-source";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type ContractItemDraft = { displayName: string; quantity: string; unit: string; unitRate: string; apuPlanVersion: string; workflowTemplate: string; industryTemplate: string };
 type SovDraft = { stableLineId: string; budgetSnapshotLineId: string; projectCostNodeId: string; description: string; amount: string; scheduleItemPlacementId: string; contractItem?: ContractItemDraft };
-const emptyLine = (apu?: any): SovDraft => ({ stableLineId: `ITEM-${Date.now()}`, budgetSnapshotLineId: "", projectCostNodeId: "", description: "", amount: "0.00", scheduleItemPlacementId: "", contractItem: { displayName: "", quantity: "1.00", unit: "Hours", unitRate: apu?.sellingPrice ?? "", apuPlanVersion: apu?.version ? String(apu.version) : "", workflowTemplate: "bim-submittal", industryTemplate: "bim-services" } });
+const emptyLine = (apu?: any): SovDraft => ({ stableLineId: `ITEM-${Date.now()}`, budgetSnapshotLineId: "", projectCostNodeId: "", description: "", amount: "0.00", scheduleItemPlacementId: "", contractItem: emptyFinancialContractItem(apu) });
 const itemValue = (quantity: string, rate: string) => {
   const decimal = /^\d{1,24}(?:\.\d{0,6})?$/;
   if (!decimal.test(quantity) || !decimal.test(rate)) return "";
