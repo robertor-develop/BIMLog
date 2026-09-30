@@ -25,6 +25,8 @@ import {
   updateJobOperationTask,
   updateJobBudgetVarianceReview,
 } from "../lib/job-operations-service";
+import { decideInternalCostVersion, proposeInternalCostPolicy, proposeMemberInternalCostProfile } from "../lib/internal-cost-governance";
+import { jobOperationScope } from "../lib/job-operations-service";
 
 const router = Router();
 router.use("/projects/:projectId/operations", authMiddleware);
@@ -97,6 +99,18 @@ const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any,
 router.get("/projects/:projectId/operations", run(async (req, res) => {
   res.setHeader("Cache-Control", "private, no-store");
   res.json(await getJobOperations({ actorUserId: req.user.userId, projectId: req.params.projectId }));
+}));
+router.post("/projects/:projectId/operations/internal-cost/policies", run(async (req, res) => {
+  const scope = await jobOperationScope(req.user.userId, Number(req.params.projectId)); if (!scope.canManage) throw new FinancialControlError(403,"INTERNAL_COST_MANAGE_DENIED","Only project/company governance may propose internal-cost policy.");
+  res.status(201).json(await proposeInternalCostPolicy({ actorUserId:req.user.userId,companyId:scope.companyId,drafterRate:req.body?.drafterRate,coordinatorRate:req.body?.coordinatorRate,effectiveFrom:req.body?.effectiveFrom,reason:req.body?.reason }));
+}));
+router.post("/projects/:projectId/operations/internal-cost/profiles", run(async (req, res) => {
+  const scope = await jobOperationScope(req.user.userId, Number(req.params.projectId)); if (!scope.canManage) throw new FinancialControlError(403,"INTERNAL_COST_MANAGE_DENIED","Only project/company governance may propose member internal cost.");
+  res.status(201).json(await proposeMemberInternalCostProfile({ actorUserId:req.user.userId,companyId:scope.companyId,userId:Number(req.body?.userId),policyVersionId:req.body?.policyVersionId,costRole:req.body?.costRole,effectiveFrom:req.body?.effectiveFrom,effectiveTo:req.body?.effectiveTo,reason:req.body?.reason }));
+}));
+router.post("/projects/:projectId/operations/internal-cost/:kind/:versionId/decision", run(async (req, res) => {
+  const scope = await jobOperationScope(req.user.userId, Number(req.params.projectId));
+  res.json(await decideInternalCostVersion({ actorUserId:req.user.userId,companyId:scope.companyId,kind:req.params.kind === 'policies' ? 'policy' : 'profile',versionId:req.params.versionId,outcome:req.body?.outcome,reason:req.body?.reason }));
 }));
 router.get("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow", run(async (req, res) => {
   res.json(await getWorkItemDeliveryWorkflow({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId }));
