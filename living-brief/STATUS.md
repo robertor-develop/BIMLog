@@ -3271,3 +3271,4 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - The full-gate PostgreSQL fixture now rejects the retired fake pending-assignment behavior and verifies the generic demand survives save, activation and reload in the Intake source.
 - The release gate now runs Coordination Knowledge Build 272 against the established guarded loopback `bimlog_rfi_test` fixture. The test verifies exact local database identity and unchanged project/viewpoint counts; no production database is used.
 - The artifact-proof gate now supplies the verified local fixture identity and F-rooted private custody path itself, while the existing helper continues to enforce loopback database identity, complete schema, UTF-8 and private ACLs.
+- The exact production-artifact closure consumes the same verified local proof inputs and passes packaged API/readiness, Living Brief, authentication, bounded Feedback storage and fail-closed invalid-authority checks.

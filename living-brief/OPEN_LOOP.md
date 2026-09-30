@@ -3873,4 +3873,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Correct the real PostgreSQL activation fixture so it proves generic demand remains in Intake while the person-assignment table stays empty.
 - [x] Route Coordination Knowledge Build 272 through the established guarded loopback `bimlog_rfi_test` fixture so the exact pre-push gate can execute its required database proof.
 - [x] Bind the artifact-proof check to the existing verified F-rooted private proof directory and guarded loopback database; preserve its identity, schema and ACL checks.
+- [x] Bind the exact production-artifact closure to those same verified local proof inputs so the final packaged runtime authorization test executes instead of failing on absent environment wiring.
 - [ ] Pass the complete exact-head gate and push UX121–UX125 once. Do not publish until UX126–UX130 complete the next ten-build boundary.
