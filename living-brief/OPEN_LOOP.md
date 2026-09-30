@@ -3910,4 +3910,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 
 - [x] UX146–UX150 expose nonblocking email readiness, authorized per-user SendGrid setup, independent sender verification, unsent-draft return, and the integrated meeting journey with matching Help guidance.
 - [x] Refresh the deterministic platform, route, disposition and semantic-review inventories and reconcile STATUS/OPEN_LOOP after that generated unit.
+- [x] Repair the full-gate Axios advisory failure through the governed dependency override and verify provenance plus a clean production audit.
 - [ ] Pass the complete exact-head pre-push gate, push UX146–UX150 once, publish the accumulated UX141–UX150 release without Replit Agents, and run full authenticated visible-Chrome smoke.
