@@ -14,7 +14,8 @@ const reconciliation = read("evidence/stabilization-program-20260919/BUILD_217_F
 const gates = read("evidence/stabilization-program-20260919/BUILD_218_COMPLETE_GATES.md");
 const identity = json("contracts/release-identity.json");
 const operatingBrief = read("living-brief/CLAUDE.md");
-const changed = git("diff", "--name-only", "d5878afc2ec82a6ea9d19a6c26dce6b0cb2feb1e...HEAD").split(/\r?\n/).filter(Boolean);
+const build219Commit = "1d3e1ce2f4a074d4e7a04a45142b1fa24bc3c781";
+const changed = git("diff", "--name-only", `d5878afc2ec82a6ea9d19a6c26dce6b0cb2feb1e...${build219Commit}`).split(/\r?\n/).filter(Boolean);
 
 assert.equal(census.totals.trackedFiles, 2399);
 assert.equal(census.totals.sourceFiles, 1806);
