@@ -3925,6 +3925,6 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 
 - [x] Builds 001–005 define buyer jobs, package capabilities, limit behavior, advisory package fit and the public bilingual comparison without duplicating entitlement authority.
 - [x] Keep the current published prices and commercial journeys unchanged; guidance never grants access, creates a subscription or overrides a signed agreement.
-- [ ] Pass the complete exact-head gate and push the five-build block once.
-- [ ] Publish the accumulated ten-build set with UX151–UX155 without Replit Agents, verify the exact live source identity and complete the full authenticated Chrome smoke before starting Commercial readiness Block 2.
+- [x] Pass the complete exact-head gate and push the five-build block once. Reviewed source `8390e106` passed with receipt SHA-256 `9742e847eeaf6047b477aaade055721e7fd1468033f8de886e39da62916a5cf5`.
+- [x] Publish the accumulated ten-build set with UX151–UX155 without Replit Agents and complete the full authenticated Chrome smoke before starting Commercial readiness Block 2. Production reports identity-bound empty Replit wrapper `8f542a3b`; its tree is identical to reviewed source `8390e106`, and Pricing, Headquarters, the authorized project-58 route matrix, hard reload and two-tab continuity passed.
 - [x] Correct the full-gate reused-fixture failure by renaming the existing bonus constraint inside the rollback-scoped legacy-spelling proof instead of trying to reuse an already owned index; focused real-PostgreSQL Intake activation passes.
