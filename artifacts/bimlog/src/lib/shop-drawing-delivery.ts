@@ -51,3 +51,14 @@ export function shopDrawingEvidenceContinuity(input: { packages?: any[]; package
       rfis:packageConnections.filter(link => link.entityType === "rfi").length, evidence:taskDeliverables.length + packageConnections.length };
   });
 }
+
+export function coordinatorShopDrawingOverview(input: { packages?: any[]; packageTasks?: any[]; tasks?: any[]; deliverables?: any[]; connections?: any[] }) {
+  const continuity = new Map(shopDrawingEvidenceContinuity(input).map(row => [row.packageId,row]));
+  return (input.packages ?? []).filter(row => row.packageType === "shop_drawing").map(pkg => {
+    const taskIds = (input.packageTasks ?? []).filter(link => link.packageId === pkg.id).map(link => link.taskId);
+    const tasks = (input.tasks ?? []).filter(task => taskIds.includes(task.id));
+    const nextAction = pkg.status === "approved" ? "complete" : pkg.status === "returned" ? "revise" : pkg.status === "submitted" ? "review" : pkg.status === "internal_review" ? "finish review" : tasks.some(task => task.status !== "complete") ? "prepare" : "issue";
+    return { packageId:pkg.id, code:pkg.packageCode, floor:String(pkg.description ?? "").replace(/^[^:]+:\s*/,"") || "—", discipline:pkg.disciplineName || pkg.disciplineCode || "—",
+      state:pkg.status, progress:Number(pkg.progressPercent ?? 0), nextAction, unassigned:tasks.some(task => task.assigneeUserId == null), evidence:continuity.get(pkg.id)?.evidence ?? 0 };
+  });
+}

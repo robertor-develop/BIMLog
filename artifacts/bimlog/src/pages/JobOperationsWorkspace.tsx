@@ -26,7 +26,7 @@ import { BudgetGovernancePanel } from "@/components/job-operations/BudgetGoverna
 import { TimeApprovalPanel } from "@/components/job-operations/TimeApprovalPanel";
 import { ProjectControlsDashboard } from "@/components/job-operations/ProjectControlsDashboard";
 import { WorkItemDeliveryWorkflowPanel } from "@/components/job-operations/WorkItemDeliveryWorkflowPanel";
-import { shopDrawingEvidenceContinuity } from "@/lib/shop-drawing-delivery";
+import { coordinatorShopDrawingOverview, shopDrawingEvidenceContinuity } from "@/lib/shop-drawing-delivery";
 import { EdtPlanPreviewPanel } from "@/components/job-operations/EdtPlanPreviewPanel";
 import { EdtDirectorAssignmentPanel } from "@/components/job-operations/EdtDirectorAssignmentPanel";
 import {
@@ -283,6 +283,7 @@ export function DocumentConnectionsPanel({
   const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
   const packages = Array.isArray(data?.packages) ? data.packages : [];
   const shopDrawingContinuity = shopDrawingEvidenceContinuity({ packages, packageTasks:data?.packageTasks, deliverables:data?.deliverables, connections });
+  const shopDrawingOverview = coordinatorShopDrawingOverview({ packages, packageTasks:data?.packageTasks, tasks, deliverables:data?.deliverables, connections });
   const targetItems = targetType === "task" ? tasks : packages;
   const canControl = (item: any) =>
     item?.canControl === true || data?.canManage === true;
@@ -1650,6 +1651,7 @@ export function JobOperationsWorkspace() {
                 </>
               )}
             </section>
+            {shopDrawingOverview.length > 0 && <section className="jo-card"><h2>{tt("Shop drawing delivery overview", "Resumen de entrega de planos de taller")}</h2><p>{tt("Follow each selected floor and discipline from planned work through issue, review, revision and approval. Unassigned future work stays visible.", "Siga cada piso y disciplina seleccionados desde la planificación hasta emisión, revisión, corrección y aprobación. El trabajo futuro sin asignar permanece visible.")}</p><div className="table-scroll"><table><thead><tr><th>{tt("Package", "Paquete")}</th><th>{tt("Floor", "Piso")}</th><th>{tt("Discipline", "Disciplina")}</th><th>{tt("State", "Estado")}</th><th>{tt("Progress", "Progreso")}</th><th>{tt("Evidence", "Evidencia")}</th><th>{tt("Next action", "Siguiente acción")}</th></tr></thead><tbody>{shopDrawingOverview.map(row=><tr key={row.packageId}><td>{row.code}</td><td>{row.floor}</td><td>{row.discipline}</td><td>{row.state}{row.unassigned ? ` · ${tt("Unassigned", "Sin asignar")}` : ""}</td><td>{row.progress}%</td><td>{row.evidence}</td><td>{row.nextAction}</td></tr>)}</tbody></table></div></section>}
             <DocumentConnectionsPanel
               data={data}
               projectId={projectId}
