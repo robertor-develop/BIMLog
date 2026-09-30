@@ -10,6 +10,7 @@ assert.throws(() => canonicalInternalCostRate("-1"), /nonnegative decimal/);
 const source = fs.readFileSync(path.join(import.meta.dirname, "internal-cost-governance.ts"), "utf8");
 const operations = fs.readFileSync(path.join(import.meta.dirname, "job-operations-service.ts"), "utf8");
 const routes = fs.readFileSync(path.join(import.meta.dirname, "../routes/job-operations.ts"), "utf8");
+const page = fs.readFileSync(path.join(import.meta.dirname, "../../../bimlog/src/pages/JobOperationsWorkspace.tsx"), "utf8");
 for (const token of ["company_internal_cost_policy_versions", "member_internal_cost_profile_versions", "effective_from", "proposed_by_id", "approved_by_id", "content_fingerprint"]) assert.match(source, new RegExp(token));
 assert.doesNotMatch(source, /DEFAULT\s+5\.1|DEFAULT\s+6\.5/);
 assert.match(operations, /resolveApprovedMemberInternalCost/);
@@ -22,3 +23,6 @@ console.log("UX127 approved member cost lookup and explicit unresolved state: PA
 for (const token of ["proposeInternalCostPolicy", "proposeMemberInternalCostProfile", "decideInternalCostVersion", "INTERNAL_COST_CEO_APPROVAL_REQUIRED"]) assert.match(source, new RegExp(token));
 assert.match(routes, /internal-cost\/:kind\/:versionId\/decision/);
 console.log("UX128 CEO approval workflow and immutable decision identity: PASS");
+assert.match(operations, /internalCostGovernance/);
+for (const phrase of ["Internal cost governance", "Gobernanza del costo interno", "Job Intake cannot edit or bypass this authority", "aprobación del CEO"]) assert.match(page, new RegExp(phrase));
+console.log("UX129 permission-appropriate project governance view: PASS");

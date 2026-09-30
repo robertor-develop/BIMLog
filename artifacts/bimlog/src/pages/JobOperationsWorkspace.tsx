@@ -1381,6 +1381,17 @@ export function JobOperationsWorkspace() {
             {data.resourceDemands.map((demand:any)=>{const reconciliation=data.resourceReconciliation?.find((row:any)=>row.demandId===demand.id);return <tr key={demand.id}><td>{demand.role}</td><td>{demand.locationLabel || "—"}</td><td>{demand.resourceCount}</td><td>{money(demand.plannedHours)}h</td><td>{reconciliation ? tt(`${money(reconciliation.assignedHours)}h assigned · ${money(reconciliation.actualHours)}h actual · ${money(reconciliation.remainingHours)}h remaining`, `${money(reconciliation.assignedHours)}h asignadas · ${money(reconciliation.actualHours)}h reales · ${money(reconciliation.remainingHours)}h restantes`) : tt("Unassigned — allocate from the matching task below", "Sin asignar — asigne desde la tarea correspondiente abajo")}</td></tr>})}
           </tbody></table></div>
         </section>}
+        {data.internalCostGovernance?.visible && <section className="jo-card" aria-labelledby="internal-cost-governance-title">
+          <h2 id="internal-cost-governance-title">{tt("Internal cost governance", "Gobernanza del costo interno")}</h2>
+          <p>{tt("Approved company policy supplies member costs automatically when priced work is assigned. Job Intake cannot edit or bypass this authority.", "La política empresarial aprobada suministra automáticamente el costo del miembro al asignar trabajo valorizado. Ingreso del Trabajo no puede editar ni omitir esta autoridad.")}</p>
+          {data.internalCostGovernance.activePolicy ? <div className="jo-summary-grid">
+            <div><span>{tt("Policy version", "Versión de política")}</span><strong>v{data.internalCostGovernance.activePolicy.version}</strong></div>
+            <div><span>{tt("Effective", "Vigente")}</span><strong>{String(data.internalCostGovernance.activePolicy.effectiveFrom).slice(0,10)}</strong></div>
+            <div><span>{tt("Drafter", "Dibujante")}</span><strong>{money(data.internalCostGovernance.activePolicy.roleRates?.drafter)}/h</strong></div>
+            <div><span>{tt("Coordinator", "Coordinador")}</span><strong>{money(data.internalCostGovernance.activePolicy.roleRates?.coordinator)}/h</strong></div>
+          </div> : <p role="status">{tt("No approved internal-cost policy is effective. Priced member assignment remains blocked until CEO approval.", "No hay una política de costo interno aprobada y vigente. La asignación valorizada queda bloqueada hasta la aprobación del CEO.")}</p>}
+          {(data.internalCostGovernance.memberProfiles?.length ?? 0)>0 && <div style={{overflow:"auto"}}><table className="jo-table"><thead><tr><th>{tt("Member", "Miembro")}</th><th>{tt("Role", "Rol")}</th><th>{tt("Approved rate", "Tarifa aprobada")}</th><th>{tt("Version / state", "Versión / estado")}</th></tr></thead><tbody>{data.internalCostGovernance.memberProfiles.map((profile:any)=><tr key={profile.id}><td>{profile.memberName}</td><td>{profile.costRole}</td><td>{money(profile.hourlyRate)}/h</td><td>v{profile.version} · {profile.status}</td></tr>)}</tbody></table></div>}
+        </section>}
         {Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin) &&
           <EdtDirectorAssignmentPanel projectId={projectId} currentUserId={Number(user?.id)} api={api} tt={tt} />}
         {data.identity?.intakeId && <EdtPlanPreviewPanel

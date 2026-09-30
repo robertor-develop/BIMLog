@@ -111,3 +111,11 @@ export async function decideInternalCostVersion(input: { actorUserId: number; co
     await client.query("COMMIT"); return row;
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { if (client !== host) client.release(); }
 }
+
+export async function getInternalCostGovernance(input: { actorUserId: number; companyId: number; includeSensitive: boolean }, client: Queryable = pool) {
+  await waitForInternalCostGovernanceMigration(); const authority = await actor(client, input.actorUserId, input.companyId);
+  if (!input.includeSensitive) return { visible: false, canPropose: false, canApprove: false, activePolicy: null, pendingPolicies: [], memberProfiles: [] };
+  const policies = (await client.query(`SELECT id,version,role_rates "roleRates",effective_from "effectiveFrom",status,proposed_by_id "proposedById",approved_by_id "approvedById",proposed_at "proposedAt",decided_at "decidedAt" FROM company_internal_cost_policy_versions WHERE company_id=$1 ORDER BY version DESC LIMIT 25`, [input.companyId])).rows;
+  const profiles = (await client.query(`SELECT DISTINCT ON(p.user_id) p.id,p.user_id "userId",u.full_name "memberName",p.version,p.policy_version_id "policyVersionId",p.cost_role "costRole",p.hourly_rate::text "hourlyRate",p.effective_from "effectiveFrom",p.effective_to "effectiveTo",p.status,p.proposed_by_id "proposedById",p.approved_by_id "approvedById",p.decided_at "decidedAt" FROM member_internal_cost_profile_versions p JOIN users u ON u.id=p.user_id WHERE p.company_id=$1 ORDER BY p.user_id,p.version DESC`, [input.companyId])).rows;
+  return { visible: true, canPropose: true, canApprove: authority.isCeo === true, activePolicy: policies.find((row:any)=>row.status==='approved' && String(row.effectiveFrom).slice(0,10)<=new Date().toISOString().slice(0,10)) ?? null, pendingPolicies: policies.filter((row:any)=>row.status==='proposed'), memberProfiles: profiles };
+}
