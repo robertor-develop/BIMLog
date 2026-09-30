@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { addProjectDisciplineInContext, normalizeProjectDisciplines, normalizeProjectLocationRef, normalizeProjectLocations, primaryDiscipline, projectLocationProjection } from "./project-scope-structure";
+import { addProjectDisciplineInContext, normalizeProjectDisciplines, normalizeProjectLocationRef, normalizeProjectLocations, primaryDiscipline, projectLocationProjection, validateProjectScopeUpdate } from "./project-scope-structure";
 
 const selected = normalizeProjectDisciplines([{ id: "d-mep", code: "mep", name: "MEP" }, { id: "d-str", code: "STR", name: "Structural" }]);
 assert.deepEqual(selected.map(row => row.code), ["MEP", "STR"]);
@@ -20,4 +20,10 @@ const canonicalLocation = normalizeProjectLocationRef(locationRef, locations);
 assert.equal(canonicalLocation?.label, "A · Level 4");
 assert.deepEqual(projectLocationProjection(locationRef, locations), projectLocationProjection(canonicalLocation, locations));
 assert.throws(() => normalizeProjectLocationRef({ buildingId: "building-a", levelId: "missing" }, locations), /same project location/);
-console.log("UX101_UX104_PROJECT_SCOPE=PASS");
+const reloaded = JSON.parse(JSON.stringify({ disciplines: created.selected, structure: locations }));
+assert.deepEqual(normalizeProjectDisciplines(reloaded.disciplines), created.selected);
+assert.deepEqual(normalizeProjectLocations(reloaded.structure), locations);
+assert.throws(() => validateProjectScopeUpdate({ currentDisciplines: created.selected, nextDisciplines: selected, currentStructure: locations, nextStructure: locations, references: { disciplineIds: ["d-elec"] } }), /used by project work/);
+assert.throws(() => validateProjectScopeUpdate({ currentDisciplines: selected, nextDisciplines: selected, currentStructure: locations, nextStructure: { buildings: [building], levels: locations.levels.filter(row => row.id !== "l7") }, references: { levelIds: ["l7"] } }), /used by project work/);
+assert.deepEqual(validateProjectScopeUpdate({ currentDisciplines: created.selected, nextDisciplines: selected, currentStructure: locations, nextStructure: locations, references: { disciplineIds: ["d-mep"] } }).disciplines, selected);
+console.log("UX101_UX105_PROJECT_SCOPE=PASS");

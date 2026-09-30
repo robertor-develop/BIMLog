@@ -68,3 +68,30 @@ export function projectLocationProjection(input: unknown, structure: ReturnType<
   const location = normalizeProjectLocationRef(input, structure);
   return location && { buildingId: location.buildingId, levelId: location.levelId, label: location.label };
 }
+
+export function validateProjectScopeUpdate(input: {
+  currentDisciplines: unknown;
+  nextDisciplines: unknown;
+  currentStructure: { buildings?: unknown; levels?: unknown };
+  nextStructure: { buildings?: unknown; levels?: unknown };
+  references?: { disciplineIds?: unknown; buildingIds?: unknown; levelIds?: unknown };
+}) {
+  const currentDisciplines = normalizeProjectDisciplines(input.currentDisciplines);
+  const nextDisciplines = normalizeProjectDisciplines(input.nextDisciplines);
+  const currentStructure = normalizeProjectLocations(input.currentStructure);
+  const nextStructure = normalizeProjectLocations(input.nextStructure);
+  const refs = input.references ?? {};
+  const referencedDisciplineIds = new Set(Array.isArray(refs.disciplineIds) ? refs.disciplineIds.map(String) : []);
+  const referencedBuildingIds = new Set(Array.isArray(refs.buildingIds) ? refs.buildingIds.map(String) : []);
+  const referencedLevelIds = new Set(Array.isArray(refs.levelIds) ? refs.levelIds.map(String) : []);
+  const nextDisciplineIds = new Set(nextDisciplines.map(row => row.id));
+  const nextBuildingIds = new Set(nextStructure.buildings.map(row => row.id));
+  const nextLevelIds = new Set(nextStructure.levels.map(row => row.id));
+  const removedDiscipline = currentDisciplines.find(row => referencedDisciplineIds.has(row.id) && !nextDisciplineIds.has(row.id));
+  if (removedDiscipline) throw new FinancialControlError(409, "PROJECT_DISCIPLINE_IN_USE", `${removedDiscipline.name} is used by project work and cannot be removed.`);
+  const removedBuilding = currentStructure.buildings.find(row => referencedBuildingIds.has(row.id) && !nextBuildingIds.has(row.id));
+  if (removedBuilding) throw new FinancialControlError(409, "PROJECT_BUILDING_IN_USE", `${removedBuilding.name} is used by project work and cannot be removed.`);
+  const removedLevel = currentStructure.levels.find(row => referencedLevelIds.has(row.id) && !nextLevelIds.has(row.id));
+  if (removedLevel) throw new FinancialControlError(409, "PROJECT_LEVEL_IN_USE", `${removedLevel.name} is used by project work and cannot be removed.`);
+  return { disciplines: nextDisciplines, structure: nextStructure };
+}
