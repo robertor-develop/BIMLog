@@ -13,6 +13,7 @@ assert.equal(BILLING_TERMS.monthly.serviceMonths, 1);
 assert.equal(BILLING_TERMS.annual.serviceMonths, 12);
 assert.equal(quotedTerm("professional", "monthly", "2026-10-01").amount, 149);
 assert.equal(quotedTerm("professional", "annual", "2026-10-01").amount, 1490);
+assert.equal(quotedTerm("professional", "annual", "2026-10-01").cycle, "annual");
 assert.equal(quotedTerm("team", "annual", "2026-10-01").cancellationEffective, "term_end");
 assert.deepEqual(COMMERCIAL_ADDONS.map((addon) => addon.id), ["project_capacity", "approved_connector", "extended_retention"]);
 assert.equal(addonsForPlan("free").length, 0);

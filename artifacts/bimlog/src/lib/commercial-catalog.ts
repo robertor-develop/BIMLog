@@ -69,9 +69,8 @@ export function quotedTerm(planId: CommercialPlanId, cycle: CatalogBillingCycle,
   const price = publishedPriceFor(planId, asOf);
   return Object.freeze({
     ...priceSnapshot(price),
-    cycle,
-    amount: cycle === "monthly" ? price.monthlyAmount : price.annualAmount,
     ...BILLING_TERMS[cycle],
+    amount: cycle === "monthly" ? price.monthlyAmount : price.annualAmount,
   });
 }
 
