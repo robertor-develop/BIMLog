@@ -3903,5 +3903,10 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 
 - [x] UX141–UX145 lead eligible BIMtech scope with configurable shop drawings, derive stable selected floor × discipline packages, project the bound published workflow state, connect task evidence and show a coordinator delivery overview.
 - [x] Preserve explicit non-shop-drawing choices, published workflow/role authority, canonical files/RFIs, initially unassigned future tasks and distinct planned/issued/reviewed/approved states.
-- [ ] Pass the complete exact-head pre-push gate and push UX141–UX145 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX146–UX150.
+- [x] UX141–UX145 passed the complete exact-head pre-push gate and were pushed once at `aad392ef`; publication was correctly deferred to the ten-build UX141–UX150 boundary.
 - [x] Repair the full-gate TypeScript scope finding so the UX144–UX145 evidence projections execute inside the authenticated Operations workspace.
+
+## Experience makeover Block 30 — SendGrid readiness and return — 2026-09-30
+
+- [x] UX146–UX150 expose nonblocking email readiness, authorized per-user SendGrid setup, independent sender verification, unsent-draft return, and the integrated meeting journey with matching Help guidance.
+- [ ] Pass the complete exact-head pre-push gate, push UX146–UX150 once, publish the accumulated UX141–UX150 release without Replit Agents, and run full authenticated visible-Chrome smoke.

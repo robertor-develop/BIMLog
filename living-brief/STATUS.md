@@ -3307,3 +3307,12 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Operations projects each shop-drawing package's canonical tasks, linked submittal/file evidence and relevant RFI connections, then shows floor, discipline, state, progress, evidence, next action and unassigned future work in one coordinator overview.
 - Product commits are `b74a64ff`, `d174e7fb`, `dda9bc01`, `2f879e29`, and `e9ff4224`. This is the first unpublished five-build block after the accepted UX131–UX140 publication; publication and authenticated Chrome smoke are due after UX146–UX150.
 - Full-gate correction `75153358` moves the evidence and overview projections into the authenticated Operations workspace scope; frontend TypeScript and the UX144–UX145 behavior checks pass after the repair.
+
+## Experience makeover Block 30 — SendGrid readiness and return — 2026-09-30
+
+- UX146 adds an optional Email readiness section to full Job Intake with distinct Not configured, Configured, Connected but unverified, Ready, and Needs attention states; missing email setup does not block Intake.
+- UX147 opens the existing authorized per-user SendGrid configuration, keeps credentials server-side outside project records and safe projections, and provides a same-origin return to the saved originating work.
+- UX148 verifies the configured sender through SendGrid's verified-sender API. A valid API key remains connected but unverified until the exact sender is active; only verified sender evidence becomes Ready.
+- UX149 requires Ready at send time, preserves the unsent RFI body and recipients before configuration, restores the same record after return, and never sends automatically.
+- UX150 updates Help and locks the meeting scenario across full Intake, exact APU lineage, generic staffing, Convention/email return, canonical Contract/EDT, later named-member costing, and excess-only cost behavior.
+- Product commits are `96dd86a1`, `e94cb8be`, `27711554`, `52e8ffa4`, and `441ae23d`. This is the ten-build publication boundary with UX141–UX145; the exact candidate requires the full pre-push gate, one push, one controlled publication without Replit Agents, and authenticated visible-Chrome acceptance.
