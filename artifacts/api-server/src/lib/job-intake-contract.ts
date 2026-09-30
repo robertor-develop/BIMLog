@@ -10,7 +10,7 @@ import {
   contractCurrency,
   exactPositiveAmount,
 } from "./financial-contract-contract";
-import { normalizeProjectDisciplines, normalizeProjectLocations, primaryDiscipline } from "./project-scope-structure";
+import { normalizeProjectDisciplines, normalizeProjectLocationRef, normalizeProjectLocations, primaryDiscipline } from "./project-scope-structure";
 
 export const JOB_INTAKE_STAGES = [
   "documents",
@@ -457,7 +457,8 @@ export function normalizeJobIntakeData(raw: unknown) {
         return { id: taskId, taskCode: optionalText(rawTask?.taskCode, `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].taskCode`, 80) || taskId, name, plannedHours: exact(rawTask?.plannedHours ?? "0", `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].plannedHours`), classification: classificationSnapshot(rawTask?.classification ?? entry?.classification) };
       });
       if (tasks.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGE_TASKS_LIMIT", "A Work Package supports at most 100 task definitions.");
-      return { id: packageId, packageCode: optionalText(entry?.packageCode, `scopeItems[${index}].workPackages[${packageIndex}].packageCode`, 50) || packageId, title: optionalText(entry?.title, `scopeItems[${index}].workPackages[${packageIndex}].title`, 160), dimensionType, dimensionValue: optionalText(entry?.dimensionValue, `scopeItems[${index}].workPackages[${packageIndex}].dimensionValue`, 160), packageType, classification: classificationSnapshot(entry?.classification), tasks };
+      const location = normalizeProjectLocationRef(entry?.location, scopeStructure);
+      return { id: packageId, packageCode: optionalText(entry?.packageCode, `scopeItems[${index}].workPackages[${packageIndex}].packageCode`, 50) || packageId, title: optionalText(entry?.title, `scopeItems[${index}].workPackages[${packageIndex}].title`, 160), dimensionType, dimensionValue: optionalText(entry?.dimensionValue ?? location?.levelName, `scopeItems[${index}].workPackages[${packageIndex}].dimensionValue`, 160), location, packageType, classification: classificationSnapshot(entry?.classification), tasks };
     });
     if (workPackages.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGES_LIMIT", "A Contract Item supports at most 100 Work Packages.");
     return {

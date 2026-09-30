@@ -51,3 +51,20 @@ export function normalizeProjectLocations(input: { buildings?: unknown; levels?:
   if (new Set(levels.map(row => row.id)).size !== levels.length) throw new FinancialControlError(400, "PROJECT_LEVEL_DUPLICATE", "Level IDs must be unique within the project.");
   return { buildings: [...buildings].sort((a, b) => a.sequence - b.sequence || a.code.localeCompare(b.code, undefined, { numeric: true })), levels: [...levels].sort((a, b) => buildings.findIndex(row => row.id === a.buildingId) - buildings.findIndex(row => row.id === b.buildingId) || a.sequence - b.sequence || a.code.localeCompare(b.code, undefined, { numeric: true })) };
 }
+
+export function normalizeProjectLocationRef(input: unknown, structure: ReturnType<typeof normalizeProjectLocations>) {
+  if (input == null || input === "") return null;
+  const source = typeof input === "object" && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  const buildingId = text(source.buildingId, "location.buildingId", 100);
+  const levelId = text(source.levelId, "location.levelId", 100);
+  const building = structure.buildings.find(row => row.id === buildingId);
+  const level = structure.levels.find(row => row.id === levelId);
+  if (!building || !level || level.buildingId !== building.id)
+    throw new FinancialControlError(400, "PROJECT_LOCATION_INVALID", "The selected building and level must belong to the same project location.");
+  return { buildingId: building.id, levelId: level.id, buildingCode: building.code, buildingName: building.name, levelCode: level.code, levelName: level.name, label: `${building.code} · ${level.name}` };
+}
+
+export function projectLocationProjection(input: unknown, structure: ReturnType<typeof normalizeProjectLocations>) {
+  const location = normalizeProjectLocationRef(input, structure);
+  return location && { buildingId: location.buildingId, levelId: location.levelId, label: location.label };
+}
