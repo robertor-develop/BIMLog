@@ -12,6 +12,23 @@ export type ProductionSourceCandidate = {
   parentTree?: string;
 };
 
+export type ProductionCommitIdentity = { commit: string; tree: string; subject: string };
+
+export function unwrapReplitPublishChain(chain: readonly ProductionCommitIdentity[]): ProductionCommitIdentity {
+  if (!chain.length) throw new Error("Remote master history is empty.");
+  for (let index = 0; index < chain.length; index += 1) {
+    const current = chain[index];
+    if (!SHA40.test(current.commit.trim().toLowerCase())) throw new Error("Remote master history contains an invalid commit.");
+    if (current.subject.trim() !== "Published your App") return current;
+    const parent = chain[index + 1];
+    if (!parent) throw new Error("Replit publish wrapper chain has no canonical parent.");
+    if (current.tree.trim().toLowerCase() !== parent.tree.trim().toLowerCase()) {
+      throw new Error("Replit publish wrapper chain changes the canonical source tree.");
+    }
+  }
+  throw new Error("Replit publish wrapper chain has no canonical source.");
+}
+
 export function resolveProductionSourceCommit(candidate: ProductionSourceCandidate): string {
   const headCommit = candidate.headCommit.trim().toLowerCase();
   if (!SHA40.test(headCommit)) throw new Error("Build source commit is not a full Git commit.");

@@ -22,7 +22,7 @@ import {
   writeFile,
 } from "fs/promises";
 import { generatePlatformMd } from "./scripts/generate-platform-md";
-import { resolveProductionSourceCommit } from "./src/lib/production-source-commit";
+import { resolveProductionSourceCommit, unwrapReplitPublishChain } from "./src/lib/production-source-commit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -150,8 +150,16 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
   let remoteMasterTree: string | undefined;
   let remoteMasterIsAncestor: boolean | undefined;
   if (replitEnvironment) {
-    remoteMasterCommit = git("rev-parse", "origin/master");
-    remoteMasterTree = git("rev-parse", "origin/master^{tree}");
+    const remoteHistory = git("log", "--first-parent", "--format=%H%x09%T%x09%s", "-64", "origin/master")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map(line => {
+        const [commit, tree, ...subject] = line.split("\t");
+        return { commit, tree, subject: subject.join("\t") };
+      });
+    const canonicalRemote = unwrapReplitPublishChain(remoteHistory);
+    remoteMasterCommit = canonicalRemote.commit;
+    remoteMasterTree = canonicalRemote.tree;
     try {
       execFileSync("git", ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "merge-base", "--is-ancestor", "origin/master", "HEAD"], { stdio: "ignore" });
       remoteMasterIsAncestor = true;
