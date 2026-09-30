@@ -1,4 +1,5 @@
 export type BilingualLabel = { en: string; es: string };
+export type CommercialPlanId = "free" | "professional" | "team" | "business" | "enterprise";
 
 export type BuyerProfileId =
   | "bim_coordinator"
@@ -68,4 +69,87 @@ export function getBuyerProfile(id: BuyerProfileId): BuyerProfile {
   const profile = BUYER_PROFILES.find((candidate) => candidate.id === id);
   if (!profile) throw new Error(`Unknown buyer profile: ${id}`);
   return profile;
+}
+
+export type PackageCapability = {
+  key: string;
+  group: BilingualLabel;
+  name: BilingualLabel;
+  includedFrom: CommercialPlanId;
+  evidence: BilingualLabel;
+};
+
+export const PLAN_ORDER: readonly CommercialPlanId[] = [
+  "free",
+  "professional",
+  "team",
+  "business",
+  "enterprise",
+] as const;
+
+export const PACKAGE_CAPABILITIES: readonly PackageCapability[] = [
+  {
+    key: "coordination.records",
+    group: { en: "Coordination", es: "Coordinación" },
+    name: { en: "Core coordination records", es: "Registros principales de coordinación" },
+    includedFrom: "free",
+    evidence: { en: "RFI and Submittal registers", es: "Registros de RFI y Submittals" },
+  },
+  {
+    key: "coordination.naming",
+    group: { en: "Coordination", es: "Coordinación" },
+    name: { en: "Naming Convention Builder", es: "Constructor de convenciones de nombres" },
+    includedFrom: "free",
+    evidence: { en: "Governed file naming", es: "Nomenclatura de archivos gobernada" },
+  },
+  {
+    key: "evidence.audit",
+    group: { en: "Evidence", es: "Evidencia" },
+    name: { en: "Document integrity and audit records", es: "Integridad documental y registros de auditoría" },
+    includedFrom: "professional",
+    evidence: { en: "Traceable record history", es: "Historial trazable del registro" },
+  },
+  {
+    key: "evidence.exports",
+    group: { en: "Evidence", es: "Evidencia" },
+    name: { en: "Governed exports and reporting", es: "Exportaciones e informes gobernados" },
+    includedFrom: "professional",
+    evidence: { en: "Client-ready controlled output", es: "Salida controlada lista para el cliente" },
+  },
+  {
+    key: "operations.team",
+    group: { en: "Operations", es: "Operaciones" },
+    name: { en: "Team coordination workflows", es: "Flujos de coordinación del equipo" },
+    includedFrom: "team",
+    evidence: { en: "Assigned and unassigned work visibility", es: "Visibilidad de trabajo asignado y sin asignar" },
+  },
+  {
+    key: "operations.daily_reports",
+    group: { en: "Operations", es: "Operaciones" },
+    name: { en: "Daily Reports", es: "Informes diarios" },
+    includedFrom: "team",
+    evidence: { en: "Structured daily project record", es: "Registro diario estructurado del proyecto" },
+  },
+  {
+    key: "governance.meetings",
+    group: { en: "Governance", es: "Gobernanza" },
+    name: { en: "Transmittals and Meeting Minutes", es: "Transmittals y minutas de reunión" },
+    includedFrom: "business",
+    evidence: { en: "Connected communication record", es: "Registro conectado de comunicaciones" },
+  },
+  {
+    key: "governance.portfolio",
+    group: { en: "Governance", es: "Gobernanza" },
+    name: { en: "Portfolio and branding options", es: "Opciones de portafolio y marca" },
+    includedFrom: "enterprise",
+    evidence: { en: "Customer-agreement scope", es: "Alcance definido en el acuerdo del cliente" },
+  },
+] as const;
+
+export function planIncludesCapability(planId: CommercialPlanId, capability: PackageCapability): boolean {
+  return PLAN_ORDER.indexOf(planId) >= PLAN_ORDER.indexOf(capability.includedFrom);
+}
+
+export function capabilitiesForPlan(planId: CommercialPlanId): readonly PackageCapability[] {
+  return PACKAGE_CAPABILITIES.filter((capability) => planIncludesCapability(planId, capability));
 }
