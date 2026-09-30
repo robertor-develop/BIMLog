@@ -87,3 +87,24 @@ export function rankSmartChoices(input: {
   for (const id of selectedIds) preferredIds.add(id);
   return { preferred: ranked.filter(row => preferredIds.has(String(row.id))), all: ranked };
 }
+
+export function searchSmartChoices(eligible: SmartChoiceOption[], query: unknown, limit = 50) {
+  const needle = String(query ?? "").trim().toLocaleLowerCase();
+  const boundedLimit = Math.max(1, Math.min(100, Number(limit) || 50));
+  if (!needle) return eligible.slice(0, boundedLimit);
+  return eligible.filter(option => [option.code, option.name, ...(option.aliases ?? [])].some(value => value.toLocaleLowerCase().includes(needle))).slice(0, boundedLimit);
+}
+
+export function addSmartChoiceInContext(input: { eligible: SmartChoiceOption[]; created: SmartChoiceOption; authorized: boolean }) {
+  if (!input.authorized) throw new FinancialControlError(403, "SMART_CHOICE_CREATE_DENIED", "You do not have authority to add this company catalog choice.");
+  const created = {
+    id: String(input.created?.id ?? "").trim(),
+    code: String(input.created?.code ?? "").trim().toUpperCase(),
+    name: String(input.created?.name ?? "").trim(),
+    aliases: Array.isArray(input.created?.aliases) ? input.created.aliases.map(String).map(value => value.trim()).filter(Boolean) : [],
+  };
+  if (!created.id || !created.code || !created.name) throw new FinancialControlError(400, "SMART_CHOICE_VALUE_INVALID", "A catalog choice requires an identity, code, and name.");
+  if (input.eligible.some(option => String(option.id) === created.id || option.code.toLocaleLowerCase() === created.code.toLocaleLowerCase()))
+    throw new FinancialControlError(409, "SMART_CHOICE_DUPLICATE", `${created.code} already exists in the eligible catalog.`);
+  return { eligible: [...input.eligible, created], selectedId: created.id };
+}

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { normalizeSmartChoiceProfile, preferredEligibleChoices, rankSmartChoices, recordSmartChoiceUse } from "./smart-choice-preferences";
+import { addSmartChoiceInContext, normalizeSmartChoiceProfile, preferredEligibleChoices, rankSmartChoices, recordSmartChoiceUse, searchSmartChoices } from "./smart-choice-preferences";
 
 const catalog = Array.from({ length: 50 }, (_, index) => ({ id: `d-${index + 1}`, code: `D${index + 1}`, name: `Discipline ${index + 1}` }));
 const profile = normalizeSmartChoiceProfile({ userId: 7, companyId: 2, pinnedDisciplineIds: ["d-4", "d-2", "d-4"] });
@@ -15,4 +15,11 @@ assert.equal(ranked.all[0]?.id, "historic");
 assert.ok(ranked.preferred.some(row => row.id === "historic"));
 assert.ok(ranked.all.findIndex(row => row.id === "d-30") < ranked.all.findIndex(row => row.id === "d-20"));
 assert.equal(ranked.all.length, 51);
-console.log("UX106_UX107_SMART_CHOICE_RANKING=PASS");
+const documentTypes = [{ id: "shop", code: "SD", name: "Shop Drawing", aliases: ["fabrication drawing"] }, { id: "rfi", code: "RFI", name: "Request for Information" }, { id: "calc", code: "CALC", name: "Calculation" }];
+assert.deepEqual(searchSmartChoices(documentTypes, "fabrication").map(row => row.id), ["shop"]);
+assert.deepEqual(searchSmartChoices(documentTypes, "CALC").map(row => row.id), ["calc"]);
+const addedDocumentType = addSmartChoiceInContext({ eligible: documentTypes, created: { id: "sketch", code: "sk", name: "Coordination Sketch" }, authorized: true });
+assert.equal(addedDocumentType.selectedId, "sketch");
+assert.equal(addedDocumentType.eligible.at(-1)?.code, "SK");
+assert.throws(() => addSmartChoiceInContext({ eligible: documentTypes, created: { id: "private", code: "X", name: "Unauthorized" }, authorized: false }), /do not have authority/);
+console.log("UX106_UX108_SMART_CHOICE_DOCUMENT_TYPES=PASS");
