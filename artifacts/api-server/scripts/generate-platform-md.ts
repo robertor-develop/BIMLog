@@ -73,6 +73,11 @@ ${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
 - Public \`/api/v1/healthz\` is both health and application-readiness evidence because the startup bootstrap holds that route at HTTP 503 until the real application barrier completes.
 - Lens Next is the sole supported Lens product. Original/Legacy Lens exists only as preserved historical migration input and must not appear as a parallel customer-facing product or installed loader.
 
+## Production runtime closure recovery
+
+- A runtime closure whose source identity matches the candidate is reused only after the complete packaged tree, dependency set, source identity and Living Brief identity validate.
+- A partial or invalid source-matched closure is retired without recursive pre-build deletion and rebuilt from the exact installed, lock-bound dependency graph before publication.
+
 ## Critical Database Facts — Read Before Every Session
 - Identity candidate I001–I005 adds nullable company retirement identity/time, guarded collision prevention and fresh request authority. Apply and verify \`lib/db/scripts/company-identity-lifecycle.sql\` before deploying consumers; no production migration or nine-project binding repair is implied by local tests. Reconciliation appends versions and preserves historical company rows. Invitation token completion remains separate I006–I010 work.
 - PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.

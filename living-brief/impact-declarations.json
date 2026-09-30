@@ -51758,6 +51758,94 @@
         "scripts/prepare-artifact-proof-fixture.mjs"
       ],
       "reviewedChangeSha256": "5a78052fcde9a914a46d3b7aaa381d763eb18bc4731fe61471427738b4beafdc"
+    },
+    {
+      "taskId": "ux-b26-runtime-closure-recovery-20260930",
+      "reviewedThroughCommit": "f5566fac5b7f5edf982426e01f5e57d6956e9376",
+      "reviewedAt": "2026-09-30T10:30:00.000Z",
+      "trigger": "release_gate_failure",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_release_repair",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        "Replit exact-source build found a stale incomplete runtime closure whose deployment-source identity matched the candidate."
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Replit production builder now validates a source-matched runtime closure before reuse and retires and rebuilds any incomplete closure; product behavior, database authority, customer data, Native source, installers, and provider-send authority are unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "126155bac1d8635d248e9fecbd7cf7eb5d6d0737afe5a26a0234130895b79572"
     }
   ]
 }

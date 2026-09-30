@@ -3884,3 +3884,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [ ] Pass the exact-head release gate, push UX126–UX130, publish accumulated UX121–UX130 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.
 - [x] Correct the first full-gate database-safety finding by declaring both internal-cost authority tables and assignment snapshot references in the canonical Drizzle schema; the focused database-safety gate now passes.
 - [x] Correct the subsequent artifact-proof fixture finding with a guarded additive schema refresh for an existing isolated fixture and preserve its already-private ACL instead of rewriting it.
+- [x] Correct Replit production-build recovery so a source-matched but incomplete runtime closure fails reuse validation, is retired, and is rebuilt before publication.
