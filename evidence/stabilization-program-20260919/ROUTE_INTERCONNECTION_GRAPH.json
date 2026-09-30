@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 691,
+    "apiRoutes": 693,
     "frontendApiReferences": 262,
     "routeOwnedTables": 61
   },
@@ -4592,6 +4592,18 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/operations/internal-cost/:kind/:versionId/decision",
+      "owner": "artifacts/api-server/src/routes/job-operations.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/operations/floor-hour-estimates",
+      "owner": "artifacts/api-server/src/routes/job-operations.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/operations/floor-hour-estimates/:estimateVersionId/decision",
       "owner": "artifacts/api-server/src/routes/job-operations.ts",
       "tables": []
     },

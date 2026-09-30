@@ -666,6 +666,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-revision-ledger.behavior.ts
 - artifacts/api-server/src/lib/financial-revision-ledger.ts
 - artifacts/api-server/src/lib/financial-statement-mapping.behavior.ts
+- artifacts/api-server/src/lib/floor-hour-cost-contract.ts
+- artifacts/api-server/src/lib/floor-hour-cost-governance.ts
 - artifacts/api-server/src/lib/folder-wizard-destination.behavior.ts
 - artifacts/api-server/src/lib/folder-wizard-destination.ts
 - artifacts/api-server/src/lib/folder-wizard-export.behavior.ts
@@ -1046,6 +1048,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ux-rollout-cohorts.ts
 - artifacts/api-server/src/lib/ux-user-acceptance.behavior.ts
 - artifacts/api-server/src/lib/ux-user-acceptance.ts
+- artifacts/api-server/src/lib/ux131-floor-estimate.behavior.ts
+- artifacts/api-server/src/lib/ux132-marginal-excess-cost.behavior.ts
+- artifacts/api-server/src/lib/ux133-deterministic-hour-allocation.behavior.ts
+- artifacts/api-server/src/lib/ux134-hour-cost-revisions.behavior.ts
+- artifacts/api-server/src/lib/ux135-floor-cost-acceptance.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-approval-progress.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.ts

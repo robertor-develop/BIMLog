@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ef1e3fdac5a91463309578a9d2c59235706afc61be08289665ac9b1cc22da779",
-  "itemCount": 272,
+  "sourceSha256": "6592a68d6f2e74002f58c5a12685088534dfb6cf31f3930f9bf97910569cc32b",
+  "itemCount": 273,
   "counts": {
-    "ACTIVE": 237,
+    "ACTIVE": 238,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -4965,6 +4965,24 @@
       "evidence": [
         "OPEN_LOOP.md:3884",
         "Experience makeover Block 26 — member internal cost and CEO approval — 2026-09-30"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "833f38209ec35649",
+      "sourceLine": 3893,
+      "heading": "Experience makeover Block 27 — floor estimate and excess-hour cost — 2026-09-30",
+      "statement": "Pass the complete exact-head pre-push gate and push UX131–UX135 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX136–UX140.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3893",
+        "Experience makeover Block 27 — floor estimate and excess-hour cost — 2026-09-30"
       ],
       "currentAuthority": false
     }

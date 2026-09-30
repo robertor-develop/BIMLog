@@ -3885,3 +3885,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Correct the first full-gate database-safety finding by declaring both internal-cost authority tables and assignment snapshot references in the canonical Drizzle schema; the focused database-safety gate now passes.
 - [x] Correct the subsequent artifact-proof fixture finding with a guarded additive schema refresh for an existing isolated fixture and preserve its already-private ACL instead of rewriting it.
 - [x] Correct Replit production-build recovery so a source-matched but incomplete runtime closure fails reuse validation, is retired, and is rebuilt before publication.
+
+## Experience makeover Block 27 — floor estimate and excess-hour cost — 2026-09-30
+
+- [x] UX131–UX135 implement versioned scope/location hour estimates, CEO approval, marginal $3.50 excess-only costing, deterministic mixed-person allocation, correction/revision history and permission-appropriate Operations breakdowns.
+- [x] Preserve each member's approved normal cost, exclude rejected/superseded time, retain append-only calculation runs, and keep customer billing, payroll and payment unchanged.
+- [ ] Pass the complete exact-head pre-push gate and push UX131–UX135 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX136–UX140.

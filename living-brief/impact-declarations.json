@@ -51846,6 +51846,95 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "126155bac1d8635d248e9fecbd7cf7eb5d6d0737afe5a26a0234130895b79572"
+    },
+    {
+      "taskId": "ux-b27-floor-excess-cost-20260930",
+      "reviewedThroughCommit": "4431c7861200a399b6294a86c65e197587d8b2aa",
+      "reviewedAt": "2026-09-30T12:30:21.318Z",
+      "trigger": "schema_or_migration",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_change",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        "Floor estimate, time-cost allocation, CEO approval, and budget-authorized Operations presentation change product behavior and database structure."
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX131-UX135 bind versioned approved floor-hour estimates to canonical scope/location, apply the .50 rate only to marginal excess hours, preserve member normal-cost snapshots and append-only recomputation evidence, and leave customer billing and payment unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "33831ce4ec6323aa547989f83751ffd934cf25167e9baa761702f6606090947d"
     }
   ]
 }
