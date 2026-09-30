@@ -3291,3 +3291,11 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Rejected, corrected and superseded time cannot double count. Every changed eligible source set or approved estimate creates an append-only calculation run with entry-level normal/excess hours, rates, costs and fingerprints, while earlier runs remain historical evidence.
 - Job Operations shows the approved estimate and current normal/excess cost breakdown only to budget-authorized users. Without an approved scope/location baseline, BIMLog applies no excess treatment.
 - Product commits are `e3553459`, `03990beb`, `cf6e2794`, `4bd8f3d4`, and `4431c786`. Focused UX131–UX135 behavior, API/UI TypeScript, database-safety and mojibake checks pass. This is the first unpublished five-build block after UX121–UX130; publication and authenticated Chrome smoke are due after UX136–UX140.
+
+## Experience makeover Block 28 — Contract and EDT lineage — 2026-09-30
+
+- UX136–UX140 replace unexplained engagement identifiers with plain company/agreement summaries, preserve Intake Contract Items as the canonical draft source, and record their stable IDs and source fingerprint on generated contract versions.
+- Existing-contract reconciliation requires the exact Contract ID, version ID and content fingerprint together. A changed version or content enters review instead of overwriting the authorized Contract or silently creating a duplicate.
+- EDT readiness identifies the missing Contract version, Delivery Workflow, Governance source, or Intake scope and offers a contextual repair route back to the originating work. Integrity checks remain fail closed and preview remains read only.
+- Repeated activation returns stable Contract and version lineage. Deterministic Intake-item fingerprints prevent retry drift; failed activation remains transactionally unchanged.
+- Product commits are `bdd009cb`, `07622e0f`, `765379e6`, `34e7a49e`, and `73b3d4f4`. Focused UX136–UX140 behavior and API/UI TypeScript checks pass. UX131–UX140 now reach the required ten-build publication and authenticated Chrome smoke boundary.

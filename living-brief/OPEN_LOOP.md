@@ -3891,3 +3891,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX131–UX135 implement versioned scope/location hour estimates, CEO approval, marginal $3.50 excess-only costing, deterministic mixed-person allocation, correction/revision history and permission-appropriate Operations breakdowns.
 - [x] Preserve each member's approved normal cost, exclude rejected/superseded time, retain append-only calculation runs, and keep customer billing, payroll and payment unchanged.
 - [ ] Pass the complete exact-head pre-push gate and push UX131–UX135 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX136–UX140.
+
+## Experience makeover Block 28 — Contract and EDT lineage — 2026-09-30
+
+- [x] UX136–UX140 explain who hires whom and under which agreement, reuse Intake items in canonical contract drafts, require exact existing-contract versions, guide EDT source repair, and preserve stable lineage on retries.
+- [x] Preserve draft/approval/execution boundaries: activation may create or reuse controlled source records but never implies approval, issuance, execution, payroll or payment.
+- [ ] Pass the complete exact-head pre-push gate, push UX136–UX140 once, publish accumulated UX131–UX140 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.

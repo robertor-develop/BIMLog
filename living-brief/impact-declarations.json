@@ -51935,6 +51935,93 @@
         "package.json"
       ],
       "reviewedChangeSha256": "33831ce4ec6323aa547989f83751ffd934cf25167e9baa761702f6606090947d"
+    },
+    {
+      "taskId": "ux-block28-contract-edt-lineage",
+      "reviewedThroughCommit": "73b3d4f4ef3ac36ca0a0f6409f765dbabd034063",
+      "reviewedAt": "2026-09-30T13:42:28.0983039Z",
+      "trigger": "schema_or_migration",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_change",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        "Floor estimate, time-cost allocation, CEO approval, and budget-authorized Operations presentation change product behavior and database structure."
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX136-UX140 connect plain company agreements, canonical Intake Contract Items, exact existing Contract versions, guided EDT source repair, and stable retry lineage without changing approval, execution, payment, or customer billing authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "605c9ea23addce4ceda6cd7355bd04114aeb6dc806497541bfb6cad8815b775e"
     }
   ]
 }

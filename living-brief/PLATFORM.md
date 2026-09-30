@@ -759,6 +759,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-configuration-snapshot.behavior.ts
 - artifacts/api-server/src/lib/job-intake-configuration.behavior.ts
 - artifacts/api-server/src/lib/job-intake-configuration.ts
+- artifacts/api-server/src/lib/job-intake-contract-lineage.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-empty-commercial-prerequisites.behavior.ts
 - artifacts/api-server/src/lib/job-intake-full-lifecycle.behavior.ts
@@ -1053,6 +1054,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ux133-deterministic-hour-allocation.behavior.ts
 - artifacts/api-server/src/lib/ux134-hour-cost-revisions.behavior.ts
 - artifacts/api-server/src/lib/ux135-floor-cost-acceptance.behavior.ts
+- artifacts/api-server/src/lib/ux137-intake-contract-items.behavior.ts
+- artifacts/api-server/src/lib/ux138-existing-contract-reconciliation.behavior.ts
+- artifacts/api-server/src/lib/ux140-activation-retry.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-approval-progress.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.ts
