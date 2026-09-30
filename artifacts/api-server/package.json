@@ -122,7 +122,7 @@
     "test:sendgrid-transport": "tsx ./scripts/test-sendgrid-transport.ts",
     "test:startup-bootstrap": "tsx ./scripts/test-startup-bootstrap.ts && tsx ./src/lib/database-startup-serialization.behavior.ts",
     "test:startup-bundle": "tsx ./scripts/test-startup-bundle.ts",
-    "test:production-artifact": "tsx ./scripts/test-production-artifact-closure.ts",
+    "test:production-artifact": "node ../../scripts/test-local-production-artifact.mjs",
     "test:release-metadata": "tsx ./src/lib/release-metadata.behavior.ts",
     "test:ai-assistance-governance": "tsx ./src/lib/ai-assistance-governance.behavior.ts && tsx ./src/lib/ai-assistance-truth.behavior.ts",
     "test:access-policy": "tsx ./src/lib/access-policy.behavior.ts",
