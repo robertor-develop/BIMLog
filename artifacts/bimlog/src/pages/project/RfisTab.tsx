@@ -2,6 +2,7 @@ import { isDirectoryRecipientEmail } from "@workspace/api-zod";
 import { ProjectPartyPicker } from "@/components/ProjectPartyPicker";
 import { uniqueRfiPriorities, withCurrentPriority } from "@/lib/rfi-priority-options";
 import { rfiTimingPresentation, rfiWorkflowSummary, safeRfiReturnTarget } from "@/lib/rfi-experience";
+import { clearEmailDraft, preserveEmailDraft, restoreEmailDraft } from "@/lib/email-draft-recovery";
 import { useState, useMemo, useRef, useEffect } from "react";
 import {
   useListRfis, useCreateRfi, useUpdateRfi, useReviseRfi, useGenerateRfiQuestion,
@@ -2591,7 +2592,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   // ── RFI sending (manual, self-reported — no platform delivery) ───────────
   const [marking, setMarking] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [aiPreview, setAiPreview] = useState<string | null>(persistedEmail.emailDraft || null);
+  const [aiPreview, setAiPreview] = useState<string | null>(() => restoreEmailDraft(projectId, rfi.id)?.body || persistedEmail.emailDraft || null);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewFailed, setPreviewFailed] = useState(false);
   const [userContext, setUserContext] = useState(persistedEmail.emailDescription || "");
@@ -2679,7 +2680,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         const list = Array.isArray(d) ? d as { provider: string; status: string }[] : [];
         const providers = Array.isArray(catalog.providers) ? catalog.providers as FileSourceCatalogEntry[] : [];
         const sg = list.find(c => c.provider === "sendgrid");
-        setSgConnected(!!sg && sg.status === "connected");
+        setSgConnected(!!sg && sg.status === "ready");
         setConnectedFileSources(providers
           .filter(p => p.oauthParam && p.availability === "available" && list.some(c => c.provider === p.key && c.status === "connected"))
           .map(p => ({ key: p.key, param: p.oauthParam!, label: lang === "es" ? p.label.es : p.label.en })));
@@ -2706,6 +2707,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
         throw new Error((err as { error?: string }).error || "Send failed");
       }
       const data = await resp.json() as Rfi;
+      clearEmailDraft(projectId, rfi.id);
       onUpdate(data);
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/rfis`] });
       toast({ title: w("RFI sent via your SendGrid — ball is now with the recipient", "RFI enviado por tu SendGrid — la pelota está con el destinatario", lang) });
@@ -2714,6 +2716,12 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     } finally {
       setSending(false);
     }
+  };
+
+  const configureEmailAndReturn = () => {
+    preserveEmailDraft({ projectId, recordType: "rfi", recordId: rfi.id, body: previewText, to: rfi.submittedToEmail || "", cc: getRfiDistributionCcEmails((rfi.distributionList as string[] | null) || []), subject: `${rfi.number} — ${rfi.subject}` });
+    const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    setPage(`/profile?section=email-sending&returnTo=${encodeURIComponent(returnTo)}`);
   };
 
   // Upload attachments from the user's computer (question + response docs).
@@ -3323,7 +3331,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
 
   const responseContent = (
     <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
-      <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}><div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><strong style={{ fontSize: 12 }}>{w("Issue and email actions", "Acciones de envio y email", lang)}</strong>{canWrite && rfi.status !== "closed" && sgConnected === true && <Button type="button" size="sm" onClick={handleSendReal} disabled={sending || !rfi.submittedToEmail} title={!rfi.submittedToEmail ? w("Set the Submitted To email first", "Defina el correo del destinatario primero", lang) : undefined}>{sending ? w("Sending...", "Enviando...", lang) : w("Send via SendGrid", "Enviar por SendGrid", lang)}</Button>}{canWrite && rfi.status !== "closed" && rfi.sendStatus !== "sent" && <Button type="button" size="sm" variant="outline" onClick={handleMarkSent} disabled={marking}>{marking ? w("Saving...", "Guardando...", lang) : w("Mark as Sent", "Marcar como Enviado", lang)}</Button>}{sgConnected === false && <Button type="button" size="sm" variant="outline" onClick={() => setPage("/profile")}>{w("Set Up Email Sending", "Configurar Envio de Email", lang)}</Button>}</div>{sgConnected === false && !hideSgNudge && <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, padding: "8px 10px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 11 }}><span style={{ flex: 1 }}>{w("Connect your own SendGrid account to send RFIs directly. Mark as Sent remains available for delivery outside BIMLog.", "Conecte su propia cuenta SendGrid para enviar RFIs directamente. Marcar como Enviado sigue disponible para envios fuera de BIMLog.", lang)}</span><button type="button" title={w("Don't remind me", "No recordarme", lang)} onClick={() => { localStorage.setItem("bimlog-hide-sendgrid-nudge", "1"); setHideSgNudge(true); }} style={{ border: "none", background: "transparent", cursor: "pointer" }}><X style={{ width: 14, height: 14 }} /></button></div>}{previewFailed && <p style={{ fontSize: 11, color: "#DC2626", marginTop: 6 }}>{w("AI email draft was unavailable. The standard editable draft remains available.", "El borrador IA no estuvo disponible. El borrador estandar editable sigue disponible.", lang)}</p>}</div>
+      <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}><div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><strong style={{ fontSize: 12 }}>{w("Issue and email actions", "Acciones de envio y email", lang)}</strong>{canWrite && rfi.status !== "closed" && sgConnected === true && <Button type="button" size="sm" onClick={handleSendReal} disabled={sending || !rfi.submittedToEmail} title={!rfi.submittedToEmail ? w("Set the Submitted To email first", "Defina el correo del destinatario primero", lang) : undefined}>{sending ? w("Sending...", "Enviando...", lang) : w("Send via SendGrid", "Enviar por SendGrid", lang)}</Button>}{canWrite && rfi.status !== "closed" && rfi.sendStatus !== "sent" && <Button type="button" size="sm" variant="outline" onClick={handleMarkSent} disabled={marking}>{marking ? w("Saving...", "Guardando...", lang) : w("Mark as Sent", "Marcar como Enviado", lang)}</Button>}{sgConnected === false && <Button type="button" size="sm" variant="outline" onClick={configureEmailAndReturn}>{w("Set Up Email Sending", "Configurar Envio de Email", lang)}</Button>}</div>{sgConnected === false && !hideSgNudge && <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, padding: "8px 10px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 11 }}><span style={{ flex: 1 }}>{w("Connect your own SendGrid account to send RFIs directly. Mark as Sent remains available for delivery outside BIMLog.", "Conecte su propia cuenta SendGrid para enviar RFIs directamente. Marcar como Enviado sigue disponible para envios fuera de BIMLog.", lang)}</span><button type="button" title={w("Don't remind me", "No recordarme", lang)} onClick={() => { localStorage.setItem("bimlog-hide-sendgrid-nudge", "1"); setHideSgNudge(true); }} style={{ border: "none", background: "transparent", cursor: "pointer" }}><X style={{ width: 14, height: 14 }} /></button></div>}{previewFailed && <p style={{ fontSize: 11, color: "#DC2626", marginTop: 6 }}>{w("AI email draft was unavailable. The standard editable draft remains available.", "El borrador IA no estuvo disponible. El borrador estandar editable sigue disponible.", lang)}</p>}</div>
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
         <OptionalSharePanel
           language={lang === "es" ? "es" : "en"}
@@ -3869,3 +3877,4 @@ function CloudPicker({ provider, projectId, rfiId, lang, onAttached, onClose }: 
     </div>
   );
 }
+

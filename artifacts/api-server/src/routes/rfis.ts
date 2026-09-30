@@ -2750,8 +2750,8 @@ router.post("/projects/:projectId/rfis/:rfiId/send", authMiddleware, requirePerm
     // The author's own SendGrid connection.
     const [conn] = await db.select().from(userConnectionsTable)
       .where(and(eq(userConnectionsTable.userId, req.user!.userId), eq(userConnectionsTable.provider, "sendgrid")));
-    if (!conn || conn.status !== "connected") {
-      res.status(428).json({ error: "Connect your SendGrid account before sending.", code: "SENDGRID_NOT_CONNECTED" });
+    if (!conn || conn.status !== "ready") {
+      res.status(428).json({ error: "Connect SendGrid and verify the sender before sending.", code: "SENDGRID_NOT_READY" });
       return;
     }
     const apiKey = (conn.credentials as { apiKey?: string } | null)?.apiKey;

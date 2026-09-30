@@ -1,0 +1,5 @@
+export type EmailDraftRecovery = { projectId: number; recordType: "rfi"; recordId: number; body: string; to: string; cc: string[]; subject: string };
+const key = (projectId: number, recordId: number) => `bimlog-email-draft:rfi:${projectId}:${recordId}`;
+export function preserveEmailDraft(draft: EmailDraftRecovery, storage: Pick<Storage, "setItem"> = sessionStorage) { storage.setItem(key(draft.projectId, draft.recordId), JSON.stringify(draft)); }
+export function restoreEmailDraft(projectId: number, recordId: number, storage: Pick<Storage, "getItem" | "removeItem"> = sessionStorage): EmailDraftRecovery | null { const raw = storage.getItem(key(projectId, recordId)); if (!raw) return null; try { const draft = JSON.parse(raw) as EmailDraftRecovery; return draft.projectId === projectId && draft.recordId === recordId && draft.recordType === "rfi" ? draft : null; } catch { storage.removeItem(key(projectId, recordId)); return null; } }
+export function clearEmailDraft(projectId: number, recordId: number, storage: Pick<Storage, "removeItem"> = sessionStorage) { storage.removeItem(key(projectId, recordId)); }
