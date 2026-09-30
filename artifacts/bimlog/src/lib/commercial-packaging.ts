@@ -190,3 +190,76 @@ export function summarizePackageLimits(
       : "At a limit, existing work remains available and an administrator must expand the plan before adding capacity.");
   return { projects, members, enforcement };
 }
+
+export type PackageFitInput = {
+  buyerProfileId: BuyerProfileId;
+  activeProjects: number;
+  membersPerProject: number;
+  needsAuditExports: boolean;
+  needsTeamOperations: boolean;
+  needsMeetingsOrTransmittals: boolean;
+  needsPortfolioAgreement: boolean;
+};
+
+export type PackageFit = {
+  planId: CommercialPlanId;
+  reason: BilingualLabel;
+  advisory: BilingualLabel;
+};
+
+export function recommendPackageFit(input: PackageFitInput): PackageFit {
+  const activeProjects = Math.max(0, Math.floor(input.activeProjects));
+  const membersPerProject = Math.max(0, Math.floor(input.membersPerProject));
+  const advisory = {
+    en: "This is a planning guide. The active BIMLog entitlement or signed customer agreement controls access.",
+    es: "Esta es una guía de planificación. La habilitación activa de BIMLog o el acuerdo firmado controla el acceso.",
+  };
+  if (input.needsPortfolioAgreement || activeProjects > 10) {
+    return {
+      planId: "enterprise",
+      reason: {
+        en: "Portfolio scale or contracted configuration requires an Enterprise conversation.",
+        es: "La escala de portafolio o una configuración contratada requiere una conversación Enterprise.",
+      },
+      advisory,
+    };
+  }
+  if (input.needsMeetingsOrTransmittals || activeProjects > 5 || input.buyerProfileId === "general_contractor") {
+    return {
+      planId: "business",
+      reason: {
+        en: "Connected governance records or multi-project contractor coordination align with Business.",
+        es: "Los registros conectados de gobernanza o la coordinación multiproyecto de contratistas corresponden a Business.",
+      },
+      advisory,
+    };
+  }
+  if (input.needsTeamOperations || activeProjects > 3 || membersPerProject > 25 || input.buyerProfileId === "coordination_firm") {
+    return {
+      planId: "team",
+      reason: {
+        en: "Team operations or several active projects align with Team.",
+        es: "Las operaciones de equipo o varios proyectos activos corresponden a Team.",
+      },
+      advisory,
+    };
+  }
+  if (input.needsAuditExports || activeProjects > 1 || membersPerProject > 5 || input.buyerProfileId === "owner_operator") {
+    return {
+      planId: "professional",
+      reason: {
+        en: "Governed evidence or expanded project capacity aligns with Professional.",
+        es: "La evidencia gobernada o una capacidad ampliada de proyectos corresponde a Professional.",
+      },
+      advisory,
+    };
+  }
+  return {
+    planId: "free",
+    reason: {
+      en: "One small project using core coordination records fits the Free evaluation scope.",
+      es: "Un proyecto pequeño con registros principales de coordinación cabe en el alcance de evaluación Free.",
+    },
+    advisory,
+  };
+}

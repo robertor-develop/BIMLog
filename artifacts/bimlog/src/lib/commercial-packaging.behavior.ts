@@ -5,6 +5,7 @@ import {
   capabilitiesForPlan,
   getBuyerProfile,
   planIncludesCapability,
+  recommendPackageFit,
   summarizePackageLimits,
 } from "./commercial-packaging";
 
@@ -41,4 +42,20 @@ assert.deepEqual(summarizePackageLimits("enterprise", { projectLimit: null, memb
   enforcement: "Los límites contratados se aplican según el acuerdo del cliente.",
 });
 
-console.log("Commercial packaging builds 001-003 buyer profiles, capabilities and limits: PASS");
+const baseFit = {
+  buyerProfileId: "bim_coordinator" as const,
+  activeProjects: 1,
+  membersPerProject: 5,
+  needsAuditExports: false,
+  needsTeamOperations: false,
+  needsMeetingsOrTransmittals: false,
+  needsPortfolioAgreement: false,
+};
+assert.equal(recommendPackageFit(baseFit).planId, "free");
+assert.equal(recommendPackageFit({ ...baseFit, needsAuditExports: true }).planId, "professional");
+assert.equal(recommendPackageFit({ ...baseFit, needsTeamOperations: true }).planId, "team");
+assert.equal(recommendPackageFit({ ...baseFit, needsMeetingsOrTransmittals: true }).planId, "business");
+assert.equal(recommendPackageFit({ ...baseFit, needsPortfolioAgreement: true }).planId, "enterprise");
+assert.equal(recommendPackageFit({ ...baseFit, activeProjects: -5 }).planId, "free");
+
+console.log("Commercial packaging builds 001-004 buyer profiles, capabilities, limits and fit guidance: PASS");
