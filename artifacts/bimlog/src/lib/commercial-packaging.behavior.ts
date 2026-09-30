@@ -5,6 +5,7 @@ import {
   capabilitiesForPlan,
   getBuyerProfile,
   planIncludesCapability,
+  summarizePackageLimits,
 } from "./commercial-packaging";
 
 assert.deepEqual(BUYER_PROFILES.map((profile) => profile.id), [
@@ -29,4 +30,15 @@ assert.equal(capabilitiesForPlan("enterprise").length, 8);
 assert.equal(planIncludesCapability("team", PACKAGE_CAPABILITIES[6]), false);
 assert.equal(planIncludesCapability("enterprise", PACKAGE_CAPABILITIES[6]), true);
 
-console.log("Commercial packaging builds 001-002 buyer profiles and capability matrix: PASS");
+assert.deepEqual(summarizePackageLimits("free", { projectLimit: 1, memberLimit: 5 }, "en"), {
+  projects: "1 active project",
+  members: "5 members per project",
+  enforcement: "At a limit, existing work remains available and an administrator must expand the plan before adding capacity.",
+});
+assert.deepEqual(summarizePackageLimits("enterprise", { projectLimit: null, memberLimit: null }, "es"), {
+  projects: "Definidos por acuerdo",
+  members: "Definidos por habilitación",
+  enforcement: "Los límites contratados se aplican según el acuerdo del cliente.",
+});
+
+console.log("Commercial packaging builds 001-003 buyer profiles, capabilities and limits: PASS");

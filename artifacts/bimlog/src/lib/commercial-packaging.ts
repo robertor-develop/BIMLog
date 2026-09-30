@@ -153,3 +153,40 @@ export function planIncludesCapability(planId: CommercialPlanId, capability: Pac
 export function capabilitiesForPlan(planId: CommercialPlanId): readonly PackageCapability[] {
   return PACKAGE_CAPABILITIES.filter((capability) => planIncludesCapability(planId, capability));
 }
+
+export type PackageLimits = {
+  projectLimit: number | null;
+  memberLimit: number | null;
+};
+
+export type PackageLimitSummary = {
+  projects: string;
+  members: string;
+  enforcement: string;
+};
+
+export function summarizePackageLimits(
+  planId: CommercialPlanId,
+  limits: PackageLimits,
+  locale: "en" | "es",
+): PackageLimitSummary {
+  const es = locale === "es";
+  const projects = limits.projectLimit === null
+    ? (es ? "Definidos por acuerdo" : "Defined by agreement")
+    : `${limits.projectLimit} ${es
+      ? (limits.projectLimit === 1 ? "proyecto activo" : "proyectos activos")
+      : (limits.projectLimit === 1 ? "active project" : "active projects")}`;
+  const members = limits.memberLimit === null
+    ? (es ? "Definidos por habilitación" : "Defined by entitlement")
+    : `${limits.memberLimit} ${es
+      ? (limits.memberLimit === 1 ? "miembro por proyecto" : "miembros por proyecto")
+      : (limits.memberLimit === 1 ? "member per project" : "members per project")}`;
+  const enforcement = planId === "enterprise"
+    ? (es
+      ? "Los límites contratados se aplican según el acuerdo del cliente."
+      : "Contracted limits are enforced according to the customer agreement.")
+    : (es
+      ? "Al alcanzar un límite, el trabajo existente permanece disponible y un administrador debe ampliar el plan antes de agregar capacidad."
+      : "At a limit, existing work remains available and an administrator must expand the plan before adding capacity.");
+  return { projects, members, enforcement };
+}
