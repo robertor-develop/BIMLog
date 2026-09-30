@@ -617,6 +617,9 @@ export function normalizeJobIntakeData(raw: unknown) {
         `assignments[${index}].internalHourlyRate`,
       );
       const incentiveAmount = exact(assignment.incentiveAmount, `assignments[${index}].incentiveAmount`);
+      const resourceCount = Number(assignment.resourceCount ?? 1);
+      if (!Number.isSafeInteger(resourceCount) || resourceCount < 1 || resourceCount > 100)
+        throw new FinancialControlError(400, "JOB_INTAKE_RESOURCE_COUNT_INVALID", "Resource quantity must be between 1 and 100.");
       const scopeItemId = optionalText(
         assignment.scopeItemId,
         `assignments[${index}].scopeItemId`,
@@ -679,6 +682,8 @@ export function normalizeJobIntakeData(raw: unknown) {
           200,
         ),
         role: optionalText(assignment.role, `assignments[${index}].role`, 100),
+        locationLabel: optionalText(assignment.locationLabel, `assignments[${index}].locationLabel`, 200),
+        resourceCount,
         contractId,
         employmentType:
           optionalText(
@@ -701,7 +706,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         rateProvenance: { internal: "assignment", customer: "contract_item", apu: selectedScopeItem?.apuPlanVersion ? `apu_version:${selectedScopeItem.apuPlanVersion}` : "unlinked" },
         plannedLaborCost: decimalFromScaled(
           (scaledSignedDecimal(plannedHours) *
-            scaledSignedDecimal(internalHourlyRate) +
+            scaledSignedDecimal(internalHourlyRate) * BigInt(resourceCount) +
             500_000n) /
             1_000_000n,
         ),

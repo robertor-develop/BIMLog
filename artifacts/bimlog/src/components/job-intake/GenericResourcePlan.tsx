@@ -14,13 +14,15 @@ export function GenericResourcePlan({ assignments, scopeItems, currency, budgetE
     <div className="ji-grid three">
      <label>{tt("Planned role", "Rol previsto")}<input aria-label={tt(`Planned role ${index + 1}`, `Rol previsto ${index + 1}`)} value={row.role} placeholder={tt("e.g. BIM coordinator", "p. ej. Coordinador BIM")} onChange={event => update(row.id, {role:event.target.value})}/></label>
      <label>{tt("Scope item", "Partida")}<select value={row.scopeItemId} onChange={event => { const scope = scopeItems.find(item => item.id === event.target.value); update(row.id, {scopeItemId: event.target.value, contractId: scope?.contractId || 'PRIMARY', assignmentTargetType:'contract_item', workPackageId:'', workPackageTaskId:''}); }}><option value="">{tt("Choose scope item", "Elija una partida")}</option>{scopeItems.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>
+     <label>{tt("Floor / location", "Piso / ubicación")}<input value={row.locationLabel || ""} placeholder={tt("e.g. Level 7", "p. ej. Piso 7")} onChange={event => update(row.id, {locationLabel:event.target.value})}/></label>
+     <label>{tt("Resource quantity", "Cantidad de recursos")}<input type="number" min="1" max="100" value={row.resourceCount ?? 1} onChange={event => update(row.id, {resourceCount:event.target.value})}/></label>
      <label>{tt("Planned hours", "Horas previstas")}<input inputMode="decimal" value={row.plannedHours} onChange={event => update(row.id, {plannedHours:event.target.value})}/></label>
      {budgetEnabled && <><label>{tt("Estimated internal cost / hour", "Costo interno estimado / hora")}<input inputMode="decimal" value={row.internalHourlyRate} onChange={event => update(row.id, {internalHourlyRate:event.target.value})}/></label>
-     <label>{tt("Planned labor cost", "Costo laboral previsto")}<output>{exactProduct(row.plannedHours, row.internalHourlyRate)} {currency}</output></label></>}
+     <label>{tt("Planned labor cost", "Costo laboral previsto")}<output>{exactProduct(exactProduct(row.plannedHours, String(row.resourceCount ?? 1)), row.internalHourlyRate)} {currency}</output></label></>}
     </div>
     {row.workPackageId && <p>{tt("Existing location / task link preserved", "Vínculo existente de ubicación / tarea conservado")}: {row.workPackageId}</p>}
     <button type="button" onClick={() => onChange(assignments.filter(item => item.id !== row.id))}>{tt("Remove planned role", "Eliminar rol previsto")}</button>
    </div>)}
-  <button type="button" disabled={!scopeItems.length} onClick={() => onChange([...assignments, {id:crypto.randomUUID(), userId:null, personName:"", role:"", scopeItemId:scopeItems[0]?.id || "", contractId:scopeItems[0]?.contractId || "PRIMARY", assignmentTargetType:"contract_item", workPackageId:"", workPackageTaskId:"", employmentType:"employee", plannedHours:"0", internalHourlyRate:"0"}])}>{tt("Add planned role", "Agregar rol previsto")}</button>
+  <button type="button" disabled={!scopeItems.length} onClick={() => onChange([...assignments, {id:crypto.randomUUID(), userId:null, personName:"", role:"", locationLabel:"", resourceCount:1, scopeItemId:scopeItems[0]?.id || "", contractId:scopeItems[0]?.contractId || "PRIMARY", assignmentTargetType:"contract_item", workPackageId:"", workPackageTaskId:"", employmentType:"employee", plannedHours:"0", internalHourlyRate:"0"}])}>{tt("Add planned role", "Agregar rol previsto")}</button>
  </div>;
 }
