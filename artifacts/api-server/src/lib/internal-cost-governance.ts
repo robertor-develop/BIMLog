@@ -3,6 +3,7 @@ import { pool } from "@workspace/db";
 export { canonicalInternalCostRate, canonicalInternalCostRole, internalCostFingerprint } from "./internal-cost-contract";
 import { canonicalInternalCostRate, canonicalInternalCostRole, internalCostFingerprint } from "./internal-cost-contract";
 import { FinancialControlError } from "./financial-control-contract";
+import { waitForJobIntakeMigration } from "./job-intake-migration";
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[] }> };
 
 let migration: Promise<void> | null = null;
@@ -10,6 +11,7 @@ export function startInternalCostGovernanceMigration() { if (!migration) migrati
 export async function waitForInternalCostGovernanceMigration() { await startInternalCostGovernanceMigration(); }
 
 export async function ensureInternalCostGovernanceSchema() {
+  await waitForJobIntakeMigration();
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -48,6 +50,20 @@ CREATE INDEX IF NOT EXISTS member_internal_cost_profile_effective_idx ON member_
 ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_profile_version_id text REFERENCES member_internal_cost_profile_versions(id);
 ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_policy_version_id text REFERENCES company_internal_cost_policy_versions(id);
 ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_effective_date date;
+CREATE TABLE IF NOT EXISTS job_activation_floor_hour_estimate_versions(
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), intake_id text NOT NULL REFERENCES job_intakes(id), work_item_id text NOT NULL REFERENCES job_activation_work_items(id), location_identity text NOT NULL, version integer NOT NULL, approved_hours numeric(30,6) NOT NULL, excess_hourly_rate numeric(30,6) NOT NULL, internal_cost_policy_version_id text NOT NULL REFERENCES company_internal_cost_policy_versions(id), status text NOT NULL DEFAULT 'proposed', reason text NOT NULL, content_fingerprint text NOT NULL, supersedes_id text REFERENCES job_activation_floor_hour_estimate_versions(id), proposed_by_id integer NOT NULL REFERENCES users(id), approved_by_id integer REFERENCES users(id), proposed_at timestamptz NOT NULL DEFAULT now(), decided_at timestamptz,
+  CONSTRAINT job_activation_floor_hour_estimate_status_chk CHECK(status IN('proposed','approved','rejected','superseded')), CONSTRAINT job_activation_floor_hour_estimate_values_chk CHECK(version>0 AND approved_hours>0 AND excess_hourly_rate>=0), CONSTRAINT job_activation_floor_hour_estimate_fingerprint_chk CHECK(content_fingerprint ~ '^[a-f0-9]{64}$'), CONSTRAINT job_activation_floor_hour_estimate_version_uidx UNIQUE(project_id,work_item_id,location_identity,version)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS job_activation_floor_hour_estimate_active_uidx ON job_activation_floor_hour_estimate_versions(project_id,work_item_id,location_identity) WHERE status='approved';
+CREATE INDEX IF NOT EXISTS job_activation_floor_hour_estimate_project_idx ON job_activation_floor_hour_estimate_versions(project_id,status,proposed_at DESC);
+CREATE TABLE IF NOT EXISTS job_activation_time_cost_allocation_runs(
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), work_item_id text NOT NULL REFERENCES job_activation_work_items(id), location_identity text NOT NULL, estimate_version_id text NOT NULL REFERENCES job_activation_floor_hour_estimate_versions(id), reason text NOT NULL, source_fingerprint text NOT NULL, created_by_id integer NOT NULL REFERENCES users(id), created_at timestamptz NOT NULL DEFAULT now(), CONSTRAINT job_activation_time_cost_run_fingerprint_chk CHECK(source_fingerprint ~ '^[a-f0-9]{64}$'), CONSTRAINT job_activation_time_cost_run_source_uidx UNIQUE(estimate_version_id,source_fingerprint)
+);
+CREATE TABLE IF NOT EXISTS job_activation_time_cost_allocations(
+  id text PRIMARY KEY, run_id text NOT NULL REFERENCES job_activation_time_cost_allocation_runs(id), time_entry_id text NOT NULL REFERENCES job_activation_time_entries(id), sequence_hours_before numeric(30,6) NOT NULL, normal_hours numeric(30,6) NOT NULL, excess_hours numeric(30,6) NOT NULL, normal_hourly_rate numeric(30,6) NOT NULL, excess_hourly_rate numeric(30,6) NOT NULL, normal_cost numeric(30,6) NOT NULL, excess_cost numeric(30,6) NOT NULL, total_cost numeric(30,6) NOT NULL, calculation_fingerprint text NOT NULL, CONSTRAINT job_activation_time_cost_allocation_entry_uidx UNIQUE(run_id,time_entry_id), CONSTRAINT job_activation_time_cost_allocation_values_chk CHECK(sequence_hours_before>=0 AND normal_hours>=0 AND excess_hours>=0 AND normal_cost>=0 AND excess_cost>=0 AND total_cost=normal_cost+excess_cost), CONSTRAINT job_activation_time_cost_allocation_fingerprint_chk CHECK(calculation_fingerprint ~ '^[a-f0-9]{64}$')
+);
+CREATE INDEX IF NOT EXISTS job_activation_time_cost_run_project_idx ON job_activation_time_cost_allocation_runs(project_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS job_activation_time_cost_allocation_entry_idx ON job_activation_time_cost_allocations(time_entry_id,run_id);
 `);
     await client.query("COMMIT");
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }

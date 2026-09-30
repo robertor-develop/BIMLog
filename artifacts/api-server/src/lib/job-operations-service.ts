@@ -9,6 +9,7 @@ import { canonicalJobOperationId } from "./job-operations-id";
 import { reconcileResourceDemand, splitResourcePlan } from "./resource-demand-contract";
 import { getInternalCostGovernance, resolveApprovedMemberInternalCost, waitForInternalCostGovernanceMigration } from "./internal-cost-governance";
 import { protectInternalCostAssignment } from "./internal-cost-contract";
+import { getFloorHourCostGovernance, refreshFloorHourCostForWorkItem } from "./floor-hour-cost-governance";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
@@ -444,7 +445,10 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
   }); });
   const showBudget = capabilities.budget === true;
   const showPlanner = capabilities.cost_value_planner === true;
-  const internalCostGovernance = await getInternalCostGovernance({ actorUserId: input.actorUserId, companyId: access.companyId, includeSensitive: showBudget });
+  const [internalCostGovernance, floorHourCostGovernance] = await Promise.all([
+    getInternalCostGovernance({ actorUserId: input.actorUserId, companyId: access.companyId, includeSensitive: showBudget }),
+    getFloorHourCostGovernance({ projectId, includeSensitive: showBudget }),
+  ]);
   const safeWorkItems = workItems.rows.map((row) => ({
     ...row,
     billingHourlyRate: showPlanner ? row.billingHourlyRate : null,
@@ -513,7 +517,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
   };
   const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
   const safeMembers = members.rows.map((row) => ({ ...row, profileInternalHourlyRate: null }));
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity, financialAuthority, internalCostGovernance, operationalProjection, activity: operationEvents.rows, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, resourceDemands, resourceReconciliation, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: safeMembers, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity, financialAuthority, internalCostGovernance, floorHourCostGovernance, operationalProjection, activity: operationEvents.rows, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, resourceDemands, resourceReconciliation, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: safeMembers, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
 }
 
 export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {
@@ -725,6 +729,7 @@ export async function addJobOperationTime(input: { actorUserId: number; projectI
     const existing = (await client.query(`SELECT id FROM job_activation_time_entries WHERE id=$1`, [entryId])).rows[0];
     if (!existing) {
       await client.query(`INSERT INTO job_activation_time_entries(id,intake_id,project_id,work_item_id,task_id,assignment_id,user_id,work_date,hours,note,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, [entryId, control.task.intake_id, projectId, control.task.work_item_id, taskId, assignmentId, userId, workDate, hours, note, input.actorUserId]);
+      await refreshFloorHourCostForWorkItem(client,{actorUserId:input.actorUserId,projectId,workItemId:control.task.work_item_id,reason:"Time entry recorded"});
       await event(client, { projectId, actorUserId: input.actorUserId, eventType: "time_recorded", workItemId: control.task.work_item_id, taskId, assignmentId, evidence: { entryId, userId, workDate, hours } });
     }
     await client.query("COMMIT"); return { id: entryId, idempotent: Boolean(existing) };

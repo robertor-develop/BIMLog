@@ -27,6 +27,7 @@ import {
 } from "../lib/job-operations-service";
 import { decideInternalCostVersion, proposeInternalCostPolicy, proposeMemberInternalCostProfile } from "../lib/internal-cost-governance";
 import { jobOperationScope } from "../lib/job-operations-service";
+import { decideFloorHourEstimate, proposeFloorHourEstimate } from "../lib/floor-hour-cost-governance";
 
 const router = Router();
 router.use("/projects/:projectId/operations", authMiddleware);
@@ -82,6 +83,9 @@ const errorEs: Record<string, string> = {
   JOB_BUDGET_METRIC_INVALID: "La métrica de variación no es válida.",
   JOB_BUDGET_OVERRUN_REQUIRED: "La métrica seleccionada no excede actualmente su línea base.",
   JOB_BUDGET_REVIEW_STATUS_INVALID: "El estado de revisión no es válido.",
+  FLOOR_HOUR_CEO_APPROVAL_REQUIRED: "Solo la autoridad del CEO puede aprobar o rechazar el estimado de horas del piso.",
+  FLOOR_HOUR_LOCATION_REQUIRED: "La partida necesita una ubicación o piso canónico antes de proponer el estimado.",
+  FLOOR_HOUR_POLICY_REQUIRED: "Primero apruebe la política empresarial de costo interno.",
 };
 
 const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any, res: any) => {
@@ -111,6 +115,16 @@ router.post("/projects/:projectId/operations/internal-cost/profiles", run(async 
 router.post("/projects/:projectId/operations/internal-cost/:kind/:versionId/decision", run(async (req, res) => {
   const scope = await jobOperationScope(req.user.userId, Number(req.params.projectId));
   res.json(await decideInternalCostVersion({ actorUserId:req.user.userId,companyId:scope.companyId,kind:req.params.kind === 'policies' ? 'policy' : 'profile',versionId:req.params.versionId,outcome:req.body?.outcome,reason:req.body?.reason }));
+}));
+router.post("/projects/:projectId/operations/floor-hour-estimates", run(async (req,res)=>{
+  const scope=await jobOperationScope(req.user.userId,Number(req.params.projectId));
+  if(!scope.canManage)throw new FinancialControlError(403,"FLOOR_HOUR_MANAGE_DENIED","Only project governance may propose a floor-hour estimate.");
+  if(!scope.intakeId)throw new FinancialControlError(409,"JOB_BUDGET_INTAKE_REQUIRED","Activate Job Intake before proposing a floor-hour estimate.");
+  res.status(201).json(await proposeFloorHourEstimate({actorUserId:req.user.userId,companyId:scope.companyId,projectId:scope.projectId,intakeId:scope.intakeId,workItemId:req.body?.workItemId,approvedHours:req.body?.approvedHours,reason:req.body?.reason}));
+}));
+router.post("/projects/:projectId/operations/floor-hour-estimates/:estimateVersionId/decision", run(async (req,res)=>{
+  const scope=await jobOperationScope(req.user.userId,Number(req.params.projectId));
+  res.json(await decideFloorHourEstimate({actorUserId:req.user.userId,companyId:scope.companyId,projectId:scope.projectId,estimateVersionId:req.params.estimateVersionId,outcome:req.body?.outcome,reason:req.body?.reason}));
 }));
 router.get("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow", run(async (req, res) => {
   res.json(await getWorkItemDeliveryWorkflow({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId }));
