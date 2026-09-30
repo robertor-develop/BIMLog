@@ -3937,3 +3937,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 009 catalogs guided launch, controlled migration and approved-connector implementation services under a signed statement of work.
 - [x] Build 010 establishes USD public presentation, applicable-tax disclosure, billing identity inputs and signed-order authority on Pricing.
 - [ ] Pass the complete exact-head gate and push Builds 006–010 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 011–015.
+- [x] Correct the complete-gate duplicate billing-cycle property and bind the exact returned cycle in focused regression coverage.
