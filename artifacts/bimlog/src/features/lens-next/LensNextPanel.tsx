@@ -734,9 +734,9 @@ export function LensNextPanel({
 
   const exportViewpointsXml = useCallback(async () => {
     if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
-    const candidates = activeIssues.filter(issue => issue.identity.projectId === authorizedProjectId && issue.visualStateAvailable && Boolean(issue.visualStateDigest));
-    if (!candidates.length) { setXmlExportState("error"); setXmlExportMessage("No active BIMLog viewpoints with authoritative Visual Packages are available to export."); return; }
-    setXmlExportState("loading"); setXmlExportMessage(`Loading ${candidates.length} authoritative BIMLog Visual Package(s)…`);
+    const candidates = filteredIssues.filter(issue => issue.identity.projectId === authorizedProjectId && issue.identity.lifecycleStatus === "active" && issue.visualStateAvailable && Boolean(issue.visualStateDigest));
+    if (!candidates.length) { setXmlExportState("error"); setXmlExportMessage("No viewpoints in the current filtered view have authoritative Visual Packages available to export."); return; }
+    setXmlExportState("loading"); setXmlExportMessage(`Loading ${candidates.length} filtered authoritative BIMLog Visual Package(s)…`);
     try {
       const loaded = await loadExportableLensNextPackages(candidates, issue => apiClient.loadVisualState(issue));
       if (!loaded.exportable.length) {
@@ -756,11 +756,11 @@ export function LensNextPanel({
       const serverSkipped = lensNextXmlSkippedSummary(loaded.skipped);
       const skipped = [serverSkipped, nativeSkipped].filter(Boolean).join("; ");
       const skippedCount = loaded.skipped.length + (summary.skippedCount ?? 0);
-      setXmlExportMessage(`${skippedCount ? "Partial export" : "Export complete"}: ${summary.serializedCount} serialized, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} ${summary.outputPath}`);
+      setXmlExportMessage(`${skippedCount ? "Partial XML V2 export" : "XML V2 export complete"}: ${summary.serializedCount} filtered viewpoint(s) organized under Open/Resolved, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} ${summary.outputPath}`);
     } catch (error) {
       setXmlExportState("error"); setXmlExportMessage(error instanceof Error ? error.message : "XML export failed");
     }
-  }, [activeIssues, apiClient, authorizedProjectId, bridgeClient, bridgeContext]);
+  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, filteredIssues]);
 
   return (
     <LensNextPanelView

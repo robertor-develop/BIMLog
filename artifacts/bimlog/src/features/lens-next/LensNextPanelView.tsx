@@ -785,8 +785,9 @@ export function LensNextPanelView({
           </button>
           {platformPullMessage && <small role="status">{platformPullMessage}</small>}
           <button type="button" data-lens-next-action="export-viewpoints-xml" disabled={!xmlExportEnabled} onClick={onExportViewpointsXml}>
-            {xmlExportState === "loading" ? "Loading BIMLog viewpoints…" : xmlExportState === "exporting" ? "Exporting XML…" : "Export Viewpoints XML"}
+            {xmlExportState === "loading" ? "Loading filtered viewpoints…" : xmlExportState === "exporting" ? "Exporting XML V2…" : "Export filtered XML V2"}
           </button>
+          <small>Exports only the currently filtered BIMLog viewpoints and organizes them into Open and Resolved folders for Navisworks.</small>
           {xmlExportMessage && <small role={xmlExportState === "error" ? "alert" : "status"}>{xmlExportMessage}</small>}
           <button type="button" aria-describedby="lens-next-sync-readiness" disabled={!synchronizationPlan.executable || reconciliationState === "running"} onClick={onRunReconciliation}>
             {reconciliationState === "running" ? "Reconciling…" : "Run confirmed reconciliation"}
