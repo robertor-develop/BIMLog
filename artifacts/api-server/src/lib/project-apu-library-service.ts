@@ -53,6 +53,6 @@ export async function applyLibraryApu(actorUserId: number, projectId: number, in
     }
     await connection.query("COMMIT");
     return {projectApuId,projectApuVersionId,version,templateVersionId,templateVersion:Number(template.version),templateFingerprint:fingerprint,currency:definition.currency,total:preview.roundedTotal,replayed:false};
-  } catch(error) { await connection.query("ROLLBACK").catch(()=>undefined); throw error; }
+  } catch(error) { await connection.query("ROLLBACK").catch(rollbackError => console.error("[project-apu-library] rollback failed", rollbackError)); throw error; }
   finally { connection.release(); }
 }
