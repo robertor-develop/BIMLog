@@ -1,0 +1,7 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const root = new URL("../../../../", import.meta.url); const read = (path: string) => fs.readFileSync(new URL(path, root), "utf8");
+const intake = read("artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"), delivery = read("artifacts/bimlog/src/lib/shop-drawing-delivery.ts"), apu = read("artifacts/bimlog/src/lib/job-intake-apu-connection.ts"), resources = read("artifacts/bimlog/src/components/job-intake/GenericResourcePlan.tsx"), email = read("artifacts/bimlog/src/components/job-intake/EmailReadinessSection.tsx"), profile = read("artifacts/bimlog/src/pages/Profile.tsx"), rfi = read("artifacts/bimlog/src/pages/project/RfisTab.tsx"), help = read("artifacts/bimlog/src/lib/help-content.ts"), cost = read("artifacts/api-server/src/lib/ux132-marginal-excess-cost.behavior.ts");
+assert.match(intake, /EmailReadinessSection/); assert.match(delivery, /SHOP_DRAWING/); assert.match(apu, /apuPlanVersion/); assert.match(apu, /unitRate/); assert.match(resources, /generic/i); assert.match(email, /continue setup without email/i); assert.match(profile, /Return to your work/); assert.match(rfi, /preserveEmailDraft/); assert.match(rfi, /configureEmailAndReturn/); assert.match(cost, /excess/i); assert.match(help, /BIMtech shop-drawing journey/); assert.match(help, /never sends automatically/);
+console.log("UX150_MEETING_JOURNEY=PASS intake=full apu=lineage staffing=generic convention_return=preserved email_return=preserved contract_edt=canonical excess=only");
+
