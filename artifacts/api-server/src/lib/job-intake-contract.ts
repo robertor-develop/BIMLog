@@ -379,6 +379,9 @@ export function normalizeJobIntakeData(raw: unknown) {
         : "draft",
       parentContractId: optionalText(contract.parentContractId, `commercial.contracts[${index}].parentContractId`, 100),
       engagementId: optionalText(contract.engagementId, `commercial.contracts[${index}].engagementId`, 100),
+      existingContractId: optionalText(contract.existingContractId, `commercial.contracts[${index}].existingContractId`, 100),
+      existingContractVersionId: optionalText(contract.existingContractVersionId, `commercial.contracts[${index}].existingContractVersionId`, 100),
+      existingContractFingerprint: optionalText(contract.existingContractFingerprint, `commercial.contracts[${index}].existingContractFingerprint`, 64),
       pricingTemplateVersionId: optionalText(contract.pricingTemplateVersionId, `commercial.contracts[${index}].pricingTemplateVersionId`, 36),
       paymentTerms: optionalText(
         contract.paymentTerms,
@@ -399,6 +402,10 @@ export function normalizeJobIntakeData(raw: unknown) {
   });
   const contractLegalKeys = new Set<string>();
   for (const contract of normalizedContracts) {
+    if (Boolean(contract.existingContractId) !== Boolean(contract.existingContractVersionId) || Boolean(contract.existingContractId) !== Boolean(contract.existingContractFingerprint))
+      throw new FinancialControlError(400, "JOB_INTAKE_EXISTING_CONTRACT_INCOMPLETE", "An existing Contract selection requires its exact Contract, version, and fingerprint together.");
+    if (contract.existingContractFingerprint && !/^[a-f0-9]{64}$/.test(contract.existingContractFingerprint))
+      throw new FinancialControlError(400, "JOB_INTAKE_EXISTING_CONTRACT_FINGERPRINT_INVALID", "The selected existing Contract fingerprint is invalid.");
     if (contract.parentContractId && (!contractIds.has(contract.parentContractId) || contract.parentContractId === contract.id))
       throw new FinancialControlError(400, "JOB_INTAKE_CONTRACT_PARENT_INVALID", "A parent agreement must reference a different agreement in this Intake.");
     if (contract.reportingType === "change_order" && !contract.parentContractId)
