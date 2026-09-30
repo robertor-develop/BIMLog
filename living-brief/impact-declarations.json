@@ -51586,7 +51586,7 @@
     {
       "taskId": "ux-b25-generic-resource-demand-20260930",
       "reviewedThroughCommit": "0f6eb8bb296779f88897a83509e70f52da8ec9a8",
-      "reviewedAt": "2026-09-30T08:58:00.000Z",
+      "reviewedAt": "2026-09-30T08:58:00Z",
       "status": "local_source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -51671,7 +51671,7 @@
     {
       "taskId": "ux-b26-member-cost-governance-20260930",
       "reviewedThroughCommit": "806071391f1395786fff54521a1f7e6f525692e4",
-      "reviewedAt": "2026-09-30T09:42:00.000Z",
+      "reviewedAt": "2026-09-30T09:42:00Z",
       "trigger": "before_execution",
       "capabilityPreflight": {
         "checkedBeforeExecution": true,
@@ -51762,7 +51762,7 @@
     {
       "taskId": "ux-b26-runtime-closure-recovery-20260930",
       "reviewedThroughCommit": "f5566fac5b7f5edf982426e01f5e57d6956e9376",
-      "reviewedAt": "2026-09-30T10:30:00.000Z",
+      "reviewedAt": "2026-09-30T10:30:00Z",
       "trigger": "release_gate_failure",
       "capabilityPreflight": {
         "checkedBeforeExecution": true,
@@ -52026,7 +52026,7 @@
     {
       "taskId": "ux-block28-publication-schema-shape-repair",
       "reviewedThroughCommit": "45df29c143ff0bfb9c61d4c0ddf035c61e9db7e6",
-      "reviewedAt": "2026-09-30T14:35:00.000Z",
+      "reviewedAt": "2026-09-30T14:35:00Z",
       "trigger": "schema_or_migration",
       "capabilityPreflight": {
         "checkedBeforeExecution": true,
@@ -52112,7 +52112,7 @@
     {
       "taskId": "ux-block29-shop-drawing-delivery",
       "reviewedThroughCommit": "7515335829a71b06a07a3da188dd074f3f0aee94",
-      "reviewedAt": "2026-09-30T15:55:00.000Z",
+      "reviewedAt": "2026-09-30T15:55:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -52182,7 +52182,7 @@
     {
       "taskId": "ux-block30-email-readiness-return",
       "reviewedThroughCommit": "3b696efc93e681ed9a2056f7e8cdab8ff999044b",
-      "reviewedAt": "2026-09-30T17:01:45.000Z",
+      "reviewedAt": "2026-09-30T17:01:45Z",
       "status": "candidate",
       "authorities": [
         {
@@ -52249,6 +52249,77 @@
       ],
       "reviewedChangeSha256": "ee35ae35471891ab2eb772769c7e6f0d58184345d45b2c45e0fca9b887bacc0f",
       "reason": ""
+    },
+    {
+      "taskId": "ux-block30-email-return-canonical-route-repair",
+      "reviewedThroughCommit": "a0f59291346eee4ec1dae080470b72e68bc174d7",
+      "reviewedAt": "2026-09-30T18:50:42Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair changes only the Email setup return destination from the unsupported /projects/:id/job-intake alias to the canonical /projects/:id/intake route and adds regression coverage. Product authority, standards, Native plugins, report rules, database schema, and customer data are unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a4e764fae5643aa68a4d52722b1864b3756f83533758eb53192c46d0d676a498",
+      "reason": "Authenticated production smoke exposed and corrected the obsolete Job Intake return alias before release closure."
     }
   ]
 }

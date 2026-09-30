@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "1905e5cd8a4b94d045191f91fcb4fb73c1a909244ea7d56e001412d7e67b53f6",
+  "sourceSha256": "d468ebf1070e710c797ffb1062c3b836b7e654f58f7254c4033d1c352edee880",
   "itemCount": 274,
   "counts": {
     "ACTIVE": 239,
@@ -4988,7 +4988,7 @@
     },
     {
       "id": "14776447cbe97848",
-      "sourceLine": 3914,
+      "sourceLine": 3915,
       "heading": "Experience makeover Block 30 — SendGrid readiness and return — 2026-09-30",
       "statement": "Pass the complete exact-head pre-push gate, push UX146–UX150 once, publish the accumulated UX141–UX150 release without Replit Agents, and run full authenticated visible-Chrome smoke.",
       "classification": "ACTIVE",
@@ -4999,7 +4999,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3914",
+        "OPEN_LOOP.md:3915",
         "Experience makeover Block 30 — SendGrid readiness and return — 2026-09-30"
       ],
       "currentAuthority": false
