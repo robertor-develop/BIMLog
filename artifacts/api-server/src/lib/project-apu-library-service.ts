@@ -4,6 +4,7 @@ import { authorizeFinancialOperation } from "./financial-control-service";
 import { waitForGenericApuPersistenceMigration } from "./generic-apu-persistence-migration";
 import { validatePricingTemplate } from "./company-pricing-template-contract";
 import { CostValuePlanError } from "./cost-value-plan-service";
+import { projectApuIdentity } from "./apu-library-reuse";
 
 const digest = (value: unknown) => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 export async function getProjectLibraryApplications(actorUserId:number,projectId:number) {
@@ -24,9 +25,10 @@ export async function applyLibraryApu(actorUserId: number, projectId: number, in
   try {
     await connection.query("BEGIN");
     await connection.query("SELECT pg_advisory_xact_lock(hashtext($1))",[`project-apu:${projectId}`]);
-    const template = (await connection.query(`SELECT v.*,v.provenance->'definition' definition
+    const template = (await connection.query(`SELECT v.*,v.provenance->'definition' definition,
+      (SELECT newest.status FROM generic_apu_template_versions newest WHERE newest.template_id=v.template_id AND newest.company_id=v.company_id ORDER BY newest.version DESC LIMIT 1) latest_status
       FROM generic_apu_template_versions v WHERE v.id=$1 AND v.company_id=$2 AND v.project_id IS NULL`,[templateVersionId,auth.scope.companyId])).rows[0];
-    if (!template || template.status !== "published") throw new CostValuePlanError(409,"APU_LIBRARY_VERSION_INELIGIBLE","Select an eligible published APU version.");
+    if (!template || template.status !== "published" || template.latest_status !== "published") throw new CostValuePlanError(409,"APU_LIBRARY_VERSION_INELIGIBLE","Select an eligible currently published APU version.");
     const { definition,preview,fingerprint } = validatePricingTemplate(template.definition);
     if (fingerprint !== template.content_fingerprint) throw new CostValuePlanError(409,"APU_LIBRARY_FINGERPRINT_MISMATCH","The published APU fingerprint is invalid.");
     const requestFingerprint = digest({projectId,templateVersionId,idempotencyKey});
@@ -35,7 +37,7 @@ export async function applyLibraryApu(actorUserId: number, projectId: number, in
       if (priorKey.request_fingerprint !== requestFingerprint) throw new CostValuePlanError(409,"APU_LIBRARY_IDEMPOTENCY_CONFLICT","The application key was already used for a different request.");
       await connection.query("ROLLBACK"); return { projectApuVersionId:priorKey.id,replayed:true };
     }
-    const projectApuId = `${projectId}:${template.template_id}`;
+    const projectApuId = projectApuIdentity(projectId,template.template_id);
     const prior = (await connection.query(`SELECT id,version FROM generic_project_apu_versions WHERE project_apu_id=$1 ORDER BY version DESC LIMIT 1`,[projectApuId])).rows[0];
     const version = Number(prior?.version ?? 0)+1;
     const projectApuVersionId = randomUUID();

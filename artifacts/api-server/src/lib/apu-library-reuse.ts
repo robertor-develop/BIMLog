@@ -3,6 +3,7 @@ import type { PricingTemplateDefinition } from "./company-pricing-template-contr
 type SavedPlan = { currency: string; name: string; fixedCompanyCost: string; allocations: { labor: string; bonus: string; taskEarnings: string }; productionPhases: Array<{ id: string; name: string; amount: string }>; administrativeLines: Array<{ id: string; name: string; amount: string }> };
 
 const stable = (prefix: string, value: string, index: number) => `${prefix}-${value.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,48) || index + 1}`;
+export const projectApuIdentity = (projectId:number,templateId:string) => `${projectId}:${templateId}`;
 
 export function projectPlanToLibraryDefinition(plan: SavedPlan, name: string): PricingTemplateDefinition {
   const nodes = [
