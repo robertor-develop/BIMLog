@@ -1374,6 +1374,13 @@ export function JobOperationsWorkspace() {
             {data.canManage && queue(tt("Needs an assignee", "Necesita responsable"), dailyQueues.unassigned, tt("Every active task has an assignee or priced resource.", "Cada tarea activa tiene responsable o recurso valorizado."))}
           </div>
         </section>}
+        {data.canManage && (data.resourceDemands?.length ?? 0) > 0 && <section className="jo-card" aria-labelledby="resource-demand-title">
+          <h2 id="resource-demand-title">{tt("Future staffing demand", "Demanda futura de personal")}</h2>
+          <p>{tt("Assign only the floor or task you are ready to staff. The remaining approved demand stays unassigned and its Intake baseline is unchanged.", "Asigne solamente el piso o la tarea que esté listo para dotar. La demanda aprobada restante queda sin asignar y su línea base de Ingreso no cambia.")}</p>
+          <div style={{overflow:"auto"}}><table className="jo-table"><thead><tr><th>{tt("Role", "Rol")}</th><th>{tt("Floor / location", "Piso / ubicación")}</th><th>{tt("Quantity", "Cantidad")}</th><th>{tt("Planned hours", "Horas previstas")}</th><th>{tt("State", "Estado")}</th></tr></thead><tbody>
+            {data.resourceDemands.map((demand:any)=><tr key={demand.id}><td>{demand.role}</td><td>{demand.locationLabel || "—"}</td><td>{demand.resourceCount}</td><td>{money(demand.plannedHours)}h</td><td>{tt("Unassigned — allocate from the matching task below", "Sin asignar — asigne desde la tarea correspondiente abajo")}</td></tr>)}
+          </tbody></table></div>
+        </section>}
         {Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin) &&
           <EdtDirectorAssignmentPanel projectId={projectId} currentUserId={Number(user?.id)} api={api} tt={tt} />}
         {data.identity?.intakeId && <EdtPlanPreviewPanel
