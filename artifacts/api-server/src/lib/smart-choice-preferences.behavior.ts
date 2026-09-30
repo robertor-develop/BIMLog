@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { addSmartChoiceInContext, normalizeSmartChoiceProfile, preferredEligibleChoices, rankSmartChoices, recordSmartChoiceUse, searchSmartChoices, validWorkflowStatusChoices } from "./smart-choice-preferences";
+import { addSmartChoiceInContext, normalizeSmartChoiceProfile, preferredEligibleChoices, rankSmartChoices, recordSmartChoiceUse, resetSmartChoiceProfile, searchSmartChoices, smartChoiceLabels, validWorkflowStatusChoices } from "./smart-choice-preferences";
 
 const catalog = Array.from({ length: 50 }, (_, index) => ({ id: `d-${index + 1}`, code: `D${index + 1}`, name: `Discipline ${index + 1}` }));
 const profile = normalizeSmartChoiceProfile({ userId: 7, companyId: 2, pinnedDisciplineIds: ["d-4", "d-2", "d-4"] });
@@ -29,4 +29,11 @@ const transitions = [
 ];
 assert.deepEqual(validWorkflowStatusChoices({ workflowVersionId: "wf-2", currentStatusId: "draft", role: "Coordinator", transitions, favoriteIds: ["approved", "review"] }).map(row => row.id), ["review"]);
 assert.deepEqual(validWorkflowStatusChoices({ workflowVersionId: "wf-2", currentStatusId: "review", role: "approver", transitions, favoriteIds: ["approved"] }).map(row => row.id), ["approved"]);
-console.log("UX106_UX109_WORKFLOW_STATUS_CHOICES=PASS");
+const reset = resetSmartChoiceProfile({ profile: { ...profile, disciplineUsage: usage }, actorUserId: 7, actorCompanyId: 2 });
+assert.deepEqual(reset.pinnedDisciplineIds, []);
+assert.deepEqual(reset.disciplineUsage, {});
+assert.throws(() => resetSmartChoiceProfile({ profile, actorUserId: 8, actorCompanyId: 2 }), /only by their user/);
+assert.throws(() => resetSmartChoiceProfile({ profile, actorUserId: 7, actorCompanyId: 3 }), /same company/);
+assert.equal(smartChoiceLabels("es-DO").showAll, "Mostrar todas las opciones");
+assert.equal(smartChoiceLabels("en").showAll, "Show all choices");
+console.log("UX106_UX110_SMART_CHOICE_ACCEPTANCE=PASS");

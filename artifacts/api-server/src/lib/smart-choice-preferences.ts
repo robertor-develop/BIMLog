@@ -137,3 +137,18 @@ export function validWorkflowStatusChoices(input: {
     return a.name.localeCompare(b.name) || String(a.id).localeCompare(String(b.id));
   });
 }
+
+export function resetSmartChoiceProfile(input: { profile: SmartChoiceProfile; actorUserId: unknown; actorCompanyId: unknown }) {
+  const actorUserId = Number(input.actorUserId);
+  const actorCompanyId = Number(input.actorCompanyId);
+  if (actorUserId !== input.profile.userId || actorCompanyId !== input.profile.companyId)
+    throw new FinancialControlError(403, "SMART_CHOICE_RESET_DENIED", "Choice preferences can be reset only by their user within the same company.");
+  return normalizeSmartChoiceProfile({ userId: actorUserId, companyId: actorCompanyId });
+}
+
+export function smartChoiceLabels(locale: unknown) {
+  const spanish = String(locale ?? "").toLocaleLowerCase().startsWith("es");
+  return spanish
+    ? { preferred: "Preferidos", all: "Todos los elegibles", search: "Buscar opciones", showAll: "Mostrar todas las opciones", showLess: "Mostrar preferidos", reset: "Restablecer preferencias" }
+    : { preferred: "Preferred", all: "All eligible", search: "Search choices", showAll: "Show all choices", showLess: "Show preferred", reset: "Reset preferences" };
+}
