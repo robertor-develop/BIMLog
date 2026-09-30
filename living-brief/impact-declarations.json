@@ -52022,6 +52022,92 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "605c9ea23addce4ceda6cd7355bd04114aeb6dc806497541bfb6cad8815b775e"
+    },
+    {
+      "taskId": "ux-block28-publication-schema-shape-repair",
+      "reviewedThroughCommit": "45df29c143ff0bfb9c61d4c0ddf035c61e9db7e6",
+      "reviewedAt": "2026-09-30T14:35:00.000Z",
+      "trigger": "schema_or_migration",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_change",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        "The provider preview proposed destructive recreation of populated production schema objects, so publication was cancelled and the declarative source was corrected before retry."
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cancelled Replit previews exposed declarative schema shapes that would recreate existing production constraints and indexes; corrective commit 45df29c1 preserves the production catalog shape without changing product authority, data, or runtime behavior."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2aed2d5e9bc20775034593272c6089d64388f734242c8191cb20687ef7795b33"
     }
   ]
 }

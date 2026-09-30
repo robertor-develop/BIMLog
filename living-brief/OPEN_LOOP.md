@@ -3897,3 +3897,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX136–UX140 explain who hires whom and under which agreement, reuse Intake items in canonical contract drafts, require exact existing-contract versions, guide EDT source repair, and preserve stable lineage on retries.
 - [x] Preserve draft/approval/execution boundaries: activation may create or reuse controlled source records but never implies approval, issuance, execution, payroll or payment.
 - [ ] Pass the complete exact-head pre-push gate, push UX136–UX140 once, publish accumulated UX131–UX140 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.
+- [x] Cancel the unsafe provider previews before promotion, preserve the existing production uniqueness constraints and index ordering in canonical Drizzle source, and rerun the complete gate before a new push/publication attempt. Production remained unchanged.
