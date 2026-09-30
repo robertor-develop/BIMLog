@@ -20,9 +20,11 @@ export function jobIntakeActivationPreview(data: any, completion: any, commercia
   return {
     workItems: scopeItems.length,
     tasks: expectedIntakeTaskCount(scopeItems, assignments),
-    resourcePlans: assignments.length,
-    namedAssignments: assignments.filter((row: any) => row.userId != null).length,
-    genericResourceDemands: assignments.filter((row: any) => row.userId == null).length,
+    // Activation persists generic rows as Intake demand, never as fake person
+    // assignments. Only already named legacy rows are expected in Operations.
+    resourcePlans: assignments.filter((row: any) => row.userId != null || String(row.personName ?? "").trim()).length,
+    namedAssignments: assignments.filter((row: any) => row.userId != null || String(row.personName ?? "").trim()).length,
+    genericResourceDemands: assignments.filter((row: any) => row.userId == null && !String(row.personName ?? "").trim()).length,
     unassignedHours: String(completion?.totals?.unassignedHours ?? "0"),
     contractDrafts: commercial ? (data?.commercial?.contracts?.length ?? 0) : 0,
   };
