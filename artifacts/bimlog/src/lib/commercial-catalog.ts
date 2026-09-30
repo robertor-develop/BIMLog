@@ -1,6 +1,7 @@
 import type { CommercialPlanId } from "./commercial-packaging";
 
 export type CatalogCurrency = "USD";
+export type CatalogBillingCycle = "monthly" | "annual";
 export type CatalogPrice = {
   planId: CommercialPlanId;
   version: number;
@@ -41,5 +42,35 @@ export function priceSnapshot(price: CatalogPrice) {
     monthlyAmount: price.monthlyAmount,
     annualAmount: price.annualAmount,
     effectiveFrom: price.effectiveFrom,
+  });
+}
+
+export type BillingTerm = {
+  cycle: CatalogBillingCycle;
+  serviceMonths: 1 | 12;
+  chargeTiming: "in_advance";
+  renewsAutomatically: boolean;
+  cancellationEffective: "term_end";
+  label: { en: string; es: string };
+};
+
+export const BILLING_TERMS: Readonly<Record<CatalogBillingCycle, BillingTerm>> = {
+  monthly: {
+    cycle: "monthly", serviceMonths: 1, chargeTiming: "in_advance", renewsAutomatically: true,
+    cancellationEffective: "term_end", label: { en: "Monthly subscription", es: "Suscripción mensual" },
+  },
+  annual: {
+    cycle: "annual", serviceMonths: 12, chargeTiming: "in_advance", renewsAutomatically: true,
+    cancellationEffective: "term_end", label: { en: "Annual subscription", es: "Suscripción anual" },
+  },
+} as const;
+
+export function quotedTerm(planId: CommercialPlanId, cycle: CatalogBillingCycle, asOf: string) {
+  const price = publishedPriceFor(planId, asOf);
+  return Object.freeze({
+    ...priceSnapshot(price),
+    cycle,
+    amount: cycle === "monthly" ? price.monthlyAmount : price.annualAmount,
+    ...BILLING_TERMS[cycle],
   });
 }

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { CATALOG_PRICES, priceSnapshot, publishedPriceFor } from "./commercial-catalog";
+import { BILLING_TERMS, CATALOG_PRICES, priceSnapshot, publishedPriceFor, quotedTerm } from "./commercial-catalog";
 
 assert.equal(CATALOG_PRICES.length, 5);
 assert.deepEqual(CATALOG_PRICES.map((price) => price.planId), ["free", "professional", "team", "business", "enterprise"]);
@@ -9,5 +9,10 @@ assert.deepEqual(priceSnapshot(publishedPriceFor("team", "2026-10-01")), {
   planId: "team", priceVersion: 1, currency: "USD", monthlyAmount: 249, annualAmount: 2490, effectiveFrom: "2026-09-30",
 });
 assert.throws(() => publishedPriceFor("free", "not-a-date"), /valid YYYY-MM-DD/);
+assert.equal(BILLING_TERMS.monthly.serviceMonths, 1);
+assert.equal(BILLING_TERMS.annual.serviceMonths, 12);
+assert.equal(quotedTerm("professional", "monthly", "2026-10-01").amount, 149);
+assert.equal(quotedTerm("professional", "annual", "2026-10-01").amount, 1490);
+assert.equal(quotedTerm("team", "annual", "2026-10-01").cancellationEffective, "term_end");
 
-console.log("Commercial catalog Build 006 versioned prices: PASS");
+console.log("Commercial catalog Builds 006-007 versioned prices and billing terms: PASS");
