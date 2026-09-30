@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
@@ -51,11 +51,19 @@ export function CompanyPricingTemplates() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [confirmingRetire, setConfirmingRetire] = useState(false);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   const original = selected ? { code: selected.provenance.code, definition: selected.provenance.definition } : { code: "", definition: initial };
   const hasUnsavedChanges = JSON.stringify({ code, definition }) !== JSON.stringify(original);
   const confirmDiscard = () => !hasUnsavedChanges || window.confirm(t("Discard unsaved pricing changes?", "¿Descartar los cambios de precios sin guardar?"));
   const publishedCount = items.filter(item => item.status === "published").length;
   const selectionState = librarySelectionState({ loading, error: listError, count: publishedCount, canAuthor: canManage });
+  const visibleItems = useMemo(() => items.filter(item => {
+    const query = search.trim().toLocaleLowerCase();
+    const matchesText = !query || `${item.provenance.code} ${item.provenance.definition.name} ${item.provenance.definition.industry}`.toLocaleLowerCase().includes(query);
+    return matchesText && (statusFilter === "all" || item.status === statusFilter);
+  }), [items, search, statusFilter]);
+  const methodSummary = (item: Version) => [...new Set(item.provenance.definition.nodes.map(node => node.method === "fixed_amount" ? t("fixed", "fijo") : node.method === "quantity_unit_cost" ? t("quantity × unit cost", "cantidad × costo unitario") : t("hours × rate", "horas × tarifa")))].join(", ");
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -177,9 +185,16 @@ export function CompanyPricingTemplates() {
       {!loading && !listError && <div className="company-pricing-layout" style={{ display: "grid", gap: 20 }}>
         <section aria-label={t("Template list", "Lista de plantillas")} style={{ minWidth: 0 }}>
           <h2>{t("Company templates", "Plantillas de empresa")}</h2>
+          <div className="company-pricing-filters">
+            <label>{t("Search APUs", "Buscar APU")}<input type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder={t("Code, name, or industry", "Código, nombre o industria")} /></label>
+            <label>{t("Status", "Estado")}<select value={statusFilter} onChange={event => setStatusFilter(event.target.value)}><option value="all">{t("All", "Todos")}</option><option value="published">{t("Published", "Publicada")}</option><option value="draft">{t("Draft", "Borrador")}</option><option value="retired">{t("Retired", "Retirada")}</option></select></label>
+          </div>
           {!items.length && <p>{canManage ? t("No pricing templates yet. Create a governed draft, preview it, then publish an immutable version.", "Todavía no hay plantillas. Cree un borrador gobernado, previsualícelo y publique una versión inmutable.") : t("No published pricing templates are available. Ask a company PMO administrator to publish one; your existing project prices remain unchanged.", "No hay plantillas publicadas disponibles. Solicite a un administrador PMO de la empresa que publique una; los precios existentes del proyecto no cambian.")}</p>}
-          {items.map(item => <button type="button" key={item.templateId} onClick={() => void open(item)} style={{ display: "block", width: "100%", textAlign: "left", marginBottom: 8, padding: 12, border: selected?.templateId === item.templateId ? "2px solid #2563EB" : "1px solid #CBD5E1", borderRadius: 8, background: "white" }}>
-            <strong>{item.provenance.code} · {item.provenance.definition.name}</strong><br />v{item.version} · {statusText(item.status)}
+          {!!items.length && !visibleItems.length && <p>{t("No APUs match this search and status.", "Ningún APU coincide con esta búsqueda y estado.")}</p>}
+          {visibleItems.map(item => <button type="button" key={item.templateId} onClick={() => void open(item)} style={{ display: "block", width: "100%", textAlign: "left", marginBottom: 8, padding: 12, border: selected?.templateId === item.templateId ? "2px solid #2563EB" : "1px solid #CBD5E1", borderRadius: 8, background: "white" }}>
+            <strong>{item.provenance.code} · {item.provenance.definition.name}</strong><br />
+            <span>v{item.version} · {statusText(item.status)} · {item.provenance.definition.currency}</span><br />
+            <small>{item.provenance.definition.nodes.length} {t("components", "componentes")} · {methodSummary(item)} · {t("Company library", "Biblioteca de empresa")}</small>
           </button>)}
         </section>
         <section aria-label={t("Template editor", "Editor de plantilla")} style={{ minWidth: 0 }}>
