@@ -3326,3 +3326,10 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - The in-product guide now explains the filter/export/import path and the resulting folder structure. Existing viewpoint identity, camera, visibility, appearance, sectioning, publishing confirmation, project/model scoping and Legacy separation remain intact.
 - Focused BIMLog typecheck, XML behavior, shared core 133/133, Navisworks 2021 native 58/58 and Navisworks 2025 native 58/58 pass. This is the first unpublished five-build block after the accepted UX141–UX150 publication; publication and authenticated Chrome smoke are due after UX156–UX160.
 - The full gate exposed a stale Build 219 check that compared its historical no-Native-change promise through current `HEAD`. The corrected check freezes the original Build 216–219 commit range, preserving that evidence while allowing separately governed later Native work; the focused historical gate passes after correction.
+
+## Commercial readiness Block 1 — product packaging — 2026-09-30
+
+- Builds 001–005 define four buyer jobs, one cumulative public capability matrix, explicit project/member limit language, advisory package-fit guidance and a bilingual package comparison on the existing Pricing route.
+- Fit guidance never grants access or creates a subscription. The active BIMLog entitlement or signed customer agreement remains authoritative; existing public prices, sales-assisted paid-plan flow and free-account path remain unchanged.
+- Product commits are `416d7770`, `1825f013`, `0f8e3c52`, `6ba4c7d0` and `4bdbeb5a`. Focused packaging behavior and the complete frontend TypeScript check pass.
+- Combined with the already pushed UX151–UX155 block, this reaches ten unpublished builds. The exact-head release gate, one push, controlled publication without Replit Agents, exact-source verification and full authenticated Chrome smoke are due now.

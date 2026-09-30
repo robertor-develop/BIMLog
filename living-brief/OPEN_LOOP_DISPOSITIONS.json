@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "101818af0b9d651477096c27cd9df0192d6506d916dd69616a465e64b7b9cdb1",
-  "itemCount": 275,
+  "sourceSha256": "bf82d96ce661e9ddf8c2d22b2c600555c445f208e5773abbaa4772488154fb95",
+  "itemCount": 277,
   "counts": {
-    "ACTIVE": 240,
+    "ACTIVE": 242,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5019,6 +5019,42 @@
       "evidence": [
         "OPEN_LOOP.md:3922",
         "Experience makeover Block 31 — redline persistence and XML V2 organization — 2026-09-30"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "9a76be784fcb315e",
+      "sourceLine": 3928,
+      "heading": "Commercial readiness Block 1 — product packaging — 2026-09-30",
+      "statement": "Pass the complete exact-head gate and push the five-build block once.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3928",
+        "Commercial readiness Block 1 — product packaging — 2026-09-30"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d0b631b1e9518f38",
+      "sourceLine": 3929,
+      "heading": "Commercial readiness Block 1 — product packaging — 2026-09-30",
+      "statement": "Publish the accumulated ten-build set with UX151–UX155 without Replit Agents, verify the exact live source identity and complete the full authenticated Chrome smoke before starting Commercial readiness Block 2.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3929",
+        "Commercial readiness Block 1 — product packaging — 2026-09-30"
       ],
       "currentAuthority": false
     }

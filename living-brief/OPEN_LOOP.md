@@ -3920,3 +3920,10 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Update focused core, dual-year native, frontend source-contract and in-product guide coverage for the exact workflow.
 - [x] Correct the stale Build 219 historical gate so its no-Native-change assertion remains bound to the original frozen commit range rather than rejecting later authorized Native blocks.
 - [ ] Pass the complete exact-head pre-push gate and push UX151–UX155 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX156–UX160.
+
+## Commercial readiness Block 1 — product packaging — 2026-09-30
+
+- [x] Builds 001–005 define buyer jobs, package capabilities, limit behavior, advisory package fit and the public bilingual comparison without duplicating entitlement authority.
+- [x] Keep the current published prices and commercial journeys unchanged; guidance never grants access, creates a subscription or overrides a signed agreement.
+- [ ] Pass the complete exact-head gate and push the five-build block once.
+- [ ] Publish the accumulated ten-build set with UX151–UX155 without Replit Agents, verify the exact live source identity and complete the full authenticated Chrome smoke before starting Commercial readiness Block 2.
