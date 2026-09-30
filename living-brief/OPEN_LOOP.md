@@ -1,5 +1,10 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 20 — final acceptance — 2026-09-30
+
+- [x] UX096–UX100 implement exact golden-journey, failure/isolation, inclusive journey, representative-user evidence and release-handoff contracts.
+- [x] Preserve canonical records and existing authorization; do not fabricate customer, Native, deployment or field acceptance.
+- [ ] Pass the complete exact-head gate, push once, publish UX091–UX100 without Replit Agents, and complete exact-identity full authenticated Chrome smoke before UX101.
 ## Experience makeover Block 19 — UX091–UX095 source candidate
 
 UX091–UX095 provide zero-write dry-run contracts for identity mapping, record/relationship reconciliation, exact financial/snapshot/permission comparison, legacy web and Native compatibility, reversible route/cohort exposure, and explicit rollout classification. Names and filenames never establish identity; every unexplained delta blocks acceptance; rollback preserves legitimate business events; unclassified projects remain excluded. Run the complete exact-head gate and push once. Do not publish until UX096–UX100 reach the next ten-build boundary.

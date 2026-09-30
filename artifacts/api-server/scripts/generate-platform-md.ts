@@ -464,6 +464,15 @@ ${appRoutes()}
 - Rollout cohorts require explicit reviewed customer, synthetic, demo or training metadata and explicit enrollment. Unclassified projects remain excluded; name-based classification is prohibited.
 - UX091-UX095 are the first five unpublished builds after the UX081-UX090 publication. No database row, schema, customer record, permission grant, Native source, installer or provider secret is changed.
 
+## Final experience acceptance - UX096-UX100
+
+- The transactional golden journey verifies setup, activation, task, evidence, decision and report in order with exact record identities and exactly one mutation per step.
+- Failure acceptance covers retry, date boundaries, permission denial and cross-tenant denial; input is preserved, retry is bounded and unauthorized records are never exposed.
+- Representative journeys cover mobile and desktop, keyboard and pointer, and English and Spanish. Applicable Native 2021/2025 field gates remain explicitly passed or deferred with a reason.
+- Roberto, Ruben and representative-user observations require dated journey evidence. Coaching dependence and unresolved confusing states block acceptance rather than becoming assumed success.
+- Release handoff binds exact source, deployment and rollback commits, completed gates, known limits and scope. Unresolved P0/P1 issues or an unrehearsed rollback block release.
+- UX091-UX100 reach the ten-build publication boundary. These acceptance contracts add no schema, customer-data, permission-authority, Native-source, installer or provider-secret changes.
+
 ## Connected commercial Intake - UX026-UX030
 
 Activated Intake with a canonical contract displays authoritative saved setup in read-only fields. Browser recovery copies remain preserved without false autosave retries; stage navigation and linked commercial records remain available. Operational activation without a canonical contract retains its existing enrichment path.

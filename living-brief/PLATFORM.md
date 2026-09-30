@@ -1003,18 +1003,28 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/trade-file-submission-review.ts
 - artifacts/api-server/src/lib/unified-action-contract.behavior.ts
 - artifacts/api-server/src/lib/unified-action-contract.ts
+- artifacts/api-server/src/lib/ux-failure-journey.behavior.ts
+- artifacts/api-server/src/lib/ux-failure-journey.ts
 - artifacts/api-server/src/lib/ux-financial-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/ux-financial-reconciliation.ts
+- artifacts/api-server/src/lib/ux-golden-journey.behavior.ts
+- artifacts/api-server/src/lib/ux-golden-journey.ts
+- artifacts/api-server/src/lib/ux-inclusive-acceptance.behavior.ts
+- artifacts/api-server/src/lib/ux-inclusive-acceptance.ts
 - artifacts/api-server/src/lib/ux-intake-quantity.behavior.ts
 - artifacts/api-server/src/lib/ux-intake-resource-plan.behavior.ts
 - artifacts/api-server/src/lib/ux-migration-identity.behavior.ts
 - artifacts/api-server/src/lib/ux-migration-identity.ts
 - artifacts/api-server/src/lib/ux-record-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/ux-record-reconciliation.ts
+- artifacts/api-server/src/lib/ux-release-handoff.behavior.ts
+- artifacts/api-server/src/lib/ux-release-handoff.ts
 - artifacts/api-server/src/lib/ux-reversible-rollout.behavior.ts
 - artifacts/api-server/src/lib/ux-reversible-rollout.ts
 - artifacts/api-server/src/lib/ux-rollout-cohorts.behavior.ts
 - artifacts/api-server/src/lib/ux-rollout-cohorts.ts
+- artifacts/api-server/src/lib/ux-user-acceptance.behavior.ts
+- artifacts/api-server/src/lib/ux-user-acceptance.ts
 - artifacts/api-server/src/lib/workflow-governance-approval-progress.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.ts
@@ -1562,6 +1572,15 @@ It changes only when the code structure or curated architectural facts change.
 - Compatibility preview covers canonical legacy web destinations and the existing Native 2021/2025 upload route. Rollback restores route and cohort exposure without rewinding legitimate business events.
 - Rollout cohorts require explicit reviewed customer, synthetic, demo or training metadata and explicit enrollment. Unclassified projects remain excluded; name-based classification is prohibited.
 - UX091-UX095 are the first five unpublished builds after the UX081-UX090 publication. No database row, schema, customer record, permission grant, Native source, installer or provider secret is changed.
+
+## Final experience acceptance - UX096-UX100
+
+- The transactional golden journey verifies setup, activation, task, evidence, decision and report in order with exact record identities and exactly one mutation per step.
+- Failure acceptance covers retry, date boundaries, permission denial and cross-tenant denial; input is preserved, retry is bounded and unauthorized records are never exposed.
+- Representative journeys cover mobile and desktop, keyboard and pointer, and English and Spanish. Applicable Native 2021/2025 field gates remain explicitly passed or deferred with a reason.
+- Roberto, Ruben and representative-user observations require dated journey evidence. Coaching dependence and unresolved confusing states block acceptance rather than becoming assumed success.
+- Release handoff binds exact source, deployment and rollback commits, completed gates, known limits and scope. Unresolved P0/P1 issues or an unrehearsed rollback block release.
+- UX091-UX100 reach the ten-build publication boundary. These acceptance contracts add no schema, customer-data, permission-authority, Native-source, installer or provider-secret changes.
 
 ## Connected commercial Intake - UX026-UX030
 

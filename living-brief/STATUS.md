@@ -1,5 +1,8 @@
 # STATUS.md - Current Accepted Platform State
 
+## Experience makeover Block 20 candidate — 2026-09-30
+
+UX096–UX100 add executable final-acceptance contracts for the exact transactional golden journey, recoverable failure and tenant-isolation behavior, complete mobile/keyboard/locale journey coverage, truthful representative-user evidence, and exact release/rollback handoff. These contracts do not fabricate Roberto, Ruben, Native, publication, or production acceptance: missing observations remain blocked or explicitly deferred. This is the second five-build block after UX091–UX095, so the exact-head gate, push, publication and full authenticated Chrome smoke are due before UX101 begins.
 ## Experience makeover Block 19 — UX091–UX095 source candidate
 
 UX091–UX095 add read-only preservation contracts before any data-affecting rollout. Identity dry runs map only stable identities or explicit reviewed decisions; matching names and filenames never merge records. Record reconciliation compares IDs, attachments, assignments and historical links and requires an explicit disposition for every delta. Financial reconciliation uses exact six-decimal arithmetic and preserves accepted versions, approvals and role grants.
