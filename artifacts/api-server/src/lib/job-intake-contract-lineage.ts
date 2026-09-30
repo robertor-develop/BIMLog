@@ -25,3 +25,13 @@ export function reconcileExistingContractSelection(input: {
       input.selected.fingerprint !== input.current.fingerprint ? "content" : "",
     ].filter(Boolean)), current: input.current };
 }
+
+export function activatedLineageReceipt(summary: unknown, fallbackContractId: string | null) {
+  type Binding = { profileId: string; contractId: string; contractVersionId: string };
+  const rows = Array.isArray((summary as any)?.contracts) ? (summary as any).contracts : [];
+  const contracts: Binding[] = rows.flatMap((row: any): Binding[] => row?.contractId && row?.contractVersionId
+    ? [{ profileId: String(row.profileId ?? ""), contractId: String(row.contractId), contractVersionId: String(row.contractVersionId) }]
+    : []);
+  if (!contracts.length && fallbackContractId) contracts.push({ profileId: "", contractId: fallbackContractId, contractVersionId: "" });
+  return { contracts, contractIds: contracts.map((entry: Binding) => entry.contractId), contractVersionIds: contracts.map((entry: Binding) => entry.contractVersionId).filter(Boolean) };
+}

@@ -37,7 +37,7 @@ import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
 import { assertIntakeProductionAllocation } from "./job-intake-contract";
 import { rollbackWithOperationalEvidence } from "./operational-failure";
-import { canonicalIntakeContractItemSource } from "./job-intake-contract-lineage";
+import { activatedLineageReceipt, canonicalIntakeContractItemSource } from "./job-intake-contract-lineage";
 
 const uuid = () => crypto.randomUUID();
 const categories = new Set([
@@ -1266,15 +1266,14 @@ export async function activateJobIntake(input: {
         "Job intake not found.",
       );
     if (intake.status === "activated" && intake.activated_contract_id) {
+      const lineage = activatedLineageReceipt(intake.activation_summary, intake.activated_contract_id);
       await client.query("COMMIT");
       return {
         intakeId: intake.id,
         contractId: intake.activated_contract_id,
-        contractIds: Array.isArray(intake.activation_summary?.contracts)
-          ? intake.activation_summary.contracts.map((contract: any) =>
-              String(contract.contractId),
-            )
-          : [intake.activated_contract_id],
+        contractIds: lineage.contractIds,
+        contractVersionIds: lineage.contractVersionIds,
+        contracts: lineage.contracts,
         status: "activated",
         activationMode: "commercial",
         idempotent: true,
