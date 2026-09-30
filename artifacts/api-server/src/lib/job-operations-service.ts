@@ -6,7 +6,7 @@ import { waitForJobIntakeMigration } from "./job-intake-migration";
 import { waitForTeamResourcePlanningMigration } from "./team-resource-planning-migration";
 import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contract";
 import { canonicalJobOperationId } from "./job-operations-id";
-import { splitResourcePlan } from "./resource-demand-contract";
+import { reconcileResourceDemand, splitResourcePlan } from "./resource-demand-contract";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
@@ -454,6 +454,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     billingHourlyRate: showPlanner ? row.billingHourlyRate : null,
     plannedBillableValue: showPlanner ? row.plannedBillableValue : null,
   }));
+  const resourceReconciliation = reconcileResourceDemand({ demands:resourceDemands, workItems:workItems.rows, assignments:assignments.rows, timeEntries:timeEntries.rows });
   const safeTasks = tasks.rows.map((row) => ({
     ...row,
     canControl: access.canManage || Number(row.assigneeUserId) === input.actorUserId || assignments.rows.some((assignment) => assignment.taskId === row.id && Number(assignment.userId) === input.actorUserId),
@@ -509,7 +510,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
   };
   const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
   const safeMembers = members.rows.map((row) => ({ ...row, profileInternalHourlyRate: showBudget ? row.profileInternalHourlyRate : null }));
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity, financialAuthority, operationalProjection, activity: operationEvents.rows, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, resourceDemands, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: safeMembers, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity, financialAuthority, operationalProjection, activity: operationEvents.rows, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, resourceDemands, resourceReconciliation, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: safeMembers, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
 }
 
 export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {

@@ -41,3 +41,14 @@ export function splitResourcePlan(rows: any[]) {
   return { demands, namedAssignments };
 }
 
+export function reconcileResourceDemand(input: { demands: ResourceDemand[]; workItems: any[]; assignments: any[]; timeEntries: any[] }) {
+  return input.demands.map((demand) => {
+    const workItemIds = new Set(input.workItems.filter((row) => String(row.stableScopeItemId) === demand.scopeItemId).map((row) => String(row.id)));
+    const assignments = input.assignments.filter((row) => workItemIds.has(String(row.workItemId)));
+    const assignmentIds = new Set(assignments.map((row) => String(row.id)));
+    const assignedHours = assignments.reduce((sum, row) => sum + Number(row.plannedHours ?? 0), 0);
+    const actualHours = input.timeEntries.filter((row) => assignmentIds.has(String(row.assignmentId))).reduce((sum, row) => sum + Number(row.hours ?? 0), 0);
+    const baselineHours = Number(demand.plannedHours) * demand.resourceCount;
+    return { demandId:demand.id, scopeItemId:demand.scopeItemId, role:demand.role, locationLabel:demand.locationLabel, baselineHours, assignedHours, actualHours, remainingHours:Math.max(0,baselineHours-assignedHours), state:assignedHours===0?"unassigned":assignedHours<baselineHours?"partially_assigned":"assigned" };
+  });
+}

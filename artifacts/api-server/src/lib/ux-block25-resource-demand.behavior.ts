@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resourceDemandFromPlan, splitResourcePlan } from "./resource-demand-contract";
+import { reconcileResourceDemand, resourceDemandFromPlan, splitResourcePlan } from "./resource-demand-contract";
 import { normalizeJobIntakeData, jobIntakeCompletion } from "./job-intake-contract";
 
 const demand = resourceDemandFromPlan({ id:"D1", role:"Drafter", scopeItemId:"S1", locationLabel:"Level 7", resourceCount:2, plannedHours:"40", internalHourlyRate:"5.10" });
@@ -17,3 +17,7 @@ console.log("UX121 generic planning demand has no fake person identity: PASS");
 console.log("UX122 floor/scope quantity and hours budget before hiring: PASS");
 console.log("UX123 seven-floor activation readiness permits zero named assignments: PASS");
 console.log("UX124 Operations exposes each future floor demand for phased task assignment: PASS");
+const reconciliation = reconcileResourceDemand({demands:[demand],workItems:[{id:"W1",stableScopeItemId:"S1"}],assignments:[{id:"A1",workItemId:"W1",plannedHours:"30",userId:7},{id:"A2",workItemId:"W1",plannedHours:"10",userId:8}],timeEntries:[{assignmentId:"A1",hours:"6"}]});
+assert.deepEqual(reconciliation[0],{demandId:"D1",scopeItemId:"S1",role:"Drafter",locationLabel:"Level 7",baselineHours:80,assignedHours:40,actualHours:6,remainingHours:40,state:"partially_assigned"});
+assert.equal(demand.plannedHours,"40"); assert.equal(demand.plannedCost,"408");
+console.log("UX125 plan, assignment, actual, and remaining reconcile without rewriting baseline: PASS");
