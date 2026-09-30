@@ -74,3 +74,38 @@ export function quotedTerm(planId: CommercialPlanId, cycle: CatalogBillingCycle,
     ...BILLING_TERMS[cycle],
   });
 }
+
+export type CommercialAddonId = "project_capacity" | "approved_connector" | "extended_retention";
+export type CommercialAddon = {
+  id: CommercialAddonId;
+  name: { en: string; es: string };
+  eligiblePlans: readonly CommercialPlanId[];
+  price: "custom_quote";
+  availability: "review_required";
+  prerequisite: { en: string; es: string };
+};
+
+export const COMMERCIAL_ADDONS: readonly CommercialAddon[] = [
+  {
+    id: "project_capacity",
+    name: { en: "Additional active-project capacity", es: "Capacidad adicional de proyectos activos" },
+    eligiblePlans: ["professional", "team", "business"], price: "custom_quote", availability: "review_required",
+    prerequisite: { en: "Plan and operating-scope review", es: "Revisión del plan y alcance operativo" },
+  },
+  {
+    id: "approved_connector",
+    name: { en: "Approved connector enablement", es: "Habilitación de conector aprobado" },
+    eligiblePlans: ["business", "enterprise"], price: "custom_quote", availability: "review_required",
+    prerequisite: { en: "Security, destination and provider review", es: "Revisión de seguridad, destino y proveedor" },
+  },
+  {
+    id: "extended_retention",
+    name: { en: "Extended governed retention", es: "Retención gobernada extendida" },
+    eligiblePlans: ["business", "enterprise"], price: "custom_quote", availability: "review_required",
+    prerequisite: { en: "Signed retention schedule", es: "Programa de retención firmado" },
+  },
+] as const;
+
+export function addonsForPlan(planId: CommercialPlanId): readonly CommercialAddon[] {
+  return COMMERCIAL_ADDONS.filter((addon) => addon.eligiblePlans.includes(planId));
+}
