@@ -14,3 +14,19 @@ export function applyShopDrawingPreset<T extends Record<string, any>>(items: T[]
   }));
   return changed ? result : items;
 }
+
+export function deriveShopDrawingPackages(input: { scopeItemId: string; existing?: any[]; levels: any[]; disciplines: any[] }) {
+  const existing = input.existing ?? [];
+  const seen = new Set(existing.map(row => `${row.location?.levelId ?? ""}:${row.classification?.disciplineId ?? ""}:SHOP_DRAWING`));
+  const created: any[] = [];
+  for (const level of input.levels) for (const discipline of input.disciplines) {
+    const key = `${level.id}:${discipline.id}:SHOP_DRAWING`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    created.push({ id:`WP-${input.scopeItemId}-${level.id}-${discipline.id}`, packageCode:`SD-${level.code}-${discipline.code}`,
+      title:`${level.name} · ${discipline.name} shop drawings`, dimensionType:"floor", dimensionValue:level.name,
+      location:{buildingId:level.buildingId,levelId:level.id}, packageType:"shop_drawing",
+      classification:{disciplineId:discipline.id,disciplineCode:discipline.code,disciplineName:discipline.name}, tasks:[] });
+  }
+  return [...existing, ...created];
+}

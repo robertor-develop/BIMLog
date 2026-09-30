@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
-import { applyShopDrawingPreset } from "../../lib/shop-drawing-delivery";
+import { applyShopDrawingPreset, deriveShopDrawingPackages } from "../../lib/shop-drawing-delivery";
 type Props = {
   items: any[];
   setItems: (updater: (items: any[]) => any[]) => void;
@@ -11,6 +11,8 @@ type Props = {
     definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: unknown[] }> } }>;
   deliveryWorkflowMode?: "approved_only" | "defaults_allowed";
   bimtechEligible?: boolean;
+  scopeStructure?: { levels?: any[] };
+  projectDisciplines?: any[];
   tt: (en: string, es: string) => string;
 };
 export function IntakeDeliveryItems(props: Props) {
@@ -69,5 +71,6 @@ export function IntakeDeliveryItems(props: Props) {
               </label>
 
 </div></div>)}
+ {props.items.some(item => item.deliverableType === "SHOP_DRAWING") && <button type="button" onClick={() => props.setItems(items => items.map(item => item.deliverableType !== "SHOP_DRAWING" ? item : ({...item, workPackages:deriveShopDrawingPackages({scopeItemId:item.id,existing:item.workPackages,levels:props.scopeStructure?.levels ?? [],disciplines:props.projectDisciplines ?? []})})))}>{props.tt("Build selected floor × discipline shop drawing plan", "Crear plan de planos por piso × disciplina seleccionados")}</button>}
 </div>;
 }
