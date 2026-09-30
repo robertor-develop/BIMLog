@@ -37,6 +37,7 @@ import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
 import { assertIntakeProductionAllocation } from "./job-intake-contract";
 import { rollbackWithOperationalEvidence } from "./operational-failure";
+import { canonicalIntakeContractItemSource } from "./job-intake-contract-lineage";
 
 const uuid = () => crypto.randomUUID();
 const categories = new Set([
@@ -1401,6 +1402,7 @@ export async function activateJobIntake(input: {
               clientCompanyId: data.identity.clientCompanyId,
               clientCompany: data.identity.clientCompany,
               contractItems: contractItems.length,
+              contractItemSource: canonicalIntakeContractItemSource(intake.id, contractItems),
               apuPlanVersions: [...new Set(contractItems.map((item) => item.apuPlanVersion).filter((version): version is number => Number.isSafeInteger(version)))],
               plannedHours: decimalFromScaled(
                 contractItems.reduce(
