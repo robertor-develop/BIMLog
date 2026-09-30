@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { safeEmailReturnTarget } from "./email-configuration-return";
-assert.equal(safeEmailReturnTarget("/projects/7/job-intake?stage=delivery"), "/projects/7/job-intake?stage=delivery");
+assert.equal(safeEmailReturnTarget("/projects/7/intake?stage=delivery"), "/projects/7/intake?stage=delivery");
 assert.equal(safeEmailReturnTarget("https://example.com/steal"), null);
 assert.equal(safeEmailReturnTarget("//example.com/steal"), null);
 const route = fs.readFileSync(new URL("../../../api-server/src/routes/connections.ts", import.meta.url), "utf8");
 assert.match(route, /eq\(userConnectionsTable\.userId, req\.user!\.userId\)/);
 assert.match(route, /credentials: \{ apiKey: apiKey\.trim\(\) \}/);
 assert.doesNotMatch(route, /toSafe[\s\S]{0,300}credentials:/);
+const intakeEmailReadiness = fs.readFileSync(new URL("../components/job-intake/EmailReadinessSection.tsx", import.meta.url), "utf8");
+assert.match(intakeEmailReadiness, /\/projects\/\$\{projectId\}\/intake\?stage=delivery/);
+assert.doesNotMatch(intakeEmailReadiness, /\/projects\/\$\{projectId\}\/job-intake/);
 console.log("UX147_SENDGRID_CONFIGURATION=PASS authority=current_user secret_projection=denied return=same_origin");
