@@ -282,8 +282,6 @@ export function DocumentConnectionsPanel({
     : [];
   const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
   const packages = Array.isArray(data?.packages) ? data.packages : [];
-  const shopDrawingContinuity = shopDrawingEvidenceContinuity({ packages, packageTasks:data?.packageTasks, deliverables:data?.deliverables, connections });
-  const shopDrawingOverview = coordinatorShopDrawingOverview({ packages, packageTasks:data?.packageTasks, tasks, deliverables:data?.deliverables, connections });
   const targetItems = targetType === "task" ? tasks : packages;
   const canControl = (item: any) =>
     item?.canControl === true || data?.canManage === true;
@@ -1295,6 +1293,8 @@ export function JobOperationsWorkspace() {
       </FinancialProjectShell>
     );
   const total = data.totals ?? {};
+  const shopDrawingContinuity = shopDrawingEvidenceContinuity({ packages:data.packages, packageTasks:data.packageTasks, deliverables:data.deliverables, connections:data.documentConnections });
+  const shopDrawingOverview = coordinatorShopDrawingOverview({ packages:data.packages, packageTasks:data.packageTasks, tasks:data.tasks, deliverables:data.deliverables, connections:data.documentConnections });
   const progress = data.tasks?.length
     ? Math.round(
         data.tasks.reduce(
