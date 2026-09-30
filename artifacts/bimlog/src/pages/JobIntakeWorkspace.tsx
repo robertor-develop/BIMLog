@@ -2,6 +2,7 @@ import { IntakeCommercialReadiness } from "@/components/job-intake/IntakeCommerc
 import { IntakeContractConnection } from "@/components/job-intake/IntakeContractConnection";
 import { GenericResourcePlan } from "@/components/job-intake/GenericResourcePlan";
 import { IntakeDeliveryItems } from "@/components/job-intake/IntakeDeliveryItems";
+import { EmailReadinessSection } from "@/components/job-intake/EmailReadinessSection";
 import { isBimtechDeliveryCompany } from "@/lib/shop-drawing-delivery";
 import { withIntakeReturn } from "@/lib/return-context";
 import { intakeReadinessLabel } from "@/lib/intake-readiness-presentation";
@@ -2275,6 +2276,7 @@ export function JobIntakeWorkspace() {
                   onChange={assignments => setData((old: any) => ({ ...old, team: { ...old.team, assignments }, review: { ...old.review, teamConfirmed: false } }))}/>
                 <p className="ji-small">{tt("Unassigned scope hours remain pending for later staffing. They do not prevent activation.", "Las horas sin personal quedan pendientes para asignarlas después. No impiden la activación.")}</p>
               </section>
+              <EmailReadinessSection projectId={projectId} tt={tt} />
               <section className="ji-card" id="ji-review">
                 <h2>6. {stageLabel("review")}</h2>
                 {guide && (
