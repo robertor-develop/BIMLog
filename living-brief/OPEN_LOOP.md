@@ -3862,3 +3862,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX116–UX120 keep plan totals separate from unit rates, prevent staffing roles from repricing customer work, bind the chosen APU version and $30 rate together, preserve them through activation, and record explicit rate changes.
 - [x] Add exact save/reload, multi-APU and activation-snapshot regression evidence for the $30 continuity case.
 - [ ] Pass the complete exact-head gate, push UX116–UX120 once, publish accumulated UX111–UX120 without Replit Agents, verify live source identity, and run the full authenticated Chrome smoke.
+- [x] Reject publication `fd5613a0` because stacked empty publication wrappers reported a wrapper parent instead of the canonical pushed source.
+- [ ] Gate and push the bounded source-attestation correction, republish, require exact live `origin/master` identity, and complete the 61-route authenticated Chrome smoke before starting UX121.
