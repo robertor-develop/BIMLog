@@ -51292,6 +51292,104 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b88308fdd84f4732eefdc191120ff80eaa03433b35f1136ee760f0e54bfad0a4"
+    },
+    {
+      "taskId": "ux-b24-apu-rate-continuity-20260930",
+      "reviewedThroughCommit": "fa455ddcbd7a8235b17d0d1767aa37a8c20dc3fc",
+      "reviewedAt": "2026-09-30T05:45:00.000Z",
+      "status": "source_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "APU plan totals and resource roles could be confused with Contract Item selling rates; the exact selected rate now retains source identity across activation.",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "category": "product_experience",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX116-UX120 establish explicit Contract Item rate identity and provenance without changing permissions, schema, customer records, Native source, installer, or provider authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/ux-block24-rate-continuity.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "843a5e01669c13d415877837745e13608658ab3b8b38f56fef40f256e2d8c3f2"
     }
   ]
 }

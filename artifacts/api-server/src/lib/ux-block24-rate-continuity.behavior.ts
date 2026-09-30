@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
-import { normalizeJobIntakeData } from "./job-intake-contract.ts";
-import { buildActivatedCommercialBaseline } from "./job-activation-commercial-baseline.ts";
+import { normalizeJobIntakeData } from "./job-intake-contract";
+import { buildActivatedCommercialBaseline } from "./job-activation-commercial-baseline";
 
 const source = { kind: "saved_apu_rate", sourceId: "apu-plan-v7", sourceLabel: "BIM coordination $30", unitRate: "30.00", unit: "Hours", currency: "USD", apuPlanVersion: 7, apuFingerprint: "f7" };
 const raw: any = { identity:{projectName:"Rate continuity",currency:"USD"}, classification:{}, scopeStructure:{}, commercial:{contracts:[{id:"C1",title:"Base",contractNumber:"001"}]}, scopeItems:[{id:"CI-1",name:"Shop drawings",plannedHours:"10",quantity:"10",billingHourlyRate:"30.00",unit:"Hours",apuPlanVersion:7,rateSource:source,contractId:"C1",projectCostNodeId:"PCN-1",budgetSnapshotLineId:"BSL-1",workflowTemplate:"bim-submittal"}], delivery:{}, team:{assignments:[]}, governance:{}, review:{} };

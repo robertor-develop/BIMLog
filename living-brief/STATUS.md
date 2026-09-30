@@ -3253,3 +3253,9 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - UX081–UX085 establish one BIMLog-by-IgniteSmart brand architecture, a connected landing journey with signed-in continuation and actual product captures, role-based capability cards with explicit prerequisites, shared deployment-specific trust facts, and an exact task return from Help through Convention resolution.
 - Product commits are `23aabf06`, `be8814f8`, `d4ba793a`, `394f34cc` and `321a3980` before Living Brief reconciliation. Existing authentication, project roles, canonical records, workflow statuses, schema, customer data, Native source, installers and provider-send authority remain unchanged.
 - This is the first five-build unpublished block after the accepted UX071–UX080 publication. Push is due after the complete gate; publication and authenticated Chrome smoke are due after UX086–UX090.
+
+## Experience makeover Block 24 source candidate — 2026-09-30
+
+- UX116–UX120 separate whole-plan APU totals from Contract Item unit rates, remove hard-coded role-based selling-rate substitution, bind the exact named APU source to the selected rate, preserve that identity through contract activation, and retain a bounded rate-change trail.
+- The USD 30.00 multi-APU regression proves the selected rate and version survive Intake save/reload, contract generation and the immutable activation pricing snapshot without falling back to another APU.
+- Product commits are `ed2132f0`, `f2fd6323`, `5999cc55`, `b07532da` and `fa455ddc`. UX111–UX120 reach the required ten-build publication and authenticated Chrome smoke boundary.

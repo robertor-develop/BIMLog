@@ -3856,3 +3856,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] UX081–UX085 implement canonical brand architecture, state-aware landing proof, verified role capability presentation, consistent deployment-specific trust copy and exact task return through Help.
 - [x] Remove unsupported fixed retention, storage-routing and independent-certification claims from the affected public surfaces.
 - [ ] Pass the complete exact-head gate and push UX081–UX085 once. Do not publish until UX086–UX090 reach the ten-build boundary.
+
+## Experience makeover Block 24 — APU rate continuity — 2026-09-30
+
+- [x] UX116–UX120 keep plan totals separate from unit rates, prevent staffing roles from repricing customer work, bind the chosen APU version and $30 rate together, preserve them through activation, and record explicit rate changes.
+- [x] Add exact save/reload, multi-APU and activation-snapshot regression evidence for the $30 continuity case.
+- [ ] Pass the complete exact-head gate, push UX116–UX120 once, publish accumulated UX111–UX120 without Replit Agents, verify live source identity, and run the full authenticated Chrome smoke.

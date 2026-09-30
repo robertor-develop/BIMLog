@@ -1013,6 +1013,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/trade-file-submission-review.ts
 - artifacts/api-server/src/lib/unified-action-contract.behavior.ts
 - artifacts/api-server/src/lib/unified-action-contract.ts
+- artifacts/api-server/src/lib/ux-block24-rate-continuity.behavior.ts
 - artifacts/api-server/src/lib/ux-failure-journey.behavior.ts
 - artifacts/api-server/src/lib/ux-failure-journey.ts
 - artifacts/api-server/src/lib/ux-financial-reconciliation.behavior.ts
