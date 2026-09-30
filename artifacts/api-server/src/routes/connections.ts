@@ -113,6 +113,21 @@ router.put("/me/connections/sendgrid", authMiddleware, async (req, res) => {
   }
 });
 
+router.post("/me/connections/sendgrid/verify", authMiddleware, async (req, res) => {
+  const [connection] = await db.select().from(userConnectionsTable).where(and(eq(userConnectionsTable.userId, req.user!.userId), eq(userConnectionsTable.provider, "sendgrid"))).limit(1);
+  const apiKey = (connection?.credentials as { apiKey?: unknown } | null)?.apiKey;
+  if (!connection || typeof apiKey !== "string" || !apiKey || !connection.accountLabel) { res.status(428).json({ error: "Connect SendGrid before verifying the sender.", code: "SENDGRID_NOT_CONNECTED" }); return; }
+  try {
+    const check = await fetch("https://api.sendgrid.com/v3/verified_senders", { headers: { Authorization: `Bearer ${apiKey}` } });
+    if (!check.ok) { await db.update(userConnectionsTable).set({ status: "error", lastError: `Sender verification failed (${check.status})`, updatedAt: new Date() }).where(eq(userConnectionsTable.id, connection.id)); res.status(502).json({ error: `SendGrid sender verification failed (${check.status})`, code: "SENDGRID_VERIFICATION_FAILED" }); return; }
+    const payload = await check.json() as { results?: Array<{ from_email?: string; verified?: boolean; locked?: boolean }> };
+    const sender = payload.results?.find(item => item.from_email?.toLowerCase() === connection.accountLabel?.toLowerCase());
+    const ready = sender?.verified === true && sender.locked !== true;
+    const [updated] = await db.update(userConnectionsTable).set({ status: ready ? "ready" : "connected", lastError: ready ? null : "The configured sender is not verified in SendGrid.", metadata: { senderVerified: ready, verifiedAt: new Date().toISOString() }, updatedAt: new Date() }).where(eq(userConnectionsTable.id, connection.id)).returning();
+    res.status(ready ? 200 : 409).json({ ...toSafe(updated), senderVerified: ready });
+  } catch { res.status(502).json({ error: "Could not reach SendGrid to verify the sender.", code: "SENDGRID_UNAVAILABLE" }); }
+});
+
 // ── PUT /me/connections/anthropic — connect this user's own AI provider ──────
 router.put("/me/connections/anthropic", authMiddleware, async (req, res) => {
   res.status(410).json({ error: "LEGACY_AI_CONNECTION_RETIRED", message: "Use /api/v1/ai-control/provider-connections. Existing legacy records are preserved but no new plaintext AI keys are accepted." });

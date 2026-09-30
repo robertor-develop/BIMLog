@@ -237,6 +237,7 @@ export function Profile() {
   const [sgKeyInput, setSgKeyInput] = useState("");
   const [sgFromInput, setSgFromInput] = useState("");
   const [savingSg, setSavingSg] = useState(false);
+  const [verifyingSg, setVerifyingSg] = useState(false);
   const [removingSg, setRemovingSg] = useState(false);
   const [telegramStatus, setTelegramStatus] = useState<TelegramStatus | null>(null);
   const [loadingTelegram, setLoadingTelegram] = useState(true);
@@ -668,6 +669,17 @@ export function Profile() {
     } finally {
       setRemovingSg(false);
     }
+  }
+
+  async function verifySendgrid() {
+    setVerifyingSg(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/me/connections/sendgrid/verify`, { method: "POST", headers: authHeaders });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Sender verification failed");
+      await loadConnections(); toast({ title: "SendGrid sender verified and ready" });
+    } catch (e) { await loadConnections(); toast({ title: e instanceof Error ? e.message : "Sender verification failed", variant: "destructive" }); }
+    finally { setVerifyingSg(false); }
   }
 
   async function connectProvider(providerParam: string) {
@@ -1602,11 +1614,12 @@ export function Profile() {
               return (
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12, flexWrap: "wrap" }}>
-                    <Badge style={{ background: sg.status === "connected" ? "#DCFCE7" : "#FEF3C7", color: sg.status === "connected" ? "#16A34A" : "#B45309", border: `1px solid ${sg.status === "connected" ? "#BBF7D0" : "#FDE68A"}`, padding: "4px 10px", fontWeight: 600 }}>
-                      <Check style={{ width: 12, height: 12, marginRight: 4 }} /> {sg.status === "connected" ? "Connected" : "Needs attention"}
+                    <Badge style={{ background: sg.status === "ready" ? "#DCFCE7" : "#FEF3C7", color: sg.status === "ready" ? "#16A34A" : "#B45309", border: `1px solid ${sg.status === "ready" ? "#BBF7D0" : "#FDE68A"}`, padding: "4px 10px", fontWeight: 600 }}>
+                      <Check style={{ width: 12, height: 12, marginRight: 4 }} /> {sg.status === "ready" ? "Ready" : sg.status === "connected" ? "Connected, sender unverified" : "Needs attention"}
                     </Badge>
                     {sg.accountLabel && <span style={{ fontSize: 13, color: "hsl(var(--muted-foreground))" }}>Sends as {sg.accountLabel}</span>}
                   </div>
+                  {sg.status !== "ready" && <Button size="sm" variant="outline" onClick={verifySendgrid} disabled={verifyingSg} style={{ marginRight: 8 }}>{verifyingSg ? "Verifying…" : "Verify sender"}</Button>}
                   <Button size="sm" variant="outline" onClick={removeSendgrid} disabled={removingSg} style={{ color: "#DC2626", borderColor: "#FECACA", gap: 6 }}>
                     <Trash2 style={{ width: 12, height: 12 }} />
                     {removingSg ? "Disconnecting…" : "Disconnect"}
