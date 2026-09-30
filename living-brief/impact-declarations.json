@@ -52181,7 +52181,7 @@
     },
     {
       "taskId": "ux-block30-email-readiness-return",
-      "reviewedThroughCommit": "441ae23d3f26ab1940b47ed3012abb633b4a97cd",
+      "reviewedThroughCommit": "aeeb0016ddfa09362eb3dc722d2fd2306895b193",
       "reviewedAt": "2026-09-30T17:01:45.000Z",
       "status": "candidate",
       "authorities": [
@@ -52242,14 +52242,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b0445f492d03fef1dd7e04754e2b060ef94e0c9cc716a8330fd5af45dc15a8f4"
+      "reviewedChangeSha256": "517f442365108af51088ed5665ecd5ed40e3a0857cd0751e65de983e87e0267a"
     }
   ]
 }
