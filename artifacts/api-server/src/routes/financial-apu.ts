@@ -5,6 +5,7 @@ import { CostValuePlanError, getCostValuePlan, saveCostValuePlan } from "../lib/
 import { exportCostValuePerformanceCsv, getCostValuePerformance, saveCostValuePerformance } from "../lib/cost-value-performance-service";
 import { exportCostValueForecastCsv, getCostValueForecast, saveCostValueForecast } from "../lib/cost-value-forecast-service";
 import { getManualBonuses, proposeManualBonus, decideManualBonus } from "../lib/cost-value-bonus-service";
+import { applyLibraryApu, getProjectLibraryApplications } from "../lib/project-apu-library-service";
 
 const router = Router();
 router.use("/projects/:projectId/financial/apu", authMiddleware);
@@ -45,6 +46,12 @@ router.get("/projects/:projectId/financial/apu", run(async (req, res) => {
 }));
 router.put("/projects/:projectId/financial/apu", run(async (req, res) => {
   res.json(await saveCostValuePlan(req.user.userId, projectId(req.params.projectId), req.body));
+}));
+router.post("/projects/:projectId/financial/apu/library-applications", run(async (req, res) => {
+  res.status(201).json({ data: await applyLibraryApu(req.user.userId,projectId(req.params.projectId),req.body) });
+}));
+router.get("/projects/:projectId/financial/apu/library-applications", run(async (req, res) => {
+  res.json({ data: await getProjectLibraryApplications(req.user.userId,projectId(req.params.projectId)) });
 }));
 router.get("/projects/:projectId/financial/apu/performance", run(async (req, res) => {
   res.json(await getCostValuePerformance(req.user.userId, projectId(req.params.projectId)));
