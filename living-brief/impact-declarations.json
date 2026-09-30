@@ -50603,8 +50603,8 @@
     },
     {
       "taskId": "ux-b18-pricing-conversion-continuity-20260929",
-      "reviewedThroughCommit": "58a9c6da652a26a7c77a40e66cf7758d2bd7953b",
-      "reviewedAt": "2026-09-29T23:25:00.000Z",
+      "reviewedThroughCommit": "ed1cffa40ec3e9e089e8438ca69d9ab0bbe86739",
+      "reviewedAt": "2026-09-29T23:57:16.000Z",
       "status": "source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -50690,10 +50690,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b00d8a5c9e25a1a8b42e4cfe7a11c65c3f5bbda98653a172ae4452211ef4d2d2"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
