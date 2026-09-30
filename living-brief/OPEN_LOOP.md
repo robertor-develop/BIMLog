@@ -3927,3 +3927,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Keep the current published prices and commercial journeys unchanged; guidance never grants access, creates a subscription or overrides a signed agreement.
 - [ ] Pass the complete exact-head gate and push the five-build block once.
 - [ ] Publish the accumulated ten-build set with UX151–UX155 without Replit Agents, verify the exact live source identity and complete the full authenticated Chrome smoke before starting Commercial readiness Block 2.
+- [x] Correct the full-gate reused-fixture failure by renaming the existing bonus constraint inside the rollback-scoped legacy-spelling proof instead of trying to reuse an already owned index; focused real-PostgreSQL Intake activation passes.

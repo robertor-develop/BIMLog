@@ -52563,6 +52563,77 @@
       ],
       "reviewedChangeSha256": "8675ca1ef38ef9c71c7e0533356bd2e7db93127a5b89cdd82f4ed37cc1f97c3c",
       "reason": "The public package experience is implemented as advisory comparison while canonical commercial authority stays in entitlements and signed agreements."
+    },
+    {
+      "taskId": "commercial-readiness-block01-gate-fixture-repair",
+      "reviewedThroughCommit": "d3c1a259dc73c3a8abe58304287c8c2e0e9d04c5",
+      "reviewedAt": "2026-09-30T22:10:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes only rollback-scoped PostgreSQL release evidence and leaves product authority and runtime behavior unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The complete gate found a real fixture repeatability failure; the shared proof now reuses the canonical constraint safely and the focused proof passes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction strengthens repeatable real-database evidence without weakening an acceptance condition."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction, offer, price or commercial promise changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production route, schema, migration or runtime topology changes; only the isolated evidence fixture changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, package, installation or plugin acceptance status changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal report or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact gate failure, correction and focused PostgreSQL pass."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the fixture defect while retaining the complete gate repeat and release work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded same-cycle correction does not establish a new production incident."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "882e4c589783b159d61bc9f540aee9f635c9557af94e693599a5849be4cc6f59",
+      "reason": "The fixture now reproduces legacy naming by renaming the canonical constraint inside a rollback transaction, preserving index ownership and replayability."
     }
   ]
 }
