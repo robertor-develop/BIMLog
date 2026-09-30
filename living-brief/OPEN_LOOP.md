@@ -3864,4 +3864,10 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [ ] Pass the complete exact-head gate, push UX116–UX120 once, publish accumulated UX111–UX120 without Replit Agents, verify live source identity, and run the full authenticated Chrome smoke.
 - [x] Reject publication `fd5613a0` because stacked empty publication wrappers reported a wrapper parent instead of the canonical pushed source.
 - [x] Reject publication `c844b728` because the provider advanced `origin/master` to another empty wrapper before assembly; the runtime still reported a wrapper rather than canonical source.
-- [ ] Gate and push the bounded source-attestation correction, republish, require exact live `origin/master` identity, and complete the 61-route authenticated Chrome smoke before starting UX121.
+- [x] Gate and push the bounded source-attestation correction, republish deployment `c7036a66`, require canonical source `12fd164769754312d21e8ec9ce3b3aa4475c6d5a`, and complete the 61-route authenticated Chrome smoke before starting UX121.
+
+## Experience makeover Block 25 — generic resource budgets and future staffing — 2026-09-30
+
+- [x] UX121–UX125 separate generic demand from person assignments, budget role/location/quantity/hours before hiring, permit activation with future work unassigned, expose phased staffing in Operations and reconcile baseline/assigned/actual hours without rewriting the approved plan.
+- [x] Preserve legacy named assignments while preventing new generic rows from creating fake `Unassigned resource` records.
+- [ ] Pass the complete exact-head gate and push UX121–UX125 once. Do not publish until UX126–UX130 complete the next ten-build boundary.

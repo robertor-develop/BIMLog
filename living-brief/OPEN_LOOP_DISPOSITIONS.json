@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "77dca89a2f81af72373191902a46c8282e431806188e613475e2d513421ff55e",
+  "sourceSha256": "a979979c06a381ab47fbc0a3ba51210b5aba70e98495e04a5912b44f3c7d477d",
   "itemCount": 272,
   "counts": {
     "ACTIVE": 237,
@@ -4951,10 +4951,10 @@
       "currentAuthority": false
     },
     {
-      "id": "4874e8783d5c92f2",
-      "sourceLine": 3867,
-      "heading": "Experience makeover Block 24 — APU rate continuity — 2026-09-30",
-      "statement": "Gate and push the bounded source-attestation correction, republish, require exact live `origin/master` identity, and complete the 61-route authenticated Chrome smoke before starting UX121.",
+      "id": "ff3402467e656503",
+      "sourceLine": 3873,
+      "heading": "Experience makeover Block 25 — generic resource budgets and future staffing — 2026-09-30",
+      "statement": "Pass the complete exact-head gate and push UX121–UX125 once. Do not publish until UX126–UX130 complete the next ten-build boundary.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -4963,8 +4963,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3867",
-        "Experience makeover Block 24 — APU rate continuity — 2026-09-30"
+        "OPEN_LOOP.md:3873",
+        "Experience makeover Block 25 — generic resource budgets and future staffing — 2026-09-30"
       ],
       "currentAuthority": false
     }

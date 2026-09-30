@@ -3263,3 +3263,8 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - UX116–UX120 separate whole-plan APU totals from Contract Item unit rates, remove hard-coded role-based selling-rate substitution, bind the exact named APU source to the selected rate, preserve that identity through contract activation, and retain a bounded rate-change trail.
 - The USD 30.00 multi-APU regression proves the selected rate and version survive Intake save/reload, contract generation and the immutable activation pricing snapshot without falling back to another APU.
 - Product commits are `ed2132f0`, `f2fd6323`, `5999cc55`, `b07532da` and `fa455ddc`. UX111–UX120 reach the required ten-build publication and authenticated Chrome smoke boundary.
+## Experience makeover Block 25 — generic resource demand — 2026-09-30
+
+- UX121–UX125 implement a person-free Intake demand model with role, scope, floor/location, quantity, hours and planning cost. Core readiness permits zero named assignments; activation persists generic demand only in the Intake baseline and no longer creates a fake person assignment.
+- Job Operations projects future demand separately for phased staffing and reconciles approved baseline, named allocation, actual hours and remaining hours without repricing or rewriting the baseline. Legacy named assignments and their history remain supported.
+- Focused contract, production component, activation-preview and TypeScript checks pass. This is the first unpublished five-build block in UX121–UX130; production publication and Chrome smoke are not due until UX130.

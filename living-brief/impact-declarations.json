@@ -51296,7 +51296,7 @@
     {
       "taskId": "ux-b24-apu-rate-continuity-20260930",
       "reviewedThroughCommit": "fa455ddcbd7a8235b17d0d1767aa37a8c20dc3fc",
-      "reviewedAt": "2026-09-30T05:45:00.000Z",
+      "reviewedAt": "2026-09-30T05:45:00Z",
       "status": "source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -51394,7 +51394,7 @@
     {
       "taskId": "ux-b24-stacked-wrapper-correction-20260930",
       "reviewedThroughCommit": "ef2318a1d2d1f7b23cd5ca49d7ff71344da7fe40",
-      "reviewedAt": "2026-09-30T06:20:00.000Z",
+      "reviewedAt": "2026-09-30T06:20:00Z",
       "status": "corrective_source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -51490,7 +51490,7 @@
     {
       "taskId": "ux-b24-wrapper-chain-correction-20260930",
       "reviewedThroughCommit": "f3c39189d3ec7b8ed40c2da4440c141bf4f5a7bc",
-      "reviewedAt": "2026-09-30T07:10:00.000Z",
+      "reviewedAt": "2026-09-30T07:10:00Z",
       "status": "corrective_source_candidate",
       "captureTiming": "same_task_post_implementation",
       "capabilityPreflight": {
@@ -51582,6 +51582,92 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "023966b66a76e6ac2fb073b88756e38e97b94ed198de63747fce45546ac049e0"
+    },
+    {
+      "taskId": "ux-b25-generic-resource-demand-20260930",
+      "reviewedThroughCommit": "33df7296b716fb608a35bdf371a0e6edbad22535",
+      "reviewedAt": "2026-09-30T08:07:00.000Z",
+      "status": "local_source_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX121-UX125 replace fake unassigned person records with canonical generic demand, phased Operations staffing, and baseline-versus-assignment-versus-actual reconciliation while preserving legacy named assignment history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b1d0f93f51850c7cbe6d5cd08508b9bffd0436161fc407eed300578933606e0d"
     }
   ]
 }

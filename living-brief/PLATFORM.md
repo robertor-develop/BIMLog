@@ -921,6 +921,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/reporting-baseline-summary.ts
 - artifacts/api-server/src/lib/reporting-baseline.behavior.ts
 - artifacts/api-server/src/lib/reporting-baseline.ts
+- artifacts/api-server/src/lib/resource-demand-contract.ts
 - artifacts/api-server/src/lib/resource-hour-sources.behavior.ts
 - artifacts/api-server/src/lib/resource-hour-sources.ts
 - artifacts/api-server/src/lib/responsibility-action-routing.behavior.ts
@@ -1014,6 +1015,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/unified-action-contract.behavior.ts
 - artifacts/api-server/src/lib/unified-action-contract.ts
 - artifacts/api-server/src/lib/ux-block24-rate-continuity.behavior.ts
+- artifacts/api-server/src/lib/ux-block25-resource-demand.behavior.ts
 - artifacts/api-server/src/lib/ux-failure-journey.behavior.ts
 - artifacts/api-server/src/lib/ux-failure-journey.ts
 - artifacts/api-server/src/lib/ux-financial-reconciliation.behavior.ts
