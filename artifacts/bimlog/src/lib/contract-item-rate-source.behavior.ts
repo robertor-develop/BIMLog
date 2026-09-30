@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
-import { emptyFinancialContractItem, manualContractRateSource } from "./contract-item-rate-source.ts";
+import { changeContractItemRate, emptyFinancialContractItem, manualContractRateSource } from "./contract-item-rate-source.ts";
 const item = emptyFinancialContractItem({ version: 7, sellingPrice: "12500.00", currency: "USD" });
 assert.equal(item.apuPlanVersion, "7");
 assert.equal(item.unitRate, "", "a whole-plan selling total must never seed a unit rate");
 assert.equal(manualContractRateSource({ unitRate: "30.00", unit: "Hours", currency: "USD", apuPlanVersion: 7 }).unitRate, "30.00");
+const source = manualContractRateSource({ unitRate: "30.00", unit: "Hours", currency: "USD", apuPlanVersion: 7 });
+const changed = changeContractItemRate({ billingHourlyRate: "35.47", apuPlanVersion: 3, rateSource: { sourceId: "apu-plan-v3" } }, "30.00", source, "2026-09-30T12:00:00.000Z");
+assert.equal(changed.billingHourlyRate, "30.00");
+assert.deepEqual(changed.rateHistory[0], { changedAt: "2026-09-30T12:00:00.000Z", before: { unitRate: "35.47", apuPlanVersion: 3, sourceId: "apu-plan-v3" }, after: { unitRate: "30.00", apuPlanVersion: 7, sourceId: "job-intake-contract-item" } });
 console.log("contract-item-rate-source.behavior: PASS");

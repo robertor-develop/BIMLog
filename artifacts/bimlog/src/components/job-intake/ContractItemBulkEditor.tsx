@@ -3,6 +3,7 @@ import { compatibleApuVersions, type IntakeApuVersion } from "../../lib/job-inta
 import { ArrowUp, ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
+import { changeContractItemRate, manualContractRateSource } from "../../lib/contract-item-rate-source";
 
 type Translate = (en: string, es: string) => string;
 
@@ -498,7 +499,7 @@ export function ContractItemBulkEditor(props: Props) {
                         `Tarifa unitaria de la Partida fila ${index + 1}`,
                       )}
                       onChange={(event) =>
-                        update(index, { billingHourlyRate: event.target.value })
+                        props.setItems(items => items.map((candidate, candidateIndex) => candidateIndex === index ? changeContractItemRate(candidate, event.target.value, manualContractRateSource({ unitRate: event.target.value, unit: candidate.unit, currency: props.currency, apuPlanVersion: candidate.apuPlanVersion })) : candidate))
                       }
                     />
                   </label>

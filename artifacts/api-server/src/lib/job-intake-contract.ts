@@ -486,6 +486,11 @@ export function normalizeJobIntakeData(raw: unknown) {
       quantity,
       billingHourlyRate,
       rateSource,
+      rateHistory: (Array.isArray(item.rateHistory) ? item.rateHistory : []).slice(-50).map((entry: any, historyIndex: number) => ({
+        changedAt: optionalText(entry?.changedAt, `scopeItems[${index}].rateHistory[${historyIndex}].changedAt`, 40),
+        before: entry?.before && typeof entry.before === "object" ? entry.before : null,
+        after: entry?.after && typeof entry.after === "object" ? entry.after : null,
+      })),
       ...(item.productionAllocation == null || item.productionAllocation === "" ? {} : {
         productionAllocation: exact(item.productionAllocation, `scopeItems[${index}].productionAllocation`),
       }),

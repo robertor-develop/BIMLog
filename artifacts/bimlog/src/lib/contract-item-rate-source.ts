@@ -25,3 +25,12 @@ export function manualContractRateSource(input: { unitRate: unknown; unit: unkno
 export function emptyFinancialContractItem(apu?: any) {
   return { displayName: "", quantity: "1.00", unit: "Hours", unitRate: "", apuPlanVersion: apu?.version ? String(apu.version) : "", workflowTemplate: "bim-submittal", industryTemplate: "bim-services" };
 }
+
+export function changeContractItemRate(item: any, nextRate: string, source: ContractItemRateSource, changedAt = new Date().toISOString()) {
+  const event = {
+    changedAt,
+    before: { unitRate: String(item.billingHourlyRate ?? "0"), apuPlanVersion: item.apuPlanVersion ?? null, sourceId: item.rateSource?.sourceId ?? null },
+    after: { unitRate: nextRate, apuPlanVersion: source.apuPlanVersion, sourceId: source.sourceId },
+  };
+  return { ...item, billingHourlyRate: nextRate, apuPlanVersion: source.apuPlanVersion, rateSource: { ...source, unitRate: nextRate }, rateHistory: [...(Array.isArray(item.rateHistory) ? item.rateHistory : []), event].slice(-50) };
+}
