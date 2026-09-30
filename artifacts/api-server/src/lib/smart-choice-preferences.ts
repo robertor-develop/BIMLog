@@ -108,3 +108,32 @@ export function addSmartChoiceInContext(input: { eligible: SmartChoiceOption[]; 
     throw new FinancialControlError(409, "SMART_CHOICE_DUPLICATE", `${created.code} already exists in the eligible catalog.`);
   return { eligible: [...input.eligible, created], selectedId: created.id };
 }
+
+export type WorkflowStatusTransition = SmartChoiceOption & {
+  workflowVersionId: string;
+  fromStatusIds: string[];
+  allowedRoles: string[];
+};
+
+export function validWorkflowStatusChoices(input: {
+  workflowVersionId: unknown;
+  currentStatusId: unknown;
+  role: unknown;
+  transitions: WorkflowStatusTransition[];
+  favoriteIds?: unknown;
+}) {
+  const workflowVersionId = String(input.workflowVersionId ?? "").trim();
+  const currentStatusId = String(input.currentStatusId ?? "").trim();
+  const role = String(input.role ?? "").trim().toLocaleLowerCase();
+  if (!workflowVersionId || !currentStatusId || !role) throw new FinancialControlError(400, "WORKFLOW_STATUS_CONTEXT_INVALID", "Status choices require an exact workflow version, current state, and role.");
+  const valid = input.transitions.filter(transition => transition.workflowVersionId === workflowVersionId && transition.fromStatusIds.includes(currentStatusId) && transition.allowedRoles.map(value => value.toLocaleLowerCase()).includes(role));
+  const validIds = new Set(valid.map(row => String(row.id)));
+  const favoriteIds = uniqueIds(input.favoriteIds, 12).filter(id => validIds.has(id));
+  const favoriteOrder = new Map(favoriteIds.map((id, index) => [id, index]));
+  return [...valid].sort((a, b) => {
+    const aFavorite = favoriteOrder.get(String(a.id));
+    const bFavorite = favoriteOrder.get(String(b.id));
+    if (aFavorite != null || bFavorite != null) return (aFavorite ?? Number.MAX_SAFE_INTEGER) - (bFavorite ?? Number.MAX_SAFE_INTEGER);
+    return a.name.localeCompare(b.name) || String(a.id).localeCompare(String(b.id));
+  });
+}

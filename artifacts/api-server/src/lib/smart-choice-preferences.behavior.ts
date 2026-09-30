@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { addSmartChoiceInContext, normalizeSmartChoiceProfile, preferredEligibleChoices, rankSmartChoices, recordSmartChoiceUse, searchSmartChoices } from "./smart-choice-preferences";
+import { addSmartChoiceInContext, normalizeSmartChoiceProfile, preferredEligibleChoices, rankSmartChoices, recordSmartChoiceUse, searchSmartChoices, validWorkflowStatusChoices } from "./smart-choice-preferences";
 
 const catalog = Array.from({ length: 50 }, (_, index) => ({ id: `d-${index + 1}`, code: `D${index + 1}`, name: `Discipline ${index + 1}` }));
 const profile = normalizeSmartChoiceProfile({ userId: 7, companyId: 2, pinnedDisciplineIds: ["d-4", "d-2", "d-4"] });
@@ -22,4 +22,11 @@ const addedDocumentType = addSmartChoiceInContext({ eligible: documentTypes, cre
 assert.equal(addedDocumentType.selectedId, "sketch");
 assert.equal(addedDocumentType.eligible.at(-1)?.code, "SK");
 assert.throws(() => addSmartChoiceInContext({ eligible: documentTypes, created: { id: "private", code: "X", name: "Unauthorized" }, authorized: false }), /do not have authority/);
-console.log("UX106_UX108_SMART_CHOICE_DOCUMENT_TYPES=PASS");
+const transitions = [
+  { id: "review", code: "REV", name: "In review", workflowVersionId: "wf-2", fromStatusIds: ["draft"], allowedRoles: ["coordinator"] },
+  { id: "approved", code: "APP", name: "Approved", workflowVersionId: "wf-2", fromStatusIds: ["review"], allowedRoles: ["approver"] },
+  { id: "legacy-review", code: "REV", name: "Legacy review", workflowVersionId: "wf-1", fromStatusIds: ["draft"], allowedRoles: ["coordinator"] },
+];
+assert.deepEqual(validWorkflowStatusChoices({ workflowVersionId: "wf-2", currentStatusId: "draft", role: "Coordinator", transitions, favoriteIds: ["approved", "review"] }).map(row => row.id), ["review"]);
+assert.deepEqual(validWorkflowStatusChoices({ workflowVersionId: "wf-2", currentStatusId: "review", role: "approver", transitions, favoriteIds: ["approved"] }).map(row => row.id), ["approved"]);
+console.log("UX106_UX109_WORKFLOW_STATUS_CHOICES=PASS");
