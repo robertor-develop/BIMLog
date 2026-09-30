@@ -123,6 +123,7 @@
     "test:startup-bootstrap": "tsx ./scripts/test-startup-bootstrap.ts && tsx ./src/lib/database-startup-serialization.behavior.ts",
     "test:startup-bundle": "tsx ./scripts/test-startup-bundle.ts",
     "test:production-artifact": "node ../../scripts/test-local-production-artifact.mjs",
+    "test:ux-block26-internal-cost": "tsx src/lib/ux-block26-internal-cost.behavior.ts",
     "test:release-metadata": "tsx ./src/lib/release-metadata.behavior.ts",
     "test:ai-assistance-governance": "tsx ./src/lib/ai-assistance-governance.behavior.ts && tsx ./src/lib/ai-assistance-truth.behavior.ts",
     "test:access-policy": "tsx ./src/lib/access-policy.behavior.ts",
