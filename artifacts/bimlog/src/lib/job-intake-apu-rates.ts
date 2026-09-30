@@ -1,50 +1,17 @@
-export const INTAKE_APU_RATE_DEFAULTS = Object.freeze({
-  drafting: "35.47",
-  bim_coordinator: "37.99",
-});
+export type GovernedApuRateChoice = { id: string; label: string; unitRate: string; unit: string; currency: string; apuPlanVersion: number | null };
 
-export type IntakeApuRateProfile = keyof typeof INTAKE_APU_RATE_DEFAULTS;
-
-export function rateForApuProfile(profile: string) {
-  return Object.prototype.hasOwnProperty.call(INTAKE_APU_RATE_DEFAULTS, profile)
-    ? INTAKE_APU_RATE_DEFAULTS[profile as IntakeApuRateProfile]
-    : null;
+/** Resource roles describe delivery responsibility; they never price a contract item. */
+export function applyAssignmentRole(data: any, assignmentIndex: number, role: string) {
+  if (!data.team?.assignments?.[assignmentIndex]) return data;
+  return { ...data, team: { ...data.team, assignments: data.team.assignments.map((item: any, index: number) => index === assignmentIndex ? { ...item, role } : item) } };
 }
 
-export function profileForApuRate(rate: unknown): IntakeApuRateProfile | "" {
-  const value = String(rate ?? "").trim();
-  return (
-    Object.entries(INTAKE_APU_RATE_DEFAULTS).find(
-      ([, defaultRate]) => defaultRate === value,
-    )?.[0] as IntakeApuRateProfile | undefined
-  ) ?? "";
+export function governedApuRateChoices(value: unknown): GovernedApuRateChoice[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry: any) => entry && entry.id && entry.unitRate && entry.currency).map((entry: any) => ({ id: String(entry.id), label: String(entry.label || entry.id), unitRate: String(entry.unitRate), unit: String(entry.unit || "Hours"), currency: String(entry.currency), apuPlanVersion: Number.isSafeInteger(Number(entry.apuPlanVersion)) && Number(entry.apuPlanVersion) > 0 ? Number(entry.apuPlanVersion) : null }));
 }
 
-export function applyAssignmentApuRate(
-  data: any,
-  assignmentIndex: number,
-  rate: string,
-  role?: string,
-) {
-  const assignment = data.team.assignments[assignmentIndex];
-  if (!assignment?.scopeItemId) return data;
-  return {
-    ...data,
-    scopeItems: data.scopeItems.map((item: any) =>
-      item.id === assignment.scopeItemId
-        ? { ...item, billingHourlyRate: rate }
-        : item,
-    ),
-    team: {
-      ...data.team,
-      assignments: data.team.assignments.map((item: any, index: number) =>
-        index === assignmentIndex && role ? { ...item, role } : item,
-      ),
-    },
-    review: {
-      ...data.review,
-      scopeConfirmed: false,
-      pricingConfirmed: false,
-    },
-  };
-}
+/** @deprecated Kept for older callers. Rate is deliberately ignored. */
+export function applyAssignmentApuRate(data: any, assignmentIndex: number, _rate: string, role?: string) { return role ? applyAssignmentRole(data, assignmentIndex, role) : data; }
+export function rateForApuProfile(_profile: string) { return null; }
+export function profileForApuRate(_rate: unknown) { return ""; }
