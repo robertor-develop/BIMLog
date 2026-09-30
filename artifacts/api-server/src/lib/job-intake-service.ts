@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { isNamedResourceAssignment } from "./resource-demand-contract";
 import path from "node:path";
 import { pool } from "@workspace/db";
 import { storage } from "./storage-adapter";
@@ -1166,6 +1167,9 @@ async function createCoreActivationWithClient(
     }
   }
   for (const assignment of input.data.team.assignments) {
+    // Generic Intake demand remains in the immutable Intake plan. It is not a
+    // person assignment and must never create an "Unassigned resource" row.
+    if (!isNamedResourceAssignment(assignment)) continue;
     const linked = workItemByScope.get(assignment.scopeItemId);
     if (!linked)
       throw new FinancialControlError(
@@ -1193,7 +1197,7 @@ async function createCoreActivationWithClient(
           scopedTaskId,
           assignment.id,
           assignment.userId,
-          assignment.personName || "Unassigned resource",
+          assignment.personName || "Assigned project member",
           assignment.role,
           assignment.employmentType,
           assignment.plannedHours,
