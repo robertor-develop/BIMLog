@@ -40,3 +40,14 @@ export function governedDeliveryState(runtime: any) {
     completed: steps.filter((step:any) => step.status === "complete").length, total: steps.length,
     nextAction: runtime?.status === "complete" ? "complete" : steps.some((step:any) => step.status !== "complete") ? "prepare" : phase?.qcRequired ? "review" : phase?.approvalRequired ? "approve" : "advance" };
 }
+
+export function shopDrawingEvidenceContinuity(input: { packages?: any[]; packageTasks?: any[]; deliverables?: any[]; connections?: any[] }) {
+  const packageTasks = input.packageTasks ?? [], deliverables = input.deliverables ?? [], connections = input.connections ?? [];
+  return (input.packages ?? []).filter(row => row.packageType === "shop_drawing").map(pkg => {
+    const taskIds = packageTasks.filter(link => link.packageId === pkg.id).map(link => link.taskId);
+    const packageConnections = connections.filter(link => (link.targetType === "work_package" && link.targetId === pkg.id) || (link.targetType === "task" && taskIds.includes(link.targetId)));
+    const taskDeliverables = deliverables.filter(link => taskIds.includes(link.taskId));
+    return { packageId:pkg.id, taskIds, submittals:taskDeliverables.filter(link => link.deliverableType === "submittal" || link.deliverableType === "shop_drawing").length,
+      rfis:packageConnections.filter(link => link.entityType === "rfi").length, evidence:taskDeliverables.length + packageConnections.length };
+  });
+}

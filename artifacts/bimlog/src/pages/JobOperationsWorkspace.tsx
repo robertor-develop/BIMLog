@@ -26,6 +26,7 @@ import { BudgetGovernancePanel } from "@/components/job-operations/BudgetGoverna
 import { TimeApprovalPanel } from "@/components/job-operations/TimeApprovalPanel";
 import { ProjectControlsDashboard } from "@/components/job-operations/ProjectControlsDashboard";
 import { WorkItemDeliveryWorkflowPanel } from "@/components/job-operations/WorkItemDeliveryWorkflowPanel";
+import { shopDrawingEvidenceContinuity } from "@/lib/shop-drawing-delivery";
 import { EdtPlanPreviewPanel } from "@/components/job-operations/EdtPlanPreviewPanel";
 import { EdtDirectorAssignmentPanel } from "@/components/job-operations/EdtDirectorAssignmentPanel";
 import {
@@ -281,6 +282,7 @@ export function DocumentConnectionsPanel({
     : [];
   const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
   const packages = Array.isArray(data?.packages) ? data.packages : [];
+  const shopDrawingContinuity = shopDrawingEvidenceContinuity({ packages, packageTasks:data?.packageTasks, deliverables:data?.deliverables, connections });
   const targetItems = targetType === "task" ? tasks : packages;
   const canControl = (item: any) =>
     item?.canControl === true || data?.canManage === true;
@@ -1607,6 +1609,10 @@ export function JobOperationsWorkspace() {
               <div className="jo-stat">
                 <strong>{data.packageSummary?.approved ?? 0}</strong>
                 <span>{tt("Approved packages", "Paquetes aprobados")}</span>
+              </div>
+              <div className="jo-stat">
+                <strong>{shopDrawingContinuity.filter(row => row.evidence > 0).length}/{shopDrawingContinuity.length}</strong>
+                <span>{tt("Shop drawings with connected evidence", "Planos de taller con evidencia conectada")}</span>
               </div>
               {data.capabilities?.budget && (
                 <>
