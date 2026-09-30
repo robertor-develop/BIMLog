@@ -12,6 +12,7 @@ namespace BIMLogLensNext
         public int ServerId { get; set; }
         public string ViewpointId { get; set; }
         public string LifecycleStatus { get; set; }
+        public string WorkflowStatus { get; set; }
         public int RevisionNumber { get; set; }
         public string DisplayId { get; set; }
         public string Note { get; set; }
@@ -144,6 +145,8 @@ namespace BIMLogLensNext
                 if (!IsLifecycle(record.LifecycleStatus))
                     throw new InvalidDataException("The BIMLog viewpoint lifecycle state is invalid.");
                 if (!string.Equals(record.LifecycleStatus, "active", StringComparison.Ordinal)) continue;
+                if (!IsWorkflowStatus(record.WorkflowStatus))
+                    throw new InvalidDataException("The BIMLog viewpoint workflow status is invalid.");
 
                 ValidateActiveRecordIntegrity(record);
                 if (!serverIds.Add(record.ServerId))
@@ -248,6 +251,13 @@ namespace BIMLogLensNext
             string.Equals(value, "active", StringComparison.Ordinal) ||
             string.Equals(value, "superseded", StringComparison.Ordinal) ||
             string.Equals(value, "voided", StringComparison.Ordinal);
+
+        private static bool IsWorkflowStatus(string value) =>
+            string.Equals(value, "open", StringComparison.Ordinal) ||
+            string.Equals(value, "follow_up", StringComparison.Ordinal) ||
+            string.Equals(value, "waiting_design", StringComparison.Ordinal) ||
+            string.Equals(value, "approved", StringComparison.Ordinal) ||
+            string.Equals(value, "resolved", StringComparison.Ordinal);
 
         private static bool IsSha256(string value) =>
             value != null && value.Length == 64 && value.All(character =>

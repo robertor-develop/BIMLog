@@ -13,6 +13,8 @@ namespace BIMLogLensNext
         public const string ViewpointsElementName = "viewpoints";
         public const string ViewFolderElementName = "viewfolder";
         public const string ViewFolderName = "BIMLog Viewpoints";
+        public const string OpenFolderName = "Open";
+        public const string ResolvedFolderName = "Resolved";
         public const string XmlSchemaInstanceNamespace = "http://www.w3.org/2001/XMLSchema-instance";
         public const string NavisworksExchangeSchemaLocation = "http://download.autodesk.com/us/navisworks/schemas/nw-exchange-12.0.xsd";
 
@@ -50,7 +52,8 @@ namespace BIMLogLensNext
                     LensNextXmlUpVector.FromOptionalValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlProjection.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlCameraScale.FromOptionalValidatedCamera(ordered[index].PackageCamera),
-                    LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson, LensNextXmlLinearUnit.FromCamera(ordered[index].PackageCamera)));
+                    LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson, LensNextXmlLinearUnit.FromCamera(ordered[index].PackageCamera)),
+                    string.Equals(ordered[index].WorkflowStatus, "resolved", StringComparison.Ordinal) ? ResolvedFolderName : OpenFolderName);
             WriteDocument(destinationPath, views);
             var outputPath = Path.GetFullPath(destinationPath);
             ValidateWrittenDocument(outputPath, result.SerializedCount);
@@ -89,10 +92,12 @@ namespace BIMLogLensNext
                 throw new InvalidDataException("The written BIMLog XML export Navisworks schema declaration is invalid.");
             var viewpoints = document.DocumentElement.SelectNodes(ViewpointsElementName);
             var folders = document.DocumentElement.SelectNodes(ViewpointsElementName + "/" + ViewFolderElementName);
-            if (viewpoints.Count != 1 || folders.Count != 1 ||
-                !string.Equals(((XmlElement)folders[0]).GetAttribute("name"), ViewFolderName, StringComparison.Ordinal))
+            if (viewpoints.Count != 1 || folders.Count != 3 ||
+                !string.Equals(((XmlElement)folders[0]).GetAttribute("name"), ViewFolderName, StringComparison.Ordinal) ||
+                !string.Equals(((XmlElement)folders[1]).GetAttribute("name"), OpenFolderName, StringComparison.Ordinal) ||
+                !string.Equals(((XmlElement)folders[2]).GetAttribute("name"), ResolvedFolderName, StringComparison.Ordinal))
                 throw new InvalidDataException("The written BIMLog XML export structure is invalid.");
-            if (((XmlElement)folders[0]).SelectNodes("view").Count != expectedViewCount)
+            if (((XmlElement)folders[0]).SelectNodes(".//view").Count != expectedViewCount)
                 throw new InvalidDataException("The written BIMLog XML export viewpoint count does not match the serialized result.");
 
             if (!string.Equals(document.DocumentElement.GetAttribute("units"), "ft", StringComparison.Ordinal))
@@ -139,8 +144,12 @@ namespace BIMLogLensNext
                     writer.WriteStartElement(ViewpointsElementName);
                     writer.WriteStartElement(ViewFolderElementName);
                     writer.WriteAttributeString("name", ViewFolderName);
-                    foreach (var view in views)
+                    foreach (var folderName in new[] { OpenFolderName, ResolvedFolderName })
                     {
+                      writer.WriteStartElement(ViewFolderElementName);
+                      writer.WriteAttributeString("name", folderName);
+                      foreach (var view in views.Where(candidate => string.Equals(candidate.FolderName, folderName, StringComparison.Ordinal)))
+                      {
                         writer.WriteStartElement("view");
                         writer.WriteAttributeString("name", view.Name);
                         writer.WriteAttributeString("guid", view.Guid.ToString("D"));
@@ -218,6 +227,8 @@ namespace BIMLogLensNext
                             writer.WriteEndElement();
                         }
                         writer.WriteEndElement();
+                      }
+                      writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
                     writer.WriteEndElement();
@@ -260,7 +271,7 @@ namespace BIMLogLensNext
 
         private sealed class LensNextXmlExportView
         {
-            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection, LensNextXmlCameraScale cameraScale, LensNextXmlSectioning sectioning)
+            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection, LensNextXmlCameraScale cameraScale, LensNextXmlSectioning sectioning, string folderName)
             {
                 Name = name;
                 Guid = guid;
@@ -270,6 +281,7 @@ namespace BIMLogLensNext
                 Projection = projection;
                 CameraScale = cameraScale;
                 Sectioning = sectioning;
+                FolderName = folderName;
             }
             public string Name { get; }
             public Guid Guid { get; }
@@ -279,6 +291,7 @@ namespace BIMLogLensNext
             public LensNextXmlProjection Projection { get; }
             public LensNextXmlCameraScale CameraScale { get; }
             public LensNextXmlSectioning Sectioning { get; }
+            public string FolderName { get; }
         }
     }
 }

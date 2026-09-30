@@ -25,6 +25,7 @@ namespace BIMLogLensNext
             XmlEncoding = "utf-8";
             XmlRoot = LensNextXmlDocumentShellWriter.RootElementName;
             ViewFolderName = LensNextXmlDocumentShellWriter.ViewFolderName;
+            OrganizationVersion = 2;
             UnitsStatus = "NOT_EMITTED";
             SchemaStatus = "PROVEN";
             ValidationResult = validationResult;
@@ -40,6 +41,7 @@ namespace BIMLogLensNext
         public string XmlEncoding { get; }
         public string XmlRoot { get; }
         public string ViewFolderName { get; }
+        public int OrganizationVersion { get; }
         public string UnitsStatus { get; }
         public string SchemaStatus { get; }
         public string ValidationResult { get; }

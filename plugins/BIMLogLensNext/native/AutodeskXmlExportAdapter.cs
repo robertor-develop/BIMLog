@@ -15,6 +15,7 @@ namespace BIMLogLensNext.Native
             public int ServerId { get; set; }
             public string ViewpointId { get; set; }
             public string LifecycleStatus { get; set; }
+            public string WorkflowStatus { get; set; }
             public int RevisionNumber { get; set; }
             public string DisplayId { get; set; }
             public string Note { get; set; }
@@ -50,7 +51,7 @@ namespace BIMLogLensNext.Native
                 DefaultExt = "xml",
                 AddExtension = true,
                 OverwritePrompt = true,
-                FileName = "BIMLog-Viewpoints.xml"
+                FileName = "BIMLog-Viewpoints-V2.xml"
             })
             {
                 if (dialog.ShowDialog() != DialogResult.OK)
@@ -82,6 +83,7 @@ namespace BIMLogLensNext.Native
                 ServerId = wire.ServerId,
                 ViewpointId = wire.ViewpointId,
                 LifecycleStatus = wire.LifecycleStatus,
+                WorkflowStatus = wire.WorkflowStatus,
                 RevisionNumber = wire.RevisionNumber,
                 DisplayId = wire.DisplayId,
                 Note = wire.Note,

@@ -834,6 +834,7 @@ export function createLensNextBridgeClient(
         return {
           ProjectId: issue.identity.projectId, ServerId: issue.identity.serverId,
           ViewpointId: issue.identity.viewpointId, LifecycleStatus: issue.identity.lifecycleStatus,
+          WorkflowStatus: issue.status,
           RevisionNumber: issue.identity.revisionNumber, DisplayId: issue.displayId, Note: issue.note,
           Priority: issue.priority, CapturedAt: issue.capturedAt, VisualStateDigest: stored.visualStateDigest,
           Package: {
