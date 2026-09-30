@@ -52320,6 +52320,94 @@
       ],
       "reviewedChangeSha256": "a4e764fae5643aa68a4d52722b1864b3756f83533758eb53192c46d0d676a498",
       "reason": "Authenticated production smoke exposed and corrected the obsolete Job Intake return alias before release closure."
+    },
+    {
+      "taskId": "ux-block31-redline-xml-v2",
+      "reviewedThroughCommit": "8a23eedb1a747e8b130a92eeecf6f4c709b1a74b",
+      "reviewedAt": "2026-09-30T19:30:00Z",
+      "status": "candidate",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "plugin",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The missing redline persistence and organized filtered XML workflow reported by Ruben are implemented and retained as explicit release and field-acceptance work."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX151-UX155 preserve native Navisworks redlines during governed Saved Viewpoint publication and add filtered XML V2 Open/Resolved organization. Existing identity, authorization, confirmation, schema, customer data, reporting, and standards authority remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "44d64e4d54c6660662f41246a4cb3af3aa166a002287216b6b11801641d21630",
+      "reason": "Ruben reported these two Lens Next deliverables as still missing; this block implements them without claiming publication or field acceptance."
     }
   ]
 }

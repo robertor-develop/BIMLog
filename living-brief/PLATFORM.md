@@ -33,6 +33,12 @@ It changes only when the code structure or curated architectural facts change.
 - A runtime closure whose source identity matches the candidate is reused only after the complete packaged tree, dependency set, source identity and Living Brief identity validate.
 - A partial or invalid source-matched closure is retired without recursive pre-build deletion and rebuilt from the exact installed, lock-bound dependency graph before publication.
 
+## Lens Next redline and XML V2 integration
+
+- The Lens Next web workspace sends workflow status with each authoritative Visual Package and scopes XML V2 candidates to the current project-filtered result set. The native bridge writes deterministic BIMLog Viewpoints/Open and BIMLog Viewpoints/Resolved folders without reading or mutating existing Saved Viewpoints during export.
+- Saved Viewpoint publication preserves native redline state through an independent Navisworks copy and reports the preservation result. Existing project/model authorization, explicit publishing confirmation, idempotency and non-redline behavior remain unchanged.
+- This five-build source block is locally verified but unpublished. Production Platform and installed Native acceptance remain at the prior accepted P36 source until the next ten-build publication boundary.
+
 ## Critical Database Facts — Read Before Every Session
 - Identity candidate I001–I005 adds nullable company retirement identity/time, guarded collision prevention and fresh request authority. Apply and verify `lib/db/scripts/company-identity-lifecycle.sql` before deploying consumers; no production migration or nine-project binding repair is implied by local tests. Reconciliation appends versions and preserves historical company rows. Invitation token completion remains separate I006–I010 work.
 - PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.

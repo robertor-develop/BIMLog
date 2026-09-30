@@ -3913,3 +3913,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Repair the full-gate Axios advisory failure through the governed dependency override and verify provenance plus a clean production audit.
 - [x] Repair the production-smoke 404 from Email setup by returning to canonical `/projects/:id/intake?stage=delivery` and bind the route into UX147 regression coverage.
 - [ ] Pass the complete exact-head pre-push gate, push UX146–UX150 once, publish the accumulated UX141–UX150 release without Replit Agents, and run full authenticated visible-Chrome smoke.
+## Experience makeover Block 31 — redline persistence and XML V2 organization — 2026-09-30
+
+- [x] UX151–UX155 preserve native redline/markup state through Saved Viewpoint publication and report the preservation method without changing existing non-redline publication behavior.
+- [x] Export the current filtered authoritative Lens Next set as XML V2 and organize imported Navisworks viewpoints into deterministic Open and Resolved folders.
+- [x] Update focused core, dual-year native, frontend source-contract and in-product guide coverage for the exact workflow.
+- [ ] Pass the complete exact-head pre-push gate and push UX151–UX155 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX156–UX160.

@@ -671,7 +671,7 @@ export function LensNextPanelView({
             <ol>
               <li><strong>Create Issue:</strong> open <em>Create BIMLog Issue</em>, enter the issue details, choose <em>Review Issue Creation</em>, then <em>Confirm and Create BIMLog Issue</em>.</li>
               <li><strong>Open Working View:</strong> select an issue in the issue list, then choose <em>Open Working View</em> in its details.</li>
-              <li><strong>Export Viewpoints XML:</strong> choose <em>Export Viewpoints XML</em> in the active-model section and select a destination. In Navisworks, open Saved Viewpoints and choose <em>Import Viewpoints</em> to import that file.</li>
+              <li><strong>Export filtered XML V2:</strong> set the status, search, trade, floor, company, or report filters you want, choose <em>Export filtered XML V2</em>, and select a destination. In Navisworks, open Saved Viewpoints and choose <em>Import Viewpoints</em>; BIMLog places the exported set under <em>BIMLog Viewpoints</em> with <em>Open</em> and <em>Resolved</em> folders.</li>
               <li><strong>Link an RFI:</strong> select an issue, open <em>Linked BIMLog Items</em>, choose <em>Link RFI</em>, select an existing RFI, and confirm with <em>Link RFI</em>.</li>
               <li><strong>Link a Submittal:</strong> select an issue, open <em>Linked BIMLog Items</em>, choose <em>Link Submittal</em>, select an existing Submittal, and confirm with <em>Link Submittal</em>.</li>
               <li><strong>Add a reference:</strong> select an issue and choose <em>Add Reference Attachment</em> under <em>Reference Attachments</em>. PDF, JPG, JPEG, and PNG files up to 5 MB are accepted.</li>
