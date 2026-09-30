@@ -21,7 +21,7 @@ export function resolveProductionSourceCommit(candidate: ProductionSourceCandida
     if (candidate.headTree.trim().toLowerCase() !== candidate.parentTree?.trim().toLowerCase()) {
       throw new Error("Replit publish wrapper changes the verified parent source tree.");
     }
-    return parentCommit;
+    if (!candidate.replitEnvironment) return parentCommit;
   }
   if (!candidate.replitEnvironment) return headCommit;
 

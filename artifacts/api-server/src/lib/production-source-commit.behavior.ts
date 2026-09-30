@@ -9,6 +9,7 @@ assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, r
 assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, headSubject: "Published your App", parentCommit: remote, parentTree: tree, replitEnvironment: false }), remote);
 assert.throws(() => resolveProductionSourceCommit({ headCommit: head, headTree: tree, headSubject: "Published your App", parentCommit: remote, parentTree: "d".repeat(40), replitEnvironment: false }), /changes/);
 assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, remoteMasterCommit: remote, remoteMasterTree: tree, remoteMasterIsAncestor: true, replitEnvironment: true }), remote);
+assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, headSubject: "Published your App", parentCommit: "d".repeat(40), parentTree: tree, remoteMasterCommit: remote, remoteMasterTree: tree, remoteMasterIsAncestor: true, replitEnvironment: true }), remote);
 assert.throws(() => resolveProductionSourceCommit({ headCommit: head, headTree: tree, remoteMasterCommit: remote, remoteMasterTree: "d".repeat(40), remoteMasterIsAncestor: true, replitEnvironment: true }), /differs/);
 assert.throws(() => resolveProductionSourceCommit({ headCommit: head, headTree: tree, remoteMasterCommit: remote, remoteMasterTree: tree, remoteMasterIsAncestor: false, replitEnvironment: true }), /not descended/);
 
