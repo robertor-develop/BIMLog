@@ -140,6 +140,32 @@ ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS start_date date;
 ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS due_date date;
 ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS predecessor_task_ids text[] NOT NULL DEFAULT '{}'::text[];
 ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1;
+CREATE TABLE IF NOT EXISTS job_activation_floor_hour_estimate_versions(
+  id text PRIMARY KEY,
+  company_id integer NOT NULL REFERENCES companies(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  intake_id text NOT NULL REFERENCES job_intakes(id),
+  work_item_id text NOT NULL REFERENCES job_activation_work_items(id),
+  location_identity text NOT NULL,
+  version integer NOT NULL,
+  approved_hours numeric(30,6) NOT NULL,
+  excess_hourly_rate numeric(30,6) NOT NULL,
+  internal_cost_policy_version_id text NOT NULL REFERENCES company_internal_cost_policy_versions(id),
+  status text NOT NULL DEFAULT 'proposed',
+  reason text NOT NULL,
+  content_fingerprint text NOT NULL,
+  supersedes_id text REFERENCES job_activation_floor_hour_estimate_versions(id),
+  proposed_by_id integer NOT NULL REFERENCES users(id),
+  approved_by_id integer REFERENCES users(id),
+  proposed_at timestamptz NOT NULL DEFAULT now(),
+  decided_at timestamptz,
+  CONSTRAINT job_activation_floor_hour_estimate_status_chk CHECK(status IN('proposed','approved','rejected','superseded')),
+  CONSTRAINT job_activation_floor_hour_estimate_values_chk CHECK(version>0 AND approved_hours>0 AND excess_hourly_rate>=0),
+  CONSTRAINT job_activation_floor_hour_estimate_fingerprint_chk CHECK(content_fingerprint ~ '^[a-f0-9]{64}$'),
+  CONSTRAINT job_activation_floor_hour_estimate_version_uidx UNIQUE(project_id,work_item_id,location_identity,version)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS job_activation_floor_hour_estimate_active_uidx ON job_activation_floor_hour_estimate_versions(project_id,work_item_id,location_identity) WHERE status='approved';
+CREATE INDEX IF NOT EXISTS job_activation_floor_hour_estimate_project_idx ON job_activation_floor_hour_estimate_versions(project_id,status,proposed_at DESC);
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_version_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_version_chk CHECK(version>0); END IF; END $$;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_progress_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_progress_chk CHECK(progress_percent>=0 AND progress_percent<=100); END IF; END $$;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_dates_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_dates_chk CHECK(start_date IS NULL OR due_date IS NULL OR start_date<=due_date); END IF; END $$;
