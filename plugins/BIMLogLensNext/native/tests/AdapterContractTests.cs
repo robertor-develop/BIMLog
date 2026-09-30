@@ -66,6 +66,7 @@ namespace BIMLogLensNext.Native.Tests
                 Run("xml_export_failure_preserves_existing_file", XmlExportFailurePreservesExistingFile);
                 Run("lens_next_xml_export_uses_authoritative_exporter_without_saved_viewpoint_mutation", LensNextXmlExportUsesAuthoritativeExporter);
                 Run("lens_next_xml_export_bridge_is_scoped_and_cancel_safe", LensNextXmlExportBridgeIsScopedAndCancelSafe);
+                Run("published_viewpoint_preserves_native_redlines", PublishedViewpointPreservesNativeRedlines);
                 Run("runtime_ignores_configured_project_when_model_marker_is_absent", RuntimeIgnoresConfiguredProjectFallback);
                 Run("health_tick_does_not_mutate_floating_window", HealthTickDoesNotMutateFloatingWindow);
                 Run("header_reports_current_version_beside_live", HeaderReportsCurrentVersionBesideLive);
@@ -589,6 +590,16 @@ namespace BIMLogLensNext.Native.Tests
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
             Equal(ReleaseIdentity.ProductVersionLabel, LensNextConstants.ProductVersionLabel);
+        }
+
+        private static void PublishedViewpointPreservesNativeRedlines()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskPublishedViewpointAdapter.cs")));
+            True(source.Contains("HasRedline"));
+            True(source.Contains("CreateUniqueCopy"));
+            True(source.Contains("redlinePersistence"));
+            True(source.Contains("A native redline Saved Viewpoint is required"));
+            True(source.Contains("did not preserve its native redline markup"));
         }
 
         private static void RuntimeIgnoresConfiguredProjectFallback()

@@ -88,6 +88,7 @@ namespace BIMLogLensNext.Tests
                 Run("xml_document_shell_is_deterministic_and_empty", XmlDocumentShellIsDeterministicAndEmpty);
                 Run("xml_document_shell_rejects_invalid_output_path", XmlDocumentShellRejectsInvalidOutputPath);
                 Run("xml_export_inputs_are_stably_ordered", XmlExportInputsAreStablyOrdered);
+                Run("xml_v2_organizes_open_and_resolved_workflow_status", XmlV2OrganizesOpenAndResolvedWorkflowStatus);
                 Run("xml_export_input_ties_use_server_id", XmlExportInputTiesUseServerId);
                 Run("xml_export_inputs_reject_cross_project_and_invalid_package", XmlExportInputsRejectCrossProjectAndInvalidPackage);
                 Run("xml_export_inputs_preserve_active_lifecycle_policy", XmlExportInputsPreserveActiveLifecyclePolicy);
@@ -209,12 +210,14 @@ namespace BIMLogLensNext.Tests
                     document.DocumentElement.GetAttribute("noNamespaceSchemaLocation", LensNextXmlDocumentShellWriter.XmlSchemaInstanceNamespace));
                 var viewpoints = document.DocumentElement.SelectNodes("viewpoints");
                 Equal(1, viewpoints.Count);
-                var folders = document.DocumentElement.SelectNodes("viewpoints/viewfolder");
-                Equal(1, folders.Count);
+                var folders = document.DocumentElement.SelectNodes("viewpoints//viewfolder");
+                Equal(3, folders.Count);
                 var folder = (XmlElement)folders[0];
                 Equal(1, folder.Attributes.Count);
                 Equal(LensNextXmlDocumentShellWriter.ViewFolderName, folder.GetAttribute("name"));
-                Equal(0, folder.ChildNodes.Count);
+                Equal(LensNextXmlDocumentShellWriter.OpenFolderName, ((XmlElement)folders[1]).GetAttribute("name"));
+                Equal(LensNextXmlDocumentShellWriter.ResolvedFolderName, ((XmlElement)folders[2]).GetAttribute("name"));
+                Equal(2, folder.ChildNodes.Count);
             }
             finally
             {
@@ -249,7 +252,7 @@ namespace BIMLogLensNext.Tests
                 Equal("13,12,11", string.Join(",", ordered.Select(value => value.ServerId)));
                 var xml = File.ReadAllText(path);
                 True(xml.Contains("<position>"));
-                Equal(1, new XmlDocumentShell(path).ViewFolderCount);
+                Equal(3, new XmlDocumentShell(path).ViewFolderCount);
                 Equal("VP-13,VP-12,VP-11", string.Join(",", new XmlDocumentShell(path).ViewNames));
                 True(new XmlDocumentShell(path).ViewGuids.All(value => Guid.TryParseExact(value, "D", out _)));
             }
@@ -261,6 +264,30 @@ namespace BIMLogLensNext.Tests
             var captured = DateTimeOffset.Parse("2026-03-01T00:00:00Z");
             var tied = new[] { ExportInput(30, 2, captured), ExportInput(10, 2, captured), ExportInput(20, 2, captured) };
             Equal("10,20,30", string.Join(",", LensNextXmlExportInputSelector.SelectOrdered(26, tied).Select(value => value.ServerId)));
+        }
+
+        private static void XmlV2OrganizesOpenAndResolvedWorkflowStatus()
+        {
+            var open = ExportInput(41, 1, null);
+            var resolved = ExportInput(42, 2, null);
+            resolved.WorkflowStatus = "resolved";
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-v2-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "organized.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { resolved, open });
+                var document = new XmlDocument { XmlResolver = null };
+                document.Load(path);
+                Equal("VP-41", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder[@name='BIMLog Viewpoints']/viewfolder[@name='Open']/view")).GetAttribute("name"));
+                Equal("VP-42", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder[@name='BIMLog Viewpoints']/viewfolder[@name='Resolved']/view")).GetAttribute("name"));
+                Equal(2, document.SelectNodes("/exchange/viewpoints//view").Count);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+
+            var invalid = ExportInput(43, 1, null);
+            invalid.WorkflowStatus = "not-a-workflow-status";
+            Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { invalid }));
         }
 
         private static void XmlExportInputsRejectCrossProjectAndInvalidPackage()
@@ -516,7 +543,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "position.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/position/pos3f").Count);
+                Equal(1, document.SelectNodes("/exchange/viewpoints//view/viewpoint/camera/position/pos3f").Count);
                 var raw = File.ReadAllText(path);
                 foreach (var forbidden in new[] { "up", "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
@@ -682,8 +709,8 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "scope.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/position/pos3f").Count);
-                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/rotation/quaternion").Count);
+                Equal(1, document.SelectNodes("/exchange/viewpoints//view/viewpoint/camera/position/pos3f").Count);
+                Equal(1, document.SelectNodes("/exchange/viewpoints//view/viewpoint/camera/rotation/quaternion").Count);
                 var raw = File.ReadAllText(path);
                 foreach (var forbidden in new[] { "<up", "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
@@ -706,7 +733,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "rotation.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, records);
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                return document.SelectNodes("/exchange/viewpoints/viewfolder/view").Cast<XmlElement>().ToDictionary(
+                return document.SelectNodes("/exchange/viewpoints//view").Cast<XmlElement>().ToDictionary(
                     view => Guid.Parse(view.GetAttribute("guid")),
                     view =>
                     {
@@ -798,7 +825,7 @@ namespace BIMLogLensNext.Tests
                 True(File.ReadAllBytes(beforePath).SequenceEqual(File.ReadAllBytes(afterPath)));
                 Equal("Feet", input.PackageCamera.SourceLinearUnit);
                 var document = new XmlDocument { XmlResolver = null }; document.Load(afterPath);
-                var quaternion = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/camera/rotation/quaternion");
+                var quaternion = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint/camera/rotation/quaternion");
                 Equal(input.PackageCamera.Rotation.A.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("a"));
                 Equal(input.PackageCamera.Rotation.B.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("b"));
                 Equal(input.PackageCamera.Rotation.C.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("c"));
@@ -845,9 +872,9 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "missing.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                True(document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/up") == null);
-                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/position/pos3f").Count);
-                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/rotation/quaternion").Count);
+                True(document.SelectSingleNode("/exchange/viewpoints//view/viewpoint/up") == null);
+                Equal(1, document.SelectNodes("/exchange/viewpoints//view/viewpoint/camera/position/pos3f").Count);
+                Equal(1, document.SelectNodes("/exchange/viewpoints//view/viewpoint/camera/rotation/quaternion").Count);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -898,7 +925,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "scope.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f").Count);
+                Equal(1, document.SelectNodes("/exchange/viewpoints//view/viewpoint/up/vec3f").Count);
                 var raw = File.ReadAllText(path);
                 foreach (var forbidden in new[] { "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
@@ -945,11 +972,11 @@ namespace BIMLogLensNext.Tests
                 LensNextXmlDocumentShellWriter.Write(second, 26, new[] { input });
                 True(File.ReadAllBytes(first).SequenceEqual(File.ReadAllBytes(second)));
                 var document = new XmlDocument { XmlResolver = null }; document.Load(first);
-                var camera = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/camera");
+                var camera = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint/camera");
                 Equal("ortho", camera.GetAttribute("projection"));
                 Equal((-12.5d).ToString("R", CultureInfo.InvariantCulture), ((XmlElement)camera.SelectSingleNode("position/pos3f")).GetAttribute("x"));
                 Equal("-0.1", ((XmlElement)camera.SelectSingleNode("rotation/quaternion")).GetAttribute("a"));
-                Equal("-0.25", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f")).GetAttribute("x"));
+                Equal("-0.25", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint/up/vec3f")).GetAttribute("x"));
                 Equal("Feet", input.PackageCamera.SourceLinearUnit);
                 Equal("Orthographic", input.PackageCamera.Projection);
             }
@@ -966,7 +993,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "scope.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                var camera = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/camera");
+                var camera = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint/camera");
                 Equal(5, camera.Attributes.Count);
                 Equal("persp", camera.GetAttribute("projection"));
                 True(camera.HasAttribute("aspect"));
@@ -991,7 +1018,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "projection.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                return ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/camera")).GetAttribute("projection");
+                return ((XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint/camera")).GetAttribute("projection");
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -1067,7 +1094,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "orthographic-fov.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
+                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint");
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
                 False(viewpoint.HasAttribute("fov")); False(viewpoint.HasAttribute("focal"));
                 Equal(1d, double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture));
@@ -1091,7 +1118,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "fov-presence.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
+                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint");
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
                 False(viewpoint.HasAttribute("fov")); False(viewpoint.HasAttribute("focal"));
                 Equal(0.785398d, double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture));
@@ -1156,7 +1183,7 @@ namespace BIMLogLensNext.Tests
                 var result = LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 Equal(1, result.RequestedCount); Equal(1, result.SerializedCount); Equal(0, result.SkippedCount);
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
+                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint");
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
                 False(viewpoint.HasAttribute("focal")); False(viewpoint.HasAttribute("fov"));
                 Equal(5, camera.Attributes.Count); Equal("persp", camera.GetAttribute("projection"));
@@ -1177,7 +1204,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "scope.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
+                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint");
                 Equal(0, viewpoint.Attributes.Count);
                 False(viewpoint.HasAttribute("focal"));
                 False(viewpoint.HasAttribute("fov"));
@@ -1202,7 +1229,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "scale.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
+                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint");
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
                 return new[]
                 {
@@ -1572,7 +1599,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "up.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                var vector = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f");
+                var vector = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint/up/vec3f");
                 return new[] { "x", "y", "z" }.Select(attribute =>
                     double.Parse(vector.GetAttribute(attribute), CultureInfo.InvariantCulture)).ToArray();
             }
@@ -1588,7 +1615,7 @@ namespace BIMLogLensNext.Tests
                 var path = Path.Combine(directory, "position.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
-                var position = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/camera/position/pos3f");
+                var position = (XmlElement)document.SelectSingleNode("/exchange/viewpoints//view/viewpoint/camera/position/pos3f");
                 return new[]
                 {
                     double.Parse(position.GetAttribute("x"), CultureInfo.InvariantCulture),
@@ -1605,6 +1632,7 @@ namespace BIMLogLensNext.Tests
             return new LensNextXmlExportInput
             {
                 ProjectId = 26, ServerId = serverId, ViewpointId = "VP-" + serverId,
+                WorkflowStatus = "open",
                 LifecycleStatus = "active", RevisionNumber = 1, Priority = priority, CapturedAt = capturedAt,
                 VisualStateDigest = digest, PackageProjectId = 26, PackageServerId = serverId,
                 PackageViewpointId = "VP-" + serverId, PackageLifecycleStatus = "active",
@@ -1689,8 +1717,8 @@ namespace BIMLogLensNext.Tests
                 GenerateBuild24Evidence(first, firstComparison); GenerateBuild24Evidence(second, secondComparison);
                 True(File.ReadAllBytes(first).SequenceEqual(File.ReadAllBytes(second)));
                 var document = new XmlDocument { XmlResolver = null }; document.Load(first);
-                Equal(3, document.SelectNodes("/exchange/viewpoints/viewfolder/view").Count);
-                Equal("VP-160,VP-161,VP-172", string.Join(",", document.SelectNodes("/exchange/viewpoints/viewfolder/view").Cast<XmlElement>().Select(value => value.GetAttribute("name"))));
+                Equal(3, document.SelectNodes("/exchange/viewpoints//view").Count);
+                Equal("VP-160,VP-161,VP-172", string.Join(",", document.SelectNodes("/exchange/viewpoints//view").Cast<XmlElement>().Select(value => value.GetAttribute("name"))));
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -1702,7 +1730,7 @@ namespace BIMLogLensNext.Tests
             Equal(3, result.Summary.RequestedCount.Value); Equal(3, result.Summary.SerializedCount.Value); Equal(0, result.Summary.SkippedCount.Value);
             Equal("SUCCESS", result.Summary.ExportResult); Equal("PASS", result.Summary.ValidationResult);
             var document = new XmlDocument { XmlResolver = null }; document.Load(xmlPath);
-            var views = document.SelectNodes("/exchange/viewpoints/viewfolder/view").Cast<XmlElement>().ToArray(); Equal(3, views.Length);
+            var views = document.SelectNodes("/exchange/viewpoints//view").Cast<XmlElement>().ToArray(); Equal(3, views.Length);
             var ordered = records.OrderBy(value => value.Priority).ToArray();
             var comparisons = new List<object>();
             for (var index = 0; index < ordered.Length; index++)
@@ -1764,9 +1792,9 @@ namespace BIMLogLensNext.Tests
             {
                 var document = new XmlDocument { XmlResolver = null };
                 document.Load(path);
-                ViewFolderCount = document.DocumentElement.SelectNodes("viewpoints/viewfolder").Count;
-                ViewNames = document.DocumentElement.SelectNodes("viewpoints/viewfolder/view").Cast<XmlElement>().Select(value => value.GetAttribute("name")).ToArray();
-                ViewGuids = document.DocumentElement.SelectNodes("viewpoints/viewfolder/view").Cast<XmlElement>().Select(value => value.GetAttribute("guid")).ToArray();
+                ViewFolderCount = document.DocumentElement.SelectNodes("viewpoints//viewfolder").Count;
+                ViewNames = document.DocumentElement.SelectNodes("viewpoints//view").Cast<XmlElement>().Select(value => value.GetAttribute("name")).ToArray();
+                ViewGuids = document.DocumentElement.SelectNodes("viewpoints//view").Cast<XmlElement>().Select(value => value.GetAttribute("guid")).ToArray();
             }
             public int ViewFolderCount { get; }
             public IReadOnlyList<string> ViewNames { get; }

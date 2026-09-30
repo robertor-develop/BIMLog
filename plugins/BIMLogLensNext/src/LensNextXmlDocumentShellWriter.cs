@@ -91,7 +91,7 @@ namespace BIMLogLensNext
                     StringComparison.Ordinal))
                 throw new InvalidDataException("The written BIMLog XML export Navisworks schema declaration is invalid.");
             var viewpoints = document.DocumentElement.SelectNodes(ViewpointsElementName);
-            var folders = document.DocumentElement.SelectNodes(ViewpointsElementName + "/" + ViewFolderElementName);
+            var folders = document.DocumentElement.SelectNodes(ViewpointsElementName + "//" + ViewFolderElementName);
             if (viewpoints.Count != 1 || folders.Count != 3 ||
                 !string.Equals(((XmlElement)folders[0]).GetAttribute("name"), ViewFolderName, StringComparison.Ordinal) ||
                 !string.Equals(((XmlElement)folders[1]).GetAttribute("name"), OpenFolderName, StringComparison.Ordinal) ||
