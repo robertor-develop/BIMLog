@@ -3316,3 +3316,4 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - UX149 requires Ready at send time, preserves the unsent RFI body and recipients before configuration, restores the same record after return, and never sends automatically.
 - UX150 updates Help and locks the meeting scenario across full Intake, exact APU lineage, generic staffing, Convention/email return, canonical Contract/EDT, later named-member costing, and excess-only cost behavior.
 - Product commits are `96dd86a1`, `e94cb8be`, `27711554`, `52e8ffa4`, and `441ae23d`. This is the ten-build publication boundary with UX141–UX145; the exact candidate requires the full pre-push gate, one push, one controlled publication without Replit Agents, and authenticated visible-Chrome acceptance.
+- Deterministic platform, route, open-loop disposition and semantic-review inventories were refreshed at `aeeb0016`; this narrative reconciliation follows that generated implementation unit.
