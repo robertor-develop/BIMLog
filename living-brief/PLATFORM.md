@@ -1057,6 +1057,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ux137-intake-contract-items.behavior.ts
 - artifacts/api-server/src/lib/ux138-existing-contract-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/ux140-activation-retry.behavior.ts
+- artifacts/api-server/src/lib/ux148-sendgrid-verification.behavior.ts
+- artifacts/api-server/src/lib/ux150-meeting-journey.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-approval-progress.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-binding.ts

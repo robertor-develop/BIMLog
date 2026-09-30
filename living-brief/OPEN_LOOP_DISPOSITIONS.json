@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "f78ee6f123b1a39ec7ef3f18acfaa307b379a08de221fdde3271a001740b2991",
+  "sourceSha256": "c72a46cc8887d94d30014809a4fd5732750df781b634d06fa27cbeae1d9901c5",
   "itemCount": 274,
   "counts": {
     "ACTIVE": 239,
@@ -4987,10 +4987,10 @@
       "currentAuthority": false
     },
     {
-      "id": "6c11eedd4f4d9269",
-      "sourceLine": 3906,
-      "heading": "Experience makeover Block 29 — shop-drawing-first delivery — 2026-09-30",
-      "statement": "Pass the complete exact-head pre-push gate and push UX141–UX145 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX146–UX150.",
+      "id": "14776447cbe97848",
+      "sourceLine": 3912,
+      "heading": "Experience makeover Block 30 — SendGrid readiness and return — 2026-09-30",
+      "statement": "Pass the complete exact-head pre-push gate, push UX146–UX150 once, publish the accumulated UX141–UX150 release without Replit Agents, and run full authenticated visible-Chrome smoke.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -4999,8 +4999,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3906",
-        "Experience makeover Block 29 — shop-drawing-first delivery — 2026-09-30"
+        "OPEN_LOOP.md:3912",
+        "Experience makeover Block 30 — SendGrid readiness and return — 2026-09-30"
       ],
       "currentAuthority": false
     }

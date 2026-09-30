@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 693,
-    "frontendApiReferences": 262,
+    "apiRoutes": 694,
+    "frontendApiReferences": 264,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -2352,6 +2352,15 @@
     {
       "method": "PUT",
       "path": "/me/connections/sendgrid",
+      "owner": "artifacts/api-server/src/routes/connections.ts",
+      "tables": [
+        "userConnectionsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/me/connections/sendgrid/verify",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
         "userConnectionsTable",
@@ -9114,6 +9123,10 @@
       "apiPath": "${API_BASE}/api/v1/feedback"
     },
     {
+      "screen": "artifacts/bimlog/src/components/job-intake/EmailReadinessSection.tsx",
+      "apiPath": "${API_BASE}/api/v1/me/connections"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/job-operations/TimeApprovalPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/projects/${projectId}/edt-engine/time-review"
     },
@@ -9512,6 +9525,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/Profile.tsx",
       "apiPath": "${API_BASE}/api/v1/me/connections/sendgrid"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+      "apiPath": "${API_BASE}/api/v1/me/connections/sendgrid/verify"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Profile.tsx",
