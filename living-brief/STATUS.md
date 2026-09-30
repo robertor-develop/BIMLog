@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Experience makeover Block 23 candidate — 2026-09-30
+
+UX111–UX115 establish the General APU Library as a readable company workspace with governed PMO authoring. Users can search by code, name or industry and see status, currency, version, component count and calculation methods before opening a version. An authorized saved project APU can be converted into a company draft with bounded source provenance and without copying the source project name or unrelated records.
+
+Applying an APU pins the exact published version and fingerprint into a new immutable project-specific lineage. Two projects using the same library version receive different project APU identities. Later library publication never changes prior project records, and retirement keeps history readable while preventing every version in that retired lineage from new selection. This is the first five-build block after the UX101–UX110 publication; publication and authenticated Chrome smoke are due at UX120.
+
 ## Experience makeover Block 22 candidate — 2026-09-30
 
 UX106–UX110 add compact, permission-preserving choice presentation for disciplines and document types. User and company pins are intersected with the eligible catalog; deterministic frequency and recency ranking never hides current or historical project selections; uncommon document types remain searchable and authorized additions remain explicit; status favorites are filtered through the exact workflow version, current state and role; and reset is isolated to the same user and company with predictable English/Spanish labels.

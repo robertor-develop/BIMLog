@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 685,
-    "frontendApiReferences": 260,
+    "apiRoutes": 688,
+    "frontendApiReferences": 262,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -2252,6 +2252,12 @@
     },
     {
       "method": "POST",
+      "path": "/projects/:projectId/apu-library/drafts",
+      "owner": "artifacts/api-server/src/routes/company-pricing-templates.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
       "path": "/company/pricing-templates/:templateId/versions",
       "owner": "artifacts/api-server/src/routes/company-pricing-templates.ts",
       "tables": []
@@ -4088,6 +4094,18 @@
     {
       "method": "PUT",
       "path": "/projects/:projectId/financial/apu",
+      "owner": "artifacts/api-server/src/routes/financial-apu.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/financial/apu/library-applications",
+      "owner": "artifacts/api-server/src/routes/financial-apu.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/financial/apu/library-applications",
       "owner": "artifacts/api-server/src/routes/financial-apu.ts",
       "tables": []
     },
@@ -9328,6 +9346,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
       "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/pricing-template-options"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/library-applications"
     },
     {
       "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",

@@ -51096,6 +51096,105 @@
         "package.json"
       ],
       "reviewedChangeSha256": "cf2cc29e9d2a1da6833d355d8ce46e12e5274d012cba58b24a4794cb10707d6c"
+    },
+    {
+      "taskId": "ux-b23-apu-library-20260930",
+      "reviewedThroughCommit": "7a7522c1308878e9016159618166cdca6c1c2107",
+      "reviewedAt": "2026-09-30T04:37:22.866Z",
+      "status": "source_candidate",
+      "captureTiming": "same_task_post_implementation",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "summary": "The General APU Library required discoverable reuse, exact version provenance, independent project lineage, and retirement-safe selection.",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "category": "product_experience",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX111-UX115 add a governed company APU Library, bounded project-to-library reuse, exact immutable project application lineage, and retirement eligibility enforcement without schema, customer-data, Native, installer, provider-secret, or production mutation changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ce5d05ac1b130f1cd3b617ed3bfdd08e22ab33a821353a120b82bc38893ce26f"
     }
   ]
 }

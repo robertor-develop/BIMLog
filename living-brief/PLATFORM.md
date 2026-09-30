@@ -200,6 +200,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-service.ts
+- artifacts/api-server/src/lib/apu-library-entry.behavior.ts
+- artifacts/api-server/src/lib/apu-library-retirement.behavior.ts
+- artifacts/api-server/src/lib/apu-library-reuse.behavior.ts
+- artifacts/api-server/src/lib/apu-library-reuse.ts
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.behavior.ts
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.ts
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
@@ -872,6 +876,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/professional-report-sections.behavior.ts
 - artifacts/api-server/src/lib/professional-report-sections.ts
 - artifacts/api-server/src/lib/project-analytics-current-view-export.ts
+- artifacts/api-server/src/lib/project-apu-library-service.behavior.ts
+- artifacts/api-server/src/lib/project-apu-library-service.ts
 - artifacts/api-server/src/lib/project-context-source.behavior.ts
 - artifacts/api-server/src/lib/project-controls-dashboard.behavior.ts
 - artifacts/api-server/src/lib/project-file-upload-contract.ts

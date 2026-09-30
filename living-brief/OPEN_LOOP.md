@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Experience makeover Block 23 — General APU Library — 2026-09-30
+
+- [x] UX111–UX115 add the company APU Library entry, search/preview metadata, controlled project-to-library draft reuse, exact project application lineage, and immutable retirement behavior.
+- [x] Keep library reads available to authorized company users while retaining PMO, finance approver and maker/checker controls for creation, publication and retirement.
+- [ ] Pass the complete exact-head gate and push UX111–UX115 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after UX116–UX120.
+
 ## Experience makeover Block 22 — compact relevant choices — 2026-09-30
 
 - [x] UX106–UX110 implement eligible pins, deterministic use ranking, searchable document types, workflow-valid status choices, isolated reset, bilingual labels and compact keyboard-accessible Intake selection.
