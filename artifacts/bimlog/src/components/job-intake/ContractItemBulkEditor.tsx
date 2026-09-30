@@ -38,16 +38,15 @@ type Props = {
 const MAX_ITEMS = 500;
 
 export function selectSavedApuVersion(
-  versions: Array<{ version: number; sellingPrice: string }>,
+  versions: Array<{ version: number; name?: string; sellingPrice: string; currency?: string; fingerprint?: string | null }>,
   selectedVersion: string,
+  item?: { billingHourlyRate?: string; unit?: string },
 ) {
   const selected = versions.find(
     (version) => version.version === Number(selectedVersion),
   );
   return selected
-    ? {
-        apuPlanVersion: selected.version,
-      }
+    ? item?.billingHourlyRate ? connectContractItemsToApu([item], selected)[0] : { apuPlanVersion: selected.version }
     : { apuPlanVersion: null };
 }
 
@@ -224,9 +223,7 @@ export function ContractItemBulkEditor(props: Props) {
       return;
     }
     props.setItems((items) =>
-      connectContractItemsToApu(items, {
-        version: props.defaultApuVersion as number,
-      }),
+      connectContractItemsToApu(items, eligibleApuVersions.find(version => version.version === props.defaultApuVersion) || { version: props.defaultApuVersion as number, currency: props.currency }),
     );
     props.onNotice(
       props.tt(
@@ -539,6 +536,7 @@ export function ContractItemBulkEditor(props: Props) {
                           selectSavedApuVersion(
                             eligibleApuVersions,
                             event.target.value,
+                            item,
                           ),
                         );
                       }}

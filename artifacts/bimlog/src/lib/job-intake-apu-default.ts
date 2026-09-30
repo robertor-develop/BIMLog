@@ -1,4 +1,4 @@
-export type IntakeApuVersion = { version: number; name?: string; sellingPrice: string; currency: string };
+export type IntakeApuVersion = { version: number; name?: string; sellingPrice: string; currency: string; fingerprint?: string | null };
 
 export function soleCompatibleApuVersion(versions: IntakeApuVersion[], currency: string) {
   const valid = compatibleApuVersions(versions, currency);
