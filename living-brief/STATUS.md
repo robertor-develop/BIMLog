@@ -3272,3 +3272,11 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - The release gate now runs Coordination Knowledge Build 272 against the established guarded loopback `bimlog_rfi_test` fixture. The test verifies exact local database identity and unchanged project/viewpoint counts; no production database is used.
 - The artifact-proof gate now supplies the verified local fixture identity and F-rooted private custody path itself, while the existing helper continues to enforce loopback database identity, complete schema, UTF-8 and private ACLs.
 - The exact production-artifact closure consumes the same verified local proof inputs and passes packaged API/readiness, Living Brief, authentication, bounded Feedback storage and fail-closed invalid-authority checks.
+
+## Experience makeover Block 26 — governed member internal cost — 2026-09-30
+
+- UX126–UX130 replace editable capacity-profile cost hints with versioned company policy and member-profile authorities. Policies preserve drafter/coordinator inputs, effective date, proposer, CEO decision, supersession, and fingerprint without turning those company inputs into platform-wide constants.
+- Resource reassignment resolves the selected member's approved effective profile. An absent profile is an explicit unresolved state and blocks priced assignment; the prior silent preservation of another member's rate is removed.
+- Project Operations presents approved policy/profile provenance only to budget-authorized users. Job Intake has no rate mutation path, and customer/non-budget responses redact the internal rate, cost, and policy/profile identities.
+- Each assignment snapshots the exact approved profile, policy, rate, and effective date. Recorded time continues to use the assignment's stored rate, while the separate customer billing/APU rate remains unchanged.
+- Product commits are `7fefadcc`, `906d0083`, `5169270a`, `d14d5600`, and `80607139`. Focused UX126–UX130 behavior plus API and UI TypeScript checks pass. UX121–UX130 now reach the required ten-build publication and authenticated Chrome smoke boundary.

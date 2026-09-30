@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 688,
+    "apiRoutes": 691,
     "frontendApiReferences": 262,
     "routeOwnedTables": 61
   },
@@ -4574,6 +4574,24 @@
     {
       "method": "GET",
       "path": "/projects/:projectId/operations",
+      "owner": "artifacts/api-server/src/routes/job-operations.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/operations/internal-cost/policies",
+      "owner": "artifacts/api-server/src/routes/job-operations.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/operations/internal-cost/profiles",
+      "owner": "artifacts/api-server/src/routes/job-operations.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/operations/internal-cost/:kind/:versionId/decision",
       "owner": "artifacts/api-server/src/routes/job-operations.ts",
       "tables": []
     },

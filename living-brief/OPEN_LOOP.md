@@ -3874,4 +3874,11 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Route Coordination Knowledge Build 272 through the established guarded loopback `bimlog_rfi_test` fixture so the exact pre-push gate can execute its required database proof.
 - [x] Bind the artifact-proof check to the existing verified F-rooted private proof directory and guarded loopback database; preserve its identity, schema and ACL checks.
 - [x] Bind the exact production-artifact closure to those same verified local proof inputs so the final packaged runtime authorization test executes instead of failing on absent environment wiring.
-- [ ] Pass the complete exact-head gate and push UX121–UX125 once. Do not publish until UX126–UX130 complete the next ten-build boundary.
+- [x] Pass the complete exact-head gate and push UX121–UX125 once. Publication was correctly deferred until UX126–UX130 completed the next ten-build boundary.
+
+## Experience makeover Block 26 — member internal cost and CEO approval — 2026-09-30
+
+- [x] UX126–UX130 add effective-dated company cost policies, approved member cost profiles, CEO-only activation, permission-appropriate Operations governance, and immutable assignment snapshots with customer redaction.
+- [x] Replace the editable capacity-profile fallback in resource reassignment. Missing approved member cost now remains explicitly unresolved and blocks priced assignment instead of preserving or fabricating a rate.
+- [x] Preserve the customer APU/billing rate independently from internal member cost and preserve historical work against later policy changes.
+- [ ] Pass the exact-head release gate, push UX126–UX130, publish accumulated UX121–UX130 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.

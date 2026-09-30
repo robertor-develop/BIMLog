@@ -51667,6 +51667,93 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "10c4d88041b2a982cc3a4f1e1160aca570c4c1265c2f4bb2ef5c82ec9485b738"
+    },
+    {
+      "taskId": "ux-b26-member-cost-governance-20260930",
+      "reviewedThroughCommit": "806071391f1395786fff54521a1f7e6f525692e4",
+      "reviewedAt": "2026-09-30T09:42:00.000Z",
+      "trigger": "before_execution",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_source",
+          "implement_product_changes",
+          "local_tests",
+          "normal_git_push"
+        ],
+        "operatorOnly": [
+          "replit_publish",
+          "authenticated_chrome_smoke"
+        ]
+      },
+      "immediateFindings": [],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "UX126-UX130 establish effective-dated CEO-approved company/member internal-cost authority, bind priced assignments to immutable approved snapshots, keep customer APU rates separate, and redact sensitive cost provenance from unauthorized views."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "da43124e259387f7a8ee046b9b38393405c9dff3c93d400d83632113d3ed02cd"
     }
   ]
 }

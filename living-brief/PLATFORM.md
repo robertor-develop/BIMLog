@@ -733,6 +733,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/help-center.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
+- artifacts/api-server/src/lib/internal-cost-contract.ts
+- artifacts/api-server/src/lib/internal-cost-governance.ts
 - artifacts/api-server/src/lib/invitation-acceptance.ts
 - artifacts/api-server/src/lib/invitation-token.behavior.ts
 - artifacts/api-server/src/lib/invitation-token.ts
@@ -1016,6 +1018,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/unified-action-contract.ts
 - artifacts/api-server/src/lib/ux-block24-rate-continuity.behavior.ts
 - artifacts/api-server/src/lib/ux-block25-resource-demand.behavior.ts
+- artifacts/api-server/src/lib/ux-block26-internal-cost.behavior.ts
 - artifacts/api-server/src/lib/ux-failure-journey.behavior.ts
 - artifacts/api-server/src/lib/ux-failure-journey.ts
 - artifacts/api-server/src/lib/ux-financial-reconciliation.behavior.ts
