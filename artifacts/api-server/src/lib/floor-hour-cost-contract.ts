@@ -18,7 +18,7 @@ export type FloorHourCostEntry = {
 };
 
 export function canonicalFloorHourEstimate(value: unknown) {
-  const scaled = scaledSignedDecimal(value);
+  const scaled = scaledSignedDecimal(String(value ?? ""));
   if (scaled <= 0n) throw new FinancialControlError(400, "FLOOR_HOUR_ESTIMATE_INVALID", "Approved floor hours must be greater than zero.");
   return decimalFromScaled(scaled);
 }
@@ -31,7 +31,7 @@ function money(hours: bigint, rate: bigint) { return (hours * rate + 500_000n) /
 
 export function allocateFloorHourCosts(input: { estimateVersionId: string; approvedHours: unknown; excessRate?: unknown; entries: readonly FloorHourCostEntry[] }) {
   const threshold = scaledSignedDecimal(canonicalFloorHourEstimate(input.approvedHours));
-  const excessRate = scaledSignedDecimal(input.excessRate ?? EXCESS_HOUR_RATE);
+  const excessRate = scaledSignedDecimal(String(input.excessRate ?? EXCESS_HOUR_RATE));
   if (excessRate < 0n) throw new FinancialControlError(400, "EXCESS_HOUR_RATE_INVALID", "Excess-hour rate must be nonnegative.");
   let consumed = 0n;
   const eligible = input.entries

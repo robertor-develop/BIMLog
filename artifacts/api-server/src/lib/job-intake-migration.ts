@@ -185,6 +185,16 @@ CREATE TABLE IF NOT EXISTS job_activation_time_entries(
   created_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT job_activation_time_hours_chk CHECK(hours>0 AND hours<=24)
 );
+CREATE TABLE IF NOT EXISTS job_activation_time_cost_allocation_runs(
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), work_item_id text NOT NULL REFERENCES job_activation_work_items(id), location_identity text NOT NULL, estimate_version_id text NOT NULL REFERENCES job_activation_floor_hour_estimate_versions(id), reason text NOT NULL, source_fingerprint text NOT NULL, created_by_id integer NOT NULL REFERENCES users(id), created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_time_cost_run_fingerprint_chk CHECK(source_fingerprint ~ '^[a-f0-9]{64}$'), CONSTRAINT job_activation_time_cost_run_source_uidx UNIQUE(estimate_version_id,source_fingerprint)
+);
+CREATE TABLE IF NOT EXISTS job_activation_time_cost_allocations(
+  id text PRIMARY KEY, run_id text NOT NULL REFERENCES job_activation_time_cost_allocation_runs(id), time_entry_id text NOT NULL REFERENCES job_activation_time_entries(id), sequence_hours_before numeric(30,6) NOT NULL, normal_hours numeric(30,6) NOT NULL, excess_hours numeric(30,6) NOT NULL, normal_hourly_rate numeric(30,6) NOT NULL, excess_hourly_rate numeric(30,6) NOT NULL, normal_cost numeric(30,6) NOT NULL, excess_cost numeric(30,6) NOT NULL, total_cost numeric(30,6) NOT NULL, calculation_fingerprint text NOT NULL,
+  CONSTRAINT job_activation_time_cost_allocation_entry_uidx UNIQUE(run_id,time_entry_id), CONSTRAINT job_activation_time_cost_allocation_values_chk CHECK(sequence_hours_before>=0 AND normal_hours>=0 AND excess_hours>=0 AND normal_cost>=0 AND excess_cost>=0 AND total_cost=normal_cost+excess_cost), CONSTRAINT job_activation_time_cost_allocation_fingerprint_chk CHECK(calculation_fingerprint ~ '^[a-f0-9]{64}$')
+);
+CREATE INDEX IF NOT EXISTS job_activation_time_cost_run_project_idx ON job_activation_time_cost_allocation_runs(project_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS job_activation_time_cost_allocation_entry_idx ON job_activation_time_cost_allocations(time_entry_id,run_id);
 CREATE TABLE IF NOT EXISTS job_activation_task_deliverables(
   id text PRIMARY KEY,
   project_id integer NOT NULL REFERENCES projects(id),
