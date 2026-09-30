@@ -82,14 +82,23 @@ try {
     if (!fs.existsSync(cli)) throw new Error("Repository-pinned Drizzle CLI is not installed.");
     run(process.execPath, [cli, "push", "--dialect", "postgresql", "--schema", "./src/schema/index.ts", "--url", rawUrl], dbDirectory);
   }
-  const after = await fixture.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");
-  const actual = new Set(after.rows.map((row) => row.tablename));
-  const missing = collectSchemaContract().tables.filter((table) => !actual.has(table));
+  let after = await fixture.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");
+  let actual = new Set(after.rows.map((row) => row.tablename));
+  let missing = collectSchemaContract().tables.filter((table) => !actual.has(table));
+  if (missing.length && prepare) {
+    const cli = path.join(dbDirectory, "node_modules", "drizzle-kit", "bin.cjs");
+    if (!fs.existsSync(cli)) throw new Error("Repository-pinned Drizzle CLI is not installed.");
+    run(process.execPath, [cli, "push", "--dialect", "postgresql", "--schema", "./src/schema/index.ts", "--url", rawUrl], dbDirectory);
+    after = await fixture.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");
+    actual = new Set(after.rows.map((row) => row.tablename));
+    missing = collectSchemaContract().tables.filter((table) => !actual.has(table));
+  }
   if (missing.length)
-    throw new Error("Disposable artifact fixture is incomplete (" + missing.length + " declared tables missing). Preserve it and use a fresh UTF-8 fixture.");
+    throw new Error("Disposable artifact fixture is incomplete (" + missing.length + " declared tables missing). Preserve it and run the guarded prepare path before release proof.");
 } finally { await fixture.end(); }
 
-if (!fs.existsSync(proofRoot)) {
+const proofRootCreated = !fs.existsSync(proofRoot);
+if (proofRootCreated) {
   if (!prepare) throw new Error("Private artifact proof directory is absent. Run this helper with --prepare first.");
   fs.mkdirSync(proofRoot, { recursive: true });
 }
@@ -99,7 +108,7 @@ if (fs.lstatSync(proofRoot).isSymbolicLink() ||
      !realRoot.toUpperCase().startsWith("F:\\BIMLOG\\TESTPROOF\\")))
   throw new Error("Artifact proof root escaped F-rooted custody.");
 if (process.platform === "win32") {
-  if (prepare) {
+  if (prepare && proofRootCreated) {
     run("icacls.exe", [proofRoot, "/inheritance:d"]);
     const account = process.env.USERDOMAIN + "\\" + process.env.USERNAME;
     run("icacls.exe", [proofRoot, "/grant", account + ":(OI)(CI)(M)"]);

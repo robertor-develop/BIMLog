@@ -2,19 +2,21 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "806071391f1395786fff54521a1f7e6f525692e4",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "8912443f08d9818a588c907d74aee3529a69afd641ad2ec0bef25f9b2a61afe7",
+  "bundleSha256": "d0178462f27ac38de7006091acb9fcf8c2d0e35728486e3d4259c912b59bc99e",
   "impact": {
     "baselineCommit": "806071391f1395786fff54521a1f7e6f525692e4",
     "changedPaths": [
       "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
       "lib/db/src/schema/index.ts",
+      "lib/db/src/schema/internal-cost-governance.ts",
       "lib/db/src/schema/job-intakes.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
-      "package.json"
+      "package.json",
+      "scripts/prepare-artifact-proof-fixture.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -123,7 +125,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "55953482f1f0a01d453968a752bf0e4b9c2e4d034ef80b4cd3844d05ced87779",
+      "sha256": "4d56937ee756efe79776126f7c68c7166268496a68120c05333a5f62af026d25",
       "sourceChangedAt": "2026-09-30T09:42:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "806071391f1395786fff54521a1f7e6f525692e4",
@@ -135,7 +137,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "b8865bd0164cbd56cf6d4be42490e1b45da09a3b8eedb4061976bc39bcdc9f45",
+      "sha256": "604accfb7c158902e90b9f05ec7b6da959640192d60a228b12181a8387fc8468",
       "sourceChangedAt": "2026-09-30T09:42:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "806071391f1395786fff54521a1f7e6f525692e4",
