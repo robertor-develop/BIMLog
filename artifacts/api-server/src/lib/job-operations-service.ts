@@ -7,6 +7,7 @@ import { waitForTeamResourcePlanningMigration } from "./team-resource-planning-m
 import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contract";
 import { canonicalJobOperationId } from "./job-operations-id";
 import { reconcileResourceDemand, splitResourcePlan } from "./resource-demand-contract";
+import { resolveApprovedMemberInternalCost, waitForInternalCostGovernanceMigration } from "./internal-cost-governance";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
@@ -365,7 +366,7 @@ async function projectControlsView(client: Queryable, access: Awaited<ReturnType
 }
 
 export async function getJobOperations(input: { actorUserId: number; projectId: unknown }) {
-  await Promise.all([waitForJobIntakeMigration(), waitForTeamResourcePlanningMigration()]);
+  await Promise.all([waitForJobIntakeMigration(), waitForTeamResourcePlanningMigration(), waitForInternalCostGovernanceMigration()]);
   const projectId = positiveInt(input.projectId, "projectId"), access = await scope(input.actorUserId, projectId);
   const [capabilities, connectionOptionView, connectionView] = await Promise.all([
     effectiveCommercialAccessForUser(input.actorUserId),
@@ -674,7 +675,7 @@ export async function updateJobOperationTask(input: { actorUserId: number; proje
 }
 
 export async function reassignJobOperationResource(input: { actorUserId: number; projectId: unknown; assignmentId: unknown; expectedVersion: unknown; userId: unknown; reason: unknown }) {
-  await Promise.all([waitForJobIntakeMigration(), waitForTeamResourcePlanningMigration()]);
+  await Promise.all([waitForJobIntakeMigration(), waitForTeamResourcePlanningMigration(), waitForInternalCostGovernanceMigration()]);
   const projectId = positiveInt(input.projectId, "projectId"), assignmentId = id(input.assignmentId, "assignmentId"), expectedVersion = positiveInt(input.expectedVersion, "expectedVersion"), userId = positiveInt(input.userId, "userId");
   const reason = requiredText(input.reason, 500, "reason");
   const client = await pool.connect();
@@ -682,18 +683,19 @@ export async function reassignJobOperationResource(input: { actorUserId: number;
     await client.query("BEGIN");
     const access = await scope(input.actorUserId, projectId, client);
     if (!access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_REASSIGN_DENIED", "Only the project leader may reassign resources.");
-    const member = (await client.query(`SELECT u.full_name,u.email,profile.content->>'internalHourlyRate' "profileInternalHourlyRate" FROM project_members pm JOIN users u ON u.id=pm.user_id LEFT JOIN LATERAL (SELECT content FROM team_capacity_profile_versions WHERE company_id=$3 AND user_id=u.id ORDER BY version DESC LIMIT 1) profile ON true WHERE pm.project_id=$1 AND pm.user_id=$2 AND pm.status='active'`, [projectId, userId, access.companyId])).rows[0];
+    const member = (await client.query(`SELECT u.full_name,u.email FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.user_id=$2 AND pm.status='active'`, [projectId, userId])).rows[0];
     if (!member) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNEE_INVALID", "The assignee must be an active project member.");
     const before = (await client.query(`SELECT r.user_id "userId",r.person_name "personName",r.planned_hours::text "plannedHours" FROM job_activation_resource_assignments r JOIN job_activation_work_items w ON w.id=r.work_item_id WHERE r.id=$1 AND r.version=$2 AND w.project_id=$3 FOR UPDATE OF r`, [assignmentId, expectedVersion, projectId])).rows[0];
     if (!before) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This assignment changed in another session. Reload before saving.");
     before.completedHours = (await client.query(`SELECT COALESCE(SUM(hours),0)::text "completedHours" FROM job_activation_time_entries WHERE assignment_id=$1`, [assignmentId])).rows[0]?.completedHours ?? "0";
     if (Number(before.userId) === userId) throw new FinancialControlError(400, "JOB_OPERATIONS_REASSIGN_SAME_USER", "Choose a different assignee.");
     const remainingHours = decimalFromScaled(scaledSignedDecimal(before.plannedHours) > scaledSignedDecimal(before.completedHours) ? scaledSignedDecimal(before.plannedHours) - scaledSignedDecimal(before.completedHours) : 0n);
-    const approvedInternalRate = member.profileInternalHourlyRate == null ? null : Number(member.profileInternalHourlyRate);
-    const updated = (await client.query(`UPDATE job_activation_resource_assignments r SET user_id=$4,person_name=$5,internal_hourly_rate=COALESCE($6::numeric,r.internal_hourly_rate),planned_internal_cost=planned_hours*COALESCE($6::numeric,r.internal_hourly_rate),version=version+1 FROM job_activation_work_items w WHERE r.id=$1 AND r.version=$2 AND r.work_item_id=w.id AND w.project_id=$3 RETURNING r.id,r.work_item_id,r.task_id,r.version,r.internal_hourly_rate "internalHourlyRate",r.billing_hourly_rate "billingHourlyRate"`, [assignmentId, expectedVersion, projectId, userId, member.full_name || member.email, approvedInternalRate])).rows[0];
+    const approvedCost = await resolveApprovedMemberInternalCost({ companyId: access.companyId, userId }, client);
+    if (approvedCost.state === "unresolved") throw new FinancialControlError(409, approvedCost.code, "The selected member has no approved internal-cost profile effective today. Ask the CEO to approve the profile before assigning priced work.");
+    const updated = (await client.query(`UPDATE job_activation_resource_assignments r SET user_id=$4,person_name=$5,internal_hourly_rate=$6::numeric,planned_internal_cost=planned_hours*$6::numeric,internal_cost_profile_version_id=$7,internal_cost_policy_version_id=$8,internal_cost_effective_date=$9::date,version=version+1 FROM job_activation_work_items w WHERE r.id=$1 AND r.version=$2 AND r.work_item_id=w.id AND w.project_id=$3 RETURNING r.id,r.work_item_id,r.task_id,r.version,r.internal_hourly_rate "internalHourlyRate",r.billing_hourly_rate "billingHourlyRate",r.internal_cost_profile_version_id "internalCostProfileVersionId",r.internal_cost_policy_version_id "internalCostPolicyVersionId",r.internal_cost_effective_date "internalCostEffectiveDate"`, [assignmentId, expectedVersion, projectId, userId, member.full_name || member.email, approvedCost.hourlyRate, approvedCost.profileVersionId, approvedCost.policyVersionId, approvedCost.effectiveDate])).rows[0];
     if (!updated) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This assignment changed in another session. Reload before saving.");
     await client.query(`UPDATE job_activation_tasks SET assignee_user_id=$2,version=version+1,updated_at=now() WHERE id=$1`, [updated.task_id, userId]);
-    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "resource_reassigned", workItemId: updated.work_item_id, taskId: updated.task_id, assignmentId, evidence: { originalUserId: before.userId, originalPersonName: before.personName, newUserId: userId, newPersonName: member.full_name || member.email, completedHours: before.completedHours, remainingTransferredHours: remainingHours, approvedInternalRateApplied: approvedInternalRate, customerBillingRateChanged: false, reason, version: updated.version } });
+    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "resource_reassigned", workItemId: updated.work_item_id, taskId: updated.task_id, assignmentId, evidence: { originalUserId: before.userId, originalPersonName: before.personName, newUserId: userId, newPersonName: member.full_name || member.email, completedHours: before.completedHours, remainingTransferredHours: remainingHours, approvedInternalRateApplied: approvedCost.hourlyRate, internalCostProfileVersionId: approvedCost.profileVersionId, internalCostPolicyVersionId: approvedCost.policyVersionId, internalCostEffectiveDate: approvedCost.effectiveDate, customerBillingRateChanged: false, reason, version: updated.version } });
     await client.query("COMMIT"); return { id: assignmentId, userId, personName: member.full_name || member.email, internalHourlyRate: updated.internalHourlyRate, billingHourlyRate: updated.billingHourlyRate, version: Number(updated.version) };
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
