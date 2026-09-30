@@ -23,6 +23,7 @@ import { AiControlPlanePanel } from "@/components/ai/AiControlPlanePanel";
 import { NotificationPreferenceCenter } from "@/components/notifications/NotificationPreferenceCenter";
 import { FeaturePolicySettingsPanel } from "@/components/settings/FeaturePolicySettingsPanel";
 import { effectiveRoleLabel, settingsDestinations } from "./settings-experience";
+import { safeEmailReturnTarget } from "@/lib/email-configuration-return";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -266,6 +267,7 @@ export function Profile() {
   const logoFileInput = useRef<HTMLInputElement>(null);
 
   const [, navigate] = useLocation();
+  const [emailReturnTarget] = useState(() => safeEmailReturnTarget(new URLSearchParams(window.location.search).get("returnTo")));
 
   const authHeaders = {
     "Content-Type": "application/json",
@@ -401,6 +403,9 @@ export function Profile() {
     loadTelegramPanel();
     // Handle the OAuth return from a provider connect.
     const params = new URLSearchParams(window.location.search);
+    if (params.get("section") === "email-sending") {
+      window.requestAnimationFrame(() => document.getElementById("profile-email-sending")?.scrollIntoView({ block: "start" }));
+    }
     if (params.get("connected")) {
       toast({ title: `${params.get("connected")} connected` });
       window.history.replaceState({}, "", window.location.pathname);
@@ -1590,7 +1595,7 @@ export function Profile() {
         </SectionCard>
 
         {/* Email Sending — per-user SendGrid connection */}
-        <SectionCard title="Email Sending (SendGrid)" icon={Mail}>
+        <div id="profile-email-sending" style={{ scrollMarginTop: 20 }}><SectionCard title="Email Sending (SendGrid)" icon={Mail}>
           {(() => {
             const sg = connections.find(c => c.provider === "sendgrid");
             if (sg) {
@@ -1637,7 +1642,8 @@ export function Profile() {
               </div>
             );
           })()}
-        </SectionCard>
+          {emailReturnTarget && <div style={{ marginTop: 12 }}><Button type="button" variant="outline" onClick={() => navigate(emailReturnTarget)}>{tt("Return to your work", "Volver a su trabajo")}</Button></div>}
+        </SectionCard></div>
 
         {/* The server-governed catalog is the only provider discovery source. */}
         <SectionCard title={tt("Approved file sources", "Fuentes de archivos aprobadas")} icon={FolderOpen}>
