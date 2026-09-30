@@ -109,3 +109,37 @@ export const COMMERCIAL_ADDONS: readonly CommercialAddon[] = [
 export function addonsForPlan(planId: CommercialPlanId): readonly CommercialAddon[] {
   return COMMERCIAL_ADDONS.filter((addon) => addon.eligiblePlans.includes(planId));
 }
+
+export type ImplementationServiceId = "guided_launch" | "portfolio_migration" | "connector_setup";
+export type ImplementationService = {
+  id: ImplementationServiceId;
+  name: { en: string; es: string };
+  outcome: { en: string; es: string };
+  price: "custom_proposal";
+  scopeAuthority: "signed_statement_of_work";
+  excludes: readonly string[];
+};
+
+export const IMPLEMENTATION_SERVICES: readonly ImplementationService[] = [
+  {
+    id: "guided_launch", name: { en: "Guided company launch", es: "Inicio guiado de la empresa" },
+    outcome: { en: "Company defaults, administrator orientation and first-project setup review", es: "Valores predeterminados, orientación administrativa y revisión del primer proyecto" },
+    price: "custom_proposal", scopeAuthority: "signed_statement_of_work", excludes: ["subscription entitlement", "customer approval"],
+  },
+  {
+    id: "portfolio_migration", name: { en: "Controlled portfolio migration", es: "Migración controlada del portafolio" },
+    outcome: { en: "Reviewed source mapping and bounded migration plan", es: "Mapeo revisado de fuentes y plan de migración delimitado" },
+    price: "custom_proposal", scopeAuthority: "signed_statement_of_work", excludes: ["unreviewed source cleanup", "automatic acceptance"],
+  },
+  {
+    id: "connector_setup", name: { en: "Approved connector setup", es: "Configuración de conector aprobado" },
+    outcome: { en: "Authorized destination, credential and readiness review", es: "Revisión autorizada de destino, credenciales y preparación" },
+    price: "custom_proposal", scopeAuthority: "signed_statement_of_work", excludes: ["provider fees", "customer security approval"],
+  },
+] as const;
+
+export function implementationService(id: ImplementationServiceId): ImplementationService {
+  const service = IMPLEMENTATION_SERVICES.find((candidate) => candidate.id === id);
+  if (!service) throw new Error(`Unknown implementation service: ${id}`);
+  return service;
+}

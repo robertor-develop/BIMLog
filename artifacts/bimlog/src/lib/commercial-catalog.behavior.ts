@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { BILLING_TERMS, CATALOG_PRICES, COMMERCIAL_ADDONS, addonsForPlan, priceSnapshot, publishedPriceFor, quotedTerm } from "./commercial-catalog";
+import { BILLING_TERMS, CATALOG_PRICES, COMMERCIAL_ADDONS, IMPLEMENTATION_SERVICES, addonsForPlan, implementationService, priceSnapshot, publishedPriceFor, quotedTerm } from "./commercial-catalog";
 
 assert.equal(CATALOG_PRICES.length, 5);
 assert.deepEqual(CATALOG_PRICES.map((price) => price.planId), ["free", "professional", "team", "business", "enterprise"]);
@@ -18,5 +18,9 @@ assert.deepEqual(COMMERCIAL_ADDONS.map((addon) => addon.id), ["project_capacity"
 assert.equal(addonsForPlan("free").length, 0);
 assert.deepEqual(addonsForPlan("business").map((addon) => addon.id), ["project_capacity", "approved_connector", "extended_retention"]);
 assert.ok(COMMERCIAL_ADDONS.every((addon) => addon.price === "custom_quote" && addon.availability === "review_required"));
+assert.deepEqual(IMPLEMENTATION_SERVICES.map((service) => service.id), ["guided_launch", "portfolio_migration", "connector_setup"]);
+assert.ok(IMPLEMENTATION_SERVICES.every((service) => service.scopeAuthority === "signed_statement_of_work"));
+assert.match(implementationService("guided_launch").outcome.en, /first-project setup/);
+assert.ok(implementationService("connector_setup").excludes.includes("provider fees"));
 
-console.log("Commercial catalog Builds 006-008 prices, terms and governed add-ons: PASS");
+console.log("Commercial catalog Builds 006-009 prices, terms, add-ons and implementation services: PASS");
