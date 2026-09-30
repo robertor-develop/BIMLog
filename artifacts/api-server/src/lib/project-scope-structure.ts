@@ -27,3 +27,12 @@ export function normalizeProjectDisciplines(input: unknown, legacy?: Record<stri
 export function primaryDiscipline(disciplines: ProjectDiscipline[], legacy?: Record<string, unknown>) {
   return disciplines[0] ?? { id: String(legacy?.disciplineId ?? ""), code: String(legacy?.disciplineCode ?? ""), name: String(legacy?.disciplineName ?? "") };
 }
+
+export function addProjectDisciplineInContext(input: { current: ProjectDiscipline[]; created: unknown; authorized: boolean }) {
+  if (!input.authorized) throw new FinancialControlError(403, "PROJECT_DISCIPLINE_CREATE_DENIED", "You do not have authority to add a discipline to this company catalog.");
+  const created = normalizeProjectDisciplines([input.created])[0]!;
+  const duplicate = input.current.find(row => row.id === created.id || row.code.toLowerCase() === created.code.toLowerCase());
+  if (duplicate) throw new FinancialControlError(409, "PROJECT_DISCIPLINE_DUPLICATE", `${duplicate.code} is already selected for this project.`);
+  const selected = normalizeProjectDisciplines([...input.current, created]);
+  return { selected, selectedId: created.id };
+}
