@@ -779,3 +779,64 @@ export function bindProviderCustomer(input: {
     status: "active", createdAt: new Date(input.now).toISOString(),
   });
 }
+
+export type TokenizedPaymentMethod = Readonly<{
+  id: string;
+  providerCustomerBindingId: string;
+  provider: string;
+  providerPaymentMethodReference: string;
+  type: "card" | "bank_account";
+  brand: string;
+  last4: string;
+  expiryMonth: number | null;
+  expiryYear: number | null;
+  funding: "credit" | "debit" | "prepaid" | "unknown" | null;
+  status: "active" | "expired" | "detached";
+  isDefault: boolean;
+  createdAt: string;
+}>;
+
+export function registerTokenizedPaymentMethod(input: {
+  id?: string;
+  customer: ProviderCustomerBinding;
+  providerPaymentMethodReference: string;
+  type: "card" | "bank_account";
+  brand: string;
+  last4: string;
+  expiryMonth?: number | null;
+  expiryYear?: number | null;
+  funding?: "credit" | "debit" | "prepaid" | "unknown" | null;
+  makeDefault?: boolean;
+  existing: readonly TokenizedPaymentMethod[];
+  now: string;
+}): TokenizedPaymentMethod {
+  if (input.customer.status !== "active") throw new Error("Payment methods require an active provider customer");
+  const providerPaymentMethodReference = input.providerPaymentMethodReference.trim();
+  const brand = input.brand.trim().toLowerCase();
+  if (!providerPaymentMethodReference || providerPaymentMethodReference.length > 200) throw new Error("A bounded tokenized payment method reference is required");
+  if (!brand || brand.length > 40) throw new Error("A bounded payment method brand is required");
+  if (!/^\d{4}$/.test(input.last4)) throw new Error("Payment method last4 must contain four digits");
+  if (input.type === "card") {
+    if (!Number.isSafeInteger(input.expiryMonth) || (input.expiryMonth ?? 0) < 1 || (input.expiryMonth ?? 13) > 12) throw new Error("A valid card expiry month is required");
+    if (!Number.isSafeInteger(input.expiryYear) || (input.expiryYear ?? 0) < 2000) throw new Error("A valid card expiry year is required");
+  } else if (input.expiryMonth != null || input.expiryYear != null || input.funding != null) {
+    throw new Error("Bank account summaries cannot contain card attributes");
+  }
+  const duplicate = input.existing.find((method) => method.provider === input.customer.provider && method.providerPaymentMethodReference === providerPaymentMethodReference);
+  if (duplicate) {
+    if (duplicate.providerCustomerBindingId !== input.customer.id) throw new Error("Payment method token belongs to another provider customer");
+    return duplicate;
+  }
+  const makeDefault = input.makeDefault ?? input.existing.every((method) => method.providerCustomerBindingId !== input.customer.id || method.status !== "active");
+  if (makeDefault && input.existing.some((method) => method.providerCustomerBindingId === input.customer.id && method.status === "active" && method.isDefault)) {
+    throw new Error("Provider customer already has a default payment method");
+  }
+  return Object.freeze({
+    id: input.id ?? crypto.randomUUID(), providerCustomerBindingId: input.customer.id,
+    provider: input.customer.provider, providerPaymentMethodReference, type: input.type, brand,
+    last4: input.last4, expiryMonth: input.type === "card" ? input.expiryMonth! : null,
+    expiryYear: input.type === "card" ? input.expiryYear! : null,
+    funding: input.type === "card" ? input.funding ?? "unknown" : null,
+    status: "active", isDefault: makeDefault, createdAt: new Date(input.now).toISOString(),
+  });
+}

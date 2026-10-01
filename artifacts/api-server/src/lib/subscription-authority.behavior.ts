@@ -17,6 +17,7 @@ import {
   createRefundCreditNote,
   createCompanyBillingProfile,
   bindProviderCustomer,
+  registerTokenizedPaymentMethod,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -179,4 +180,11 @@ assert.equal(bindProviderCustomer({ profile: billingProfile, provider: "stripe",
 assert.throws(() => bindProviderCustomer({ profile: { ...billingProfile, companyId: 8 }, provider: "stripe", providerCustomerReference: "cus_bimtech_7", existing: [providerCustomer], now: providerCustomer.createdAt }), /another company/);
 assert.throws(() => bindProviderCustomer({ profile: billingProfile, provider: "stripe", providerCustomerReference: "cus_other", existing: [providerCustomer], now: providerCustomer.createdAt }), /already has an active customer/);
 
-console.log("Commercial account Block 6 Build 027: PASS");
+const paymentMethod = registerTokenizedPaymentMethod({ id: "payment-method-1", customer: providerCustomer, providerPaymentMethodReference: "pm_bimtech_7", type: "card", brand: " Visa ", last4: "4242", expiryMonth: 12, expiryYear: 2029, funding: "credit", existing: [], now: "2026-10-01T03:32:00Z" });
+assert.deepEqual({ provider: paymentMethod.provider, brand: paymentMethod.brand, last4: paymentMethod.last4, default: paymentMethod.isDefault, status: paymentMethod.status }, { provider: "stripe", brand: "visa", last4: "4242", default: true, status: "active" });
+assert.equal(registerTokenizedPaymentMethod({ customer: providerCustomer, providerPaymentMethodReference: "pm_bimtech_7", type: "card", brand: "visa", last4: "4242", expiryMonth: 12, expiryYear: 2029, existing: [paymentMethod], now: paymentMethod.createdAt }), paymentMethod);
+assert.throws(() => registerTokenizedPaymentMethod({ customer: providerCustomer, providerPaymentMethodReference: "pm_invalid", type: "card", brand: "visa", last4: "4242424242424242", expiryMonth: 12, expiryYear: 2029, existing: [], now: paymentMethod.createdAt }), /last4/);
+assert.throws(() => registerTokenizedPaymentMethod({ customer: providerCustomer, providerPaymentMethodReference: "pm_second", type: "card", brand: "mastercard", last4: "4444", expiryMonth: 11, expiryYear: 2029, makeDefault: true, existing: [paymentMethod], now: paymentMethod.createdAt }), /already has a default/);
+assert.throws(() => registerTokenizedPaymentMethod({ customer: { ...providerCustomer, id: "provider-customer-2", companyId: 8 }, providerPaymentMethodReference: "pm_bimtech_7", type: "card", brand: "visa", last4: "4242", expiryMonth: 12, expiryYear: 2029, existing: [paymentMethod], now: paymentMethod.createdAt }), /another provider customer/);
+
+console.log("Commercial account Block 6 Build 028: PASS");
