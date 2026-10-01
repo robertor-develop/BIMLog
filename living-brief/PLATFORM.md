@@ -305,6 +305,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-project-scope.ts
 - artifacts/api-server/src/lib/commercial-provider-adapter.behavior.ts
 - artifacts/api-server/src/lib/commercial-provider-adapter.ts
+- artifacts/api-server/src/lib/commercial-provider-events.behavior.ts
+- artifacts/api-server/src/lib/commercial-provider-events.ts
 - artifacts/api-server/src/lib/company-directory-resolution.behavior.ts
 - artifacts/api-server/src/lib/company-directory-resolution.ts
 - artifacts/api-server/src/lib/company-identity-reconciliation.behavior.ts

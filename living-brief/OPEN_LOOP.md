@@ -3983,4 +3983,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 033 verifies raw Stripe webhook payloads using timestamped rotating `v1` signatures, replay bounds and duplicate-event protection.
 - [x] Build 034 launches the Stripe customer portal only from a ready single-use BIMLog session with exact company/customer lineage and a controlled return URL.
 - [x] Build 035 supplies a bounded executable Stripe transport with fixed TLS host, `/v1/` path enforcement, timeout, response-size limit and JSON validation.
-- [ ] Pass the complete exact-head gate, push Builds 031–035 once, publish accumulated Builds 026–035 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push Builds 031–035 once, publish accumulated Builds 026–035 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke. Live source `3a487a1c` passed all 61 registered routes, hard reload, independent Integrations-tab continuity and console inspection.
+
+## Commercial readiness Block 8 — Stripe event application and reconciliation — 2026-10-01
+
+- [x] Build 036 durably ingests only payloads matching their verified Stripe receipt, rejects duplicate event identities and explicitly retains unsupported event types as ignored.
+- [x] Build 037 applies Checkout completion only when session, customer, metadata, amount, currency, attempt, order and subscription lineage all match.
+- [x] Build 038 synchronizes Stripe subscription updates and deletion through the existing revision-safe BIMLog subscription lifecycle.
+- [x] Build 039 synchronizes paid invoices and refunds with exact provider bindings, integer-cent amounts and duplicate/over-refund protection.
+- [x] Build 040 exposes permission-safe reconciliation counts and unresolved event details with governed retry timing and manual-reconciliation limits.
+- [ ] Pass the complete exact-head gate and push Builds 036–040 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 041–045.

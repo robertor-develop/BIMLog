@@ -3390,3 +3390,12 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Webhooks verify the raw body against Stripe's timestamped `v1` signature within a bounded replay window, accept rotating signatures, reject duplicate event IDs and preserve a payload digest. Portal launch requires matching company/customer/session lineage and a BIMLog-controlled return URL.
 - The transport enforces the Stripe `/v1/` boundary, TLS host, request timeout, response-size limit and JSON parsing without including credentials in returned readiness or errors.
 - Product commits are `ee9684c0`, `9a7eb27c`, `806a2a39`, `57022945` and `64e00432`. Focused Block 7 behavior and API TypeScript pass. Builds 026–035 now reach the required ten-build publication boundary.
+- The complete exact-head gate passed at reconciled source `3a487a1c`; GitHub `master` advanced once, production health bound the live package to that exact source, and authenticated Chrome passed all 61 registered routes, hard reload, independent Integrations-tab continuity and zero console errors. No Replit Agent was used.
+
+## Commercial readiness Block 8 — Stripe event application and reconciliation — 2026-10-01
+
+- Builds 036–040 add durable verified-event intake, exact Checkout completion application, Stripe subscription synchronization, paid-invoice/refund synchronization and permission-safe reconciliation status.
+- Provider payloads must match their verified receipt digest and exact event, object, customer, company, subscription, order, amount and currency lineage before changing BIMLog commercial authority. Unknown event types are retained as explicitly ignored rather than silently applied.
+- Checkout completion atomically advances only a prepared attempt, submitted order and pending subscription. Subscription updates use revision-safe BIMLog transitions. Invoice and refund application retain integer-cent totals and prevent duplicate or excessive credits.
+- Unresolved events carry governed error codes, bounded retry timing and a five-attempt manual-reconciliation threshold. Customer administrators see counts and action state without provider event identifiers; billing, support and audit roles may inspect bounded identities.
+- Product commits are `c295febd`, `8f2f927f`, `872da467`, `26f46a4a` and `62b06bb1`. Focused Block 8 behavior and API TypeScript pass. This is the first unpublished five-build block after the accepted Builds 026–035 publication; publication and authenticated Chrome smoke are due after Builds 041–045.
