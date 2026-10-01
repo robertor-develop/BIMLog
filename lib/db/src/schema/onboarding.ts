@@ -26,5 +26,5 @@ export const emailVerificationTokensTable = pgTable("email_verification_tokens",
   consumedAt: timestamp("consumed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
-  index("email_verification_tokens_user_idx").on(table.userId, table.createdAt.desc()),
+  index("email_verification_tokens_user_idx").on(table.userId, sql`${table.createdAt} DESC`),
 ]);
