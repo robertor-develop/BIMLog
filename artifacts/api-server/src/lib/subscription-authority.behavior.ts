@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import {
   changeSeatQuantity,
   createCompanySubscription,
+  createEntitlementSnapshot,
   createSeatQuantity,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
+  verifyEntitlementSnapshot,
 } from "./subscription-authority";
 
 assert.deepEqual(SUBSCRIPTION_PLAN_IDS, ["free", "professional", "team", "business", "enterprise"]);
@@ -45,4 +47,19 @@ assert.throws(() => changeSeatQuantity({ quantity: assignedSeats, purchased: 14,
 assert.throws(() => changeSeatQuantity({ quantity: assignedSeats, purchased: 25, expectedRevision: 2, now: "2026-09-30T20:09:00Z" }), /stale/);
 assert.throws(() => createSeatQuantity({ subscriptionId: recovered.id, seatClass: "viewer", purchased: -1, now: recovered.updatedAt }), /non-negative integer/);
 
-console.log("Commercial subscription Builds 011-013 company record, lifecycle, and seats: PASS");
+const snapshot = createEntitlementSnapshot({ subscription: recovered, seatQuantities: [assignedSeats], effectiveAt: "2026-09-30T20:10:00Z" });
+const sameSnapshot = createEntitlementSnapshot({ subscription: recovered, seatQuantities: [assignedSeats], effectiveAt: "2026-09-30T20:10:00Z" });
+assert.equal(snapshot.enabled, true);
+assert.equal(snapshot.fingerprint, sameSnapshot.fingerprint);
+assert.equal(snapshot.subscriptionRevision, recovered.revision);
+assert.ok(snapshot.capabilities.includes("team.manage"));
+assert.equal(verifyEntitlementSnapshot(snapshot), true);
+assert.equal(verifyEntitlementSnapshot({ ...snapshot, planId: "enterprise" }), false);
+const suspended = transitionSubscription({ subscription: recovered, to: "suspended", expectedRevision: 5, now: "2026-09-30T20:11:00Z" });
+const suspendedSnapshot = createEntitlementSnapshot({ subscription: suspended, seatQuantities: [assignedSeats], effectiveAt: "2026-09-30T20:11:00Z" });
+assert.equal(suspendedSnapshot.enabled, false);
+assert.deepEqual(suspendedSnapshot.capabilities, []);
+assert.notEqual(suspendedSnapshot.fingerprint, snapshot.fingerprint);
+assert.throws(() => createEntitlementSnapshot({ subscription: recovered, seatQuantities: [{ ...assignedSeats, subscriptionId: "sub-other" }], effectiveAt: recovered.updatedAt }), /another subscription/);
+
+console.log("Commercial subscription Builds 011-014 company record, lifecycle, seats, and entitlement snapshot: PASS");

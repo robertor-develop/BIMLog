@@ -127,3 +127,61 @@ export function changeSeatQuantity(input: {
     updatedAt: new Date(input.now).toISOString(),
   });
 }
+
+const PLAN_CAPABILITIES: Readonly<Record<SubscriptionPlanId, readonly string[]>> = {
+  free: ["project.read"],
+  professional: ["project.read", "project.manage", "coordination.manage"],
+  team: ["project.read", "project.manage", "coordination.manage", "team.manage", "commercial.read"],
+  business: ["project.read", "project.manage", "coordination.manage", "team.manage", "commercial.read", "commercial.manage", "integration.manage"],
+  enterprise: ["project.read", "project.manage", "coordination.manage", "team.manage", "commercial.read", "commercial.manage", "integration.manage", "governance.manage"],
+};
+
+export type SubscriptionEntitlementSnapshot = Readonly<{
+  subscriptionId: string;
+  companyId: number;
+  planId: SubscriptionPlanId;
+  catalogPriceVersion: number;
+  subscriptionRevision: number;
+  enabled: boolean;
+  capabilities: readonly string[];
+  seats: readonly Readonly<{ seatClass: SubscriptionSeatClass; purchased: number; assigned: number; revision: number }>[];
+  effectiveAt: string;
+  fingerprint: string;
+}>;
+
+function snapshotFingerprint(value: Omit<SubscriptionEntitlementSnapshot, "fingerprint">): string {
+  return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+export function createEntitlementSnapshot(input: {
+  subscription: CompanySubscription;
+  seatQuantities: readonly SubscriptionSeatQuantity[];
+  effectiveAt: string;
+}): SubscriptionEntitlementSnapshot {
+  const seen = new Set<SubscriptionSeatClass>();
+  const seats = input.seatQuantities.map((quantity) => {
+    if (quantity.subscriptionId !== input.subscription.id) throw new Error("Seat quantity belongs to another subscription");
+    if (seen.has(quantity.seatClass)) throw new Error(`Duplicate ${quantity.seatClass} seat quantity`);
+    seen.add(quantity.seatClass);
+    validateSeatCounts(quantity.purchased, quantity.assigned);
+    return Object.freeze({ seatClass: quantity.seatClass, purchased: quantity.purchased, assigned: quantity.assigned, revision: quantity.revision });
+  }).sort((a, b) => a.seatClass.localeCompare(b.seatClass));
+  const enabled = input.subscription.status === "active";
+  const unsigned = Object.freeze({
+    subscriptionId: input.subscription.id,
+    companyId: input.subscription.companyId,
+    planId: input.subscription.planId,
+    catalogPriceVersion: input.subscription.catalogPriceVersion,
+    subscriptionRevision: input.subscription.revision,
+    enabled,
+    capabilities: Object.freeze(enabled ? [...PLAN_CAPABILITIES[input.subscription.planId]] : []),
+    seats: Object.freeze(seats),
+    effectiveAt: new Date(input.effectiveAt).toISOString(),
+  });
+  return Object.freeze({ ...unsigned, fingerprint: snapshotFingerprint(unsigned) });
+}
+
+export function verifyEntitlementSnapshot(snapshot: SubscriptionEntitlementSnapshot): boolean {
+  const { fingerprint, ...unsigned } = snapshot;
+  return fingerprint === snapshotFingerprint(unsigned);
+}
