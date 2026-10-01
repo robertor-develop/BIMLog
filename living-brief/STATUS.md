@@ -2,7 +2,7 @@
 
 ## P37 onboarding-schema publication repair — 2026-10-01
 
-The corrected P37 republication was stopped before promotion because Replit proposed dropping `user_onboarding_profiles` and `email_verification_tokens`. No destructive migration was approved and production remained unchanged. The canonical Drizzle schema now declares the same named work-profile constraint and verification-token user index already created by the additive startup migration. Database source-safety and destructive-SQL fixtures pass. Replit development-schema parity, exact-head gate, push, safe republication, exact live identity and repeated authenticated Chrome smoke remain required before B061.
+The corrected P37 republication was stopped before promotion because Replit proposed dropping `user_onboarding_profiles` and `email_verification_tokens`. No destructive migration was approved and production remained unchanged. The canonical Drizzle schema now declares the same named work-profile constraint and verification-token user index already created by the additive startup migration. The index declaration uses production's exact `DESC` default null ordering rather than Drizzle's different `.desc()` ordering. Database source-safety, destructive-SQL fixtures and database TypeScript pass. Replit development-schema parity, exact-head gate, push, safe republication, exact live identity and repeated authenticated Chrome smoke remain required before B061.
 
 Post-commit release reconciliation binds the B056–B060 candidate to source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf`; the complete clean gate, push, publication, and authenticated production smoke remain required before acceptance.
 

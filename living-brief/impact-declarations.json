@@ -53580,7 +53580,7 @@
     },
     {
       "taskId": "saas-block12-p37-onboarding-schema-parity-repair",
-      "reviewedThroughCommit": "e57119a3045b20b347492c5778fa4955724acf66",
+      "reviewedThroughCommit": "97cee93f424d7f279a513f18ce8b43c288c67ffc",
       "reviewedAt": "2026-10-01T23:03:00Z",
       "status": "candidate",
       "authorities": [
@@ -53647,8 +53647,8 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "0b4586628231d995dccf8e12e9add878287aa28eba4077aca6c9ab1b0a632905",
-      "reason": "The publication preview exposed schema-authority drift; canonical declarations now preserve the existing onboarding tables, constraint and index."
+      "reviewedChangeSha256": "46b2fd4ff16a33f0f0f2b5fb3071bc7d70bff0b03e4415632d275f0278ed873b",
+      "reason": "The publication preview exposed schema-authority drift; canonical declarations now preserve the existing onboarding tables and constraint while matching the production token index's DESC null ordering."
     }
   ]
 }
