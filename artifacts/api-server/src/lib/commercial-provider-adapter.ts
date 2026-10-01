@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { CheckoutAttempt, CommercialOrder, ProviderCustomerBinding, ProviderEventReceipt } from "./subscription-authority";
+import type { BillingPortalSession, CheckoutAttempt, CommercialOrder, ProviderCustomerBinding, ProviderEventReceipt } from "./subscription-authority";
 
 export type CommercialProviderReadiness = Readonly<{
   provider: "stripe";
@@ -144,4 +144,26 @@ export function verifyStripeWebhook(input: {
     provider: "stripe", eventId: event.id, eventType: event.type,
     payloadDigest: sha256(input.rawPayload), receivedAt: new Date(input.nowEpochSeconds * 1000).toISOString(),
   });
+}
+
+export async function createStripeBillingPortalLaunch(input: {
+  configuration: StripeCommercialConfiguration;
+  session: BillingPortalSession;
+  customer: ProviderCustomerBinding;
+  transport: StripeTransport;
+}): Promise<Readonly<{ providerSessionId: string; portalUrl: string }>> {
+  if (input.session.status !== "ready" || input.customer.status !== "active") throw new Error("Stripe billing portal requires ready internal and provider customer sessions");
+  if (input.session.companyId !== input.customer.companyId || input.session.providerCustomerBindingId !== input.customer.id || input.customer.provider !== "stripe") throw new Error("Stripe billing portal lineage is invalid");
+  const body = new URLSearchParams();
+  body.set("customer", input.customer.providerCustomerReference);
+  body.set("return_url", `${input.configuration.appOrigin}${input.session.returnPath}`);
+  if (input.configuration.portalConfigurationId) body.set("configuration", input.configuration.portalConfigurationId);
+  const response = await input.transport({
+    method: "POST", path: "/v1/billing_portal/sessions", body,
+    headers: Object.freeze({ Authorization: `Bearer ${input.configuration.secretKey}`, "Stripe-Version": input.configuration.apiVersion, "Idempotency-Key": input.session.id }),
+  });
+  if (response.status < 200 || response.status >= 300 || !response.body || typeof response.body !== "object") throw new Error("Stripe billing portal session creation failed");
+  const result = response.body as { id?: unknown; url?: unknown; customer?: unknown };
+  if (typeof result.id !== "string" || !result.id.startsWith("bps_") || result.customer !== input.customer.providerCustomerReference) throw new Error("Stripe billing portal response identity is invalid");
+  return Object.freeze({ providerSessionId: result.id, portalUrl: safeHostedUrl(result.url, "billing.stripe.com") });
 }

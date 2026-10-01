@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
-import { createStripeCheckoutSession, inspectStripeCommercialConfiguration, verifyStripeWebhook } from "./commercial-provider-adapter";
+import { createStripeBillingPortalLaunch, createStripeCheckoutSession, inspectStripeCommercialConfiguration, verifyStripeWebhook } from "./commercial-provider-adapter";
 import crypto from "node:crypto";
-import { createCheckoutAttempt, createCommercialOrder, createCompanySubscription, transitionCommercialOrder } from "./subscription-authority";
+import { createBillingPortalSession, createCheckoutAttempt, createCommercialOrder, createCompanySubscription, transitionCommercialOrder } from "./subscription-authority";
 
 const configured = inspectStripeCommercialConfiguration({
   secretKey: "sk_test_bimlog_1234567890", webhookSecret: "whsec_bimlog_1234567890",
@@ -47,4 +47,18 @@ assert.throws(() => verifyStripeWebhook({ rawPayload: webhookPayload, signatureH
 assert.throws(() => verifyStripeWebhook({ rawPayload: `${webhookPayload} `, signatureHeader: `t=${webhookTimestamp},v1=${webhookSignature}`, webhookSecret: configured.configuration!.webhookSecret, nowEpochSeconds: webhookTimestamp, priorReceipts: [] }), /signature is invalid/);
 assert.throws(() => verifyStripeWebhook({ rawPayload: webhookPayload, signatureHeader: `t=${webhookTimestamp},v1=${webhookSignature}`, webhookSecret: configured.configuration!.webhookSecret, nowEpochSeconds: webhookTimestamp, priorReceipts: [receipt] }), /already received/);
 
-console.log("Commercial provider Block 7 Build 033: PASS");
+const internalPortal = createBillingPortalSession({ id: "portal-launch-31", customer, requestedBy: "billing-admin-31", returnPath: "/settings/billing", now: "2026-10-01T04:05:00Z" });
+let portalRequest: Parameters<NonNullable<Parameters<typeof createStripeBillingPortalLaunch>[0]["transport"]>>[0] | undefined;
+const portal = await createStripeBillingPortalLaunch({ configuration: configured.configuration!, session: internalPortal, customer, transport: async (request) => {
+  portalRequest = request;
+  return { status: 200, body: { id: "bps_bimlog_31", customer: customer.providerCustomerReference, url: "https://billing.stripe.com/p/session/bimlog31" } };
+} });
+assert.equal(portal.providerSessionId, "bps_bimlog_31");
+assert.equal(portalRequest?.path, "/v1/billing_portal/sessions");
+assert.equal(portalRequest?.body.get("customer"), customer.providerCustomerReference);
+assert.equal(portalRequest?.body.get("return_url"), "https://app.bimlog.com/settings/billing");
+assert.equal(portalRequest?.body.get("configuration"), "bpc_bimlog");
+assert.equal(portalRequest?.headers["Idempotency-Key"], internalPortal.id);
+await assert.rejects(() => createStripeBillingPortalLaunch({ configuration: configured.configuration!, session: internalPortal, customer, transport: async () => ({ status: 200, body: { id: "bps_bad", customer: customer.providerCustomerReference, url: "https://evil.example/portal" } }) }), /untrusted hosted URL/);
+
+console.log("Commercial provider Block 7 Build 034: PASS");
