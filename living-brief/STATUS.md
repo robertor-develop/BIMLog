@@ -3345,3 +3345,12 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Pricing now explains renewal and term-end cancellation, lists governed add-ons and implementation outcomes, and states that applicable taxes are excluded until the final order form, tax rules and issued billing document establish the amount due. Enterprise treatment remains agreement-defined.
 - Product commits are `111d80ed`, `c7fb96f2`, `f7e56b2e`, `33509bd8` and `aa2db693`. Focused catalog behavior, Pricing source acceptance and frontend TypeScript pass. This is the first unpublished five-build block after the accepted Commercial Readiness Block 1 publication; publication and authenticated Chrome smoke are due after Builds 011–015.
 - The first complete gate found Build 007 returning a duplicate `cycle` property. Correction `8fe01a9d` emits the authoritative billing-term cycle once and adds exact-cycle regression coverage; focused catalog and frontend TypeScript checks pass before the complete gate repeat.
+
+## Commercial readiness Block 3 — subscription authority — 2026-09-30
+
+- Builds 011–015 define immutable company subscription records, a revision-checked lifecycle, purchased and assigned seat quantities, deterministic entitlement snapshots, and an append-only hash-chained commercial audit history.
+- Entitlement snapshots grant capabilities only while the subscription is active. Every snapshot binds the company, plan, catalog price version, subscription revision, seat revisions and effective time; non-active states produce an explicit disabled snapshot with no capabilities.
+- Seat quantities cannot be negative, exceed purchased capacity or be reduced below seats already assigned. Lifecycle and seat mutations reject stale revisions.
+- Product commits are `42000d32`, `182a6918`, `b2e1ff8b`, `2b3e03f4` and `26f9e7d0`. Focused Block 3 behavior and API TypeScript checks pass.
+- This source block creates domain authority only. It does not activate checkout, charge a payment method, persist provider credentials, change current user entitlement enforcement or claim production publication before the exact-head release and live acceptance gates pass.
+- Builds 006–015 now reach the required ten-build publication boundary.

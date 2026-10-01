@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "02ba02179088a8e0286dee1c846fd9429787ae302f7d3bd3ce0c3219c01a831f",
-  "itemCount": 276,
+  "sourceSha256": "466324876d85fbd44bcb851aa7511e07cdfd6657d5809d05af62686c01cdbd8c",
+  "itemCount": 277,
   "counts": {
-    "ACTIVE": 241,
+    "ACTIVE": 242,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5037,6 +5037,24 @@
       "evidence": [
         "OPEN_LOOP.md:3939",
         "Commercial readiness Block 2 — commercial catalog — 2026-09-30"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "994e31cfc09a5991",
+      "sourceLine": 3949,
+      "heading": "Commercial readiness Block 3 — subscription authority — 2026-09-30",
+      "statement": "Pass the complete exact-head gate, push Builds 011–015 once, publish accumulated Builds 006–015 without Replit Agents, verify the exact live identity and run full authenticated visible-Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3949",
+        "Commercial readiness Block 3 — subscription authority — 2026-09-30"
       ],
       "currentAuthority": false
     }

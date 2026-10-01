@@ -3938,3 +3938,12 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 010 establishes USD public presentation, applicable-tax disclosure, billing identity inputs and signed-order authority on Pricing.
 - [ ] Pass the complete exact-head gate and push Builds 006–010 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 011–015.
 - [x] Correct the complete-gate duplicate billing-cycle property and bind the exact returned cycle in focused regression coverage.
+
+## Commercial readiness Block 3 — subscription authority — 2026-09-30
+
+- [x] Build 011 defines immutable company subscription records bound to an exact catalog price version.
+- [x] Build 012 governs revision-safe subscription lifecycle transitions and terminal states.
+- [x] Build 013 governs purchased and assigned seat quantities without permitting over-assignment or unsafe reduction.
+- [x] Build 014 creates deterministic active-only entitlement snapshots with company, plan, catalog and seat provenance.
+- [x] Build 015 creates attributable, append-only, hash-chained commercial audit history and the focused block acceptance command.
+- [ ] Pass the complete exact-head gate, push Builds 011–015 once, publish accumulated Builds 006–015 without Replit Agents, verify the exact live identity and run full authenticated visible-Chrome smoke.

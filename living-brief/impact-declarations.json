@@ -52847,6 +52847,78 @@
       ],
       "reviewedChangeSha256": "6619d50d5716b220a16c32942f373dc154263eaefc01bf37a996af82388c821b",
       "reason": "The quoted term now exposes one authoritative billing cycle and focused TypeScript plus behavior checks pass."
+    },
+    {
+      "taskId": "commercial-readiness-block03-subscription-authority",
+      "reviewedThroughCommit": "26f9e7d06bd0f84725113a3adeb8684d7d3a673a",
+      "reviewedAt": "2026-10-01T00:35:14Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Subscription authority remains within BIMLog commercial readiness and does not change ecosystem coordination doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five sequential builds preserve the authorized block, push and ten-build publication cadence."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused behavior covers stale revisions, invalid transitions, seat limits, deterministic snapshots and audit tamper detection."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "Records the company subscription, lifecycle, seat, entitlement and commercial audit authority needed for later billing integration."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Adds a server-side commercial domain module and focused acceptance command without routes, schema, migrations or provider activation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, package, installer or field-acceptance behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal report or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accounting, tax, legal or compliance conclusion is added."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 011-015, their exact commits, behavior and ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the five implementation builds while retaining the exact-head gate, push, publication and live smoke."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The commercial audit history is product behavior and does not declare a production incident."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9e9b7cfffa9a2e168c483470ce061c9390ad71d5776806eac159aba0c77f9f51",
+      "reason": "BIMLog now has deterministic company subscription authority without claiming payment-provider activation or changing existing user entitlement enforcement."
     }
   ]
 }

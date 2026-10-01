@@ -1010,6 +1010,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/submittal-register-coverage.ts
 - artifacts/api-server/src/lib/submittal-review-tracking.behavior.ts
 - artifacts/api-server/src/lib/submittal-review-tracking.ts
+- artifacts/api-server/src/lib/subscription-authority.behavior.ts
+- artifacts/api-server/src/lib/subscription-authority.ts
 - artifacts/api-server/src/lib/team-performance-postgres-query.behavior.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
 - artifacts/api-server/src/lib/team-performance.behavior.ts
