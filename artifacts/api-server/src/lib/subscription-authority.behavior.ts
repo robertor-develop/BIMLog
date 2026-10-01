@@ -14,6 +14,7 @@ import {
   recordCollectionFailure,
   scheduleSubscriptionCancellation,
   applyScheduledCancellation,
+  createRefundCreditNote,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -153,4 +154,16 @@ const cancelledAtTerm = applyScheduledCancellation({ subscription: checkoutCompl
 assert.deepEqual({ subscription: cancelledAtTerm.subscription.status, cancellation: cancelledAtTerm.cancellation.status, appliedAt: cancelledAtTerm.cancellation.appliedAt }, { subscription: "cancelled", cancellation: "applied", appliedAt: firstTerm.endsAt });
 assert.throws(() => scheduleSubscriptionCancellation({ subscription: checkoutCompletion.subscription, term: firstTerm, requestedBy: "company-admin-7", reason: "Late request", requestedAt: firstTerm.endsAt }), /before the term ends/);
 
-console.log("Commercial billing Block 5 Build 024: PASS");
+const refundPayload = JSON.stringify({ invoiceId: paidInvoice.id, amountCents: 66430 });
+const refundSignature = crypto.createHmac("sha256", providerSecret).update(`${providerIssuedAt}.${refundPayload}`).digest("hex");
+const refundReceipt = verifyAndReceiveProviderEvent({ provider: "stripe", eventId: "evt-refund-1", eventType: "charge.refunded", rawPayload: refundPayload, signatureHex: refundSignature, signingSecret: providerSecret, issuedAtEpochSeconds: providerIssuedAt, nowEpochSeconds: providerIssuedAt + 10, priorReceipts: [] });
+const partialCredit = createRefundCreditNote({ id: "credit-1", creditNumber: "BIM-CN-2026-0001", invoice: paidInvoice, receipt: refundReceipt, rawPayload: refundPayload, priorCredits: [], reason: "Approved partial service credit", issuedAt: "2026-10-02T20:17:00Z" });
+assert.deepEqual({ amount: partialCredit.amountCents, status: partialCredit.status, invoiceId: partialCredit.invoiceId }, { amount: 66430, status: "partial_refund", invoiceId: paidInvoice.id });
+const finalRefundPayload = JSON.stringify({ invoiceId: paidInvoice.id, amountCents: 200000 });
+const finalRefundSignature = crypto.createHmac("sha256", providerSecret).update(`${providerIssuedAt}.${finalRefundPayload}`).digest("hex");
+const finalRefundReceipt = verifyAndReceiveProviderEvent({ provider: "stripe", eventId: "evt-refund-2", eventType: "charge.refunded", rawPayload: finalRefundPayload, signatureHex: finalRefundSignature, signingSecret: providerSecret, issuedAtEpochSeconds: providerIssuedAt, nowEpochSeconds: providerIssuedAt + 10, priorReceipts: [refundReceipt] });
+const finalCredit = createRefundCreditNote({ id: "credit-2", creditNumber: "BIM-CN-2026-0002", invoice: paidInvoice, receipt: finalRefundReceipt, rawPayload: finalRefundPayload, priorCredits: [partialCredit], reason: "Approved remaining service refund", issuedAt: "2026-10-03T20:17:00Z" });
+assert.equal(finalCredit.status, "full_refund");
+assert.throws(() => createRefundCreditNote({ creditNumber: "BIM-CN-2026-0003", invoice: paidInvoice, receipt: finalRefundReceipt, rawPayload: finalRefundPayload, priorCredits: [partialCredit, finalCredit], reason: "Duplicate refund", issuedAt: "2026-10-04T20:17:00Z" }), /already applied/);
+
+console.log("Commercial billing Block 5 Builds 021-025: PASS");

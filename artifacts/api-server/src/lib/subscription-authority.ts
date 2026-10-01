@@ -192,7 +192,10 @@ export type CommercialAuditAction =
   | "seats.changed"
   | "entitlements.snapshotted"
   | "order.accepted"
-  | "checkout.completed";
+  | "checkout.completed"
+  | "invoice.issued"
+  | "subscription.cancellation_scheduled"
+  | "refund.recorded";
 
 export type CommercialAuditEvent = Readonly<{
   sequence: number;
@@ -645,4 +648,52 @@ export function applyScheduledCancellation(input: {
   if (now < input.cancellation.effectiveAt) throw new Error("Cancellation effective time has not arrived");
   const subscription = transitionSubscription({ subscription: input.subscription, to: "cancelled", expectedRevision: input.subscription.revision, now });
   return Object.freeze({ subscription, cancellation: Object.freeze({ ...input.cancellation, status: "applied", appliedAt: now }) });
+}
+
+export type CommercialCreditNote = Readonly<{
+  id: string;
+  creditNumber: string;
+  invoiceId: string;
+  subscriptionId: string;
+  provider: string;
+  providerEventId: string;
+  amountCents: number;
+  currency: "USD";
+  reason: string;
+  status: "partial_refund" | "full_refund";
+  issuedAt: string;
+}>;
+
+export function createRefundCreditNote(input: {
+  id?: string;
+  creditNumber: string;
+  invoice: CommercialInvoice;
+  receipt: ProviderEventReceipt;
+  rawPayload: string;
+  priorCredits: readonly CommercialCreditNote[];
+  reason: string;
+  issuedAt: string;
+}): CommercialCreditNote {
+  const creditNumber = input.creditNumber.trim();
+  const reason = input.reason.trim();
+  if (!creditNumber) throw new Error("A credit note number is required");
+  if (reason.length < 3 || reason.length > 500) throw new Error("A refund reason must be between 3 and 500 characters");
+  if (input.priorCredits.some((credit) => credit.creditNumber === creditNumber)) throw new Error("Credit note number already exists");
+  if (input.priorCredits.some((credit) => credit.provider === input.receipt.provider && credit.providerEventId === input.receipt.eventId)) throw new Error("Refund event was already applied");
+  if (input.priorCredits.some((credit) => credit.invoiceId !== input.invoice.id)) throw new Error("Prior credit belongs to another invoice");
+  if (input.receipt.eventType !== "charge.refunded") throw new Error("Provider event does not confirm a refund");
+  if (crypto.createHash("sha256").update(input.rawPayload).digest("hex") !== input.receipt.payloadDigest) throw new Error("Refund payload does not match its receipt");
+  let payload: { invoiceId?: unknown; amountCents?: unknown };
+  try { payload = JSON.parse(input.rawPayload) as { invoiceId?: unknown; amountCents?: unknown }; } catch { throw new Error("Refund payload is invalid JSON"); }
+  if (payload.invoiceId !== input.invoice.id || !Number.isSafeInteger(payload.amountCents) || (payload.amountCents as number) <= 0) throw new Error("Refund payload identity or amount is invalid");
+  const amountCents = payload.amountCents as number;
+  const credited = input.priorCredits.reduce((sum, credit) => sum + credit.amountCents, 0);
+  if (credited + amountCents > input.invoice.totalCents) throw new Error("Refund exceeds the paid invoice total");
+  return Object.freeze({
+    id: input.id ?? crypto.randomUUID(), creditNumber, invoiceId: input.invoice.id,
+    subscriptionId: input.invoice.subscriptionId, provider: input.receipt.provider,
+    providerEventId: input.receipt.eventId, amountCents, currency: input.invoice.currency, reason,
+    status: credited + amountCents === input.invoice.totalCents ? "full_refund" : "partial_refund",
+    issuedAt: new Date(input.issuedAt).toISOString(),
+  });
 }
