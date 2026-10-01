@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createCompanySubscription } from "./subscription-authority";
 import { deriveSubscriptionAccess } from "./commercial-billing-operations";
-import { deriveCustomerSupportEntitlement, openCustomerSupportCase } from "./commercial-customer-support";
+import { deriveCustomerSupportEntitlement, openCustomerSupportCase, transitionCustomerSupportCase } from "./commercial-customer-support";
 
 const subscriptionBase = createCompanySubscription({ id:"sub-46", companyId:7, planId:"business", catalogPriceVersion:7, billingCycle:"monthly", currency:"USD", amount:3000, now:"2026-10-01T00:00:00Z" });
 const subscription = { ...subscriptionBase, status:"active" as const, revision:2, updatedAt:"2026-10-01T00:01:00.000Z" };
@@ -18,3 +18,11 @@ assert.deepEqual({ company:supportCase.companyId, status:supportCase.status, due
 assert.equal(openCustomerSupportCase({ entitlement, requesterUserId:71, channel:"web", locale:"es", category:"billing", priority:"urgent", subject:"Invoice amount differs", description:"The October invoice does not match our approved subscription.", requestKey:"customer-71-october-invoice", existing:[supportCase], now:"2026-10-03T10:01:00Z" }), supportCase);
 assert.throws(() => openCustomerSupportCase({ entitlement, requesterUserId:71, channel:"phone" as never, locale:"en", category:"technical", priority:"normal", subject:"Phone request", description:"This channel is not included.", requestKey:"bad-channel", existing:[], now:"2026-10-03T10:00:00Z" }), /channel is not entitled/);
 console.log("B047 idempotent support case intake and SLA: PASS");
+
+const acknowledged = transitionCustomerSupportCase({ supportCase, expectedRevision:1, actorUserId:901, actorRole:"support", action:"acknowledge", note:"Billing specialist assigned.", now:"2026-10-03T10:30:00Z" });
+assert.deepEqual({ status:acknowledged.supportCase.status, revision:acknowledged.supportCase.revision, action:acknowledged.event.action, from:acknowledged.event.fromStatus }, { status:"in_progress", revision:2, action:"acknowledge", from:"open" });
+const resolved = transitionCustomerSupportCase({ supportCase:acknowledged.supportCase, expectedRevision:2, actorUserId:901, actorRole:"support", action:"resolve", note:"Confirmed the credit note and corrected statement.", now:"2026-10-03T11:00:00Z" });
+assert.equal(resolved.supportCase.status, "resolved");
+assert.throws(() => transitionCustomerSupportCase({ supportCase, expectedRevision:1, actorUserId:71, actorRole:"customer", action:"acknowledge", note:"Self assign", now:"2026-10-03T10:30:00Z" }), /cannot perform/);
+assert.throws(() => transitionCustomerSupportCase({ supportCase:acknowledged.supportCase, expectedRevision:1, actorUserId:901, actorRole:"support", action:"resolve", note:"stale", now:"2026-10-03T11:00:00Z" }), /revision conflict/);
+console.log("B048 revision-safe support lifecycle and audit: PASS");

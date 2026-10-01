@@ -70,3 +70,32 @@ export function openCustomerSupportCase(input: {
     subject, description, status:"open", openedAt, responseDueAt:new Date(new Date(openedAt).getTime() + targetMinutes * 60000).toISOString(), revision:1,
   });
 }
+
+export type SupportCaseEvent = Readonly<{
+  id: string; caseId: string; companyId: number; revision: number; actorUserId: number;
+  actorRole: "customer" | "support" | "support_manager"; action: "acknowledge" | "resolve" | "close" | "reopen";
+  fromStatus: CustomerSupportCase["status"]; toStatus: CustomerSupportCase["status"]; occurredAt: string; note: string;
+}>;
+
+export function transitionCustomerSupportCase(input: {
+  supportCase: CustomerSupportCase; expectedRevision: number; actorUserId: number;
+  actorRole: SupportCaseEvent["actorRole"]; action: SupportCaseEvent["action"]; note: string; now: string;
+}): Readonly<{ supportCase: CustomerSupportCase; event: SupportCaseEvent }> {
+  if (input.expectedRevision !== input.supportCase.revision) throw new Error("Support case revision conflict");
+  if (!Number.isSafeInteger(input.actorUserId) || input.actorUserId < 1) throw new Error("Support actor is invalid");
+  const transitions: Record<SupportCaseEvent["action"], readonly [CustomerSupportCase["status"], CustomerSupportCase["status"], readonly SupportCaseEvent["actorRole"][]]> = {
+    acknowledge:["open","in_progress",["support","support_manager"]],
+    resolve:["in_progress","resolved",["support","support_manager"]],
+    close:["resolved","closed",["customer","support_manager"]],
+    reopen:["resolved","in_progress",["customer","support","support_manager"]],
+  };
+  const [fromStatus, toStatus, roles] = transitions[input.action];
+  if (input.supportCase.status !== fromStatus) throw new Error("Support case transition is invalid");
+  if (!roles.includes(input.actorRole)) throw new Error("Support actor cannot perform this transition");
+  const note = input.note.trim();
+  if (note.length < 3 || note.length > 2000) throw new Error("Support transition note is invalid");
+  const occurredAt = instant(input.now, "Support transition time");
+  const revision = input.supportCase.revision + 1;
+  const event = Object.freeze({ id:crypto.createHash("sha256").update(`${input.supportCase.id}:${revision}:${input.action}`).digest("hex"), caseId:input.supportCase.id, companyId:input.supportCase.companyId, revision, actorUserId:input.actorUserId, actorRole:input.actorRole, action:input.action, fromStatus, toStatus, occurredAt, note });
+  return Object.freeze({ supportCase:Object.freeze({ ...input.supportCase, status:toStatus, revision }), event });
+}
