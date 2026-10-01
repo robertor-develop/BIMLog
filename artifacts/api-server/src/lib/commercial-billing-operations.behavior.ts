@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createCompanySubscription } from "./subscription-authority";
-import { cancelBillingNotice, createCustomerBillingStatement, deriveSubscriptionAccess, evaluateSubscriptionAccess, prepareBillingNotice } from "./commercial-billing-operations";
+import { cancelBillingNotice, createCustomerBillingStatement, deriveSubscriptionAccess, evaluateSubscriptionAccess, prepareBillingNotice, projectBillingOperations } from "./commercial-billing-operations";
 
 const subscription = createCompanySubscription({ id:"sub-41", companyId:7, planId:"business", catalogPriceVersion:7, billingCycle:"monthly", currency:"USD", amount:3000, now:"2026-10-01T00:00:00Z" });
 const active = { ...subscription, status:"active" as const, revision:2, updatedAt:"2026-10-01T00:01:00.000Z" };
@@ -29,3 +29,13 @@ assert.equal(cancelBillingNotice({ notice, subscription:active, now:"2026-10-05T
 assert.equal(cancelBillingNotice({ notice, subscription:pastDue, now:"2026-10-05T00:02:00Z" }), notice);
 assert.throws(() => prepareBillingNotice({ companyId:7, subscription:pastDue, collection, recipientEmail:"bad", locale:"en", kind:"retry_scheduled", existing:[], now:"2026-10-05T00:00:00Z" }), /recipient/);
 console.log("B043 governed billing collection notices: PASS");
+
+const adminView = projectBillingOperations({ companyId:7, subscription:pastDue, grant, statements:[statement], notices:[notice], role:"billing_admin" });
+assert.deepEqual({ id:adminView.subscription.id, amount:adminView.statements[0]?.netPaidCents, email:adminView.notices[0]?.recipientEmail, manage:adminView.canManageBilling }, { id:active.id, amount:2500, email:"billing@bimtech.example", manage:true });
+const supportView = projectBillingOperations({ companyId:7, subscription:pastDue, grant, statements:[statement], notices:[notice], role:"support" });
+assert.deepEqual({ id:supportView.subscription.id, revision:supportView.subscription.revision, amount:supportView.statements[0]?.netPaidCents, email:supportView.notices[0]?.recipientEmail, manage:supportView.canManageBilling }, { id:null, revision:null, amount:null, email:null, manage:false });
+const customerView = projectBillingOperations({ companyId:7, subscription:pastDue, grant, statements:[statement], notices:[notice], role:"customer_admin" });
+assert.equal(customerView.statements[0]?.netPaidCents, 2500);
+assert.equal(customerView.notices[0]?.id, null);
+assert.throws(() => projectBillingOperations({ companyId:8, subscription:pastDue, grant, statements:[], notices:[], role:"auditor" }), /another company/);
+console.log("B044 permission-safe billing operations projection: PASS");

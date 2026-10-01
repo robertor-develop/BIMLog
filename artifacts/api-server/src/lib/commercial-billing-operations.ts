@@ -159,3 +159,34 @@ export function cancelBillingNotice(input: { notice: BillingNotice; subscription
   if (input.notice.status === "cancelled" || input.subscription.status === "past_due") return input.notice;
   return Object.freeze({ ...input.notice, status:"cancelled" });
 }
+
+export type BillingOperationsRole = "billing_admin" | "customer_admin" | "support" | "auditor";
+
+export function projectBillingOperations(input: {
+  companyId: number;
+  subscription: CompanySubscription;
+  grant: SubscriptionAccessGrant | null;
+  statements: readonly CustomerBillingStatement[];
+  notices: readonly BillingNotice[];
+  role: BillingOperationsRole;
+}): Readonly<{
+  subscription: Readonly<{ id: string | null; planId: string; status: CompanySubscription["status"]; revision: number | null }>;
+  access: Readonly<{ active: boolean; features: readonly SubscriptionFeature[]; seatLimit: number | null; expiresAt: string | null }>;
+  statements: readonly Readonly<{ id: string; periodStartsAt: string; periodEndsAt: string; netPaidCents: number | null; status: CustomerBillingStatement["status"] }>[];
+  notices: readonly Readonly<{ id: string | null; kind: BillingNotice["kind"]; status: BillingNotice["status"]; recipientEmail: string | null; notBefore: string }>[];
+  canManageBilling: boolean;
+}> {
+  if (input.subscription.companyId !== input.companyId) throw new Error("Billing operations subscription belongs to another company");
+  if (input.grant && (input.grant.companyId !== input.companyId || input.grant.subscriptionId !== input.subscription.id)) throw new Error("Billing operations access grant lineage is invalid");
+  if (input.statements.some((statement) => statement.companyId !== input.companyId || statement.subscriptionId !== input.subscription.id)) throw new Error("Billing operations statement lineage is invalid");
+  if (input.notices.some((notice) => notice.companyId !== input.companyId || notice.subscriptionId !== input.subscription.id)) throw new Error("Billing operations notice lineage is invalid");
+  const financial = input.role === "billing_admin" || input.role === "customer_admin" || input.role === "auditor";
+  const identifiers = input.role === "billing_admin" || input.role === "auditor";
+  return Object.freeze({
+    subscription:Object.freeze({ id:identifiers ? input.subscription.id : null, planId:input.subscription.planId, status:input.subscription.status, revision:identifiers ? input.subscription.revision : null }),
+    access:Object.freeze({ active:input.grant?.status === "active", features:input.grant?.features ?? [], seatLimit:input.grant?.seatLimit ?? null, expiresAt:input.grant?.expiresAt ?? null }),
+    statements:Object.freeze(input.statements.map((statement) => Object.freeze({ id:statement.id, periodStartsAt:statement.periodStartsAt, periodEndsAt:statement.periodEndsAt, netPaidCents:financial ? statement.netPaidCents : null, status:statement.status }))),
+    notices:Object.freeze(input.notices.map((notice) => Object.freeze({ id:identifiers ? notice.id : null, kind:notice.kind, status:notice.status, recipientEmail:input.role === "billing_admin" ? notice.recipientEmail : null, notBefore:notice.notBefore }))),
+    canManageBilling:input.role === "billing_admin",
+  });
+}
