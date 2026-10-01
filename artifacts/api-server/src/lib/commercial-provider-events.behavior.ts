@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { applyStripeCheckoutCompleted, applyStripeInvoicePaid, applyStripeRefund, applyStripeSubscriptionEvent, ingestStripeProviderEvent } from "./commercial-provider-events";
+import { applyStripeCheckoutCompleted, applyStripeInvoicePaid, applyStripeRefund, applyStripeSubscriptionEvent, ingestStripeProviderEvent, markCommercialProviderEventUnresolved, projectCommercialProviderReconciliation, retryCommercialProviderEvent } from "./commercial-provider-events";
 import { createCheckoutAttempt, createCommercialOrder, createCompanySubscription, transitionCommercialOrder, transitionSubscription } from "./subscription-authority";
 import type { ProviderEventReceipt } from "./subscription-authority";
 
@@ -58,3 +58,17 @@ assert.equal(refund039.credit.status, "partial_refund");
 assert.throws(() => applyStripeRefund({ event: refundEvent039, rawPayload: refund039Raw.replace("5000", "250000"), invoice: paid039.invoice, priorCredits: [], reason: "Approved service credit", now: "2026-10-01T12:07:00Z" }), /does not match/);
 
 console.log("Commercial provider Block 8 Build 039: PASS");
+
+const unresolved040 = markCommercialProviderEventUnresolved({ event: event038, errorCode: "LINEAGE_NOT_FOUND", nextRetryAt: "2026-10-01T12:10:00Z", now: "2026-10-01T12:08:00Z" });
+const customerView040 = projectCommercialProviderReconciliation({ events: [completion037.event, paid039.event, refund039.event, unresolved040, ignored], role: "customer_admin" });
+assert.equal(customerView040.status, "action_required");
+assert.deepEqual(customerView040.counts, { pending: 0, ignored: 1, applied: 3, unresolved: 1 });
+assert.equal(customerView040.issues[0]?.providerEventId, null);
+const auditView040 = projectCommercialProviderReconciliation({ events: [unresolved040], role: "auditor" });
+assert.equal(auditView040.issues[0]?.providerEventId, "evt_038");
+assert.throws(() => retryCommercialProviderEvent({ event: unresolved040, expectedAttemptCount: 1, now: "2026-10-01T12:09:59Z" }), /has not arrived/);
+const retry040 = retryCommercialProviderEvent({ event: unresolved040, expectedAttemptCount: 1, now: "2026-10-01T12:10:00Z" });
+assert.equal(retry040.status, "pending");
+assert.equal(retry040.lastErrorCode, "LINEAGE_NOT_FOUND");
+
+console.log("Commercial provider Block 8 Build 040: PASS");

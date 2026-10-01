@@ -26,6 +26,7 @@ export type CommercialProviderEvent = Readonly<{
   customerReference: string | null;
   attemptCount: number;
   lastErrorCode: string | null;
+  nextRetryAt: string | null;
   appliedAt: string | null;
 }>;
 
@@ -68,13 +69,13 @@ export function ingestStripeProviderEvent(input: {
     eventType: input.receipt.eventType, payloadDigest: input.receipt.payloadDigest,
     providerCreatedAt: new Date((payload.created as number) * 1000).toISOString(), receivedAt: input.receipt.receivedAt,
     status: supported ? "pending" : "ignored", objectId: object.id, customerReference,
-    attemptCount: 0, lastErrorCode: supported ? null : "UNSUPPORTED_EVENT_TYPE", appliedAt: null,
+    attemptCount: 0, lastErrorCode: supported ? null : "UNSUPPORTED_EVENT_TYPE", nextRetryAt: null, appliedAt: null,
   });
 }
 
 function appliedEvent(event: CommercialProviderEvent, now: string): CommercialProviderEvent {
   if (event.status !== "pending") throw new Error("Only a pending provider event can be applied");
-  return Object.freeze({ ...event, status: "applied", attemptCount: event.attemptCount + 1, lastErrorCode: null, appliedAt: new Date(now).toISOString() });
+  return Object.freeze({ ...event, status: "applied", attemptCount: event.attemptCount + 1, lastErrorCode: null, nextRetryAt: null, appliedAt: new Date(now).toISOString() });
 }
 
 export function applyStripeCheckoutCompleted(input: {
@@ -187,4 +188,51 @@ export function applyStripeRefund(input: {
     issuedAt: new Date(input.now).toISOString(),
   });
   return Object.freeze({ event: appliedEvent(input.event, input.now), credit });
+}
+
+const RECONCILIATION_ERROR_CODES = ["LINEAGE_NOT_FOUND", "AMOUNT_MISMATCH", "UNSUPPORTED_STATE", "TRANSIENT_PROVIDER_FAILURE"] as const;
+export type ReconciliationErrorCode = (typeof RECONCILIATION_ERROR_CODES)[number];
+
+export function markCommercialProviderEventUnresolved(input: {
+  event: CommercialProviderEvent;
+  errorCode: ReconciliationErrorCode;
+  nextRetryAt: string | null;
+  now: string;
+}): CommercialProviderEvent {
+  if (input.event.status !== "pending") throw new Error("Only a pending provider event can become unresolved");
+  if (!RECONCILIATION_ERROR_CODES.includes(input.errorCode)) throw new Error("A governed reconciliation error code is required");
+  const now = new Date(input.now);
+  const nextRetry = input.nextRetryAt === null ? null : new Date(input.nextRetryAt);
+  if (!Number.isFinite(now.getTime()) || (nextRetry && (!Number.isFinite(nextRetry.getTime()) || nextRetry <= now))) throw new Error("Provider event retry must be scheduled in the future");
+  return Object.freeze({ ...input.event, status: "unresolved", attemptCount: input.event.attemptCount + 1, lastErrorCode: input.errorCode, nextRetryAt: nextRetry?.toISOString() ?? null });
+}
+
+export function retryCommercialProviderEvent(input: { event: CommercialProviderEvent; expectedAttemptCount: number; now: string }): CommercialProviderEvent {
+  if (input.event.status !== "unresolved" || input.event.attemptCount !== input.expectedAttemptCount) throw new Error("Provider event retry state is stale");
+  if (input.event.attemptCount >= 5) throw new Error("Provider event requires manual reconciliation");
+  const now = new Date(input.now).toISOString();
+  if (!input.event.nextRetryAt || now < input.event.nextRetryAt) throw new Error("Provider event retry time has not arrived");
+  return Object.freeze({ ...input.event, status: "pending", nextRetryAt: null });
+}
+
+export type CommercialReconciliationRole = "billing_admin" | "support" | "auditor" | "customer_admin";
+
+export function projectCommercialProviderReconciliation(input: {
+  events: readonly CommercialProviderEvent[];
+  role: CommercialReconciliationRole;
+}): Readonly<{
+  status: "ready" | "action_required";
+  counts: Readonly<Record<CommercialProviderEvent["status"], number>>;
+  oldestPendingAt: string | null;
+  issues: readonly Readonly<{ providerEventId: string | null; eventType: string; errorCode: string | null; attemptCount: number; nextRetryAt: string | null }>[];
+}> {
+  const counts = { pending: 0, ignored: 0, applied: 0, unresolved: 0 };
+  for (const event of input.events) counts[event.status] += 1;
+  const pendingDates = input.events.filter((event) => event.status === "pending").map((event) => event.receivedAt).sort();
+  const mayInspectIdentity = input.role === "support" || input.role === "auditor" || input.role === "billing_admin";
+  const issues = input.events.filter((event) => event.status === "unresolved").map((event) => Object.freeze({
+    providerEventId: mayInspectIdentity ? event.providerEventId : null,
+    eventType: event.eventType, errorCode: event.lastErrorCode, attemptCount: event.attemptCount, nextRetryAt: event.nextRetryAt,
+  }));
+  return Object.freeze({ status: counts.unresolved > 0 ? "action_required" : "ready", counts: Object.freeze(counts), oldestPendingAt: pendingDates[0] ?? null, issues: Object.freeze(issues) });
 }
