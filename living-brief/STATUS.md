@@ -3434,3 +3434,8 @@ incompatible or interrupted updates. Shared Native regression passes 138/138 and
 Native projects compile with zero errors. This five-build source block is awaiting its single
 push; publication, a new package, and installed Navisworks field acceptance are due at the
 B056–B060 ten-build boundary.
+
+## B056-B060 authorization-inventory repair — 2026-10-01
+
+The complete gate identified that the anonymous, possession-bound email-confirmation endpoint was missing from the explicit public-route inventory. Commit `9e2626c0fa5c002cb954312534ed358b452e2766` classifies only that exact POST route as public; its hashed, expiring, single-use token boundary is unchanged. The focused endpoint authority matrix now passes with zero missing authentication or project-authority entries. Full exact-head gate, push, publication and authenticated Chrome smoke remain due.
+

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ba240f11bad4af3700932fa1bbb6ca61aefc772d060c300f637f1b77d9026198",
-  "itemCount": 279,
+  "sourceSha256": "66bb8dade5728c7c2ab5ce00b701007736d0fcd718888833f813461ec130f241",
+  "itemCount": 280,
   "counts": {
-    "ACTIVE": 244,
+    "ACTIVE": 245,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5091,6 +5091,24 @@
       "evidence": [
         "OPEN_LOOP.md:4062",
         "B056–B060 post-commit release reconciliation — 2026-10-01"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "908e54a6071e2691",
+      "sourceLine": 4068,
+      "heading": "B056-B060 gate repair — 2026-10-01",
+      "statement": "Pass the repeated complete gate at repaired candidate `9e2626c0fa5c002cb954312534ed358b452e2766`, push, publish and complete authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4068",
+        "B056-B060 gate repair — 2026-10-01"
       ],
       "currentAuthority": false
     }

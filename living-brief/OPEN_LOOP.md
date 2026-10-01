@@ -4060,3 +4060,10 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 # B056–B060 post-commit release reconciliation — 2026-10-01
 
 - [ ] Candidate source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf` must pass the complete clean gate, reach `origin/master`, publish at the ten-build boundary, and pass full authenticated Chrome smoke before the block is accepted.
+
+## B056-B060 gate repair — 2026-10-01
+
+- [x] Explicitly classify `POST /onboarding/email-verification/confirm` as the possession-bound public confirmation route and retain all sibling onboarding routes behind authentication.
+- [x] Regenerate the complete endpoint authority matrix and verify zero missing authentication/project-authority entries.
+- [ ] Pass the repeated complete gate at repaired candidate `9e2626c0fa5c002cb954312534ed358b452e2766`, push, publish and complete authenticated Chrome smoke.
+
