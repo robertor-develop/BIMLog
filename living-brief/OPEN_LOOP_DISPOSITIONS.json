@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "466324876d85fbd44bcb851aa7511e07cdfd6657d5809d05af62686c01cdbd8c",
+  "sourceSha256": "f17399fd1d379f2162488631f7dd2b700e726e3b9aa8eab61274ac8da10952e1",
   "itemCount": 277,
   "counts": {
     "ACTIVE": 242,
@@ -5023,28 +5023,28 @@
       "currentAuthority": false
     },
     {
-      "id": "47a2ce1dfb3a3346",
-      "sourceLine": 3939,
-      "heading": "Commercial readiness Block 2 — commercial catalog — 2026-09-30",
-      "statement": "Pass the complete exact-head gate and push Builds 006–010 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 011–015.",
+      "id": "a4e4ecd3003336cd",
+      "sourceLine": 3950,
+      "heading": "Commercial readiness Block 3 — subscription authority — 2026-09-30",
+      "statement": "Complete the remaining authenticated project-58 route matrix; Headquarters, Help/manual, training and Pricing passed before the Chrome controller detached.",
       "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
+      "workClass": "PRODUCT_WORK",
       "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:3939",
-        "Commercial readiness Block 2 — commercial catalog — 2026-09-30"
+        "OPEN_LOOP.md:3950",
+        "Commercial readiness Block 3 — subscription authority — 2026-09-30"
       ],
       "currentAuthority": false
     },
     {
-      "id": "994e31cfc09a5991",
-      "sourceLine": 3949,
-      "heading": "Commercial readiness Block 3 — subscription authority — 2026-09-30",
-      "statement": "Pass the complete exact-head gate, push Builds 011–015 once, publish accumulated Builds 006–015 without Replit Agents, verify the exact live identity and run full authenticated visible-Chrome smoke.",
+      "id": "a2927dcda8685031",
+      "sourceLine": 3959,
+      "heading": "Commercial readiness Block 4 — checkout authority — 2026-10-01",
+      "statement": "Pass the complete exact-head block gate and push Builds 016–020 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 021–025.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -5053,8 +5053,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3949",
-        "Commercial readiness Block 3 — subscription authority — 2026-09-30"
+        "OPEN_LOOP.md:3959",
+        "Commercial readiness Block 4 — checkout authority — 2026-10-01"
       ],
       "currentAuthority": false
     }
