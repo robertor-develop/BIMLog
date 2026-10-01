@@ -124,3 +124,24 @@ export function projectCustomerSupportWorkspace(input: {
     canManage:operational,
   });
 }
+
+export const SUPPORT_READINESS_BLOCKERS = [
+  "ENTITLEMENT_MISSING", "ENTITLEMENT_STALE", "OPEN_CASE_OVERDUE", "UNRESOLVED_URGENT_CASE", "CASE_EVENT_GAP",
+] as const;
+export type SupportReadinessBlocker = (typeof SUPPORT_READINESS_BLOCKERS)[number];
+
+export function assessCustomerSupportReadiness(input: {
+  companyId: number; entitlement: CustomerSupportEntitlement | null;
+  cases: readonly CustomerSupportCase[]; events: readonly SupportCaseEvent[]; now: string;
+}): Readonly<{ status: "ready" | "action_required"; blockers: readonly SupportReadinessBlocker[]; checkedAt: string }> {
+  const checkedAt = instant(input.now, "Support readiness time");
+  const blockers: SupportReadinessBlocker[] = [];
+  if (!input.entitlement) blockers.push("ENTITLEMENT_MISSING");
+  else if (input.entitlement.companyId !== input.companyId || input.entitlement.status !== "active" || input.entitlement.expiresAt <= checkedAt) blockers.push("ENTITLEMENT_STALE");
+  if (input.cases.some(supportCase => supportCase.companyId !== input.companyId || (input.entitlement && supportCase.entitlementId !== input.entitlement.id))) throw new Error("Support readiness case lineage is invalid");
+  if (input.events.some(event => event.companyId !== input.companyId || !input.cases.some(supportCase => supportCase.id === event.caseId))) throw new Error("Support readiness event lineage is invalid");
+  if (input.cases.some(supportCase => (supportCase.status === "open" || supportCase.status === "in_progress") && supportCase.responseDueAt < checkedAt)) blockers.push("OPEN_CASE_OVERDUE");
+  if (input.cases.some(supportCase => supportCase.priority === "urgent" && supportCase.status !== "resolved" && supportCase.status !== "closed")) blockers.push("UNRESOLVED_URGENT_CASE");
+  if (input.cases.some(supportCase => supportCase.revision > 1 && !input.events.some(event => event.caseId === supportCase.id && event.revision === supportCase.revision))) blockers.push("CASE_EVENT_GAP");
+  return Object.freeze({ status:blockers.length ? "action_required" : "ready", blockers:Object.freeze(blockers), checkedAt });
+}

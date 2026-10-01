@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createCompanySubscription } from "./subscription-authority";
 import { deriveSubscriptionAccess } from "./commercial-billing-operations";
-import { deriveCustomerSupportEntitlement, openCustomerSupportCase, projectCustomerSupportWorkspace, transitionCustomerSupportCase } from "./commercial-customer-support";
+import { assessCustomerSupportReadiness, deriveCustomerSupportEntitlement, openCustomerSupportCase, projectCustomerSupportWorkspace, transitionCustomerSupportCase } from "./commercial-customer-support";
 
 const subscriptionBase = createCompanySubscription({ id:"sub-46", companyId:7, planId:"business", catalogPriceVersion:7, billingCycle:"monthly", currency:"USD", amount:3000, now:"2026-10-01T00:00:00Z" });
 const subscription = { ...subscriptionBase, status:"active" as const, revision:2, updatedAt:"2026-10-01T00:01:00.000Z" };
@@ -36,3 +36,11 @@ const auditView = projectCustomerSupportWorkspace({ companyId:7, viewerUserId:99
 assert.equal(auditView.cases[0]?.description, null);
 assert.equal(auditView.events[0]?.note, null);
 console.log("B049 permission-safe customer support projection: PASS");
+
+const ready = assessCustomerSupportReadiness({ companyId:7, entitlement, cases:[resolved.supportCase,otherCase], events:[acknowledged.event,resolved.event], now:"2026-10-03T11:30:00Z" });
+assert.deepEqual(ready, { status:"ready", blockers:[], checkedAt:"2026-10-03T11:30:00.000Z" });
+const actionRequired = assessCustomerSupportReadiness({ companyId:7, entitlement, cases:[supportCase], events:[], now:"2026-10-03T13:00:00Z" });
+assert.deepEqual(actionRequired.blockers, ["OPEN_CASE_OVERDUE","UNRESOLVED_URGENT_CASE"]);
+assert.equal(assessCustomerSupportReadiness({ companyId:7, entitlement:null, cases:[], events:[], now:"2026-10-03T11:30:00Z" }).blockers[0], "ENTITLEMENT_MISSING");
+assert.equal(assessCustomerSupportReadiness({ companyId:7, entitlement, cases:[resolved.supportCase], events:[acknowledged.event], now:"2026-10-03T11:30:00Z" }).blockers.includes("CASE_EVENT_GAP"), true);
+console.log("B050 fail-closed customer support readiness: PASS");
