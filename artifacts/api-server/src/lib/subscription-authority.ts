@@ -379,3 +379,39 @@ export function createCheckoutAttempt(input: {
     status: "created", providerReference: null, createdAt: now, updatedAt: now,
   });
 }
+
+export type ProviderEventReceipt = Readonly<{
+  provider: string;
+  eventId: string;
+  eventType: string;
+  payloadDigest: string;
+  receivedAt: string;
+}>;
+
+export function verifyAndReceiveProviderEvent(input: {
+  provider: string;
+  eventId: string;
+  eventType: string;
+  rawPayload: string;
+  signatureHex: string;
+  signingSecret: string;
+  issuedAtEpochSeconds: number;
+  nowEpochSeconds: number;
+  priorReceipts: readonly ProviderEventReceipt[];
+}): ProviderEventReceipt {
+  const provider = input.provider.trim().toLowerCase();
+  const eventId = input.eventId.trim();
+  const eventType = input.eventType.trim();
+  if (!provider || !eventId || !eventType) throw new Error("Provider event identity is required");
+  if (!Number.isSafeInteger(input.issuedAtEpochSeconds) || Math.abs(input.nowEpochSeconds - input.issuedAtEpochSeconds) > 300) throw new Error("Provider event timestamp is outside the replay window");
+  if (input.priorReceipts.some((receipt) => receipt.provider === provider && receipt.eventId === eventId)) throw new Error("Provider event was already received");
+  const expected = crypto.createHmac("sha256", input.signingSecret).update(`${input.issuedAtEpochSeconds}.${input.rawPayload}`).digest();
+  let supplied: Buffer;
+  try { supplied = Buffer.from(input.signatureHex, "hex"); } catch { throw new Error("Provider event signature is invalid"); }
+  if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) throw new Error("Provider event signature is invalid");
+  return Object.freeze({
+    provider, eventId, eventType,
+    payloadDigest: crypto.createHash("sha256").update(input.rawPayload).digest("hex"),
+    receivedAt: new Date(input.nowEpochSeconds * 1000).toISOString(),
+  });
+}
