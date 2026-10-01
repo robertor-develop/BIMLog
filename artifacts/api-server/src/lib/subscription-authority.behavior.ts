@@ -8,6 +8,7 @@ import {
   createCommercialOrder,
   createCheckoutAttempt,
   createEntitlementSnapshot,
+  createPaidInvoice,
   createSeatQuantity,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
@@ -121,4 +122,9 @@ assert.deepEqual({ checkout: checkoutCompletion.attempt.status, reference: check
 assert.throws(() => applyCheckoutCompletion({ receipt: providerReceipt, rawPayload: `${providerPayload} `, attempt: checkout, order: submittedOrder, subscription: pending, now: "2026-09-30T20:16:00Z" }), /does not match/);
 assert.throws(() => applyCheckoutCompletion({ receipt: providerReceipt, rawPayload: providerPayload, attempt: checkout, order: submittedOrder, subscription, now: "2026-09-30T20:16:00Z" }), /pending subscription/);
 
-console.log("Commercial checkout Block 4 Builds 016-020: PASS");
+const paidInvoice = createPaidInvoice({ id: "inv-1", invoiceNumber: "BIM-2026-0001", completion: checkoutCompletion, existing: [], issuedAt: "2026-09-30T20:17:00Z" });
+assert.deepEqual({ status: paidInvoice.status, subtotal: paidInvoice.subtotalCents, tax: paidInvoice.taxCents, total: paidInvoice.totalCents, reference: paidInvoice.providerReference }, { status: "paid", subtotal: 249000, tax: 17430, total: 266430, reference: "evt-1" });
+assert.throws(() => createPaidInvoice({ invoiceNumber: paidInvoice.invoiceNumber, completion: checkoutCompletion, existing: [paidInvoice], issuedAt: paidInvoice.issuedAt }), /already exists/);
+assert.throws(() => createPaidInvoice({ invoiceNumber: "BIM-2026-0002", completion: { ...checkoutCompletion, attempt: { ...checkoutCompletion.attempt, amount: 1 } }, existing: [], issuedAt: paidInvoice.issuedAt }), /does not match/);
+
+console.log("Commercial billing Block 5 Build 021: PASS");

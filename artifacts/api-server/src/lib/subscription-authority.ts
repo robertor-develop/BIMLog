@@ -443,3 +443,63 @@ export function applyCheckoutCompletion(input: {
     subscription: transitionSubscription({ subscription: input.subscription, to: "active", expectedRevision: input.subscription.revision, now }),
   });
 }
+
+export type CommercialInvoice = Readonly<{
+  id: string;
+  invoiceNumber: string;
+  companyId: number;
+  subscriptionId: string;
+  orderId: string;
+  orderRevision: number;
+  checkoutAttemptId: string;
+  provider: string;
+  providerReference: string;
+  currency: "USD";
+  subtotalCents: number;
+  taxCents: number;
+  totalCents: number;
+  status: "paid";
+  issuedAt: string;
+  paidAt: string;
+}>;
+
+function toCents(value: number, label: string): number {
+  const cents = Math.round(value * 100);
+  if (!Number.isSafeInteger(cents) || cents < 0 || Math.abs(cents / 100 - value) > Number.EPSILON * 100) {
+    throw new Error(`${label} must have no more than two decimal places`);
+  }
+  return cents;
+}
+
+export function createPaidInvoice(input: {
+  id?: string;
+  invoiceNumber: string;
+  completion: Readonly<{ attempt: CheckoutAttempt; order: CommercialOrder; subscription: CompanySubscription }>;
+  existing: readonly CommercialInvoice[];
+  issuedAt: string;
+}): CommercialInvoice {
+  const { attempt, order, subscription } = input.completion;
+  const invoiceNumber = input.invoiceNumber.trim();
+  if (!invoiceNumber) throw new Error("An invoice number is required");
+  if (input.existing.some((invoice) => invoice.invoiceNumber === invoiceNumber)) throw new Error("Invoice number already exists");
+  if (attempt.status !== "completed" || order.status !== "accepted" || subscription.status !== "active") {
+    throw new Error("A paid invoice requires a completed checkout lineage");
+  }
+  if (attempt.orderId !== order.id || order.subscriptionId !== subscription.id || order.total === null || order.tax === null) {
+    throw new Error("Invoice checkout lineage is invalid");
+  }
+  if (!attempt.providerReference) throw new Error("A provider payment reference is required");
+  const subtotalCents = toCents(order.subtotal, "Invoice subtotal");
+  const taxCents = toCents(order.tax, "Invoice tax");
+  const totalCents = toCents(order.total, "Invoice total");
+  if (subtotalCents + taxCents !== totalCents || toCents(attempt.amount, "Checkout amount") !== totalCents) {
+    throw new Error("Invoice amount does not match the completed checkout");
+  }
+  const issuedAt = new Date(input.issuedAt).toISOString();
+  return Object.freeze({
+    id: input.id ?? crypto.randomUUID(), invoiceNumber, companyId: subscription.companyId,
+    subscriptionId: subscription.id, orderId: order.id, orderRevision: order.revision,
+    checkoutAttemptId: attempt.id, provider: attempt.provider, providerReference: attempt.providerReference,
+    currency: order.currency, subtotalCents, taxCents, totalCents, status: "paid", issuedAt, paidAt: issuedAt,
+  });
+}
