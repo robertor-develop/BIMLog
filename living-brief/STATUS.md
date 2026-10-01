@@ -3372,3 +3372,12 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Invoice and credit amounts use exact integer cents. Invoice creation rechecks company, subscription, order revision, checkout provider/reference, subtotal, tax and total; credit notes recheck the signed provider receipt and prohibit duplicate events or cumulative refunds above the paid invoice.
 - Collection failure moves active access to explicit past-due state without silently cancelling it. Term-end cancellation cannot apply early and preserves actor, reason, request time and effective time.
 - Product commits are `5ba987f5`, `806666f1`, `2c2e0ddc`, `aac08820` and `7cf94557`. Focused Block 5 behavior and API TypeScript pass. Builds 016–025 now reach the required ten-build publication boundary.
+- The complete exact-head gate passed at reconciled source `43700797`; GitHub `master` advanced once, Replit published the identical reviewed tree, and live health reported identity-bound source `43700797` with package `bimlog-4370079748d964c4-3d60c0f13be2c362`.
+- Authenticated visible-Chrome acceptance passed all 61 registered routes on authorized project `58`, hard reload, independent second-tab continuity and zero console errors. No Replit Agent was used.
+
+## Commercial readiness Block 6 — customer billing account — 2026-10-01
+
+- Builds 026–030 establish verified company billing identity, collision-safe provider customer references, tokenized payment-method summaries, short-lived single-use billing-portal sessions and permission-safe billing account projections.
+- BIMLog stores provider tokens and display-safe brand/last-four/expiry metadata only. It rejects cross-company or cross-customer token reuse, multiple active defaults, unsafe portal return URLs and portal replay.
+- Billing administrators receive the bounded provider reference and masked tax identifier required to manage billing. Customer administrators receive safe payment-method display data; support receives readiness without billing contact, tokens or payment methods. Provider payment-method references never enter projections.
+- Product commits are `3dcdd3a9`, `84562fb5`, `dd314dcb`, `b7f687af` and `c9dc1205`. Focused Block 6 behavior and API TypeScript pass. This is the first unpublished five-build block; publication and authenticated Chrome smoke are due after Builds 031–035.

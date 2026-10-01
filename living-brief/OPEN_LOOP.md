@@ -3965,4 +3965,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 023 records provider-verified collection failure, past-due state, retry count and bounded grace timing without silent cancellation.
 - [x] Build 024 schedules attributable cancellation at the paid term boundary and refuses early application.
 - [x] Build 025 records provider-verified partial/full refund credit notes with duplicate and over-refund protection.
-- [ ] Pass the complete exact-head gate, push Builds 021–025 once, publish accumulated Builds 016–025 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push Builds 021–025 once, publish accumulated Builds 016–025 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke. Live source `43700797` passed all 61 registered authenticated routes, hard reload, second-tab continuity and console inspection.
+
+## Commercial readiness Block 6 — customer billing account — 2026-10-01
+
+- [x] Build 026 verifies complete company billing identity with normalized email and country fields.
+- [x] Build 027 binds one active provider customer per company/provider and prevents cross-company reference reuse.
+- [x] Build 028 records tokenized payment-method summaries without PAN or CVC and enforces provider-customer lineage plus one active default.
+- [x] Build 029 creates bounded, short-lived, single-use billing-portal sessions with safe same-origin return paths.
+- [x] Build 030 projects billing identity, provider readiness and payment summaries according to explicit billing, customer, support and audit roles without exposing provider payment tokens.
+- [ ] Pass the complete exact-head gate and push Builds 026–030 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 031–035.

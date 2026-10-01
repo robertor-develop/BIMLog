@@ -53061,6 +53061,77 @@
       ],
       "reviewedChangeSha256": "7bf73e9b276c6b204042e24fc6ff67371281d43256eb318caaa521cf8740b1c2",
       "reason": "BIMLog now preserves paid invoice, subscription term, failed collection, cancellation and verified refund authority without configuring a live payment provider."
+    },
+    {
+      "taskId": "commercial-readiness-block06-customer-billing-account",
+      "reviewedThroughCommit": "c9dc120537ea399a67c4feee91bc2dfbf830153d",
+      "reviewedAt": "2026-10-01T03:26:07.890Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Customer billing account controls remain attributable, provider-neutral and human-governed within BIMLog commercial readiness."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work preserves the authorized five-build push and ten-build publication cadence."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Focused acceptance covers verified identity, provider reference collisions, tokenized payment summaries, portal expiry and role-specific redaction."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "Adds the secure customer billing account boundary required before BIMLog can operate a sellable self-service commercial journey."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Extends the server commercial domain module and acceptance command without routes, schema, migration, provider credentials or autonomous money movement."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, package, installer or Navisworks-facing behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Billing account domain projections are defined without changing customer-facing formal document rendering."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No tax, payment-card, accounting, legal or compliance conclusion is asserted."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 026-030, product commits, acceptance behavior and the first five-build unpublished boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 026-030 while retaining the complete gate and push plus the next ten-build publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production incident or historical audit finding is introduced."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "69d749dfc5d79f1759333496d337875c6cd87d80f349418350e4bf0929cfad03",
+      "reason": "BIMLog now defines a permission-safe billing account boundary without storing raw payment credentials or configuring a live payment provider."
     }
   ]
 }
