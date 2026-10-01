@@ -53065,7 +53065,7 @@
     {
       "taskId": "commercial-readiness-block06-customer-billing-account",
       "reviewedThroughCommit": "c9dc120537ea399a67c4feee91bc2dfbf830153d",
-      "reviewedAt": "2026-10-01T03:26:07.890Z",
+      "reviewedAt": "2026-10-01T03:26:07.89Z",
       "status": "candidate",
       "authorities": [
         {
@@ -53208,7 +53208,7 @@
     {
       "taskId": "commercial-readiness-block08-stripe-event-reconciliation",
       "reviewedThroughCommit": "62b06bb1b8962770850ac178101e4877b824a54c",
-      "reviewedAt": "2026-10-01T04:44:48.380Z",
+      "reviewedAt": "2026-10-01T04:44:48.38Z",
       "status": "candidate",
       "authorities": [
         {
@@ -53280,7 +53280,7 @@
     {
       "taskId": "commercial-readiness-block09-billing-operations",
       "reviewedThroughCommit": "9ab37ffbd247c2ba321612523d925eeae12286b1",
-      "reviewedAt": "2026-10-01T05:40:00.000Z",
+      "reviewedAt": "2026-10-01T05:40:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -53350,9 +53350,9 @@
       "reason": "BIMLog now connects canonical subscription and billing evidence to customer access, statements, collection notices and operational readiness."
     },
     {
-      "taskId": "commercial-readiness-block10-customer-support",
-      "reviewedThroughCommit": "19e6ba10848587a72fc4bd013ad0844c71548bf5",
-      "reviewedAt": "2026-10-01T12:00:00.000Z",
+      "taskId": "saas-block11-lens-auto-update-b051-b055",
+      "reviewedThroughCommit": "0b0d843ef6d1443d9c9d5aa8e418a1051ed07330",
+      "reviewedAt": "2026-10-01T14:30:00.000Z",
       "status": "candidate",
       "authorities": [
         {
@@ -53414,11 +53414,25 @@
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/Apply-LensNextPendingUpdate.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
+        "plugins/BIMLogLensNext/New-LensNextUpdateManifest.ps1",
+        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "plugins/BIMLogLensNext/native/LensNextDockPanelControl.cs",
+        "plugins/BIMLogLensNext/native/LensNextNativeConfig.cs",
+        "plugins/BIMLogLensNext/native/LensNextNativeUpdateService.cs",
+        "plugins/BIMLogLensNext/src/LensNextUpdateClient.cs",
+        "plugins/BIMLogLensNext/src/LensNextUpdateContracts.cs",
+        "plugins/BIMLogLensNext/src/LensNextUpdateSecurity.cs",
+        "plugins/BIMLogLensNext/src/LensNextUpdateStaging.cs",
+        "plugins/BIMLogLensNext/tests/LensNextUpdateTests.cs",
+        "plugins/BIMLogLensNext/tests/Program.cs"
       ],
-      "reviewedChangeSha256": "91d4225eeb3142f2201ade3eeb59c882a89854ebd0225004c9a1085b67970194",
+      "reviewedChangeSha256": "d2567ab77d648fb28642b6b1794604fb94d1ce39e656aa12579afae3df7aaa25",
       "reason": "BIMLog now derives governed customer-support entitlement and case operations from canonical subscription access without claiming provider delivery."
     }
   ]

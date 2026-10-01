@@ -75,6 +75,9 @@ namespace BIMLogLensNext.Native
                 UpdateChrome();
                 StartRuntimeAndWorkspace(false, false);
                 _healthTimer.Start();
+                var assemblyName = Assembly.GetExecutingAssembly().GetName().Name ?? "";
+                var productYear = assemblyName.EndsWith("2021", StringComparison.Ordinal) ? 2021 : 2025;
+                _ = new LensNextNativeUpdateService(_runtime.Config ?? LensNextNativeConfig.Load(), productYear).CheckOnStartupAsync();
             };
         }
 

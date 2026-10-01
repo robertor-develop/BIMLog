@@ -28,6 +28,7 @@
     <Compile Include="..\LensNextSettingsForm.cs" Link="LensNextSettingsForm.cs" />
     <Compile Include="..\LensNextDockPanelControl.cs" Link="LensNextDockPanelControl.cs" />
     <Compile Include="..\LensNextNativeLog.cs" Link="LensNextNativeLog.cs" />
+    <Compile Include="..\LensNextNativeUpdateService.cs" Link="LensNextNativeUpdateService.cs" />
     <ProjectReference Include="..\..\BIMLogLensNext.csproj" />
     <Reference Include="Autodesk.Navisworks.Api" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Api.dll" Private="false" />
     <Reference Include="Autodesk.Navisworks.Automation" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Automation.dll" Private="false" />

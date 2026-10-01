@@ -12,6 +12,10 @@ namespace BIMLogLensNext.Native
         public int ProjectId { get; set; }
         public int AutoRefreshSeconds { get; set; } = 10;
         public bool ViewpointPublishingEnabled { get; set; } = false;
+        public bool AutomaticUpdatesEnabled { get; set; } = true;
+        public string UpdateChannel { get; set; } = "stable";
+        public string UpdateManifestUrl { get; set; } = "https://bimlog.app/lens-next/updates/stable/manifest.json";
+        public string UpdatePublicKeyXml { get; set; } = "<RSAKeyValue><Modulus>2NyTAB5mC8CdBAj2ZiQU+XELtljaKmaf1oAwBYMSrYvgcn1j60gOwl8McJfbv3vpr7Gf8dD0UJKJ6TSXVxi8cuoT+6PIrx6j9I78Cw4Qf9DpqaX4N9hyKBzylQuWWbz2hTiLRkXAszNtRYkJ+iwfA3qqkspBBK5GVKheoOTI7JlVYbDGGpSdiok3a+WSiLda9l5hr3eP/2ew87FZzoEaIJKgWjLww3zP3sDekDrP1VOgeqaEEXoXTktDI3FA2erNWrmUCOliEvTkuDEgqxXJa9I7WsU0HPj1HTPhMSANYh0NEbT6YWizPvD9ONRS71r0aI/9UFdyBNAXyTNvZbPTKfjZ39UsLV1ITtlpq7atGMbQMYOrSNSM3HiTS4qWVZUWrzWav+SPcuWonLWOqm9KCVY92mMgtNuwfMWZpFvy15waMRJrnllHbfMgVHpufRId9h9c5yzzsTcz3fTmznhX5FOPbnnFzkpbHM9u6waThpgNS4sYeBLOjiOgJZh40TRd</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
         public List<string> AllowedWebOrigins { get; set; } = new List<string> { "https://bimlog.app", "https://www.bimlog.app" };
 
         public static string ConfigDirectory => Path.Combine(
@@ -80,6 +84,9 @@ namespace BIMLogLensNext.Native
         {
             config.BimLogWebUrl = (config.BimLogWebUrl ?? "https://bimlog.app").Trim().TrimEnd('/');
             config.AutoRefreshSeconds = Math.Max(5, Math.Min(300, config.AutoRefreshSeconds));
+            config.UpdateChannel = string.Equals(config.UpdateChannel, "beta", StringComparison.OrdinalIgnoreCase) ? "beta" : "stable";
+            config.UpdateManifestUrl = (config.UpdateManifestUrl ?? "https://bimlog.app/lens-next/updates/stable/manifest.json").Trim();
+            config.UpdatePublicKeyXml = string.IsNullOrWhiteSpace(config.UpdatePublicKeyXml) ? new LensNextNativeConfig().UpdatePublicKeyXml : config.UpdatePublicKeyXml.Trim();
             config.AllowedWebOrigins = (config.AllowedWebOrigins ?? new List<string>())
                 .Where(value => !string.IsNullOrWhiteSpace(value))
                 .Select(value => value.Trim().TrimEnd('/'))

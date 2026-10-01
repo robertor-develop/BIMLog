@@ -3414,3 +3414,13 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Builds 046–050 add subscription-bound support entitlement, idempotent bilingual case intake and response deadlines, revision-safe role-controlled lifecycle events, permission-safe workspaces and fail-closed support readiness.
 - Product commits are `f5480926`, `6162c618`, `357ea8ad`, `5771c2ab` and `19e6ba10`. The cumulative Block 10 behavior suite and API TypeScript pass. This is the first unpublished five-build block after the accepted Builds 036–045 publication; publication and authenticated Chrome smoke are due after Builds 051–055.
 - No schema, production customer record, provider credential, email, external support message, Native source or installer changed. Domain records prepare and govern support work; they do not claim that a third-party help desk or email provider delivered anything.
+# 250-build SaaS Block 11 — Lens Next automatic updates — 2026-10-01
+
+B051–B055 implement the priority automatic-update path requested by Ruben: an exact signed
+manifest, safe startup discovery, SHA-256 and RSA verification, staged installation after
+Navisworks closes, last-known-good rollback, and release tooling for Navisworks 2021/2025.
+The updater fails closed and leaves the installed plugin active on offline, invalid,
+incompatible or interrupted updates. Shared Native regression passes 138/138 and both yearly
+Native projects compile with zero errors. This five-build source block is awaiting its single
+push; publication, a new package, and installed Navisworks field acceptance are due at the
+B056–B060 ten-build boundary.

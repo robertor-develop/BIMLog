@@ -1,5 +1,42 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## 250-build SaaS completion — Priority Block 11: Lens Next automatic updates — 2026-10-01
+
+Ruben's 2026-10-01 request for Lens Next to obtain future releases without receiving a
+manually delivered package is a priority product requirement. It was already named as Native
+feature 25 in `VISION.md`; this entry promotes it into the active 250-build execution ledger.
+The next five builds are reserved as follows:
+
+- [x] **B051 — Governed update manifest:** publish an authenticated release manifest with
+  stable/beta channel, semantic version, supported Navisworks years, minimum BIMLog version,
+  package digest, size, release notes and mandatory/optional classification.
+- [x] **B052 — Safe update discovery:** check on Lens Next startup and on explicit user request,
+  cache the last successful check, tolerate offline/provider failure, and allow an optional
+  update to be deferred without blocking Navisworks work.
+- [x] **B053 — Verified package acquisition:** download through a bounded transport, reject
+  unsupported Navisworks packages, verify exact size, SHA-256 and publisher signature before
+  staging, and never execute an unverified artifact.
+- [x] **B054 — Controlled installation and rollback:** stage atomically, require Navisworks to
+  be closed before replacing loaded binaries, preserve the last known-good package, recover
+  from interrupted installation, and provide a manual repair/rollback path.
+- [x] **B055 — Release operations and acceptance:** add authorized release/channel controls,
+  user-visible update status and secret-free diagnostics; prove upgrade, defer, offline,
+  corrupt-package, incompatible-version, interrupted-install and rollback behavior for the
+  supported Navisworks 2021 and 2025 packages.
+
+This priority insertion does not remove customer onboarding or any other SaaS completion
+scope. The previously planned onboarding sequence moves back by one block. The program remains
+250 builds / 50 blocks; after completed B001-B050, 200 builds / 40 blocks remain. B051-B055 are
+one five-build block, pushed once after the complete block. Publication remains due after the
+following five-build block, followed by full authenticated Chrome smoke; Native changes also
+require package verification and real Navisworks field acceptance.
+
+Source acceptance: the shared updater regression reports 138/138 PASS including the five update
+contracts; both Native 2021 and 2025 projects compile with zero errors. The signed-manifest
+operator fixture passes using the DPAPI-protected F-rooted release key. This is a pushed-source
+block only: no updater manifest or new Native package is published at this five-build boundary,
+and real installed-package/rollback field acceptance remains due with the B056-B060 publication.
+
 ## Experience makeover Block 23 — General APU Library — 2026-09-30
 
 - [x] UX111–UX115 add the company APU Library entry, search/preview metadata, controlled project-to-library draft reuse, exact project application lineage, and immutable retirement behavior.

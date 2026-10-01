@@ -65,6 +65,7 @@ $coreOutput=Join-Path $buildRoot 'bin\BIMLogLensNext\Release\net48'
 $nativeOutput=Join-Path $buildRoot "bin\BIMLogLensNext.Native$year\Release\net48"
 foreach($name in @('BIMLogLensNext.dll','BIMLogLensNext.pdb')){Copy-Item -LiteralPath (Join-Path $coreOutput $name) -Destination (Join-Path $contentsRoot $name) -Force}
 foreach($name in @("BIMLogLensNext.Native$year.dll","BIMLogLensNext.Native$year.pdb",'Microsoft.Web.WebView2.Core.dll','Microsoft.Web.WebView2.WinForms.dll','Microsoft.Web.WebView2.Wpf.dll')){Copy-Item -LiteralPath (Join-Path $nativeOutput $name) -Destination (Join-Path $contentsRoot $name) -Force}
+Copy-Item -LiteralPath (Join-Path $sourceRoot 'Apply-LensNextPendingUpdate.ps1') -Destination $contentsRoot -Force
 Copy-Item -LiteralPath (Join-Path $nativeOutput 'runtimes') -Destination $contentsRoot -Recurse -Force
 foreach($name in @('Install-BIMLogLensNext.ps1','Install-BIMLogLensNext2025.ps1','Uninstall-BIMLogLensNext2025.ps1','INSTALL-BIMLOG-LENS-NEXT-2025.bat','UNINSTALL-BIMLOG-LENS-NEXT-2025.bat','COLLECT-BIMLOG-LENS-NEXT-DIAGNOSTICS.bat','Collect-BIMLogLensNext2025Diagnostics.ps1','README-ROBERTO-RUBEN.txt','FIELD-ACCEPTANCE-CHECKLIST.txt','COLLECT-LENS-NEXT-FAILURE-DETAILS.bat','Collect-LensNextFailureDetails.ps1')){Copy-Item -LiteralPath (Join-Path $sourceRoot $name) -Destination $packageRoot -Force}
 $pulseBundleName="BIMLogPulse$year.bundle"

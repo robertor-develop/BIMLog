@@ -275,6 +275,11 @@ namespace BIMLogLensNext.Tests
             Directory.CreateDirectory(directory);
             try
             {
+                Run("update_manifest_policy_is_exact", UpdateManifestPolicyIsExact);
+                Run("update_manifest_signature_is_verified", UpdateManifestSignatureIsVerified);
+                Run("update_package_integrity_is_verified", UpdatePackageIntegrityIsVerified);
+                Run("update_staging_preserves_installation", UpdateStagingPreservesInstallation);
+                Run("update_installer_has_rollback_contract", UpdateInstallerHasRollbackContract);
                 var path = Path.Combine(directory, "organized.xml");
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { resolved, open });
                 var document = new XmlDocument { XmlResolver = null };
