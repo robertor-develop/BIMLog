@@ -72,6 +72,7 @@ ${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
 - Publication requires the read-only database operator to prove exact development/production schema correspondence, no destructive action, development-data copy off, and a clean exact source. Build 020 returned \`schemaAction=NONE\` and changed no production row or schema object.
 - Public \`/api/v1/healthz\` is both health and application-readiness evidence because the startup bootstrap holds that route at HTTP 503 until the real application barrier completes.
 - Lens Next is the sole supported Lens product. Original/Legacy Lens exists only as preserved historical migration input and must not appear as a parallel customer-facing product or installed loader.
+- The current B051–B060 publication candidate is \`v1.05.N18-P37\` / \`1.5.18.37\`; it includes signed year-specific Lens Next automatic-update manifests and packages for Navisworks 2021 and 2025. Production remains at the prior accepted P36 source until this ten-build boundary passes push, publication, and authenticated Chrome acceptance.
 
 ## Production runtime closure recovery
 

@@ -23,6 +23,13 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/verify-email",
+      "owner": "VerifyEmail",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/reset-password",
       "owner": "ResetPasswordPage",
       "availability": "shipping",

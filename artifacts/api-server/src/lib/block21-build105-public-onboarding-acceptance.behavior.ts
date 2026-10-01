@@ -12,7 +12,7 @@ for (const route of ["/", "/features", "/pricing", "/register", "/login", "/help
 }
 assert.match(landing, /href="\/register"/);
 assert.match(register, /setLocation\("\/dashboard"\)/);
-assert.match(onboarding, /Go to Dashboard/);
+assert.match(onboarding, /Save and open full Intake/);
 assert.match(onboarding, /role="dialog"/);
 assert.match(help, /Help Center/);
 assert.match(help, /Search Help Center/);

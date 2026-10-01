@@ -1,0 +1,15 @@
+{
+  "contractVersion": "lens-next-update.v1",
+  "channel": "stable",
+  "version": "1.5.18.37",
+  "minimumBimLogVersion": "1.5.18.37",
+  "packageUrl": "https://bimlog.app/lens-next/updates/stable/2021/BIMLog-Lens-Next-Navisworks2021-v1.05.N18-P37.zip",
+  "packageSha256": "9a4bf5a43950c006b985bd0c9aa0a83e325a8777d98c3ccfb993690305730c79",
+  "packageSize": 692090,
+  "signature": "0kqWZyUTwK4quZwQxcQD78gjotg4BEaFBFMFxfLofEYfHVP2topb2lonSpNaJpfmm0eYfi4zMwPxQFy0InSPR223NR8eDtD3MBIg+rNfTOAgT4u0402n05DQGYAawwGHbbucnQxL2vmDw9SJn25gDIV2/LJbn81Hhpk4FDdQAfk8iUF6IFruHsSogR9MAClZPzpyWm6KkgUh8vA/tIXsBaGCnsRPfWJV+3EE3IpPhiw3p9WHISMTLotlpoSiRlHAlu+aQS7qp4zUV9bgybWOpnCBVzs4XHRUc+MOgJDQ6GBqhsVZLZ+CIax6LiK1jwkg6EzNuBuweskLZz2/SRzYjUE4erJ1a5ez0dyKTvjxRNiQe8NTlSLdyRI8oYzW0LvVuuqQ4vNwK6Ih/qgo/25Jc8VbFqU84Q0LhNBFgOW8hf0YNJyiQvr/zmrqZHAaXVgG+shdoL9GnYVqpIIhl/m6vaRK6hd4wAEMkx5Z7SEFmxP27DUECbE8SR4yHx/O6G2U",
+  "releaseNotesUrl": "https://bimlog.app/releases",
+  "mandatory": false,
+  "navisworksYears": [
+    2021
+  ]
+}

@@ -62,4 +62,5 @@ export * from "./team-resource-planning";
 export * from "./internal-cost-governance";
 export * from "./enterprise-identity";
 export * from "./connector-foundation";
+export * from "./onboarding";
 export * from "./coordination-knowledge";

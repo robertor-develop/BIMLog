@@ -3,7 +3,7 @@ namespace BIMLogLensNext
 {
     public static class ReleaseIdentity
     {
-        public const string ProductVersionLabel = "v1.05.N18-P36";
-        public const string BinaryVersion = "1.5.18.36";
+        public const string ProductVersionLabel = "v1.05.N18-P37";
+        public const string BinaryVersion = "1.5.18.37";
     }
 }

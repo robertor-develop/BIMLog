@@ -21,6 +21,7 @@ const namedPage = (loader: () => Promise<object>, name: string) =>
 const Landing = namedPage(() => import("@/pages/Landing"), "Landing");
 const Login = namedPage(() => import("@/pages/Login"), "Login");
 const Register = namedPage(() => import("@/pages/Register"), "Register");
+const VerifyEmail = namedPage(() => import("@/pages/VerifyEmail"), "VerifyEmail");
 const Dashboard = namedPage(() => import("@/pages/Dashboard"), "Dashboard");
 const PendingItems = namedPage(() => import("@/pages/PendingItems"), "PendingItems");
 const ProjectDetail = namedPage(() => import("@/pages/ProjectDetail"), "ProjectDetail");
@@ -207,6 +208,7 @@ function Router() {
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
+      <Route path="/verify-email" component={VerifyEmail} />
       <Route path="/reset-password" component={ResetPasswordPage} />
 
       {/* Legal pages - public */}

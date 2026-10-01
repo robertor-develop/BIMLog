@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## SaaS completion Block 12 candidate — 2026-10-01
+
+B056–B060 advance the exact candidate identity to `v1.05.N18-P37` / `1.5.18.37`. The five-build block adds verified email onboarding, authenticated company context, a permission-neutral work profile, canonical first-project creation with direct full-Intake continuation, and saved frequent discipline/document defaults with Shop Drawings first. The combined B051–B060 release also contains signed year-specific Lens Next automatic-update manifests and packages for Navisworks 2021 and 2025. Production remains at the prior accepted release until this ten-build boundary is pushed, published, and authenticated-smoke accepted.
+
 ## Experience makeover Block 24 publication correction — 2026-09-30
 
 UX116–UX120 passed the complete exact-head gate and were pushed with UX111–UX115 for the required ten-build publication. Two publications were rejected because consecutive empty Replit publication wrappers caused the runtime to report a wrapper instead of the canonical source. Production assembly now walks the bounded first-parent wrapper chain, validates every adjacent tree as identical, and resolves the release identity to the first non-wrapper commit. A corrected gate, push, republication and full authenticated Chrome smoke are required before the block is accepted.
@@ -3414,6 +3418,10 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Builds 046–050 add subscription-bound support entitlement, idempotent bilingual case intake and response deadlines, revision-safe role-controlled lifecycle events, permission-safe workspaces and fail-closed support readiness.
 - Product commits are `f5480926`, `6162c618`, `357ea8ad`, `5771c2ab` and `19e6ba10`. The cumulative Block 10 behavior suite and API TypeScript pass. This is the first unpublished five-build block after the accepted Builds 036–045 publication; publication and authenticated Chrome smoke are due after Builds 051–055.
 - No schema, production customer record, provider credential, email, external support message, Native source or installer changed. Domain records prepare and govern support work; they do not claim that a third-party help desk or email provider delivered anything.
+# 250-build SaaS Block 12 — verified onboarding candidate — 2026-10-01
+
+B056–B060 replace the dismissible onboarding slideshow with a resumable PostgreSQL-backed setup: expiring single-use email verification, explicit authenticated company identity, non-privileged work-profile selection, canonical first-project creation, and bounded coordinator defaults with Shop Drawings first. Completion fails closed until verified email, work profile, and project membership exist. A newly created project proceeds to full Intake and does not force team assignment. The Lens updater now resolves a year-specific signed manifest so 2021 and 2025 packages remain isolated. Focused contracts and both TypeScript checks pass; exact-head full gate, push, package/publication, live authenticated Chrome and installed Navisworks acceptance remain due.
+
 # 250-build SaaS Block 11 — Lens Next automatic updates — 2026-10-01
 
 B051–B055 implement the priority automatic-update path requested by Ruben: an exact signed

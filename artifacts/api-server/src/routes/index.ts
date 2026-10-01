@@ -57,12 +57,14 @@ import companyPricingTemplatesRouter from "./company-pricing-templates";
 import workflowGovernancePoliciesRouter from "./workflow-governance-policies";
 import coordinationKnowledgeRouter from "./coordination-knowledge";
 import edtEngineRouter from "./edt-engine";
+import onboardingRouter from "./onboarding";
 
 const router: IRouter = Router();
 
 router.use(downloadsRouter);
 router.use(healthRouter);
 router.use(authRouter);
+router.use(onboardingRouter);
 router.use(configRouter);
 router.use(projectsRouter);
 router.use(filesRouter);

@@ -35,8 +35,9 @@ namespace BIMLogLensNext.Native
                 var current = Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 var root = LensNextNativeConfig.ConfigDirectory;
                 var installRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                var manifestUrl = _config.UpdateManifestUrl.Replace("{year}", _navisworksYear.ToString());
                 var result = new LensNextUpdateCoordinator(new LensNextUpdateClient()).CheckAndStage(
-                    new Uri(_config.UpdateManifestUrl), current, _navisworksYear, _config.UpdateChannel,
+                    new Uri(manifestUrl), current, _navisworksYear, _config.UpdateChannel,
                     _config.UpdatePublicKeyXml, root, installRoot);
                 LensNextNativeLog.Info("Automatic update result: " + result.Code + (result.Manifest == null ? "" : " version=" + result.Manifest.Version));
                 if (result.Code == "update_staged") LaunchUpdater(result.StagedPlanPath, installRoot);

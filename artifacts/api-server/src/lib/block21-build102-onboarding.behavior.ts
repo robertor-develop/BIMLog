@@ -23,10 +23,9 @@ assert.match(register, /login#invite=/);
 assert.match(register, /addEventListener\("hashchange",changed\)/);
 assert.match(register, /removeEventListener\("hashchange",changed\)/);
 assert.match(register, /setInviteToken\(next\);setInvitation\(null\)/);
-assert.match(onboarding, /if \(!r\.ok\) throw/);
-assert.match(onboarding, /We could not load your project access/);
-assert.match(onboarding, /does not mistake an invited account for a new workspace/);
-assert.match(onboarding, /setLoadAttempt\(value => value \+ 1\)/);
-assert.doesNotMatch(onboarding, /\.catch\(\(\) => setFlowType\("new"\)\)/);
+assert.match(onboarding, /if\(!response\.ok\)throw/);
+assert.match(onboarding, /Setup could not be loaded/);
+assert.match(onboarding, /Current authenticated company/);
+assert.match(onboarding, /secure invitation/);
 
 console.log("block21 build102 invitation and onboarding recovery: PASS");

@@ -53434,6 +53434,109 @@
       ],
       "reviewedChangeSha256": "d2567ab77d648fb28642b6b1794604fb94d1ce39e656aa12579afae3df7aaa25",
       "reason": "BIMLog now derives governed customer-support entitlement and case operations from canonical subscription access without claiming provider delivery."
+    },
+    {
+      "taskId": "saas-block12-verified-onboarding-b056-b060",
+      "reviewedThroughCommit": "3a687dca91db916e976fe5b8bcf2fce6c02df281",
+      "reviewedAt": "2026-10-01T16:30:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding flow uses current BIMLog tenant and product boundaries without changing ecosystem ownership."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The authorized five-build block, ten-build publication cadence, Native packaging and authenticated smoke gates remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification, tenant identity, authorization isolation, canonical project creation, persistent defaults and signed packages have executable acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verified self-service onboarding and automatic Native updates implement the already accepted sellable SaaS direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Adds onboarding persistence, verification routes, public confirmation UI and year-specific signed updater release assets."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Advances Lens Next to v1.05.N18-P37 and resolves a year-specific update manifest for Navisworks 2021 and 2025."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal customer report renderer, export layout or governed report design contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new standards, legal, payment, tax, privacy or regulatory compliance conclusion is asserted."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the five onboarding builds and their remaining exact-head publication and live acceptance gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes source scope B056-B060 and retains push, publication, Chrome smoke and installed Native field acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production customer mutation or incident is claimed; package and publication evidence remains explicitly bounded."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/block21-build102-onboarding.behavior.ts",
+        "artifacts/api-server/src/lib/block21-build105-public-onboarding-acceptance.behavior.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/components/OnboardingFlow.tsx",
+        "contracts/lens-product-status.json",
+        "contracts/release-identity.json",
+        "docs/experience/ux-program/ROUTES.json",
+        "evidence/stabilization-program-20260919/ACCESSIBILITY_RESPONSIVE_MATRIX.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/api-zod/src/release-identity.ts",
+        "lib/db/src/schema/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext.ps1",
+        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
+        "plugins/BIMLogLensNext/ReleaseIdentity.g.props",
+        "plugins/BIMLogLensNext/Test-LensNextFieldAcceptanceReadiness.ps1",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/LensNextNativeConfig.cs",
+        "plugins/BIMLogLensNext/native/LensNextNativeUpdateService.cs",
+        "plugins/BIMLogLensNext/src/ReleaseIdentity.g.cs",
+        "scripts/check-current-state-contract.mjs"
+      ],
+      "reviewedChangeSha256": "e57275a31a71764d5d42580317df07cc1cda102f1efa5a28095f1223af8744eb",
+      "reason": "B056-B060 replace slideshow onboarding with verified, resumable account, company, profile, project and coordinator-default setup while publishing isolated signed Lens packages."
     }
   ]
 }

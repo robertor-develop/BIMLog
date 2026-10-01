@@ -27,6 +27,7 @@ It changes only when the code structure or curated architectural facts change.
 - Publication requires the read-only database operator to prove exact development/production schema correspondence, no destructive action, development-data copy off, and a clean exact source. Build 020 returned `schemaAction=NONE` and changed no production row or schema object.
 - Public `/api/v1/healthz` is both health and application-readiness evidence because the startup bootstrap holds that route at HTTP 503 until the real application barrier completes.
 - Lens Next is the sole supported Lens product. Original/Legacy Lens exists only as preserved historical migration input and must not appear as a parallel customer-facing product or installed loader.
+- The current B051–B060 publication candidate is `v1.05.N18-P37` / `1.5.18.37`; it includes signed year-specific Lens Next automatic-update manifests and packages for Navisworks 2021 and 2025. Production remains at the prior accepted P36 source until this ten-build boundary passes push, publication, and authenticated Chrome acceptance.
 
 ## Production runtime closure recovery
 
@@ -108,6 +109,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/meeting_minutes.ts
 - artifacts/api-server/src/routes/members.ts
 - artifacts/api-server/src/routes/notifications.ts
+- artifacts/api-server/src/routes/onboarding.ts
 - artifacts/api-server/src/routes/project_directory.ts
 - artifacts/api-server/src/routes/projects.ts
 - artifacts/api-server/src/routes/reports.ts
@@ -125,6 +127,7 @@ It changes only when the code structure or curated architectural facts change.
 - downloadsRouter
 - healthRouter
 - authRouter
+- onboardingRouter
 - configRouter
 - projectsRouter
 - filesRouter
@@ -846,6 +849,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/meeting-schedule-placement.behavior.ts
 - artifacts/api-server/src/lib/meeting-schedule-placement.ts
 - artifacts/api-server/src/lib/oauth.ts
+- artifacts/api-server/src/lib/onboarding-migration.ts
 - artifacts/api-server/src/lib/operational-failure.behavior.ts
 - artifacts/api-server/src/lib/operational-failure.ts
 - artifacts/api-server/src/lib/operational-register-table.ts
@@ -971,6 +975,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/runtime-closure-retirement.behavior.ts
 - artifacts/api-server/src/lib/runtime-resilience.ts
 - artifacts/api-server/src/lib/runtime-security.ts
+- artifacts/api-server/src/lib/saas-block12-onboarding.behavior.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/scoped-briefing-cache.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts
@@ -1139,6 +1144,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/living-brief-gate.ts
 - lib/db/src/schema/meeting-minutes.ts
 - lib/db/src/schema/notifications.ts
+- lib/db/src/schema/onboarding.ts
 - lib/db/src/schema/platform-settings.ts
 - lib/db/src/schema/project-directory.ts
 - lib/db/src/schema/project-milestones.ts
@@ -1200,6 +1206,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/TeamPerformanceWorkspace.tsx
 - artifacts/bimlog/src/pages/Terms.tsx
 - artifacts/bimlog/src/pages/TotalControl.tsx
+- artifacts/bimlog/src/pages/VerifyEmail.tsx
 - artifacts/bimlog/src/pages/not-found.tsx
 - artifacts/bimlog/src/pages/project/ActivityTab.tsx
 - artifacts/bimlog/src/pages/project/AnalyticsTab.tsx
@@ -1237,6 +1244,7 @@ It changes only when the code structure or curated architectural facts change.
 - /
 - /login
 - /register
+- /verify-email
 - /reset-password
 - /privacy
 - /terms

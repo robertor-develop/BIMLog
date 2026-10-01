@@ -6,8 +6,8 @@ param(
   [string]$Model2025=''
 )
 $ErrorActionPreference='Stop'
-$release='v1.05.N18-P36'
-$binaryVersion='1.5.18.36'
+$release='v1.05.N18-P37'
+$binaryVersion='1.5.18.37'
 $loadRoot='C:\ProgramData\Autodesk\ApplicationPlugins'
 $results=@()
 foreach($year in @(2021,2025)){

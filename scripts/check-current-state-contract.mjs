@@ -12,8 +12,8 @@ function assert(condition, message) {
 
 function validate(snapshot) {
   const { release, lens, ledger, status, openLoop, platform, plugin, quality, migration, meeting, viewpoints, provider } = snapshot;
-  assert(release.label === "v1.05.N18-P36", "release identity must match the Build 080 P36 candidate");
-  assert(release.binaryVersion === "1.5.18.36", "binary identity must match P36");
+  assert(release.label === "v1.05.N18-P37", "release identity must match the current P37 candidate");
+  assert(release.binaryVersion === "1.5.18.37", "binary identity must match P37");
   assert(lens.supportedProduct === "Lens Next" && lens.supportedProductCount === 1, "Lens Next must be the sole supported Lens product");
   assert(lens.legacyStatus === "migration-only", "Legacy Lens must be migration-only");
   assert(lens.customerFacingLegacyProduct === false && lens.parallelInstallationSupported === false && lens.legacyLoaderAllowedInAcceptedSetup === false, "Legacy Lens cannot remain customer-facing, parallel-installed, or loadable");

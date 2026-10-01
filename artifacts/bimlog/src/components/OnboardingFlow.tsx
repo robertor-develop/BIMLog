@@ -1,262 +1,52 @@
-import { useState, useEffect } from "react";
-import { useI18n } from "@/lib/i18n";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
-import { PartyPopper, Folder, CheckCircle2, Lock, Rocket, Hand, HardHat, Ruler, Users, Package, Sparkles, Zap, AlertCircle } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AlertCircle, Building2, Check, ChevronLeft, Mail, Settings2, UserRound, X } from "lucide-react";
 
-const STORAGE_KEY = "bimlog-onboarding-done";
-const API = "/api/v1";
+const STORAGE_KEY="bimlog-onboarding-dismissed-v2";
+const API=(import.meta.env.BASE_URL||"").replace(/\/$/,"")+"/api/v1";
+const roles=[["bim_coordinator","BIM coordinator","Coordinador BIM"],["project_admin","Project administrator","Administrador de proyecto"],["document_controller","Document controller","Controlador documental"],["designer","Designer / detailer","Diseñador / dibujante"],["field_team","Field team","Equipo de campo"],["executive","Executive / owner","Ejecutivo / propietario"]] as const;
+const allDisciplines=["Architecture","Structural","Mechanical","Electrical","Plumbing","Fire Protection","Civil"];
+const allDocuments=["Shop Drawings","Coordination Drawings","Clash Reports","RFIs","Submittals"];
+type State={email:string;companyName:string;emailVerifiedAt:string|null;workProfile:string|null;preferredDisciplines:string[];preferredDocumentTypes:string[];completedSteps:string[];completedAt:string|null;projectCount:number};
 
-type FlowType = "invited" | "new" | null;
-
-interface Step {
-  id: string;
-  icon: React.ReactNode;
-  titleEn: string;
-  titleEs: string;
-  bodyEn: string;
-  bodyEs: string;
-}
-
-const STEPS_INVITED: Step[] = [
-  {
-    id: "welcome",
-    icon: <PartyPopper size={48} color="#2563EB" />,
-    titleEn: "Welcome to BIMLog",
-    titleEs: "Bienvenido a BIMLog",
-    bodyEn: "You've been invited to collaborate on a BIM project. BIMLog keeps every file, RFI, submittal, and coordination issue in one immutable audit trail.",
-    bodyEs: "Has sido invitado a colaborar en un proyecto BIM. BIMLog mantiene cada archivo, RFI, submittal y punto de coordinación en un historial de auditoría inmutable.",
-  },
-  {
-    id: "project",
-    icon: <Folder size={48} color="#2563EB" />,
-    titleEn: "Your Project is Ready",
-    titleEs: "Tu Proyecto Está Listo",
-    bodyEn: "Head to your Dashboard to see the project you've been added to. Click into it to explore files, RFIs, submittals, transmittals, and more.",
-    bodyEs: "Ve a tu Dashboard para ver el proyecto al que fuiste agregado. Haz clic para explorar archivos, RFIs, submittals, transmisiones y más.",
-  },
-  {
-    id: "naming",
-    icon: <CheckCircle2 size={48} color="#2563EB" />,
-    titleEn: "ISO 19650 Naming Convention",
-    titleEs: "Convención de Nombres ISO 19650",
-    bodyEn: "Every file you upload is validated against the project's naming convention. Use the Name Generator tool to create compliant file names instantly.",
-    bodyEs: "Cada archivo que subes es validado contra la convención del proyecto. Usa el Generador de Nombres para crear nombres de archivo conformes al instante.",
-  },
-  {
-    id: "audit",
-    icon: <Lock size={48} color="#2563EB" />,
-    titleEn: "Immutable Audit Trail",
-    titleEs: "Historial de Auditoría Inmutable",
-    bodyEn: "Every action — uploads, approvals, comments, supersessions — is permanently logged. Nothing can be deleted. This protects you legally.",
-    bodyEs: "Cada acción — subidas, aprobaciones, comentarios, supersesiones — queda registrada permanentemente. Nada puede eliminarse. Esto te protege legalmente.",
-  },
-  {
-    id: "done",
-    icon: <Rocket size={48} color="#2563EB" />,
-    titleEn: "You're All Set!",
-    titleEs: "¡Todo Listo!",
-    bodyEn: "You're ready to use BIMLog. If you need help, click the Help button in any project view. Welcome to the team!",
-    bodyEs: "Estás listo para usar BIMLog. Si necesitas ayuda, haz clic en Ayuda en cualquier vista de proyecto. ¡Bienvenido al equipo!",
-  },
-];
-
-const STEPS_NEW: Step[] = [
-  {
-    id: "welcome",
-    icon: <Hand size={48} color="#2563EB" />,
-    titleEn: "Welcome to BIMLog by IgniteSmart",
-    titleEs: "Bienvenido a BIMLog by IgniteSmart",
-    bodyEn: "BIMLog is the intelligence layer for AEC project coordination — ISO 19650 compliant naming, immutable audit trails, RFIs, submittals, transmittals, and AI-powered insights.",
-    bodyEs: "BIMLog es la capa de inteligencia para coordinación de proyectos AEC — nombres conformes ISO 19650, historial inmutable, RFIs, submittals, transmisiones e insights con IA.",
-  },
-  {
-    id: "create",
-    icon: <HardHat size={48} color="#2563EB" />,
-    titleEn: "Create Your First Project",
-    titleEs: "Crea Tu Primer Proyecto",
-    bodyEn: "From your Dashboard, click \"New Project\" and enter a project code and name. The project code should follow your organisation's prefix convention (e.g. NYC-270).",
-    bodyEs: "Desde tu Dashboard, haz clic en \"Nuevo Proyecto\" e ingresa un código y nombre. El código debe seguir la convención de prefijos de tu organización (p.ej. NYC-270).",
-  },
-  {
-    id: "convention",
-    icon: <Ruler size={48} color="#2563EB" />,
-    titleEn: "Configure Naming Convention",
-    titleEs: "Configura la Convención de Nombres",
-    bodyEn: "Go to your project → Tools → Naming Convention to set up ISO 19650-compliant naming rules. This governs every file uploaded to the project.",
-    bodyEs: "Ve a tu proyecto → Herramientas → Convención de Nombres para configurar reglas ISO 19650. Esto rige cada archivo subido al proyecto.",
-  },
-  {
-    id: "team",
-    icon: <Users size={48} color="#2563EB" />,
-    titleEn: "Invite Your Team",
-    titleEs: "Invita a Tu Equipo",
-    bodyEn: "In your project, go to the Team tab to add members. You can assign roles: Project Admin, BIM Manager, Document Controller, Engineer, Architect, or Viewer.",
-    bodyEs: "En tu proyecto, ve a la pestaña Equipo para agregar miembros. Puedes asignar roles: Admin, BIM Manager, Controlador de Documentos, Ingeniero, Arquitecto o Viewer.",
-  },
-  {
-    id: "modules",
-    icon: <Package size={48} color="#2563EB" />,
-    titleEn: "Explore the Modules",
-    titleEs: "Explora los Módulos",
-    bodyEn: "BIMLog includes Files, RFIs, Submittals, Transmittals, Change Orders, Meeting Minutes, Schedule, Directory, and AI Reports — everything you need for project coordination.",
-    bodyEs: "BIMLog incluye Archivos, RFIs, Submittals, Transmisiones, Órdenes de Cambio, Actas, Cronograma, Directorio y Reportes IA — todo para coordinar tu proyecto.",
-  },
-  {
-    id: "done",
-    icon: <Sparkles size={48} color="#2563EB" />,
-    titleEn: "You're Ready to Build!",
-    titleEs: "¡Listo para Construir!",
-    bodyEn: "Your workspace is set up. Head to the Dashboard to create your first project. Remember: every action is logged permanently — so work with confidence.",
-    bodyEs: "Tu espacio de trabajo está configurado. Ve al Dashboard para crear tu primer proyecto. Recuerda: cada acción se registra permanentemente — trabaja con confianza.",
-  },
-];
-
-export function OnboardingFlow({ onDone }: { onDone: () => void }) {
-  const { lang } = useI18n();
-  const { user, token } = useAuthStore();
-  const tl = (en: string, es: string) => lang === "es" ? es : en;
-
-  const [flowType, setFlowType] = useState<FlowType>(null);
-  const [step, setStep] = useState(0);
-  const [loadError, setLoadError] = useState(false);
-  const [loadAttempt, setLoadAttempt] = useState(0);
-
-  useEffect(() => {
-    if (!token) return;
-    fetch(`${API}/projects`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => {
-        if (!r.ok) throw new Error(`project_access_${r.status}`);
-        return r.json();
-      })
-      .then((projects: unknown[]) => {
-        const inProject = Array.isArray(projects) && projects.length > 0;
-        setLoadError(false);
-        setFlowType(inProject ? "invited" : "new");
-      })
-      .catch(() => setLoadError(true));
-  }, [token, loadAttempt]);
-
-  if (loadError) {
-    return (
-      <div role="dialog" aria-modal="true" aria-labelledby="onboarding-load-error" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000 }}>
-        <div style={{ background: "white", borderRadius: 16, padding: 32, width: 420, maxWidth: "92vw", textAlign: "center" }}>
-          <AlertCircle size={36} color="#B91C1C" aria-hidden="true" />
-          <h2 id="onboarding-load-error" style={{ color: "#111827", fontSize: 18 }}>{tl("We could not load your project access", "No pudimos cargar su acceso a proyectos")}</h2>
-          <p style={{ color: "#4B5563", fontSize: 13, lineHeight: 1.6 }}>{tl("Nothing was changed. Retry before choosing a workflow so BIMLog does not mistake an invited account for a new workspace.", "No se cambió nada. Reintente antes de elegir un flujo para que BIMLog no confunda una cuenta invitada con un espacio nuevo.")}</p>
-          <button type="button" onClick={() => { setLoadError(false); setFlowType(null); setLoadAttempt(value => value + 1); }} style={{ padding: "10px 18px", border: 0, borderRadius: 8, background: "#2563EB", color: "white", fontWeight: 700, cursor: "pointer" }}>{tl("Retry", "Reintentar")}</button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!flowType) {
-    return (
-      <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000 }}>
-        <div style={{ background: "white", borderRadius: 16, padding: 40, width: 360, textAlign: "center" }}>
-          <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Zap size={28} color="#2563EB" /></div>
-          <div style={{ color: "#6B7280", fontSize: 13 }}>{tl("Loading…", "Cargando…")}</div>
-        </div>
-      </div>
-    );
-  }
-
-  const steps = flowType === "invited" ? STEPS_INVITED : STEPS_NEW;
-  const current = steps[step];
-  const isLast = step === steps.length - 1;
-  const pct = Math.round(((step + 1) / steps.length) * 100);
-
-  const complete = () => {
-    localStorage.setItem(STORAGE_KEY, "1");
-    onDone();
-  };
-
-  return (
-    <div style={{
-      position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
-      display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000,
-    }}>
-      <div style={{
-        background: "white", borderRadius: 20, width: 480, maxWidth: "92vw",
-        overflow: "hidden", boxShadow: "0 24px 80px rgba(0,0,0,0.25)",
-      }}>
-        {/* Top progress bar */}
-        <div style={{ height: 4, background: "#E5E7EB" }}>
-          <div style={{ height: "100%", width: `${pct}%`, background: "#2563EB", transition: "width 0.4s ease" }} />
-        </div>
-
-        {/* Header */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px 0" }}>
-          <div style={{ display: "flex", gap: 6 }}>
-            {steps.map((_, i) => (
-              <div key={i} style={{
-                width: i === step ? 20 : 6, height: 6, borderRadius: 3,
-                background: i <= step ? "#2563EB" : "#E5E7EB", transition: "all 0.3s",
-              }} />
-            ))}
-          </div>
-          <button
-            onClick={complete}
-            style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, color: "#9CA3AF", fontWeight: 500 }}
-          >
-            {tl("Skip", "Omitir")}
-          </button>
-        </div>
-
-        {/* Content */}
-        <div style={{ padding: "28px 32px 24px", textAlign: "center" }}>
-          <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>{current.icon}</div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#111827", marginBottom: 12, lineHeight: 1.3 }}>
-            {tl(current.titleEn, current.titleEs)}
-          </h2>
-          <p style={{ fontSize: 14, color: "#4B5563", lineHeight: 1.7, margin: 0 }}>
-            {tl(current.bodyEn, current.bodyEs)}
-          </p>
-
-          {/* Step indicator */}
-          <div style={{ fontSize: 11, color: "#9CA3AF", marginTop: 20 }}>
-            {tl(`Step ${step + 1} of ${steps.length}`, `Paso ${step + 1} de ${steps.length}`)}
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div style={{ padding: "0 32px 28px", display: "flex", gap: 10 }}>
-          {step > 0 && (
-            <button
-              onClick={() => setStep(s => s - 1)}
-              style={{
-                flex: 1, padding: "10px 0", border: "1.5px solid #E5E7EB", borderRadius: 9,
-                background: "white", cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#374151",
-              }}
-            >
-              {tl("Back", "Atrás")}
-            </button>
-          )}
-          <button
-            onClick={() => isLast ? complete() : setStep(s => s + 1)}
-            style={{
-              flex: 2, padding: "10px 0", border: "none", borderRadius: 9,
-              background: "#2563EB", cursor: "pointer", fontSize: 13, fontWeight: 700, color: "white",
-            }}
-          >
-            {isLast
-              ? tl("Go to Dashboard →", "Ir al Dashboard →")
-              : tl("Next →", "Siguiente →")}
-          </button>
-        </div>
-
-        {/* Flow label */}
-        <div style={{ textAlign: "center", padding: "0 0 16px", fontSize: 10, color: "#D1D5DB" }}>
-          {flowType === "invited"
-            ? tl("Invited user onboarding", "Onboarding de usuario invitado")
-            : tl("New account onboarding", "Onboarding de cuenta nueva")}
-        </div>
-      </div>
+export function OnboardingFlow({onDone}:{onDone:()=>void}){
+  const {lang}=useI18n(),token=useAuthStore(s=>s.token),tl=(en:string,es:string)=>lang==="es"?es:en;
+  const [,navigate]=useLocation();
+  const [state,setState]=useState<State|null>(null),[step,setStep]=useState(0),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
+  const [role,setRole]=useState(""),[disciplines,setDisciplines]=useState<string[]>(["Architecture"]),[documents,setDocuments]=useState<string[]>(["Shop Drawings"]);
+  const [project,setProject]=useState({name:"",code:"",description:""});
+  const [createdProjectId,setCreatedProjectId]=useState<number|null>(null);
+  const headers=useMemo(()=>({Authorization:`Bearer ${token}`,"Content-Type":"application/json"}),[token]);
+  const load=async()=>{setError("");const response=await fetch(`${API}/onboarding`,{headers});if(!response.ok)throw new Error(tl("Setup could not be loaded.","No se pudo cargar la configuración."));const data=await response.json() as State;setState(data);setRole(data.workProfile||"");setDisciplines(data.preferredDisciplines.length?data.preferredDisciplines:["Architecture"]);setDocuments(data.preferredDocumentTypes.length?data.preferredDocumentTypes:["Shop Drawings"]);if(data.completedAt){localStorage.setItem(STORAGE_KEY,"1");onDone();}};
+  useEffect(()=>{void load().catch(e=>setError(e.message));},[token]);
+  const request=async(path:string,init:RequestInit={})=>{setBusy(true);setError("");setNotice("");try{const response=await fetch(`${API}${path}`,{...init,headers:{...headers,...init.headers}});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||tl("The step could not be saved.","No se pudo guardar el paso."));return body;}finally{setBusy(false);}};
+  const toggle=(value:string,current:string[],set:(v:string[])=>void)=>set(current.includes(value)?current.filter(item=>item!==value):[...current,value]);
+  const saveProfile=async()=>{if(!role)throw new Error(tl("Choose the work profile that best matches your day-to-day work.","Elija el perfil que mejor represente su trabajo diario."));await request("/onboarding",{method:"PATCH",body:JSON.stringify({workProfile:role})});setStep(3);};
+  const createProject=async()=>{const body={...project,code:project.code.trim().toUpperCase()};if(!body.name.trim()||!body.code)throw new Error(tl("Project name and code are required.","Se requieren el nombre y código del proyecto."));const created=await request("/projects",{method:"POST",body:JSON.stringify(body)});setCreatedProjectId(Number(created.id));setState(current=>current?{...current,projectCount:current.projectCount+1}:current);setStep(4);};
+  const finish=async()=>{await request("/onboarding",{method:"PATCH",body:JSON.stringify({preferredDisciplines:disciplines,preferredDocumentTypes:documents})});await request("/onboarding/complete",{method:"POST"});localStorage.setItem(STORAGE_KEY,"1");onDone();navigate(createdProjectId?`/projects/${createdProjectId}/intake`:"/dashboard");};
+  if(!state&&!error)return <Overlay><p className="rounded-xl bg-white p-8">{tl("Loading your setup…","Cargando su configuración…")}</p></Overlay>;
+  const titles=[["Verify your email","Verifique su correo"],["Confirm your company","Confirme su empresa"],["Choose your work profile","Elija su perfil de trabajo"],["Create your first project","Cree su primer proyecto"],["Set useful defaults","Configure valores útiles"]];
+  return <Overlay><div role="dialog" aria-modal="true" aria-labelledby="onboarding-title" className="w-[720px] max-w-[94vw] max-h-[92vh] overflow-auto rounded-2xl bg-white shadow-2xl">
+    <div className="h-1 bg-slate-200"><div className="h-full bg-blue-600 transition-all" style={{width:`${(step+1)*20}%`}}/></div>
+    <div className="flex items-center justify-between border-b px-6 py-4"><div><p className="text-xs font-bold uppercase tracking-wider text-blue-600">{tl(`Setup ${step+1} of 5`,`Configuración ${step+1} de 5`)}</p><h2 id="onboarding-title" className="text-xl font-bold">{tl(titles[step][0],titles[step][1])}</h2></div><button aria-label={tl("Close setup","Cerrar configuración")} onClick={()=>{localStorage.setItem(STORAGE_KEY,"1");onDone();}}><X/></button></div>
+    <div className="p-6">{error&&<div role="alert" className="mb-4 flex gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"><AlertCircle className="h-5 w-5"/>{error}</div>}{notice&&<div role="status" className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">{notice}</div>}
+      {step===0&&<Step icon={<Mail/>} text={tl(`We will verify ${state?.email}. This protects invitations and account recovery.`,`Verificaremos ${state?.email}. Esto protege las invitaciones y la recuperación de la cuenta.`)}>{state?.emailVerifiedAt?<Done text={tl("Email verified","Correo verificado")}/>:<Button disabled={busy} onClick={()=>void request("/onboarding/email-verification",{method:"POST"}).then(()=>setNotice(tl("Verification email sent. Open its secure link, then return and refresh this step.","Correo de verificación enviado. Abra su enlace seguro, luego regrese y actualice este paso."))).catch(e=>setError(e.message))}>{tl("Send verification email","Enviar correo de verificación")}</Button>}<Button variant="outline" disabled={busy} onClick={()=>void load().catch(e=>setError(e.message))}>{tl("Refresh status","Actualizar estado")}</Button></Step>}
+      {step===1&&<Step icon={<Building2/>} text={tl("Your company workspace is the boundary for catalogs, pricing and people. Joining another company requires its secure invitation.","El espacio de su empresa es el límite para catálogos, precios y personas. Unirse a otra empresa requiere su invitación segura.")}><div className="rounded-lg border bg-slate-50 p-4"><strong>{state?.companyName}</strong><p className="text-sm text-slate-600">{tl("Current authenticated company","Empresa autenticada actual")}</p></div></Step>}
+      {step===2&&<Step icon={<UserRound/>} text={tl("This personalizes guidance only. It never grants permissions or changes your project role.","Esto solo personaliza la guía. Nunca otorga permisos ni cambia su rol del proyecto.")}><div className="grid gap-2 sm:grid-cols-2">{roles.map(item=><Choice key={item[0]} active={role===item[0]} onClick={()=>setRole(item[0])}>{tl(item[1],item[2])}</Choice>)}</div></Step>}
+      {step===3&&<Step icon={<Building2/>} text={state?.projectCount?tl("You already have project access. Continue with that project or create another from Headquarters.","Ya tiene acceso a un proyecto. Continúe con ese proyecto o cree otro desde la Sede."):tl("Create the project shell now. BIMLog will take you directly to full Job Intake; team assignments can remain pending.","Cree ahora la base del proyecto. BIMLog lo llevará directamente al Intake completo; las asignaciones del equipo pueden quedar pendientes.")}>{!state?.projectCount&&<div className="grid gap-3"><Input aria-label={tl("Project name","Nombre del proyecto")} placeholder={tl("Project name","Nombre del proyecto")} value={project.name} onChange={e=>setProject({...project,name:e.target.value})}/><Input aria-label={tl("Project code","Código del proyecto")} placeholder="PROJ-001" value={project.code} onChange={e=>setProject({...project,code:e.target.value.replace(/[^a-zA-Z0-9-]/g,"")})}/><Input aria-label={tl("Description","Descripción")} placeholder={tl("Optional description","Descripción opcional")} value={project.description} onChange={e=>setProject({...project,description:e.target.value})}/></div>}</Step>}
+      {step===4&&<Step icon={<Settings2/>} text={tl("Start with the choices you use most. Shop Drawings remain first for BIM coordination; you can search the full governed catalogs in Intake.","Comience con las opciones que más usa. Shop Drawings permanece primero para coordinación BIM; puede buscar los catálogos controlados completos en Intake.")}><Label text={tl("Frequent disciplines","Disciplinas frecuentes")}>{allDisciplines.map(value=><Choice key={value} active={disciplines.includes(value)} onClick={()=>toggle(value,disciplines,setDisciplines)}>{value}</Choice>)}</Label><Label text={tl("Frequent deliverables","Entregables frecuentes")}>{allDocuments.map(value=><Choice key={value} active={documents.includes(value)} onClick={()=>toggle(value,documents,setDocuments)}>{value}</Choice>)}</Label></Step>}
     </div>
-  );
+    <div className="flex justify-between border-t px-6 py-4"><Button variant="outline" disabled={step===0||busy} onClick={()=>setStep(step-1)}><ChevronLeft className="mr-1 h-4 w-4"/>{tl("Back","Atrás")}</Button>{step===0?<Button disabled={!state?.emailVerifiedAt} onClick={()=>setStep(1)}>{tl("Continue","Continuar")}</Button>:step===1?<Button onClick={()=>setStep(2)}>{tl("This is my company","Esta es mi empresa")}</Button>:step===2?<Button disabled={busy} onClick={()=>void saveProfile().catch(e=>setError(e.message))}>{tl("Save and continue","Guardar y continuar")}</Button>:step===3?<Button disabled={busy} onClick={()=>state?.projectCount?setStep(4):void createProject().catch(e=>setError(e.message))}>{state?.projectCount?tl("Continue","Continuar"):tl("Create project","Crear proyecto")}</Button>:<Button disabled={busy||!disciplines.length||!documents.length} onClick={()=>void finish().catch(e=>setError(e.message))}>{tl("Save and open full Intake","Guardar y abrir Intake completo")}</Button>}</div>
+  </div></Overlay>;
 }
 
-export function useOnboarding() {
-  const { token } = useAuthStore();
-  const isDone = () => !!localStorage.getItem(STORAGE_KEY);
-  return { shouldShow: !!token && !isDone(), markDone: () => localStorage.setItem(STORAGE_KEY, "1") };
-}
+function Overlay({children}:{children:React.ReactNode}){return <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-950/60 p-3">{children}</div>}
+function Step({icon,text,children}:{icon:React.ReactNode;text:string;children:React.ReactNode}){return <div><div className="mb-5 flex gap-3"><div className="rounded-lg bg-blue-50 p-3 text-blue-700">{icon}</div><p className="text-sm leading-6 text-slate-600">{text}</p></div><div className="space-y-3">{children}</div></div>}
+function Done({text}:{text:string}){return <div className="flex items-center gap-2 rounded-lg bg-emerald-50 p-3 font-semibold text-emerald-800"><Check className="h-5 w-5"/>{text}</div>}
+function Choice({active,onClick,children}:{active:boolean;onClick:()=>void;children:React.ReactNode}){return <button type="button" aria-pressed={active} onClick={onClick} className={`rounded-lg border px-3 py-2 text-left text-sm ${active?"border-blue-600 bg-blue-50 font-semibold text-blue-800":"border-slate-200 hover:border-slate-400"}`}>{children}</button>}
+function Label({text,children}:{text:string;children:React.ReactNode}){return <div><p className="mb-2 mt-4 text-sm font-semibold">{text}</p><div className="flex flex-wrap gap-2">{children}</div></div>}
+export function useOnboarding(){const {token}=useAuthStore();return{shouldShow:!!token&&!localStorage.getItem(STORAGE_KEY),markDone:()=>localStorage.setItem(STORAGE_KEY,"1")};}

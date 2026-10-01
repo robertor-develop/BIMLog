@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## 250-build SaaS completion — Block 12: verified onboarding — 2026-10-01
+
+- [x] **B056 — Account and email verification:** expiring single-use hashed verification tokens, resend replacement, delivery status, and public confirmation.
+- [x] **B057 — Company creation/join:** explicit authenticated company boundary with secure invitation-only joining and no name-based tenant inference.
+- [x] **B058 — Role selection:** bounded personal work profile that cannot grant permissions or change project roles.
+- [x] **B059 — First-project wizard:** canonical project creation, duplicate-safe existing-project continuation, and direct full-Intake handoff with pending team assignments allowed.
+- [x] **B060 — Intelligent defaults:** persisted frequent discipline/deliverable choices with Shop Drawings first and server-verified completion prerequisites.
+- [ ] Complete the exact-head release gate and one push for B056–B060. Publish combined B051–B060, publish signed year-specific Lens Next 2021/2025 updater assets, verify exact live identity, run full authenticated Chrome smoke, and complete real installed-package/rollback field acceptance.
+
 ## 250-build SaaS completion — Priority Block 11: Lens Next automatic updates — 2026-10-01
 
 Ruben's 2026-10-01 request for Lens Next to obtain future releases without receiving a
