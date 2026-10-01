@@ -3381,3 +3381,12 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - BIMLog stores provider tokens and display-safe brand/last-four/expiry metadata only. It rejects cross-company or cross-customer token reuse, multiple active defaults, unsafe portal return URLs and portal replay.
 - Billing administrators receive the bounded provider reference and masked tax identifier required to manage billing. Customer administrators receive safe payment-method display data; support receives readiness without billing contact, tokens or payment methods. Provider payment-method references never enter projections.
 - Product commits are `3dcdd3a9`, `84562fb5`, `dd314dcb`, `b7f687af` and `c9dc1205`. Focused Block 6 behavior and API TypeScript pass. This is the first unpublished five-build block; publication and authenticated Chrome smoke are due after Builds 031–035.
+- The complete exact-head gate passed and GitHub `master` advanced to reconciled source `a2c7d938`; Builds 026–030 remained unpublished pending the second five-build block.
+
+## Commercial readiness Block 7 — Stripe provider operations — 2026-10-01
+
+- Builds 031–035 add a redacted provider-readiness contract, server-side Stripe Checkout creation, Stripe-Signature webhook verification, controlled customer-portal launch and a bounded production transport for the exact Stripe API host.
+- Checkout binds the submitted BIMLog order, provider customer, catalog price reference, company and subscription metadata to one idempotent hosted session. It accepts only Stripe-hosted HTTPS checkout URLs and never sends the secret key to the browser.
+- Webhooks verify the raw body against Stripe's timestamped `v1` signature within a bounded replay window, accept rotating signatures, reject duplicate event IDs and preserve a payload digest. Portal launch requires matching company/customer/session lineage and a BIMLog-controlled return URL.
+- The transport enforces the Stripe `/v1/` boundary, TLS host, request timeout, response-size limit and JSON parsing without including credentials in returned readiness or errors.
+- Product commits are `ee9684c0`, `9a7eb27c`, `806a2a39`, `57022945` and `64e00432`. Focused Block 7 behavior and API TypeScript pass. Builds 026–035 now reach the required ten-build publication boundary.

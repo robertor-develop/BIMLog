@@ -3974,4 +3974,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 028 records tokenized payment-method summaries without PAN or CVC and enforces provider-customer lineage plus one active default.
 - [x] Build 029 creates bounded, short-lived, single-use billing-portal sessions with safe same-origin return paths.
 - [x] Build 030 projects billing identity, provider readiness and payment summaries according to explicit billing, customer, support and audit roles without exposing provider payment tokens.
-- [ ] Pass the complete exact-head gate and push Builds 026–030 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 031–035.
+- [x] Pass the complete exact-head gate and push Builds 026–030 once. Reconciled source `a2c7d938` remained unpublished until Builds 031–035.
+
+## Commercial readiness Block 7 — Stripe provider operations — 2026-10-01
+
+- [x] Build 031 defines redacted Stripe test/live readiness, webhook readiness and portal configuration status without projecting secrets.
+- [x] Build 032 creates hosted subscription Checkout sessions from exact submitted-order, attempt, provider-customer and catalog-price lineage with idempotency.
+- [x] Build 033 verifies raw Stripe webhook payloads using timestamped rotating `v1` signatures, replay bounds and duplicate-event protection.
+- [x] Build 034 launches the Stripe customer portal only from a ready single-use BIMLog session with exact company/customer lineage and a controlled return URL.
+- [x] Build 035 supplies a bounded executable Stripe transport with fixed TLS host, `/v1/` path enforcement, timeout, response-size limit and JSON validation.
+- [ ] Pass the complete exact-head gate, push Builds 031–035 once, publish accumulated Builds 026–035 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.
