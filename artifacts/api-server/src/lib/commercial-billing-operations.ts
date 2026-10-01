@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { CommercialCreditNote, CommercialInvoice, CompanySubscription, SubscriptionTerm } from "./subscription-authority";
+import type { CollectionCase, CommercialCreditNote, CommercialInvoice, CompanySubscription, SubscriptionTerm } from "./subscription-authority";
 
 export const SUBSCRIPTION_FEATURES = ["projects", "coordination", "reports", "lens_next", "commercial_controls"] as const;
 export type SubscriptionFeature = (typeof SUBSCRIPTION_FEATURES)[number];
@@ -108,4 +108,54 @@ export function createCustomerBillingStatement(input: {
     status: creditedCents === 0 ? "paid" : netPaidCents === 0 ? "fully_refunded" : "partially_refunded",
     generatedAt: instant(input.generatedAt, "Statement generation time"),
   });
+}
+
+export type BillingNotice = Readonly<{
+  id: string;
+  companyId: number;
+  subscriptionId: string;
+  collectionCaseId: string;
+  collectionAttempt: number;
+  kind: "payment_failed" | "retry_scheduled" | "grace_ending" | "collection_exhausted";
+  recipientEmail: string;
+  locale: "en" | "es";
+  status: "prepared" | "cancelled";
+  preparedAt: string;
+  notBefore: string;
+}>;
+
+export function prepareBillingNotice(input: {
+  companyId: number;
+  subscription: CompanySubscription;
+  collection: CollectionCase;
+  recipientEmail: string;
+  locale: "en" | "es";
+  kind: BillingNotice["kind"];
+  existing: readonly BillingNotice[];
+  now: string;
+}): BillingNotice {
+  if (input.subscription.companyId !== input.companyId || input.collection.subscriptionId !== input.subscription.id) throw new Error("Billing notice lineage is invalid");
+  if (!input.collection.id.trim() || input.collection.failedAttempts < 1) throw new Error("Billing collection state is invalid");
+  const recipientEmail = input.recipientEmail.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipientEmail)) throw new Error("Billing notice recipient is invalid");
+  const compatible = input.collection.status === "exhausted" ? ["collection_exhausted"] : ["payment_failed", "retry_scheduled", "grace_ending"];
+  if (!compatible.includes(input.kind)) throw new Error("Billing notice kind does not match collection state");
+  const duplicate = input.existing.find((notice) => notice.collectionCaseId === input.collection.id && notice.collectionAttempt === input.collection.failedAttempts && notice.kind === input.kind);
+  if (duplicate) return duplicate;
+  if (input.existing.some((notice) => notice.companyId !== input.companyId || notice.subscriptionId !== input.subscription.id)) throw new Error("Existing billing notice belongs to another subscription");
+  const now = instant(input.now, "Billing notice preparation time");
+  const notBefore = input.kind === "retry_scheduled" && input.collection.nextRetryAt ? input.collection.nextRetryAt : now;
+  return Object.freeze({
+    id:crypto.createHash("sha256").update(`${input.companyId}:${input.collection.id}:${input.collection.failedAttempts}:${input.kind}`).digest("hex"),
+    companyId:input.companyId, subscriptionId:input.subscription.id, collectionCaseId:input.collection.id,
+    collectionAttempt:input.collection.failedAttempts, kind:input.kind, recipientEmail, locale:input.locale,
+    status:"prepared", preparedAt:now, notBefore,
+  });
+}
+
+export function cancelBillingNotice(input: { notice: BillingNotice; subscription: CompanySubscription; now: string }): BillingNotice {
+  instant(input.now, "Billing notice cancellation time");
+  if (input.notice.subscriptionId !== input.subscription.id || input.notice.companyId !== input.subscription.companyId) throw new Error("Billing notice subscription lineage is invalid");
+  if (input.notice.status === "cancelled" || input.subscription.status === "past_due") return input.notice;
+  return Object.freeze({ ...input.notice, status:"cancelled" });
 }
