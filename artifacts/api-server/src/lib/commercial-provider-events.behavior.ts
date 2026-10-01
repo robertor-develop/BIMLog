@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { applyStripeCheckoutCompleted, applyStripeSubscriptionEvent, ingestStripeProviderEvent } from "./commercial-provider-events";
+import { applyStripeCheckoutCompleted, applyStripeInvoicePaid, applyStripeRefund, applyStripeSubscriptionEvent, ingestStripeProviderEvent } from "./commercial-provider-events";
 import { createCheckoutAttempt, createCommercialOrder, createCompanySubscription, transitionCommercialOrder, transitionSubscription } from "./subscription-authority";
 import type { ProviderEventReceipt } from "./subscription-authority";
 
@@ -43,3 +43,18 @@ assert.equal(synchronized038.event.status, "applied");
 assert.throws(() => applyStripeSubscriptionEvent({ event: event038, rawPayload: subscription038Raw, binding: { subscriptionId: completion037.subscription.id, companyId: 37, providerSubscriptionReference: "sub_other", providerCustomerReference: "cus_038" }, subscription: completion037.subscription, now: "2026-10-01T12:05:00Z" }), /binding is invalid/);
 
 console.log("Commercial provider Block 8 Build 038: PASS");
+
+const invoice039Raw = JSON.stringify({ id: "evt_invoice_039", type: "invoice.paid", created: 1790856200, data: { object: { id: "in_039", number: "BIM-2026-0039", customer: "cus_038", subscription: "sub_stripe_038", currency: "usd", amount_paid: 249000, metadata: { subscription_id: completion037.subscription.id, company_id: "37" } } } });
+const invoiceEvent039 = ingestStripeProviderEvent({ receipt: verified(invoice039Raw, "evt_invoice_039", "invoice.paid"), rawPayload: invoice039Raw, existing: [intake037, event038] });
+const paid039 = applyStripeInvoicePaid({ event: invoiceEvent039, rawPayload: invoice039Raw, binding: { subscriptionId: completion037.subscription.id, companyId: 37, providerSubscriptionReference: "sub_stripe_038", providerCustomerReference: "cus_038" }, completion: completion037, existingInvoices: [], now: "2026-10-01T12:06:00Z" });
+assert.equal(paid039.invoice.totalCents, 249000);
+assert.equal(paid039.event.status, "applied");
+
+const refund039Raw = JSON.stringify({ id: "evt_refund_039", type: "charge.refunded", created: 1790856300, data: { object: { id: "ch_039", currency: "usd", amount_refunded: 5000, metadata: { invoice_id: paid039.invoice.id } } } });
+const refundEvent039 = ingestStripeProviderEvent({ receipt: verified(refund039Raw, "evt_refund_039", "charge.refunded"), rawPayload: refund039Raw, existing: [intake037, event038, invoiceEvent039] });
+const refund039 = applyStripeRefund({ event: refundEvent039, rawPayload: refund039Raw, invoice: paid039.invoice, priorCredits: [], reason: "Approved service credit", now: "2026-10-01T12:07:00Z" });
+assert.equal(refund039.credit.amountCents, 5000);
+assert.equal(refund039.credit.status, "partial_refund");
+assert.throws(() => applyStripeRefund({ event: refundEvent039, rawPayload: refund039Raw.replace("5000", "250000"), invoice: paid039.invoice, priorCredits: [], reason: "Approved service credit", now: "2026-10-01T12:07:00Z" }), /does not match/);
+
+console.log("Commercial provider Block 8 Build 039: PASS");

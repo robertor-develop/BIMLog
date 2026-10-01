@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
-import { transitionCommercialOrder, transitionSubscription } from "./subscription-authority";
-import type { CheckoutAttempt, CommercialOrder, CompanySubscription, ProviderEventReceipt } from "./subscription-authority";
+import { createPaidInvoice, transitionCommercialOrder, transitionSubscription } from "./subscription-authority";
+import type { CheckoutAttempt, CommercialCreditNote, CommercialInvoice, CommercialOrder, CompanySubscription, ProviderEventReceipt } from "./subscription-authority";
 
 export const STRIPE_COMMERCIAL_EVENT_TYPES = [
   "checkout.session.completed",
@@ -132,4 +132,59 @@ export function applyStripeSubscriptionEvent(input: {
     ? input.subscription
     : transitionSubscription({ subscription: input.subscription, to: desired, expectedRevision: input.subscription.revision, now: input.now });
   return Object.freeze({ event: appliedEvent(input.event, input.now), subscription });
+}
+
+export function applyStripeInvoicePaid(input: {
+  event: CommercialProviderEvent;
+  rawPayload: string;
+  binding: StripeSubscriptionBinding;
+  completion: Readonly<{ attempt: CheckoutAttempt; order: CommercialOrder; subscription: CompanySubscription }>;
+  existingInvoices: readonly CommercialInvoice[];
+  now: string;
+}): Readonly<{ event: CommercialProviderEvent; invoice: CommercialInvoice }> {
+  if (input.event.eventType !== "invoice.paid" || input.event.status !== "pending") throw new Error("A pending paid-invoice event is required");
+  if (sha256(input.rawPayload) !== input.event.payloadDigest) throw new Error("Invoice event payload does not match its intake record");
+  let payload: { data?: { object?: { id?: unknown; number?: unknown; customer?: unknown; subscription?: unknown; currency?: unknown; amount_paid?: unknown; metadata?: Record<string, unknown> } } };
+  try { payload = JSON.parse(input.rawPayload); } catch { throw new Error("Invoice event payload is invalid JSON"); }
+  const object = payload.data?.object;
+  if (!object || object.id !== input.event.objectId || object.customer !== input.binding.providerCustomerReference || object.subscription !== input.binding.providerSubscriptionReference) throw new Error("Stripe invoice binding is invalid");
+  if (input.binding.subscriptionId !== input.completion.subscription.id || input.binding.companyId !== input.completion.subscription.companyId || object.metadata?.subscription_id !== input.binding.subscriptionId || object.metadata?.company_id !== String(input.binding.companyId)) throw new Error("Invoice metadata lineage is invalid");
+  if (object.currency !== input.completion.order.currency.toLowerCase() || object.amount_paid !== Math.round((input.completion.order.total ?? -1) * 100)) throw new Error("Stripe invoice amount does not match the accepted order");
+  if (typeof object.number !== "string" || !object.number.trim()) throw new Error("Stripe invoice number is missing");
+  return Object.freeze({
+    event: appliedEvent(input.event, input.now),
+    invoice: createPaidInvoice({ invoiceNumber: object.number, completion: input.completion, existing: input.existingInvoices, issuedAt: input.now }),
+  });
+}
+
+export function applyStripeRefund(input: {
+  event: CommercialProviderEvent;
+  rawPayload: string;
+  invoice: CommercialInvoice;
+  priorCredits: readonly CommercialCreditNote[];
+  reason: string;
+  now: string;
+}): Readonly<{ event: CommercialProviderEvent; credit: CommercialCreditNote }> {
+  if (input.event.eventType !== "charge.refunded" || input.event.status !== "pending") throw new Error("A pending refund event is required");
+  if (sha256(input.rawPayload) !== input.event.payloadDigest) throw new Error("Refund event payload does not match its intake record");
+  let payload: { data?: { object?: { id?: unknown; currency?: unknown; amount_refunded?: unknown; metadata?: Record<string, unknown> } } };
+  try { payload = JSON.parse(input.rawPayload); } catch { throw new Error("Refund event payload is invalid JSON"); }
+  const object = payload.data?.object;
+  if (!object || object.id !== input.event.objectId || object.metadata?.invoice_id !== input.invoice.id || object.currency !== input.invoice.currency.toLowerCase()) throw new Error("Stripe refund invoice lineage is invalid");
+  if (!Number.isSafeInteger(object.amount_refunded) || (object.amount_refunded as number) <= 0) throw new Error("Stripe refund amount is invalid");
+  if (input.priorCredits.some((credit) => credit.providerEventId === input.event.providerEventId)) throw new Error("Stripe refund event was already applied");
+  if (input.priorCredits.some((credit) => credit.invoiceId !== input.invoice.id)) throw new Error("Prior credit belongs to another invoice");
+  const amountCents = object.amount_refunded as number;
+  const credited = input.priorCredits.reduce((sum, credit) => sum + credit.amountCents, 0);
+  if (credited + amountCents > input.invoice.totalCents) throw new Error("Refund exceeds the paid invoice total");
+  const reason = input.reason.trim();
+  if (reason.length < 3 || reason.length > 500) throw new Error("A bounded refund reason is required");
+  const credit = Object.freeze({
+    id: crypto.randomUUID(), creditNumber: `STRIPE-${input.event.providerEventId}`, invoiceId: input.invoice.id,
+    subscriptionId: input.invoice.subscriptionId, provider: "stripe", providerEventId: input.event.providerEventId,
+    amountCents, currency: input.invoice.currency, reason,
+    status: credited + amountCents === input.invoice.totalCents ? "full_refund" as const : "partial_refund" as const,
+    issuedAt: new Date(input.now).toISOString(),
+  });
+  return Object.freeze({ event: appliedEvent(input.event, input.now), credit });
 }
