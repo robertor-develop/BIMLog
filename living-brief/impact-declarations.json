@@ -53352,7 +53352,7 @@
     {
       "taskId": "saas-block11-lens-auto-update-b051-b055",
       "reviewedThroughCommit": "0b0d843ef6d1443d9c9d5aa8e418a1051ed07330",
-      "reviewedAt": "2026-10-01T14:30:00.000Z",
+      "reviewedAt": "2026-10-01T14:30:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -53437,8 +53437,8 @@
     },
     {
       "taskId": "saas-block12-verified-onboarding-b056-b060",
-      "reviewedThroughCommit": "3a687dca91db916e976fe5b8bcf2fce6c02df281",
-      "reviewedAt": "2026-10-01T16:30:00.000Z",
+      "reviewedThroughCommit": "9e256fc8c1a3fd2183d5cd359e62d90c3a599baf",
+      "reviewedAt": "2026-10-01T16:30:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -53498,44 +53498,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/scripts/generate-platform-md.ts",
-        "artifacts/api-server/src/app.ts",
-        "artifacts/api-server/src/lib/block21-build102-onboarding.behavior.ts",
-        "artifacts/api-server/src/lib/block21-build105-public-onboarding-acceptance.behavior.ts",
-        "artifacts/api-server/src/routes/index.ts",
-        "artifacts/bimlog/src/App.tsx",
-        "artifacts/bimlog/src/components/OnboardingFlow.tsx",
-        "contracts/lens-product-status.json",
-        "contracts/release-identity.json",
-        "docs/experience/ux-program/ROUTES.json",
-        "evidence/stabilization-program-20260919/ACCESSIBILITY_RESPONSIVE_MATRIX.json",
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
-        "lib/api-zod/src/release-identity.ts",
-        "lib/db/src/schema/index.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
-        "living-brief/PLUGIN.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "package.json",
-        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
-        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
-        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
-        "plugins/BIMLogLensNext/Install-BIMLogLensNext.ps1",
-        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
-        "plugins/BIMLogLensNext/ReleaseIdentity.g.props",
-        "plugins/BIMLogLensNext/Test-LensNextFieldAcceptanceReadiness.ps1",
-        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
-        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
-        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
-        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
-        "plugins/BIMLogLensNext/native/LensNextNativeConfig.cs",
-        "plugins/BIMLogLensNext/native/LensNextNativeUpdateService.cs",
-        "plugins/BIMLogLensNext/src/ReleaseIdentity.g.cs",
-        "scripts/check-current-state-contract.mjs"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e57275a31a71764d5d42580317df07cc1cda102f1efa5a28095f1223af8744eb",
+      "reviewedChangeSha256": "0845fce1a83d96de64c69c89fe02d550bcc8a9d34d8ae50fd7e57d726786b451",
       "reason": "B056-B060 replace slideshow onboarding with verified, resumable account, company, profile, project and coordinator-default setup while publishing isolated signed Lens packages."
     }
   ]

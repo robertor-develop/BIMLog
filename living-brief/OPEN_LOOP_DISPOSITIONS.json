@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2cf0b811d450e3fb345f9ba1c3f708eaf74eab5592bf8a096513f4ee32825bb0",
-  "itemCount": 278,
+  "sourceSha256": "ba240f11bad4af3700932fa1bbb6ca61aefc772d060c300f637f1b77d9026198",
+  "itemCount": 279,
   "counts": {
-    "ACTIVE": 243,
+    "ACTIVE": 244,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5073,6 +5073,24 @@
       "evidence": [
         "OPEN_LOOP.md:4059",
         "Commercial readiness Block 10 — customer support operations — 2026-10-01"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5df283650b4e768c",
+      "sourceLine": 4062,
+      "heading": "B056–B060 post-commit release reconciliation — 2026-10-01",
+      "statement": "Candidate source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf` must pass the complete clean gate, reach `origin/master`, publish at the ten-build boundary, and pass full authenticated Chrome smoke before the block is accepted.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4062",
+        "B056–B060 post-commit release reconciliation — 2026-10-01"
       ],
       "currentAuthority": false
     }

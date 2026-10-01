@@ -4057,3 +4057,6 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 049 projects support entitlement, cases and events by customer, support, support-manager and auditor roles without broad requester or case-detail exposure.
 - [x] Build 050 fails customer-support readiness closed for missing/stale entitlement, overdue open cases, unresolved urgent cases or missing current-revision evidence.
 - [ ] Pass the complete exact-head gate and push Builds 046–050 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 051–055.
+# B056–B060 post-commit release reconciliation — 2026-10-01
+
+- [ ] Candidate source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf` must pass the complete clean gate, reach `origin/master`, publish at the ten-build boundary, and pass full authenticated Chrome smoke before the block is accepted.

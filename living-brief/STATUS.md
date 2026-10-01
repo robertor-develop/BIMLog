@@ -1,5 +1,7 @@
 # STATUS.md - Current Accepted Platform State
 
+Post-commit release reconciliation binds the B056–B060 candidate to source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf`; the complete clean gate, push, publication, and authenticated production smoke remain required before acceptance.
+
 ## SaaS completion Block 12 candidate — 2026-10-01
 
 B056–B060 advance the exact candidate identity to `v1.05.N18-P37` / `1.5.18.37`. The five-build block adds verified email onboarding, authenticated company context, a permission-neutral work profile, canonical first-project creation with direct full-Intake continuation, and saved frequent discipline/document defaults with Shop Drawings first. The combined B051–B060 release also contains signed year-specific Lens Next automatic-update manifests and packages for Navisworks 2021 and 2025. Production remains at the prior accepted release until this ten-build boundary is pushed, published, and authenticated-smoke accepted.
