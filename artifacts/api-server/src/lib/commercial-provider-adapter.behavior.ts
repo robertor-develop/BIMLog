@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { createStripeBillingPortalLaunch, createStripeCheckoutSession, inspectStripeCommercialConfiguration, verifyStripeWebhook } from "./commercial-provider-adapter";
+import { createStripeBillingPortalLaunch, createStripeCheckoutSession, createStripeTransport, inspectStripeCommercialConfiguration, verifyStripeWebhook } from "./commercial-provider-adapter";
 import crypto from "node:crypto";
 import { createBillingPortalSession, createCheckoutAttempt, createCommercialOrder, createCompanySubscription, transitionCommercialOrder } from "./subscription-authority";
 
@@ -61,4 +61,19 @@ assert.equal(portalRequest?.body.get("configuration"), "bpc_bimlog");
 assert.equal(portalRequest?.headers["Idempotency-Key"], internalPortal.id);
 await assert.rejects(() => createStripeBillingPortalLaunch({ configuration: configured.configuration!, session: internalPortal, customer, transport: async () => ({ status: 200, body: { id: "bps_bad", customer: customer.providerCustomerReference, url: "https://evil.example/portal" } }) }), /untrusted hosted URL/);
 
-console.log("Commercial provider Block 7 Build 034: PASS");
+let transportUrl = "";
+let transportInit: RequestInit | undefined;
+const transport = createStripeTransport({ fetchImpl: (async (url: string | URL | Request, init?: RequestInit) => {
+  transportUrl = String(url); transportInit = init;
+  return new Response(JSON.stringify({ id: "cs_test_transport" }), { status: 200, headers: { "content-type": "application/json", "content-length": "26" } });
+}) as typeof fetch });
+const transportResponse = await transport({ method: "POST", path: "/v1/checkout/sessions", headers: { Authorization: "Bearer test-secret", "Idempotency-Key": "transport-1" }, body: new URLSearchParams({ mode: "subscription" }) });
+assert.equal(transportUrl, "https://api.stripe.com/v1/checkout/sessions");
+assert.equal(transportInit?.method, "POST");
+assert.equal(transportInit?.body, "mode=subscription");
+assert.equal(transportResponse.status, 200);
+assert.deepEqual(transportResponse.body, { id: "cs_test_transport" });
+await assert.rejects(() => createStripeTransport({ maxResponseBytes: 1024, fetchImpl: (async () => new Response("x".repeat(1025), { status: 500 })) as typeof fetch })({ method: "POST", path: "/v1/test", headers: {}, body: new URLSearchParams() }), /size limit/);
+await assert.rejects(() => transport({ method: "POST", path: "/v1/../secrets", headers: {}, body: new URLSearchParams() }), /path is invalid/);
+
+console.log("Commercial provider Block 7 Build 035: PASS");

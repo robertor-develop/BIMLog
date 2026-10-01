@@ -71,6 +71,43 @@ export type StripeTransport = (request: Readonly<{
   body: URLSearchParams;
 }>) => Promise<Readonly<{ status: number; body: unknown }>>;
 
+export function createStripeTransport(input: {
+  fetchImpl?: typeof fetch;
+  timeoutMs?: number;
+  maxResponseBytes?: number;
+} = {}): StripeTransport {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  const timeoutMs = input.timeoutMs ?? 10_000;
+  const maxResponseBytes = input.maxResponseBytes ?? 1_048_576;
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1_000 || timeoutMs > 30_000) throw new Error("Stripe transport timeout must be between 1000 and 30000 milliseconds");
+  if (!Number.isSafeInteger(maxResponseBytes) || maxResponseBytes < 1_024 || maxResponseBytes > 2_097_152) throw new Error("Stripe transport response limit is invalid");
+  return async (request) => {
+    if (!request.path.startsWith("/v1/") || request.path.includes("..")) throw new Error("Stripe transport path is invalid");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetchImpl(`https://api.stripe.com${request.path}`, {
+        method: request.method, headers: { ...request.headers, "Content-Type": "application/x-www-form-urlencoded" },
+        body: request.body.toString(), signal: controller.signal,
+      });
+      const contentLength = Number(response.headers.get("content-length") ?? "0");
+      if (Number.isFinite(contentLength) && contentLength > maxResponseBytes) throw new Error("Stripe response exceeds the configured size limit");
+      const text = await response.text();
+      if (Buffer.byteLength(text, "utf8") > maxResponseBytes) throw new Error("Stripe response exceeds the configured size limit");
+      let body: unknown = null;
+      if (text) {
+        try { body = JSON.parse(text); } catch { throw new Error("Stripe returned an invalid JSON response"); }
+      }
+      return Object.freeze({ status: response.status, body });
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") throw new Error("Stripe request timed out");
+      throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
+  };
+}
+
 function safeHostedUrl(value: unknown, expectedHost: string): string {
   if (typeof value !== "string") throw new Error("Commercial provider response is missing a hosted URL");
   const url = new URL(value);
