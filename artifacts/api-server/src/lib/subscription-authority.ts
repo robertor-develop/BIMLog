@@ -40,3 +40,31 @@ export function createCompanySubscription(input: {
     createdAt: now, updatedAt: now,
   });
 }
+
+const ALLOWED_TRANSITIONS: Readonly<Record<SubscriptionStatus, readonly SubscriptionStatus[]>> = {
+  draft: ["pending", "cancelled"],
+  pending: ["active", "cancelled", "expired"],
+  active: ["past_due", "suspended", "cancelled", "expired"],
+  past_due: ["active", "suspended", "cancelled", "expired"],
+  suspended: ["active", "cancelled", "expired"],
+  cancelled: [],
+  expired: [],
+};
+
+export function transitionSubscription(input: {
+  subscription: CompanySubscription;
+  to: SubscriptionStatus;
+  expectedRevision: number;
+  now: string;
+}): CompanySubscription {
+  if (input.subscription.revision !== input.expectedRevision) throw new Error("Subscription revision is stale");
+  if (!ALLOWED_TRANSITIONS[input.subscription.status].includes(input.to)) {
+    throw new Error(`Subscription transition ${input.subscription.status} -> ${input.to} is not allowed`);
+  }
+  return Object.freeze({
+    ...input.subscription,
+    status: input.to,
+    revision: input.subscription.revision + 1,
+    updatedAt: new Date(input.now).toISOString(),
+  });
+}
