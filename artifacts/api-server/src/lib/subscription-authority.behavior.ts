@@ -15,6 +15,7 @@ import {
   scheduleSubscriptionCancellation,
   applyScheduledCancellation,
   createRefundCreditNote,
+  createCompanyBillingProfile,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -166,4 +167,9 @@ const finalCredit = createRefundCreditNote({ id: "credit-2", creditNumber: "BIM-
 assert.equal(finalCredit.status, "full_refund");
 assert.throws(() => createRefundCreditNote({ creditNumber: "BIM-CN-2026-0003", invoice: paidInvoice, receipt: finalRefundReceipt, rawPayload: finalRefundPayload, priorCredits: [partialCredit, finalCredit], reason: "Duplicate refund", issuedAt: "2026-10-04T20:17:00Z" }), /already applied/);
 
-console.log("Commercial billing Block 5 Builds 021-025: PASS");
+const billingProfile = createCompanyBillingProfile({ companyId: 7, legalName: " BIMTech Corp ", billingEmail: " Billing@BIMTech.example ", addressLine1: "100 Coordination Way", city: "Miami", region: "FL", postalCode: "33101", countryCode: "us", taxId: "US-TEST-7", verifiedAt: "2026-10-01T03:30:00Z" });
+assert.deepEqual({ legalName: billingProfile.legalName, email: billingProfile.billingEmail, country: billingProfile.countryCode, revision: billingProfile.revision }, { legalName: "BIMTech Corp", email: "billing@bimtech.example", country: "US", revision: 1 });
+assert.throws(() => createCompanyBillingProfile({ companyId: 7, legalName: "BIMTech", billingEmail: "invalid", addressLine1: "100 Way", city: "Miami", postalCode: "33101", countryCode: "US", verifiedAt: billingProfile.verifiedAt }), /valid billing email/);
+assert.throws(() => createCompanyBillingProfile({ companyId: 7, legalName: "BIMTech", billingEmail: "billing@example.com", addressLine1: "100 Way", city: "Miami", postalCode: "33101", countryCode: "USA", verifiedAt: billingProfile.verifiedAt }), /two-letter/);
+
+console.log("Commercial account Block 6 Build 026: PASS");

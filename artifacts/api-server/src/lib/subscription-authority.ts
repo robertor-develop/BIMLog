@@ -697,3 +697,47 @@ export function createRefundCreditNote(input: {
     issuedAt: new Date(input.issuedAt).toISOString(),
   });
 }
+
+export type CompanyBillingProfile = Readonly<{
+  companyId: number;
+  legalName: string;
+  billingEmail: string;
+  addressLine1: string;
+  addressLine2: string | null;
+  city: string;
+  region: string | null;
+  postalCode: string;
+  countryCode: string;
+  taxId: string | null;
+  revision: number;
+  verifiedAt: string;
+  updatedAt: string;
+}>;
+
+export function createCompanyBillingProfile(input: {
+  companyId: number;
+  legalName: string;
+  billingEmail: string;
+  addressLine1: string;
+  addressLine2?: string | null;
+  city: string;
+  region?: string | null;
+  postalCode: string;
+  countryCode: string;
+  taxId?: string | null;
+  verifiedAt: string;
+}): CompanyBillingProfile {
+  const required = [input.legalName, input.billingEmail, input.addressLine1, input.city, input.postalCode].map((value) => value.trim());
+  if (!Number.isSafeInteger(input.companyId) || input.companyId < 1) throw new Error("A valid billing company is required");
+  if (required.some((value) => !value)) throw new Error("Complete billing identity is required");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(required[1])) throw new Error("A valid billing email is required");
+  const countryCode = input.countryCode.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(countryCode)) throw new Error("A two-letter billing country code is required");
+  const verifiedAt = new Date(input.verifiedAt).toISOString();
+  return Object.freeze({
+    companyId: input.companyId, legalName: required[0], billingEmail: required[1].toLowerCase(),
+    addressLine1: required[2], addressLine2: input.addressLine2?.trim() || null, city: required[3],
+    region: input.region?.trim() || null, postalCode: required[4], countryCode,
+    taxId: input.taxId?.trim() || null, revision: 1, verifiedAt, updatedAt: verifiedAt,
+  });
+}
