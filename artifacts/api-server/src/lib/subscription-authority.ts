@@ -306,3 +306,34 @@ export function createCommercialOrder(input: {
     updatedAt: now,
   });
 }
+
+const ORDER_TRANSITIONS: Readonly<Record<CommercialOrderStatus, readonly CommercialOrderStatus[]>> = {
+  draft: ["ready", "cancelled", "expired"],
+  ready: ["submitted", "cancelled", "expired"],
+  submitted: ["accepted", "cancelled", "expired"],
+  accepted: [],
+  cancelled: [],
+  expired: [],
+};
+
+export function transitionCommercialOrder(input: {
+  order: CommercialOrder;
+  to: CommercialOrderStatus;
+  expectedRevision: number;
+  tax?: number;
+  now: string;
+}): CommercialOrder {
+  if (input.order.revision !== input.expectedRevision) throw new Error("Order revision is stale");
+  if (!ORDER_TRANSITIONS[input.order.status].includes(input.to)) throw new Error(`Order transition ${input.order.status} -> ${input.to} is not allowed`);
+  const now = new Date(input.now).toISOString();
+  if (input.to !== "expired" && now >= input.order.expiresAt) throw new Error("Order has expired");
+  let tax = input.order.tax;
+  let total = input.order.total;
+  if (input.order.status === "draft" && input.to === "ready") {
+    if (!Number.isFinite(input.tax) || (input.tax ?? -1) < 0) throw new Error("A non-negative finalized tax is required");
+    tax = input.tax!;
+    total = input.order.subtotal + tax;
+  }
+  if ((input.to === "submitted" || input.to === "accepted") && total === null) throw new Error("Order total must be finalized before submission");
+  return Object.freeze({ ...input.order, tax, total, status: input.to, revision: input.order.revision + 1, updatedAt: now });
+}

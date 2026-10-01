@@ -8,6 +8,7 @@ import {
   createSeatQuantity,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
+  transitionCommercialOrder,
   verifyEntitlementSnapshot,
   verifyCommercialAuditHistory,
 } from "./subscription-authority";
@@ -90,5 +91,11 @@ assert.equal(taxPendingOrder.status, "draft");
 assert.equal(taxPendingOrder.total, null);
 assert.throws(() => createCommercialOrder({ subscription, subtotal: -1, expiresAt: "2026-10-30T20:00:00Z", now: subscription.createdAt }), /subtotal/);
 assert.throws(() => createCommercialOrder({ subscription, subtotal: 2490, tax: 0, expiresAt: subscription.createdAt, now: subscription.createdAt }), /future/);
+const finalizedOrder = transitionCommercialOrder({ order: taxPendingOrder, to: "ready", expectedRevision: 1, tax: 174.3, now: "2026-09-30T20:11:00Z" });
+const submittedOrder = transitionCommercialOrder({ order: finalizedOrder, to: "submitted", expectedRevision: 2, now: "2026-09-30T20:12:00Z" });
+assert.deepEqual({ status: submittedOrder.status, total: submittedOrder.total, revision: submittedOrder.revision }, { status: "submitted", total: 2664.3, revision: 3 });
+assert.throws(() => transitionCommercialOrder({ order: submittedOrder, to: "accepted", expectedRevision: 2, now: "2026-09-30T20:13:00Z" }), /stale/);
+assert.throws(() => transitionCommercialOrder({ order, to: "accepted", expectedRevision: 1, now: "2026-09-30T20:13:00Z" }), /not allowed/);
+assert.throws(() => transitionCommercialOrder({ order: taxPendingOrder, to: "ready", expectedRevision: 1, now: "2026-09-30T20:11:00Z" }), /finalized tax/);
 
 console.log("Commercial subscription Block 3 Builds 011-015: PASS");
