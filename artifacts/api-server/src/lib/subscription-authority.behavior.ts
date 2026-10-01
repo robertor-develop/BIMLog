@@ -11,6 +11,7 @@ import {
   createPaidInvoice,
   createSeatQuantity,
   createSubscriptionTerm,
+  recordCollectionFailure,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -135,4 +136,12 @@ assert.equal(secondTerm.sequence, 2);
 assert.equal(secondTerm.renewsAt, null);
 assert.throws(() => createSubscriptionTerm({ subscription: checkoutCompletion.subscription, invoice: paidInvoice, priorTerms: [firstTerm], startsAt: "2027-10-01T20:17:00Z", automaticRenewal: true }), /prior term boundary/);
 
-console.log("Commercial billing Block 5 Build 022: PASS");
+const failedPayload = JSON.stringify({ subscriptionId: checkoutCompletion.subscription.id, termSequence: firstTerm.sequence });
+const failedSignature = crypto.createHmac("sha256", providerSecret).update(`${providerIssuedAt}.${failedPayload}`).digest("hex");
+const failedReceipt = verifyAndReceiveProviderEvent({ provider: "stripe", eventId: "evt-failed-1", eventType: "invoice.payment_failed", rawPayload: failedPayload, signatureHex: failedSignature, signingSecret: providerSecret, issuedAtEpochSeconds: providerIssuedAt, nowEpochSeconds: providerIssuedAt + 10, priorReceipts: [] });
+const collectionFailure = recordCollectionFailure({ id: "collection-1", subscription: checkoutCompletion.subscription, term: firstTerm, receipt: failedReceipt, nextRetryAt: "2026-10-02T20:17:00Z", graceEndsAt: "2026-10-08T20:17:00Z", now: "2026-10-01T20:17:00Z" });
+assert.deepEqual({ subscription: collectionFailure.subscription.status, status: collectionFailure.collection.status, attempts: collectionFailure.collection.failedAttempts }, { subscription: "past_due", status: "retry_scheduled", attempts: 1 });
+assert.throws(() => recordCollectionFailure({ subscription: collectionFailure.subscription, term: firstTerm, receipt: failedReceipt, existing: collectionFailure.collection, nextRetryAt: null, graceEndsAt: "2026-10-08T20:17:00Z", now: "2026-10-02T20:17:00Z" }), /already applied/);
+assert.throws(() => recordCollectionFailure({ subscription: checkoutCompletion.subscription, term: firstTerm, receipt: failedReceipt, nextRetryAt: "2026-10-09T20:17:00Z", graceEndsAt: "2026-10-08T20:17:00Z", now: "2026-10-01T20:17:00Z" }), /inside the grace/);
+
+console.log("Commercial billing Block 5 Build 023: PASS");

@@ -550,3 +550,52 @@ export function createSubscriptionTerm(input: {
     sourceOrderId: input.invoice.orderId, sourceInvoiceId: input.invoice.id,
   });
 }
+
+export type CollectionCase = Readonly<{
+  id: string;
+  subscriptionId: string;
+  termSequence: number;
+  status: "retry_scheduled" | "recovered" | "exhausted";
+  failedAttempts: number;
+  lastProviderEventId: string;
+  nextRetryAt: string | null;
+  graceEndsAt: string;
+  revision: number;
+  updatedAt: string;
+}>;
+
+export function recordCollectionFailure(input: {
+  id?: string;
+  subscription: CompanySubscription;
+  term: SubscriptionTerm;
+  receipt: ProviderEventReceipt;
+  existing?: CollectionCase;
+  nextRetryAt: string | null;
+  graceEndsAt: string;
+  now: string;
+}): Readonly<{ subscription: CompanySubscription; collection: CollectionCase }> {
+  if (input.subscription.status !== "active" && input.subscription.status !== "past_due") throw new Error("Collection failure requires an active or past-due subscription");
+  if (input.term.subscriptionId !== input.subscription.id) throw new Error("Collection term belongs to another subscription");
+  if (input.receipt.eventType !== "invoice.payment_failed") throw new Error("Provider event does not confirm a collection failure");
+  if (input.existing && (input.existing.subscriptionId !== input.subscription.id || input.existing.termSequence !== input.term.sequence)) throw new Error("Collection case lineage is invalid");
+  if (input.existing?.lastProviderEventId === input.receipt.eventId) throw new Error("Collection failure event was already applied");
+  const now = new Date(input.now);
+  const graceEnds = new Date(input.graceEndsAt);
+  if (!Number.isFinite(now.getTime()) || !Number.isFinite(graceEnds.getTime()) || graceEnds <= now) throw new Error("Collection grace period must end in the future");
+  const nextRetry = input.nextRetryAt === null ? null : new Date(input.nextRetryAt);
+  if (nextRetry && (!Number.isFinite(nextRetry.getTime()) || nextRetry <= now || nextRetry >= graceEnds)) throw new Error("Collection retry must fall inside the grace period");
+  const failedAttempts = (input.existing?.failedAttempts ?? 0) + 1;
+  const subscription = input.subscription.status === "active"
+    ? transitionSubscription({ subscription: input.subscription, to: "past_due", expectedRevision: input.subscription.revision, now: now.toISOString() })
+    : input.subscription;
+  return Object.freeze({
+    subscription,
+    collection: Object.freeze({
+      id: input.existing?.id ?? input.id ?? crypto.randomUUID(), subscriptionId: input.subscription.id,
+      termSequence: input.term.sequence, status: nextRetry ? "retry_scheduled" : "exhausted",
+      failedAttempts, lastProviderEventId: input.receipt.eventId,
+      nextRetryAt: nextRetry?.toISOString() ?? null, graceEndsAt: graceEnds.toISOString(),
+      revision: (input.existing?.revision ?? 0) + 1, updatedAt: now.toISOString(),
+    }),
+  });
+}
