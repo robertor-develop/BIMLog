@@ -20,6 +20,7 @@ import {
   registerTokenizedPaymentMethod,
   createBillingPortalSession,
   consumeBillingPortalSession,
+  projectBillingAccount,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -200,4 +201,14 @@ assert.throws(() => consumeBillingPortalSession({ session: portalSession, compan
 const expiredPortal = consumeBillingPortalSession({ session: portalSession, companyId: 7, requestedBy: "billing-admin-7", now: portalSession.expiresAt });
 assert.equal(expiredPortal.status, "expired");
 
-console.log("Commercial account Block 6 Build 029: PASS");
+const billingAdminView = projectBillingAccount({ profile: billingProfile, customer: providerCustomer, paymentMethods: [paymentMethod], role: "billing_admin" });
+assert.deepEqual({ canManage: billingAdminView.canManageBilling, providerReference: billingAdminView.provider.customerReference, tax: billingAdminView.identity.taxIdMasked, last4: billingAdminView.paymentMethods[0]?.last4 }, { canManage: true, providerReference: "cus_bimtech_7", tax: "***ST-7", last4: "4242" });
+assert.equal("providerPaymentMethodReference" in billingAdminView.paymentMethods[0], false);
+const customerAdminView = projectBillingAccount({ profile: billingProfile, customer: providerCustomer, paymentMethods: [paymentMethod], role: "customer_admin" });
+assert.deepEqual({ canManage: customerAdminView.canManageBilling, providerReference: customerAdminView.provider.customerReference, tax: customerAdminView.identity.taxIdMasked, count: customerAdminView.paymentMethods.length }, { canManage: false, providerReference: null, tax: null, count: 1 });
+const supportView = projectBillingAccount({ profile: billingProfile, customer: providerCustomer, paymentMethods: [paymentMethod], role: "support" });
+assert.deepEqual({ email: supportView.identity.billingEmail, providerReference: supportView.provider.customerReference, methods: supportView.paymentMethods.length }, { email: null, providerReference: null, methods: 0 });
+assert.throws(() => projectBillingAccount({ profile: billingProfile, customer: { ...providerCustomer, companyId: 8 }, paymentMethods: [], role: "billing_admin" }), /another company/);
+assert.throws(() => projectBillingAccount({ profile: billingProfile, customer: providerCustomer, paymentMethods: [{ ...paymentMethod, providerCustomerBindingId: "provider-customer-other" }], role: "billing_admin" }), /another provider customer/);
+
+console.log("Commercial account Block 6 Build 030: PASS");

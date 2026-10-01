@@ -891,3 +891,71 @@ export function consumeBillingPortalSession(input: {
   if (now >= input.session.expiresAt) return Object.freeze({ ...input.session, status: "expired", consumedAt: null });
   return Object.freeze({ ...input.session, status: "consumed", consumedAt: now });
 }
+
+export type BillingAccountRole = "customer_admin" | "billing_admin" | "support" | "auditor";
+
+export type BillingAccountProjection = Readonly<{
+  companyId: number;
+  role: BillingAccountRole;
+  identity: Readonly<{
+    legalName: string;
+    billingEmail: string | null;
+    countryCode: string;
+    taxIdMasked: string | null;
+    verifiedAt: string;
+  }>;
+  provider: Readonly<{ configured: boolean; name: string | null; customerReference: string | null }>;
+  paymentMethods: readonly Readonly<{
+    id: string;
+    type: "card" | "bank_account";
+    brand: string;
+    last4: string;
+    expiryMonth: number | null;
+    expiryYear: number | null;
+    status: "active" | "expired" | "detached";
+    isDefault: boolean;
+  }>[];
+  canManageBilling: boolean;
+}>;
+
+function maskTaxId(taxId: string | null): string | null {
+  if (!taxId) return null;
+  const suffix = taxId.replace(/\s/g, "").slice(-4);
+  return suffix ? `***${suffix}` : null;
+}
+
+export function projectBillingAccount(input: {
+  profile: CompanyBillingProfile;
+  customer: ProviderCustomerBinding | null;
+  paymentMethods: readonly TokenizedPaymentMethod[];
+  role: BillingAccountRole;
+}): BillingAccountProjection {
+  if (!(["customer_admin", "billing_admin", "support", "auditor"] as const).includes(input.role)) throw new Error("A recognized billing account role is required");
+  if (input.customer && input.customer.companyId !== input.profile.companyId) throw new Error("Provider customer belongs to another company");
+  if (input.customer && input.paymentMethods.some((method) => method.providerCustomerBindingId !== input.customer!.id)) throw new Error("Payment method belongs to another provider customer");
+  if (!input.customer && input.paymentMethods.length) throw new Error("Payment methods require a provider customer");
+  const isBillingAdmin = input.role === "billing_admin";
+  const canViewContact = isBillingAdmin || input.role === "customer_admin" || input.role === "auditor";
+  const canViewMethods = isBillingAdmin || input.role === "customer_admin";
+  return Object.freeze({
+    companyId: input.profile.companyId, role: input.role,
+    identity: Object.freeze({
+      legalName: input.profile.legalName,
+      billingEmail: canViewContact ? input.profile.billingEmail : null,
+      countryCode: input.profile.countryCode,
+      taxIdMasked: isBillingAdmin || input.role === "auditor" ? maskTaxId(input.profile.taxId) : null,
+      verifiedAt: input.profile.verifiedAt,
+    }),
+    provider: Object.freeze({
+      configured: input.customer?.status === "active",
+      name: input.customer?.provider ?? null,
+      customerReference: isBillingAdmin ? input.customer?.providerCustomerReference ?? null : null,
+    }),
+    paymentMethods: Object.freeze(canViewMethods ? input.paymentMethods.map((method) => Object.freeze({
+      id: method.id, type: method.type, brand: method.brand, last4: method.last4,
+      expiryMonth: method.expiryMonth, expiryYear: method.expiryYear, status: method.status,
+      isDefault: method.isDefault,
+    })) : []),
+    canManageBilling: isBillingAdmin,
+  });
+}
