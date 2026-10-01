@@ -252,3 +252,57 @@ export function verifyCommercialAuditHistory(history: readonly CommercialAuditEv
   }
   return true;
 }
+
+export type CommercialOrderStatus = "draft" | "ready" | "submitted" | "accepted" | "cancelled" | "expired";
+
+export type CommercialOrder = Readonly<{
+  id: string;
+  companyId: number;
+  subscriptionId: string;
+  planId: SubscriptionPlanId;
+  catalogPriceVersion: number;
+  billingCycle: "monthly" | "annual";
+  currency: "USD";
+  subtotal: number;
+  tax: number | null;
+  total: number | null;
+  status: CommercialOrderStatus;
+  revision: number;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+}>;
+
+export function createCommercialOrder(input: {
+  id?: string;
+  subscription: CompanySubscription;
+  subtotal: number;
+  tax?: number | null;
+  expiresAt: string;
+  now: string;
+}): CommercialOrder {
+  if (input.subscription.status !== "draft") throw new Error("Orders require a draft subscription");
+  if (!Number.isFinite(input.subtotal) || input.subtotal < 0) throw new Error("Order subtotal must be non-negative");
+  const tax = input.tax ?? null;
+  if (tax !== null && (!Number.isFinite(tax) || tax < 0)) throw new Error("Order tax must be non-negative");
+  const now = new Date(input.now).toISOString();
+  const expiresAt = new Date(input.expiresAt).toISOString();
+  if (expiresAt <= now) throw new Error("Order expiration must be in the future");
+  return Object.freeze({
+    id: input.id ?? crypto.randomUUID(),
+    companyId: input.subscription.companyId,
+    subscriptionId: input.subscription.id,
+    planId: input.subscription.planId,
+    catalogPriceVersion: input.subscription.catalogPriceVersion,
+    billingCycle: input.subscription.billingCycle,
+    currency: input.subscription.currency,
+    subtotal: input.subtotal,
+    tax,
+    total: tax === null ? null : input.subtotal + tax,
+    status: tax === null ? "draft" : "ready",
+    revision: 1,
+    expiresAt,
+    createdAt: now,
+    updatedAt: now,
+  });
+}

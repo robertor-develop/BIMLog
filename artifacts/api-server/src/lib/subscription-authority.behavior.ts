@@ -3,6 +3,7 @@ import {
   appendCommercialAuditEvent,
   changeSeatQuantity,
   createCompanySubscription,
+  createCommercialOrder,
   createEntitlementSnapshot,
   createSeatQuantity,
   SUBSCRIPTION_PLAN_IDS,
@@ -81,5 +82,13 @@ assert.equal(verifyCommercialAuditHistory(auditHistory), true);
 assert.equal(verifyCommercialAuditHistory([createdEvent, { ...activatedEvent, reason: "altered" }]), false);
 assert.throws(() => appendCommercialAuditEvent({ history: auditHistory, subscription: recovered, action: "seats.changed", actorId: "", reason: "Seat update", occurredAt: recovered.updatedAt }), /actor/);
 assert.throws(() => appendCommercialAuditEvent({ history: [{ ...createdEvent, digest: "tampered" }], subscription, action: "subscription.transitioned", actorId: "user-42", reason: "Activate", occurredAt: pending.updatedAt }), /history is invalid/);
+
+const order = createCommercialOrder({ id: "ord-company-7", subscription, subtotal: 2490, tax: 174.3, expiresAt: "2026-10-30T20:00:00Z", now: subscription.createdAt });
+assert.deepEqual({ companyId: order.companyId, planId: order.planId, total: order.total, status: order.status, revision: order.revision }, { companyId: 7, planId: "team", total: 2664.3, status: "ready", revision: 1 });
+const taxPendingOrder = createCommercialOrder({ subscription, subtotal: 2490, expiresAt: "2026-10-30T20:00:00Z", now: subscription.createdAt });
+assert.equal(taxPendingOrder.status, "draft");
+assert.equal(taxPendingOrder.total, null);
+assert.throws(() => createCommercialOrder({ subscription, subtotal: -1, expiresAt: "2026-10-30T20:00:00Z", now: subscription.createdAt }), /subtotal/);
+assert.throws(() => createCommercialOrder({ subscription, subtotal: 2490, tax: 0, expiresAt: subscription.createdAt, now: subscription.createdAt }), /future/);
 
 console.log("Commercial subscription Block 3 Builds 011-015: PASS");
