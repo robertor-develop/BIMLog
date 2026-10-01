@@ -290,6 +290,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/clash-report-provenance.ts
 - artifacts/api-server/src/lib/clash-visual-package-truth.ts
 - artifacts/api-server/src/lib/cloud-files.ts
+- artifacts/api-server/src/lib/commercial-billing-operations.behavior.ts
+- artifacts/api-server/src/lib/commercial-billing-operations.ts
 - artifacts/api-server/src/lib/commercial-change-approval.behavior.ts
 - artifacts/api-server/src/lib/commercial-change-approval.ts
 - artifacts/api-server/src/lib/commercial-change-order-draft.behavior.ts

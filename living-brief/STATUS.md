@@ -3399,3 +3399,10 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Checkout completion atomically advances only a prepared attempt, submitted order and pending subscription. Subscription updates use revision-safe BIMLog transitions. Invoice and refund application retain integer-cent totals and prevent duplicate or excessive credits.
 - Unresolved events carry governed error codes, bounded retry timing and a five-attempt manual-reconciliation threshold. Customer administrators see counts and action state without provider event identifiers; billing, support and audit roles may inspect bounded identities.
 - Product commits are `c295febd`, `8f2f927f`, `872da467`, `26f46a4a` and `62b06bb1`. Focused Block 8 behavior and API TypeScript pass. This is the first unpublished five-build block after the accepted Builds 026–035 publication; publication and authenticated Chrome smoke are due after Builds 041–045.
+
+## Commercial readiness Block 9 source candidate — 2026-10-01
+
+- Builds 041–045 connect reconciled Stripe billing truth to subscription-derived access, deterministic customer statements, governed collection notices, permission-safe billing operations and fail-closed release readiness.
+- Product commits are `243ba178`, `a3f0a043`, `9d2e0c4d`, `4aa06fd7` and `9ab37ffb`. The cumulative Block 9 behavior suite and API TypeScript pass.
+- Access remains bound to the exact company, subscription revision, effective term, catalog-price version, features and seat limit. Statements reference existing invoices and credits; notices are prepared records and never claim email delivery. No provider token, card secret, PAN or CVC is projected.
+- Builds 036–045 now reach the required ten-build publication boundary. Exact-head full-gate, push, Replit Shell publication without Replit Agents, exact live-source verification and the complete authenticated Chrome route smoke remain required.

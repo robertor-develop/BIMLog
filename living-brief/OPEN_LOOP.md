@@ -3992,4 +3992,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 038 synchronizes Stripe subscription updates and deletion through the existing revision-safe BIMLog subscription lifecycle.
 - [x] Build 039 synchronizes paid invoices and refunds with exact provider bindings, integer-cent amounts and duplicate/over-refund protection.
 - [x] Build 040 exposes permission-safe reconciliation counts and unresolved event details with governed retry timing and manual-reconciliation limits.
-- [ ] Pass the complete exact-head gate and push Builds 036–040 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 041–045.
+- [x] Pass the complete exact-head gate and push Builds 036–040 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 041–045. Pushed exact source `87eb665e05519d1970a285fef5b165f92c0c076e` after the full gate passed.
+
+## Commercial readiness Block 9 — billing operations and access — 2026-10-01
+
+- [x] Build 041 derives idempotent company access from the exact active subscription revision, paid term, catalog-price version, feature set and seat limit.
+- [x] Build 042 creates deterministic period statements from exact paid invoices and credit-note lineage without duplicating financial records.
+- [x] Build 043 prepares idempotent, localized collection notices from the canonical collection attempt and cancels pending notices after recovery without claiming provider delivery.
+- [x] Build 044 projects subscription, access, statement and notice truth according to billing-admin, customer-admin, support and auditor roles without exposing provider or recipient identifiers broadly.
+- [x] Build 045 fails billing readiness closed when subscription, access, statement, collection or notice evidence is incomplete, stale or overdue.
+- [ ] Pass the complete exact-head gate, push Builds 041–045 once, publish accumulated Builds 036–045 without Replit Agents, verify the exact live source identity, and complete the full authenticated Chrome smoke.

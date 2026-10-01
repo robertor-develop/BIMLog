@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2666c08b3fc3667fac2d5d2cdbffa9ad14451d54246257823a8727759302aaa9",
+  "sourceSha256": "350a949bc75e107ab44f824d9bfd262a04734a5304c53ce0227a8e59f1a66056",
   "itemCount": 277,
   "counts": {
     "ACTIVE": 242,
@@ -5041,10 +5041,10 @@
       "currentAuthority": false
     },
     {
-      "id": "1cdc4190a9d42489",
-      "sourceLine": 3995,
-      "heading": "Commercial readiness Block 8 — Stripe event application and reconciliation — 2026-10-01",
-      "statement": "Pass the complete exact-head gate and push Builds 036–040 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 041–045.",
+      "id": "92f253aeb1fc4c23",
+      "sourceLine": 4004,
+      "heading": "Commercial readiness Block 9 — billing operations and access — 2026-10-01",
+      "statement": "Pass the complete exact-head gate, push Builds 041–045 once, publish accumulated Builds 036–045 without Replit Agents, verify the exact live source identity, and complete the full authenticated Chrome smoke.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -5053,8 +5053,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3995",
-        "Commercial readiness Block 8 — Stripe event application and reconciliation — 2026-10-01"
+        "OPEN_LOOP.md:4004",
+        "Commercial readiness Block 9 — billing operations and access — 2026-10-01"
       ],
       "currentAuthority": false
     }
