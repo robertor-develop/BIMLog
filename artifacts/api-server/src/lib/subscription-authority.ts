@@ -337,3 +337,45 @@ export function transitionCommercialOrder(input: {
   if ((input.to === "submitted" || input.to === "accepted") && total === null) throw new Error("Order total must be finalized before submission");
   return Object.freeze({ ...input.order, tax, total, status: input.to, revision: input.order.revision + 1, updatedAt: now });
 }
+
+export type CheckoutAttempt = Readonly<{
+  id: string;
+  orderId: string;
+  orderRevision: number;
+  provider: string;
+  idempotencyKey: string;
+  amount: number;
+  currency: "USD";
+  status: "created" | "redirect_ready" | "completed" | "failed" | "expired";
+  providerReference: string | null;
+  createdAt: string;
+  updatedAt: string;
+}>;
+
+export function createCheckoutAttempt(input: {
+  id?: string;
+  order: CommercialOrder;
+  provider: string;
+  idempotencyKey: string;
+  existing: readonly CheckoutAttempt[];
+  now: string;
+}): CheckoutAttempt {
+  if (input.order.status !== "submitted" || input.order.total === null) throw new Error("Checkout requires a submitted order with a finalized total");
+  const provider = input.provider.trim().toLowerCase();
+  const idempotencyKey = input.idempotencyKey.trim();
+  if (!provider) throw new Error("A checkout provider is required");
+  if (idempotencyKey.length < 16 || idempotencyKey.length > 200) throw new Error("A bounded checkout idempotency key is required");
+  const duplicate = input.existing.find((attempt) => attempt.provider === provider && attempt.idempotencyKey === idempotencyKey);
+  if (duplicate) {
+    if (duplicate.orderId !== input.order.id || duplicate.orderRevision !== input.order.revision || duplicate.amount !== input.order.total) {
+      throw new Error("Checkout idempotency key conflicts with another order state");
+    }
+    return duplicate;
+  }
+  const now = new Date(input.now).toISOString();
+  return Object.freeze({
+    id: input.id ?? crypto.randomUUID(), orderId: input.order.id, orderRevision: input.order.revision,
+    provider, idempotencyKey, amount: input.order.total, currency: input.order.currency,
+    status: "created", providerReference: null, createdAt: now, updatedAt: now,
+  });
+}

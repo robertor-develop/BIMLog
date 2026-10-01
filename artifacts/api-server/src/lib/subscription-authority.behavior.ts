@@ -4,6 +4,7 @@ import {
   changeSeatQuantity,
   createCompanySubscription,
   createCommercialOrder,
+  createCheckoutAttempt,
   createEntitlementSnapshot,
   createSeatQuantity,
   SUBSCRIPTION_PLAN_IDS,
@@ -97,5 +98,10 @@ assert.deepEqual({ status: submittedOrder.status, total: submittedOrder.total, r
 assert.throws(() => transitionCommercialOrder({ order: submittedOrder, to: "accepted", expectedRevision: 2, now: "2026-09-30T20:13:00Z" }), /stale/);
 assert.throws(() => transitionCommercialOrder({ order, to: "accepted", expectedRevision: 1, now: "2026-09-30T20:13:00Z" }), /not allowed/);
 assert.throws(() => transitionCommercialOrder({ order: taxPendingOrder, to: "ready", expectedRevision: 1, now: "2026-09-30T20:11:00Z" }), /finalized tax/);
+const checkout = createCheckoutAttempt({ id: "checkout-1", order: submittedOrder, provider: " Stripe ", idempotencyKey: "company-7-order-20260930", existing: [], now: "2026-09-30T20:13:00Z" });
+assert.deepEqual({ provider: checkout.provider, amount: checkout.amount, status: checkout.status }, { provider: "stripe", amount: 2664.3, status: "created" });
+assert.equal(createCheckoutAttempt({ order: submittedOrder, provider: "stripe", idempotencyKey: checkout.idempotencyKey, existing: [checkout], now: "2026-09-30T20:14:00Z" }), checkout);
+assert.throws(() => createCheckoutAttempt({ order: { ...submittedOrder, total: 1 }, provider: "stripe", idempotencyKey: checkout.idempotencyKey, existing: [checkout], now: "2026-09-30T20:14:00Z" }), /conflicts/);
+assert.throws(() => createCheckoutAttempt({ order, provider: "stripe", idempotencyKey: "company-7-order-20260930", existing: [], now: "2026-09-30T20:14:00Z" }), /submitted order/);
 
 console.log("Commercial subscription Block 3 Builds 011-015: PASS");
