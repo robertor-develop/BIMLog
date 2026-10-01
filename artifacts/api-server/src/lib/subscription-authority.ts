@@ -68,3 +68,62 @@ export function transitionSubscription(input: {
     updatedAt: new Date(input.now).toISOString(),
   });
 }
+
+export const SUBSCRIPTION_SEAT_CLASSES = ["member", "administrator", "viewer"] as const;
+export type SubscriptionSeatClass = (typeof SUBSCRIPTION_SEAT_CLASSES)[number];
+
+export type SubscriptionSeatQuantity = Readonly<{
+  subscriptionId: string;
+  seatClass: SubscriptionSeatClass;
+  purchased: number;
+  assigned: number;
+  revision: number;
+  updatedAt: string;
+}>;
+
+function validateSeatCounts(purchased: number, assigned: number): void {
+  if (!Number.isSafeInteger(purchased) || purchased < 0) throw new Error("Purchased seats must be a non-negative integer");
+  if (!Number.isSafeInteger(assigned) || assigned < 0) throw new Error("Assigned seats must be a non-negative integer");
+  if (assigned > purchased) throw new Error("Assigned seats cannot exceed purchased seats");
+}
+
+export function createSeatQuantity(input: {
+  subscriptionId: string;
+  seatClass: SubscriptionSeatClass;
+  purchased: number;
+  assigned?: number;
+  now: string;
+}): SubscriptionSeatQuantity {
+  if (!input.subscriptionId.trim()) throw new Error("A subscription is required for seat quantities");
+  if (!SUBSCRIPTION_SEAT_CLASSES.includes(input.seatClass)) throw new Error("A valid seat class is required");
+  const assigned = input.assigned ?? 0;
+  validateSeatCounts(input.purchased, assigned);
+  return Object.freeze({
+    subscriptionId: input.subscriptionId,
+    seatClass: input.seatClass,
+    purchased: input.purchased,
+    assigned,
+    revision: 1,
+    updatedAt: new Date(input.now).toISOString(),
+  });
+}
+
+export function changeSeatQuantity(input: {
+  quantity: SubscriptionSeatQuantity;
+  purchased?: number;
+  assigned?: number;
+  expectedRevision: number;
+  now: string;
+}): SubscriptionSeatQuantity {
+  if (input.quantity.revision !== input.expectedRevision) throw new Error("Seat quantity revision is stale");
+  const purchased = input.purchased ?? input.quantity.purchased;
+  const assigned = input.assigned ?? input.quantity.assigned;
+  validateSeatCounts(purchased, assigned);
+  return Object.freeze({
+    ...input.quantity,
+    purchased,
+    assigned,
+    revision: input.quantity.revision + 1,
+    updatedAt: new Date(input.now).toISOString(),
+  });
+}

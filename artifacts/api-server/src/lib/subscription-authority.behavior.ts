@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { createCompanySubscription, SUBSCRIPTION_PLAN_IDS, transitionSubscription } from "./subscription-authority";
+import {
+  changeSeatQuantity,
+  createCompanySubscription,
+  createSeatQuantity,
+  SUBSCRIPTION_PLAN_IDS,
+  transitionSubscription,
+} from "./subscription-authority";
 
 assert.deepEqual(SUBSCRIPTION_PLAN_IDS, ["free", "professional", "team", "business", "enterprise"]);
 const subscription = createCompanySubscription({
@@ -21,4 +27,22 @@ assert.equal(recovered.revision, 5);
 assert.throws(() => transitionSubscription({ subscription: recovered, to: "pending", expectedRevision: 5, now: "2026-09-30T20:05:00Z" }), /not allowed/);
 assert.throws(() => transitionSubscription({ subscription: recovered, to: "cancelled", expectedRevision: 4, now: "2026-09-30T20:05:00Z" }), /stale/);
 
-console.log("Commercial subscription Builds 011-012 company record and lifecycle: PASS");
+const memberSeats = createSeatQuantity({
+  subscriptionId: recovered.id, seatClass: "member", purchased: 12, assigned: 7,
+  now: "2026-09-30T20:06:00Z",
+});
+const expandedSeats = changeSeatQuantity({
+  quantity: memberSeats, purchased: 20, expectedRevision: 1, now: "2026-09-30T20:07:00Z",
+});
+const assignedSeats = changeSeatQuantity({
+  quantity: expandedSeats, assigned: 15, expectedRevision: 2, now: "2026-09-30T20:08:00Z",
+});
+assert.deepEqual(
+  { purchased: assignedSeats.purchased, assigned: assignedSeats.assigned, revision: assignedSeats.revision },
+  { purchased: 20, assigned: 15, revision: 3 },
+);
+assert.throws(() => changeSeatQuantity({ quantity: assignedSeats, purchased: 14, expectedRevision: 3, now: "2026-09-30T20:09:00Z" }), /cannot exceed/);
+assert.throws(() => changeSeatQuantity({ quantity: assignedSeats, purchased: 25, expectedRevision: 2, now: "2026-09-30T20:09:00Z" }), /stale/);
+assert.throws(() => createSeatQuantity({ subscriptionId: recovered.id, seatClass: "viewer", purchased: -1, now: recovered.updatedAt }), /non-negative integer/);
+
+console.log("Commercial subscription Builds 011-013 company record, lifecycle, and seats: PASS");
