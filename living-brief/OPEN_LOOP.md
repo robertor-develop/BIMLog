@@ -3,7 +3,7 @@
 ## P37 publication repair — preserve onboarding tables — 2026-10-01
 
 - [x] Reject the Replit migration preview that proposed dropping `user_onboarding_profiles` and `email_verification_tokens`; no production data mutation was approved.
-- [x] Declare `user_onboarding_work_profile_chk` and `email_verification_tokens_user_idx` in the canonical Drizzle schema, including production's exact `DESC` default null ordering, so development and production retain identical additive onboarding objects.
+- [x] Declare `user_onboarding_work_profile_chk` and `email_verification_tokens_user_idx` in the canonical Drizzle schema, using explicit `.desc().nullsFirst()` ordering so generated migrations retain production's exact additive onboarding objects.
 - [ ] Repeat the exact-head gate, push, guarded Replit development-schema parity, publication, exact live identity check and full authenticated Chrome smoke before B061.
 
 ## 250-build SaaS completion — Block 12: verified onboarding — 2026-10-01

@@ -53579,9 +53579,9 @@
       "reason": "The first P37 publication exposed a five-wrapper release-attribution defect; production assembly now verifies and unwraps the complete bounded chain before binding the canonical source."
     },
     {
-      "taskId": "saas-block12-p37-onboarding-schema-parity-repair",
-      "reviewedThroughCommit": "97cee93f424d7f279a513f18ce8b43c288c67ffc",
-      "reviewedAt": "2026-10-01T23:03:00Z",
+      "taskId": "saas-block12-p37-onboarding-schema-null-order-repair",
+      "reviewedThroughCommit": "675d1486d5ad04529e39dbaa31fb11bedd2e1f65",
+      "reviewedAt": "2026-10-01T23:04:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -53597,7 +53597,7 @@
         {
           "key": "quality",
           "result": "updated",
-          "reason": "Publication acceptance now records the destructive preview refusal and requires exact development/production schema parity."
+          "reason": "Publication acceptance now records both cancelled previews and requires exact generated development/production schema parity."
         },
         {
           "key": "vision",
@@ -53607,7 +53607,7 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "Canonical Drizzle declarations now include the named onboarding constraint and verification-token index created by the additive runtime migration."
+          "reason": "The canonical verification-token index now uses Drizzle's explicit descending NULLS FIRST API so generated migrations match production."
         },
         {
           "key": "plugin",
@@ -53627,7 +53627,7 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records the cancelled unsafe migration and bounded parity repair."
+          "reason": "Records both cancelled unsafe migrations and the explicit null-order repair."
         },
         {
           "key": "open_loop",
@@ -53641,14 +53641,17 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
         "evidence/saas-completion-20261001/B056_B060_PUBLICATION_IDENTITY_REPAIR.md",
+        "lib/db/src/schema/onboarding.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "46b2fd4ff16a33f0f0f2b5fb3071bc7d70bff0b03e4415632d275f0278ed873b",
-      "reason": "The publication preview exposed schema-authority drift; canonical declarations now preserve the existing onboarding tables and constraint while matching the production token index's DESC null ordering."
+      "reviewedChangeSha256": "be20590b0892a27f5c761bf748b133fe183db29e16d9923572a7a0a8d76b82be",
+      "reason": "The second publication preview proved raw SQL still normalized to NULLS LAST; the canonical declaration now uses explicit descending NULLS FIRST semantics before another safe publication attempt."
     }
   ]
 }
