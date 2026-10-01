@@ -144,7 +144,14 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
     ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, ...args],
     { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
   ).trim().toLowerCase();
-  const headCommit = git("rev-parse", "HEAD");
+  const localHistory = git("log", "--first-parent", "--format=%H%x09%T%x09%s", "-64", "HEAD")
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map(line => {
+      const [commit, tree, ...subject] = line.split("\t");
+      return { commit, tree, subject: subject.join("\t") };
+    });
+  const canonicalHead = unwrapReplitPublishChain(localHistory);
   const replitEnvironment = Boolean(process.env.REPL_ID || process.env.REPL_SLUG);
   let remoteMasterCommit: string | undefined;
   let remoteMasterTree: string | undefined;
@@ -168,11 +175,9 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
     }
   }
   const sourceCommit = resolveProductionSourceCommit({
-    headCommit,
-    headTree: git("rev-parse", "HEAD^{tree}"),
-    headSubject: git("show", "-s", "--format=%s", "HEAD"),
-    parentCommit: git("rev-parse", "HEAD^"),
-    parentTree: git("rev-parse", "HEAD^1^{tree}"),
+    headCommit: canonicalHead.commit,
+    headTree: canonicalHead.tree,
+    headSubject: canonicalHead.subject,
     remoteMasterCommit,
     remoteMasterTree,
     remoteMasterIsAncestor,
