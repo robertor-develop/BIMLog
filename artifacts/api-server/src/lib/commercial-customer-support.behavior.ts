@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createCompanySubscription } from "./subscription-authority";
 import { deriveSubscriptionAccess } from "./commercial-billing-operations";
-import { deriveCustomerSupportEntitlement, openCustomerSupportCase, transitionCustomerSupportCase } from "./commercial-customer-support";
+import { deriveCustomerSupportEntitlement, openCustomerSupportCase, projectCustomerSupportWorkspace, transitionCustomerSupportCase } from "./commercial-customer-support";
 
 const subscriptionBase = createCompanySubscription({ id:"sub-46", companyId:7, planId:"business", catalogPriceVersion:7, billingCycle:"monthly", currency:"USD", amount:3000, now:"2026-10-01T00:00:00Z" });
 const subscription = { ...subscriptionBase, status:"active" as const, revision:2, updatedAt:"2026-10-01T00:01:00.000Z" };
@@ -26,3 +26,13 @@ assert.equal(resolved.supportCase.status, "resolved");
 assert.throws(() => transitionCustomerSupportCase({ supportCase, expectedRevision:1, actorUserId:71, actorRole:"customer", action:"acknowledge", note:"Self assign", now:"2026-10-03T10:30:00Z" }), /cannot perform/);
 assert.throws(() => transitionCustomerSupportCase({ supportCase:acknowledged.supportCase, expectedRevision:1, actorUserId:901, actorRole:"support", action:"resolve", note:"stale", now:"2026-10-03T11:00:00Z" }), /revision conflict/);
 console.log("B048 revision-safe support lifecycle and audit: PASS");
+
+const otherCase = openCustomerSupportCase({ entitlement, requesterUserId:72, channel:"email", locale:"en", category:"technical", priority:"normal", subject:"Export is unavailable", description:"The governed project export remains unavailable after retry.", requestKey:"customer-72-export", existing:[supportCase], now:"2026-10-03T12:00:00Z" });
+const customerView = projectCustomerSupportWorkspace({ companyId:7, viewerUserId:71, role:"customer", entitlement, cases:[resolved.supportCase,otherCase], events:[acknowledged.event,resolved.event] });
+assert.deepEqual({ cases:customerView.cases.length, requester:customerView.cases[0]?.requesterUserId, canManage:customerView.canManage, events:customerView.events.length }, { cases:1, requester:null, canManage:false, events:2 });
+const supportView = projectCustomerSupportWorkspace({ companyId:7, viewerUserId:901, role:"support", entitlement, cases:[resolved.supportCase,otherCase], events:[acknowledged.event,resolved.event] });
+assert.deepEqual({ cases:supportView.cases.length, requester:supportView.cases[0]?.requesterUserId, canManage:supportView.canManage }, { cases:2, requester:71, canManage:true });
+const auditView = projectCustomerSupportWorkspace({ companyId:7, viewerUserId:990, role:"auditor", entitlement, cases:[resolved.supportCase], events:[resolved.event] });
+assert.equal(auditView.cases[0]?.description, null);
+assert.equal(auditView.events[0]?.note, null);
+console.log("B049 permission-safe customer support projection: PASS");

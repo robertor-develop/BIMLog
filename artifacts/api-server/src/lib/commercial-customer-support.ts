@@ -99,3 +99,28 @@ export function transitionCustomerSupportCase(input: {
   const event = Object.freeze({ id:crypto.createHash("sha256").update(`${input.supportCase.id}:${revision}:${input.action}`).digest("hex"), caseId:input.supportCase.id, companyId:input.supportCase.companyId, revision, actorUserId:input.actorUserId, actorRole:input.actorRole, action:input.action, fromStatus, toStatus, occurredAt, note });
   return Object.freeze({ supportCase:Object.freeze({ ...input.supportCase, status:toStatus, revision }), event });
 }
+
+export type SupportWorkspaceRole = "customer" | "support" | "support_manager" | "auditor";
+
+export function projectCustomerSupportWorkspace(input: {
+  companyId: number; viewerUserId: number; role: SupportWorkspaceRole;
+  entitlement: CustomerSupportEntitlement; cases: readonly CustomerSupportCase[]; events: readonly SupportCaseEvent[];
+}): Readonly<{
+  entitlement: Readonly<{ tier: SupportTier; channels: readonly SupportChannel[]; responseTargetMinutes: number; expiresAt: string }>;
+  cases: readonly Readonly<{ id: string; requesterUserId: number | null; category: CustomerSupportCase["category"]; priority: CustomerSupportCase["priority"]; subject: string; description: string | null; status: CustomerSupportCase["status"]; openedAt: string; responseDueAt: string; revision: number }>[];
+  events: readonly Readonly<{ caseId: string; revision: number; action: SupportCaseEvent["action"]; occurredAt: string; note: string | null }>[];
+  canManage: boolean;
+}> {
+  if (input.entitlement.companyId !== input.companyId) throw new Error("Support entitlement belongs to another company");
+  if (input.cases.some(supportCase => supportCase.companyId !== input.companyId || supportCase.entitlementId !== input.entitlement.id)) throw new Error("Support case lineage is invalid");
+  const visibleCases = input.role === "customer" ? input.cases.filter(supportCase => supportCase.requesterUserId === input.viewerUserId) : input.cases;
+  const visibleIds = new Set(visibleCases.map(supportCase => supportCase.id));
+  if (input.events.some(event => event.companyId !== input.companyId || !input.cases.some(supportCase => supportCase.id === event.caseId))) throw new Error("Support event lineage is invalid");
+  const operational = input.role === "support" || input.role === "support_manager";
+  return Object.freeze({
+    entitlement:Object.freeze({ tier:input.entitlement.tier, channels:input.entitlement.channels, responseTargetMinutes:input.entitlement.responseTargetMinutes, expiresAt:input.entitlement.expiresAt }),
+    cases:Object.freeze(visibleCases.map(supportCase => Object.freeze({ id:supportCase.id, requesterUserId:operational ? supportCase.requesterUserId : null, category:supportCase.category, priority:supportCase.priority, subject:supportCase.subject, description:input.role === "auditor" ? null : supportCase.description, status:supportCase.status, openedAt:supportCase.openedAt, responseDueAt:supportCase.responseDueAt, revision:supportCase.revision }))),
+    events:Object.freeze(input.events.filter(event => visibleIds.has(event.caseId)).map(event => Object.freeze({ caseId:event.caseId, revision:event.revision, action:event.action, occurredAt:event.occurredAt, note:input.role === "auditor" ? null : event.note }))),
+    canManage:operational,
+  });
+}
