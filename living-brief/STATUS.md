@@ -3364,3 +3364,11 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - Checkout attempts bind one provider, idempotency key, order revision, amount and currency. Reusing the same key returns the same attempt only for the exact order state; conflicting reuse is rejected.
 - Provider events require a valid HMAC, a five-minute replay window, unique provider event identity and a payload digest. Completion rechecks provider, event type, checkout ID, order ID and the full subscription lineage before activating access.
 - Product commits are `d748c4c7`, `9a4cb244`, `79823381`, `2e86b890` and `1d9df332`. Focused checkout behavior and API TypeScript pass. This is the first five-build block after the Builds 006–015 publication; push is due now and publication is due after Builds 021–025.
+- The complete pre-push gate passed and GitHub `master` advanced to reconciled source `0ed2145a`; Builds 016–020 remain the first half of the next publication batch.
+
+## Commercial readiness Block 5 — billing continuity — 2026-10-01
+
+- Builds 021–025 issue immutable paid invoices from exact completed checkout lineage, define contiguous monthly or annual subscription terms, govern failed collection with bounded retry/grace state, schedule cancellation at the paid term boundary, and record verified partial or full refunds as immutable credit notes.
+- Invoice and credit amounts use exact integer cents. Invoice creation rechecks company, subscription, order revision, checkout provider/reference, subtotal, tax and total; credit notes recheck the signed provider receipt and prohibit duplicate events or cumulative refunds above the paid invoice.
+- Collection failure moves active access to explicit past-due state without silently cancelling it. Term-end cancellation cannot apply early and preserves actor, reason, request time and effective time.
+- Product commits are `5ba987f5`, `806666f1`, `2c2e0ddc`, `aac08820` and `7cf94557`. Focused Block 5 behavior and API TypeScript pass. Builds 016–025 now reach the required ten-build publication boundary.

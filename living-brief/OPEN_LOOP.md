@@ -3956,4 +3956,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 018 creates provider-neutral idempotent checkout attempts bound to the exact order revision, amount and currency.
 - [x] Build 019 verifies signed provider events, rejects replay-window violations and duplicate provider event identities, and stores payload digests without secrets.
 - [x] Build 020 activates the checkout, order and pending subscription together only after the verified provider completion matches the complete lineage.
-- [ ] Pass the complete exact-head block gate and push Builds 016–020 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 021–025.
+- [x] Pass the complete exact-head block gate and push Builds 016–020 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 021–025.
+
+## Commercial readiness Block 5 — billing continuity — 2026-10-01
+
+- [x] Build 021 issues an immutable paid invoice from exact completed checkout, accepted order and active subscription lineage.
+- [x] Build 022 creates contiguous monthly or annual subscription terms with explicit automatic-renewal timing.
+- [x] Build 023 records provider-verified collection failure, past-due state, retry count and bounded grace timing without silent cancellation.
+- [x] Build 024 schedules attributable cancellation at the paid term boundary and refuses early application.
+- [x] Build 025 records provider-verified partial/full refund credit notes with duplicate and over-refund protection.
+- [ ] Pass the complete exact-head gate, push Builds 021–025 once, publish accumulated Builds 016–025 without Replit Agents, verify exact live identity, and run the full authenticated Chrome smoke.

@@ -52990,6 +52990,77 @@
       ],
       "reviewedChangeSha256": "b33d186da255ec33603077e05b71c4bb0ce452d5e9d707a06de2fc5b51704fd0",
       "reason": "BIMLog now has provider-neutral checkout authority with signed event verification and exact activation lineage; no payment processor is configured or charged by this source block."
+    },
+    {
+      "taskId": "commercial-readiness-block05-billing-continuity",
+      "reviewedThroughCommit": "7cf94557e7492f6e6ffea5494fef72701cadc834",
+      "reviewedAt": "2026-10-01T02:35:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Billing continuity remains attributable, provider-neutral and human-governed within BIMLog commercial readiness."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work preserves the authorized five-build push and ten-build publication cadence."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Focused acceptance covers exact invoice lineage, contiguous terms, bounded collection retries, term-end cancellation and duplicate or excess refund rejection."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "Adds the billing records and lifecycle controls needed to operate paid BIMLog subscriptions after checkout."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Extends the server commercial domain module and acceptance command without routes, schema, migration, provider credentials or autonomous money movement."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, package, installer or Navisworks-facing behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Invoice and credit-note domain records are defined; no customer-facing formal document renderer changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No tax, accounting, legal or compliance conclusion is asserted."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 021-025, exact product commits, acceptance behavior and the ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 021-025 while retaining the complete gate, push, publication, live identity and authenticated Chrome smoke."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production incident or historical audit finding is introduced."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7bf73e9b276c6b204042e24fc6ff67371281d43256eb318caaa521cf8740b1c2",
+      "reason": "BIMLog now preserves paid invoice, subscription term, failed collection, cancellation and verified refund authority without configuring a live payment provider."
     }
   ]
 }
