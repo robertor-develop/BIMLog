@@ -14,6 +14,8 @@ assert.equal(matrix.missingProjectAuthority.length, 0);
 assert.equal(matrix.endpoints.find(entry=>entry.path==='/auth/invitations/preview')?.public,true);
 assert.equal(matrix.endpoints.find(entry=>entry.path==='/auth/invitations/accept')?.authenticated,true);
 assert.equal(matrix.endpoints.find(entry=>entry.path==='/auth/invitations/accept')?.public,false);
+assert.equal(matrix.endpoints.find(entry=>entry.path==='/onboarding/email-verification/confirm')?.public,true);
+assert.equal(matrix.endpoints.find(entry=>entry.path==='/onboarding/email-verification/confirm')?.authenticated,false);
 for (const surface of ["files.ts", "reports.ts", "clash_reports.ts", "feedback.ts", "ai-control-plane.ts"]) {
   assert.ok(matrix.endpoints.some((entry) => entry.file === surface), `missing sensitive surface ${surface}`);
 }

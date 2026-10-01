@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "artifacts/api-server/src/routes",
-  "endpointCount": 675,
+  "endpointCount": 699,
   "counts": {
-    "public": 14,
-    "authenticated": 661,
-    "projectScoped": 393,
-    "objectScoped": 308,
+    "public": 15,
+    "authenticated": 684,
+    "projectScoped": 410,
+    "objectScoped": 315,
     "dynamic": 6
   },
   "missingAuthentication": [],
@@ -1088,7 +1088,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 282
+      "line": 283
     },
     {
       "file": "clash_reports.ts",
@@ -1100,7 +1100,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 294
+      "line": 295
     },
     {
       "file": "clash_reports.ts",
@@ -1112,7 +1112,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 325
+      "line": 326
     },
     {
       "file": "clash_reports.ts",
@@ -1124,7 +1124,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 582
+      "line": 583
     },
     {
       "file": "clash_reports.ts",
@@ -1136,7 +1136,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 633
+      "line": 634
     },
     {
       "file": "clash_reports.ts",
@@ -1150,7 +1150,7 @@
       "objectParams": [
         "serverId"
       ],
-      "line": 741
+      "line": 742
     },
     {
       "file": "clash_reports.ts",
@@ -1164,7 +1164,7 @@
       "objectParams": [
         "serverId"
       ],
-      "line": 820
+      "line": 821
     },
     {
       "file": "clash_reports.ts",
@@ -1178,7 +1178,7 @@
       "objectParams": [
         "serverId"
       ],
-      "line": 828
+      "line": 829
     },
     {
       "file": "clash_reports.ts",
@@ -1193,7 +1193,7 @@
         "serverId",
         "linkId"
       ],
-      "line": 856
+      "line": 857
     },
     {
       "file": "clash_reports.ts",
@@ -1207,7 +1207,7 @@
       "objectParams": [
         "serverId"
       ],
-      "line": 867
+      "line": 868
     },
     {
       "file": "clash_reports.ts",
@@ -1221,7 +1221,7 @@
       "objectParams": [
         "serverId"
       ],
-      "line": 875
+      "line": 876
     },
     {
       "file": "clash_reports.ts",
@@ -1236,7 +1236,7 @@
         "serverId",
         "attachmentId"
       ],
-      "line": 902
+      "line": 903
     },
     {
       "file": "clash_reports.ts",
@@ -1248,7 +1248,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 929
+      "line": 930
     },
     {
       "file": "clash_reports.ts",
@@ -1260,7 +1260,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1230
+      "line": 1231
     },
     {
       "file": "clash_reports.ts",
@@ -1272,7 +1272,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1271
+      "line": 1272
     },
     {
       "file": "clash_reports.ts",
@@ -1284,7 +1284,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1388
+      "line": 1389
     },
     {
       "file": "clash_reports.ts",
@@ -1298,7 +1298,7 @@
       "objectParams": [
         "viewpointId"
       ],
-      "line": 1465
+      "line": 1466
     },
     {
       "file": "clash_reports.ts",
@@ -1312,7 +1312,7 @@
       "objectParams": [
         "viewpointId"
       ],
-      "line": 1534
+      "line": 1535
     },
     {
       "file": "clash_reports.ts",
@@ -1324,7 +1324,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1594
+      "line": 1595
     },
     {
       "file": "clash_reports.ts",
@@ -1336,7 +1336,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1957
+      "line": 1958
     },
     {
       "file": "clash_reports.ts",
@@ -1348,7 +1348,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1997
+      "line": 1998
     },
     {
       "file": "clash_reports.ts",
@@ -1360,7 +1360,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 2028
+      "line": 2053
     },
     {
       "file": "clash_reports.ts",
@@ -1372,7 +1372,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 2138
+      "line": 2163
     },
     {
       "file": "clash_reports.ts",
@@ -1386,7 +1386,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 2247
+      "line": 2272
     },
     {
       "file": "clash_reports.ts",
@@ -1400,7 +1400,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 2278
+      "line": 2303
     },
     {
       "file": "clash_reports.ts",
@@ -1414,7 +1414,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 2336
+      "line": 2361
     },
     {
       "file": "clash_reports.ts",
@@ -1428,7 +1428,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 2422
+      "line": 2447
     },
     {
       "file": "clash_reports.ts",
@@ -1442,7 +1442,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 2512
+      "line": 2537
     },
     {
       "file": "clash_reports.ts",
@@ -1456,7 +1456,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 2571
+      "line": 2596
     },
     {
       "file": "clash_reports.ts",
@@ -1470,7 +1470,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 2651
+      "line": 2676
     },
     {
       "file": "clash_reports.ts",
@@ -1484,7 +1484,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 2702
+      "line": 2727
     },
     {
       "file": "clash_reports.ts",
@@ -1496,7 +1496,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 2759
+      "line": 2784
     },
     {
       "file": "clash_reports.ts",
@@ -1508,7 +1508,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 2787
+      "line": 2812
     },
     {
       "file": "clash_reports.ts",
@@ -1522,7 +1522,7 @@
       "objectParams": [
         "reportRecordId"
       ],
-      "line": 2816
+      "line": 2841
     },
     {
       "file": "clash_reports.ts",
@@ -1534,7 +1534,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 2837
+      "line": 2862
     },
     {
       "file": "clash_reports.ts",
@@ -1546,7 +1546,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 2872
+      "line": 2897
     },
     {
       "file": "clash_reports.ts",
@@ -1560,7 +1560,7 @@
       "objectParams": [
         "clashId"
       ],
-      "line": 3425
+      "line": 3450
     },
     {
       "file": "clash_reports.ts",
@@ -1574,7 +1574,7 @@
       "objectParams": [
         "reportId"
       ],
-      "line": 3437
+      "line": 3462
     },
     {
       "file": "clash_reports.ts",
@@ -1588,7 +1588,7 @@
       "objectParams": [
         "reportId"
       ],
-      "line": 3652
+      "line": 3677
     },
     {
       "file": "clash_reports.ts",
@@ -1602,7 +1602,7 @@
       "objectParams": [
         "reportId"
       ],
-      "line": 3677
+      "line": 3702
     },
     {
       "file": "clash_reports.ts",
@@ -1617,7 +1617,7 @@
         "reportId",
         "clashId"
       ],
-      "line": 3736
+      "line": 3761
     },
     {
       "file": "clash_reports.ts",
@@ -1631,7 +1631,7 @@
       "objectParams": [
         "reportId"
       ],
-      "line": 3769
+      "line": 3794
     },
     {
       "file": "clash_reports.ts",
@@ -1645,7 +1645,7 @@
       "objectParams": [
         "reportId"
       ],
-      "line": 3802
+      "line": 3827
     },
     {
       "file": "clash_reports.ts",
@@ -1659,7 +1659,7 @@
       "objectParams": [
         "reportId"
       ],
-      "line": 3820
+      "line": 3845
     },
     {
       "file": "clash_reports.ts",
@@ -1673,7 +1673,7 @@
       "objectParams": [
         "reportId"
       ],
-      "line": 3852
+      "line": 3877
     },
     {
       "file": "clash_reports.ts",
@@ -1688,7 +1688,7 @@
         "reportId",
         "clashId"
       ],
-      "line": 4094
+      "line": 4119
     },
     {
       "file": "clash_reports.ts",
@@ -1700,7 +1700,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 4145
+      "line": 4170
     },
     {
       "file": "clash_reports.ts",
@@ -1712,7 +1712,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 4305
+      "line": 4330
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1858,7 +1858,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 50
+      "line": 51
     },
     {
       "file": "company-pricing-templates.ts",
@@ -1870,7 +1870,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 111
+      "line": 113
     },
     {
       "file": "company-pricing-templates.ts",
@@ -1882,7 +1882,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 122
+      "line": 124
     },
     {
       "file": "company-pricing-templates.ts",
@@ -1896,7 +1896,7 @@
       "objectParams": [
         "templateId"
       ],
-      "line": 133
+      "line": 135
     },
     {
       "file": "company-pricing-templates.ts",
@@ -1908,7 +1908,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 147
+      "line": 149
     },
     {
       "file": "company-pricing-templates.ts",
@@ -1920,7 +1920,19 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 156
+      "line": 158
+    },
+    {
+      "file": "company-pricing-templates.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/apu-library/drafts",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [],
+      "line": 182
     },
     {
       "file": "company-pricing-templates.ts",
@@ -1934,7 +1946,7 @@
       "objectParams": [
         "templateId"
       ],
-      "line": 180
+      "line": 213
     },
     {
       "file": "company-pricing-templates.ts",
@@ -1948,7 +1960,7 @@
       "objectParams": [
         "templateId"
       ],
-      "line": 208
+      "line": 241
     },
     {
       "file": "company-pricing-templates.ts",
@@ -1962,7 +1974,7 @@
       "objectParams": [
         "templateId"
       ],
-      "line": 248
+      "line": 281
     },
     {
       "file": "company-profile.ts",
@@ -1974,7 +1986,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 14
+      "line": 22
     },
     {
       "file": "company-profile.ts",
@@ -1986,7 +1998,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 38
+      "line": 39
     },
     {
       "file": "company-profile.ts",
@@ -1998,7 +2010,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 72
+      "line": 75
     },
     {
       "file": "company-profile.ts",
@@ -2012,7 +2024,7 @@
       "objectParams": [
         "userId"
       ],
-      "line": 102
+      "line": 105
     },
     {
       "file": "config.ts",
@@ -2076,6 +2088,18 @@
     },
     {
       "file": "connections.ts",
+      "method": "POST",
+      "path": "/me/connections/sendgrid/verify",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 116
+    },
+    {
+      "file": "connections.ts",
       "method": "PUT",
       "path": "/me/connections/anthropic",
       "public": false,
@@ -2084,7 +2108,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 117
+      "line": 132
     },
     {
       "file": "connections.ts",
@@ -2098,7 +2122,7 @@
       "objectParams": [
         "provider"
       ],
-      "line": 126
+      "line": 141
     },
     {
       "file": "connections.ts",
@@ -2112,7 +2136,7 @@
       "objectParams": [
         "provider"
       ],
-      "line": 148
+      "line": 163
     },
     {
       "file": "connections.ts",
@@ -2124,7 +2148,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 203
+      "line": 218
     },
     {
       "file": "connections.ts",
@@ -2138,7 +2162,7 @@
       "objectParams": [
         "provider"
       ],
-      "line": 230
+      "line": 245
     },
     {
       "file": "connections.ts",
@@ -2152,7 +2176,7 @@
       "objectParams": [
         "provider"
       ],
-      "line": 258
+      "line": 273
     },
     {
       "file": "contact.ts",
@@ -3070,7 +3094,7 @@
       "projectScoped": true,
       "projectAuthority": "mounted_middleware_and_service",
       "objectParams": [],
-      "line": 243
+      "line": 244
     },
     {
       "file": "coordinator-actions.ts",
@@ -3082,7 +3106,7 @@
       "projectScoped": true,
       "projectAuthority": "mounted_middleware_and_service",
       "objectParams": [],
-      "line": 278
+      "line": 279
     },
     {
       "file": "coordinator-actions.ts",
@@ -3094,7 +3118,7 @@
       "projectScoped": true,
       "projectAuthority": "mounted_middleware_and_service",
       "objectParams": [],
-      "line": 320
+      "line": 321
     },
     {
       "file": "coordinator-actions.ts",
@@ -3106,7 +3130,7 @@
       "projectScoped": true,
       "projectAuthority": "mounted_middleware_and_service",
       "objectParams": [],
-      "line": 361
+      "line": 362
     },
     {
       "file": "coordinator-actions.ts",
@@ -3118,7 +3142,7 @@
       "projectScoped": true,
       "projectAuthority": "mounted_middleware_and_service",
       "objectParams": [],
-      "line": 406
+      "line": 407
     },
     {
       "file": "coordinator-actions.ts",
@@ -3130,7 +3154,7 @@
       "projectScoped": true,
       "projectAuthority": "mounted_middleware_and_service",
       "objectParams": [],
-      "line": 426
+      "line": 427
     },
     {
       "file": "coordinator-actions.ts",
@@ -3142,7 +3166,7 @@
       "projectScoped": true,
       "projectAuthority": "mounted_middleware_and_service",
       "objectParams": [],
-      "line": 445
+      "line": 446
     },
     {
       "file": "coordinator-actions.ts",
@@ -3154,7 +3178,7 @@
       "projectScoped": true,
       "projectAuthority": "mounted_middleware_and_service",
       "objectParams": [],
-      "line": 458
+      "line": 459
     },
     {
       "file": "coordinator-actions.ts",
@@ -3168,7 +3192,7 @@
       "objectParams": [
         "savedViewId"
       ],
-      "line": 478
+      "line": 479
     },
     {
       "file": "coordinator-actions.ts",
@@ -3182,7 +3206,7 @@
       "objectParams": [
         "savedViewId"
       ],
-      "line": 501
+      "line": 502
     },
     {
       "file": "dashboard_briefing.ts",
@@ -3194,7 +3218,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 614
+      "line": 620
     },
     {
       "file": "dashboard_briefing.ts",
@@ -3206,7 +3230,19 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 721
+      "line": 727
+    },
+    {
+      "file": "dashboard_briefing.ts",
+      "method": "GET",
+      "path": "/dashboard/responsibilities",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 781
     },
     {
       "file": "dashboard_briefing.ts",
@@ -3218,7 +3254,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 776
+      "line": 835
     },
     {
       "file": "dashboard_briefing.ts",
@@ -3230,7 +3266,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 823
+      "line": 882
     },
     {
       "file": "dashboard_briefing.ts",
@@ -3242,7 +3278,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 851
+      "line": 910
     },
     {
       "file": "dashboard_briefing.ts",
@@ -3254,7 +3290,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 862
+      "line": 921
     },
     {
       "file": "dashboard_briefing.ts",
@@ -3266,7 +3302,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 873
+      "line": 932
     },
     {
       "file": "delivery-workflow-templates.ts",
@@ -3462,7 +3498,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 31
+      "line": 34
     },
     {
       "file": "edt-engine.ts",
@@ -3474,7 +3510,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 41
+      "line": 44
     },
     {
       "file": "edt-engine.ts",
@@ -3486,7 +3522,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 52
+      "line": 55
     },
     {
       "file": "edt-engine.ts",
@@ -3500,7 +3536,7 @@
       "objectParams": [
         "intakeId"
       ],
-      "line": 69
+      "line": 72
     },
     {
       "file": "edt-engine.ts",
@@ -3514,7 +3550,7 @@
       "objectParams": [
         "intakeId"
       ],
-      "line": 80
+      "line": 83
     },
     {
       "file": "edt-engine.ts",
@@ -3526,7 +3562,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 91
+      "line": 94
     },
     {
       "file": "edt-engine.ts",
@@ -3540,7 +3576,7 @@
       "objectParams": [
         "requestId"
       ],
-      "line": 99
+      "line": 102
     },
     {
       "file": "edt-engine.ts",
@@ -3552,7 +3588,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 107
+      "line": 110
     },
     {
       "file": "edt-engine.ts",
@@ -3566,7 +3602,7 @@
       "objectParams": [
         "requestId"
       ],
-      "line": 121
+      "line": 124
     },
     {
       "file": "edt-engine.ts",
@@ -3578,7 +3614,19 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 131
+      "line": 134
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/edt-engine/time-review",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 149
     },
     {
       "file": "edt-engine.ts",
@@ -3592,7 +3640,7 @@
       "objectParams": [
         "entryId"
       ],
-      "line": 138
+      "line": 166
     },
     {
       "file": "edt-engine.ts",
@@ -3606,7 +3654,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 145
+      "line": 178
     },
     {
       "file": "edt-engine.ts",
@@ -3620,7 +3668,7 @@
       "objectParams": [
         "issuanceId"
       ],
-      "line": 156
+      "line": 189
     },
     {
       "file": "edt-engine.ts",
@@ -3634,7 +3682,7 @@
       "objectParams": [
         "intakeId"
       ],
-      "line": 168
+      "line": 201
     },
     {
       "file": "feature-policies.ts",
@@ -4500,31 +4548,7 @@
     {
       "file": "financial-apu.ts",
       "method": "GET",
-      "path": "/projects/:projectId/financial/apu",
-      "public": false,
-      "authenticated": true,
-      "role": "authenticated_user",
-      "projectScoped": true,
-      "projectAuthority": "authenticated_service_boundary",
-      "objectParams": [],
-      "line": 26
-    },
-    {
-      "file": "financial-apu.ts",
-      "method": "PUT",
-      "path": "/projects/:projectId/financial/apu",
-      "public": false,
-      "authenticated": true,
-      "role": "authenticated_user",
-      "projectScoped": true,
-      "projectAuthority": "authenticated_service_boundary",
-      "objectParams": [],
-      "line": 29
-    },
-    {
-      "file": "financial-apu.ts",
-      "method": "GET",
-      "path": "/projects/:projectId/financial/apu/performance",
+      "path": "/projects/:projectId/financial/apu/bonus-proposals",
       "public": false,
       "authenticated": true,
       "role": "authenticated_user",
@@ -4535,8 +4559,8 @@
     },
     {
       "file": "financial-apu.ts",
-      "method": "PUT",
-      "path": "/projects/:projectId/financial/apu/performance",
+      "method": "POST",
+      "path": "/projects/:projectId/financial/apu/bonus-proposals",
       "public": false,
       "authenticated": true,
       "role": "authenticated_user",
@@ -4547,20 +4571,22 @@
     },
     {
       "file": "financial-apu.ts",
-      "method": "GET",
-      "path": "/projects/:projectId/financial/apu/performance.csv",
+      "method": "POST",
+      "path": "/projects/:projectId/financial/apu/bonus-proposals/:proposalId/decision",
       "public": false,
       "authenticated": true,
       "role": "authenticated_user",
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
-      "objectParams": [],
-      "line": 38
+      "objectParams": [
+        "proposalId"
+      ],
+      "line": 39
     },
     {
       "file": "financial-apu.ts",
       "method": "GET",
-      "path": "/projects/:projectId/financial/apu/forecast",
+      "path": "/projects/:projectId/financial/apu",
       "public": false,
       "authenticated": true,
       "role": "authenticated_user",
@@ -4572,7 +4598,7 @@
     {
       "file": "financial-apu.ts",
       "method": "PUT",
-      "path": "/projects/:projectId/financial/apu/forecast",
+      "path": "/projects/:projectId/financial/apu",
       "public": false,
       "authenticated": true,
       "role": "authenticated_user",
@@ -4580,6 +4606,90 @@
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
       "line": 47
+    },
+    {
+      "file": "financial-apu.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/financial/apu/library-applications",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 50
+    },
+    {
+      "file": "financial-apu.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/financial/apu/library-applications",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 53
+    },
+    {
+      "file": "financial-apu.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/financial/apu/performance",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 56
+    },
+    {
+      "file": "financial-apu.ts",
+      "method": "PUT",
+      "path": "/projects/:projectId/financial/apu/performance",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 59
+    },
+    {
+      "file": "financial-apu.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/financial/apu/performance.csv",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 62
+    },
+    {
+      "file": "financial-apu.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/financial/apu/forecast",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 68
+    },
+    {
+      "file": "financial-apu.ts",
+      "method": "PUT",
+      "path": "/projects/:projectId/financial/apu/forecast",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 71
     },
     {
       "file": "financial-apu.ts",
@@ -4591,7 +4701,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 50
+      "line": 74
     },
     {
       "file": "financial-budgets.ts",
@@ -4752,6 +4862,36 @@
     {
       "file": "financial-contracts.ts",
       "method": "GET",
+      "path": "/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "contractId",
+        "versionId"
+      ],
+      "line": 48
+    },
+    {
+      "file": "financial-contracts.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "contractId",
+        "versionId"
+      ],
+      "line": 79
+    },
+    {
+      "file": "financial-contracts.ts",
+      "method": "GET",
       "path": "/projects/:projectId/financial/contracts",
       "public": false,
       "authenticated": true,
@@ -4759,7 +4899,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 80
+      "line": 135
     },
     {
       "file": "financial-contracts.ts",
@@ -4771,7 +4911,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 81
+      "line": 136
     },
     {
       "file": "financial-contracts.ts",
@@ -4785,7 +4925,7 @@
       "objectParams": [
         "contractId"
       ],
-      "line": 149
+      "line": 204
     },
     {
       "file": "financial-contracts.ts",
@@ -4797,7 +4937,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 151
+      "line": 206
     },
     {
       "file": "financial-contracts.ts",
@@ -4812,7 +4952,7 @@
         "contractId",
         "versionId"
       ],
-      "line": 152
+      "line": 207
     },
     {
       "file": "financial-contracts.ts",
@@ -4827,7 +4967,7 @@
         "contractId",
         "versionId"
       ],
-      "line": 153
+      "line": 208
     },
     {
       "file": "financial-contracts.ts",
@@ -4842,7 +4982,7 @@
         "contractId",
         "versionId"
       ],
-      "line": 154
+      "line": 209
     },
     {
       "file": "financial-contracts.ts",
@@ -4856,7 +4996,7 @@
       "objectParams": [
         "contractId"
       ],
-      "line": 156
+      "line": 211
     },
     {
       "file": "financial-contracts.ts",
@@ -4872,7 +5012,7 @@
         "amendmentId",
         "versionId"
       ],
-      "line": 157
+      "line": 212
     },
     {
       "file": "financial-contracts.ts",
@@ -4888,7 +5028,7 @@
         "amendmentId",
         "versionId"
       ],
-      "line": 158
+      "line": 213
     },
     {
       "file": "financial-contracts.ts",
@@ -4904,7 +5044,21 @@
         "amendmentId",
         "versionId"
       ],
-      "line": 159
+      "line": 214
+    },
+    {
+      "file": "financial-contracts.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/financial/contracts/:contractId/grants",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "contractId"
+      ],
+      "line": 216
     },
     {
       "file": "financial-contracts.ts",
@@ -4918,7 +5072,7 @@
       "objectParams": [
         "contractId"
       ],
-      "line": 161
+      "line": 217
     },
     {
       "file": "financial-contracts.ts",
@@ -4932,7 +5086,7 @@
       "objectParams": [
         "contractId"
       ],
-      "line": 163
+      "line": 219
     },
     {
       "file": "financial-contracts.ts",
@@ -4947,7 +5101,7 @@
         "contractId",
         "paymentApplicationId"
       ],
-      "line": 164
+      "line": 220
     },
     {
       "file": "financial-contracts.ts",
@@ -4961,7 +5115,7 @@
       "objectParams": [
         "contractId"
       ],
-      "line": 165
+      "line": 221
     },
     {
       "file": "financial-contracts.ts",
@@ -4976,7 +5130,7 @@
         "contractId",
         "paymentApplicationId"
       ],
-      "line": 166
+      "line": 222
     },
     {
       "file": "financial-contracts.ts",
@@ -4991,7 +5145,7 @@
         "contractId",
         "paymentApplicationId"
       ],
-      "line": 167
+      "line": 223
     },
     {
       "file": "financial-contracts.ts",
@@ -5006,7 +5160,7 @@
         "contractId",
         "paymentApplicationId"
       ],
-      "line": 168
+      "line": 224
     },
     {
       "file": "financial-contracts.ts",
@@ -5018,7 +5172,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 170
+      "line": 226
     },
     {
       "file": "financial-contracts.ts",
@@ -5032,7 +5186,7 @@
       "objectParams": [
         "sessionId"
       ],
-      "line": 174
+      "line": 230
     },
     {
       "file": "financial-contracts.ts",
@@ -5046,7 +5200,7 @@
       "objectParams": [
         "contractId"
       ],
-      "line": 179
+      "line": 235
     },
     {
       "file": "financial-contracts.ts",
@@ -5060,7 +5214,7 @@
       "objectParams": [
         "contractId"
       ],
-      "line": 180
+      "line": 236
     },
     {
       "file": "financial-controls.ts",
@@ -5493,7 +5647,72 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 97
+      "line": 103
+    },
+    {
+      "file": "job-operations.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/operations/internal-cost/policies",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 107
+    },
+    {
+      "file": "job-operations.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/operations/internal-cost/profiles",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 111
+    },
+    {
+      "file": "job-operations.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/operations/internal-cost/:kind/:versionId/decision",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "kind",
+        "versionId"
+      ],
+      "line": 115
+    },
+    {
+      "file": "job-operations.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/operations/floor-hour-estimates",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 119
+    },
+    {
+      "file": "job-operations.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/operations/floor-hour-estimates/:estimateVersionId/decision",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "estimateVersionId"
+      ],
+      "line": 125
     },
     {
       "file": "job-operations.ts",
@@ -5507,7 +5726,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 101
+      "line": 129
     },
     {
       "file": "job-operations.ts",
@@ -5522,7 +5741,7 @@
         "workItemId",
         "role"
       ],
-      "line": 104
+      "line": 132
     },
     {
       "file": "job-operations.ts",
@@ -5538,7 +5757,7 @@
         "phaseId",
         "taskId"
       ],
-      "line": 107
+      "line": 135
     },
     {
       "file": "job-operations.ts",
@@ -5552,7 +5771,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 110
+      "line": 138
     },
     {
       "file": "job-operations.ts",
@@ -5566,7 +5785,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 113
+      "line": 141
     },
     {
       "file": "job-operations.ts",
@@ -5580,7 +5799,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 116
+      "line": 144
     },
     {
       "file": "job-operations.ts",
@@ -5594,7 +5813,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 119
+      "line": 147
     },
     {
       "file": "job-operations.ts",
@@ -5608,7 +5827,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 122
+      "line": 150
     },
     {
       "file": "job-operations.ts",
@@ -5622,7 +5841,7 @@
       "objectParams": [
         "taskId"
       ],
-      "line": 125
+      "line": 153
     },
     {
       "file": "job-operations.ts",
@@ -5636,7 +5855,7 @@
       "objectParams": [
         "assignmentId"
       ],
-      "line": 128
+      "line": 156
     },
     {
       "file": "job-operations.ts",
@@ -5648,7 +5867,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 131
+      "line": 159
     },
     {
       "file": "job-operations.ts",
@@ -5660,7 +5879,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 134
+      "line": 162
     },
     {
       "file": "job-operations.ts",
@@ -5674,7 +5893,7 @@
       "objectParams": [
         "deliverableId"
       ],
-      "line": 137
+      "line": 165
     },
     {
       "file": "job-operations.ts",
@@ -5686,7 +5905,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 140
+      "line": 168
     },
     {
       "file": "job-operations.ts",
@@ -5700,7 +5919,7 @@
       "objectParams": [
         "connectionId"
       ],
-      "line": 143
+      "line": 171
     },
     {
       "file": "job-operations.ts",
@@ -5712,7 +5931,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 146
+      "line": 174
     },
     {
       "file": "job-operations.ts",
@@ -5726,7 +5945,7 @@
       "objectParams": [
         "packageId"
       ],
-      "line": 149
+      "line": 177
     },
     {
       "file": "job-operations.ts",
@@ -5738,7 +5957,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 152
+      "line": 180
     },
     {
       "file": "job-operations.ts",
@@ -5750,7 +5969,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 155
+      "line": 183
     },
     {
       "file": "job-operations.ts",
@@ -5764,7 +5983,7 @@
       "objectParams": [
         "reviewId"
       ],
-      "line": 158
+      "line": 186
     },
     {
       "file": "linked_items.ts",
@@ -5791,7 +6010,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 66
+      "line": 67
     },
     {
       "file": "linked_items.ts",
@@ -5805,7 +6024,7 @@
       "objectParams": [
         "linkId"
       ],
-      "line": 125
+      "line": 126
     },
     {
       "file": "living_brief.ts",
@@ -6497,6 +6716,66 @@
       "line": 77
     },
     {
+      "file": "onboarding.ts",
+      "method": "GET",
+      "path": "/onboarding",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 18
+    },
+    {
+      "file": "onboarding.ts",
+      "method": "POST",
+      "path": "/onboarding/email-verification",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 26
+    },
+    {
+      "file": "onboarding.ts",
+      "method": "POST",
+      "path": "/onboarding/email-verification/confirm",
+      "public": true,
+      "authenticated": false,
+      "role": "public",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 42
+    },
+    {
+      "file": "onboarding.ts",
+      "method": "PATCH",
+      "path": "/onboarding",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 59
+    },
+    {
+      "file": "onboarding.ts",
+      "method": "POST",
+      "path": "/onboarding/complete",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 70
+    },
+    {
       "file": "project_directory.ts",
       "method": "GET",
       "path": "/projects/:projectId/directory",
@@ -6506,7 +6785,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 351
+      "line": 352
     },
     {
       "file": "project_directory.ts",
@@ -6518,7 +6797,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 373
+      "line": 374
     },
     {
       "file": "project_directory.ts",
@@ -6530,7 +6809,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 720
+      "line": 721
     },
     {
       "file": "project_directory.ts",
@@ -6542,7 +6821,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 786
+      "line": 787
     },
     {
       "file": "project_directory.ts",
@@ -6554,7 +6833,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 972
+      "line": 974
     },
     {
       "file": "project_directory.ts",
@@ -6568,7 +6847,7 @@
       "objectParams": [
         "entryId"
       ],
-      "line": 1085
+      "line": 1088
     },
     {
       "file": "project_directory.ts",
@@ -6582,7 +6861,7 @@
       "objectParams": [
         "entryId"
       ],
-      "line": 1132
+      "line": 1135
     },
     {
       "file": "project_directory.ts",
@@ -6596,7 +6875,7 @@
       "objectParams": [
         "entryId"
       ],
-      "line": 1181
+      "line": 1184
     },
     {
       "file": "project_directory.ts",
@@ -6608,7 +6887,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1323
+      "line": 1327
     },
     {
       "file": "projects.ts",
@@ -6728,7 +7007,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 163
+      "line": 165
     },
     {
       "file": "reports.ts",
@@ -6740,7 +7019,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 247
+      "line": 255
     },
     {
       "file": "reports.ts",
@@ -6752,7 +7031,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 269
+      "line": 277
     },
     {
       "file": "reports.ts",
@@ -6764,7 +7043,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 351
+      "line": 359
     },
     {
       "file": "reports.ts",
@@ -6776,7 +7055,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 411
+      "line": 419
     },
     {
       "file": "reports.ts",
@@ -6788,7 +7067,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 477
+      "line": 485
     },
     {
       "file": "reports.ts",
@@ -6800,7 +7079,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 545
+      "line": 553
     },
     {
       "file": "reports.ts",
@@ -6815,7 +7094,7 @@
         "module",
         "itemId"
       ],
-      "line": 626
+      "line": 634
     },
     {
       "file": "reports.ts",
@@ -6827,7 +7106,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 692
+      "line": 700
     },
     {
       "file": "reports.ts",
@@ -6839,7 +7118,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 777
+      "line": 785
     },
     {
       "file": "reports.ts",
@@ -6851,7 +7130,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1096
+      "line": 1104
     },
     {
       "file": "reports.ts",
@@ -6863,7 +7142,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1177
+      "line": 1185
     },
     {
       "file": "reports.ts",
@@ -6875,7 +7154,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1258
+      "line": 1266
     },
     {
       "file": "rfis.ts",
@@ -7758,7 +8037,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 607
+      "line": 608
     },
     {
       "file": "submittals.ts",
@@ -7770,7 +8049,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 781
+      "line": 784
     },
     {
       "file": "submittals.ts",
@@ -7782,7 +8061,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 865
+      "line": 868
     },
     {
       "file": "submittals.ts",
@@ -7796,7 +8075,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 993
+      "line": 996
     },
     {
       "file": "submittals.ts",
@@ -7810,7 +8089,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1084
+      "line": 1087
     },
     {
       "file": "submittals.ts",
@@ -7824,7 +8103,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1103
+      "line": 1106
     },
     {
       "file": "submittals.ts",
@@ -7838,7 +8117,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1118
+      "line": 1121
     },
     {
       "file": "submittals.ts",
@@ -7852,7 +8131,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1234
+      "line": 1237
     },
     {
       "file": "submittals.ts",
@@ -7864,7 +8143,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1361
+      "line": 1364
     },
     {
       "file": "submittals.ts",
@@ -7878,7 +8157,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1364
+      "line": 1367
     },
     {
       "file": "submittals.ts",
@@ -7892,7 +8171,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1367
+      "line": 1370
     },
     {
       "file": "submittals.ts",
@@ -7906,7 +8185,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1444
+      "line": 1447
     },
     {
       "file": "submittals.ts",
@@ -7920,7 +8199,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1654
+      "line": 1657
     },
     {
       "file": "submittals.ts",
@@ -7934,7 +8213,34 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1704
+      "line": 1707
+    },
+    {
+      "file": "submittals.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/submittal-register-coverage",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [],
+      "line": 1864
+    },
+    {
+      "file": "submittals.ts",
+      "method": "PUT",
+      "path": "/projects/:projectId/submittal-register/:itemId/packages/:submittalId",
+      "public": false,
+      "authenticated": true,
+      "role": "project_admin_or_super_admin",
+      "projectScoped": true,
+      "projectAuthority": "middleware",
+      "objectParams": [
+        "itemId",
+        "submittalId"
+      ],
+      "line": 1872
     },
     {
       "file": "submittals.ts",
@@ -7946,7 +8252,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1861
+      "line": 1885
     },
     {
       "file": "submittals.ts",
@@ -7958,7 +8264,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1874
+      "line": 1898
     },
     {
       "file": "submittals.ts",
@@ -7972,7 +8278,7 @@
       "objectParams": [
         "itemId"
       ],
-      "line": 1903
+      "line": 1927
     },
     {
       "file": "submittals.ts",
@@ -7986,7 +8292,7 @@
       "objectParams": [
         "itemId"
       ],
-      "line": 1922
+      "line": 1946
     },
     {
       "file": "submittals.ts",
@@ -8000,7 +8306,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 1935
+      "line": 1959
     },
     {
       "file": "submittals.ts",
@@ -8012,7 +8318,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 1970
+      "line": 1994
     },
     {
       "file": "submittals.ts",
@@ -8024,7 +8330,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 2025
+      "line": 2049
     },
     {
       "file": "submittals.ts",
@@ -8036,7 +8342,7 @@
       "projectScoped": true,
       "projectAuthority": "middleware",
       "objectParams": [],
-      "line": 2069
+      "line": 2093
     },
     {
       "file": "submittals.ts",
@@ -8050,7 +8356,7 @@
       "objectParams": [
         "submittalId"
       ],
-      "line": 2193
+      "line": 2217
     },
     {
       "file": "team-performance.ts",

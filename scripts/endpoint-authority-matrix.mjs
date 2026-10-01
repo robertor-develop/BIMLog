@@ -11,6 +11,9 @@ const publicRules = [
   // Pre-sign-in preview requires possession of an expiring opaque invitation credential.
   // Acceptance remains authenticated; this exception does not cover sibling routes.
   /^auth\.ts\|POST\|\/auth\/invitations\/preview$/,
+  // Email confirmation is intentionally pre-sign-in and requires possession of
+  // a hashed, expiring, single-use verification token.
+  /^onboarding\.ts\|POST\|\/onboarding\/email-verification\/confirm$/,
   /^health\.ts\|GET\|\/(health|ready|version)$/,
   /^health\.ts\|GET\|\/healthz$/,
   /^auth\.ts\|(POST|GET)\|\/(auth\/login|auth\/register|auth\/forgot-password|auth\/reset-password|auth\/verify-reset-token)$/,
