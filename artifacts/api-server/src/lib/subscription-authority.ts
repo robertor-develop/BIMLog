@@ -503,3 +503,50 @@ export function createPaidInvoice(input: {
     currency: order.currency, subtotalCents, taxCents, totalCents, status: "paid", issuedAt, paidAt: issuedAt,
   });
 }
+
+export type SubscriptionTerm = Readonly<{
+  subscriptionId: string;
+  sequence: number;
+  billingCycle: "monthly" | "annual";
+  startsAt: string;
+  endsAt: string;
+  renewsAt: string | null;
+  sourceOrderId: string;
+  sourceInvoiceId: string;
+}>;
+
+function addBillingCycle(start: Date, cycle: "monthly" | "annual"): Date {
+  const next = new Date(start);
+  const originalDay = start.getUTCDate();
+  next.setUTCDate(1);
+  if (cycle === "monthly") next.setUTCMonth(next.getUTCMonth() + 1);
+  else next.setUTCFullYear(next.getUTCFullYear() + 1);
+  const lastDay = new Date(Date.UTC(next.getUTCFullYear(), next.getUTCMonth() + 1, 0)).getUTCDate();
+  next.setUTCDate(Math.min(originalDay, lastDay));
+  return next;
+}
+
+export function createSubscriptionTerm(input: {
+  subscription: CompanySubscription;
+  invoice: CommercialInvoice;
+  priorTerms: readonly SubscriptionTerm[];
+  startsAt: string;
+  automaticRenewal: boolean;
+}): SubscriptionTerm {
+  if (input.subscription.status !== "active" || input.invoice.status !== "paid") throw new Error("A subscription term requires active paid authority");
+  if (input.invoice.subscriptionId !== input.subscription.id || input.invoice.companyId !== input.subscription.companyId) throw new Error("Subscription term invoice lineage is invalid");
+  if (input.priorTerms.some((term) => term.subscriptionId !== input.subscription.id)) throw new Error("Prior term belongs to another subscription");
+  const ordered = [...input.priorTerms].sort((a, b) => a.sequence - b.sequence);
+  if (ordered.some((term, index) => term.sequence !== index + 1)) throw new Error("Prior subscription term sequence is invalid");
+  const starts = new Date(input.startsAt);
+  if (!Number.isFinite(starts.getTime())) throw new Error("A valid subscription term start is required");
+  const previous = ordered.at(-1);
+  if (previous && starts.toISOString() !== previous.endsAt) throw new Error("Renewal term must start at the prior term boundary");
+  const ends = addBillingCycle(starts, input.subscription.billingCycle);
+  return Object.freeze({
+    subscriptionId: input.subscription.id, sequence: ordered.length + 1,
+    billingCycle: input.subscription.billingCycle, startsAt: starts.toISOString(), endsAt: ends.toISOString(),
+    renewsAt: input.automaticRenewal ? ends.toISOString() : null,
+    sourceOrderId: input.invoice.orderId, sourceInvoiceId: input.invoice.id,
+  });
+}

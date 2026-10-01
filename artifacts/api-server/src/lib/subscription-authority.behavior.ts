@@ -10,6 +10,7 @@ import {
   createEntitlementSnapshot,
   createPaidInvoice,
   createSeatQuantity,
+  createSubscriptionTerm,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -127,4 +128,11 @@ assert.deepEqual({ status: paidInvoice.status, subtotal: paidInvoice.subtotalCen
 assert.throws(() => createPaidInvoice({ invoiceNumber: paidInvoice.invoiceNumber, completion: checkoutCompletion, existing: [paidInvoice], issuedAt: paidInvoice.issuedAt }), /already exists/);
 assert.throws(() => createPaidInvoice({ invoiceNumber: "BIM-2026-0002", completion: { ...checkoutCompletion, attempt: { ...checkoutCompletion.attempt, amount: 1 } }, existing: [], issuedAt: paidInvoice.issuedAt }), /does not match/);
 
-console.log("Commercial billing Block 5 Build 021: PASS");
+const firstTerm = createSubscriptionTerm({ subscription: checkoutCompletion.subscription, invoice: paidInvoice, priorTerms: [], startsAt: "2026-09-30T20:17:00Z", automaticRenewal: true });
+assert.deepEqual({ sequence: firstTerm.sequence, startsAt: firstTerm.startsAt, endsAt: firstTerm.endsAt, renewsAt: firstTerm.renewsAt }, { sequence: 1, startsAt: "2026-09-30T20:17:00.000Z", endsAt: "2027-09-30T20:17:00.000Z", renewsAt: "2027-09-30T20:17:00.000Z" });
+const secondTerm = createSubscriptionTerm({ subscription: checkoutCompletion.subscription, invoice: paidInvoice, priorTerms: [firstTerm], startsAt: firstTerm.endsAt, automaticRenewal: false });
+assert.equal(secondTerm.sequence, 2);
+assert.equal(secondTerm.renewsAt, null);
+assert.throws(() => createSubscriptionTerm({ subscription: checkoutCompletion.subscription, invoice: paidInvoice, priorTerms: [firstTerm], startsAt: "2027-10-01T20:17:00Z", automaticRenewal: true }), /prior term boundary/);
+
+console.log("Commercial billing Block 5 Build 022: PASS");
