@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { createStripeCheckoutSession, inspectStripeCommercialConfiguration } from "./commercial-provider-adapter";
+import { createStripeCheckoutSession, inspectStripeCommercialConfiguration, verifyStripeWebhook } from "./commercial-provider-adapter";
+import crypto from "node:crypto";
 import { createCheckoutAttempt, createCommercialOrder, createCompanySubscription, transitionCommercialOrder } from "./subscription-authority";
 
 const configured = inspectStripeCommercialConfiguration({
@@ -36,4 +37,14 @@ assert.equal(checkoutRequest?.body.get("line_items[0][price]"), "price_team_annu
 assert.equal(checkoutRequest?.body.get("mode"), "subscription");
 await assert.rejects(() => createStripeCheckoutSession({ configuration: configured.configuration!, order, attempt, customer, priceReference: "price_team_annual", transport: async () => ({ status: 200, body: { id: "cs_test_bad", url: "https://evil.example/pay", expires_at: 1790829000 } }) }), /untrusted hosted URL/);
 
-console.log("Commercial provider Block 7 Build 032: PASS");
+const webhookTimestamp = 1790829120;
+const webhookPayload = JSON.stringify({ id: "evt_bimlog_31", type: "checkout.session.completed", data: { object: { id: checkout.providerSessionId } } });
+const webhookSignature = crypto.createHmac("sha256", configured.configuration!.webhookSecret).update(`${webhookTimestamp}.${webhookPayload}`).digest("hex");
+const receipt = verifyStripeWebhook({ rawPayload: webhookPayload, signatureHeader: `t=${webhookTimestamp},v1=00,v1=${webhookSignature}`, webhookSecret: configured.configuration!.webhookSecret, nowEpochSeconds: webhookTimestamp + 15, priorReceipts: [] });
+assert.deepEqual({ provider: receipt.provider, id: receipt.eventId, type: receipt.eventType }, { provider: "stripe", id: "evt_bimlog_31", type: "checkout.session.completed" });
+assert.equal(receipt.payloadDigest.length, 64);
+assert.throws(() => verifyStripeWebhook({ rawPayload: webhookPayload, signatureHeader: `t=${webhookTimestamp},v1=${webhookSignature}`, webhookSecret: configured.configuration!.webhookSecret, nowEpochSeconds: webhookTimestamp + 301, priorReceipts: [] }), /replay window/);
+assert.throws(() => verifyStripeWebhook({ rawPayload: `${webhookPayload} `, signatureHeader: `t=${webhookTimestamp},v1=${webhookSignature}`, webhookSecret: configured.configuration!.webhookSecret, nowEpochSeconds: webhookTimestamp, priorReceipts: [] }), /signature is invalid/);
+assert.throws(() => verifyStripeWebhook({ rawPayload: webhookPayload, signatureHeader: `t=${webhookTimestamp},v1=${webhookSignature}`, webhookSecret: configured.configuration!.webhookSecret, nowEpochSeconds: webhookTimestamp, priorReceipts: [receipt] }), /already received/);
+
+console.log("Commercial provider Block 7 Build 033: PASS");

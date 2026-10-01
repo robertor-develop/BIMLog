@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import type { CheckoutAttempt, CommercialOrder, ProviderCustomerBinding } from "./subscription-authority";
+import type { CheckoutAttempt, CommercialOrder, ProviderCustomerBinding, ProviderEventReceipt } from "./subscription-authority";
 
 export type CommercialProviderReadiness = Readonly<{
   provider: "stripe";
@@ -110,4 +110,38 @@ export async function createStripeCheckoutSession(input: {
   if (typeof result.id !== "string" || !result.id.startsWith("cs_")) throw new Error("Stripe checkout response identity is invalid");
   if (!Number.isSafeInteger(result.expires_at)) throw new Error("Stripe checkout response expiry is invalid");
   return Object.freeze({ providerSessionId: result.id, checkoutUrl: safeHostedUrl(result.url, "checkout.stripe.com"), expiresAt: new Date((result.expires_at as number) * 1000).toISOString() });
+}
+
+export function verifyStripeWebhook(input: {
+  rawPayload: string;
+  signatureHeader: string;
+  webhookSecret: string;
+  nowEpochSeconds: number;
+  priorReceipts: readonly ProviderEventReceipt[];
+  toleranceSeconds?: number;
+}): ProviderEventReceipt {
+  const parts = input.signatureHeader.split(",").map((part) => part.trim().split("=", 2));
+  const timestampText = parts.find(([key]) => key === "t")?.[1] ?? "";
+  const signatures = parts.filter(([key]) => key === "v1").map(([, value]) => value).filter(Boolean);
+  const timestamp = Number(timestampText);
+  const toleranceSeconds = input.toleranceSeconds ?? 300;
+  if (!Number.isSafeInteger(timestamp) || !Number.isSafeInteger(toleranceSeconds) || toleranceSeconds < 1 || toleranceSeconds > 900 || Math.abs(input.nowEpochSeconds - timestamp) > toleranceSeconds) {
+    throw new Error("Stripe webhook timestamp is outside the replay window");
+  }
+  if (!input.webhookSecret.startsWith("whsec_") || signatures.length === 0) throw new Error("Stripe webhook signature is invalid");
+  const expected = crypto.createHmac("sha256", input.webhookSecret).update(`${timestamp}.${input.rawPayload}`).digest();
+  const verified = signatures.some((signature) => {
+    if (!/^[0-9a-f]{64}$/i.test(signature)) return false;
+    const supplied = Buffer.from(signature, "hex");
+    return supplied.length === expected.length && crypto.timingSafeEqual(supplied, expected);
+  });
+  if (!verified) throw new Error("Stripe webhook signature is invalid");
+  let event: { id?: unknown; type?: unknown };
+  try { event = JSON.parse(input.rawPayload) as { id?: unknown; type?: unknown }; } catch { throw new Error("Stripe webhook payload is invalid JSON"); }
+  if (typeof event.id !== "string" || !event.id.startsWith("evt_") || typeof event.type !== "string" || !event.type.trim()) throw new Error("Stripe webhook event identity is invalid");
+  if (input.priorReceipts.some((receipt) => receipt.provider === "stripe" && receipt.eventId === event.id)) throw new Error("Stripe webhook event was already received");
+  return Object.freeze({
+    provider: "stripe", eventId: event.id, eventType: event.type,
+    payloadDigest: sha256(input.rawPayload), receivedAt: new Date(input.nowEpochSeconds * 1000).toISOString(),
+  });
 }
