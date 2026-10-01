@@ -18,6 +18,8 @@ import {
   createCompanyBillingProfile,
   bindProviderCustomer,
   registerTokenizedPaymentMethod,
+  createBillingPortalSession,
+  consumeBillingPortalSession,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -187,4 +189,15 @@ assert.throws(() => registerTokenizedPaymentMethod({ customer: providerCustomer,
 assert.throws(() => registerTokenizedPaymentMethod({ customer: providerCustomer, providerPaymentMethodReference: "pm_second", type: "card", brand: "mastercard", last4: "4444", expiryMonth: 11, expiryYear: 2029, makeDefault: true, existing: [paymentMethod], now: paymentMethod.createdAt }), /already has a default/);
 assert.throws(() => registerTokenizedPaymentMethod({ customer: { ...providerCustomer, id: "provider-customer-2", companyId: 8 }, providerPaymentMethodReference: "pm_bimtech_7", type: "card", brand: "visa", last4: "4242", expiryMonth: 12, expiryYear: 2029, existing: [paymentMethod], now: paymentMethod.createdAt }), /another provider customer/);
 
-console.log("Commercial account Block 6 Build 028: PASS");
+const portalSession = createBillingPortalSession({ id: "portal-session-1", customer: providerCustomer, requestedBy: "billing-admin-7", returnPath: "/settings/billing", now: "2026-10-01T03:33:00Z" });
+assert.deepEqual({ companyId: portalSession.companyId, status: portalSession.status, returnPath: portalSession.returnPath, expiresAt: portalSession.expiresAt }, { companyId: 7, status: "ready", returnPath: "/settings/billing", expiresAt: "2026-10-01T03:43:00.000Z" });
+const consumedPortal = consumeBillingPortalSession({ session: portalSession, companyId: 7, requestedBy: "billing-admin-7", now: "2026-10-01T03:34:00Z" });
+assert.deepEqual({ status: consumedPortal.status, consumedAt: consumedPortal.consumedAt }, { status: "consumed", consumedAt: "2026-10-01T03:34:00.000Z" });
+assert.throws(() => consumeBillingPortalSession({ session: consumedPortal, companyId: 7, requestedBy: "billing-admin-7", now: "2026-10-01T03:35:00Z" }), /already been used/);
+assert.throws(() => createBillingPortalSession({ customer: providerCustomer, requestedBy: "billing-admin-7", returnPath: "https://evil.example", now: portalSession.createdAt }), /safe BIMLog-relative/);
+assert.throws(() => createBillingPortalSession({ customer: providerCustomer, requestedBy: "billing-admin-7", returnPath: "//evil.example", now: portalSession.createdAt }), /safe BIMLog-relative/);
+assert.throws(() => consumeBillingPortalSession({ session: portalSession, companyId: 8, requestedBy: "billing-admin-7", now: "2026-10-01T03:34:00Z" }), /does not match/);
+const expiredPortal = consumeBillingPortalSession({ session: portalSession, companyId: 7, requestedBy: "billing-admin-7", now: portalSession.expiresAt });
+assert.equal(expiredPortal.status, "expired");
+
+console.log("Commercial account Block 6 Build 029: PASS");

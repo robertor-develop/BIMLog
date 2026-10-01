@@ -840,3 +840,54 @@ export function registerTokenizedPaymentMethod(input: {
     status: "active", isDefault: makeDefault, createdAt: new Date(input.now).toISOString(),
   });
 }
+
+export type BillingPortalSession = Readonly<{
+  id: string;
+  companyId: number;
+  providerCustomerBindingId: string;
+  requestedBy: string;
+  returnPath: string;
+  status: "ready" | "consumed" | "expired";
+  expiresAt: string;
+  createdAt: string;
+  consumedAt: string | null;
+}>;
+
+export function createBillingPortalSession(input: {
+  id?: string;
+  customer: ProviderCustomerBinding;
+  requestedBy: string;
+  returnPath: string;
+  ttlSeconds?: number;
+  now: string;
+}): BillingPortalSession {
+  if (input.customer.status !== "active") throw new Error("Billing portal requires an active provider customer");
+  const requestedBy = input.requestedBy.trim();
+  const returnPath = input.returnPath.trim();
+  if (!requestedBy) throw new Error("Billing portal requester is required");
+  if (!returnPath.startsWith("/") || returnPath.startsWith("//") || returnPath.includes("\\") || /[\r\n]/.test(returnPath)) {
+    throw new Error("Billing portal return path must be a safe BIMLog-relative path");
+  }
+  const ttlSeconds = input.ttlSeconds ?? 600;
+  if (!Number.isSafeInteger(ttlSeconds) || ttlSeconds < 60 || ttlSeconds > 900) throw new Error("Billing portal session lifetime must be between 60 and 900 seconds");
+  const createdAt = new Date(input.now);
+  return Object.freeze({
+    id: input.id ?? crypto.randomUUID(), companyId: input.customer.companyId,
+    providerCustomerBindingId: input.customer.id, requestedBy, returnPath, status: "ready",
+    expiresAt: new Date(createdAt.getTime() + ttlSeconds * 1000).toISOString(),
+    createdAt: createdAt.toISOString(), consumedAt: null,
+  });
+}
+
+export function consumeBillingPortalSession(input: {
+  session: BillingPortalSession;
+  companyId: number;
+  requestedBy: string;
+  now: string;
+}): BillingPortalSession {
+  if (input.session.companyId !== input.companyId || input.session.requestedBy !== input.requestedBy.trim()) throw new Error("Billing portal session identity does not match");
+  if (input.session.status !== "ready") throw new Error("Billing portal session has already been used");
+  const now = new Date(input.now).toISOString();
+  if (now >= input.session.expiresAt) return Object.freeze({ ...input.session, status: "expired", consumedAt: null });
+  return Object.freeze({ ...input.session, status: "consumed", consumedAt: now });
+}
