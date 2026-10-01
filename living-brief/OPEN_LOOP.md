@@ -4001,4 +4001,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 043 prepares idempotent, localized collection notices from the canonical collection attempt and cancels pending notices after recovery without claiming provider delivery.
 - [x] Build 044 projects subscription, access, statement and notice truth according to billing-admin, customer-admin, support and auditor roles without exposing provider or recipient identifiers broadly.
 - [x] Build 045 fails billing readiness closed when subscription, access, statement, collection or notice evidence is incomplete, stale or overdue.
-- [ ] Pass the complete exact-head gate, push Builds 041–045 once, publish accumulated Builds 036–045 without Replit Agents, verify the exact live source identity, and complete the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push Builds 041–045 once, publish accumulated Builds 036–045 without Replit Agents, verify the exact live source identity, and complete the full authenticated Chrome smoke. Live health is identity-bound to exact source `345dc645a05e0f4befb14b408c5cfdd8c863498a`; all 61 registered routes, bounded asynchronous resolution, project-home redirect, hard reload, independent Integrations-tab continuity and both Chrome consoles passed.
+
+## Commercial readiness Block 10 — customer support operations — 2026-10-01
+
+- [x] Build 046 derives company customer-support entitlement from the exact active subscription revision and access grant, with governed channels, tier, response target and expiry.
+- [x] Build 047 opens idempotent bilingual support cases only through an entitled channel and calculates the response deadline from the governed tier and priority.
+- [x] Build 048 applies revision-safe acknowledge, resolve, close and reopen transitions with explicit actor roles and immutable audit events.
+- [x] Build 049 projects support entitlement, cases and events by customer, support, support-manager and auditor roles without broad requester or case-detail exposure.
+- [x] Build 050 fails customer-support readiness closed for missing/stale entitlement, overdue open cases, unresolved urgent cases or missing current-revision evidence.
+- [ ] Pass the complete exact-head gate and push Builds 046–050 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 051–055.

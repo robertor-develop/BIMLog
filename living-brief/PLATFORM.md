@@ -296,6 +296,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-change-approval.ts
 - artifacts/api-server/src/lib/commercial-change-order-draft.behavior.ts
 - artifacts/api-server/src/lib/commercial-change-order-draft.ts
+- artifacts/api-server/src/lib/commercial-customer-support.behavior.ts
+- artifacts/api-server/src/lib/commercial-customer-support.ts
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.ts
 - artifacts/api-server/src/lib/commercial-evidence-package.behavior.ts
