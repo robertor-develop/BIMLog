@@ -14,6 +14,7 @@
     "test:commercial-billing-block05": "tsx ./src/lib/subscription-authority.behavior.ts && tsc -p tsconfig.json --noEmit",
     "test:commercial-account-block06": "tsx ./src/lib/subscription-authority.behavior.ts && tsc -p tsconfig.json --noEmit",
     "test:commercial-provider-block07": "tsx ./src/lib/commercial-provider-adapter.behavior.ts && tsc -p tsconfig.json --noEmit",
+    "test:commercial-provider-block08": "tsx ./src/lib/commercial-provider-events.behavior.ts && tsc -p tsconfig.json --noEmit",
     "repair:bimtech-identity-templates": "tsx ./scripts/bimtech-identity-template-repair.ts",
     "test:bimtech-template-repair": "tsx ./src/lib/bimtech-template-repair-definitions.behavior.ts",
     "test:edt-engine-build296": "tsx ./src/lib/edt-engine-build296.behavior.ts",
