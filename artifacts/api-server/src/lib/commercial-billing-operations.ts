@@ -190,3 +190,35 @@ export function projectBillingOperations(input: {
     canManageBilling:input.role === "billing_admin",
   });
 }
+
+export const BILLING_READINESS_BLOCKERS = [
+  "SUBSCRIPTION_NOT_ACTIVE", "ACCESS_GRANT_MISSING", "ACCESS_GRANT_STALE", "STATEMENT_MISSING",
+  "UNRESOLVED_COLLECTION", "NOTICE_MISSING", "NOTICE_OVERDUE",
+] as const;
+export type BillingReadinessBlocker = (typeof BILLING_READINESS_BLOCKERS)[number];
+
+export function assessCommercialBillingReadiness(input: {
+  subscription: CompanySubscription;
+  grant: SubscriptionAccessGrant | null;
+  statements: readonly CustomerBillingStatement[];
+  collection: CollectionCase | null;
+  notices: readonly BillingNotice[];
+  now: string;
+}): Readonly<{ status: "ready" | "action_required"; blockers: readonly BillingReadinessBlocker[]; checkedAt: string }> {
+  const checkedAt = instant(input.now, "Billing readiness time");
+  const blockers: BillingReadinessBlocker[] = [];
+  if (input.subscription.status !== "active" && input.subscription.status !== "past_due") blockers.push("SUBSCRIPTION_NOT_ACTIVE");
+  if (!input.grant) blockers.push("ACCESS_GRANT_MISSING");
+  else if (input.grant.subscriptionId !== input.subscription.id || input.grant.companyId !== input.subscription.companyId || input.grant.subscriptionRevision > input.subscription.revision || input.grant.expiresAt <= checkedAt) blockers.push("ACCESS_GRANT_STALE");
+  if (!input.statements.length) blockers.push("STATEMENT_MISSING");
+  else if (input.statements.some((statement) => statement.companyId !== input.subscription.companyId || statement.subscriptionId !== input.subscription.id)) throw new Error("Billing readiness statement lineage is invalid");
+  if (input.collection && input.collection.status !== "recovered") {
+    if (input.collection.subscriptionId !== input.subscription.id) throw new Error("Billing readiness collection lineage is invalid");
+    blockers.push("UNRESOLVED_COLLECTION");
+    const applicable = input.notices.filter((notice) => notice.collectionCaseId === input.collection?.id && notice.collectionAttempt === input.collection?.failedAttempts && notice.status === "prepared");
+    if (!applicable.length) blockers.push("NOTICE_MISSING");
+    else if (applicable.every((notice) => notice.notBefore < checkedAt)) blockers.push("NOTICE_OVERDUE");
+  }
+  if (input.notices.some((notice) => notice.companyId !== input.subscription.companyId || notice.subscriptionId !== input.subscription.id)) throw new Error("Billing readiness notice lineage is invalid");
+  return Object.freeze({ status:blockers.length ? "action_required" : "ready", blockers:Object.freeze(blockers), checkedAt });
+}

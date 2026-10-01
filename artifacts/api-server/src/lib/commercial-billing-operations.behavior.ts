@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createCompanySubscription } from "./subscription-authority";
-import { cancelBillingNotice, createCustomerBillingStatement, deriveSubscriptionAccess, evaluateSubscriptionAccess, prepareBillingNotice, projectBillingOperations } from "./commercial-billing-operations";
+import { assessCommercialBillingReadiness, cancelBillingNotice, createCustomerBillingStatement, deriveSubscriptionAccess, evaluateSubscriptionAccess, prepareBillingNotice, projectBillingOperations } from "./commercial-billing-operations";
 
 const subscription = createCompanySubscription({ id:"sub-41", companyId:7, planId:"business", catalogPriceVersion:7, billingCycle:"monthly", currency:"USD", amount:3000, now:"2026-10-01T00:00:00Z" });
 const active = { ...subscription, status:"active" as const, revision:2, updatedAt:"2026-10-01T00:01:00.000Z" };
@@ -39,3 +39,13 @@ assert.equal(customerView.statements[0]?.netPaidCents, 2500);
 assert.equal(customerView.notices[0]?.id, null);
 assert.throws(() => projectBillingOperations({ companyId:8, subscription:pastDue, grant, statements:[], notices:[], role:"auditor" }), /another company/);
 console.log("B044 permission-safe billing operations projection: PASS");
+
+const ready = assessCommercialBillingReadiness({ subscription:active, grant, statements:[statement], collection:null, notices:[], now:"2026-10-05T00:00:00Z" });
+assert.deepEqual(ready, { status:"ready", blockers:[], checkedAt:"2026-10-05T00:00:00.000Z" });
+const action = assessCommercialBillingReadiness({ subscription:pastDue, grant, statements:[statement], collection, notices:[notice], now:"2026-10-07T00:00:00Z" });
+assert.equal(action.status, "action_required");
+assert.ok(action.blockers.includes("UNRESOLVED_COLLECTION"));
+assert.ok(action.blockers.includes("NOTICE_OVERDUE"));
+const incomplete = assessCommercialBillingReadiness({ subscription, grant:null, statements:[], collection:null, notices:[], now:"2026-10-05T00:00:00Z" });
+assert.deepEqual(incomplete.blockers, ["SUBSCRIPTION_NOT_ACTIVE","ACCESS_GRANT_MISSING","STATEMENT_MISSING"]);
+console.log("B045 commercial billing release acceptance: PASS");
