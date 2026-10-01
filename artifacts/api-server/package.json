@@ -9,6 +9,7 @@
     "dist/index.meta.json"
   ],
   "scripts": {
+    "test:commercial-subscription-block03": "tsx ./src/lib/subscription-authority.behavior.ts",
     "repair:bimtech-identity-templates": "tsx ./scripts/bimtech-identity-template-repair.ts",
     "test:bimtech-template-repair": "tsx ./src/lib/bimtech-template-repair-definitions.behavior.ts",
     "test:edt-engine-build296": "tsx ./src/lib/edt-engine-build296.behavior.ts",

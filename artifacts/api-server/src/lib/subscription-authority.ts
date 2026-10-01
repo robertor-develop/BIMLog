@@ -185,3 +185,70 @@ export function verifyEntitlementSnapshot(snapshot: SubscriptionEntitlementSnaps
   const { fingerprint, ...unsigned } = snapshot;
   return fingerprint === snapshotFingerprint(unsigned);
 }
+
+export type CommercialAuditAction =
+  | "subscription.created"
+  | "subscription.transitioned"
+  | "seats.changed"
+  | "entitlements.snapshotted";
+
+export type CommercialAuditEvent = Readonly<{
+  sequence: number;
+  subscriptionId: string;
+  companyId: number;
+  action: CommercialAuditAction;
+  actorId: string;
+  reason: string;
+  occurredAt: string;
+  subscriptionRevision: number;
+  previousDigest: string | null;
+  details: Readonly<Record<string, string | number | boolean | null>>;
+  digest: string;
+}>;
+
+function auditDigest(event: Omit<CommercialAuditEvent, "digest">): string {
+  return crypto.createHash("sha256").update(JSON.stringify(event)).digest("hex");
+}
+
+export function appendCommercialAuditEvent(input: {
+  history: readonly CommercialAuditEvent[];
+  subscription: CompanySubscription;
+  action: CommercialAuditAction;
+  actorId: string;
+  reason: string;
+  occurredAt: string;
+  details?: Readonly<Record<string, string | number | boolean | null>>;
+}): CommercialAuditEvent {
+  const actorId = input.actorId.trim();
+  const reason = input.reason.trim();
+  if (!actorId) throw new Error("A commercial audit actor is required");
+  if (reason.length < 3 || reason.length > 500) throw new Error("A commercial audit reason must be between 3 and 500 characters");
+  if (!verifyCommercialAuditHistory(input.history)) throw new Error("Commercial audit history is invalid");
+  const previous = input.history.at(-1);
+  if (previous && previous.subscriptionId !== input.subscription.id) throw new Error("Commercial audit history belongs to another subscription");
+  const unsigned = Object.freeze({
+    sequence: input.history.length + 1,
+    subscriptionId: input.subscription.id,
+    companyId: input.subscription.companyId,
+    action: input.action,
+    actorId,
+    reason,
+    occurredAt: new Date(input.occurredAt).toISOString(),
+    subscriptionRevision: input.subscription.revision,
+    previousDigest: previous?.digest ?? null,
+    details: Object.freeze({ ...(input.details ?? {}) }),
+  });
+  return Object.freeze({ ...unsigned, digest: auditDigest(unsigned) });
+}
+
+export function verifyCommercialAuditHistory(history: readonly CommercialAuditEvent[]): boolean {
+  let previousDigest: string | null = null;
+  for (let index = 0; index < history.length; index += 1) {
+    const event = history[index];
+    if (event.sequence !== index + 1 || event.previousDigest !== previousDigest) return false;
+    const { digest, ...unsigned } = event;
+    if (digest !== auditDigest(unsigned)) return false;
+    previousDigest = digest;
+  }
+  return true;
+}

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  appendCommercialAuditEvent,
   changeSeatQuantity,
   createCompanySubscription,
   createEntitlementSnapshot,
@@ -7,6 +8,7 @@ import {
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   verifyEntitlementSnapshot,
+  verifyCommercialAuditHistory,
 } from "./subscription-authority";
 
 assert.deepEqual(SUBSCRIPTION_PLAN_IDS, ["free", "professional", "team", "business", "enterprise"]);
@@ -62,4 +64,22 @@ assert.deepEqual(suspendedSnapshot.capabilities, []);
 assert.notEqual(suspendedSnapshot.fingerprint, snapshot.fingerprint);
 assert.throws(() => createEntitlementSnapshot({ subscription: recovered, seatQuantities: [{ ...assignedSeats, subscriptionId: "sub-other" }], effectiveAt: recovered.updatedAt }), /another subscription/);
 
-console.log("Commercial subscription Builds 011-014 company record, lifecycle, seats, and entitlement snapshot: PASS");
+const createdEvent = appendCommercialAuditEvent({
+  history: [], subscription, action: "subscription.created", actorId: "user-42",
+  reason: "Company selected the Team annual plan", occurredAt: subscription.createdAt,
+  details: { planId: subscription.planId, amount: subscription.amount },
+});
+const activatedEvent = appendCommercialAuditEvent({
+  history: [createdEvent], subscription: active, action: "subscription.transitioned", actorId: "billing-worker",
+  reason: "Payment provider confirmed the subscription", occurredAt: active.updatedAt,
+  details: { from: "pending", to: "active" },
+});
+const auditHistory = [createdEvent, activatedEvent];
+assert.equal(activatedEvent.sequence, 2);
+assert.equal(activatedEvent.previousDigest, createdEvent.digest);
+assert.equal(verifyCommercialAuditHistory(auditHistory), true);
+assert.equal(verifyCommercialAuditHistory([createdEvent, { ...activatedEvent, reason: "altered" }]), false);
+assert.throws(() => appendCommercialAuditEvent({ history: auditHistory, subscription: recovered, action: "seats.changed", actorId: "", reason: "Seat update", occurredAt: recovered.updatedAt }), /actor/);
+assert.throws(() => appendCommercialAuditEvent({ history: [{ ...createdEvent, digest: "tampered" }], subscription, action: "subscription.transitioned", actorId: "user-42", reason: "Activate", occurredAt: pending.updatedAt }), /history is invalid/);
+
+console.log("Commercial subscription Block 3 Builds 011-015: PASS");
