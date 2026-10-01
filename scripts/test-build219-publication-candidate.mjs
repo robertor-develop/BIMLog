@@ -25,8 +25,8 @@ assert.match(reconciliation, /Status: `PASS`/);
 assert.match(gates, /Status: `PASS`/);
 assert.match(gates, /Navisworks 2021 Native contract: `57\/57 PASS`/);
 assert.match(gates, /Navisworks 2025 Native contract: `57\/57 PASS`/);
-assert.equal(identity.label, "v1.05.N18-P36");
-assert.equal(identity.binaryVersion, "1.5.18.36");
+assert.equal(identity.label, "v1.05.N18-P37");
+assert.equal(identity.binaryVersion, "1.5.18.37");
 
 for (const [name, required] of [
   ["persistent authorization", /clear instruction to proceed, push, publish or deploy remains valid through completion/i],
