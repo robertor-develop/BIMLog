@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import type { CheckoutAttempt, CommercialOrder, ProviderCustomerBinding } from "./subscription-authority";
 
 export type CommercialProviderReadiness = Readonly<{
   provider: "stripe";
@@ -61,4 +62,52 @@ export function inspectStripeCommercialConfiguration(input: {
     readiness,
     configuration: configured ? Object.freeze({ secretKey, webhookSecret, portalConfigurationId, appOrigin, apiVersion }) : null,
   });
+}
+
+export type StripeTransport = (request: Readonly<{
+  method: "POST";
+  path: string;
+  headers: Readonly<Record<string, string>>;
+  body: URLSearchParams;
+}>) => Promise<Readonly<{ status: number; body: unknown }>>;
+
+function safeHostedUrl(value: unknown, expectedHost: string): string {
+  if (typeof value !== "string") throw new Error("Commercial provider response is missing a hosted URL");
+  const url = new URL(value);
+  if (url.protocol !== "https:" || url.hostname !== expectedHost) throw new Error("Commercial provider returned an untrusted hosted URL");
+  return url.toString();
+}
+
+export async function createStripeCheckoutSession(input: {
+  configuration: StripeCommercialConfiguration;
+  order: CommercialOrder;
+  attempt: CheckoutAttempt;
+  customer: ProviderCustomerBinding;
+  priceReference: string;
+  transport: StripeTransport;
+}): Promise<Readonly<{ providerSessionId: string; checkoutUrl: string; expiresAt: string }>> {
+  if (input.order.status !== "submitted" || input.attempt.status !== "created") throw new Error("Stripe checkout requires a submitted order and created attempt");
+  if (input.attempt.orderId !== input.order.id || input.customer.companyId !== input.order.companyId || input.attempt.provider !== "stripe" || input.customer.provider !== "stripe") throw new Error("Stripe checkout lineage is invalid");
+  const priceReference = input.priceReference.trim();
+  if (!/^price_[A-Za-z0-9_]{6,}$/.test(priceReference)) throw new Error("A valid Stripe price reference is required");
+  const body = new URLSearchParams();
+  body.set("mode", "subscription");
+  body.set("customer", input.customer.providerCustomerReference);
+  body.set("client_reference_id", input.order.id);
+  body.set("line_items[0][price]", priceReference);
+  body.set("line_items[0][quantity]", "1");
+  body.set("success_url", `${input.configuration.appOrigin}/settings/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
+  body.set("cancel_url", `${input.configuration.appOrigin}/settings/billing?checkout=cancelled`);
+  body.set("metadata[order_id]", input.order.id);
+  body.set("metadata[subscription_id]", input.order.subscriptionId);
+  body.set("metadata[company_id]", String(input.order.companyId));
+  const response = await input.transport({
+    method: "POST", path: "/v1/checkout/sessions", body,
+    headers: Object.freeze({ Authorization: `Bearer ${input.configuration.secretKey}`, "Stripe-Version": input.configuration.apiVersion, "Idempotency-Key": input.attempt.idempotencyKey }),
+  });
+  if (response.status < 200 || response.status >= 300 || !response.body || typeof response.body !== "object") throw new Error("Stripe checkout session creation failed");
+  const result = response.body as { id?: unknown; url?: unknown; expires_at?: unknown };
+  if (typeof result.id !== "string" || !result.id.startsWith("cs_")) throw new Error("Stripe checkout response identity is invalid");
+  if (!Number.isSafeInteger(result.expires_at)) throw new Error("Stripe checkout response expiry is invalid");
+  return Object.freeze({ providerSessionId: result.id, checkoutUrl: safeHostedUrl(result.url, "checkout.stripe.com"), expiresAt: new Date((result.expires_at as number) * 1000).toISOString() });
 }
