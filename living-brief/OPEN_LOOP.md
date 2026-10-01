@@ -4067,3 +4067,10 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Regenerate the complete endpoint authority matrix and verify zero missing authentication/project-authority entries.
 - [ ] Pass the repeated complete gate at repaired candidate `9e2626c0fa5c002cb954312534ed358b452e2766`, push, publish and complete authenticated Chrome smoke.
 
+
+## B056-B060 P37 candidate gate repair — 2026-10-01
+
+- [x] Replace the stale P36 assertion in the current publication-candidate regression with canonical P37 identity while retaining historical P36 evidence.
+- [x] Pass focused Build 219 and Block 44 suites.
+- [ ] Repeat the complete gate at repaired candidate `60d6f9d9104d1a55ec09cc24eff48db7129d3210`, then push, publish and run full authenticated Chrome smoke.
+

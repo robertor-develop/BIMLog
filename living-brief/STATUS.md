@@ -3439,3 +3439,8 @@ B056–B060 ten-build boundary.
 
 The complete gate identified that the anonymous, possession-bound email-confirmation endpoint was missing from the explicit public-route inventory. Commit `9e2626c0fa5c002cb954312534ed358b452e2766` classifies only that exact POST route as public; its hashed, expiring, single-use token boundary is unchanged. The focused endpoint authority matrix now passes with zero missing authentication or project-authority entries. Full exact-head gate, push, publication and authenticated Chrome smoke remain due.
 
+
+## B056-B060 publication-candidate assertion repair — 2026-10-01
+
+Commit `60d6f9d9104d1a55ec09cc24eff48db7129d3210` aligns the final publication-candidate regression with canonical P37 identity. Historical accepted P36 evidence remains unchanged. The focused Build 219 and Block 44 publication suites pass; the complete exact-head gate must be repeated before push and publication.
+

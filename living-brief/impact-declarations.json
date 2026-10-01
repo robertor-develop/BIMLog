@@ -53437,8 +53437,8 @@
     },
     {
       "taskId": "saas-block12-verified-onboarding-b056-b060",
-      "reviewedThroughCommit": "9e2626c0fa5c002cb954312534ed358b452e2766",
-      "reviewedAt": "2026-10-01T17:15:00Z",
+      "reviewedThroughCommit": "60d6f9d9104d1a55ec09cc24eff48db7129d3210",
+      "reviewedAt": "2026-10-01T18:10:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -53503,8 +53503,8 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "50b8f98314431036f6aacc7f8afb6f65d896a86adf9d9af2065574f87363ece9",
-      "reason": "B056-B060 onboarding remains unchanged; the gate repair explicitly records the anonymous possession-bound email confirmation route in the authorization inventory."
+      "reviewedChangeSha256": "442dfd0f1a780b2874bb4652d05200f5c92aeabe8606e38b4c598b44ac1de226",
+      "reason": "B056-B060 product scope is unchanged; the release gate now asserts the canonical P37 candidate while preserving historical P36 evidence."
     }
   ]
 }
