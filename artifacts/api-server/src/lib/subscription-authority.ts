@@ -190,7 +190,9 @@ export type CommercialAuditAction =
   | "subscription.created"
   | "subscription.transitioned"
   | "seats.changed"
-  | "entitlements.snapshotted";
+  | "entitlements.snapshotted"
+  | "order.accepted"
+  | "checkout.completed";
 
 export type CommercialAuditEvent = Readonly<{
   sequence: number;
@@ -413,5 +415,31 @@ export function verifyAndReceiveProviderEvent(input: {
     provider, eventId, eventType,
     payloadDigest: crypto.createHash("sha256").update(input.rawPayload).digest("hex"),
     receivedAt: new Date(input.nowEpochSeconds * 1000).toISOString(),
+  });
+}
+
+export function applyCheckoutCompletion(input: {
+  receipt: ProviderEventReceipt;
+  rawPayload: string;
+  attempt: CheckoutAttempt;
+  order: CommercialOrder;
+  subscription: CompanySubscription;
+  now: string;
+}): Readonly<{ attempt: CheckoutAttempt; order: CommercialOrder; subscription: CompanySubscription }> {
+  if (crypto.createHash("sha256").update(input.rawPayload).digest("hex") !== input.receipt.payloadDigest) throw new Error("Provider event payload does not match its receipt");
+  if (input.receipt.provider !== input.attempt.provider) throw new Error("Provider event belongs to another checkout provider");
+  if (input.receipt.eventType !== "checkout.completed") throw new Error("Provider event does not confirm checkout completion");
+  let payload: { checkoutId?: unknown; orderId?: unknown };
+  try { payload = JSON.parse(input.rawPayload) as { checkoutId?: unknown; orderId?: unknown }; } catch { throw new Error("Provider event payload is invalid JSON"); }
+  if (payload.checkoutId !== input.attempt.id || payload.orderId !== input.order.id) throw new Error("Provider event does not match the checkout order");
+  if (input.attempt.orderId !== input.order.id || input.order.subscriptionId !== input.subscription.id) throw new Error("Checkout completion lineage is invalid");
+  if (input.attempt.status !== "created" && input.attempt.status !== "redirect_ready") throw new Error("Checkout attempt cannot be completed from its current state");
+  if (input.order.status !== "submitted") throw new Error("Checkout completion requires a submitted order");
+  if (input.subscription.status !== "pending") throw new Error("Checkout completion requires a pending subscription");
+  const now = new Date(input.now).toISOString();
+  return Object.freeze({
+    attempt: Object.freeze({ ...input.attempt, status: "completed", providerReference: input.receipt.eventId, updatedAt: now }),
+    order: transitionCommercialOrder({ order: input.order, to: "accepted", expectedRevision: input.order.revision, now }),
+    subscription: transitionSubscription({ subscription: input.subscription, to: "active", expectedRevision: input.subscription.revision, now }),
   });
 }

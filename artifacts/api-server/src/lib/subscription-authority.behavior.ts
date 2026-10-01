@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import crypto from "node:crypto";
 import {
   appendCommercialAuditEvent,
+  applyCheckoutCompletion,
   changeSeatQuantity,
   createCompanySubscription,
   createCommercialOrder,
@@ -105,7 +106,7 @@ assert.deepEqual({ provider: checkout.provider, amount: checkout.amount, status:
 assert.equal(createCheckoutAttempt({ order: submittedOrder, provider: "stripe", idempotencyKey: checkout.idempotencyKey, existing: [checkout], now: "2026-09-30T20:14:00Z" }), checkout);
 assert.throws(() => createCheckoutAttempt({ order: { ...submittedOrder, total: 1 }, provider: "stripe", idempotencyKey: checkout.idempotencyKey, existing: [checkout], now: "2026-09-30T20:14:00Z" }), /conflicts/);
 assert.throws(() => createCheckoutAttempt({ order, provider: "stripe", idempotencyKey: "company-7-order-20260930", existing: [], now: "2026-09-30T20:14:00Z" }), /submitted order/);
-const providerPayload = JSON.stringify({ id: "evt-1", type: "checkout.completed", checkoutId: checkout.id });
+const providerPayload = JSON.stringify({ id: "evt-1", type: "checkout.completed", checkoutId: checkout.id, orderId: submittedOrder.id });
 const providerIssuedAt = 1790799300;
 const providerSecret = "test-only-signing-secret";
 const providerSignature = crypto.createHmac("sha256", providerSecret).update(`${providerIssuedAt}.${providerPayload}`).digest("hex");
@@ -115,5 +116,9 @@ assert.equal(providerReceipt.payloadDigest.length, 64);
 assert.throws(() => verifyAndReceiveProviderEvent({ provider: "stripe", eventId: "evt-1", eventType: "checkout.completed", rawPayload: providerPayload, signatureHex: providerSignature, signingSecret: providerSecret, issuedAtEpochSeconds: providerIssuedAt, nowEpochSeconds: providerIssuedAt + 10, priorReceipts: [providerReceipt] }), /already received/);
 assert.throws(() => verifyAndReceiveProviderEvent({ provider: "stripe", eventId: "evt-2", eventType: "checkout.completed", rawPayload: providerPayload, signatureHex: "00", signingSecret: providerSecret, issuedAtEpochSeconds: providerIssuedAt, nowEpochSeconds: providerIssuedAt + 10, priorReceipts: [] }), /signature/);
 assert.throws(() => verifyAndReceiveProviderEvent({ provider: "stripe", eventId: "evt-2", eventType: "checkout.completed", rawPayload: providerPayload, signatureHex: providerSignature, signingSecret: providerSecret, issuedAtEpochSeconds: providerIssuedAt, nowEpochSeconds: providerIssuedAt + 301, priorReceipts: [] }), /replay window/);
+const checkoutCompletion = applyCheckoutCompletion({ receipt: providerReceipt, rawPayload: providerPayload, attempt: checkout, order: submittedOrder, subscription: pending, now: "2026-09-30T20:16:00Z" });
+assert.deepEqual({ checkout: checkoutCompletion.attempt.status, reference: checkoutCompletion.attempt.providerReference, order: checkoutCompletion.order.status, subscription: checkoutCompletion.subscription.status }, { checkout: "completed", reference: "evt-1", order: "accepted", subscription: "active" });
+assert.throws(() => applyCheckoutCompletion({ receipt: providerReceipt, rawPayload: `${providerPayload} `, attempt: checkout, order: submittedOrder, subscription: pending, now: "2026-09-30T20:16:00Z" }), /does not match/);
+assert.throws(() => applyCheckoutCompletion({ receipt: providerReceipt, rawPayload: providerPayload, attempt: checkout, order: submittedOrder, subscription, now: "2026-09-30T20:16:00Z" }), /pending subscription/);
 
-console.log("Commercial subscription Block 3 Builds 011-015: PASS");
+console.log("Commercial checkout Block 4 Builds 016-020: PASS");
