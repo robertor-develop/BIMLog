@@ -53505,6 +53505,78 @@
       ],
       "reviewedChangeSha256": "442dfd0f1a780b2874bb4652d05200f5c92aeabe8606e38b4c598b44ac1de226",
       "reason": "B056-B060 product scope is unchanged; the release gate now asserts the canonical P37 candidate while preserving historical P36 evidence."
+    },
+    {
+      "taskId": "saas-block12-p37-chained-wrapper-identity-repair",
+      "reviewedThroughCommit": "49442262f291a7b8b19b60b68573a3279d3bcd33",
+      "reviewedAt": "2026-10-01T22:05:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair preserves attributable release evidence and the existing governed publication boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing stop-on-production-defect and repair-before-next-block instructions already control this work."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Live acceptance now explicitly requires complete chained publish-wrapper resolution rather than a merely bound wrapper commit."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes release attribution mechanics without changing product or commercial direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Production assembly now unwraps the complete bounded local first-parent Replit publication-wrapper chain."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native source, installers, signed manifests and package bytes are unchanged by this repair."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal report renderer, export layout or document-design contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, legal rule or regulatory conclusion is added or changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the first P37 publication, exact mismatch, wrapper evidence and bounded repair candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps republication and repeated live acceptance open and blocks B061 until they pass."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The dated incident evidence is retained in the release evidence file without rewriting historical audit records."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/saas-completion-20261001/B056_B060_PUBLICATION_IDENTITY_REPAIR.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4eaee97c3dbd2ec5de738fdaa4c5c4e6c3ffc02113fc24033683ec09bbb841fa",
+      "reason": "The first P37 publication exposed a five-wrapper release-attribution defect; production assembly now verifies and unwraps the complete bounded chain before binding the canonical source."
     }
   ]
 }

@@ -3444,3 +3444,6 @@ The complete gate identified that the anonymous, possession-bound email-confirma
 
 Commit `60d6f9d9104d1a55ec09cc24eff48db7129d3210` aligns the final publication-candidate regression with canonical P37 identity. Historical accepted P36 evidence remains unchanged. The focused Build 219 and Block 44 publication suites pass; the complete exact-head gate must be repeated before push and publication.
 
+## B056-B060 live publication identity repair — 2026-10-01
+
+Replit publication `adb53e67` successfully promoted the P37 product and the authenticated Chrome route/session smoke passed, but public health reported wrapper commit `2cd9134cfbbec43d1105f74e43997a093e36dc70` instead of canonical source `05e4998f528c79a79079592e28f5b0c29d0faf1b`. Git evidence proved five consecutive byte-identical `Published your App` wrappers. Repair commit `c6104220fc8e18dad04192c931652a9ad75a7fc0` makes production assembly unwrap the complete bounded local first-parent wrapper chain before binding release identity. Focused behavior, TypeScript and deterministic production assembly pass; full gate, push, republication and repeated smoke remain required before acceptance.

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "8c5f46ebfe0f658b788c274388ca266437f81f63c05747c38f80cd64aa9c6275",
-  "itemCount": 281,
+  "sourceSha256": "5918dcf1b6d0714209f469786052102480d795a7f0d6ebf3e4e8acb6e9eaa724",
+  "itemCount": 282,
   "counts": {
-    "ACTIVE": 246,
+    "ACTIVE": 247,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5127,6 +5127,24 @@
       "evidence": [
         "OPEN_LOOP.md:4075",
         "B056-B060 P37 candidate gate repair — 2026-10-01"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7cb53130a7af2429",
+      "sourceLine": 4082,
+      "heading": "B056-B060 publication identity repair — 2026-10-01",
+      "statement": "Pass the complete exact-head gate, push the repair, republish, verify live health equals the repaired canonical commit, and repeat authenticated Chrome smoke before starting B061.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4082",
+        "B056-B060 publication identity repair — 2026-10-01"
       ],
       "currentAuthority": false
     }

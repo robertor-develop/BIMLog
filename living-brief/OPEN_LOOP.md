@@ -4074,3 +4074,9 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Pass focused Build 219 and Block 44 suites.
 - [ ] Repeat the complete gate at repaired candidate `60d6f9d9104d1a55ec09cc24eff48db7129d3210`, then push, publish and run full authenticated Chrome smoke.
 
+## B056-B060 publication identity repair — 2026-10-01
+
+- [x] Publish the combined B051-B060 candidate and complete authenticated Chrome route, responsive workflow, reload and two-tab checks at P37.
+- [x] Detect the live source mismatch instead of accepting a merely bound wrapper identity: health reported `2cd9134cfbbec43d1105f74e43997a093e36dc70` while the canonical published source was `05e4998f528c79a79079592e28f5b0c29d0faf1b`.
+- [x] Prove the intervening commits are five consecutive byte-identical `Published your App` wrappers and repair production assembly to unwrap the complete bounded local first-parent wrapper chain.
+- [ ] Pass the complete exact-head gate, push the repair, republish, verify live health equals the repaired canonical commit, and repeat authenticated Chrome smoke before starting B061.
