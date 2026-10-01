@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { applyStripeCheckoutCompleted, ingestStripeProviderEvent } from "./commercial-provider-events";
+import { applyStripeCheckoutCompleted, applyStripeSubscriptionEvent, ingestStripeProviderEvent } from "./commercial-provider-events";
 import { createCheckoutAttempt, createCommercialOrder, createCompanySubscription, transitionCommercialOrder, transitionSubscription } from "./subscription-authority";
 import type { ProviderEventReceipt } from "./subscription-authority";
 
@@ -34,3 +34,12 @@ assert.deepEqual({ event: completion037.event.status, attempt: completion037.att
 assert.throws(() => applyStripeCheckoutCompleted({ event: intake037, rawPayload: checkout037Raw.replace("249000", "249001"), attempt: redirectedAttempt, order: submittedOrder, subscription: pendingSubscription, now: "2026-10-01T12:03:00Z" }), /does not match/);
 
 console.log("Commercial provider Block 8 Build 037: PASS");
+
+const subscription038Raw = JSON.stringify({ id: "evt_038", type: "customer.subscription.updated", created: 1790856100, data: { object: { id: "sub_stripe_038", customer: "cus_038", status: "past_due", metadata: { subscription_id: completion037.subscription.id, company_id: "37" } } } });
+const event038 = ingestStripeProviderEvent({ receipt: verified(subscription038Raw, "evt_038", "customer.subscription.updated"), rawPayload: subscription038Raw, existing: [intake037] });
+const synchronized038 = applyStripeSubscriptionEvent({ event: event038, rawPayload: subscription038Raw, binding: { subscriptionId: completion037.subscription.id, companyId: 37, providerSubscriptionReference: "sub_stripe_038", providerCustomerReference: "cus_038" }, subscription: completion037.subscription, now: "2026-10-01T12:05:00Z" });
+assert.equal(synchronized038.subscription.status, "past_due");
+assert.equal(synchronized038.event.status, "applied");
+assert.throws(() => applyStripeSubscriptionEvent({ event: event038, rawPayload: subscription038Raw, binding: { subscriptionId: completion037.subscription.id, companyId: 37, providerSubscriptionReference: "sub_other", providerCustomerReference: "cus_038" }, subscription: completion037.subscription, now: "2026-10-01T12:05:00Z" }), /binding is invalid/);
+
+console.log("Commercial provider Block 8 Build 038: PASS");

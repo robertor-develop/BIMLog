@@ -29,6 +29,13 @@ export type CommercialProviderEvent = Readonly<{
   appliedAt: string | null;
 }>;
 
+export type StripeSubscriptionBinding = Readonly<{
+  subscriptionId: string;
+  companyId: number;
+  providerSubscriptionReference: string;
+  providerCustomerReference: string;
+}>;
+
 type StripeEventPayload = {
   id?: unknown;
   type?: unknown;
@@ -97,4 +104,32 @@ export function applyStripeCheckoutCompleted(input: {
     order: transitionCommercialOrder({ order: input.order, to: "accepted", expectedRevision: input.order.revision, now }),
     subscription: transitionSubscription({ subscription: input.subscription, to: "active", expectedRevision: input.subscription.revision, now }),
   });
+}
+
+export function applyStripeSubscriptionEvent(input: {
+  event: CommercialProviderEvent;
+  rawPayload: string;
+  binding: StripeSubscriptionBinding;
+  subscription: CompanySubscription;
+  now: string;
+}): Readonly<{ event: CommercialProviderEvent; subscription: CompanySubscription }> {
+  if (!['customer.subscription.updated', 'customer.subscription.deleted'].includes(input.event.eventType) || input.event.status !== "pending") throw new Error("A pending Stripe subscription event is required");
+  if (sha256(input.rawPayload) !== input.event.payloadDigest) throw new Error("Subscription event payload does not match its intake record");
+  let payload: { data?: { object?: { id?: unknown; customer?: unknown; status?: unknown; metadata?: Record<string, unknown> } } };
+  try { payload = JSON.parse(input.rawPayload); } catch { throw new Error("Subscription event payload is invalid JSON"); }
+  const object = payload.data?.object;
+  if (!object || object.id !== input.binding.providerSubscriptionReference || object.id !== input.event.objectId || object.customer !== input.binding.providerCustomerReference) throw new Error("Stripe subscription binding is invalid");
+  if (input.binding.subscriptionId !== input.subscription.id || input.binding.companyId !== input.subscription.companyId || object.metadata?.subscription_id !== input.subscription.id || object.metadata?.company_id !== String(input.subscription.companyId)) throw new Error("Subscription metadata lineage is invalid");
+  const desired = input.event.eventType === "customer.subscription.deleted" || object.status === "canceled"
+    ? "cancelled" as const
+    : object.status === "active" || object.status === "trialing"
+      ? "active" as const
+      : object.status === "past_due" || object.status === "unpaid"
+        ? "past_due" as const
+        : null;
+  if (!desired) throw new Error("Stripe subscription status is unsupported");
+  const subscription = desired === input.subscription.status
+    ? input.subscription
+    : transitionSubscription({ subscription: input.subscription, to: desired, expectedRevision: input.subscription.revision, now: input.now });
+  return Object.freeze({ event: appliedEvent(input.event, input.now), subscription });
 }
