@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## P37 publication repair — preserve onboarding tables — 2026-10-01
+
+- [x] Reject the Replit migration preview that proposed dropping `user_onboarding_profiles` and `email_verification_tokens`; no production data mutation was approved.
+- [x] Declare `user_onboarding_work_profile_chk` and `email_verification_tokens_user_idx` in the canonical Drizzle schema so development and production retain the same additive onboarding objects.
+- [ ] Repeat the exact-head gate, push, guarded Replit development-schema parity, publication, exact live identity check and full authenticated Chrome smoke before B061.
+
 ## 250-build SaaS completion — Block 12: verified onboarding — 2026-10-01
 
 - [x] **B056 — Account and email verification:** expiring single-use hashed verification tokens, resend replacement, delivery status, and public confirmation.

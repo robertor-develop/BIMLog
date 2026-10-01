@@ -53577,6 +53577,78 @@
       ],
       "reviewedChangeSha256": "4eaee97c3dbd2ec5de738fdaa4c5c4e6c3ffc02113fc24033683ec09bbb841fa",
       "reason": "The first P37 publication exposed a five-wrapper release-attribution defect; production assembly now verifies and unwraps the complete bounded chain before binding the canonical source."
+    },
+    {
+      "taskId": "saas-block12-p37-onboarding-schema-parity-repair",
+      "reviewedThroughCommit": "e57119a3045b20b347492c5778fa4955724acf66",
+      "reviewedAt": "2026-10-01T23:03:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair preserves existing customer data and attributable release evidence."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing fail-closed database and repair-before-next-block rules already govern this correction."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Publication acceptance now records the destructive preview refusal and requires exact development/production schema parity."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product or commercial direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Canonical Drizzle declarations now include the named onboarding constraint and verification-token index created by the additive runtime migration."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next sources, manifests and packages are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or regulatory conclusion changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the cancelled unsafe migration and bounded parity repair."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps gate, safe publication and repeated live acceptance open before B061."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The dated incident evidence records that no destructive production mutation was approved."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/saas-completion-20261001/B056_B060_PUBLICATION_IDENTITY_REPAIR.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0b4586628231d995dccf8e12e9add878287aa28eba4077aca6c9ab1b0a632905",
+      "reason": "The publication preview exposed schema-authority drift; canonical declarations now preserve the existing onboarding tables, constraint and index."
     }
   ]
 }
