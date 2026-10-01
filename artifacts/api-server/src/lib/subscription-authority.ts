@@ -741,3 +741,41 @@ export function createCompanyBillingProfile(input: {
     taxId: input.taxId?.trim() || null, revision: 1, verifiedAt, updatedAt: verifiedAt,
   });
 }
+
+export type ProviderCustomerBinding = Readonly<{
+  id: string;
+  companyId: number;
+  billingProfileRevision: number;
+  provider: string;
+  providerCustomerReference: string;
+  status: "active" | "retired";
+  createdAt: string;
+}>;
+
+export function bindProviderCustomer(input: {
+  id?: string;
+  profile: CompanyBillingProfile;
+  provider: string;
+  providerCustomerReference: string;
+  existing: readonly ProviderCustomerBinding[];
+  now: string;
+}): ProviderCustomerBinding {
+  const provider = input.provider.trim().toLowerCase();
+  const providerCustomerReference = input.providerCustomerReference.trim();
+  if (!provider || !providerCustomerReference) throw new Error("Provider customer identity is required");
+  if (providerCustomerReference.length > 200) throw new Error("Provider customer reference is too long");
+  const duplicate = input.existing.find((binding) => binding.provider === provider && binding.providerCustomerReference === providerCustomerReference);
+  if (duplicate) {
+    if (duplicate.companyId !== input.profile.companyId) throw new Error("Provider customer is already bound to another company");
+    if (duplicate.status !== "active") throw new Error("Retired provider customer bindings cannot be reused");
+    return duplicate;
+  }
+  if (input.existing.some((binding) => binding.companyId === input.profile.companyId && binding.provider === provider && binding.status === "active")) {
+    throw new Error("Company already has an active customer for this provider");
+  }
+  return Object.freeze({
+    id: input.id ?? crypto.randomUUID(), companyId: input.profile.companyId,
+    billingProfileRevision: input.profile.revision, provider, providerCustomerReference,
+    status: "active", createdAt: new Date(input.now).toISOString(),
+  });
+}

@@ -16,6 +16,7 @@ import {
   applyScheduledCancellation,
   createRefundCreditNote,
   createCompanyBillingProfile,
+  bindProviderCustomer,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -172,4 +173,10 @@ assert.deepEqual({ legalName: billingProfile.legalName, email: billingProfile.bi
 assert.throws(() => createCompanyBillingProfile({ companyId: 7, legalName: "BIMTech", billingEmail: "invalid", addressLine1: "100 Way", city: "Miami", postalCode: "33101", countryCode: "US", verifiedAt: billingProfile.verifiedAt }), /valid billing email/);
 assert.throws(() => createCompanyBillingProfile({ companyId: 7, legalName: "BIMTech", billingEmail: "billing@example.com", addressLine1: "100 Way", city: "Miami", postalCode: "33101", countryCode: "USA", verifiedAt: billingProfile.verifiedAt }), /two-letter/);
 
-console.log("Commercial account Block 6 Build 026: PASS");
+const providerCustomer = bindProviderCustomer({ id: "provider-customer-1", profile: billingProfile, provider: " Stripe ", providerCustomerReference: "cus_bimtech_7", existing: [], now: "2026-10-01T03:31:00Z" });
+assert.deepEqual({ companyId: providerCustomer.companyId, provider: providerCustomer.provider, profileRevision: providerCustomer.billingProfileRevision, status: providerCustomer.status }, { companyId: 7, provider: "stripe", profileRevision: 1, status: "active" });
+assert.equal(bindProviderCustomer({ profile: billingProfile, provider: "stripe", providerCustomerReference: "cus_bimtech_7", existing: [providerCustomer], now: providerCustomer.createdAt }), providerCustomer);
+assert.throws(() => bindProviderCustomer({ profile: { ...billingProfile, companyId: 8 }, provider: "stripe", providerCustomerReference: "cus_bimtech_7", existing: [providerCustomer], now: providerCustomer.createdAt }), /another company/);
+assert.throws(() => bindProviderCustomer({ profile: billingProfile, provider: "stripe", providerCustomerReference: "cus_other", existing: [providerCustomer], now: providerCustomer.createdAt }), /already has an active customer/);
+
+console.log("Commercial account Block 6 Build 027: PASS");
