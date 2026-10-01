@@ -12,6 +12,8 @@ import {
   createSeatQuantity,
   createSubscriptionTerm,
   recordCollectionFailure,
+  scheduleSubscriptionCancellation,
+  applyScheduledCancellation,
   SUBSCRIPTION_PLAN_IDS,
   transitionSubscription,
   transitionCommercialOrder,
@@ -144,4 +146,11 @@ assert.deepEqual({ subscription: collectionFailure.subscription.status, status: 
 assert.throws(() => recordCollectionFailure({ subscription: collectionFailure.subscription, term: firstTerm, receipt: failedReceipt, existing: collectionFailure.collection, nextRetryAt: null, graceEndsAt: "2026-10-08T20:17:00Z", now: "2026-10-02T20:17:00Z" }), /already applied/);
 assert.throws(() => recordCollectionFailure({ subscription: checkoutCompletion.subscription, term: firstTerm, receipt: failedReceipt, nextRetryAt: "2026-10-09T20:17:00Z", graceEndsAt: "2026-10-08T20:17:00Z", now: "2026-10-01T20:17:00Z" }), /inside the grace/);
 
-console.log("Commercial billing Block 5 Build 023: PASS");
+const cancellation = scheduleSubscriptionCancellation({ id: "cancel-1", subscription: checkoutCompletion.subscription, term: firstTerm, requestedBy: "company-admin-7", reason: "Company requested non-renewal", requestedAt: "2027-09-01T12:00:00Z" });
+assert.deepEqual({ status: cancellation.status, effectiveAt: cancellation.effectiveAt, actor: cancellation.requestedBy }, { status: "scheduled", effectiveAt: firstTerm.endsAt, actor: "company-admin-7" });
+assert.throws(() => applyScheduledCancellation({ subscription: checkoutCompletion.subscription, cancellation, now: "2027-09-29T12:00:00Z" }), /has not arrived/);
+const cancelledAtTerm = applyScheduledCancellation({ subscription: checkoutCompletion.subscription, cancellation, now: firstTerm.endsAt });
+assert.deepEqual({ subscription: cancelledAtTerm.subscription.status, cancellation: cancelledAtTerm.cancellation.status, appliedAt: cancelledAtTerm.cancellation.appliedAt }, { subscription: "cancelled", cancellation: "applied", appliedAt: firstTerm.endsAt });
+assert.throws(() => scheduleSubscriptionCancellation({ subscription: checkoutCompletion.subscription, term: firstTerm, requestedBy: "company-admin-7", reason: "Late request", requestedAt: firstTerm.endsAt }), /before the term ends/);
+
+console.log("Commercial billing Block 5 Build 024: PASS");

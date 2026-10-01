@@ -599,3 +599,50 @@ export function recordCollectionFailure(input: {
     }),
   });
 }
+
+export type SubscriptionCancellation = Readonly<{
+  id: string;
+  subscriptionId: string;
+  termSequence: number;
+  requestedBy: string;
+  reason: string;
+  requestedAt: string;
+  effectiveAt: string;
+  status: "scheduled" | "applied";
+  appliedAt: string | null;
+}>;
+
+export function scheduleSubscriptionCancellation(input: {
+  id?: string;
+  subscription: CompanySubscription;
+  term: SubscriptionTerm;
+  requestedBy: string;
+  reason: string;
+  requestedAt: string;
+}): SubscriptionCancellation {
+  if (input.subscription.status !== "active" && input.subscription.status !== "past_due") throw new Error("Only an active or past-due subscription can be scheduled for cancellation");
+  if (input.term.subscriptionId !== input.subscription.id) throw new Error("Cancellation term belongs to another subscription");
+  const requestedBy = input.requestedBy.trim();
+  const reason = input.reason.trim();
+  if (!requestedBy) throw new Error("A cancellation actor is required");
+  if (reason.length < 3 || reason.length > 500) throw new Error("A cancellation reason must be between 3 and 500 characters");
+  const requestedAt = new Date(input.requestedAt).toISOString();
+  if (requestedAt >= input.term.endsAt) throw new Error("Cancellation must be scheduled before the term ends");
+  return Object.freeze({
+    id: input.id ?? crypto.randomUUID(), subscriptionId: input.subscription.id, termSequence: input.term.sequence,
+    requestedBy, reason, requestedAt, effectiveAt: input.term.endsAt, status: "scheduled", appliedAt: null,
+  });
+}
+
+export function applyScheduledCancellation(input: {
+  subscription: CompanySubscription;
+  cancellation: SubscriptionCancellation;
+  now: string;
+}): Readonly<{ subscription: CompanySubscription; cancellation: SubscriptionCancellation }> {
+  if (input.cancellation.subscriptionId !== input.subscription.id) throw new Error("Cancellation belongs to another subscription");
+  if (input.cancellation.status !== "scheduled") throw new Error("Cancellation is not scheduled");
+  const now = new Date(input.now).toISOString();
+  if (now < input.cancellation.effectiveAt) throw new Error("Cancellation effective time has not arrived");
+  const subscription = transitionSubscription({ subscription: input.subscription, to: "cancelled", expectedRevision: input.subscription.revision, now });
+  return Object.freeze({ subscription, cancellation: Object.freeze({ ...input.cancellation, status: "applied", appliedAt: now }) });
+}
