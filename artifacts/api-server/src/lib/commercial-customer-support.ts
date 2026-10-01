@@ -38,3 +38,35 @@ export function deriveCustomerSupportEntitlement(input: {
     effectiveAt: now, expiresAt: input.grant.expiresAt, status: "active",
   });
 }
+
+export type CustomerSupportCase = Readonly<{
+  id: string; companyId: number; subscriptionId: string; entitlementId: string; requesterUserId: number;
+  channel: SupportChannel; locale: "en" | "es"; category: "billing" | "access" | "workflow" | "technical";
+  priority: "normal" | "urgent"; subject: string; description: string; status: "open" | "in_progress" | "resolved" | "closed";
+  openedAt: string; responseDueAt: string; revision: number;
+}>;
+
+export function openCustomerSupportCase(input: {
+  entitlement: CustomerSupportEntitlement; requesterUserId: number; channel: SupportChannel; locale: "en" | "es";
+  category: CustomerSupportCase["category"]; priority: CustomerSupportCase["priority"];
+  subject: string; description: string; requestKey: string; existing: readonly CustomerSupportCase[]; now: string;
+}): CustomerSupportCase {
+  const openedAt = instant(input.now, "Support case opening time");
+  if (input.entitlement.status !== "active" || input.entitlement.expiresAt <= openedAt) throw new Error("Customer support entitlement is not active");
+  if (!input.entitlement.channels.includes(input.channel)) throw new Error("Support channel is not entitled");
+  if (!Number.isSafeInteger(input.requesterUserId) || input.requesterUserId < 1) throw new Error("Support requester is invalid");
+  const subject = input.subject.trim();
+  const description = input.description.trim();
+  const requestKey = input.requestKey.trim();
+  if (subject.length < 5 || subject.length > 160 || description.length < 10 || description.length > 10000 || !requestKey) throw new Error("Support case content is invalid");
+  const id = crypto.createHash("sha256").update(`${input.entitlement.companyId}:${input.requesterUserId}:${requestKey}`).digest("hex");
+  const duplicate = input.existing.find(supportCase => supportCase.id === id);
+  if (duplicate) return duplicate;
+  if (input.existing.some(supportCase => supportCase.companyId !== input.entitlement.companyId)) throw new Error("Existing support case belongs to another company");
+  const targetMinutes = input.priority === "urgent" ? Math.min(input.entitlement.responseTargetMinutes, 120) : input.entitlement.responseTargetMinutes;
+  return Object.freeze({
+    id, companyId:input.entitlement.companyId, subscriptionId:input.entitlement.subscriptionId, entitlementId:input.entitlement.id,
+    requesterUserId:input.requesterUserId, channel:input.channel, locale:input.locale, category:input.category, priority:input.priority,
+    subject, description, status:"open", openedAt, responseDueAt:new Date(new Date(openedAt).getTime() + targetMinutes * 60000).toISOString(), revision:1,
+  });
+}
