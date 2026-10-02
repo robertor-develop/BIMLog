@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import {salesInquiryActionUrgency} from "./sales-inquiry-action-urgency";
+const now=new Date("2026-10-02T12:00:00.000Z");
+assert.equal(salesInquiryActionUrgency("closed",new Date("2026-10-01T00:00:00.000Z"),now),"closed");
+assert.equal(salesInquiryActionUrgency("new",null,now),"unscheduled");
+assert.equal(salesInquiryActionUrgency("qualified",new Date("2026-10-02T11:59:59.000Z"),now),"overdue");
+assert.equal(salesInquiryActionUrgency("qualified",new Date("2026-10-02T15:00:00.000Z"),now),"today");
+assert.equal(salesInquiryActionUrgency("qualified",new Date("2026-10-03T15:00:00.000Z"),now),"upcoming");
+assert.throws(()=>salesInquiryActionUrgency("new",new Date("invalid"),now),/DUE_INVALID/);
+console.log("B136 deterministic sales action urgency: PASS");
