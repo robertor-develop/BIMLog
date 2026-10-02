@@ -8,6 +8,7 @@
     "build": "node scripts/build-production.mjs && node scripts/verify-build.mjs",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test:commercial-platform-readiness": "pnpm --filter @workspace/api-server exec tsx ../bimlog/src/lib/commercial-workspace-client.behavior.ts && pnpm --filter @workspace/api-server exec tsx ../bimlog/src/pages/commercial-workspace.behavior.ts",
     "test:edt-engine-build334": "pnpm --filter @workspace/api-server exec tsx ../bimlog/src/components/job-operations/edt-plan-preview.behavior.ts"
   },
   "devDependencies": {
