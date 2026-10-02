@@ -8,7 +8,7 @@
     "sidebarLinks": 4,
     "apiRoutes": 703,
     "frontendApiReferences": 270,
-    "routeOwnedTables": 61
+    "routeOwnedTables": 62
   },
   "compatibilityRedirects": [
     {
@@ -2447,7 +2447,9 @@
       "path": "/contact",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
-        "contactSubmissionsTable"
+        "contactSubmissionsTable",
+        "salesInquiryAssignmentEventsTable",
+        "usersTable"
       ]
     },
     {
@@ -2455,7 +2457,9 @@
       "path": "/admin/sales-inquiries",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
-        "contactSubmissionsTable"
+        "contactSubmissionsTable",
+        "salesInquiryAssignmentEventsTable",
+        "usersTable"
       ]
     },
     {
@@ -2463,7 +2467,9 @@
       "path": "/admin/sales-inquiries/:id/status",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
-        "contactSubmissionsTable"
+        "contactSubmissionsTable",
+        "salesInquiryAssignmentEventsTable",
+        "usersTable"
       ]
     },
     {
@@ -2471,7 +2477,9 @@
       "path": "/admin/sales-inquiries/:id/assignment",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
-        "contactSubmissionsTable"
+        "contactSubmissionsTable",
+        "salesInquiryAssignmentEventsTable",
+        "usersTable"
       ]
     },
     {

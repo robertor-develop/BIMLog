@@ -3565,3 +3565,14 @@ B101–B105 passed the complete gate and reached `origin/master` at exact source
 - B115 adds bilingual overdue filtering, visible response deadline and owner state, plus a revision-safe Assign to me action in the existing Total Control inquiry review.
 - Focused B111-B115 behavior suites and both API/frontend TypeScript checks pass at implementation source `a0368ccd`. This is the first five-build block after the accepted B101-B110 publication; complete gate and one push are due, while publication and authenticated Chrome smoke remain due at B120.
 - Full-gate repair 6370f8cc forces TypeScript project-reference rebuilds so additive schema declarations cannot be hidden by stale incremental metadata.
+
+B111–B115 passed the complete exact-head gate and reached `origin/master` at exact source `f0995c3f6355a73af4201a73d21b3cb98c1cc228`. The block remained unpublished as the first half of the B111–B120 publication batch.
+
+## 250-build SaaS Completion Block 24 — accountable sales ownership — 2026-10-02
+
+- B116 joins the assigned Super Administrator's visible identity into the protected sales queue and derives current-user ownership on the server.
+- B117 adds strict all, mine and unassigned ownership scopes without accepting arbitrary user identifiers.
+- B118 prevents reassignment away from another owner and limits release to the current owner under the existing revision boundary.
+- B119 writes assigned and released events transactionally to an append-only history table with actor, previous owner, next owner and timestamp.
+- B120 adds bilingual owner filtering, visible owner names and a release action shown only to the current owner.
+- Focused API behavior, database schema compilation, API TypeScript, browser contract behavior and frontend TypeScript pass at repaired implementation source `88162c3d2664beb9bb1e5c7ba782664b288fd8f6`. B111–B120 now reach the required ten-build publication boundary; complete gate, push, controlled publication, exact live identity and full authenticated Chrome smoke are due.

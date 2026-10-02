@@ -4191,4 +4191,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B113 add revision-safe Super Administrator self-assignment without trusting a client-supplied actor.
 - [x] B114 expose strict accountability data and bounded overdue-only filtering through the protected inquiry list.
 - [x] B115 add bilingual overdue filtering, response deadline, ownership state and Assign to me action in Total Control.
-- [ ] Pass the complete exact-head gate and push B111–B115 once. The stale schema-declaration cache found by the first gate is repaired at `6370f8cc`; repeat the exact-head gate before push. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B116–B120.
+- [x] Pass the complete exact-head gate and push B111–B115 once. Exact source `f0995c3f6355a73af4201a73d21b3cb98c1cc228` reached `origin/master`; the block remained unpublished as the first half of the B111–B120 publication batch.
+
+## 250-build SaaS Completion Block 24 — accountable sales ownership — 2026-10-02
+
+- [x] B116 expose the accountable Super Administrator's visible name and a server-derived current-owner flag through a strict browser contract.
+- [x] B117 add bounded all, mine and unassigned ownership scopes to the protected inquiry queue.
+- [x] B118 prevent assignment theft and allow release only by the current owner while retaining revision checks.
+- [x] B119 record every assignment and release in an immutable transactional event history.
+- [x] B120 complete the bilingual owner filter, visible owner identity and controlled release workflow in Total Control.
+- [ ] Pass the complete exact-head gate, push B116–B120, publish accumulated B111–B120 without Replit Agents, verify exact live identity and complete full authenticated Chrome smoke.

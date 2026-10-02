@@ -1175,6 +1175,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/rfi-responses.ts
 - lib/db/src/schema/rfi-view-events.ts
 - lib/db/src/schema/rfis.ts
+- lib/db/src/schema/sales-inquiry-assignment-events.ts
 - lib/db/src/schema/schedule-planner.ts
 - lib/db/src/schema/submittal-register.ts
 - lib/db/src/schema/submittal-view-events.ts
