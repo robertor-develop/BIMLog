@@ -5,6 +5,7 @@ for(const token of ["Next steps","Próximos pasos","Complete billing identity","
 for(const token of ["What happens next","Qué sucede ahora","Your company","You do not need to configure them","data.responsibilities.customer","data.responsibilities.bimlog"])assert.match(source,new RegExp(token));
 for(const token of ["parseCommercialCheckoutReturn","Checkout received","Checkout cancelled","verifying the provider confirmation","No subscription change was claimed"])assert.match(source,new RegExp(token));
 assert.match(source,/data\.actions\.map/);assert.match(source,/action\.status==="blocked"/);assert.match(source,/Button disabled/);
+assert.match(source,/minmax\(min\(240px,100%\),1fr\)/);assert.match(source,/Waiting for:/);assert.match(source,/action\.blockers\.map/);assert.doesNotMatch(source,/Ready \/ Listo|Setup required \/ Requiere configuración/);
 assert.match(source,/AbortController/);assert.match(source,/parseCommercialWorkspace/);assert.doesNotMatch(source,/stripe.*secret/i);
 console.log("B069 bilingual Billing & Support workspace: PASS");
 const app=fs.readFileSync(new URL("../App.tsx",import.meta.url),"utf8"),sidebar=fs.readFileSync(new URL("../components/layout/MasterSidebar.tsx",import.meta.url),"utf8");
