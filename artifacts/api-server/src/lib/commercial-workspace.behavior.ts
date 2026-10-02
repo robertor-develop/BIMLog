@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {createCompanySubscription} from "./subscription-authority";
 import {deriveSubscriptionAccess} from "./commercial-billing-operations";
-import {assembleCommercialWorkspace,previewPlanChange,reconcileCommercialSeats} from "./commercial-workspace";
+import {assembleCommercialWorkspace,assessCommercialLaunch,previewPlanChange,reconcileCommercialSeats} from "./commercial-workspace";
 const draft=createCompanySubscription({id:"sub-workspace",companyId:42,planId:"business",catalogPriceVersion:3,billingCycle:"monthly",currency:"USD",amount:3000,now:"2026-10-01T00:00:00Z"});
 const subscription={...draft,status:"active" as const,revision:2,updatedAt:"2026-10-01T00:01:00.000Z"};
 const term={subscriptionId:subscription.id,sequence:1,billingCycle:"monthly" as const,startsAt:"2026-10-01T00:00:00.000Z",endsAt:"2026-11-01T00:00:00.000Z",renewsAt:"2026-11-01T00:00:00.000Z",sourceOrderId:"order-workspace",sourceInvoiceId:"invoice-workspace"};
@@ -21,4 +21,9 @@ assert.deepEqual({assigned:seats.assigned,available:seats.available,email:seats.
 assert.throws(()=>reconcileCommercialSeats({workspace:{...workspace,seatLimit:1},assignments:seats.assignments}),/limit exceeded/);
 assert.throws(()=>reconcileCommercialSeats({workspace,assignments:[seats.assignments[0]!,{...seats.assignments[0]!,userId:3}]}),/duplicated/);
 console.log("B063 company seat roster and allowance enforcement: PASS");
+const launch=assessCommercialLaunch({workspace,billingIdentityComplete:true,providerReady:true,webhookReady:true,portalReady:true,supportReady:true,now:"2026-10-02T00:00:00Z"});
+assert.deepEqual({status:launch.status,blockers:launch.blockers},{status:"ready",blockers:[]});
+const blockedLaunch=assessCommercialLaunch({workspace,billingIdentityComplete:true,providerReady:false,webhookReady:false,portalReady:false,supportReady:true,now:"2026-10-02T00:00:00Z"});
+assert.deepEqual(blockedLaunch.blockers,["PROVIDER_NOT_READY","WEBHOOK_NOT_READY","PORTAL_NOT_READY"]);
+console.log("B064 fail-closed payment-provider launch readiness: PASS");
 export {subscription,access,workspace};

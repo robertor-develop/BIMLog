@@ -38,3 +38,17 @@ export function reconcileCommercialSeats(input:{workspace:CommercialWorkspaceSta
   const available=input.workspace.seatLimit-assignments.length;
   return Object.freeze({assigned:assignments.length,available,assignments:Object.freeze(assignments),canInvite:input.workspace.status==="active"&&input.workspace.accessStatus==="active"&&available>0});
 }
+
+export const COMMERCIAL_LAUNCH_BLOCKERS=["SUBSCRIPTION_INACTIVE","ACCESS_INACTIVE","BILLING_IDENTITY_INCOMPLETE","PROVIDER_NOT_READY","WEBHOOK_NOT_READY","PORTAL_NOT_READY","SUPPORT_NOT_READY"] as const;
+export type CommercialLaunchBlocker=(typeof COMMERCIAL_LAUNCH_BLOCKERS)[number];
+export function assessCommercialLaunch(input:{workspace:CommercialWorkspaceState;billingIdentityComplete:boolean;providerReady:boolean;webhookReady:boolean;portalReady:boolean;supportReady:boolean;now:string}):Readonly<{status:"ready"|"blocked";blockers:readonly CommercialLaunchBlocker[];checkedAt:string}>{
+  const checkedAt=iso(input.now,"Commercial launch check time"),blockers:CommercialLaunchBlocker[]=[];
+  if(input.workspace.status!=="active")blockers.push("SUBSCRIPTION_INACTIVE");
+  if(input.workspace.accessStatus!=="active"||input.workspace.expiresAt<=checkedAt)blockers.push("ACCESS_INACTIVE");
+  if(!input.billingIdentityComplete)blockers.push("BILLING_IDENTITY_INCOMPLETE");
+  if(!input.providerReady)blockers.push("PROVIDER_NOT_READY");
+  if(!input.webhookReady)blockers.push("WEBHOOK_NOT_READY");
+  if(!input.portalReady)blockers.push("PORTAL_NOT_READY");
+  if(!input.supportReady)blockers.push("SUPPORT_NOT_READY");
+  return Object.freeze({status:blockers.length?"blocked":"ready",blockers:Object.freeze(blockers),checkedAt});
+}
