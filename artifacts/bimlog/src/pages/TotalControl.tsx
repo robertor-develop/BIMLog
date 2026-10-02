@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 import { confirmAndRetireProject } from "@/lib/project-retirement";
+import { SalesInquiryQueue } from "@/components/admin/SalesInquiryQueue";
 import { getMe } from "@workspace/api-client-react";
 import { User, Building2, Folder, Circle, FileText, Zap, MessageSquare, ClipboardList, TrendingUp, Brain, Loader2, Lock, AlertTriangle, Users, MapPin, Eye, EyeOff } from "lucide-react";
 
@@ -74,7 +75,7 @@ interface PlatformStats { totalUsers: number; totalCompanies: number; totalProje
 interface Company { id: number; name: string; status: string; plan?: string; projectCount: number; userCount: number; fileCount: number; createdAt: string; website?: string; address?: string; phone?: string; }
 interface Project { id: number; code: string; name: string; status: string; companyName?: string; memberCount: number; fileCount: number; rfiCount?: number; submittalCount?: number; createdAt: string; conventionCompanyCodes?: string[]; participatingCompanies?: string[]; unassignedConventionCompanies?: string[]; }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed"];
+const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Sales Inquiries"];
 
 const TOTAL_CONTROL_SHELL_CSS = `
   .hq-total-control-page {
@@ -1015,6 +1016,7 @@ export function TotalControl() {
         Projects: "Proyectos",
         "Email Log": "Correos",
         "Activity Feed": "Actividad",
+        "Sales Inquiries": "Consultas comerciales",
       } as Record<string, string>,
     }
     : {
@@ -1085,6 +1087,7 @@ export function TotalControl() {
             {activeTab === 3 && token && <TCProjectsTab token={token} />}
             {activeTab === 4 && token && <TCEmailLogTab token={token} />}
             {activeTab === 5 && token && <TCActivityFeedTab token={token} />}
+            {activeTab === 6 && token && <SalesInquiryQueue token={token} />}
           </>
         )}
       </main>
