@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "9eee348db8f892f5df08ed6d361efbd5f33b73a9cfdf4353c7101a59c5533356",
-  "itemCount": 285,
+  "sourceSha256": "0a23725a75a2e7555c2b619b18d5af21f12fbf7d894a60dca74770dbcf73c4d8",
+  "itemCount": 286,
   "counts": {
-    "ACTIVE": 250,
+    "ACTIVE": 251,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5198,6 +5198,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4241",
+        "250-build SaaS Completion Block 28 — actionable sales workload — 2026-10-02"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "28a1f6325721f616",
+      "sourceLine": 4243,
+      "heading": "250-build SaaS Completion Block 28 — actionable sales workload — 2026-10-02",
+      "statement": "Repair the real stale-artifact production failure by advancing the tracked B131–B140 Replit cache epoch, repeat the full exact-head gate, push, republish and require production health to equal the repaired head before Chrome acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4243",
         "250-build SaaS Completion Block 28 — actionable sales workload — 2026-10-02"
       ],
       "currentAuthority": false

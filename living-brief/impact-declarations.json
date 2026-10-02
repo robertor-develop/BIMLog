@@ -54739,6 +54739,77 @@
       ],
       "reviewedChangeSha256": "d29a08326c5b8273d1ae84bedf0f2634729d7ad206e86dcaaee7cedb6b58c183",
       "reason": "B136-B140 turn already scheduled sales actions into an authorized deterministic workload view with bounded server filters and bilingual due-state presentation; no external message, payment, credential, or customer-data mutation is introduced."
+    },
+    {
+      "taskId": "saas-b140-replit-cache-repair",
+      "reviewedThroughCommit": "a521a2f27fa6c0b33dc8cb4c6bac7e5501639e0e",
+      "reviewedAt": "2026-10-02T18:38:26Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded publication-cache repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded publication-cache repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded publication-cache repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded publication-cache repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated inventory is reconciled after the tracked Replit cache epoch changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded publication-cache repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded publication-cache repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded publication-cache repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact stale-artifact production failure and repair."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks republication, exact identity and authenticated smoke as mandatory."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded publication-cache repair follows the existing authority without changing its semantic rules."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6c661d323d0b9a0843b3af699ba4176892f42ae1a623130af684c5224a82f02f",
+      "reason": "Production reused the accepted B130 artifact after B140 publication; the tracked cache epoch changes to force a fresh provider build without changing product behavior."
     }
   ]
 }
