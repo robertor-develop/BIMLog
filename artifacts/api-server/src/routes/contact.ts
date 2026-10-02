@@ -7,7 +7,7 @@ import {authMiddleware,isSuperAdminMiddleware} from "../middlewares/auth";
 import {assertSalesInquiryTransition} from "../lib/sales-inquiry-operations";
 import {parseSalesInquiryListQuery} from "../lib/sales-inquiry-query";
 import {salesInquiryResponseDueAt} from "../lib/sales-inquiry-response";
-import {parseSalesInquiryAssignment} from "../lib/sales-inquiry-assignment";
+import {canChangeSalesInquiryAssignment,parseSalesInquiryAssignment} from "../lib/sales-inquiry-assignment";
 
 const router = Router();
 
@@ -62,8 +62,12 @@ router.patch("/admin/sales-inquiries/:id/assignment",authMiddleware,isSuperAdmin
   if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}
   let input;
   try{input=parseSalesInquiryAssignment(req.body);}catch{res.status(400).json({code:"SALES_INQUIRY_ASSIGNMENT_INVALID"});return;}
+  const [current]=await db.select({assignedToUserId:contactSubmissionsTable.assignedToUserId,updatedAt:contactSubmissionsTable.updatedAt}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.id,id)).limit(1);
+  if(!current||current.updatedAt.getTime()!==input.expectedUpdatedAt.getTime()){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}
+  if(!canChangeSalesInquiryAssignment(current.assignedToUserId,actorId,input.assigned)){res.status(409).json({code:"SALES_INQUIRY_ASSIGNMENT_CONFLICT"});return;}
   const now=new Date();
-  const [updated]=await db.update(contactSubmissionsTable).set({assignedToUserId:input.assigned?actorId:null,assignedAt:input.assigned?now:null,updatedAt:now}).where(and(eq(contactSubmissionsTable.id,id),eq(contactSubmissionsTable.updatedAt,input.expectedUpdatedAt))).returning({id:contactSubmissionsTable.id,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedAt:contactSubmissionsTable.assignedAt,updatedAt:contactSubmissionsTable.updatedAt});
+  const ownership=input.assigned?or(isNull(contactSubmissionsTable.assignedToUserId),eq(contactSubmissionsTable.assignedToUserId,actorId)):eq(contactSubmissionsTable.assignedToUserId,actorId);
+  const [updated]=await db.update(contactSubmissionsTable).set({assignedToUserId:input.assigned?actorId:null,assignedAt:input.assigned?now:null,updatedAt:now}).where(and(eq(contactSubmissionsTable.id,id),eq(contactSubmissionsTable.updatedAt,input.expectedUpdatedAt),ownership)).returning({id:contactSubmissionsTable.id,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedAt:contactSubmissionsTable.assignedAt,updatedAt:contactSubmissionsTable.updatedAt});
   if(!updated){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}
   res.json(updated);
 });

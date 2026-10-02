@@ -8,3 +8,8 @@ export function parseSalesInquiryAssignment(value:unknown):SalesInquiryAssignmen
   if(Number.isNaN(expectedUpdatedAt.getTime())||expectedUpdatedAt.toISOString()!==row.expectedUpdatedAt)throw new Error("SALES_INQUIRY_ASSIGNMENT_INVALID");
   return Object.freeze({expectedUpdatedAt,assigned:row.assigned});
 }
+
+export function canChangeSalesInquiryAssignment(currentAssigneeId:number|null,actorId:number,assigned:boolean):boolean{
+  if(!Number.isSafeInteger(actorId)||actorId<1)throw new Error("SALES_INQUIRY_ACTOR_INVALID");
+  return currentAssigneeId===actorId||assigned&&currentAssigneeId===null;
+}
