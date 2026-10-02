@@ -8,6 +8,8 @@ import {assertSalesInquiryTransition} from "../lib/sales-inquiry-operations";
 import {parseSalesInquiryListQuery} from "../lib/sales-inquiry-query";
 import {salesInquiryResponseDueAt} from "../lib/sales-inquiry-response";
 import {canChangeSalesInquiryAssignment,parseSalesInquiryAssignment} from "../lib/sales-inquiry-assignment";
+import {parseSalesInquiryAssignmentHistoryQuery} from "../lib/sales-inquiry-assignment-history";
+import {alias} from "drizzle-orm/pg-core";
 
 const router = Router();
 
@@ -75,6 +77,22 @@ router.patch("/admin/sales-inquiries/:id/assignment",authMiddleware,isSuperAdmin
   if(updated==="conflict"){res.status(409).json({code:"SALES_INQUIRY_ASSIGNMENT_CONFLICT"});return;}
   if(!updated){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}
   res.json(updated);
+});
+
+router.get("/admin/sales-inquiries/:id/assignment-history",authMiddleware,isSuperAdminMiddleware,async(req,res)=>{
+  const id=Number(req.params.id);
+  if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}
+  let query;
+  try{query=parseSalesInquiryAssignmentHistoryQuery(req.query as Record<string,unknown>);}catch{res.status(400).json({code:"SALES_INQUIRY_HISTORY_QUERY_INVALID"});return;}
+  const actor=alias(usersTable,"assignment_actor"),previousOwner=alias(usersTable,"previous_assignment_owner"),nextOwner=alias(usersTable,"next_assignment_owner");
+  const [inquiry,items,totalRows]=await Promise.all([
+    db.select({id:contactSubmissionsTable.id}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.id,id)).limit(1),
+    db.select({id:salesInquiryAssignmentEventsTable.id,action:salesInquiryAssignmentEventsTable.action,actorUserId:salesInquiryAssignmentEventsTable.actorUserId,actorName:actor.fullName,previousAssigneeUserId:salesInquiryAssignmentEventsTable.previousAssigneeUserId,previousAssigneeName:previousOwner.fullName,nextAssigneeUserId:salesInquiryAssignmentEventsTable.nextAssigneeUserId,nextAssigneeName:nextOwner.fullName,createdAt:salesInquiryAssignmentEventsTable.createdAt}).from(salesInquiryAssignmentEventsTable).innerJoin(actor,eq(actor.id,salesInquiryAssignmentEventsTable.actorUserId)).leftJoin(previousOwner,eq(previousOwner.id,salesInquiryAssignmentEventsTable.previousAssigneeUserId)).leftJoin(nextOwner,eq(nextOwner.id,salesInquiryAssignmentEventsTable.nextAssigneeUserId)).where(eq(salesInquiryAssignmentEventsTable.inquiryId,id)).orderBy(desc(salesInquiryAssignmentEventsTable.createdAt),desc(salesInquiryAssignmentEventsTable.id)).limit(query.limit).offset(query.offset),
+    db.select({total:count()}).from(salesInquiryAssignmentEventsTable).where(eq(salesInquiryAssignmentEventsTable.inquiryId,id)),
+  ]);
+  if(!inquiry.length){res.status(404).json({code:"SALES_INQUIRY_NOT_FOUND"});return;}
+  res.set("Cache-Control","private, no-store, max-age=0");
+  res.json({items,limit:query.limit,offset:query.offset,total:Number(totalRows[0]?.total??0)});
 });
 
 export default router;
