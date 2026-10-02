@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { intentLabel, parseCommercialIntent, rememberCommercialIntent } from "@/lib/commercial-intent";
 import { recordConversionEvent } from "@/lib/conversion-funnel";
 import { useEffect } from "react";
+import { useI18n } from "@/lib/i18n";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -31,29 +32,31 @@ const CONTACT_INFO = [
 ];
 
 export function Contact() {
+  const {tt}=useI18n();
   const intent = parseCommercialIntent(window.location.search);
   const [form, setForm] = useState({ fullName: "", email: "", companyName: "", country: "", interest: intent ? intentLabel(intent) : "", message: intent?.useCase ? `Primary use case: ${intent.useCase}` : "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [requestKey]=useState(()=>crypto.randomUUID());
   useEffect(()=>{if(intent)recordConversionEvent("contact_started");},[]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.fullName || !form.email || !form.companyName || !form.country || !form.interest || !form.message) {
-      setErrorMsg("All fields are required."); return;
+      setErrorMsg(tt("All fields are required.","Todos los campos son obligatorios.")); return;
     }
     rememberCommercialIntent(intent); setStatus("sending"); setErrorMsg("");
     try {
       const r = await fetch(`${API_BASE}/api/v1/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({...form,plan:intent?.plan??null,billingCycle:intent?.billing??null,useCase:intent?.useCase||null,requestKey}),
       });
       const d = await r.json();
-      if (d.success) { recordConversionEvent("contact_submitted"); setStatus("sent"); }
-      else { setStatus("error"); setErrorMsg(d.error || "Something went wrong. Please email us directly."); }
+      if (r.ok&&d.success) { recordConversionEvent("contact_submitted"); setStatus("sent"); }
+      else { setStatus("error"); setErrorMsg(d.error || tt("Something went wrong. Please try again.","Ocurrió un error. Inténtelo de nuevo.")); }
     } catch {
-      setStatus("error"); setErrorMsg("Could not connect. Please email us at info@ignitesmart.ai.");
+      setStatus("error"); setErrorMsg(tt("Could not connect. Your information was not claimed as received.","No se pudo conectar. Su información no se registró como recibida."));
     }
   };
 
@@ -62,22 +65,22 @@ export function Contact() {
       <div style={{ maxWidth: 1000, margin: "0 auto", padding: "40px 24px", flex: 1, width: "100%" }}>
         <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: "hsl(var(--muted-foreground))", textDecoration: "none", marginBottom: 40 }}>
           <ChevronLeft style={{ width: 14, height: 14 }} />
-          Back to home
+          {tt("Back to home","Volver al inicio")}
         </Link>
 
         <div style={{ marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(var(--primary))", background: "hsl(var(--primary)/0.08)", padding: "3px 10px", borderRadius: 4 }}>Contact</span>
         </div>
-        <h1 style={{ fontSize: 32, fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: 8, fontFamily: "var(--font-display)" }}>Get in touch</h1>
+        <h1 style={{ fontSize: 32, fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: 8, fontFamily: "var(--font-display)" }}>{tt("Get in touch","Contáctenos")}</h1>
         <p style={{ fontSize: 15, color: "hsl(var(--muted-foreground))", marginBottom: 48, lineHeight: 1.7 }}>
-          Questions about pricing, a custom proposal, or the Founding Partner program — we respond to every inquiry within one business day.
+          {tt("Questions about pricing, a custom proposal, or the Founding Partner program — we respond to every inquiry within one business day.","Consultas sobre precios, una propuesta personalizada o el programa de Socios Fundadores: respondemos cada solicitud dentro de un día hábil.")}
         </p>
-        {intent && <div role="status" style={{marginBottom:24,padding:14,border:"1px solid hsl(var(--border))",borderRadius:8}}><strong>Selected from Pricing:</strong> {intentLabel(intent)}{intent.useCase?` · ${intent.useCase}`:""}. You can change it below.</div>}
+        {intent && <div role="status" style={{marginBottom:24,padding:14,border:"1px solid hsl(var(--border))",borderRadius:8}}><strong>{tt("Selected from Pricing:","Seleccionado en Precios:")}</strong> {intentLabel(intent)}{intent.useCase?` · ${intent.useCase}`:""}. {tt("You can change it below.","Puede cambiarlo abajo.")}</div>}
 
         <div style={{ display: "flex", gap: 48, flexWrap: "wrap", alignItems: "flex-start" }}>
           {/* Contact info — left */}
           <div style={{ minWidth: 260, flex: "0 0 260px" }}>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 24 }}>Contact information</h2>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 24 }}>{tt("Contact information","Información de contacto")}</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {CONTACT_INFO.map((item, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
@@ -104,10 +107,10 @@ export function Contact() {
           <div style={{ flex: 1, minWidth: 300 }}>
             {status === "sent" ? (
               <div style={{ background: "#22c55e11", border: "1px solid #22c55e44", borderRadius: 12, padding: "36px 32px", textAlign: "center" }}>
-                <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 12 }}>Sent</div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 8 }}>Message received</div>
+                <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 12 }}>{tt("Sent","Enviado")}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 8 }}>{tt("Message received","Mensaje recibido")}</div>
                 <div style={{ fontSize: 14, color: "hsl(var(--muted-foreground))", lineHeight: 1.7 }}>
-                  Thank you for reaching out. We will reply to <strong>{form.email}</strong> within one business day.
+                  {tt("Thank you for reaching out. We will reply within one business day to","Gracias por comunicarse. Responderemos dentro de un día hábil a")} <strong>{form.email}</strong>.
                 </div>
               </div>
             ) : (
@@ -116,7 +119,7 @@ export function Contact() {
                   <div style={{ background: "#ef444411", border: "1px solid #ef444444", borderRadius: 8, padding: "10px 14px", fontSize: 13, color: "#ef4444" }}>{errorMsg}</div>
                 )}
 
-                <div style={{ display: "flex", gap: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", display: "block", marginBottom: 6 }}>Full Name <span style={{ color: "#ef4444" }}>*</span></label>
                     <Input value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} placeholder="Roberto Rodriguez" />
@@ -127,7 +130,7 @@ export function Contact() {
                   </div>
                 </div>
 
-                <div style={{ display: "flex", gap: 12 }}>
+                <div style={{ display: "grid", gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))", gap: 12 }}>
                   <div style={{ flex: 1 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, color: "hsl(var(--foreground))", display: "block", marginBottom: 6 }}>Company Name <span style={{ color: "#ef4444" }}>*</span></label>
                     <Input value={form.companyName} onChange={e => setForm(f => ({ ...f, companyName: e.target.value }))} placeholder="Acme Construction" />
@@ -166,7 +169,7 @@ export function Contact() {
                 </div>
 
                 <Button type="submit" disabled={status === "sending"} style={{ fontWeight: 700, fontSize: 14, padding: "12px 24px" }}>
-                  {status === "sending" ? "Sending..." : "Send Message"}
+                  {status === "sending" ? tt("Sending...","Enviando...") : tt("Send Message","Enviar mensaje")}
                 </Button>
 
                 <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", margin: 0, lineHeight: 1.6 }}>
