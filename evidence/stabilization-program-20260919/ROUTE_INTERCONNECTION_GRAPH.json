@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 707,
-    "frontendApiReferences": 273,
-    "routeOwnedTables": 63
+    "apiRoutes": 709,
+    "frontendApiReferences": 274,
+    "routeOwnedTables": 64
   },
   "compatibilityRedirects": [
     {
@@ -8695,6 +8695,22 @@
     },
     {
       "method": "GET",
+      "path": "/support/cases",
+      "owner": "artifacts/api-server/src/routes/support-cases.ts",
+      "tables": [
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/support/cases",
+      "owner": "artifacts/api-server/src/routes/support-cases.ts",
+      "tables": [
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/projects/:projectId/commercial/team-performance",
       "owner": "artifacts/api-server/src/routes/team-performance.ts",
       "tables": []
@@ -9216,6 +9232,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/ContractPaymentApplicationsPanel.tsx",
       "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/projects/${projectId}/financial/contracts/${encodeURIComponent(contract.id)}/payments"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
+      "apiPath": "${API_BASE}/api/v1/support/cases"
     },
     {
       "screen": "artifacts/bimlog/src/components/dashboard/ResponsibilityWorkspace.tsx",
