@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { check, index, integer, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 
 export const contactSubmissionsTable = pgTable("contact_submissions", {
   id: serial("id").primaryKey(),
@@ -15,6 +15,9 @@ export const contactSubmissionsTable = pgTable("contact_submissions", {
   requestKey: text("request_key"),
   fingerprint: text("fingerprint"),
   status: text("status").notNull().default("new"),
+  responseDueAt: timestamp("response_due_at"),
+  assignedToUserId: integer("assigned_to_user_id"),
+  assignedAt: timestamp("assigned_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => [
@@ -23,6 +26,7 @@ export const contactSubmissionsTable = pgTable("contact_submissions", {
   check("contact_submissions_status_chk",sql`${table.status} in ('new','acknowledged','qualified','closed')`),
   uniqueIndex("contact_submissions_request_key_uidx").on(table.requestKey).where(sql`${table.requestKey} is not null`),
   index("contact_submissions_status_created_idx").on(table.status,table.createdAt.desc()),
+  index("contact_submissions_response_due_idx").on(table.status,table.responseDueAt),
 ]);
 
 export type ContactSubmission = typeof contactSubmissionsTable.$inferSelect;

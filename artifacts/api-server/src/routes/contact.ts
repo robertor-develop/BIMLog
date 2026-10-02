@@ -6,6 +6,7 @@ import {parseSalesInquiryInput,salesInquiryFingerprint} from "../lib/commercial-
 import {authMiddleware,isSuperAdminMiddleware} from "../middlewares/auth";
 import {assertSalesInquiryTransition} from "../lib/sales-inquiry-operations";
 import {parseSalesInquiryListQuery} from "../lib/sales-inquiry-query";
+import {salesInquiryResponseDueAt} from "../lib/sales-inquiry-response";
 
 const router = Router();
 
@@ -14,7 +15,8 @@ router.post("/contact", async (req, res) => {
     const input=parseSalesInquiryInput(req.body);
     const fingerprint=salesInquiryFingerprint(input);
     try{
-      const [created]=await db.insert(contactSubmissionsTable).values({...input,fingerprint,status:"new"}).returning({id:contactSubmissionsTable.id,status:contactSubmissionsTable.status});
+      const receivedAt=new Date();
+      const [created]=await db.insert(contactSubmissionsTable).values({...input,fingerprint,status:"new",createdAt:receivedAt,updatedAt:receivedAt,responseDueAt:salesInquiryResponseDueAt(receivedAt)}).returning({id:contactSubmissionsTable.id,status:contactSubmissionsTable.status});
       res.status(201).json({success:true,inquiryId:created.id,status:created.status,replayed:false});
     }catch(error){
       if((error as {code?:unknown})?.code!=="23505")throw error;

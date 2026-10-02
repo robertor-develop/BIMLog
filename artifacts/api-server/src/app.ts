@@ -481,8 +481,13 @@ queueDatabaseStartup(async () => {
     await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS fingerprint text`);
     await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'new'`);
     await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS updated_at timestamp NOT NULL DEFAULT now()`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS response_due_at timestamp`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS assigned_to_user_id integer REFERENCES users(id)`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS assigned_at timestamp`);
+    await pool.query(`UPDATE contact_submissions SET response_due_at=created_at + CASE WHEN EXTRACT(ISODOW FROM created_at)=5 THEN interval '3 days' WHEN EXTRACT(ISODOW FROM created_at)=6 THEN interval '2 days' ELSE interval '1 day' END WHERE response_due_at IS NULL`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS contact_submissions_request_key_uidx ON contact_submissions(request_key) WHERE request_key IS NOT NULL`);
     await pool.query(`CREATE INDEX IF NOT EXISTS contact_submissions_status_created_idx ON contact_submissions(status, created_at DESC)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS contact_submissions_response_due_idx ON contact_submissions(status, response_due_at)`);
     console.log("[migration] structured sales inquiry columns ensured");
   } catch {
     console.error("[migration] structured sales inquiry migration failed");
