@@ -15,7 +15,7 @@ export function assembleCommercialWorkspace(input:{subscription:CompanySubscript
   if(access.companyId!==subscription.companyId||access.subscriptionId!==subscription.id||access.subscriptionRevision!==subscription.revision)throw new Error("Commercial workspace lineage is invalid");
   if(access.effectiveAt>now)throw new Error("Commercial access is not yet effective");
   const canonical=`${subscription.companyId}:${subscription.id}:${subscription.revision}:${subscription.planId}:${subscription.status}:${access.id}:${access.status}:${access.seatLimit}:${access.effectiveAt}:${access.expiresAt}`;
-  return Object.freeze({companyId:subscription.companyId,subscriptionId:subscription.id,subscriptionRevision:subscription.revision,planId:subscription.planId,status:subscription.status,accessStatus:access.expiresAt<=now?"inactive":access.status,seatLimit:access.seatLimit,effectiveAt:access.effectiveAt,expiresAt:access.expiresAt,fingerprint:crypto.createHash("sha256").update(canonical).digest("hex")});
+  return Object.freeze({companyId:subscription.companyId,subscriptionId:subscription.id,subscriptionRevision:subscription.revision,planId:subscription.planId,status:subscription.status,accessStatus:access.expiresAt<=now?"expired":access.status,seatLimit:access.seatLimit,effectiveAt:access.effectiveAt,expiresAt:access.expiresAt,fingerprint:crypto.createHash("sha256").update(canonical).digest("hex")});
 }
 
 export type PlanChangePreview=Readonly<{companyId:number;subscriptionId:string;fromPlan:SubscriptionPlanId;toPlan:SubscriptionPlanId;fromSeatLimit:number;toSeatLimit:number;assignedSeats:number;effectiveAt:string;requiresSeatReduction:boolean;canSubmit:boolean;blockers:readonly string[];writesPerformed:0}>;
