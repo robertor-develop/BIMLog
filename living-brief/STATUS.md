@@ -3440,6 +3440,8 @@ B066–B070 turn the commercial contracts into a discoverable authenticated cust
 
 Focused Block 14 behavior and both TypeScript checks pass at exact Build 070 implementation commit `ad920911ac05448ab05af26a4fc3c4ff6ac89518`.
 
+The first complete gate correctly rejected the stale UX route inventory. Repair `35b12cea5fdfa737352d1d186b3cc52762b4d755` registers the protected `/settings/billing-support` route as the `CommercialWorkspace` owner; generation and exact check pass before the full-gate repeat.
+
 B056–B060 replace the dismissible onboarding slideshow with a resumable PostgreSQL-backed setup: expiring single-use email verification, explicit authenticated company identity, non-privileged work-profile selection, canonical first-project creation, and bounded coordinator defaults with Shop Drawings first. Completion fails closed until verified email, work profile, and project membership exist. A newly created project proceeds to full Intake and does not force team assignment. The Lens updater now resolves a year-specific signed manifest so 2021 and 2025 packages remain isolated. Focused contracts and both TypeScript checks pass; exact-head full gate, push, package/publication, live authenticated Chrome and installed Navisworks acceptance remain due.
 
 # 250-build SaaS Block 11 — Lens Next automatic updates — 2026-10-01
