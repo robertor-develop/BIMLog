@@ -9119,7 +9119,7 @@
     },
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
-      "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries${query}"
+      "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries"
     },
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",

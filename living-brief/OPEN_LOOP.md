@@ -4173,4 +4173,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B103 expose bounded inquiry detail with complete commercial context and long-message containment.
 - [x] B104 connect only allowed lifecycle transitions through the revision-safe expected-state API and recover visibly from conflicts.
 - [x] B105 integrate the bilingual responsive sales workspace into Total Control.
-- [ ] Pass the complete exact-head gate and push B101–B105 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B106–B110.
+- [x] Pass the complete exact-head gate and push B101–B105 once. Exact source `3e6eb9ff58c499343bcf0e3660f9626100530a93` reached `origin/master`; the first five-build block remained unpublished as required.
+
+## 250-build SaaS Completion Block 22 — scalable sales operations — 2026-10-02
+
+- [x] B106 add bounded server-side inquiry search, deterministic paging, exact totals and strict query validation.
+- [x] B107 reject incomplete, malformed or contradictory paging metadata at the browser boundary.
+- [x] B108 expose search, exact result counts and previous/next navigation without silent truncation.
+- [x] B109 localize filters, statuses, errors, paging and lifecycle actions in English and Spanish.
+- [x] B110 contain keyboard focus inside inquiry review, support Escape, prevent background scrolling and restore focus to the originating row.
+- [ ] Pass the complete exact-head gate, push B106–B110 once, publish accumulated B101–B110 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
