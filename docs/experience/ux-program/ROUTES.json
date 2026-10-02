@@ -212,6 +212,13 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/settings/billing-support",
+      "owner": "CommercialWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/admin/feedback",
       "owner": "AdminPanel",
       "availability": "gated",
