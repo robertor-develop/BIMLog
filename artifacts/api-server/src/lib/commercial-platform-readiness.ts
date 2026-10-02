@@ -11,6 +11,8 @@ export const commercialBillingCycles=["monthly","annual"] as const;
 export type CommercialCatalogSlot=`${typeof commercialPaidOffers[number]}.${typeof commercialBillingCycles[number]}`;
 export type CommercialCatalogCoverage=Readonly<{slot:CommercialCatalogSlot;status:"ready"|"missing"|"invalid"|"duplicate_price"}>;
 export type CommercialProviderMode="test"|"live"|"unavailable";
+export const commercialSalesLaunchBlockers=["catalog","provider","live_mode","webhook","portal","support"] as const;
+export type CommercialSalesLaunchBlocker=typeof commercialSalesLaunchBlockers[number];
 const sendgridPattern=/^SG\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}$/;
 const check=(service:CommercialPlatformService,ready:boolean,code:string):CommercialPlatformCheck=>Object.freeze({service,status:ready?"ready":"not_configured",code});
 
@@ -47,5 +49,14 @@ export function inspectCommercialPlatformReadiness(environment:NodeJS.ProcessEnv
     check("billing_portal",billingPortalConfigured,billingPortalConfigured?"portal_ready":"portal_invalid"),
     check("support_channel",supportConfigured,supportCode),
   ]);
-  return Object.freeze({subscriptionConfigured,paymentProviderConfigured,webhookConfigured,billingPortalConfigured,supportConfigured,providerMode,catalogCoverage,checks});
+  const salesLaunchBlockers=Object.freeze([
+    ...(!subscriptionConfigured?["catalog" as const]:[]),
+    ...(!paymentProviderConfigured?["provider" as const]:[]),
+    ...(providerMode==="test"?["live_mode" as const]:[]),
+    ...(!webhookConfigured?["webhook" as const]:[]),
+    ...(!billingPortalConfigured?["portal" as const]:[]),
+    ...(!supportConfigured?["support" as const]:[]),
+  ]);
+  const salesLaunchStatus:"ready"|"test_only"|"blocked"=salesLaunchBlockers.length===0?"ready":providerMode==="test"&&salesLaunchBlockers.every(blocker=>blocker==="live_mode")?"test_only":"blocked";
+  return Object.freeze({subscriptionConfigured,paymentProviderConfigured,webhookConfigured,billingPortalConfigured,supportConfigured,providerMode,salesLaunchStatus,salesLaunchBlockers,catalogCoverage,checks});
 }

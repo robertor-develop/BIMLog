@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import {inspectCommercialPlatformReadiness} from "./commercial-platform-readiness";
 
+const sendgridKey=()=>"SG.abcdefghijklmnop.qrstuvwxyzABCDE";
+const stripeReadyEnvironment=(mode:"test"|"live"="live")=>({BIMLOG_COMMERCIAL_MODE:mode,STRIPE_SECRET_KEY:`sk_${mode}_abcdefghijkl`,STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijkl",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_ready",BIMLOG_APP_ORIGIN:"https://bimlog.app"});
+
 const empty=inspectCommercialPlatformReadiness({});
 assert.equal(empty.subscriptionConfigured,false);
 assert.equal(empty.checks.length,5);
@@ -29,13 +32,20 @@ assert.equal(stripeReady.paymentProviderConfigured,true);
 assert.equal(stripeReady.providerMode,"live");
 assert.equal(stripeReady.webhookConfigured,true);
 assert.equal(stripeReady.billingPortalConfigured,true);
+assert.equal(stripeReady.salesLaunchStatus,"blocked");
+assert.deepEqual(stripeReady.salesLaunchBlockers,["catalog","support"]);
+const launchReady=inspectCommercialPlatformReadiness({...stripeReadyEnvironment(),BIMLOG_STRIPE_PRICE_IDS:catalog,SENDGRID_API_KEY:sendgridKey(),BIMLOG_SUPPORT_FROM_EMAIL:"support@bimlog.app",BIMLOG_SUPPORT_INBOX_EMAIL:"help@bimlog.app"});
+assert.equal(launchReady.salesLaunchStatus,"ready");
+assert.deepEqual(launchReady.salesLaunchBlockers,[]);
+const testOnly=inspectCommercialPlatformReadiness({...stripeReadyEnvironment("test"),BIMLOG_STRIPE_PRICE_IDS:catalog,SENDGRID_API_KEY:sendgridKey(),BIMLOG_SUPPORT_FROM_EMAIL:"support@bimlog.app",BIMLOG_SUPPORT_INBOX_EMAIL:"help@bimlog.app"});
+assert.equal(testOnly.salesLaunchStatus,"test_only");
+assert.deepEqual(testOnly.salesLaunchBlockers,["live_mode"]);
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_COMMERCIAL_MODE:"test",STRIPE_SECRET_KEY:"sk_test_abcdefghijklmnop",STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijkl",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_test",BIMLOG_APP_ORIGIN:"https://bimlog.app"}).providerMode,"test");
 assert.equal(inspectCommercialPlatformReadiness({STRIPE_SECRET_KEY:"invalid"}).providerMode,"unavailable");
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_COMMERCIAL_MODE:"test",STRIPE_SECRET_KEY:"sk_live_abcdefghijkl",STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijkl",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_live",BIMLOG_APP_ORIGIN:"https://bimlog.app"}).paymentProviderConfigured,false);
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_COMMERCIAL_MODE:"live",STRIPE_SECRET_KEY:"bad",STRIPE_WEBHOOK_SECRET:"bad",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_live"}).billingPortalConfigured,false);
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_COMMERCIAL_MODE:"live",STRIPE_SECRET_KEY:"sk_live_abcdefghijkl",STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijkl",BIMLOG_APP_ORIGIN:"http://bimlog.app"}).paymentProviderConfigured,false);
-const sendgridKey="SG.abcdefghijklmnop.qrstuvwxyzABCDE";
-assert.equal(inspectCommercialPlatformReadiness({SENDGRID_API_KEY:sendgridKey}).supportConfigured,false);
-assert.equal(inspectCommercialPlatformReadiness({SENDGRID_API_KEY:sendgridKey,BIMLOG_SUPPORT_FROM_EMAIL:"support@bimlog.app"}).checks[4]?.code,"support_inbox_invalid");
-assert.equal(inspectCommercialPlatformReadiness({SENDGRID_API_KEY:sendgridKey,BIMLOG_SUPPORT_FROM_EMAIL:"support@bimlog.app",BIMLOG_SUPPORT_INBOX_EMAIL:"help@bimlog.app"}).supportConfigured,true);
+assert.equal(inspectCommercialPlatformReadiness({SENDGRID_API_KEY:sendgridKey()}).supportConfigured,false);
+assert.equal(inspectCommercialPlatformReadiness({SENDGRID_API_KEY:sendgridKey(),BIMLOG_SUPPORT_FROM_EMAIL:"support@bimlog.app"}).checks[4]?.code,"support_inbox_invalid");
+assert.equal(inspectCommercialPlatformReadiness({SENDGRID_API_KEY:sendgridKey(),BIMLOG_SUPPORT_FROM_EMAIL:"support@bimlog.app",BIMLOG_SUPPORT_INBOX_EMAIL:"help@bimlog.app"}).supportConfigured,true);
 console.log("commercial platform readiness catalog behavior passed");
