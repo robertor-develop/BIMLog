@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import {createCompanySubscription} from "./subscription-authority";
+import {deriveSubscriptionAccess} from "./commercial-billing-operations";
+import {assembleCommercialWorkspace} from "./commercial-workspace";
+const draft=createCompanySubscription({id:"sub-workspace",companyId:42,planId:"business",catalogPriceVersion:3,billingCycle:"monthly",currency:"USD",amount:3000,now:"2026-10-01T00:00:00Z"});
+const subscription={...draft,status:"active" as const,revision:2,updatedAt:"2026-10-01T00:01:00.000Z"};
+const term={subscriptionId:subscription.id,sequence:1,billingCycle:"monthly" as const,startsAt:"2026-10-01T00:00:00.000Z",endsAt:"2026-11-01T00:00:00.000Z",renewsAt:"2026-11-01T00:00:00.000Z",sourceOrderId:"order-workspace",sourceInvoiceId:"invoice-workspace"};
+const access=deriveSubscriptionAccess({subscription,term,catalogPriceVersionId:"price-v3",features:["projects","coordination"],seatLimit:10,existing:[],now:"2026-10-01T00:02:00Z"});
+const workspace=assembleCommercialWorkspace({subscription,access,now:"2026-10-02T00:00:00Z"});
+assert.deepEqual({companyId:workspace.companyId,planId:workspace.planId,seatLimit:workspace.seatLimit,accessStatus:workspace.accessStatus},{companyId:42,planId:"business",seatLimit:10,accessStatus:"active"});
+assert.equal(workspace.fingerprint.length,64);
+assert.throws(()=>assembleCommercialWorkspace({subscription,access:{...access,companyId:43},now:"2026-10-02T00:00:00Z"}),/lineage/);
+console.log("B061 canonical authenticated commercial workspace state: PASS");
+export {subscription,access,workspace};
