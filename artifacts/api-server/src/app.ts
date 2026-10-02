@@ -474,6 +474,23 @@ queueDatabaseStartup(async () => {
 
 queueDatabaseStartup(async () => {
   try {
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS plan text`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS billing_cycle text`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS use_case text`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS request_key text`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS fingerprint text`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'new'`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS updated_at timestamp NOT NULL DEFAULT now()`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS contact_submissions_request_key_uidx ON contact_submissions(request_key) WHERE request_key IS NOT NULL`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS contact_submissions_status_created_idx ON contact_submissions(status, created_at DESC)`);
+    console.log("[migration] structured sales inquiry columns ensured");
+  } catch {
+    console.error("[migration] structured sales inquiry migration failed");
+  }
+});
+
+queueDatabaseStartup(async () => {
+  try {
     await pool.query(
       `ALTER TABLE naming_conventions ADD COLUMN IF NOT EXISTS setup_status text NOT NULL DEFAULT 'not_started'`,
     );
