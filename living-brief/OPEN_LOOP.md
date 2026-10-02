@@ -4209,4 +4209,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B123 show the immutable owner-change trail inside bilingual inquiry review.
 - [x] B124 expose accessible loading, empty, failure and retry behavior without hiding history failures.
 - [x] B125 paginate long histories while preserving deterministic newest-first order and Super Administrator scope.
-- [ ] Pass the complete exact-head gate and push B121–B125 once. This first five-build block remains unpublished; publication and full authenticated Chrome smoke are due after B130.
+- [x] Pass the complete exact-head gate and push B121–B125 once. Exact source `9c4bca75a6059df1a27c5505d962afbd74e0d10a` reached `origin/master`; this first five-build block remained unpublished.
+
+## 250-build SaaS Completion Block 26 — durable sales follow-up — 2026-10-02
+
+- [x] B126 define bounded follow-up notes with exact revision identity.
+- [x] B127 persist attributable immutable follow-up history with additive migration parity.
+- [x] B128 expose protected deterministic list and revision-safe note creation.
+- [x] B129 reject malformed, duplicate or contradictory follow-up pages before rendering.
+- [x] B130 complete bilingual follow-up review and creation with loading, empty, error, retry and stale-write recovery.
+- [ ] Pass the complete exact-head gate, push B126–B130 once, publish accumulated B121–B130 without Replit Agents, verify exact live identity and complete full authenticated Chrome smoke.

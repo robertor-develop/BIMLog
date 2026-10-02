@@ -3587,3 +3587,14 @@ B111–B120 passed the complete exact-head gate and reached production at canoni
 - B124 adds bilingual loading, empty, error and retry behavior with accessible busy/live state.
 - B125 paginates long assignment histories without expanding authorization or duplicating the immutable event authority.
 - Focused API/frontend behavior and both TypeScript projects pass. This is the first five-build block after the B111–B120 publication; complete gate and one push are due, while publication and authenticated Chrome smoke remain due at B130.
+
+B121–B125 passed the complete exact-head gate and reached `origin/master` at source `9c4bca75a6059df1a27c5505d962afbd74e0d10a`. The block remained unpublished as the first half of the B121–B130 publication batch.
+
+## 250-build SaaS Completion Block 26 — durable sales follow-up — 2026-10-02
+
+- B126 defines bounded follow-up notes with exact revision identity.
+- B127 persists attributable follow-up history through additive schema and startup-migration parity.
+- B128 adds Super Administrator-only deterministic list and revision-safe create operations.
+- B129 strictly validates follow-up identities, authors, timestamps, notes and paging before rendering.
+- B130 adds bilingual follow-up review, note creation, loading, empty, error, retry and stale-write recovery to Total Control.
+- Focused contracts and API/frontend TypeScript pass. B121–B130 now reach the ten-build publication boundary; complete gate, one push, controlled publication, exact live identity and full authenticated Chrome smoke are due.

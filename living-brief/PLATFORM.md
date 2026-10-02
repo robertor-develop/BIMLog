@@ -993,6 +993,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/sales-inquiry-assignment-history.ts
 - artifacts/api-server/src/lib/sales-inquiry-assignment.behavior.ts
 - artifacts/api-server/src/lib/sales-inquiry-assignment.ts
+- artifacts/api-server/src/lib/sales-inquiry-follow-up.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-follow-up.ts
 - artifacts/api-server/src/lib/sales-inquiry-operations.behavior.ts
 - artifacts/api-server/src/lib/sales-inquiry-operations.ts
 - artifacts/api-server/src/lib/sales-inquiry-query.behavior.ts
@@ -1178,6 +1180,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/rfi-view-events.ts
 - lib/db/src/schema/rfis.ts
 - lib/db/src/schema/sales-inquiry-assignment-events.ts
+- lib/db/src/schema/sales-inquiry-follow-ups.ts
 - lib/db/src/schema/schedule-planner.ts
 - lib/db/src/schema/submittal-register.ts
 - lib/db/src/schema/submittal-view-events.ts
