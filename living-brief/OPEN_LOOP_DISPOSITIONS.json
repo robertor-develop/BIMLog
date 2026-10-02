@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "9c270503ba6eb4e947a8915ff54d5883c440107b4b6667b1b5dfeb8de55d9f0c",
-  "itemCount": 283,
+  "sourceSha256": "81683c20b5ca881100a2a0848ce9903c8d2c9f1362e903b0e93fc169df285b1b",
+  "itemCount": 281,
   "counts": {
-    "ACTIVE": 248,
+    "ACTIVE": 246,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -63,24 +63,6 @@
     }
   ],
   "items": [
-    {
-      "id": "fdd870a76e59b7dd",
-      "sourceLine": 7,
-      "heading": "P37 publication repair — preserve onboarding tables — 2026-10-01",
-      "statement": "Repeat the exact-head gate, push, guarded Replit development-schema parity, publication, exact live identity check and full authenticated Chrome smoke before B061.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:7",
-        "P37 publication repair — preserve onboarding tables — 2026-10-01"
-      ],
-      "currentAuthority": false
-    },
     {
       "id": "10dae841dd5d4352",
       "sourceLine": 16,
@@ -5145,24 +5127,6 @@
       "evidence": [
         "OPEN_LOOP.md:4081",
         "B056-B060 P37 candidate gate repair — 2026-10-01"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "7cb53130a7af2429",
-      "sourceLine": 4088,
-      "heading": "B056-B060 publication identity repair — 2026-10-01",
-      "statement": "Pass the complete exact-head gate, push the repair, republish, verify live health equals the repaired canonical commit, and repeat authenticated Chrome smoke before starting B061.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:4088",
-        "B056-B060 publication identity repair — 2026-10-01"
       ],
       "currentAuthority": false
     }

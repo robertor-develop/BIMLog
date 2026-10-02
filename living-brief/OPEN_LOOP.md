@@ -4,7 +4,7 @@
 
 - [x] Reject the Replit migration preview that proposed dropping `user_onboarding_profiles` and `email_verification_tokens`; no production data mutation was approved.
 - [x] Declare `user_onboarding_work_profile_chk` and `email_verification_tokens_user_idx` in the canonical Drizzle schema, using explicit `.desc().nullsFirst()` ordering so generated migrations retain production's exact additive onboarding objects.
-- [ ] Repeat the exact-head gate, push, guarded Replit development-schema parity, publication, exact live identity check and full authenticated Chrome smoke before B061.
+- [x] Repeat the exact-head gate, push, guarded Replit development-schema parity, publication, exact live identity check and full authenticated Chrome smoke before B061. Accepted at canonical source `2f01eb92ad5ddc5358eabb45cb82c9c6d8597e01`, receipt `d806fd15`; desktop 44/44, responsive 10/10, two-tab and console checks passed.
 
 ## 250-build SaaS completion — Block 12: verified onboarding — 2026-10-01
 
@@ -4085,4 +4085,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Publish the combined B051-B060 candidate and complete authenticated Chrome route, responsive workflow, reload and two-tab checks at P37.
 - [x] Detect the live source mismatch instead of accepting a merely bound wrapper identity: health reported `2cd9134cfbbec43d1105f74e43997a093e36dc70` while the canonical published source was `05e4998f528c79a79079592e28f5b0c29d0faf1b`.
 - [x] Prove the intervening commits are five consecutive byte-identical `Published your App` wrappers and repair production assembly to unwrap the complete bounded local first-parent wrapper chain.
-- [ ] Pass the complete exact-head gate, push the repair, republish, verify live health equals the repaired canonical commit, and repeat authenticated Chrome smoke before starting B061.
+- [x] Pass the complete exact-head gate, push the repair, republish, verify live health equals the repaired canonical commit, and repeat authenticated Chrome smoke before starting B061. Accepted at `2f01eb92ad5ddc5358eabb45cb82c9c6d8597e01` / `d806fd15`.

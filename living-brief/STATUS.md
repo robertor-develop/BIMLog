@@ -1,8 +1,8 @@
 # STATUS.md - Current Accepted Platform State
 
-## P37 onboarding-schema publication repair — 2026-10-01
+## P37 accepted publication — 2026-10-01
 
-The corrected P37 republication was stopped before promotion because Replit proposed dropping `user_onboarding_profiles` and `email_verification_tokens`. No destructive migration was approved and production remained unchanged. The canonical Drizzle schema now declares the same named work-profile constraint and verification-token user index already created by the additive startup migration. A second retry proved that a raw `DESC` expression still normalized to `NULLS LAST` in Replit's generator, so it was cancelled before promotion as well. The index now uses Drizzle's explicit `.desc().nullsFirst()` API to preserve production's exact ordering. The exact-head gate, push, guarded parity, safe republication, live identity and authenticated Chrome smoke must pass before B061.
+P37 is live from canonical source `2f01eb92ad5ddc5358eabb45cb82c9c6d8597e01` under Replit receipt `d806fd15`. Two unsafe migration previews were cancelled without production mutation; the final `.desc().nullsFirst()` declaration produced exact development/production correspondence and no migration approval screen. Public health reports `v1.05.N18-P37`, `identityBound=true`, and the exact canonical source. Authenticated Chrome passed 44/44 desktop routes, 10/10 focused mobile/tablet routes, two-tab session continuity, and zero console warnings/errors.
 
 Post-commit release reconciliation binds the B056–B060 candidate to source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf`; the complete clean gate, push, publication, and authenticated production smoke remain required before acceptance.
 

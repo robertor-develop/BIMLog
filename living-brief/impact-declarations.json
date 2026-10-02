@@ -53579,8 +53579,8 @@
       "reason": "The first P37 publication exposed a five-wrapper release-attribution defect; production assembly now verifies and unwraps the complete bounded chain before binding the canonical source."
     },
     {
-      "taskId": "saas-block12-p37-onboarding-schema-null-order-repair",
-      "reviewedThroughCommit": "675d1486d5ad04529e39dbaa31fb11bedd2e1f65",
+      "taskId": "saas-block12-p37-accepted-publication",
+      "reviewedThroughCommit": "2f01eb92ad5ddc5358eabb45cb82c9c6d8597e01",
       "reviewedAt": "2026-10-01T23:04:00Z",
       "status": "candidate",
       "authorities": [
@@ -53627,12 +53627,12 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records both cancelled unsafe migrations and the explicit null-order repair."
+          "reason": "Records the accepted exact source, publication receipt, migration-free promotion and authenticated Chrome results."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Keeps gate, safe publication and repeated live acceptance open before B061."
+          "reason": "Closes the exact-head gate, safe publication, live identity and repeated authenticated acceptance before B061."
         },
         {
           "key": "audit",
@@ -53641,17 +53641,13 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/scripts/generate-platform-md.ts",
-        "evidence/saas-completion-20261001/B056_B060_PUBLICATION_IDENTITY_REPAIR.md",
-        "lib/db/src/schema/onboarding.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "be20590b0892a27f5c761bf748b133fe183db29e16d9923572a7a0a8d76b82be",
-      "reason": "The second publication preview proved raw SQL still normalized to NULLS LAST; the canonical declaration now uses explicit descending NULLS FIRST semantics before another safe publication attempt."
+      "reviewedChangeSha256": "9886b94d4e41c11ecdeeee1e78bfd51badde2db6129a1f518e9975c05391b5d6",
+      "reason": "P37 is accepted after explicit NULLS FIRST parity removed the unsafe migration, exact live identity matched canonical source, and authenticated desktop and responsive smoke passed."
     }
   ]
 }
