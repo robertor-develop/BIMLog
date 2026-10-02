@@ -2,10 +2,13 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "1def7b78fb4411ff2de9e6c8b213fcc19bb526effd489a746666e67a471b84e6",
+  "bundleSha256": "15937c23dcdfc8c003f973614a9b0d9dd73ed8f6715b84b5ea18fbd1257ed136",
   "impact": {
     "baselineCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
     "changedPaths": [
+      "living-brief/OPEN_LOOP.md",
+      "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
@@ -114,9 +117,9 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "cc3dae6813e4a41886b376557f2c67d4b84115ab5fac0aa24fa363f1f6802e0e",
-      "sourceChangedAt": "2026-10-02T18:05:11-04:00",
-      "changeState": "accepted",
+      "sha256": "b8153e1c3aef4ef5a7722ffe51869218d4df7dc974f4e06b6b4a9b52772c3d0e",
+      "sourceChangedAt": "2026-10-02T22:45:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
       "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
       "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
@@ -126,9 +129,9 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "ec7219c2f8feece428d46638d97792c46df8b11cafda2a04d85025683e55576e",
-      "sourceChangedAt": "2026-10-02T18:05:11-04:00",
-      "changeState": "accepted",
+      "sha256": "e0a0487a51e70bae65763c7df1c108d635769b1945a01dbe6ab8e6967ec3c6b7",
+      "sourceChangedAt": "2026-10-02T22:45:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
       "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
       "semanticReviewTask": "saas-block30-sales-schema-identity-repair",

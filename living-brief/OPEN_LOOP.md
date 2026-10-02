@@ -4262,3 +4262,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B150 add bilingual urgent, waiting and resolved support operations to Total Control.
 - [ ] Pass the complete exact-head gate, push B146–B150 once, publish accumulated B141–B150, verify exact live identity and run the full authenticated Chrome smoke.
 - [ ] Repair the detected support-case constraint-identity mismatch at `9ecde2f6845e55d658ca69e9111e0a4a1a8e1760`, repeat the complete gate, apply only the additive support-case schema to both governed database targets, require `schemaAction=NONE`, republish and repeat the full authenticated Chrome smoke.
+- [ ] Complete the accumulated sales-assignment constraint-identity repair at `0982e7bc645c7c141452f1c5af5e5fee6a3f128c`, remove only the predicate-equivalent redundant unnamed check, and require an exact repeated receipt before Publish.

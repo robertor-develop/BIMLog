@@ -55090,9 +55090,12 @@
         }
       ],
       "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reviewedChangeSha256": "f5abe9bdbbbbfeaef0ba3bc40d16ecdb73a3e3efe95ff0e6a5c26e1b2e950390",
       "reason": "The exact database receipt isolated one redundant unnamed sales-assignment check; source now creates only the stable governed identity."
     }
   ]
