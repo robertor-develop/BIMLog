@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "800a9e74a6b92de088a231ad30cf0f1fc1cbd8c2b19decdd104d7c798995079d",
+  "sourceSha256": "3b105042c6854ca9c7ffeb91d1708d8118e6608ce236c06176e321a743d041ac",
   "itemCount": 285,
   "counts": {
     "ACTIVE": 250,
@@ -5185,10 +5185,10 @@
       "currentAuthority": false
     },
     {
-      "id": "b4c8f764d202f4fe",
-      "sourceLine": 4149,
-      "heading": "250-build SaaS Completion Block 18 — commercial catalog coverage — 2026-10-02",
-      "statement": "Pass the complete exact-head gate, push B086–B090 once, publish accumulated B081–B090 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.",
+      "id": "262a850ee01439f1",
+      "sourceLine": 4158,
+      "heading": "250-build SaaS Completion Block 19 — live sales launch truth — 2026-10-02",
+      "statement": "Pass the complete exact-head gate and push B091–B095 once. Keep this first five-build block unpublished; publication and full authenticated Chrome smoke are due after B096–B100.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -5197,8 +5197,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4149",
-        "250-build SaaS Completion Block 18 — commercial catalog coverage — 2026-10-02"
+        "OPEN_LOOP.md:4158",
+        "250-build SaaS Completion Block 19 — live sales launch truth — 2026-10-02"
       ],
       "currentAuthority": false
     }

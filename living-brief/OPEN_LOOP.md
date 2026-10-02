@@ -4146,4 +4146,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B088 project the six secret-free catalog coverage records through the authenticated commercial workspace.
 - [x] B089 reject incomplete, duplicated or contradictory catalog coverage at the browser boundary.
 - [x] B090 render bilingual monthly and annual checkout coverage for Professional, Team and Business plans.
-- [ ] Pass the complete exact-head gate, push B086–B090 once, publish accumulated B081–B090 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B086–B090 once, publish accumulated B081–B090 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke. Production is identity-bound to wrapper `86e29540930a34377e2f4ff15c9aa550a67f259d`, whose first parent is reviewed source `b7310f6cfb12fcd989eaa653908180ecf67a60eb`; all 63 registered routes, desktop/tablet/exact-390 containment and console review passed.
+
+## 250-build SaaS Completion Block 19 — live sales launch truth — 2026-10-02
+
+- [x] B091 expose the configured Stripe operating mode without returning credentials or provider identifiers.
+- [x] B092 distinguish live-sales readiness, test-only checkout and blocked commercial configuration.
+- [x] B093 project the bounded sales-launch state and exact BIMLog-owned blockers through the authenticated commercial workspace.
+- [x] B094 reject unknown, duplicated or contradictory launch state at the browser boundary.
+- [x] B095 present a bilingual sellability banner and exact BIMLog-owned corrective steps without asking customers for provider settings.
+- [ ] Pass the complete exact-head gate and push B091–B095 once. Keep this first five-build block unpublished; publication and full authenticated Chrome smoke are due after B096–B100.
