@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "8e7e6d9817b1b15abe4f088f40d83530dc95584859ccdae5bb11dbada448e8a5",
+  "sourceSha256": "ef9d8b120fc8948fb3d066576f2c70c5abe30b7d4f616276fc0e30300705ca6a",
   "itemCount": 285,
   "counts": {
     "ACTIVE": 250,
@@ -5185,10 +5185,10 @@
       "currentAuthority": false
     },
     {
-      "id": "02dd23c95b42d428",
+      "id": "f87f26bcc2c47101",
       "sourceLine": 4194,
       "heading": "250-build SaaS Completion Block 23 — accountable sales response — 2026-10-02",
-      "statement": "Pass the complete exact-head gate and push B111–B115 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B116–B120.",
+      "statement": "Pass the complete exact-head gate and push B111–B115 once. The stale schema-declaration cache found by the first gate is repaired at `6370f8cc`; repeat the exact-head gate before push. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B116–B120.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {

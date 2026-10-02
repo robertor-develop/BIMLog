@@ -3564,3 +3564,4 @@ B101–B105 passed the complete gate and reached `origin/master` at exact source
 - B114 exposes accountability fields through the protected list, adds a strict overdue-only query and rejects malformed or internally inconsistent assignment data at the browser boundary.
 - B115 adds bilingual overdue filtering, visible response deadline and owner state, plus a revision-safe Assign to me action in the existing Total Control inquiry review.
 - Focused B111-B115 behavior suites and both API/frontend TypeScript checks pass at implementation source `a0368ccd`. This is the first five-build block after the accepted B101-B110 publication; complete gate and one push are due, while publication and authenticated Chrome smoke remain due at B120.
+- Full-gate repair 6370f8cc forces TypeScript project-reference rebuilds so additive schema declarations cannot be hidden by stale incremental metadata.

@@ -4191,4 +4191,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B113 add revision-safe Super Administrator self-assignment without trusting a client-supplied actor.
 - [x] B114 expose strict accountability data and bounded overdue-only filtering through the protected inquiry list.
 - [x] B115 add bilingual overdue filtering, response deadline, ownership state and Assign to me action in Total Control.
-- [ ] Pass the complete exact-head gate and push B111–B115 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B116–B120.
+- [ ] Pass the complete exact-head gate and push B111–B115 once. The stale schema-declaration cache found by the first gate is repaired at `6370f8cc`; repeat the exact-head gate before push. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B116–B120.

@@ -54368,8 +54368,8 @@
     },
     {
       "taskId": "saas-completion-block23-accountable-sales-response",
-      "reviewedThroughCommit": "a0368ccd36537c90c1683cfffd33c35a761238e6",
-      "reviewedAt": "2026-10-02T11:18:29Z",
+      "reviewedThroughCommit": "6370f8cc6002464659d7bbc2330772081cad7176",
+      "reviewedAt": "2026-10-02T11:21:50Z",
       "status": "candidate",
       "authorities": [
         {
@@ -54429,15 +54429,13 @@
         }
       ],
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "ae799cbcc26b0f591f0ae610aab2c7f20958fa65536827ecb075280b1cb4ca23",
-      "reason": "B111-B115 connect the promised sales response target to durable ownership, overdue visibility and revision-safe Super Administrator action on the existing inquiry authority."
+      "reviewedChangeSha256": "5939db1235ebfa65c43bf3f2b1d8a87909132356e8a5f52a24f6925fe76bfcc6",
+      "reason": "B111-B115 connect the promised sales response target to durable ownership, overdue visibility and revision-safe Super Administrator action on the existing inquiry authority. The full gate exposed and the repair forces project-reference rebuilds so schema declarations cannot remain stale."
     }
   ]
 }
