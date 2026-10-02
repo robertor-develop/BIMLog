@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 709,
-    "frontendApiReferences": 274,
+    "apiRoutes": 711,
+    "frontendApiReferences": 276,
     "routeOwnedTables": 64
   },
   "compatibilityRedirects": [
@@ -8698,7 +8698,9 @@
       "path": "/support/cases",
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
-        "supportCasesTable"
+        "companiesTable",
+        "supportCasesTable",
+        "usersTable"
       ]
     },
     {
@@ -8706,7 +8708,29 @@
       "path": "/support/cases",
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
-        "supportCasesTable"
+        "companiesTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/support/cases",
+      "owner": "artifacts/api-server/src/routes/support-cases.ts",
+      "tables": [
+        "companiesTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/support/cases/:id/status",
+      "owner": "artifacts/api-server/src/routes/support-cases.ts",
+      "tables": [
+        "companiesTable",
+        "supportCasesTable",
+        "usersTable"
       ]
     },
     {
@@ -9220,6 +9244,14 @@
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/next-action"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/SupportCaseQueue.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/support/cases"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/SupportCaseQueue.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/support/cases/${item.id}/status"
     },
     {
       "screen": "artifacts/bimlog/src/components/ai/AiControlPlanePanel.tsx",

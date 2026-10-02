@@ -123,6 +123,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/search.ts
 - artifacts/api-server/src/routes/submittal_reports.ts
 - artifacts/api-server/src/routes/submittals.ts
+- artifacts/api-server/src/routes/support-case-admin-list.behavior.ts
+- artifacts/api-server/src/routes/support-case-status.behavior.ts
 - artifacts/api-server/src/routes/support-cases.behavior.ts
 - artifacts/api-server/src/routes/support-cases.ts
 - artifacts/api-server/src/routes/team-performance.ts
@@ -1063,6 +1065,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/submittal-review-tracking.ts
 - artifacts/api-server/src/lib/subscription-authority.behavior.ts
 - artifacts/api-server/src/lib/subscription-authority.ts
+- artifacts/api-server/src/lib/support-case-operations.behavior.ts
+- artifacts/api-server/src/lib/support-case-operations.ts
 - artifacts/api-server/src/lib/team-performance-postgres-query.behavior.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
 - artifacts/api-server/src/lib/team-performance.behavior.ts

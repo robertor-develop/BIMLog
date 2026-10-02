@@ -3618,3 +3618,7 @@ The cache-repair implementation unit is semantically reconciled against the exac
 B141–B145 replace the Billing & Support contact dead-end with authenticated, company/requester-scoped customer-service cases. The block adds a bounded secret-rejecting case contract, additive durable schema and startup parity, idempotent protected create/list operations, strict browser response validation, and a bilingual create/history workspace. It does not send email, expose provider credentials, grant administrator access, or claim external delivery. This is the first five builds after the B131–B140 publication and remains push-only until B150.
 
 The exact-head gate identified and repaired route-fixture inventory pollution, regenerated the deterministic route graph, refreshed the disposable artifact-proof schema for `support_cases`, and reconciled generated Open Loop state before push. These repairs do not add builds or move the B150 publication boundary.
+
+## 250-build SaaS Completion Block 30 — customer service operations — 2026-10-02
+
+B146–B150 connect customer-created support cases to governed platform operations: explicit lifecycle transitions and workload classification, a Super Administrator-only cross-company queue, revision-safe status updates, strict browser validation, and bilingual Total Control presentation with urgent, waiting and resolved views. The block does not send external messages, expose credentials, modify payments or change Native. B141–B150 now reach the ten-build publication and authenticated Chrome acceptance boundary.

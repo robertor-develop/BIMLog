@@ -4250,5 +4250,14 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B143 expose authenticated requester-scoped list and idempotent create operations without widening administrator authority.
 - [x] B144 strictly validate support history at the browser boundary.
 - [x] B145 add bilingual customer-service creation, history, loading, empty, error and retry states to Billing & Support.
-- [ ] Pass the complete exact-head gate and push B141–B145 once. Keep the block unpublished until B146–B150 completes the ten-build publication batch.
+- [x] Pass the complete exact-head gate and push B141–B145 once. Exact source `3444caed206d86f5b028c002d94a1033972076d7` reached `origin/master`; the block remained unpublished until B150.
 - [x] Repair the route-fixture inventory collision, reconcile the deterministic route graph and Open Loop index, and update the disposable proof database with the additive `support_cases` table before the final exact-head gate.
+
+## 250-build SaaS Completion Block 30 — customer service operations — 2026-10-02
+
+- [x] B146 define governed support-case transitions and deterministic urgent, waiting and resolved workload states.
+- [x] B147 expose a Super Administrator-only accountable support queue with company and requester identity.
+- [x] B148 add revision-safe support lifecycle updates with explicit conflict recovery.
+- [x] B149 reject malformed, duplicate or contradictory support operations responses before rendering.
+- [x] B150 add bilingual urgent, waiting and resolved support operations to Total Control.
+- [ ] Pass the complete exact-head gate, push B146–B150 once, publish accumulated B141–B150, verify exact live identity and run the full authenticated Chrome smoke.
