@@ -2,6 +2,12 @@ export const SALES_INQUIRY_STATUSES = ["new", "acknowledged", "qualified", "clos
 export type SalesInquiryStatus = (typeof SALES_INQUIRY_STATUSES)[number];
 export const SALES_INQUIRY_NEXT_ACTION_TYPES=["call","demo","email","proposal"] as const;
 export type SalesInquiryNextActionType=(typeof SALES_INQUIRY_NEXT_ACTION_TYPES)[number];
+export type SalesInquiryActionUrgency="overdue"|"today"|"upcoming"|"unscheduled"|"closed";
+export function salesInquiryActionUrgency(inquiry:Pick<SalesInquiry,"status"|"nextActionDueAt">,now=new Date()):SalesInquiryActionUrgency{
+  if(inquiry.status==="closed")return "closed";if(!inquiry.nextActionDueAt)return "unscheduled";
+  const due=new Date(inquiry.nextActionDueAt);if(Number.isNaN(due.getTime()))throw new Error("Invalid sales inquiry next action due time");
+  if(due.getTime()<now.getTime())return "overdue";const end=new Date(now);end.setHours(23,59,59,999);return due.getTime()<=end.getTime()?"today":"upcoming";
+}
 export type SalesInquiry = Readonly<{ id:number; fullName:string; email:string; companyName:string; country:string; interest:string; message:string; plan:string|null; billingCycle:string|null; useCase:string|null; status:SalesInquiryStatus; responseDueAt:string; assignedToUserId:number|null; assignedToName:string|null; assignedToCurrentUser:boolean; assignedAt:string|null; nextActionType:SalesInquiryNextActionType|null; nextActionDueAt:string|null; createdAt:string; updatedAt:string }>;
 const text=(value:unknown,field:string,max=4000)=>{if(typeof value!=="string"||!value.trim()||value.length>max)throw new Error(`Invalid sales inquiry ${field}`);return value;};
 const optional=(value:unknown,field:string)=>value==null?null:text(value,field,160);
