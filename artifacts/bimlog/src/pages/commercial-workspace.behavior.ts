@@ -4,6 +4,8 @@ for(const token of ["Billing & Support","Facturación y Soporte","/api/v1/commer
 for(const token of ["Next steps","Próximos pasos","Complete billing identity","Review plans","Contact support","Unavailable until setup is complete"])assert.match(source,new RegExp(token));
 for(const token of ["What happens next","Qué sucede ahora","Your company","You do not need to configure them","data.responsibilities.customer","data.responsibilities.bimlog"])assert.match(source,new RegExp(token));
 for(const token of ["BIMLog service readiness","Preparación de servicios BIMLog","data.platformChecks.map","BIMLog setup pending","Your company does not need to enter technical settings"])assert.match(source,new RegExp(token));
+for(const token of ["Plan checkout coverage","Cobertura de pago por plan","data.catalogCoverage.map","Monthly billing","Annual billing","BIMLog correction required"])assert.match(source,new RegExp(token));
+assert.doesNotMatch(source,/price_[A-Za-z0-9_]+/);
 for(const token of ["parseCommercialCheckoutReturn","Checkout received","Checkout cancelled","verifying the provider confirmation","No subscription change was claimed"])assert.match(source,new RegExp(token));
 assert.match(source,/data\.actions\.map/);assert.match(source,/action\.status==="blocked"/);assert.match(source,/Button disabled/);
 assert.match(source,/minmax\(min\(240px,100%\),1fr\)/);assert.match(source,/Waiting for:/);assert.match(source,/action\.blockers\.map/);assert.doesNotMatch(source,/Ready \/ Listo|Setup required \/ Requiere configuración/);
