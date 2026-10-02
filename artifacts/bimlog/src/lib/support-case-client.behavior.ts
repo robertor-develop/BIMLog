@@ -1,0 +1,3 @@
+import assert from "node:assert/strict";import {newSupportRequestKey,parseSupportCases} from "./support-case-client";
+const payload={items:[{id:7,category:"billing",priority:"urgent",subject:"Invoice help",status:"open",createdAt:"2026-10-02T10:00:00Z",updatedAt:"2026-10-02T10:00:00Z"}]};assert.equal(parseSupportCases(payload)[0]?.subject,"Invoice help");assert.match(newSupportRequestKey(),/^support_[a-f0-9]{32}$/);for(const bad of [{}, {items:[{...payload.items[0],status:"deleted"}]},{items:[{...payload.items[0],createdAt:"today"}]}])assert.throws(()=>parseSupportCases(bad));
+console.log("B144 strict browser support case projection: PASS");
