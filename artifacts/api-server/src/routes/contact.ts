@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { contactSubmissionsTable,salesInquiryAssignmentEventsTable,salesInquiryFollowUpsTable,usersTable } from "@workspace/db/schema";
-import {and,count,desc,eq,ilike,isNull,lt,ne,or} from "drizzle-orm";
+import {and,count,desc,eq,gt,gte,ilike,isNull,lt,lte,ne,or} from "drizzle-orm";
 import {parseSalesInquiryInput,salesInquiryFingerprint} from "../lib/commercial-sales-inquiry";
 import {authMiddleware,isSuperAdminMiddleware} from "../middlewares/auth";
 import {assertSalesInquiryTransition} from "../lib/sales-inquiry-operations";
@@ -44,6 +44,11 @@ router.get("/admin/sales-inquiries",authMiddleware,isSuperAdminMiddleware,async(
   if(query.overdue)filters.push(and(ne(contactSubmissionsTable.status,"closed"),lt(contactSubmissionsTable.responseDueAt,new Date()))!);
   if(query.assignment==="mine")filters.push(eq(contactSubmissionsTable.assignedToUserId,req.user!.userId));
   if(query.assignment==="unassigned")filters.push(isNull(contactSubmissionsTable.assignedToUserId));
+  const actionNow=new Date(),actionEndOfToday=new Date(actionNow);actionEndOfToday.setHours(23,59,59,999);
+  if(query.actionScope==="overdue")filters.push(and(ne(contactSubmissionsTable.status,"closed"),lt(contactSubmissionsTable.nextActionDueAt,actionNow))!);
+  if(query.actionScope==="today")filters.push(and(ne(contactSubmissionsTable.status,"closed"),gte(contactSubmissionsTable.nextActionDueAt,actionNow),lte(contactSubmissionsTable.nextActionDueAt,actionEndOfToday))!);
+  if(query.actionScope==="upcoming")filters.push(and(ne(contactSubmissionsTable.status,"closed"),gt(contactSubmissionsTable.nextActionDueAt,actionEndOfToday))!);
+  if(query.actionScope==="unscheduled")filters.push(and(ne(contactSubmissionsTable.status,"closed"),isNull(contactSubmissionsTable.nextActionDueAt))!);
   const where=filters.length?and(...filters):undefined;
   const fields={id:contactSubmissionsTable.id,fullName:contactSubmissionsTable.fullName,email:contactSubmissionsTable.email,companyName:contactSubmissionsTable.companyName,country:contactSubmissionsTable.country,interest:contactSubmissionsTable.interest,message:contactSubmissionsTable.message,plan:contactSubmissionsTable.plan,billingCycle:contactSubmissionsTable.billingCycle,useCase:contactSubmissionsTable.useCase,status:contactSubmissionsTable.status,responseDueAt:contactSubmissionsTable.responseDueAt,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedToName:usersTable.fullName,assignedAt:contactSubmissionsTable.assignedAt,nextActionType:contactSubmissionsTable.nextActionType,nextActionDueAt:contactSubmissionsTable.nextActionDueAt,createdAt:contactSubmissionsTable.createdAt,updatedAt:contactSubmissionsTable.updatedAt};
   const [selectedRows,totalRows]=await Promise.all([db.select(fields).from(contactSubmissionsTable).leftJoin(usersTable,eq(usersTable.id,contactSubmissionsTable.assignedToUserId)).where(where).orderBy(desc(contactSubmissionsTable.createdAt),desc(contactSubmissionsTable.id)).limit(query.limit).offset(query.offset),db.select({total:count()}).from(contactSubmissionsTable).where(where)]);

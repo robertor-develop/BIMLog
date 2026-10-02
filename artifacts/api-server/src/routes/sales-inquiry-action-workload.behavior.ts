@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {fileURLToPath} from "node:url";
+const source=readFileSync(fileURLToPath(new URL("./contact.ts",import.meta.url)),"utf8");
+assert.match(source,/query\.actionScope==="overdue"/);
+assert.match(source,/query\.actionScope==="today"/);
+assert.match(source,/query\.actionScope==="upcoming"/);
+assert.match(source,/query\.actionScope==="unscheduled"/);
+assert.match(source,/ne\(contactSubmissionsTable\.status,"closed"\)/);
+assert.match(source,/isNull\(contactSubmissionsTable\.nextActionDueAt\)/);
+console.log("B138 protected scheduled-action workload projection: PASS");
