@@ -117,6 +117,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/projects.ts
 - artifacts/api-server/src/routes/reports.ts
 - artifacts/api-server/src/routes/rfis.ts
+- artifacts/api-server/src/routes/sales-inquiry-next-action.behavior.ts
 - artifacts/api-server/src/routes/schedule.ts
 - artifacts/api-server/src/routes/search.ts
 - artifacts/api-server/src/routes/submittal_reports.ts
@@ -995,6 +996,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/sales-inquiry-assignment.ts
 - artifacts/api-server/src/lib/sales-inquiry-follow-up.behavior.ts
 - artifacts/api-server/src/lib/sales-inquiry-follow-up.ts
+- artifacts/api-server/src/lib/sales-inquiry-next-action-schema.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-next-action.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-next-action.ts
 - artifacts/api-server/src/lib/sales-inquiry-operations.behavior.ts
 - artifacts/api-server/src/lib/sales-inquiry-operations.ts
 - artifacts/api-server/src/lib/sales-inquiry-query.behavior.ts

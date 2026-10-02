@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 706,
-    "frontendApiReferences": 272,
+    "apiRoutes": 707,
+    "frontendApiReferences": 273,
     "routeOwnedTables": 63
   },
   "compatibilityRedirects": [
@@ -2511,6 +2511,17 @@
     {
       "method": "POST",
       "path": "/admin/sales-inquiries/:id/follow-ups",
+      "owner": "artifacts/api-server/src/routes/contact.ts",
+      "tables": [
+        "contactSubmissionsTable",
+        "salesInquiryAssignmentEventsTable",
+        "salesInquiryFollowUpsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/sales-inquiries/:id/next-action",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
         "contactSubmissionsTable",
@@ -9189,6 +9200,10 @@
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/assignment"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/next-action"
     },
     {
       "screen": "artifacts/bimlog/src/components/ai/AiControlPlanePanel.tsx",

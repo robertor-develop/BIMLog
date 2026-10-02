@@ -4218,6 +4218,15 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B128 expose protected deterministic list and revision-safe note creation.
 - [x] B129 reject malformed, duplicate or contradictory follow-up pages before rendering.
 - [x] B130 complete bilingual follow-up review and creation with loading, empty, error, retry and stale-write recovery.
-- [ ] Pass the complete exact-head gate, push B126–B130 once, publish accumulated B121–B130 without Replit Agents, verify exact live identity and complete full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B126–B130 once, publish accumulated B121–B130 without Replit Agents, verify exact live identity and complete full authenticated Chrome smoke. Accepted at exact production source `3f6ec337611f16babe68aab6fffe2107377367a3`; 63/63 authenticated routes, exact-390 containment, hard reload and zero-error console passed after the tracked Replit cache epoch forced a fresh artifact.
 - [x] Repair the complete-gate JSX boundary failure and rerun focused frontend/API TypeScript before repeating the complete gate.
-- [ ] Publish the cache-epoch repair, require live source identity to equal the repaired B130 head, and run the full authenticated Chrome smoke before B131 begins. Replit's prior attempts recycled source `62c5a71a1ed6776a9d2e8e0096f9ff483bcf6cec` despite an attested B130 workspace; no stale-artifact publication counts as acceptance.
+- [x] Publish the cache-epoch repair, require live source identity to equal the repaired B130 head, and run the full authenticated Chrome smoke before B131 begins. Production accepted exact repaired source `3f6ec337611f16babe68aab6fffe2107377367a3`.
+
+## 250-build SaaS Completion Block 27 — scheduled sales next actions — 2026-10-02
+
+- [x] B131 define bounded scheduled call, demo, email and proposal actions with exact revision identity.
+- [x] B132 persist paired next-action type and due time with additive schema/startup-migration parity.
+- [x] B133 expose a protected revision-safe scheduling operation limited to the current accountable owner and open inquiries.
+- [x] B134 reject malformed, unpaired or unknown scheduled-action data at the browser boundary.
+- [x] B135 show and schedule the next action bilingually in Total Control with stale-write and ownership recovery.
+- [ ] Pass the complete exact-head gate and push B131–B135 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after B136–B140.

@@ -54647,12 +54647,24 @@
       ],
       "reviewedChangedPaths": [
         ".replit",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/sales-inquiry-next-action-schema.behavior.ts",
+        "artifacts/api-server/src/lib/sales-inquiry-next-action.behavior.ts",
+        "artifacts/api-server/src/lib/sales-inquiry-next-action.ts",
+        "artifacts/api-server/src/routes/contact.ts",
+        "artifacts/api-server/src/routes/sales-inquiry-next-action.behavior.ts",
+        "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+        "artifacts/bimlog/src/lib/sales-inquiry-client.behavior.ts",
+        "artifacts/bimlog/src/lib/sales-inquiry-client.ts",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/db/src/schema/contact-submissions.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "4fc1282fa9591472b2505591eb05eeac99154ecd8890b6ab083a81f7d4c8c0d3",
+      "reviewedChangeSha256": "40d072cc4fec8431be24d05e1a6a1ca837964cb62f5cfdd54a9deba17fcf0711",
       "reason": "B126-B130 add attributable durable sales follow-up notes to the existing canonical inquiry and protected Total Control workflow; the complete gate caught and the repair removed a malformed JSX boundary before release."
     }
   ]
