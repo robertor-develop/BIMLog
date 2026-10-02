@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {createCompanySubscription} from "./subscription-authority";
 import {deriveSubscriptionAccess} from "./commercial-billing-operations";
-import {assembleCommercialWorkspace,assessCommercialLaunch,previewPlanChange,reconcileCommercialSeats} from "./commercial-workspace";
+import {assembleCommercialWorkspace,assessCommercialLaunch,previewPlanChange,projectCommercialWorkspace,reconcileCommercialSeats} from "./commercial-workspace";
 const draft=createCompanySubscription({id:"sub-workspace",companyId:42,planId:"business",catalogPriceVersion:3,billingCycle:"monthly",currency:"USD",amount:3000,now:"2026-10-01T00:00:00Z"});
 const subscription={...draft,status:"active" as const,revision:2,updatedAt:"2026-10-01T00:01:00.000Z"};
 const term={subscriptionId:subscription.id,sequence:1,billingCycle:"monthly" as const,startsAt:"2026-10-01T00:00:00.000Z",endsAt:"2026-11-01T00:00:00.000Z",renewsAt:"2026-11-01T00:00:00.000Z",sourceOrderId:"order-workspace",sourceInvoiceId:"invoice-workspace"};
@@ -26,4 +26,10 @@ assert.deepEqual({status:launch.status,blockers:launch.blockers},{status:"ready"
 const blockedLaunch=assessCommercialLaunch({workspace,billingIdentityComplete:true,providerReady:false,webhookReady:false,portalReady:false,supportReady:true,now:"2026-10-02T00:00:00Z"});
 assert.deepEqual(blockedLaunch.blockers,["PROVIDER_NOT_READY","WEBHOOK_NOT_READY","PORTAL_NOT_READY"]);
 console.log("B064 fail-closed payment-provider launch readiness: PASS");
+const customerView=projectCommercialWorkspace({workspace,role:"customer_admin",launch,seats});
+assert.deepEqual({canChangePlan:customerView.canChangePlan,canOpenBillingPortal:customerView.canOpenBillingPortal,canManageProvider:customerView.canManageProvider},{canChangePlan:true,canOpenBillingPortal:true,canManageProvider:false});
+const auditorView=projectCommercialWorkspace({workspace,role:"auditor",launch:blockedLaunch,seats});
+assert.deepEqual((auditorView.launch as {blockers:unknown[]}).blockers,[]);
+assert.equal(JSON.stringify(customerView).includes("secret"),false);
+console.log("B065 permission-safe customer, billing, support and audit workspace: PASS");
 export {subscription,access,workspace};

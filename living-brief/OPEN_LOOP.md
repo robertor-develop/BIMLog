@@ -4063,6 +4063,15 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 049 projects support entitlement, cases and events by customer, support, support-manager and auditor roles without broad requester or case-detail exposure.
 - [x] Build 050 fails customer-support readiness closed for missing/stale entitlement, overdue open cases, unresolved urgent cases or missing current-revision evidence.
 - [ ] Pass the complete exact-head gate and push Builds 046–050 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after Builds 051–055.
+
+## 250-build SaaS Completion Block 13 — commercial workspace integration — 2026-10-01
+
+- [x] Build 061 assembles canonical company, subscription and access lineage into one deterministic authenticated commercial-workspace state.
+- [x] Build 062 previews plan and seat-limit changes without writes and blocks reductions below assigned seats.
+- [x] Build 063 normalizes and deduplicates the company seat roster, enforces the purchased allowance and exposes remaining capacity.
+- [x] Build 064 fails payment-provider launch readiness closed across subscription, access, billing identity, provider, webhook, portal and support evidence.
+- [x] Build 065 projects the workspace for customer-admin, billing-admin, support and auditor roles without provider secrets or broad operational detail.
+- [ ] Pass the complete exact-head gate and push B061–B065 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B066–B070.
 # B056–B060 post-commit release reconciliation — 2026-10-01
 
 - [ ] Candidate source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf` must pass the complete clean gate, reach `origin/master`, publish at the ten-build boundary, and pass full authenticated Chrome smoke before the block is accepted.

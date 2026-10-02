@@ -3426,6 +3426,10 @@ Publication identity correction: the UX071–UX080 publication exposed Replit's 
 - No schema, production customer record, provider credential, email, external support message, Native source or installer changed. Domain records prepare and govern support work; they do not claim that a third-party help desk or email provider delivered anything.
 # 250-build SaaS Block 12 — verified onboarding candidate — 2026-10-01
 
+## 250-build SaaS Completion Block 13 — commercial workspace integration — 2026-10-01
+
+B061–B065 connect the existing B001–B050 commercial authorities into a single deterministic company workspace contract. The block validates exact subscription/access lineage, previews plan changes without writes, enforces seat capacity, fails launch closed when provider or support evidence is incomplete, and limits customer, billing, support and audit projections by role. It does not claim a live Stripe credential, payment, email delivery or help-desk integration. This is the first five-build block after accepted P37; publication and authenticated Chrome smoke are due after B066–B070.
+
 B056–B060 replace the dismissible onboarding slideshow with a resumable PostgreSQL-backed setup: expiring single-use email verification, explicit authenticated company identity, non-privileged work-profile selection, canonical first-project creation, and bounded coordinator defaults with Shop Drawings first. Completion fails closed until verified email, work profile, and project membership exist. A newly created project proceeds to full Intake and does not force team assignment. The Lens updater now resolves a year-specific signed manifest so 2021 and 2025 packages remain isolated. Focused contracts and both TypeScript checks pass; exact-head full gate, push, package/publication, live authenticated Chrome and installed Navisworks acceptance remain due.
 
 # 250-build SaaS Block 11 — Lens Next automatic updates — 2026-10-01

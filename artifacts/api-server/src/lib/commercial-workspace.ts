@@ -30,7 +30,7 @@ export function previewPlanChange(input:{workspace:CommercialWorkspaceState;toPl
   return Object.freeze({companyId:input.workspace.companyId,subscriptionId:input.workspace.subscriptionId,fromPlan:input.workspace.planId,toPlan:input.toPlan,fromSeatLimit:input.workspace.seatLimit,toSeatLimit:input.toSeatLimit,assignedSeats:input.assignedSeats,effectiveAt,requiresSeatReduction,canSubmit:blockers.length===0,blockers:Object.freeze(blockers),writesPerformed:0});
 }
 
-export type CommercialSeatAssignment=Readonly<{userId:number;email:string;role:"member"|"administrator"|"viewer";status:"active"|"invited">>;
+export type CommercialSeatAssignment=Readonly<{userId:number;email:string;role:"member"|"administrator"|"viewer";status:"active"|"invited"}>;
 export function reconcileCommercialSeats(input:{workspace:CommercialWorkspaceState;assignments:readonly CommercialSeatAssignment[]}):Readonly<{assigned:number;available:number;assignments:readonly CommercialSeatAssignment[];canInvite:boolean}>{
   const seenUsers=new Set<number>(),seenEmails=new Set<string>();
   const assignments=input.assignments.map(entry=>{const email=entry.email.trim().toLowerCase();if(!Number.isSafeInteger(entry.userId)||entry.userId<1||!/^\S+@\S+\.\S+$/.test(email))throw new Error("Commercial seat identity is invalid");if(seenUsers.has(entry.userId)||seenEmails.has(email))throw new Error("Commercial seat assignment is duplicated");seenUsers.add(entry.userId);seenEmails.add(email);return Object.freeze({...entry,email});});
@@ -51,4 +51,11 @@ export function assessCommercialLaunch(input:{workspace:CommercialWorkspaceState
   if(!input.portalReady)blockers.push("PORTAL_NOT_READY");
   if(!input.supportReady)blockers.push("SUPPORT_NOT_READY");
   return Object.freeze({status:blockers.length?"blocked":"ready",blockers:Object.freeze(blockers),checkedAt});
+}
+
+export type CommercialWorkspaceRole="customer_admin"|"billing_admin"|"support"|"auditor";
+export function projectCommercialWorkspace(input:{workspace:CommercialWorkspaceState;role:CommercialWorkspaceRole;launch:ReturnType<typeof assessCommercialLaunch>;seats:ReturnType<typeof reconcileCommercialSeats>}):Readonly<Record<string,unknown>>{
+  const operational=input.role==="billing_admin"||input.role==="support";
+  const customer=input.role==="customer_admin";
+  return Object.freeze({companyId:input.workspace.companyId,planId:input.workspace.planId,status:input.workspace.status,accessStatus:input.workspace.accessStatus,expiresAt:input.workspace.expiresAt,seatSummary:Object.freeze({assigned:input.seats.assigned,available:input.seats.available,canInvite:customer&&input.seats.canInvite}),launch:Object.freeze({status:input.launch.status,blockers:operational||customer?input.launch.blockers:[],checkedAt:input.launch.checkedAt}),canChangePlan:customer,canOpenBillingPortal:customer&&input.launch.status==="ready",canManageProvider:input.role==="billing_admin",canManageSupport:input.role==="support"});
 }
