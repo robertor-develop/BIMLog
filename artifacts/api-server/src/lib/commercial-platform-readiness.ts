@@ -17,9 +17,11 @@ export function inspectCommercialPlatformReadiness(environment:NodeJS.ProcessEnv
   let billingPortalConfigured=false;
   try{
     const stripe=inspectStripeCommercialConfiguration({secretKey:environment.STRIPE_SECRET_KEY,webhookSecret:environment.STRIPE_WEBHOOK_SECRET,portalConfigurationId:environment.STRIPE_PORTAL_CONFIGURATION_ID,appOrigin:environment.BIMLOG_APP_ORIGIN??"https://bimlog.app"}).readiness;
-    paymentProviderConfigured=stripe.configured;
+    const expectedMode=environment.BIMLOG_COMMERCIAL_MODE?.trim();
+    const modeMatches=(expectedMode==="test"||expectedMode==="live")&&stripe.mode===expectedMode;
+    paymentProviderConfigured=stripe.configured&&modeMatches;
     webhookConfigured=stripe.configured&&stripe.webhookConfigured;
-    billingPortalConfigured=stripe.configured&&stripe.portalConfigured;
+    billingPortalConfigured=paymentProviderConfigured&&stripe.portalConfigured;
   }catch{/* Invalid provider configuration remains unavailable. */}
   const supportConfigured=sendgridPattern.test((environment.SENDGRID_API_KEY??"").trim())&&emailPattern.test((environment.BIMLOG_SUPPORT_FROM_EMAIL??"").trim())&&emailPattern.test((environment.BIMLOG_SUPPORT_INBOX_EMAIL??"").trim());
   const checks=Object.freeze([
