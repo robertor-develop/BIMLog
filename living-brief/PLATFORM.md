@@ -310,6 +310,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-evidence-package.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.ts
+- artifacts/api-server/src/lib/commercial-platform-readiness.behavior.ts
+- artifacts/api-server/src/lib/commercial-platform-readiness.ts
 - artifacts/api-server/src/lib/commercial-potential-impact.behavior.ts
 - artifacts/api-server/src/lib/commercial-potential-impact.ts
 - artifacts/api-server/src/lib/commercial-project-scope.ts

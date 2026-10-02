@@ -3489,3 +3489,14 @@ Replit publication `adb53e67` successfully promoted the P37 product and the auth
 - B079 replaces the mixed blocker list with clear bilingual “Your company” and “BIMLog” panels so customers are not asked to configure provider infrastructure.
 - B080 localizes status language, exposes exact blocked-action reasons and contains every card grid at narrow widths.
 - Focused runtime, client, page behavior and frontend TypeScript checks pass at implementation source `5af2d9f8`. B071–B080 now reach the ten-build publication boundary; complete gate, push, one controlled Replit Shell publication, exact live identity and full authenticated Chrome smoke are due.
+
+The B071–B080 publication is accepted as release `v1.05.N18-P37`, Replit deployment `b0ca1738`, and exact production source `f076d0d5cf0137d84e953e57c427bb2b218a0ce4`. The authenticated Chrome smoke passed 63/63 routes plus desktop, tablet and exact-390 responsive checks with no console warnings or errors.
+
+## 250-build SaaS Completion Block 17 — commercial platform truth — 2026-10-02
+
+- B081 validates a nonempty, unique catalog of well-formed Stripe price references.
+- B082 makes payment, webhook and portal readiness depend on coherent Stripe credentials, HTTPS application origin and the declared test/live operating mode.
+- B083 reports support ready only when SendGrid transport, platform sender and support inbox are all valid.
+- B084 replaces environment-presence guesses with five bounded secret-free service diagnostics in the authenticated commercial workspace response.
+- B085 rejects incomplete, duplicate or contradictory diagnostics at the browser boundary and presents a bilingual BIMLog-managed readiness checklist without exposing credentials or technical settings.
+- Focused API behavior, API TypeScript, strict client behavior, page behavior and frontend TypeScript checks pass at implementation source `eb07e026`. This is the first five-build block after the accepted B071–B080 publication; push is due now, while publication and authenticated Chrome smoke are due after B086–B090.

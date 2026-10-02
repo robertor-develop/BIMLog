@@ -4128,4 +4128,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B078 validate exact responsibility partition and readiness consistency at the client boundary.
 - [x] B079 present clear bilingual customer and BIMLog responsibility panels without duplicate controls.
 - [x] B080 localize state labels, explain exact blocked-action reasons and preserve narrow-screen containment.
-- [ ] Pass the complete exact-head gate, push B076–B080 once, publish accumulated B071–B080 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B076–B080 once, publish accumulated B071–B080 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke. Accepted as production release `v1.05.N18-P37`, deployment `b0ca1738`, exact source `f076d0d5cf0137d84e953e57c427bb2b218a0ce4`, with 63/63 authenticated routes and responsive desktop/tablet/exact-390 checks passing without console warnings or errors.
+
+## 250-build SaaS Completion Block 17 — commercial platform truth — 2026-10-02
+
+- [x] B081 validate the complete Stripe subscription price catalog instead of accepting arbitrary nonempty text.
+- [x] B082 validate Stripe credentials, webhook, portal, secure application origin and declared test/live mode as one coherent configuration.
+- [x] B083 require a valid SendGrid transport, platform sender and support inbox before reporting customer support ready.
+- [x] B084 expose five bounded, secret-free platform service diagnostics through the authenticated commercial workspace.
+- [x] B085 strictly validate and render the five bilingual BIMLog-managed service checks without exposing credentials or technical configuration to customers.
+- [ ] Pass the complete exact-head gate and push B081–B085 once. Keep this first five-build block unpublished; publication and full authenticated Chrome smoke are due after B086–B090 reaches ten unpublished builds.
