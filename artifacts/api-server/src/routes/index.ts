@@ -59,6 +59,7 @@ import coordinationKnowledgeRouter from "./coordination-knowledge";
 import edtEngineRouter from "./edt-engine";
 import onboardingRouter from "./onboarding";
 import commercialWorkspaceRouter from "./commercial-workspace";
+import supportCasesRouter from "./support-cases";
 
 const router: IRouter = Router();
 
@@ -67,6 +68,7 @@ router.use(healthRouter);
 router.use(authRouter);
 router.use(onboardingRouter);
 router.use(commercialWorkspaceRouter);
+router.use(supportCasesRouter);
 router.use(configRouter);
 router.use(projectsRouter);
 router.use(filesRouter);
