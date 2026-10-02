@@ -6,12 +6,20 @@ export type CommercialPlatformCheck=Readonly<{service:CommercialPlatformService;
 
 const emailPattern=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const pricePattern=/^price_[A-Za-z0-9_]{6,}$/;
+export const commercialPaidOffers=["professional","team","business"] as const;
+export const commercialBillingCycles=["monthly","annual"] as const;
+export type CommercialCatalogSlot=`${typeof commercialPaidOffers[number]}.${typeof commercialBillingCycles[number]}`;
+export type CommercialCatalogCoverage=Readonly<{slot:CommercialCatalogSlot;configured:boolean}>;
 const sendgridPattern=/^SG\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}$/;
 const check=(service:CommercialPlatformService,ready:boolean,code:string):CommercialPlatformCheck=>Object.freeze({service,status:ready?"ready":"not_configured",code});
 
 export function inspectCommercialPlatformReadiness(environment:NodeJS.ProcessEnv){
-  const prices=(environment.BIMLOG_STRIPE_PRICE_IDS??"").split(",").map(value=>value.trim()).filter(Boolean);
-  const subscriptionConfigured=prices.length>0&&prices.every(value=>pricePattern.test(value))&&new Set(prices).size===prices.length;
+  const requiredSlots=commercialPaidOffers.flatMap(plan=>commercialBillingCycles.map(cycle=>`${plan}.${cycle}` as CommercialCatalogSlot));
+  const entries=(environment.BIMLOG_STRIPE_PRICE_IDS??"").split(",").map(value=>value.trim()).filter(Boolean).map(value=>value.split("=",2).map(part=>part.trim()) as [string,string]);
+  const mapped=new Map(entries);
+  const catalogCoverage=Object.freeze(requiredSlots.map(slot=>Object.freeze({slot,configured:pricePattern.test(mapped.get(slot)??"")})));
+  const prices=entries.map(([,price])=>price);
+  const subscriptionConfigured=entries.length===requiredSlots.length&&mapped.size===requiredSlots.length&&requiredSlots.every(slot=>mapped.has(slot))&&prices.every(value=>pricePattern.test(value))&&new Set(prices).size===prices.length;
   let paymentProviderConfigured=false;
   let webhookConfigured=false;
   let billingPortalConfigured=false;
@@ -35,5 +43,5 @@ export function inspectCommercialPlatformReadiness(environment:NodeJS.ProcessEnv
     check("billing_portal",billingPortalConfigured,billingPortalConfigured?"portal_ready":"portal_invalid"),
     check("support_channel",supportConfigured,supportCode),
   ]);
-  return Object.freeze({subscriptionConfigured,paymentProviderConfigured,webhookConfigured,billingPortalConfigured,supportConfigured,checks});
+  return Object.freeze({subscriptionConfigured,paymentProviderConfigured,webhookConfigured,billingPortalConfigured,supportConfigured,catalogCoverage,checks});
 }

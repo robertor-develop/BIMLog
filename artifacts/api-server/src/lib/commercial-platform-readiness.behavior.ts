@@ -6,11 +6,13 @@ assert.equal(empty.subscriptionConfigured,false);
 assert.equal(empty.checks.length,5);
 assert.equal(empty.checks.every(item=>item.status==="not_configured"),true);
 
-const valid=inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"price_standard_2026,price_enterprise_2026"});
+const catalog="professional.monthly=price_prof_monthly,professional.annual=price_prof_annual,team.monthly=price_team_monthly,team.annual=price_team_annual,business.monthly=price_business_monthly,business.annual=price_business_annual";
+const valid=inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:catalog});
 assert.equal(valid.subscriptionConfigured,true);
 assert.equal(valid.checks[0]?.code,"catalog_ready");
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"price_good_2026,invalid"}).subscriptionConfigured,false);
-assert.equal(inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"price_duplicate_2026,price_duplicate_2026"}).subscriptionConfigured,false);
+assert.equal(inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"professional.monthly=price_duplicate_2026,professional.annual=price_duplicate_2026"}).subscriptionConfigured,false);
+assert.deepEqual(valid.catalogCoverage.map(item=>item.slot),["professional.monthly","professional.annual","team.monthly","team.annual","business.monthly","business.annual"]);
 assert.equal(JSON.stringify(valid).includes("BIMLOG_STRIPE_PRICE_IDS"),false);
 
 const stripeReady=inspectCommercialPlatformReadiness({
