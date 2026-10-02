@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {parseCommercialWorkspace} from "./commercial-workspace-client";
 const platformChecks=["subscription_catalog","payment_provider","payment_webhook","billing_portal","support_channel"].map(service=>({service,status:"ready",code:"service_ready"}));
 const catalogCoverage=["professional.monthly","professional.annual","team.monthly","team.annual","business.monthly","business.annual"].map(slot=>({slot,status:"ready"}));
-const parsed=parseCommercialWorkspace({companyId:7,companyName:" BIMCorp ",memberCount:12,commercialAccess:true,subscriptionStatus:"active",billingIdentityStatus:"complete",paymentProviderStatus:"ready",webhookStatus:"ready",billingPortalStatus:"ready",supportStatus:"ready",readiness:"ready",blockers:[],responsibilities:{customer:[],bimlog:[],customerReadiness:"ready",platformReadiness:"ready"},platformChecks,catalogCoverage,actions:[{id:"review_plans",status:"available",href:"/pricing",blockers:[]}]});
+const parsed=parseCommercialWorkspace({companyId:7,companyName:" BIMCorp ",memberCount:12,commercialAccess:true,subscriptionStatus:"active",billingIdentityStatus:"complete",paymentProviderStatus:"ready",webhookStatus:"ready",billingPortalStatus:"ready",supportStatus:"ready",providerMode:"live",salesLaunchStatus:"ready",salesLaunchBlockers:[],readiness:"ready",blockers:[],responsibilities:{customer:[],bimlog:[],customerReadiness:"ready",platformReadiness:"ready"},platformChecks,catalogCoverage,actions:[{id:"review_plans",status:"available",href:"/pricing",blockers:[]}]});
 assert.deepEqual({name:parsed.companyName,members:parsed.memberCount,readiness:parsed.readiness},{name:"BIMCorp",members:12,readiness:"ready"});
 assert.throws(()=>parseCommercialWorkspace({...parsed,paymentProviderStatus:"connected"}),/provider status/);
 assert.throws(()=>parseCommercialWorkspace({...parsed,memberCount:-1}),/identity/);
@@ -14,4 +14,6 @@ assert.throws(()=>parseCommercialWorkspace({...parsed,platformChecks:parsed.plat
 assert.throws(()=>parseCommercialWorkspace({...parsed,platformChecks:parsed.platformChecks.map((item,index)=>index===0?{...item,status:"not_configured"}:item)}),/platform consistency/);
 assert.throws(()=>parseCommercialWorkspace({...parsed,catalogCoverage:parsed.catalogCoverage.slice(0,5)}),/catalog coverage/);
 assert.throws(()=>parseCommercialWorkspace({...parsed,catalogCoverage:parsed.catalogCoverage.map((item,index)=>index===0?{...item,status:"missing"}:item)}),/catalog consistency/);
+assert.throws(()=>parseCommercialWorkspace({...parsed,providerMode:"test",salesLaunchStatus:"ready",salesLaunchBlockers:["live_mode"]}),/sales launch consistency/);
+assert.throws(()=>parseCommercialWorkspace({...parsed,salesLaunchStatus:"blocked",salesLaunchBlockers:["secret_key"]}),/sales launch blocker/);
 console.log("B068 strict commercial workspace client adapter: PASS");
