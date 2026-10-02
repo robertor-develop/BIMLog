@@ -10,6 +10,7 @@ import {salesInquiryResponseDueAt} from "../lib/sales-inquiry-response";
 import {canChangeSalesInquiryAssignment,parseSalesInquiryAssignment} from "../lib/sales-inquiry-assignment";
 import {parseSalesInquiryAssignmentHistoryQuery} from "../lib/sales-inquiry-assignment-history";
 import {parseSalesInquiryFollowUp} from "../lib/sales-inquiry-follow-up";
+import {parseSalesInquiryNextAction} from "../lib/sales-inquiry-next-action";
 import {alias} from "drizzle-orm/pg-core";
 
 const router = Router();
@@ -44,7 +45,7 @@ router.get("/admin/sales-inquiries",authMiddleware,isSuperAdminMiddleware,async(
   if(query.assignment==="mine")filters.push(eq(contactSubmissionsTable.assignedToUserId,req.user!.userId));
   if(query.assignment==="unassigned")filters.push(isNull(contactSubmissionsTable.assignedToUserId));
   const where=filters.length?and(...filters):undefined;
-  const fields={id:contactSubmissionsTable.id,fullName:contactSubmissionsTable.fullName,email:contactSubmissionsTable.email,companyName:contactSubmissionsTable.companyName,country:contactSubmissionsTable.country,interest:contactSubmissionsTable.interest,message:contactSubmissionsTable.message,plan:contactSubmissionsTable.plan,billingCycle:contactSubmissionsTable.billingCycle,useCase:contactSubmissionsTable.useCase,status:contactSubmissionsTable.status,responseDueAt:contactSubmissionsTable.responseDueAt,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedToName:usersTable.fullName,assignedAt:contactSubmissionsTable.assignedAt,createdAt:contactSubmissionsTable.createdAt,updatedAt:contactSubmissionsTable.updatedAt};
+  const fields={id:contactSubmissionsTable.id,fullName:contactSubmissionsTable.fullName,email:contactSubmissionsTable.email,companyName:contactSubmissionsTable.companyName,country:contactSubmissionsTable.country,interest:contactSubmissionsTable.interest,message:contactSubmissionsTable.message,plan:contactSubmissionsTable.plan,billingCycle:contactSubmissionsTable.billingCycle,useCase:contactSubmissionsTable.useCase,status:contactSubmissionsTable.status,responseDueAt:contactSubmissionsTable.responseDueAt,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedToName:usersTable.fullName,assignedAt:contactSubmissionsTable.assignedAt,nextActionType:contactSubmissionsTable.nextActionType,nextActionDueAt:contactSubmissionsTable.nextActionDueAt,createdAt:contactSubmissionsTable.createdAt,updatedAt:contactSubmissionsTable.updatedAt};
   const [selectedRows,totalRows]=await Promise.all([db.select(fields).from(contactSubmissionsTable).leftJoin(usersTable,eq(usersTable.id,contactSubmissionsTable.assignedToUserId)).where(where).orderBy(desc(contactSubmissionsTable.createdAt),desc(contactSubmissionsTable.id)).limit(query.limit).offset(query.offset),db.select({total:count()}).from(contactSubmissionsTable).where(where)]);
   const rows=selectedRows.map(row=>({...row,assignedToCurrentUser:row.assignedToUserId===req.user!.userId}));
   res.set("Cache-Control","private, no-store, max-age=0");
@@ -107,6 +108,25 @@ router.post("/admin/sales-inquiries/:id/follow-ups",authMiddleware,isSuperAdminM
   const id=Number(req.params.id);if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}let input;try{input=parseSalesInquiryFollowUp(req.body);}catch{res.status(400).json({code:"SALES_INQUIRY_FOLLOW_UP_INVALID"});return;}
   const created=await db.transaction(async tx=>{const [current]=await tx.select({updatedAt:contactSubmissionsTable.updatedAt}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.id,id)).for("update").limit(1);if(!current||current.updatedAt.getTime()!==input.expectedUpdatedAt.getTime())return null;const now=new Date();const [event]=await tx.insert(salesInquiryFollowUpsTable).values({inquiryId:id,actorUserId:req.user!.userId,note:input.note,createdAt:now}).returning({id:salesInquiryFollowUpsTable.id,note:salesInquiryFollowUpsTable.note,createdAt:salesInquiryFollowUpsTable.createdAt});await tx.update(contactSubmissionsTable).set({updatedAt:now}).where(eq(contactSubmissionsTable.id,id));return {...event,updatedAt:now};});
   if(!created){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}res.status(201).json(created);
+});
+
+router.patch("/admin/sales-inquiries/:id/next-action",authMiddleware,isSuperAdminMiddleware,async(req,res)=>{
+  const id=Number(req.params.id),actorId=req.user!.userId;
+  if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}
+  let input;try{input=parseSalesInquiryNextAction(req.body);}catch{res.status(400).json({code:"SALES_INQUIRY_NEXT_ACTION_INVALID"});return;}
+  const result=await db.transaction(async tx=>{
+    const [current]=await tx.select({status:contactSubmissionsTable.status,assignedToUserId:contactSubmissionsTable.assignedToUserId,updatedAt:contactSubmissionsTable.updatedAt}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.id,id)).for("update").limit(1);
+    if(!current||current.updatedAt.getTime()!==input.expectedUpdatedAt.getTime())return "stale" as const;
+    if(current.status==="closed")return "closed" as const;
+    if(current.assignedToUserId!==actorId)return "owner" as const;
+    const now=new Date();
+    const [updated]=await tx.update(contactSubmissionsTable).set({nextActionType:input.type,nextActionDueAt:input.dueAt,updatedAt:now}).where(and(eq(contactSubmissionsTable.id,id),eq(contactSubmissionsTable.updatedAt,input.expectedUpdatedAt))).returning({id:contactSubmissionsTable.id,nextActionType:contactSubmissionsTable.nextActionType,nextActionDueAt:contactSubmissionsTable.nextActionDueAt,updatedAt:contactSubmissionsTable.updatedAt});
+    return updated??"stale" as const;
+  });
+  if(result==="stale"){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}
+  if(result==="closed"){res.status(409).json({code:"SALES_INQUIRY_CLOSED"});return;}
+  if(result==="owner"){res.status(403).json({code:"SALES_INQUIRY_OWNER_REQUIRED"});return;}
+  res.set("Cache-Control","private, no-store, max-age=0");res.json(result);
 });
 
 export default router;
