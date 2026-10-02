@@ -4219,3 +4219,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B129 reject malformed, duplicate or contradictory follow-up pages before rendering.
 - [x] B130 complete bilingual follow-up review and creation with loading, empty, error, retry and stale-write recovery.
 - [ ] Pass the complete exact-head gate, push B126–B130 once, publish accumulated B121–B130 without Replit Agents, verify exact live identity and complete full authenticated Chrome smoke.
+- [x] Repair the complete-gate JSX boundary failure and rerun focused frontend/API TypeScript before repeating the complete gate.

@@ -54585,7 +54585,7 @@
     },
     {
       "taskId": "saas-completion-block26-durable-sales-follow-up",
-      "reviewedThroughCommit": "a7678f9b287cbcacdac368f820c04cedef335238",
+      "reviewedThroughCommit": "c89756bdcff24a8cf30f7d7ef373fc0bc0107e3c",
       "reviewedAt": "2026-10-02T14:00:00Z",
       "status": "candidate",
       "authorities": [
@@ -54646,15 +54646,13 @@
         }
       ],
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "7cc29366f151a0a61bc4d9a97eb1f97c90b4e458db7e360199a561eb454bf4ad",
-      "reason": "B126-B130 add attributable durable sales follow-up notes to the existing canonical inquiry and protected Total Control workflow."
+      "reviewedChangeSha256": "245e79ec3f3daf62d358425de739f245f23382e14e45702a7e0d4a592e0b1e01",
+      "reason": "B126-B130 add attributable durable sales follow-up notes to the existing canonical inquiry and protected Total Control workflow; the complete gate caught and the repair removed a malformed JSX boundary before release."
     }
   ]
 }

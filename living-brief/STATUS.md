@@ -3598,3 +3598,4 @@ B121–B125 passed the complete exact-head gate and reached `origin/master` at s
 - B129 strictly validates follow-up identities, authors, timestamps, notes and paging before rendering.
 - B130 adds bilingual follow-up review, note creation, loading, empty, error, retry and stale-write recovery to Total Control.
 - Focused contracts and API/frontend TypeScript pass. B121–B130 now reach the ten-build publication boundary; complete gate, one push, controlled publication, exact live identity and full authenticated Chrome smoke are due.
+- The complete gate caught a malformed B130 JSX handler boundary; repair `c89756bd` restores the component boundary and focused frontend/API TypeScript now pass before the required full rerun.
