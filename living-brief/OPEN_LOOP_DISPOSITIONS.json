@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "095ec42131a540457255c04c233e54ea590ee74973a469d87bb7572d14350092",
-  "itemCount": 287,
+  "sourceSha256": "ec7219c2f8feece428d46638d97792c46df8b11cafda2a04d85025683e55576e",
+  "itemCount": 288,
   "counts": {
-    "ACTIVE": 252,
+    "ACTIVE": 253,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5234,6 +5234,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4263",
+        "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f8edbcf14e4269d2",
+      "sourceLine": 4264,
+      "heading": "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02",
+      "statement": "Repair the detected support-case constraint-identity mismatch at `9ecde2f6845e55d658ca69e9111e0a4a1a8e1760`, repeat the complete gate, apply only the additive support-case schema to both governed database targets, require `schemaAction=NONE`, republish and repeat the full authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4264",
         "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02"
       ],
       "currentAuthority": false
