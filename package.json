@@ -167,7 +167,7 @@
     "test:saas-block12": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/saas-block12-onboarding.behavior.ts",
     "test:saas-block13": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/commercial-workspace.behavior.ts",
     "test:saas-block14": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/commercial-workspace-runtime.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/commercial-workspace-client.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/pages/commercial-workspace.behavior.ts",
-    "test:saas-block23": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/sales-inquiry-response.behavior.ts",
+    "test:saas-block23": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/sales-inquiry-response.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/sales-inquiry-assignment.behavior.ts",
     "test:saas-block22": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/sales-inquiry-query.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/sales-inquiry-client.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/components/admin/sales-inquiry-queue.behavior.ts",
     "test:saas-block21": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/sales-inquiry-client.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/components/admin/sales-inquiry-queue.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/pages/sales-inquiry-total-control.behavior.ts",
     "test:saas-block20": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/commercial-sales-inquiry.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/commercial-sales-inquiry-schema.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/routes/contact.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/pages/contact-sales-inquiry.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/sales-inquiry-operations.behavior.ts",
@@ -210,6 +210,7 @@
     "adm-zip": "0.6.1"
   }
 }
+
 
 
 

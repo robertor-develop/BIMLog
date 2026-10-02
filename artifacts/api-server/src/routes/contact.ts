@@ -7,6 +7,7 @@ import {authMiddleware,isSuperAdminMiddleware} from "../middlewares/auth";
 import {assertSalesInquiryTransition} from "../lib/sales-inquiry-operations";
 import {parseSalesInquiryListQuery} from "../lib/sales-inquiry-query";
 import {salesInquiryResponseDueAt} from "../lib/sales-inquiry-response";
+import {parseSalesInquiryAssignment} from "../lib/sales-inquiry-assignment";
 
 const router = Router();
 
@@ -48,6 +49,17 @@ router.patch("/admin/sales-inquiries/:id/status",authMiddleware,isSuperAdminMidd
   if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}
   try{assertSalesInquiryTransition(expectedStatus,nextStatus);}catch{res.status(400).json({code:"SALES_INQUIRY_TRANSITION_INVALID"});return;}
   const [updated]=await db.update(contactSubmissionsTable).set({status:nextStatus,updatedAt:new Date()}).where(and(eq(contactSubmissionsTable.id,id),eq(contactSubmissionsTable.status,expectedStatus))).returning({id:contactSubmissionsTable.id,status:contactSubmissionsTable.status,updatedAt:contactSubmissionsTable.updatedAt});
+  if(!updated){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}
+  res.json(updated);
+});
+
+router.patch("/admin/sales-inquiries/:id/assignment",authMiddleware,isSuperAdminMiddleware,async(req,res)=>{
+  const id=Number(req.params.id),actorId=req.user!.userId;
+  if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}
+  let input;
+  try{input=parseSalesInquiryAssignment(req.body);}catch{res.status(400).json({code:"SALES_INQUIRY_ASSIGNMENT_INVALID"});return;}
+  const now=new Date();
+  const [updated]=await db.update(contactSubmissionsTable).set({assignedToUserId:input.assigned?actorId:null,assignedAt:input.assigned?now:null,updatedAt:now}).where(and(eq(contactSubmissionsTable.id,id),eq(contactSubmissionsTable.updatedAt,input.expectedUpdatedAt))).returning({id:contactSubmissionsTable.id,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedAt:contactSubmissionsTable.assignedAt,updatedAt:contactSubmissionsTable.updatedAt});
   if(!updated){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}
   res.json(updated);
 });
