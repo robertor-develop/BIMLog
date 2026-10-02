@@ -4110,3 +4110,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Detect the live source mismatch instead of accepting a merely bound wrapper identity: health reported `2cd9134cfbbec43d1105f74e43997a093e36dc70` while the canonical published source was `05e4998f528c79a79079592e28f5b0c29d0faf1b`.
 - [x] Prove the intervening commits are five consecutive byte-identical `Published your App` wrappers and repair production assembly to unwrap the complete bounded local first-parent wrapper chain.
 - [x] Pass the complete exact-head gate, push the repair, republish, verify live health equals the repaired canonical commit, and repeat authenticated Chrome smoke before starting B061. Accepted at `2f01eb92ad5ddc5358eabb45cb82c9c6d8597e01` / `d806fd15`.
+
+## 250-build SaaS Completion Block 15 — commercial customer actions — 2026-10-02
+
+- [x] B071 returns Stripe Checkout success and cancellation to `/settings/billing-support`.
+- [x] B072 exposes server-authoritative same-origin next actions and explicit blocked states.
+- [x] B073 rejects unknown or mismatched commercial actions at the client boundary.
+- [x] B074 renders bilingual responsive next-step cards without duplicate page actions.
+- [x] B075 reports bounded checkout return state without claiming provider-confirmed access.
+- [x] Repair the TypeScript blocker-array widening found by the block gate and repeat focused typecheck successfully.
+- [ ] Pass the complete exact-head gate and push B071–B075 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B076–B080.

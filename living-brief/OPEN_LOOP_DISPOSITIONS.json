@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "169f690cd34b2e70662792655c1d0a12de2d7e971a5f22a10f41b47b013b9e5c",
-  "itemCount": 284,
+  "sourceSha256": "7344dcb7b502206dbaf2baa7f0475a1325c020ac9da39eb7c52b5b31a0b77711",
+  "itemCount": 285,
   "counts": {
-    "ACTIVE": 249,
+    "ACTIVE": 250,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5181,6 +5181,24 @@
       "evidence": [
         "OPEN_LOOP.md:4105",
         "B056-B060 P37 candidate gate repair — 2026-10-01"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "8acb9173485efd73",
+      "sourceLine": 4122,
+      "heading": "250-build SaaS Completion Block 15 — commercial customer actions — 2026-10-02",
+      "statement": "Pass the complete exact-head gate and push B071–B075 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B076–B080.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4122",
+        "250-build SaaS Completion Block 15 — commercial customer actions — 2026-10-02"
       ],
       "currentAuthority": false
     }

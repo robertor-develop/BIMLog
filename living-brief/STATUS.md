@@ -3471,3 +3471,12 @@ Commit `60d6f9d9104d1a55ec09cc24eff48db7129d3210` aligns the final publication-c
 ## B056-B060 live publication identity repair — 2026-10-01
 
 Replit publication `adb53e67` successfully promoted the P37 product and the authenticated Chrome route/session smoke passed, but public health reported wrapper commit `2cd9134cfbbec43d1105f74e43997a093e36dc70` instead of canonical source `05e4998f528c79a79079592e28f5b0c29d0faf1b`. Git evidence proved five consecutive byte-identical `Published your App` wrappers. Repair commit `c6104220fc8e18dad04192c931652a9ad75a7fc0` makes production assembly unwrap the complete bounded local first-parent wrapper chain before binding release identity. Focused behavior, TypeScript and deterministic production assembly pass; full gate, push, republication and repeated smoke remain required before acceptance.
+
+## 250-build SaaS Completion Block 15 — commercial customer actions — 2026-10-02
+
+- B071 corrects Stripe Checkout success and cancellation returns to the protected Billing & Support workspace.
+- B072 projects fixed same-origin billing identity, plan review and support actions with explicit available, complete or blocked state.
+- B073 validates action identity, status, blockers and exact route pairing at the browser boundary.
+- B074 adds responsive bilingual next-step cards and removes duplicate action controls from the blocker summary.
+- B075 gives honest bounded success/cancelled feedback and waits for provider confirmation before claiming subscription access.
+- Focused behavior suites and TypeScript pass after repairing the blocker-array enum boundary in `1c3bb164e462b7566abd955487b298df98b93095`. This is the first five-build block after the accepted B061–B070 publication; push is due now, while publication and authenticated Chrome smoke are due after B076–B080.
