@@ -13,6 +13,11 @@ assert.equal(valid.checks[0]?.code,"catalog_ready");
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"price_good_2026,invalid"}).subscriptionConfigured,false);
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"professional.monthly=price_duplicate_2026,professional.annual=price_duplicate_2026"}).subscriptionConfigured,false);
 assert.deepEqual(valid.catalogCoverage.map(item=>item.slot),["professional.monthly","professional.annual","team.monthly","team.annual","business.monthly","business.annual"]);
+assert.equal(valid.catalogCoverage.every(item=>item.status==="ready"),true);
+const incompleteCatalog=inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"professional.monthly=price_duplicate_2026,professional.annual=price_duplicate_2026,team.monthly=bad"});
+assert.equal(incompleteCatalog.catalogCoverage.find(item=>item.slot==="professional.monthly")?.status,"duplicate_price");
+assert.equal(incompleteCatalog.catalogCoverage.find(item=>item.slot==="team.monthly")?.status,"invalid");
+assert.equal(incompleteCatalog.catalogCoverage.find(item=>item.slot==="business.annual")?.status,"missing");
 assert.equal(JSON.stringify(valid).includes("BIMLOG_STRIPE_PRICE_IDS"),false);
 
 const stripeReady=inspectCommercialPlatformReadiness({
