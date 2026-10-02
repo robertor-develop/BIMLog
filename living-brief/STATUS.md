@@ -3434,6 +3434,10 @@ The focused B061–B065 behavior suite and API TypeScript check pass at the Buil
 
 The first complete gate rejected a non-canonical `inactive` access value. Repair `5192b57e53d46f91536294327ae56d368ac7586c` uses the existing `expired` state; focused behavior and API TypeScript pass before the complete gate repeat.
 
+## 250-build SaaS Completion Block 14 — live Billing & Support workspace — 2026-10-01
+
+B066–B070 turn the commercial contracts into a discoverable authenticated customer workspace. The server reports current company membership, commercial access, billing-identity completeness and Boolean subscription/Stripe/webhook/portal/SendGrid readiness without returning credentials or claiming a payment. A strict frontend adapter rejects malformed status, and the bilingual responsive page exposes loading, retry, ready and action-required states with direct company-profile and support paths. No database schema or customer record is changed. This reaches the B061–B070 publication boundary; complete gate, one push, controlled publication, exact identity verification and full authenticated Chrome smoke are due.
+
 B056–B060 replace the dismissible onboarding slideshow with a resumable PostgreSQL-backed setup: expiring single-use email verification, explicit authenticated company identity, non-privileged work-profile selection, canonical first-project creation, and bounded coordinator defaults with Shop Drawings first. Completion fails closed until verified email, work profile, and project membership exist. A newly created project proceeds to full Intake and does not force team assignment. The Lens updater now resolves a year-specific signed manifest so 2021 and 2025 packages remain isolated. Focused contracts and both TypeScript checks pass; exact-head full gate, push, package/publication, live authenticated Chrome and installed Navisworks acceptance remain due.
 
 # 250-build SaaS Block 11 — Lens Next automatic updates — 2026-10-01

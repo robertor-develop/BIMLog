@@ -3,3 +3,6 @@ const source=fs.readFileSync(new URL("./CommercialWorkspace.tsx",import.meta.url
 for(const token of ["Billing & Support","Facturación y Soporte","/api/v1/commercial/workspace","Loading commercial status","Status unavailable","Action required","Complete these items before selling subscriptions"])assert.match(source,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
 assert.match(source,/AbortController/);assert.match(source,/parseCommercialWorkspace/);assert.doesNotMatch(source,/stripe.*secret/i);
 console.log("B069 bilingual Billing & Support workspace: PASS");
+const app=fs.readFileSync(new URL("../App.tsx",import.meta.url),"utf8"),sidebar=fs.readFileSync(new URL("../components/layout/MasterSidebar.tsx",import.meta.url),"utf8");
+assert.match(app,/settings\/billing-support/);assert.match(app,/ProtectedRoute component=\{CommercialWorkspace\}/);assert.match(sidebar,/Billing & Support/);assert.match(sidebar,/Facturación y Soporte/);
+console.log("B070 discoverable protected commercial workspace acceptance: PASS");

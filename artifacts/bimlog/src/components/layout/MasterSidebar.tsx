@@ -466,6 +466,7 @@ export function MasterSidebar() {
           {navButton(t("Feature Visibility", "Visibilidad de funciones"), "/profile", Settings2)}
           {navButton(t("Notification Settings", "Configuración de Notificaciones"), "/settings/notifications", Bell)}
           {navButton(t("Company Profile", "Perfil de Empresa"), "/settings/company-profile", Building2)}
+          {navButton(t("Billing & Support", "Facturación y Soporte"), "/settings/billing-support", CircleDollarSign)}
           {navButton(t("Financial Controls", "Controles Financieros"), "/settings/financial-controls", CircleDollarSign)}
         </div>
       </nav>

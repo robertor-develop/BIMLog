@@ -31,6 +31,7 @@ const Profile = namedPage(() => import("@/pages/Profile"), "Profile");
 const CompanyProfile = namedPage(() => import("@/pages/CompanyProfile"), "CompanyProfile");
 const NotificationSettings = namedPage(() => import("@/pages/NotificationSettings"), "NotificationSettings");
 const FinancialControlsSettings = namedPage(() => import("@/pages/FinancialControlsSettings"), "FinancialControlsSettings");
+const CommercialWorkspace = namedPage(() => import("@/pages/CommercialWorkspace"), "CommercialWorkspace");
 const FinancialApuWorkspace = namedPage(() => import("@/pages/FinancialApuWorkspace"), "FinancialApuWorkspace");
 const FinancialBudgetWorkspace = namedPage(() => import("@/pages/FinancialBudgetWorkspace"), "FinancialBudgetWorkspace");
 const FinancialContractWorkspace = namedPage(() => import("@/pages/FinancialContractWorkspace"), "FinancialContractWorkspace");
@@ -280,6 +281,9 @@ function Router() {
       </Route>
       <Route path="/settings/financial-controls">
         {() => <ProtectedRoute component={FinancialControlsSettings} />}
+      </Route>
+      <Route path="/settings/billing-support">
+        {() => <ProtectedRoute component={CommercialWorkspace} />}
       </Route>
       <Route path="/admin/feedback">
         {() => <AccessRoute component={AdminPanel} surface="feedback_administration" />}
