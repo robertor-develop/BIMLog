@@ -1,10 +1,12 @@
 import { SALES_INQUIRY_STATUSES, type SalesInquiryStatus } from "./sales-inquiry-operations";
+import {SALES_INQUIRY_ACTION_SCOPES,type SalesInquiryActionScope} from "./sales-inquiry-action-urgency";
 
 export type SalesInquiryListQuery = Readonly<{
   status: "" | SalesInquiryStatus;
   search: string;
   overdue: boolean;
   assignment: "" | "mine" | "unassigned";
+  actionScope:""|SalesInquiryActionScope;
   limit: number;
   offset: number;
 }>;
@@ -18,9 +20,11 @@ export function parseSalesInquiryListQuery(query: Record<string, unknown>): Sale
   if(query.overdue!==undefined&&query.overdue!==""&&query.overdue!=="true"&&query.overdue!=="false")throw new Error("SALES_INQUIRY_OVERDUE_INVALID");
   const assignment=typeof query.assignment==="string"?query.assignment.trim():"";
   if(assignment!==""&&assignment!=="mine"&&assignment!=="unassigned")throw new Error("SALES_INQUIRY_ASSIGNMENT_SCOPE_INVALID");
+  const actionScope=typeof query.actionScope==="string"?query.actionScope.trim():"";
+  if(actionScope!==""&&!SALES_INQUIRY_ACTION_SCOPES.includes(actionScope as SalesInquiryActionScope))throw new Error("SALES_INQUIRY_ACTION_SCOPE_INVALID");
   const limit = query.limit === undefined ? 25 : Number(query.limit);
   const offset = query.offset === undefined ? 0 : Number(query.offset);
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new Error("SALES_INQUIRY_LIMIT_INVALID");
   if (!Number.isSafeInteger(offset) || offset < 0 || offset > 1_000_000) throw new Error("SALES_INQUIRY_OFFSET_INVALID");
-  return Object.freeze({ status: status as "" | SalesInquiryStatus, search, overdue, assignment:assignment as ""|"mine"|"unassigned", limit, offset });
+  return Object.freeze({ status: status as "" | SalesInquiryStatus, search, overdue, assignment:assignment as ""|"mine"|"unassigned", actionScope:actionScope as ""|SalesInquiryActionScope, limit, offset });
 }
