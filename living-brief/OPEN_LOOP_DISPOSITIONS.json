@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "81683c20b5ca881100a2a0848ce9903c8d2c9f1362e903b0e93fc169df285b1b",
-  "itemCount": 281,
+  "sourceSha256": "481abeb2923c079d27f0adc95222f32cfac0e9ebbc1c0126587c9f2903d6e487",
+  "itemCount": 282,
   "counts": {
-    "ACTIVE": 246,
+    "ACTIVE": 247,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5077,8 +5077,26 @@
       "currentAuthority": false
     },
     {
+      "id": "1aa8640f083460d3",
+      "sourceLine": 4074,
+      "heading": "250-build SaaS Completion Block 13 — commercial workspace integration — 2026-10-01",
+      "statement": "Pass the complete exact-head gate and push B061–B065 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B066–B070.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4074",
+        "250-build SaaS Completion Block 13 — commercial workspace integration — 2026-10-01"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "5df283650b4e768c",
-      "sourceLine": 4068,
+      "sourceLine": 4078,
       "heading": "B056–B060 post-commit release reconciliation — 2026-10-01",
       "statement": "Candidate source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf` must pass the complete clean gate, reach `origin/master`, publish at the ten-build boundary, and pass full authenticated Chrome smoke before the block is accepted.",
       "classification": "ACTIVE",
@@ -5089,14 +5107,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4068",
+        "OPEN_LOOP.md:4078",
         "B056–B060 post-commit release reconciliation — 2026-10-01"
       ],
       "currentAuthority": false
     },
     {
       "id": "908e54a6071e2691",
-      "sourceLine": 4074,
+      "sourceLine": 4084,
       "heading": "B056-B060 gate repair — 2026-10-01",
       "statement": "Pass the repeated complete gate at repaired candidate `9e2626c0fa5c002cb954312534ed358b452e2766`, push, publish and complete authenticated Chrome smoke.",
       "classification": "ACTIVE",
@@ -5107,14 +5125,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4074",
+        "OPEN_LOOP.md:4084",
         "B056-B060 gate repair — 2026-10-01"
       ],
       "currentAuthority": false
     },
     {
       "id": "53dd84ae3692fe3b",
-      "sourceLine": 4081,
+      "sourceLine": 4091,
       "heading": "B056-B060 P37 candidate gate repair — 2026-10-01",
       "statement": "Repeat the complete gate at repaired candidate `60d6f9d9104d1a55ec09cc24eff48db7129d3210`, then push, publish and run full authenticated Chrome smoke.",
       "classification": "ACTIVE",
@@ -5125,7 +5143,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4081",
+        "OPEN_LOOP.md:4091",
         "B056-B060 P37 candidate gate repair — 2026-10-01"
       ],
       "currentAuthority": false
