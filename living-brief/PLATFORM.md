@@ -989,6 +989,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/runtime-resilience.ts
 - artifacts/api-server/src/lib/runtime-security.ts
 - artifacts/api-server/src/lib/saas-block12-onboarding.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-assignment-history.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-assignment-history.ts
 - artifacts/api-server/src/lib/sales-inquiry-assignment.behavior.ts
 - artifacts/api-server/src/lib/sales-inquiry-assignment.ts
 - artifacts/api-server/src/lib/sales-inquiry-operations.behavior.ts

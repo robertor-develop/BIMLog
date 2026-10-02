@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 703,
-    "frontendApiReferences": 270,
+    "apiRoutes": 704,
+    "frontendApiReferences": 271,
     "routeOwnedTables": 62
   },
   "compatibilityRedirects": [
@@ -2475,6 +2475,16 @@
     {
       "method": "PATCH",
       "path": "/admin/sales-inquiries/:id/assignment",
+      "owner": "artifacts/api-server/src/routes/contact.ts",
+      "tables": [
+        "contactSubmissionsTable",
+        "salesInquiryAssignmentEventsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/sales-inquiries/:id/assignment-history",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
         "contactSubmissionsTable",
@@ -9136,6 +9146,10 @@
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/assignment-history"
     },
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",

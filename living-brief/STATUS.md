@@ -3576,3 +3576,14 @@ B111–B115 passed the complete exact-head gate and reached `origin/master` at e
 - B119 writes assigned and released events transactionally to an append-only history table with actor, previous owner, next owner and timestamp.
 - B120 adds bilingual owner filtering, visible owner names and a release action shown only to the current owner.
 - Focused API behavior, database schema compilation, API TypeScript, browser contract behavior and frontend TypeScript pass at repaired implementation source `88162c3d2664beb9bb1e5c7ba782664b288fd8f6`. B111–B120 now reach the required ten-build publication boundary; complete gate, push, controlled publication, exact live identity and full authenticated Chrome smoke are due.
+
+B111–B120 passed the complete exact-head gate and reached production at canonical source `62c5a71a1ed6776a9d2e8e0096f9ff483bcf6cec` and identity-bound package `bimlog-62c5a71a1ed6776a-f6140b18977ad6f4`. Production health was exact-source verified; authenticated Chrome passed 63/63 routes, exact-390 containment, hard reload, independent-tab continuity and zero console warnings/errors. The saved Roberto Test 1 account correctly remains denied from Super Administrator-only Total Control operations.
+
+## 250-build SaaS Completion Block 25 — visible sales ownership history — 2026-10-02
+
+- B121 exposes bounded, deterministic assignment history through a Super Administrator-only inquiry endpoint with exact inquiry existence and no-store behavior.
+- B122 rejects malformed, duplicate or contradictory assignment events and paging metadata at the browser boundary.
+- B123 presents actor, action, previous/next owner and event time in the bounded inquiry review.
+- B124 adds bilingual loading, empty, error and retry behavior with accessible busy/live state.
+- B125 paginates long assignment histories without expanding authorization or duplicating the immutable event authority.
+- Focused API/frontend behavior and both TypeScript projects pass. This is the first five-build block after the B111–B120 publication; complete gate and one push are due, while publication and authenticated Chrome smoke remain due at B130.

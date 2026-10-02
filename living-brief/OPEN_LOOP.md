@@ -4200,4 +4200,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B118 prevent assignment theft and allow release only by the current owner while retaining revision checks.
 - [x] B119 record every assignment and release in an immutable transactional event history.
 - [x] B120 complete the bilingual owner filter, visible owner identity and controlled release workflow in Total Control.
-- [ ] Pass the complete exact-head gate, push B116–B120, publish accumulated B111–B120 without Replit Agents, verify exact live identity and complete full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B116–B120, publish accumulated B111–B120 without Replit Agents, verify exact live identity and complete full authenticated Chrome smoke. Accepted at source `62c5a71a1ed6776a9d2e8e0096f9ff483bcf6cec`, package `bimlog-62c5a71a1ed6776a-f6140b18977ad6f4`, with 63/63 authenticated routes, exact-390 containment, session continuity and clean console checks.
+
+## 250-build SaaS Completion Block 25 — visible sales ownership history — 2026-10-02
+
+- [x] B121 expose bounded assignment history through the protected inquiry boundary.
+- [x] B122 strictly validate event identities, actions, owner relationships, timestamps and paging before rendering.
+- [x] B123 show the immutable owner-change trail inside bilingual inquiry review.
+- [x] B124 expose accessible loading, empty, failure and retry behavior without hiding history failures.
+- [x] B125 paginate long histories while preserving deterministic newest-first order and Super Administrator scope.
+- [ ] Pass the complete exact-head gate and push B121–B125 once. This first five-build block remains unpublished; publication and full authenticated Chrome smoke are due after B130.
