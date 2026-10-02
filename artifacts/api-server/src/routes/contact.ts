@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { contactSubmissionsTable } from "@workspace/db/schema";
+import { contactSubmissionsTable,usersTable } from "@workspace/db/schema";
 import {and,count,desc,eq,ilike,lt,ne,or} from "drizzle-orm";
 import {parseSalesInquiryInput,salesInquiryFingerprint} from "../lib/commercial-sales-inquiry";
 import {authMiddleware,isSuperAdminMiddleware} from "../middlewares/auth";
@@ -39,8 +39,9 @@ router.get("/admin/sales-inquiries",authMiddleware,isSuperAdminMiddleware,async(
   if(query.search){const term=`%${query.search}%`;filters.push(or(ilike(contactSubmissionsTable.fullName,term),ilike(contactSubmissionsTable.email,term),ilike(contactSubmissionsTable.companyName,term),ilike(contactSubmissionsTable.country,term),ilike(contactSubmissionsTable.interest,term))!);}
   if(query.overdue)filters.push(and(ne(contactSubmissionsTable.status,"closed"),lt(contactSubmissionsTable.responseDueAt,new Date()))!);
   const where=filters.length?and(...filters):undefined;
-  const fields={id:contactSubmissionsTable.id,fullName:contactSubmissionsTable.fullName,email:contactSubmissionsTable.email,companyName:contactSubmissionsTable.companyName,country:contactSubmissionsTable.country,interest:contactSubmissionsTable.interest,message:contactSubmissionsTable.message,plan:contactSubmissionsTable.plan,billingCycle:contactSubmissionsTable.billingCycle,useCase:contactSubmissionsTable.useCase,status:contactSubmissionsTable.status,responseDueAt:contactSubmissionsTable.responseDueAt,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedAt:contactSubmissionsTable.assignedAt,createdAt:contactSubmissionsTable.createdAt,updatedAt:contactSubmissionsTable.updatedAt};
-  const [rows,totalRows]=await Promise.all([db.select(fields).from(contactSubmissionsTable).where(where).orderBy(desc(contactSubmissionsTable.createdAt),desc(contactSubmissionsTable.id)).limit(query.limit).offset(query.offset),db.select({total:count()}).from(contactSubmissionsTable).where(where)]);
+  const fields={id:contactSubmissionsTable.id,fullName:contactSubmissionsTable.fullName,email:contactSubmissionsTable.email,companyName:contactSubmissionsTable.companyName,country:contactSubmissionsTable.country,interest:contactSubmissionsTable.interest,message:contactSubmissionsTable.message,plan:contactSubmissionsTable.plan,billingCycle:contactSubmissionsTable.billingCycle,useCase:contactSubmissionsTable.useCase,status:contactSubmissionsTable.status,responseDueAt:contactSubmissionsTable.responseDueAt,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedToName:usersTable.fullName,assignedAt:contactSubmissionsTable.assignedAt,createdAt:contactSubmissionsTable.createdAt,updatedAt:contactSubmissionsTable.updatedAt};
+  const [selectedRows,totalRows]=await Promise.all([db.select(fields).from(contactSubmissionsTable).leftJoin(usersTable,eq(usersTable.id,contactSubmissionsTable.assignedToUserId)).where(where).orderBy(desc(contactSubmissionsTable.createdAt),desc(contactSubmissionsTable.id)).limit(query.limit).offset(query.offset),db.select({total:count()}).from(contactSubmissionsTable).where(where)]);
+  const rows=selectedRows.map(row=>({...row,assignedToCurrentUser:row.assignedToUserId===req.user!.userId}));
   res.set("Cache-Control","private, no-store, max-age=0");
   res.json({items:rows,limit:query.limit,offset:query.offset,total:Number(totalRows[0]?.total??0)});
 });
