@@ -4251,3 +4251,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B144 strictly validate support history at the browser boundary.
 - [x] B145 add bilingual customer-service creation, history, loading, empty, error and retry states to Billing & Support.
 - [ ] Pass the complete exact-head gate and push B141–B145 once. Keep the block unpublished until B146–B150 completes the ten-build publication batch.
+- [x] Repair the route-fixture inventory collision, reconcile the deterministic route graph and Open Loop index, and update the disposable proof database with the additive `support_cases` table before the final exact-head gate.

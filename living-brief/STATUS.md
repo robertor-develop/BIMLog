@@ -3616,3 +3616,5 @@ The cache-repair implementation unit is semantically reconciled against the exac
 ## 250-build SaaS Completion Block 29 — tracked customer service — 2026-10-02
 
 B141–B145 replace the Billing & Support contact dead-end with authenticated, company/requester-scoped customer-service cases. The block adds a bounded secret-rejecting case contract, additive durable schema and startup parity, idempotent protected create/list operations, strict browser response validation, and a bilingual create/history workspace. It does not send email, expose provider credentials, grant administrator access, or claim external delivery. This is the first five builds after the B131–B140 publication and remains push-only until B150.
+
+The exact-head gate identified and repaired route-fixture inventory pollution, regenerated the deterministic route graph, refreshed the disposable artifact-proof schema for `support_cases`, and reconciled generated Open Loop state before push. These repairs do not add builds or move the B150 publication boundary.

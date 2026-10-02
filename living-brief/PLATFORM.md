@@ -123,6 +123,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/search.ts
 - artifacts/api-server/src/routes/submittal_reports.ts
 - artifacts/api-server/src/routes/submittals.ts
+- artifacts/api-server/src/routes/support-cases.behavior.ts
+- artifacts/api-server/src/routes/support-cases.ts
 - artifacts/api-server/src/routes/team-performance.ts
 - artifacts/api-server/src/routes/telegram-product.ts
 - artifacts/api-server/src/routes/transmittals.ts
@@ -134,6 +136,7 @@ It changes only when the code structure or curated architectural facts change.
 - authRouter
 - onboardingRouter
 - commercialWorkspaceRouter
+- supportCasesRouter
 - configRouter
 - projectsRouter
 - filesRouter
@@ -325,6 +328,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-sales-inquiry-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry.ts
+- artifacts/api-server/src/lib/commercial-support-case-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-support-case.behavior.ts
+- artifacts/api-server/src/lib/commercial-support-case.ts
 - artifacts/api-server/src/lib/commercial-workspace-runtime.behavior.ts
 - artifacts/api-server/src/lib/commercial-workspace-runtime.ts
 - artifacts/api-server/src/lib/commercial-workspace.behavior.ts
@@ -1193,6 +1199,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/submittal-view-events.ts
 - lib/db/src/schema/submittal_reports.ts
 - lib/db/src/schema/submittals.ts
+- lib/db/src/schema/support-cases.ts
 - lib/db/src/schema/team-resource-planning.ts
 - lib/db/src/schema/telegram-product.ts
 - lib/db/src/schema/transmittals.ts
