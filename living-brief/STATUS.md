@@ -3432,6 +3432,8 @@ B061–B065 connect the existing B001–B050 commercial authorities into a singl
 
 The focused B061–B065 behavior suite and API TypeScript check pass at the Build 065 implementation boundary `7dcb10e1b4df21adc7f543c210ba3bd510a14589`; complete exact-head acceptance and the single block push remain due.
 
+The first complete gate rejected a non-canonical `inactive` access value. Repair `5192b57e53d46f91536294327ae56d368ac7586c` uses the existing `expired` state; focused behavior and API TypeScript pass before the complete gate repeat.
+
 B056–B060 replace the dismissible onboarding slideshow with a resumable PostgreSQL-backed setup: expiring single-use email verification, explicit authenticated company identity, non-privileged work-profile selection, canonical first-project creation, and bounded coordinator defaults with Shop Drawings first. Completion fails closed until verified email, work profile, and project membership exist. A newly created project proceeds to full Intake and does not force team assignment. The Lens updater now resolves a year-specific signed manifest so 2021 and 2025 packages remain isolated. Focused contracts and both TypeScript checks pass; exact-head full gate, push, package/publication, live authenticated Chrome and installed Navisworks acceptance remain due.
 
 # 250-build SaaS Block 11 — Lens Next automatic updates — 2026-10-01

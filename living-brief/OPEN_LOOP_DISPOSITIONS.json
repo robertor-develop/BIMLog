@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "481abeb2923c079d27f0adc95222f32cfac0e9ebbc1c0126587c9f2903d6e487",
+  "sourceSha256": "b55f339daa29585f57f16b9afab9874bfd2067d3112fc03555fa181bf4e82372",
   "itemCount": 282,
   "counts": {
     "ACTIVE": 247,
@@ -5096,7 +5096,7 @@
     },
     {
       "id": "5df283650b4e768c",
-      "sourceLine": 4078,
+      "sourceLine": 4079,
       "heading": "B056–B060 post-commit release reconciliation — 2026-10-01",
       "statement": "Candidate source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf` must pass the complete clean gate, reach `origin/master`, publish at the ten-build boundary, and pass full authenticated Chrome smoke before the block is accepted.",
       "classification": "ACTIVE",
@@ -5107,14 +5107,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4078",
+        "OPEN_LOOP.md:4079",
         "B056–B060 post-commit release reconciliation — 2026-10-01"
       ],
       "currentAuthority": false
     },
     {
       "id": "908e54a6071e2691",
-      "sourceLine": 4084,
+      "sourceLine": 4085,
       "heading": "B056-B060 gate repair — 2026-10-01",
       "statement": "Pass the repeated complete gate at repaired candidate `9e2626c0fa5c002cb954312534ed358b452e2766`, push, publish and complete authenticated Chrome smoke.",
       "classification": "ACTIVE",
@@ -5125,14 +5125,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4084",
+        "OPEN_LOOP.md:4085",
         "B056-B060 gate repair — 2026-10-01"
       ],
       "currentAuthority": false
     },
     {
       "id": "53dd84ae3692fe3b",
-      "sourceLine": 4091,
+      "sourceLine": 4092,
       "heading": "B056-B060 P37 candidate gate repair — 2026-10-01",
       "statement": "Repeat the complete gate at repaired candidate `60d6f9d9104d1a55ec09cc24eff48db7129d3210`, then push, publish and run full authenticated Chrome smoke.",
       "classification": "ACTIVE",
@@ -5143,7 +5143,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4091",
+        "OPEN_LOOP.md:4092",
         "B056-B060 P37 candidate gate repair — 2026-10-01"
       ],
       "currentAuthority": false

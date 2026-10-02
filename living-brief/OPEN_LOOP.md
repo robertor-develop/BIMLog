@@ -4073,6 +4073,7 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Build 065 projects the workspace for customer-admin, billing-admin, support and auditor roles without provider secrets or broad operational detail.
 - [ ] Pass the complete exact-head gate and push B061–B065 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B066–B070.
 - [x] Bind the Block 13 semantic review and generated platform/state inventories to exact Build 065 implementation commit `7dcb10e1b4df21adc7f543c210ba3bd510a14589`.
+- [x] Correct the complete-gate access-state type failure by using canonical `expired` state in repair `5192b57e53d46f91536294327ae56d368ac7586c`.
 # B056–B060 post-commit release reconciliation — 2026-10-01
 
 - [ ] Candidate source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf` must pass the complete clean gate, reach `origin/master`, publish at the ten-build boundary, and pass full authenticated Chrome smoke before the block is accepted.

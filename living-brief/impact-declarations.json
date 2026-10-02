@@ -53651,7 +53651,7 @@
     },
     {
       "taskId": "saas-completion-block13-commercial-workspace",
-      "reviewedThroughCommit": "7dcb10e1b4df21adc7f543c210ba3bd510a14589",
+      "reviewedThroughCommit": "5192b57e53d46f91536294327ae56d368ac7586c",
       "reviewedAt": "2026-10-01T23:40:00Z",
       "status": "candidate",
       "authorities": [
@@ -53714,12 +53714,11 @@
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "bcbacf908ad17b3f43d296f41d36919a8a5e0b5eefe8d0d5445ff8f3c5169908",
-      "reason": "B061-B065 integrate existing commercial authorities into a deterministic, role-safe company workspace without claiming live provider operations."
+      "reviewedChangeSha256": "392bafff030da0c241c7fa7ff7ceae453d16b1ca2e4428fcdd684ef9f5a78c0e",
+      "reason": "B061-B065 integrate existing commercial authorities into a deterministic, role-safe company workspace and use the canonical expired access state without claiming live provider operations."
     }
   ]
 }
