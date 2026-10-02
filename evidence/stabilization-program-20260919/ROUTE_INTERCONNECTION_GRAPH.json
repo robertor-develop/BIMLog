@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 711,
+    "apiRoutes": 712,
     "frontendApiReferences": 276,
     "routeOwnedTables": 64
   },
@@ -8734,6 +8734,16 @@
       ]
     },
     {
+      "method": "PATCH",
+      "path": "/admin/support/cases/:id/assignment",
+      "owner": "artifacts/api-server/src/routes/support-cases.ts",
+      "tables": [
+        "companiesTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
       "method": "GET",
       "path": "/projects/:projectId/commercial/team-performance",
       "owner": "artifacts/api-server/src/routes/team-performance.ts",
@@ -9251,7 +9261,7 @@
     },
     {
       "screen": "artifacts/bimlog/src/components/admin/SupportCaseQueue.tsx",
-      "apiPath": "${API_BASE}/api/v1/admin/support/cases/${item.id}/status"
+      "apiPath": "${API_BASE}/api/v1/admin/support/cases/${item.id}/${path}"
     },
     {
       "screen": "artifacts/bimlog/src/components/ai/AiControlPlanePanel.tsx",

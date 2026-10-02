@@ -1,13 +1,15 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
+  "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "15937c23dcdfc8c003f973614a9b0d9dd73ed8f6715b84b5ea18fbd1257ed136",
+  "bundleSha256": "5feda36c78a6144c53722bd60509c525524b34e474cc10119068bbee100344e4",
   "impact": {
-    "baselineCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
+    "baselineCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
     "changedPaths": [
+      "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -24,11 +26,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "claude",
@@ -36,11 +38,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "quality",
@@ -48,11 +50,11 @@
       "sha256": "b6cced2db201c506cda5eb1ac6f7d03167c8893de71f880eda4ccef3b51d2829",
       "sourceChangedAt": "2026-09-21T09:39:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "vision",
@@ -60,23 +62,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "a6ecceb9d26b33dea594acbc67bbdaa7442568db2ebe4e6c06677372d77bc2d4",
-      "sourceChangedAt": "2026-10-02T17:12:21-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "sha256": "1abc062d29a4c33a326681de064704105c06754d8844f2b6455a378902523852",
+      "sourceChangedAt": "2026-10-02T23:30:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "plugin",
@@ -84,11 +86,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "report_design_system",
@@ -96,11 +98,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "standards_register",
@@ -108,35 +110,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "b8153e1c3aef4ef5a7722ffe51869218d4df7dc974f4e06b6b4a9b52772c3d0e",
-      "sourceChangedAt": "2026-10-02T22:45:00.000Z",
+      "sha256": "8e288e15abf54fe76b2e6820040f1a17efecebb3855a5e2bc51fc3ff61e4d206",
+      "sourceChangedAt": "2026-10-02T23:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "e0a0487a51e70bae65763c7df1c108d635769b1945a01dbe6ab8e6967ec3c6b7",
-      "sourceChangedAt": "2026-10-02T22:45:00.000Z",
+      "sha256": "8029f9c78f7070f37ba5296717ae09ae648bf6e83b03593f4a3a8db2b25fc696",
+      "sourceChangedAt": "2026-10-02T23:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     },
     {
       "key": "audit",
@@ -144,11 +146,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
-      "semanticReviewTask": "saas-block30-sales-schema-identity-repair",
+      "reconciledThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewedThroughCommit": "f1517eda9d4c795ea06b8afff263aa88559e7bf8",
+      "semanticReviewTask": "saas-block31-accountable-customer-service",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-02T22:45:00Z"
+      "semanticReviewedAt": "2026-10-02T23:30:00Z"
     }
   ]
 }

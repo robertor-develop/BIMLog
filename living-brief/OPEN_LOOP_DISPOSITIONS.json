@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "e0a0487a51e70bae65763c7df1c108d635769b1945a01dbe6ab8e6967ec3c6b7",
-  "itemCount": 289,
+  "sourceSha256": "8029f9c78f7070f37ba5296717ae09ae648bf6e83b03593f4a3a8db2b25fc696",
+  "itemCount": 287,
   "counts": {
-    "ACTIVE": 254,
+    "ACTIVE": 252,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5221,10 +5221,10 @@
       "currentAuthority": false
     },
     {
-      "id": "947056072fcd6100",
-      "sourceLine": 4263,
-      "heading": "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02",
-      "statement": "Pass the complete exact-head gate, push B146–B150 once, publish accumulated B141–B150, verify exact live identity and run the full authenticated Chrome smoke.",
+      "id": "1b5a09ff86360faa",
+      "sourceLine": 4274,
+      "heading": "250-build SaaS Completion Block 31 — accountable customer service — 2026-10-02",
+      "statement": "Pass the complete exact-head gate and push B151–B155 once. This is the first unpublished five-build block after the accepted B141–B150 publication; publication and full authenticated Chrome smoke remain scheduled after B156–B160.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -5233,44 +5233,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4263",
-        "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "f8edbcf14e4269d2",
-      "sourceLine": 4264,
-      "heading": "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02",
-      "statement": "Repair the detected support-case constraint-identity mismatch at `9ecde2f6845e55d658ca69e9111e0a4a1a8e1760`, repeat the complete gate, apply only the additive support-case schema to both governed database targets, require `schemaAction=NONE`, republish and repeat the full authenticated Chrome smoke.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:4264",
-        "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "81101efba341aecc",
-      "sourceLine": 4265,
-      "heading": "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02",
-      "statement": "Complete the accumulated sales-assignment constraint-identity repair at `0982e7bc645c7c141452f1c5af5e5fee6a3f128c`, remove only the predicate-equivalent redundant unnamed check, and require an exact repeated receipt before Publish.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:4265",
-        "250-build SaaS Completion Block 30 — customer service operations — 2026-10-02"
+        "OPEN_LOOP.md:4274",
+        "250-build SaaS Completion Block 31 — accountable customer service — 2026-10-02"
       ],
       "currentAuthority": false
     }

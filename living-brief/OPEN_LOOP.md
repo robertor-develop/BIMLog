@@ -4260,6 +4260,15 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B148 add revision-safe support lifecycle updates with explicit conflict recovery.
 - [x] B149 reject malformed, duplicate or contradictory support operations responses before rendering.
 - [x] B150 add bilingual urgent, waiting and resolved support operations to Total Control.
-- [ ] Pass the complete exact-head gate, push B146–B150 once, publish accumulated B141–B150, verify exact live identity and run the full authenticated Chrome smoke.
-- [ ] Repair the detected support-case constraint-identity mismatch at `9ecde2f6845e55d658ca69e9111e0a4a1a8e1760`, repeat the complete gate, apply only the additive support-case schema to both governed database targets, require `schemaAction=NONE`, republish and repeat the full authenticated Chrome smoke.
-- [ ] Complete the accumulated sales-assignment constraint-identity repair at `0982e7bc645c7c141452f1c5af5e5fee6a3f128c`, remove only the predicate-equivalent redundant unnamed check, and require an exact repeated receipt before Publish.
+- [x] Pass the complete exact-head gate, push B146–B150 once, publish accumulated B141–B150, verify exact live identity and run the full authenticated Chrome smoke. Accepted at source `92c973b9102735b203f3250c2d8d169c2e5f3652`, package `bimlog-92c973b9102735b2-baa97aacba1f6f59`, with 63/63 desktop and exact-390 routes, tablet coverage, reload and two-tab continuity.
+- [x] Repair the detected support-case constraint-identity mismatch at `9ecde2f6845e55d658ca69e9111e0a4a1a8e1760`, repeat the complete gate, apply only the additive support-case schema to both governed database targets, require `schemaAction=NONE`, republish and repeat the full authenticated Chrome smoke.
+- [x] Complete the accumulated sales-assignment constraint-identity repair at `0982e7bc645c7c141452f1c5af5e5fee6a3f128c`, remove only the predicate-equivalent redundant unnamed check, and require an exact repeated receipt before Publish.
+
+## 250-build SaaS Completion Block 31 — accountable customer service — 2026-10-02
+
+- [x] B151 define deterministic four-hour urgent and next-business-day normal response targets and overdue rules.
+- [x] B152 persist response deadlines and accountable Super Administrator assignment with additive schema/startup parity.
+- [x] B153 add revision-safe Super Administrator self-assignment and controlled release without trusting a client-supplied actor.
+- [x] B154 reject malformed, duplicated or contradictory accountability data before rendering.
+- [x] B155 expose bilingual response deadlines, overdue state, ownership state, Assign to me and Release controls in Total Control.
+- [ ] Pass the complete exact-head gate and push B151–B155 once. This is the first unpublished five-build block after the accepted B141–B150 publication; publication and full authenticated Chrome smoke remain scheduled after B156–B160.
