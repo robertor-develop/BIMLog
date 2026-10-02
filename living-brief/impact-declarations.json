@@ -54653,6 +54653,7 @@
         "artifacts/api-server/src/lib/sales-inquiry-next-action.ts",
         "artifacts/api-server/src/routes/contact.ts",
         "artifacts/api-server/src/routes/sales-inquiry-next-action.behavior.ts",
+        "artifacts/bimlog/src/components/admin/SalesInquiryQueue.next-action.behavior.ts",
         "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
         "artifacts/bimlog/src/lib/sales-inquiry-client.behavior.ts",
         "artifacts/bimlog/src/lib/sales-inquiry-client.ts",
@@ -54664,7 +54665,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "40d072cc4fec8431be24d05e1a6a1ca837964cb62f5cfdd54a9deba17fcf0711",
+      "reviewedChangeSha256": "eece5033d03add07f4755876cd8f03554832c5a6d89b6e9ebaa1408141c7d935",
       "reason": "B126-B130 add attributable durable sales follow-up notes to the existing canonical inquiry and protected Total Control workflow; the complete gate caught and the repair removed a malformed JSX boundary before release."
     }
   ]
