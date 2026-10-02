@@ -71,6 +71,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/autodesk.ts
 - artifacts/api-server/src/routes/change_orders.ts
 - artifacts/api-server/src/routes/clash_reports.ts
+- artifacts/api-server/src/routes/commercial-workspace.ts
 - artifacts/api-server/src/routes/company-master-catalogs.ts
 - artifacts/api-server/src/routes/company-pricing-templates.ts
 - artifacts/api-server/src/routes/company-profile.ts
@@ -129,6 +130,7 @@ It changes only when the code structure or curated architectural facts change.
 - healthRouter
 - authRouter
 - onboardingRouter
+- commercialWorkspaceRouter
 - configRouter
 - projectsRouter
 - filesRouter
@@ -315,6 +317,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-provider-adapter.ts
 - artifacts/api-server/src/lib/commercial-provider-events.behavior.ts
 - artifacts/api-server/src/lib/commercial-provider-events.ts
+- artifacts/api-server/src/lib/commercial-workspace-runtime.behavior.ts
+- artifacts/api-server/src/lib/commercial-workspace-runtime.ts
 - artifacts/api-server/src/lib/commercial-workspace.behavior.ts
 - artifacts/api-server/src/lib/commercial-workspace.ts
 - artifacts/api-server/src/lib/company-directory-resolution.behavior.ts
@@ -1172,6 +1176,7 @@ It changes only when the code structure or curated architectural facts change.
 ## Frontend pages (artifacts/bimlog/src/pages)
 - artifacts/bimlog/src/pages/About.tsx
 - artifacts/bimlog/src/pages/AdminPanel.tsx
+- artifacts/bimlog/src/pages/CommercialWorkspace.tsx
 - artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx
 - artifacts/bimlog/src/pages/CompanyMasterCatalogs.tsx
 - artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx
@@ -1274,6 +1279,7 @@ It changes only when the code structure or curated architectural facts change.
 - /settings/company-profile
 - /settings/notifications
 - /settings/financial-controls
+- /settings/billing-support
 - /admin/feedback
 - /company-catalogs
 - /company-workflows
