@@ -4085,6 +4085,7 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [ ] Pass the complete exact-head gate, push B066–B070 once, publish accumulated B061–B070 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
 - [x] Bind the Block 14 semantic review and generated inventories to exact Build 070 implementation commit `ad920911ac05448ab05af26a4fc3c4ff6ac89518`.
 - [x] Repair the complete-gate route inventory failure by registering `/settings/billing-support` in exact source-derived route ownership at `35b12cea5fdfa737352d1d186b3cc52762b4d755`.
+- [x] Repair the repeated complete-gate accessibility inventory failure by adding `/settings/billing-support` to the deterministic 64-surface, 192-viewport matrix at `1f67801e4f3f45a53097233356835cd6f7c74dd0`.
 # B056–B060 post-commit release reconciliation — 2026-10-01
 
 - [ ] Candidate source `9e256fc8c1a3fd2183d5cd359e62d90c3a599baf` must pass the complete clean gate, reach `origin/master`, publish at the ten-build boundary, and pass full authenticated Chrome smoke before the block is accepted.
