@@ -4229,4 +4229,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B133 expose a protected revision-safe scheduling operation limited to the current accountable owner and open inquiries.
 - [x] B134 reject malformed, unpaired or unknown scheduled-action data at the browser boundary.
 - [x] B135 show and schedule the next action bilingually in Total Control with stale-write and ownership recovery.
-- [ ] Pass the complete exact-head gate and push B131–B135 once. Do not publish this five-build block; publication and authenticated Chrome smoke are due after B136–B140.
+- [x] Pass the complete exact-head gate and push B131–B135 once. Exact source `59e9acd8243bf5bc4ed3717fd1058d4fe5f978ab` reached `origin/master`; the block remained unpublished.
+
+## 250-build SaaS Completion Block 28 — actionable sales workload — 2026-10-02
+
+- [x] B136 classify open next actions deterministically as overdue, today, upcoming or unscheduled while keeping closed inquiries separate.
+- [x] B137 add a bounded allowlisted action-workload filter to the sales inquiry query contract.
+- [x] B138 apply protected server-side action scopes without expanding Super Administrator access or returning credentials.
+- [x] B139 project and validate the same urgency states at the browser boundary.
+- [x] B140 add bilingual workload filters, visible due-state labels and exact due times to Total Control.
+- [ ] Pass the complete exact-head gate, push B136–B140, publish accumulated B131–B140, verify exact live identity and run the full authenticated Chrome smoke.

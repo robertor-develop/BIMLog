@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {fileURLToPath} from "node:url";
+const source=readFileSync(fileURLToPath(new URL("./SalesInquiryQueue.tsx",import.meta.url)),"utf8");
+assert.match(source,/params\.set\("actionScope",actionScope\)/);
+assert.match(source,/Next action filter/);
+assert.match(source,/value="overdue"/);
+assert.match(source,/value="today"/);
+assert.match(source,/value="upcoming"/);
+assert.match(source,/value="unscheduled"/);
+assert.match(source,/salesInquiryActionUrgency\(item\)/);
+assert.match(source,/<time dateTime=\{item\.nextActionDueAt\}>/);
+console.log("B140 bilingual scheduled-action workload UI: PASS");
