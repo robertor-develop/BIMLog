@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { contactSubmissionsTable,salesInquiryAssignmentEventsTable,usersTable } from "@workspace/db/schema";
+import { contactSubmissionsTable,salesInquiryAssignmentEventsTable,salesInquiryFollowUpsTable,usersTable } from "@workspace/db/schema";
 import {and,count,desc,eq,ilike,isNull,lt,ne,or} from "drizzle-orm";
 import {parseSalesInquiryInput,salesInquiryFingerprint} from "../lib/commercial-sales-inquiry";
 import {authMiddleware,isSuperAdminMiddleware} from "../middlewares/auth";
@@ -9,6 +9,7 @@ import {parseSalesInquiryListQuery} from "../lib/sales-inquiry-query";
 import {salesInquiryResponseDueAt} from "../lib/sales-inquiry-response";
 import {canChangeSalesInquiryAssignment,parseSalesInquiryAssignment} from "../lib/sales-inquiry-assignment";
 import {parseSalesInquiryAssignmentHistoryQuery} from "../lib/sales-inquiry-assignment-history";
+import {parseSalesInquiryFollowUp} from "../lib/sales-inquiry-follow-up";
 import {alias} from "drizzle-orm/pg-core";
 
 const router = Router();
@@ -93,6 +94,19 @@ router.get("/admin/sales-inquiries/:id/assignment-history",authMiddleware,isSupe
   if(!inquiry.length){res.status(404).json({code:"SALES_INQUIRY_NOT_FOUND"});return;}
   res.set("Cache-Control","private, no-store, max-age=0");
   res.json({items,limit:query.limit,offset:query.offset,total:Number(totalRows[0]?.total??0)});
+});
+
+router.get("/admin/sales-inquiries/:id/follow-ups",authMiddleware,isSuperAdminMiddleware,async(req,res)=>{
+  const id=Number(req.params.id);if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}
+  let query;try{query=parseSalesInquiryAssignmentHistoryQuery(req.query as Record<string,unknown>);}catch{res.status(400).json({code:"SALES_INQUIRY_FOLLOW_UP_QUERY_INVALID"});return;}
+  const [inquiry,items,totalRows]=await Promise.all([db.select({id:contactSubmissionsTable.id}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.id,id)).limit(1),db.select({id:salesInquiryFollowUpsTable.id,actorUserId:salesInquiryFollowUpsTable.actorUserId,actorName:usersTable.fullName,note:salesInquiryFollowUpsTable.note,createdAt:salesInquiryFollowUpsTable.createdAt}).from(salesInquiryFollowUpsTable).innerJoin(usersTable,eq(usersTable.id,salesInquiryFollowUpsTable.actorUserId)).where(eq(salesInquiryFollowUpsTable.inquiryId,id)).orderBy(desc(salesInquiryFollowUpsTable.createdAt),desc(salesInquiryFollowUpsTable.id)).limit(query.limit).offset(query.offset),db.select({total:count()}).from(salesInquiryFollowUpsTable).where(eq(salesInquiryFollowUpsTable.inquiryId,id))]);
+  if(!inquiry.length){res.status(404).json({code:"SALES_INQUIRY_NOT_FOUND"});return;}res.set("Cache-Control","private, no-store, max-age=0");res.json({items,limit:query.limit,offset:query.offset,total:Number(totalRows[0]?.total??0)});
+});
+
+router.post("/admin/sales-inquiries/:id/follow-ups",authMiddleware,isSuperAdminMiddleware,async(req,res)=>{
+  const id=Number(req.params.id);if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}let input;try{input=parseSalesInquiryFollowUp(req.body);}catch{res.status(400).json({code:"SALES_INQUIRY_FOLLOW_UP_INVALID"});return;}
+  const created=await db.transaction(async tx=>{const [current]=await tx.select({updatedAt:contactSubmissionsTable.updatedAt}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.id,id)).for("update").limit(1);if(!current||current.updatedAt.getTime()!==input.expectedUpdatedAt.getTime())return null;const now=new Date();const [event]=await tx.insert(salesInquiryFollowUpsTable).values({inquiryId:id,actorUserId:req.user!.userId,note:input.note,createdAt:now}).returning({id:salesInquiryFollowUpsTable.id,note:salesInquiryFollowUpsTable.note,createdAt:salesInquiryFollowUpsTable.createdAt});await tx.update(contactSubmissionsTable).set({updatedAt:now}).where(eq(contactSubmissionsTable.id,id));return {...event,updatedAt:now};});
+  if(!created){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}res.status(201).json(created);
 });
 
 export default router;
