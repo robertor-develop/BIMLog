@@ -989,10 +989,14 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/runtime-resilience.ts
 - artifacts/api-server/src/lib/runtime-security.ts
 - artifacts/api-server/src/lib/saas-block12-onboarding.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-assignment.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-assignment.ts
 - artifacts/api-server/src/lib/sales-inquiry-operations.behavior.ts
 - artifacts/api-server/src/lib/sales-inquiry-operations.ts
 - artifacts/api-server/src/lib/sales-inquiry-query.behavior.ts
 - artifacts/api-server/src/lib/sales-inquiry-query.ts
+- artifacts/api-server/src/lib/sales-inquiry-response.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-response.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/scoped-briefing-cache.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts

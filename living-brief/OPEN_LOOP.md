@@ -4182,4 +4182,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B108 expose search, exact result counts and previous/next navigation without silent truncation.
 - [x] B109 localize filters, statuses, errors, paging and lifecycle actions in English and Spanish.
 - [x] B110 contain keyboard focus inside inquiry review, support Escape, prevent background scrolling and restore focus to the originating row.
-- [ ] Pass the complete exact-head gate, push B106–B110 once, publish accumulated B101–B110 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B106–B110 once, publish accumulated B101–B110 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke. Accepted at source `88b70393503789ae0c966c60ebafce68f705a663`, deployment `6e4bc4a6`, with 63/63 authenticated routes, exact-390 containment, session restoration and clean console checks.
+
+## 250-build SaaS Completion Block 23 — accountable sales response — 2026-10-02
+
+- [x] B111 define the deterministic one-business-day inquiry response target and overdue rule.
+- [x] B112 persist response deadline, accountable Super Administrator and assignment time with additive migration parity.
+- [x] B113 add revision-safe Super Administrator self-assignment without trusting a client-supplied actor.
+- [x] B114 expose strict accountability data and bounded overdue-only filtering through the protected inquiry list.
+- [x] B115 add bilingual overdue filtering, response deadline, ownership state and Assign to me action in Total Control.
+- [ ] Pass the complete exact-head gate and push B111–B115 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B116–B120.

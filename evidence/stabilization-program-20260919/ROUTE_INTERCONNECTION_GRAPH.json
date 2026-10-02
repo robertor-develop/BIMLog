@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 702,
-    "frontendApiReferences": 269,
+    "apiRoutes": 703,
+    "frontendApiReferences": 270,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -2461,6 +2461,14 @@
     {
       "method": "PATCH",
       "path": "/admin/sales-inquiries/:id/status",
+      "owner": "artifacts/api-server/src/routes/contact.ts",
+      "tables": [
+        "contactSubmissionsTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/sales-inquiries/:id/assignment",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
         "contactSubmissionsTable"
@@ -9124,6 +9132,10 @@
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/status"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/assignment"
     },
     {
       "screen": "artifacts/bimlog/src/components/ai/AiControlPlanePanel.tsx",
