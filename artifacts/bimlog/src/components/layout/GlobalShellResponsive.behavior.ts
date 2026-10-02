@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const sidebar = fs.readFileSync(new URL("./MasterSidebar.tsx", import.meta.url), "utf8");
+const navbar = fs.readFileSync(new URL("./Navbar.tsx", import.meta.url), "utf8");
 const css = fs.readFileSync(new URL("../../index.css", import.meta.url), "utf8");
 
 const checks: Array<[string, RegExp]> = [
@@ -15,8 +16,9 @@ const checks: Array<[string, RegExp]> = [
   ["desktop shell prevents page-level overflow", /\.app-shell \{[^}]*overflow: hidden/s],
   ["desktop main area can shrink", /\.main-area \{[^}]*min-width: 0/s],
   ["390px content cannot create page overflow", /@media \(max-width: 390px\)[\s\S]*\.page-content \{[\s\S]*overflow-x: hidden/s],
+  ["390px topbar uses the brand link as the compact headquarters return", /className="app-topbar-dashboard-link"[\s\S]*@media \(max-width: 390px\)[\s\S]*\.app-topbar-dashboard-link \{ display: none; \}/s],
   ["notification drawer uses bounded mobile width", /isMobile \? "calc\(100vw - 24px\)"/],
 ];
 
-for (const [name, pattern] of checks) assert.match(`${sidebar}\n${css}`, pattern, name);
+for (const [name, pattern] of checks) assert.match(`${sidebar}\n${navbar}\n${css}`, pattern, name);
 console.log(JSON.stringify({ status: "PASS", checks: checks.length, desktop: true, mobile390: true }));

@@ -84,7 +84,7 @@ export function Navbar() {
         {user ? (
           <>
             {!isDashboard && (
-              <Link href="/dashboard">
+              <Link href="/dashboard" className="app-topbar-dashboard-link">
                 <Button variant="ghost" size="sm" style={{ fontSize: 12 }}>{t("nav.dashboard")}</Button>
               </Link>
             )}
