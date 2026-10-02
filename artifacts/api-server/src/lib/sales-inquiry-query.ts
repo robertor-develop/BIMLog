@@ -4,6 +4,7 @@ export type SalesInquiryListQuery = Readonly<{
   status: "" | SalesInquiryStatus;
   search: string;
   overdue: boolean;
+  assignment: "" | "mine" | "unassigned";
   limit: number;
   offset: number;
 }>;
@@ -19,5 +20,7 @@ export function parseSalesInquiryListQuery(query: Record<string, unknown>): Sale
   const offset = query.offset === undefined ? 0 : Number(query.offset);
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new Error("SALES_INQUIRY_LIMIT_INVALID");
   if (!Number.isSafeInteger(offset) || offset < 0 || offset > 1_000_000) throw new Error("SALES_INQUIRY_OFFSET_INVALID");
-  return Object.freeze({ status: status as "" | SalesInquiryStatus, search, overdue, limit, offset });
+  return Object.freeze({ status: status as "" | SalesInquiryStatus, search, overdue, assignment:assignment as ""|"mine"|"unassigned", limit, offset });
 }
+  const assignment=typeof query.assignment==="string"?query.assignment.trim():"";
+  if(assignment!==""&&assignment!=="mine"&&assignment!=="unassigned")throw new Error("SALES_INQUIRY_ASSIGNMENT_SCOPE_INVALID");
