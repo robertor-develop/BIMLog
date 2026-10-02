@@ -77,6 +77,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/company-profile.ts
 - artifacts/api-server/src/routes/config.ts
 - artifacts/api-server/src/routes/connections.ts
+- artifacts/api-server/src/routes/contact.behavior.ts
 - artifacts/api-server/src/routes/contact.ts
 - artifacts/api-server/src/routes/contract-item-workflows.ts
 - artifacts/api-server/src/routes/conventions.ts
@@ -319,6 +320,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-provider-adapter.ts
 - artifacts/api-server/src/lib/commercial-provider-events.behavior.ts
 - artifacts/api-server/src/lib/commercial-provider-events.ts
+- artifacts/api-server/src/lib/commercial-sales-inquiry-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-sales-inquiry.behavior.ts
+- artifacts/api-server/src/lib/commercial-sales-inquiry.ts
 - artifacts/api-server/src/lib/commercial-workspace-runtime.behavior.ts
 - artifacts/api-server/src/lib/commercial-workspace-runtime.ts
 - artifacts/api-server/src/lib/commercial-workspace.behavior.ts
@@ -985,6 +989,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/runtime-resilience.ts
 - artifacts/api-server/src/lib/runtime-security.ts
 - artifacts/api-server/src/lib/saas-block12-onboarding.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-operations.behavior.ts
+- artifacts/api-server/src/lib/sales-inquiry-operations.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/scoped-briefing-cache.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts

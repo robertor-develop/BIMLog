@@ -3522,3 +3522,14 @@ B081–B090 passed the complete gate and production acceptance. Replit published
 - B094 strictly validates the provider mode, launch status, blocker allowlist, uniqueness and state consistency before rendering.
 - B095 presents the sellability result bilingually and makes clear that provider configuration belongs to BIMLog rather than the customer.
 - Focused API behavior, API TypeScript, strict client behavior, page behavior and frontend TypeScript checks pass at implementation source `2f9089f9`. This is the first five-build block after the accepted B081–B090 publication; push is due now and publication remains due at B100.
+
+B091–B095 passed the complete exact-head gate and reached `origin/master` at exact source `333b1f310c42c0e1ccb17efeae822de1354e1bb2`. The block remained unpublished as the first half of the next ten-build publication batch.
+
+## 250-build SaaS Completion Block 20 — durable sales inquiry operations — 2026-10-02
+
+- B096 defines one normalized, bounded and credential-safe sales inquiry contract with stable retry identity.
+- B097 persists Pricing plan, billing cycle, use case, request identity, fingerprint and lifecycle state with non-destructive startup migration parity.
+- B098 makes public inquiry submission idempotent, detects divergent request-key reuse and returns sanitized failures.
+- B099 carries the exact Pricing intent into a bilingual responsive Contact form and preserves the same request identity across retries.
+- B100 gives verified Super Administrators a bounded customer-service queue with explicit new, acknowledged, qualified and closed progression.
+- Focused block behavior, database schema compilation, API TypeScript and frontend TypeScript checks pass. B091–B100 now reach the required ten-build publication boundary.

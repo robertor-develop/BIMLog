@@ -4155,4 +4155,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B093 project the bounded sales-launch state and exact BIMLog-owned blockers through the authenticated commercial workspace.
 - [x] B094 reject unknown, duplicated or contradictory launch state at the browser boundary.
 - [x] B095 present a bilingual sellability banner and exact BIMLog-owned corrective steps without asking customers for provider settings.
-- [ ] Pass the complete exact-head gate and push B091–B095 once. Keep this first five-build block unpublished; publication and full authenticated Chrome smoke are due after B096–B100.
+- [x] Pass the complete exact-head gate and push B091–B095 once. Exact source `333b1f310c42c0e1ccb17efeae822de1354e1bb2` reached `origin/master`; this first five-build block remained unpublished as required.
+
+## 250-build SaaS Completion Block 20 — durable sales inquiry operations — 2026-10-02
+
+- [x] B096 validates and normalizes bounded commercial sales inquiries, including plan, billing cycle, use case and retry identity, while refusing credential-like content.
+- [x] B097 adds durable structured inquiry fields, lifecycle status, request-key uniqueness and startup-migration parity.
+- [x] B098 makes the public inquiry endpoint idempotent, conflict-aware and sanitized without exposing database errors.
+- [x] B099 preserves Pricing intent through a bilingual, responsive and retry-safe Contact experience.
+- [x] B100 adds a bounded Super Administrator sales-inquiry queue and revision-safe lifecycle progression for customer-service follow-up.
+- [ ] Pass the complete exact-head gate, push B096–B100 once, publish accumulated B091–B100 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.

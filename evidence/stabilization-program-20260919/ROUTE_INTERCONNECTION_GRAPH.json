@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 700,
+    "apiRoutes": 702,
     "frontendApiReferences": 267,
     "routeOwnedTables": 61
   },
@@ -2445,6 +2445,22 @@
     {
       "method": "POST",
       "path": "/contact",
+      "owner": "artifacts/api-server/src/routes/contact.ts",
+      "tables": [
+        "contactSubmissionsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/sales-inquiries",
+      "owner": "artifacts/api-server/src/routes/contact.ts",
+      "tables": [
+        "contactSubmissionsTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/sales-inquiries/:id/status",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
         "contactSubmissionsTable"
