@@ -14,6 +14,7 @@ assert.equal(inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"price_
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"professional.monthly=price_duplicate_2026,professional.annual=price_duplicate_2026"}).subscriptionConfigured,false);
 assert.deepEqual(valid.catalogCoverage.map(item=>item.slot),["professional.monthly","professional.annual","team.monthly","team.annual","business.monthly","business.annual"]);
 assert.equal(valid.catalogCoverage.every(item=>item.status==="ready"),true);
+assert.equal(valid.providerMode,"unavailable");
 const incompleteCatalog=inspectCommercialPlatformReadiness({BIMLOG_STRIPE_PRICE_IDS:"professional.monthly=price_duplicate_2026,professional.annual=price_duplicate_2026,team.monthly=bad"});
 assert.equal(incompleteCatalog.catalogCoverage.find(item=>item.slot==="professional.monthly")?.status,"duplicate_price");
 assert.equal(incompleteCatalog.catalogCoverage.find(item=>item.slot==="team.monthly")?.status,"invalid");
@@ -25,8 +26,11 @@ const stripeReady=inspectCommercialPlatformReadiness({
   STRIPE_PORTAL_CONFIGURATION_ID:"bpc_live",BIMLOG_APP_ORIGIN:"https://bimlog.app",
 });
 assert.equal(stripeReady.paymentProviderConfigured,true);
+assert.equal(stripeReady.providerMode,"live");
 assert.equal(stripeReady.webhookConfigured,true);
 assert.equal(stripeReady.billingPortalConfigured,true);
+assert.equal(inspectCommercialPlatformReadiness({BIMLOG_COMMERCIAL_MODE:"test",STRIPE_SECRET_KEY:"sk_test_abcdefghijklmnop",STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijkl",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_test",BIMLOG_APP_ORIGIN:"https://bimlog.app"}).providerMode,"test");
+assert.equal(inspectCommercialPlatformReadiness({STRIPE_SECRET_KEY:"invalid"}).providerMode,"unavailable");
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_COMMERCIAL_MODE:"test",STRIPE_SECRET_KEY:"sk_live_abcdefghijkl",STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijkl",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_live",BIMLOG_APP_ORIGIN:"https://bimlog.app"}).paymentProviderConfigured,false);
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_COMMERCIAL_MODE:"live",STRIPE_SECRET_KEY:"bad",STRIPE_WEBHOOK_SECRET:"bad",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_live"}).billingPortalConfigured,false);
 assert.equal(inspectCommercialPlatformReadiness({BIMLOG_COMMERCIAL_MODE:"live",STRIPE_SECRET_KEY:"sk_live_abcdefghijkl",STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijkl",BIMLOG_APP_ORIGIN:"http://bimlog.app"}).paymentProviderConfigured,false);

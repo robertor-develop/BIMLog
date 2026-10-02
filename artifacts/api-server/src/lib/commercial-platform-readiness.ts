@@ -10,6 +10,7 @@ export const commercialPaidOffers=["professional","team","business"] as const;
 export const commercialBillingCycles=["monthly","annual"] as const;
 export type CommercialCatalogSlot=`${typeof commercialPaidOffers[number]}.${typeof commercialBillingCycles[number]}`;
 export type CommercialCatalogCoverage=Readonly<{slot:CommercialCatalogSlot;status:"ready"|"missing"|"invalid"|"duplicate_price"}>;
+export type CommercialProviderMode="test"|"live"|"unavailable";
 const sendgridPattern=/^SG\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}$/;
 const check=(service:CommercialPlatformService,ready:boolean,code:string):CommercialPlatformCheck=>Object.freeze({service,status:ready?"ready":"not_configured",code});
 
@@ -24,8 +25,10 @@ export function inspectCommercialPlatformReadiness(environment:NodeJS.ProcessEnv
   let paymentProviderConfigured=false;
   let webhookConfigured=false;
   let billingPortalConfigured=false;
+  let providerMode:CommercialProviderMode="unavailable";
   try{
     const stripe=inspectStripeCommercialConfiguration({secretKey:environment.STRIPE_SECRET_KEY,webhookSecret:environment.STRIPE_WEBHOOK_SECRET,portalConfigurationId:environment.STRIPE_PORTAL_CONFIGURATION_ID,appOrigin:environment.BIMLOG_APP_ORIGIN??"https://bimlog.app"}).readiness;
+    providerMode=stripe.configured?stripe.mode:"unavailable";
     const expectedMode=environment.BIMLOG_COMMERCIAL_MODE?.trim();
     const modeMatches=(expectedMode==="test"||expectedMode==="live")&&stripe.mode===expectedMode;
     paymentProviderConfigured=stripe.configured&&modeMatches;
@@ -44,5 +47,5 @@ export function inspectCommercialPlatformReadiness(environment:NodeJS.ProcessEnv
     check("billing_portal",billingPortalConfigured,billingPortalConfigured?"portal_ready":"portal_invalid"),
     check("support_channel",supportConfigured,supportCode),
   ]);
-  return Object.freeze({subscriptionConfigured,paymentProviderConfigured,webhookConfigured,billingPortalConfigured,supportConfigured,catalogCoverage,checks});
+  return Object.freeze({subscriptionConfigured,paymentProviderConfigured,webhookConfigured,billingPortalConfigured,supportConfigured,providerMode,catalogCoverage,checks});
 }
