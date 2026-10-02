@@ -29,3 +29,12 @@ export function previewPlanChange(input:{workspace:CommercialWorkspaceState;toPl
   if(requiresSeatReduction)blockers.push("ASSIGNED_SEATS_EXCEED_TARGET");
   return Object.freeze({companyId:input.workspace.companyId,subscriptionId:input.workspace.subscriptionId,fromPlan:input.workspace.planId,toPlan:input.toPlan,fromSeatLimit:input.workspace.seatLimit,toSeatLimit:input.toSeatLimit,assignedSeats:input.assignedSeats,effectiveAt,requiresSeatReduction,canSubmit:blockers.length===0,blockers:Object.freeze(blockers),writesPerformed:0});
 }
+
+export type CommercialSeatAssignment=Readonly<{userId:number;email:string;role:"member"|"administrator"|"viewer";status:"active"|"invited">>;
+export function reconcileCommercialSeats(input:{workspace:CommercialWorkspaceState;assignments:readonly CommercialSeatAssignment[]}):Readonly<{assigned:number;available:number;assignments:readonly CommercialSeatAssignment[];canInvite:boolean}>{
+  const seenUsers=new Set<number>(),seenEmails=new Set<string>();
+  const assignments=input.assignments.map(entry=>{const email=entry.email.trim().toLowerCase();if(!Number.isSafeInteger(entry.userId)||entry.userId<1||!/^\S+@\S+\.\S+$/.test(email))throw new Error("Commercial seat identity is invalid");if(seenUsers.has(entry.userId)||seenEmails.has(email))throw new Error("Commercial seat assignment is duplicated");seenUsers.add(entry.userId);seenEmails.add(email);return Object.freeze({...entry,email});});
+  if(assignments.length>input.workspace.seatLimit)throw new Error("Commercial seat limit exceeded");
+  const available=input.workspace.seatLimit-assignments.length;
+  return Object.freeze({assigned:assignments.length,available,assignments:Object.freeze(assignments),canInvite:input.workspace.status==="active"&&input.workspace.accessStatus==="active"&&available>0});
+}

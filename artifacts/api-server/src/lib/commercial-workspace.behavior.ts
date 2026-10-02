@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {createCompanySubscription} from "./subscription-authority";
 import {deriveSubscriptionAccess} from "./commercial-billing-operations";
-import {assembleCommercialWorkspace,previewPlanChange} from "./commercial-workspace";
+import {assembleCommercialWorkspace,previewPlanChange,reconcileCommercialSeats} from "./commercial-workspace";
 const draft=createCompanySubscription({id:"sub-workspace",companyId:42,planId:"business",catalogPriceVersion:3,billingCycle:"monthly",currency:"USD",amount:3000,now:"2026-10-01T00:00:00Z"});
 const subscription={...draft,status:"active" as const,revision:2,updatedAt:"2026-10-01T00:01:00.000Z"};
 const term={subscriptionId:subscription.id,sequence:1,billingCycle:"monthly" as const,startsAt:"2026-10-01T00:00:00.000Z",endsAt:"2026-11-01T00:00:00.000Z",renewsAt:"2026-11-01T00:00:00.000Z",sourceOrderId:"order-workspace",sourceInvoiceId:"invoice-workspace"};
@@ -16,4 +16,9 @@ assert.deepEqual({canSubmit:upgrade.canSubmit,writes:upgrade.writesPerformed,blo
 const reduction=previewPlanChange({workspace,toPlan:"professional",toSeatLimit:3,assignedSeats:8,effectiveAt:"2026-11-01T00:00:00Z"});
 assert.deepEqual({canSubmit:reduction.canSubmit,requiresSeatReduction:reduction.requiresSeatReduction,blocker:reduction.blockers[0]},{canSubmit:false,requiresSeatReduction:true,blocker:"ASSIGNED_SEATS_EXCEED_TARGET"});
 console.log("B062 non-mutating plan-change preview: PASS");
+const seats=reconcileCommercialSeats({workspace,assignments:[{userId:1,email:"OWNER@EXAMPLE.COM",role:"administrator",status:"active"},{userId:2,email:"coordinator@example.com",role:"member",status:"invited"}]});
+assert.deepEqual({assigned:seats.assigned,available:seats.available,email:seats.assignments[0]?.email,canInvite:seats.canInvite},{assigned:2,available:8,email:"owner@example.com",canInvite:true});
+assert.throws(()=>reconcileCommercialSeats({workspace:{...workspace,seatLimit:1},assignments:seats.assignments}),/limit exceeded/);
+assert.throws(()=>reconcileCommercialSeats({workspace,assignments:[seats.assignments[0]!,{...seats.assignments[0]!,userId:3}]}),/duplicated/);
+console.log("B063 company seat roster and allowance enforcement: PASS");
 export {subscription,access,workspace};
