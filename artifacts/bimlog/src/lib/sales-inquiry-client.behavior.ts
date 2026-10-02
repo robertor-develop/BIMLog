@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import {parseSalesInquiryList} from "./sales-inquiry-client";
-const row={id:1,fullName:"Ruben Crespo",email:"ruben@example.com",companyName:"BIMTech",country:"Bolivia",interest:"Professional plan",message:"Need a demo",plan:"professional",billingCycle:"annual",useCase:"coordination",status:"new",responseDueAt:"2026-10-05T12:00:00.000Z",assignedToUserId:null,assignedAt:null,createdAt:"2026-10-02T12:00:00.000Z",updatedAt:"2026-10-02T12:00:00.000Z"};
+const row={id:1,fullName:"Ruben Crespo",email:"ruben@example.com",companyName:"BIMTech",country:"Bolivia",interest:"Professional plan",message:"Need a demo",plan:"professional",billingCycle:"annual",useCase:"coordination",status:"new",responseDueAt:"2026-10-05T12:00:00.000Z",assignedToUserId:null,assignedToName:null,assignedToCurrentUser:false,assignedAt:null,createdAt:"2026-10-02T12:00:00.000Z",updatedAt:"2026-10-02T12:00:00.000Z"};
 assert.equal(parseSalesInquiryList({items:[row],limit:25,offset:0,total:1}).items[0]?.status,"new");
 assert.throws(()=>parseSalesInquiryList({items:[row,{...row}],limit:25,offset:0,total:2}),/Duplicate/);
 assert.throws(()=>parseSalesInquiryList({items:[{...row,status:"deleted"}],limit:25,offset:0,total:1}),/status/);
 assert.throws(()=>parseSalesInquiryList({items:[row],limit:500,offset:0,total:1}),/limit/);
 assert.throws(()=>parseSalesInquiryList({items:[row],limit:25,offset:-1,total:1}),/offset/);
 assert.throws(()=>parseSalesInquiryList({items:[row],limit:25,offset:25,total:1}),/Contradictory/);
+assert.throws(()=>parseSalesInquiryList({items:[{...row,assignedToUserId:7,assignedAt:"2026-10-02T12:05:00.000Z"}],limit:25,offset:0,total:1}),/accountability/);
 console.log("B107 strict paged sales inquiry browser contract: PASS");
