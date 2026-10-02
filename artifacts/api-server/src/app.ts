@@ -465,6 +465,17 @@ queueDatabaseStartup(async () => {
 
 queueDatabaseStartup(async () => {
   try {
+    await pool.query(`CREATE TABLE IF NOT EXISTS support_cases (id serial PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), requester_user_id integer NOT NULL REFERENCES users(id), category text NOT NULL CHECK (category IN ('billing','account','technical','data','other')), priority text NOT NULL CHECK (priority IN ('normal','urgent')), subject text NOT NULL, description text NOT NULL, request_key text NOT NULL, fingerprint text NOT NULL, status text NOT NULL DEFAULT 'open' CHECK (status IN ('open','in_progress','resolved','closed')), created_at timestamp NOT NULL DEFAULT now(), updated_at timestamp NOT NULL DEFAULT now())`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS support_cases_requester_request_key_uidx ON support_cases(requester_user_id,request_key)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS support_cases_company_created_idx ON support_cases(company_id,created_at DESC)`);
+    console.log("[migration] customer support case table ensured");
+  } catch {
+    console.error("[migration] customer support case migration failed");
+  }
+});
+
+queueDatabaseStartup(async () => {
+  try {
     await startFeatureCatalogMigration();
     console.log("[migration] feature catalog tables ensured");
   } catch {
