@@ -484,10 +484,13 @@ queueDatabaseStartup(async () => {
     await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS response_due_at timestamp`);
     await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS assigned_to_user_id integer REFERENCES users(id)`);
     await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS assigned_at timestamp`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS next_action_type text`);
+    await pool.query(`ALTER TABLE contact_submissions ADD COLUMN IF NOT EXISTS next_action_due_at timestamp`);
     await pool.query(`UPDATE contact_submissions SET response_due_at=created_at + CASE WHEN EXTRACT(ISODOW FROM created_at)=5 THEN interval '3 days' WHEN EXTRACT(ISODOW FROM created_at)=6 THEN interval '2 days' ELSE interval '1 day' END WHERE response_due_at IS NULL`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS contact_submissions_request_key_uidx ON contact_submissions(request_key) WHERE request_key IS NOT NULL`);
     await pool.query(`CREATE INDEX IF NOT EXISTS contact_submissions_status_created_idx ON contact_submissions(status, created_at DESC)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS contact_submissions_response_due_idx ON contact_submissions(status, response_due_at)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS contact_submissions_next_action_due_idx ON contact_submissions(status, next_action_due_at)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS sales_inquiry_assignment_events (id serial PRIMARY KEY, inquiry_id integer NOT NULL REFERENCES contact_submissions(id), actor_user_id integer NOT NULL REFERENCES users(id), previous_assignee_user_id integer REFERENCES users(id), next_assignee_user_id integer REFERENCES users(id), action text NOT NULL CHECK (action IN ('assigned','released')), created_at timestamp NOT NULL DEFAULT now())`);
     await pool.query(`CREATE INDEX IF NOT EXISTS sales_inquiry_assignment_events_inquiry_idx ON sales_inquiry_assignment_events(inquiry_id, created_at DESC)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS sales_inquiry_follow_ups (id serial PRIMARY KEY, inquiry_id integer NOT NULL REFERENCES contact_submissions(id), actor_user_id integer NOT NULL REFERENCES users(id), note text NOT NULL, created_at timestamp NOT NULL DEFAULT now())`);
