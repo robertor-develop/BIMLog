@@ -4220,3 +4220,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B130 complete bilingual follow-up review and creation with loading, empty, error, retry and stale-write recovery.
 - [ ] Pass the complete exact-head gate, push B126–B130 once, publish accumulated B121–B130 without Replit Agents, verify exact live identity and complete full authenticated Chrome smoke.
 - [x] Repair the complete-gate JSX boundary failure and rerun focused frontend/API TypeScript before repeating the complete gate.
+- [ ] Publish the cache-epoch repair, require live source identity to equal the repaired B130 head, and run the full authenticated Chrome smoke before B131 begins. Replit's prior attempts recycled source `62c5a71a1ed6776a9d2e8e0096f9ff483bcf6cec` despite an attested B130 workspace; no stale-artifact publication counts as acceptance.

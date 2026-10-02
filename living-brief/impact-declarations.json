@@ -54646,12 +54646,13 @@
         }
       ],
       "reviewedChangedPaths": [
+        ".replit",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "245e79ec3f3daf62d358425de739f245f23382e14e45702a7e0d4a592e0b1e01",
+      "reviewedChangeSha256": "4fc1282fa9591472b2505591eb05eeac99154ecd8890b6ab083a81f7d4c8c0d3",
       "reason": "B126-B130 add attributable durable sales follow-up notes to the existing canonical inquiry and protected Total Control workflow; the complete gate caught and the repair removed a malformed JSX boundary before release."
     }
   ]

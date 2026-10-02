@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ba1e048e94984e236fc3fe317dba620b1d3289c552c0aba1aa52302ff29f5ac1",
-  "itemCount": 285,
+  "sourceSha256": "c939736cc292d65b04c8bc5238295139402318d5de134a93efbe701e7a121b80",
+  "itemCount": 286,
   "counts": {
-    "ACTIVE": 250,
+    "ACTIVE": 251,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5198,6 +5198,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4221",
+        "250-build SaaS Completion Block 26 — durable sales follow-up — 2026-10-02"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "dc05d7165201740f",
+      "sourceLine": 4223,
+      "heading": "250-build SaaS Completion Block 26 — durable sales follow-up — 2026-10-02",
+      "statement": "Publish the cache-epoch repair, require live source identity to equal the repaired B130 head, and run the full authenticated Chrome smoke before B131 begins. Replit's prior attempts recycled source `62c5a71a1ed6776a9d2e8e0096f9ff483bcf6cec` despite an attested B130 workspace; no stale-artifact publication counts as acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4223",
         "250-build SaaS Completion Block 26 — durable sales follow-up — 2026-10-02"
       ],
       "currentAuthority": false
