@@ -12,4 +12,5 @@ assert.match(source,/params\.set\("overdue","true"\)/);assert.match(source,/Over
 assert.match(source,/\/assignment/);assert.match(source,/expectedUpdatedAt:selected\.updatedAt/);assert.match(source,/Assign to me/);
 assert.match(source,/parseSalesInquiryAssignmentHistory/);assert.match(source,/assignment-history/);assert.match(source,/Assignment history/);assert.match(source,/Historial de responsables/);
 assert.match(source,/historyError/);assert.match(source,/setHistoryRevision/);assert.match(source,/aria-busy=\{historyLoading\}/);assert.match(source,/HISTORY_PAGE_SIZE=10/);assert.match(source,/Assignment history pages/);
+assert.match(source,/parseSalesInquiryFollowUps/);assert.match(source,/Sales follow-up/);assert.match(source,/Seguimiento comercial/);assert.match(source,/expectedUpdatedAt:selected\.updatedAt/);assert.match(source,/Save note/);assert.match(source,/Guardar nota/);
 console.log("B110 accessible sales inquiry review dialog: PASS");
