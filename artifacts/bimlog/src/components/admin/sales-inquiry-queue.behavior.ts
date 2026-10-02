@@ -10,4 +10,6 @@ for(const phrase of ["Buscar por contacto","Reintentar","Anterior","Siguiente","
 assert.match(source,/event\.key==="Escape"/);assert.match(source,/event\.key!=="Tab"/);assert.match(source,/closeRef\.current\?\.focus/);assert.match(source,/openerRef\.current\?\.focus/);assert.match(source,/document\.body\.style\.overflow="hidden"/);
 assert.match(source,/params\.set\("overdue","true"\)/);assert.match(source,/Overdue only/);assert.match(source,/Response due/);
 assert.match(source,/\/assignment/);assert.match(source,/expectedUpdatedAt:selected\.updatedAt/);assert.match(source,/Assign to me/);
+assert.match(source,/parseSalesInquiryAssignmentHistory/);assert.match(source,/assignment-history/);assert.match(source,/Assignment history/);assert.match(source,/Historial de responsables/);
+assert.match(source,/historyError/);assert.match(source,/setHistoryRevision/);assert.match(source,/aria-busy=\{historyLoading\}/);assert.match(source,/HISTORY_PAGE_SIZE=10/);assert.match(source,/Assignment history pages/);
 console.log("B110 accessible sales inquiry review dialog: PASS");
