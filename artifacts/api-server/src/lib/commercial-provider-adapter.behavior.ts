@@ -35,6 +35,8 @@ assert.equal(checkoutRequest?.headers["Idempotency-Key"], attempt.idempotencyKey
 assert.equal(checkoutRequest?.body.get("metadata[order_id]"), order.id);
 assert.equal(checkoutRequest?.body.get("line_items[0][price]"), "price_team_annual");
 assert.equal(checkoutRequest?.body.get("mode"), "subscription");
+assert.equal(checkoutRequest?.body.get("success_url"), "https://app.bimlog.com/settings/billing-support?checkout=success&session_id={CHECKOUT_SESSION_ID}");
+assert.equal(checkoutRequest?.body.get("cancel_url"), "https://app.bimlog.com/settings/billing-support?checkout=cancelled");
 await assert.rejects(() => createStripeCheckoutSession({ configuration: configured.configuration!, order, attempt, customer, priceReference: "price_team_annual", transport: async () => ({ status: 200, body: { id: "cs_test_bad", url: "https://evil.example/pay", expires_at: 1790829000 } }) }), /untrusted hosted URL/);
 
 const webhookTimestamp = 1790829120;

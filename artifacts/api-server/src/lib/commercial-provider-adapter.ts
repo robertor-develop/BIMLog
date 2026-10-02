@@ -133,8 +133,8 @@ export async function createStripeCheckoutSession(input: {
   body.set("client_reference_id", input.order.id);
   body.set("line_items[0][price]", priceReference);
   body.set("line_items[0][quantity]", "1");
-  body.set("success_url", `${input.configuration.appOrigin}/settings/billing?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
-  body.set("cancel_url", `${input.configuration.appOrigin}/settings/billing?checkout=cancelled`);
+  body.set("success_url", `${input.configuration.appOrigin}/settings/billing-support?checkout=success&session_id={CHECKOUT_SESSION_ID}`);
+  body.set("cancel_url", `${input.configuration.appOrigin}/settings/billing-support?checkout=cancelled`);
   body.set("metadata[order_id]", input.order.id);
   body.set("metadata[subscription_id]", input.order.subscriptionId);
   body.set("metadata[company_id]", String(input.order.companyId));
