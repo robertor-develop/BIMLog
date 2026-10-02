@@ -18,6 +18,7 @@ export * from "./feature-flags";
 export * from "./admin-actions-log";
 export * from "./contact-submissions";
 export * from "./sales-inquiry-assignment-events";
+export * from "./sales-inquiry-follow-ups";
 export * from "./project-directory";
 export * from "./notifications";
 export * from "./transmittals";

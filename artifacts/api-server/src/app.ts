@@ -490,6 +490,8 @@ queueDatabaseStartup(async () => {
     await pool.query(`CREATE INDEX IF NOT EXISTS contact_submissions_response_due_idx ON contact_submissions(status, response_due_at)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS sales_inquiry_assignment_events (id serial PRIMARY KEY, inquiry_id integer NOT NULL REFERENCES contact_submissions(id), actor_user_id integer NOT NULL REFERENCES users(id), previous_assignee_user_id integer REFERENCES users(id), next_assignee_user_id integer REFERENCES users(id), action text NOT NULL CHECK (action IN ('assigned','released')), created_at timestamp NOT NULL DEFAULT now())`);
     await pool.query(`CREATE INDEX IF NOT EXISTS sales_inquiry_assignment_events_inquiry_idx ON sales_inquiry_assignment_events(inquiry_id, created_at DESC)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS sales_inquiry_follow_ups (id serial PRIMARY KEY, inquiry_id integer NOT NULL REFERENCES contact_submissions(id), actor_user_id integer NOT NULL REFERENCES users(id), note text NOT NULL, created_at timestamp NOT NULL DEFAULT now())`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS sales_inquiry_follow_ups_inquiry_idx ON sales_inquiry_follow_ups(inquiry_id, created_at DESC)`);
     console.log("[migration] structured sales inquiry columns ensured");
   } catch {
     console.error("[migration] structured sales inquiry migration failed");
