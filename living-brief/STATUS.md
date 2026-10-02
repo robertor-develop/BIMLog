@@ -3500,3 +3500,14 @@ The B071–B080 publication is accepted as release `v1.05.N18-P37`, Replit deplo
 - B084 replaces environment-presence guesses with five bounded secret-free service diagnostics in the authenticated commercial workspace response.
 - B085 rejects incomplete, duplicate or contradictory diagnostics at the browser boundary and presents a bilingual BIMLog-managed readiness checklist without exposing credentials or technical settings.
 - Focused API behavior, API TypeScript, strict client behavior, page behavior and frontend TypeScript checks pass at implementation source `eb07e026`. This is the first five-build block after the accepted B071–B080 publication; push is due now, while publication and authenticated Chrome smoke are due after B086–B090.
+
+B081–B085 passed the complete exact-head gate and reached `origin/master` at exact source `ec6eebb147b35c6b8ce9dec512d19399c8ca8c4a`. The block remained unpublished as the first half of the next ten-build publication batch.
+
+## 250-build SaaS Completion Block 18 — commercial catalog coverage — 2026-10-02
+
+- B086 replaces the unstructured price-ID bag with explicit Professional, Team and Business monthly/annual mappings.
+- B087 requires all six mappings to be present, valid and unique and emits bounded missing, invalid or duplicate diagnostics.
+- B088 includes the six secret-free catalog coverage records in the authenticated commercial workspace and verifies consistency with subscription readiness.
+- B089 requires the exact six-slot partition and rejects browser payloads that contradict subscription readiness.
+- B090 gives customers and operators a bilingual plan/cycle coverage view without exposing Stripe price identifiers or credentials.
+- Focused API behavior, API TypeScript, strict client behavior, page behavior and frontend TypeScript checks pass at implementation source `6faa9aa3`. B081–B090 now reach the ten-build publication boundary; complete gate, push, one controlled Replit Shell publication, exact live identity and full authenticated Chrome smoke are due.

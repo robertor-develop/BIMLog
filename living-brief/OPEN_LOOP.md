@@ -4137,4 +4137,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B083 require a valid SendGrid transport, platform sender and support inbox before reporting customer support ready.
 - [x] B084 expose five bounded, secret-free platform service diagnostics through the authenticated commercial workspace.
 - [x] B085 strictly validate and render the five bilingual BIMLog-managed service checks without exposing credentials or technical configuration to customers.
-- [ ] Pass the complete exact-head gate and push B081–B085 once. Keep this first five-build block unpublished; publication and full authenticated Chrome smoke are due after B086–B090 reaches ten unpublished builds.
+- [x] Pass the complete exact-head gate and push B081–B085 once. Exact source `ec6eebb147b35c6b8ce9dec512d19399c8ca8c4a` reached `origin/master`; the first five-build block remained unpublished as required.
+
+## 250-build SaaS Completion Block 18 — commercial catalog coverage — 2026-10-02
+
+- [x] B086 bind every paid commercial offer and billing cycle to an explicit Stripe price reference.
+- [x] B087 require complete unique coverage and diagnose missing, invalid or reused mappings without exposing price identifiers.
+- [x] B088 project the six secret-free catalog coverage records through the authenticated commercial workspace.
+- [x] B089 reject incomplete, duplicated or contradictory catalog coverage at the browser boundary.
+- [x] B090 render bilingual monthly and annual checkout coverage for Professional, Team and Business plans.
+- [ ] Pass the complete exact-head gate, push B086–B090 once, publish accumulated B081–B090 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
