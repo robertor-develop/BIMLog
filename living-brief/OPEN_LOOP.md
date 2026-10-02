@@ -4119,4 +4119,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B074 renders bilingual responsive next-step cards without duplicate page actions.
 - [x] B075 reports bounded checkout return state without claiming provider-confirmed access.
 - [x] Repair the TypeScript blocker-array widening found by the block gate and repeat focused typecheck successfully.
-- [ ] Pass the complete exact-head gate and push B071–B075 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B076–B080.
+- [x] Pass the complete exact-head gate and push B071–B075 once. Exact source `2f4720e86889a8519e51f7f3fc94c1966164b1f4` reached `origin/master`; the first five-build block remained unpublished as required.
+
+## 250-build SaaS Completion Block 16 — commercial responsibility guidance — 2026-10-02
+
+- [x] B076 separate customer-owned billing identity from BIMLog-owned provider/service readiness.
+- [x] B077 prevent authenticated commercial readiness from being cached or shared across authorization contexts.
+- [x] B078 validate exact responsibility partition and readiness consistency at the client boundary.
+- [x] B079 present clear bilingual customer and BIMLog responsibility panels without duplicate controls.
+- [x] B080 localize state labels, explain exact blocked-action reasons and preserve narrow-screen containment.
+- [ ] Pass the complete exact-head gate, push B076–B080 once, publish accumulated B071–B080 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.

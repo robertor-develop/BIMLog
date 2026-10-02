@@ -3480,3 +3480,12 @@ Replit publication `adb53e67` successfully promoted the P37 product and the auth
 - B074 adds responsive bilingual next-step cards and removes duplicate action controls from the blocker summary.
 - B075 gives honest bounded success/cancelled feedback and waits for provider confirmation before claiming subscription access.
 - Focused behavior suites and TypeScript pass after repairing the blocker-array enum boundary in `1c3bb164e462b7566abd955487b298df98b93095`. This is the first five-build block after the accepted B061–B070 publication; push is due now, while publication and authenticated Chrome smoke are due after B076–B080.
+
+## 250-build SaaS Completion Block 16 — commercial responsibility guidance — 2026-10-02
+
+- B076 separates customer-owned billing-identity work from BIMLog-owned subscription, payment, webhook, portal and support configuration.
+- B077 marks the authenticated company readiness response private and non-cacheable and varies it by Authorization.
+- B078 rejects incomplete, duplicated or contradictory customer/BIMLog responsibility partitions before rendering.
+- B079 replaces the mixed blocker list with clear bilingual “Your company” and “BIMLog” panels so customers are not asked to configure provider infrastructure.
+- B080 localizes status language, exposes exact blocked-action reasons and contains every card grid at narrow widths.
+- Focused runtime, client, page behavior and frontend TypeScript checks pass at implementation source `5af2d9f8`. B071–B080 now reach the ten-build publication boundary; complete gate, push, one controlled Replit Shell publication, exact live identity and full authenticated Chrome smoke are due.
