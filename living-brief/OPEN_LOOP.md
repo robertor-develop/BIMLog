@@ -4164,4 +4164,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B098 makes the public inquiry endpoint idempotent, conflict-aware and sanitized without exposing database errors.
 - [x] B099 preserves Pricing intent through a bilingual, responsive and retry-safe Contact experience.
 - [x] B100 adds a bounded Super Administrator sales-inquiry queue and revision-safe lifecycle progression for customer-service follow-up.
-- [ ] Pass the complete exact-head gate, push B096–B100 once, publish accumulated B091–B100 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B096–B100 once, publish accumulated B091–B100 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke. Accepted at canonical source `24137215c9634720d03037bda73ab4f8946bea05`, deployment `3600b8b3`, with repeated 63/63 authenticated routes and responsive/session/console checks passing.
+
+## 250-build SaaS Completion Block 21 — visible sales operations — 2026-10-02
+
+- [x] B101 strictly validate the protected inquiry-list response and reject malformed, duplicate or contradictory records.
+- [x] B102 expose a filterable Super Administrator sales-inquiry queue with loading, retry and empty states.
+- [x] B103 expose bounded inquiry detail with complete commercial context and long-message containment.
+- [x] B104 connect only allowed lifecycle transitions through the revision-safe expected-state API and recover visibly from conflicts.
+- [x] B105 integrate the bilingual responsive sales workspace into Total Control.
+- [ ] Pass the complete exact-head gate and push B101–B105 once. Do not publish this first five-build block; publication and authenticated Chrome smoke are due after B106–B110.

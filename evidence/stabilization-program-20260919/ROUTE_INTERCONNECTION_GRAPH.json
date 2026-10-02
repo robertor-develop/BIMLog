@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 702,
-    "frontendApiReferences": 267,
+    "frontendApiReferences": 269,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -9116,6 +9116,14 @@
     {
       "screen": "artifacts/bimlog/src/company-controls-harness.tsx",
       "apiPath": "/api/v1/company/master-catalogs/"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries${query}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/status"
     },
     {
       "screen": "artifacts/bimlog/src/components/ai/AiControlPlanePanel.tsx",
