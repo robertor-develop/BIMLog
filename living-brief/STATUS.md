@@ -3608,3 +3608,5 @@ The cache-epoch repair published successfully at exact source `3f6ec337611f16bab
 B136–B140 turn scheduled actions into an operational queue: deterministic overdue/today/upcoming/unscheduled classification, bounded server-side filtering, protected query execution, strict browser parity and bilingual Total Control filters with visible due times. Closed inquiries remain separate, authorization remains Super Administrator-only, and no email or external notification is claimed. This reaches the B131–B140 publication boundary.
 
 The exact-head release gate required and received a full generated-platform, semantic-impact, disposition and state reconciliation before this block could be pushed or published.
+
+The first B131–B140 publication reached Live but production health still reported the prior `3f6ec337611f16babe68aab6fffe2107377367a3` artifact instead of reviewed source `f596908029b80d527d22ee5f971e2ab3e615003e`. The tracked Replit publication cache epoch now advances for B131–B140; exact identity, republication and the full authenticated Chrome smoke remain mandatory.

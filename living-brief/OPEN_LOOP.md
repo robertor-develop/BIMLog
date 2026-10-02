@@ -4240,3 +4240,4 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B140 add bilingual workload filters, visible due-state labels and exact due times to Total Control.
 - [ ] Pass the complete exact-head gate, push B136–B140, publish accumulated B131–B140, verify exact live identity and run the full authenticated Chrome smoke.
 - [x] Reconcile the generated platform inventory, semantic-impact declaration, Open Loop dispositions and Living Brief state after the exact-head gate rejected stale governance metadata.
+- [ ] Repair the real stale-artifact production failure by advancing the tracked B131–B140 Replit cache epoch, repeat the full exact-head gate, push, republish and require production health to equal the repaired head before Chrome acceptance.
