@@ -6,4 +6,5 @@ assert.match(source,/expectedStatus:selected\.status/);assert.match(source,/resp
 assert.match(source,/Consultas comerciales/);assert.match(source,/Ninguna consulta coincide/);assert.match(source,/width:"min\(680px,100%\)"/);
 assert.match(source,/new URLSearchParams/);assert.match(source,/role="search"/);assert.match(source,/setOffset\(0\)/);assert.match(source,/copy\.pages/);assert.match(source,/offset\+items\.length>=total/);
 for(const phrase of ["Buscar por contacto","Reintentar","Anterior","Siguiente","No se pudieron cargar","Nueva","Calificada","Cerrada"])assert.match(source,new RegExp(phrase));
-console.log("B109 bilingual searchable sales inquiry operations: PASS");
+assert.match(source,/event\.key==="Escape"/);assert.match(source,/event\.key!=="Tab"/);assert.match(source,/closeRef\.current\?\.focus/);assert.match(source,/openerRef\.current\?\.focus/);assert.match(source,/document\.body\.style\.overflow="hidden"/);
+console.log("B110 accessible sales inquiry review dialog: PASS");
