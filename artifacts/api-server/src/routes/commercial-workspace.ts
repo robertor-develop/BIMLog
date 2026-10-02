@@ -10,6 +10,8 @@ const router:IRouter=Router();
 const configured=(name:string)=>typeof process.env[name]==="string"&&process.env[name]!.trim().length>0;
 
 router.get("/commercial/workspace",authMiddleware,async(req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");
+  res.set("Vary","Authorization");
   try{
     const actor=req.user!;
     const [company]=await db.select({id:companiesTable.id,name:companiesTable.name,address:companiesTable.address,phone:companiesTable.phone}).from(companiesTable).where(eq(companiesTable.id,actor.companyId)).limit(1);

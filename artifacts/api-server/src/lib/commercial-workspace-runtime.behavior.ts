@@ -15,6 +15,8 @@ console.log("B066 live commercial readiness projection: PASS");
 const route=fs.readFileSync(new URL("../routes/commercial-workspace.ts",import.meta.url),"utf8");
 assert.match(route,/router\.get\("\/commercial\/workspace",authMiddleware/);
 assert.match(route,/COMMERCIAL_WORKSPACE_UNAVAILABLE/);
+assert.match(route,/Cache-Control","private, no-store, max-age=0/);
+assert.match(route,/Vary","Authorization/);
 assert.match(route,/paymentProviderConfigured:configured\("STRIPE_SECRET_KEY"\)/);
 assert.doesNotMatch(route,/process\.env\[[^\]]+\]\s*[},]/);
 console.log("B067 authenticated secret-free commercial workspace endpoint: PASS");
