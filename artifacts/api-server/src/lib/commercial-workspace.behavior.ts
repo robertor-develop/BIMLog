@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import {createCompanySubscription} from "./subscription-authority";
 import {deriveSubscriptionAccess} from "./commercial-billing-operations";
-import {assembleCommercialWorkspace} from "./commercial-workspace";
+import {assembleCommercialWorkspace,previewPlanChange} from "./commercial-workspace";
 const draft=createCompanySubscription({id:"sub-workspace",companyId:42,planId:"business",catalogPriceVersion:3,billingCycle:"monthly",currency:"USD",amount:3000,now:"2026-10-01T00:00:00Z"});
 const subscription={...draft,status:"active" as const,revision:2,updatedAt:"2026-10-01T00:01:00.000Z"};
 const term={subscriptionId:subscription.id,sequence:1,billingCycle:"monthly" as const,startsAt:"2026-10-01T00:00:00.000Z",endsAt:"2026-11-01T00:00:00.000Z",renewsAt:"2026-11-01T00:00:00.000Z",sourceOrderId:"order-workspace",sourceInvoiceId:"invoice-workspace"};
@@ -11,4 +11,9 @@ assert.deepEqual({companyId:workspace.companyId,planId:workspace.planId,seatLimi
 assert.equal(workspace.fingerprint.length,64);
 assert.throws(()=>assembleCommercialWorkspace({subscription,access:{...access,companyId:43},now:"2026-10-02T00:00:00Z"}),/lineage/);
 console.log("B061 canonical authenticated commercial workspace state: PASS");
+const upgrade=previewPlanChange({workspace,toPlan:"enterprise",toSeatLimit:25,assignedSeats:8,effectiveAt:"2026-11-01T00:00:00Z"});
+assert.deepEqual({canSubmit:upgrade.canSubmit,writes:upgrade.writesPerformed,blockers:upgrade.blockers},{canSubmit:true,writes:0,blockers:[]});
+const reduction=previewPlanChange({workspace,toPlan:"professional",toSeatLimit:3,assignedSeats:8,effectiveAt:"2026-11-01T00:00:00Z"});
+assert.deepEqual({canSubmit:reduction.canSubmit,requiresSeatReduction:reduction.requiresSeatReduction,blocker:reduction.blockers[0]},{canSubmit:false,requiresSeatReduction:true,blocker:"ASSIGNED_SEATS_EXCEED_TARGET"});
+console.log("B062 non-mutating plan-change preview: PASS");
 export {subscription,access,workspace};
