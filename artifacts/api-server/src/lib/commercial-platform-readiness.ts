@@ -23,13 +23,17 @@ export function inspectCommercialPlatformReadiness(environment:NodeJS.ProcessEnv
     webhookConfigured=stripe.configured&&stripe.webhookConfigured;
     billingPortalConfigured=paymentProviderConfigured&&stripe.portalConfigured;
   }catch{/* Invalid provider configuration remains unavailable. */}
-  const supportConfigured=sendgridPattern.test((environment.SENDGRID_API_KEY??"").trim())&&emailPattern.test((environment.BIMLOG_SUPPORT_FROM_EMAIL??"").trim())&&emailPattern.test((environment.BIMLOG_SUPPORT_INBOX_EMAIL??"").trim());
+  const supportTransportConfigured=sendgridPattern.test((environment.SENDGRID_API_KEY??"").trim());
+  const supportSenderConfigured=emailPattern.test((environment.BIMLOG_SUPPORT_FROM_EMAIL??"").trim());
+  const supportInboxConfigured=emailPattern.test((environment.BIMLOG_SUPPORT_INBOX_EMAIL??"").trim());
+  const supportConfigured=supportTransportConfigured&&supportSenderConfigured&&supportInboxConfigured;
+  const supportCode=!supportTransportConfigured?"support_transport_invalid":!supportSenderConfigured?"support_sender_invalid":!supportInboxConfigured?"support_inbox_invalid":"support_ready";
   const checks=Object.freeze([
     check("subscription_catalog",subscriptionConfigured,subscriptionConfigured?"catalog_ready":"catalog_invalid"),
     check("payment_provider",paymentProviderConfigured,paymentProviderConfigured?"provider_ready":"provider_invalid"),
     check("payment_webhook",webhookConfigured,webhookConfigured?"webhook_ready":"webhook_invalid"),
     check("billing_portal",billingPortalConfigured,billingPortalConfigured?"portal_ready":"portal_invalid"),
-    check("support_channel",supportConfigured,supportConfigured?"support_ready":"support_invalid"),
+    check("support_channel",supportConfigured,supportCode),
   ]);
   return Object.freeze({subscriptionConfigured,paymentProviderConfigured,webhookConfigured,billingPortalConfigured,supportConfigured,checks});
 }
