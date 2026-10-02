@@ -9,7 +9,7 @@
     "dist/index.meta.json"
   ],
   "scripts": {
-    "test:commercial-platform-readiness": "tsx ./src/lib/commercial-platform-readiness.behavior.ts",
+    "test:commercial-platform-readiness": "tsx ./src/lib/commercial-platform-readiness.behavior.ts && tsx ./src/lib/commercial-workspace-runtime.behavior.ts",
     "test:commercial-subscription-block03": "tsx ./src/lib/subscription-authority.behavior.ts",
     "test:commercial-checkout-block04": "tsx ./src/lib/subscription-authority.behavior.ts && tsc -p tsconfig.json --noEmit",
     "test:commercial-billing-block05": "tsx ./src/lib/subscription-authority.behavior.ts && tsc -p tsconfig.json --noEmit",
