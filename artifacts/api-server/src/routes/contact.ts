@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { contactSubmissionsTable,usersTable } from "@workspace/db/schema";
+import { contactSubmissionsTable,salesInquiryAssignmentEventsTable,usersTable } from "@workspace/db/schema";
 import {and,count,desc,eq,ilike,isNull,lt,ne,or} from "drizzle-orm";
 import {parseSalesInquiryInput,salesInquiryFingerprint} from "../lib/commercial-sales-inquiry";
 import {authMiddleware,isSuperAdminMiddleware} from "../middlewares/auth";
@@ -62,12 +62,17 @@ router.patch("/admin/sales-inquiries/:id/assignment",authMiddleware,isSuperAdmin
   if(!Number.isSafeInteger(id)||id<1){res.status(400).json({code:"SALES_INQUIRY_ID_INVALID"});return;}
   let input;
   try{input=parseSalesInquiryAssignment(req.body);}catch{res.status(400).json({code:"SALES_INQUIRY_ASSIGNMENT_INVALID"});return;}
-  const [current]=await db.select({assignedToUserId:contactSubmissionsTable.assignedToUserId,updatedAt:contactSubmissionsTable.updatedAt}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.id,id)).limit(1);
-  if(!current||current.updatedAt.getTime()!==input.expectedUpdatedAt.getTime()){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}
-  if(!canChangeSalesInquiryAssignment(current.assignedToUserId,actorId,input.assigned)){res.status(409).json({code:"SALES_INQUIRY_ASSIGNMENT_CONFLICT"});return;}
-  const now=new Date();
-  const ownership=input.assigned?or(isNull(contactSubmissionsTable.assignedToUserId),eq(contactSubmissionsTable.assignedToUserId,actorId)):eq(contactSubmissionsTable.assignedToUserId,actorId);
-  const [updated]=await db.update(contactSubmissionsTable).set({assignedToUserId:input.assigned?actorId:null,assignedAt:input.assigned?now:null,updatedAt:now}).where(and(eq(contactSubmissionsTable.id,id),eq(contactSubmissionsTable.updatedAt,input.expectedUpdatedAt),ownership)).returning({id:contactSubmissionsTable.id,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedAt:contactSubmissionsTable.assignedAt,updatedAt:contactSubmissionsTable.updatedAt});
+  const updated=await db.transaction(async tx=>{
+    const [current]=await tx.select({assignedToUserId:contactSubmissionsTable.assignedToUserId,updatedAt:contactSubmissionsTable.updatedAt}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.id,id)).for("update").limit(1);
+    if(!current||current.updatedAt.getTime()!==input.expectedUpdatedAt.getTime())return null;
+    if(!canChangeSalesInquiryAssignment(current.assignedToUserId,actorId,input.assigned))return "conflict" as const;
+    const now=new Date(),nextAssigneeUserId=input.assigned?actorId:null;
+    const [changed]=await tx.update(contactSubmissionsTable).set({assignedToUserId:nextAssigneeUserId,assignedAt:input.assigned?now:null,updatedAt:now}).where(and(eq(contactSubmissionsTable.id,id),eq(contactSubmissionsTable.updatedAt,input.expectedUpdatedAt))).returning({id:contactSubmissionsTable.id,assignedToUserId:contactSubmissionsTable.assignedToUserId,assignedAt:contactSubmissionsTable.assignedAt,updatedAt:contactSubmissionsTable.updatedAt});
+    if(!changed)return null;
+    await tx.insert(salesInquiryAssignmentEventsTable).values({inquiryId:id,actorUserId:actorId,previousAssigneeUserId:current.assignedToUserId,nextAssigneeUserId,action:input.assigned?"assigned":"released",createdAt:now});
+    return changed;
+  });
+  if(updated==="conflict"){res.status(409).json({code:"SALES_INQUIRY_ASSIGNMENT_CONFLICT"});return;}
   if(!updated){res.status(409).json({code:"SALES_INQUIRY_STALE_OR_MISSING"});return;}
   res.json(updated);
 });
