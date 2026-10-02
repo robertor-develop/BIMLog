@@ -25,3 +25,15 @@ export function parseSalesInquiryList(value:unknown):SalesInquiryPage{
   if(items.length>limit||offset+items.length>Math.max(total,offset))throw new Error("Contradictory sales inquiry page");
   return Object.freeze({items,limit,offset,total});
 }
+
+export type SalesInquiryAssignmentEvent=Readonly<{id:number;action:"assigned"|"released";actorUserId:number;actorName:string;previousAssigneeUserId:number|null;previousAssigneeName:string|null;nextAssigneeUserId:number|null;nextAssigneeName:string|null;createdAt:string}>;
+export type SalesInquiryAssignmentHistoryPage=Readonly<{items:SalesInquiryAssignmentEvent[];limit:number;offset:number;total:number}>;
+export function parseSalesInquiryAssignmentHistory(value:unknown):SalesInquiryAssignmentHistoryPage{
+  if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("Invalid assignment history response");
+  const payload=value as Record<string,unknown>;if(!Array.isArray(payload.items))throw new Error("Invalid assignment history items");
+  const limit=Number(payload.limit),offset=Number(payload.offset),total=Number(payload.total);
+  if(!Number.isSafeInteger(limit)||limit<1||limit>100||!Number.isSafeInteger(offset)||offset<0||offset>1_000_000||!Number.isSafeInteger(total)||total<0)throw new Error("Invalid assignment history page");
+  const items=payload.items.map(raw=>{if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new Error("Invalid assignment event");const row=raw as Record<string,unknown>,id=Number(row.id),actorUserId=Number(row.actorUserId),action=row.action,createdAt=text(row.createdAt,"createdAt",80),actorName=text(row.actorName,"actorName",160);const optionalId=(v:unknown)=>v===null?null:Number(v),optionalName=(v:unknown)=>v===null?null:text(v,"ownerName",160),previousAssigneeUserId=optionalId(row.previousAssigneeUserId),nextAssigneeUserId=optionalId(row.nextAssigneeUserId),previousAssigneeName=optionalName(row.previousAssigneeName),nextAssigneeName=optionalName(row.nextAssigneeName);if(!Number.isSafeInteger(id)||id<1||!Number.isSafeInteger(actorUserId)||actorUserId<1||(action!=="assigned"&&action!=="released")||Number.isNaN(Date.parse(createdAt))||(previousAssigneeUserId===null)!==(previousAssigneeName===null)||(nextAssigneeUserId===null)!==(nextAssigneeName===null)||(action==="assigned"&&nextAssigneeUserId===null)||(action==="released"&&nextAssigneeUserId!==null))throw new Error("Invalid assignment event");return Object.freeze({id,action,actorUserId,actorName,previousAssigneeUserId,previousAssigneeName,nextAssigneeUserId,nextAssigneeName,createdAt})});
+  if(items.length>limit||offset+items.length>Math.max(total,offset)||new Set(items.map(item=>item.id)).size!==items.length)throw new Error("Contradictory assignment history page");
+  return Object.freeze({items,limit,offset,total});
+}
