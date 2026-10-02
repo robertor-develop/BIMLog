@@ -55026,6 +55026,74 @@
       ],
       "reviewedChangeSha256": "12da4355bb713bb5d362c93cfe604a34de2c5a50a754eca2b8ef48dcd418644d",
       "reason": "The prepublication receipt detected unnamed startup checks; this repair binds stable identities before additive schema reconciliation and publication."
+    },
+    {
+      "taskId": "saas-block30-sales-schema-identity-repair",
+      "reviewedThroughCommit": "0982e7bc645c7c141452f1c5af5e5fee6a3f128c",
+      "reviewedAt": "2026-10-02T22:45:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded schema-identity repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded schema-identity repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded schema-identity repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded schema-identity repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Names the sales-assignment startup check to match the governed source schema exactly."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded schema-identity repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded schema-identity repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded schema-identity repair follows the existing authority without changing its semantic rules."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the final exact-schema prepublication repair."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the repeated release gate and exact database receipt."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded schema-identity repair follows the existing authority without changing its semantic rules."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "reason": "The exact database receipt isolated one redundant unnamed sales-assignment check; source now creates only the stable governed identity."
     }
   ]
 }
