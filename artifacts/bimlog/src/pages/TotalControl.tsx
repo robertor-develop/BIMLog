@@ -5,6 +5,7 @@ import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 import { confirmAndRetireProject } from "@/lib/project-retirement";
 import { SalesInquiryQueue } from "@/components/admin/SalesInquiryQueue";
+import { SupportCaseQueue } from "@/components/admin/SupportCaseQueue";
 import { getMe } from "@workspace/api-client-react";
 import { User, Building2, Folder, Circle, FileText, Zap, MessageSquare, ClipboardList, TrendingUp, Brain, Loader2, Lock, AlertTriangle, Users, MapPin, Eye, EyeOff } from "lucide-react";
 
@@ -1087,7 +1088,7 @@ export function TotalControl() {
             {activeTab === 3 && token && <TCProjectsTab token={token} />}
             {activeTab === 4 && token && <TCEmailLogTab token={token} />}
             {activeTab === 5 && token && <TCActivityFeedTab token={token} />}
-            {activeTab === 6 && token && <SalesInquiryQueue token={token} />}
+            {activeTab === 6 && token && <><SalesInquiryQueue token={token} /><SupportCaseQueue token={token} /></>}
           </>
         )}
       </main>
