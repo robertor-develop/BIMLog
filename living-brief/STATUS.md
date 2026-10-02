@@ -3612,3 +3612,7 @@ The exact-head release gate required and received a full generated-platform, sem
 The first B131–B140 publication reached Live but production health still reported the prior `3f6ec337611f16babe68aab6fffe2107377367a3` artifact instead of reviewed source `f596908029b80d527d22ee5f971e2ab3e615003e`. The tracked Replit publication cache epoch now advances for B131–B140; exact identity, republication and the full authenticated Chrome smoke remain mandatory.
 
 The cache-repair implementation unit is semantically reconciled against the exact failed production identity evidence before its repeated release gate.
+
+## 250-build SaaS Completion Block 29 — tracked customer service — 2026-10-02
+
+B141–B145 replace the Billing & Support contact dead-end with authenticated, company/requester-scoped customer-service cases. The block adds a bounded secret-rejecting case contract, additive durable schema and startup parity, idempotent protected create/list operations, strict browser response validation, and a bilingual create/history workspace. It does not send email, expose provider credentials, grant administrator access, or claim external delivery. This is the first five builds after the B131–B140 publication and remains push-only until B150.

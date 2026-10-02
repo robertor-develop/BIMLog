@@ -1,7 +1,6 @@
 import {check,index,integer,pgTable,serial,text,timestamp,uniqueIndex} from "drizzle-orm/pg-core";
 import {sql} from "drizzle-orm";
-import {companiesTable} from "./company_profiles";
-import {usersTable} from "./users";
+import {companiesTable,usersTable} from "./users";
 
 export const supportCasesTable=pgTable("support_cases",{
   id:serial("id").primaryKey(),companyId:integer("company_id").notNull().references(()=>companiesTable.id),requesterUserId:integer("requester_user_id").notNull().references(()=>usersTable.id),

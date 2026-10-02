@@ -4242,3 +4242,12 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Reconcile the generated platform inventory, semantic-impact declaration, Open Loop dispositions and Living Brief state after the exact-head gate rejected stale governance metadata.
 - [ ] Repair the real stale-artifact production failure by advancing the tracked B131–B140 Replit cache epoch, repeat the full exact-head gate, push, republish and require production health to equal the repaired head before Chrome acceptance.
 - [x] Record the failed live identity and reconcile the cache-repair implementation unit in the governed Living Brief state before repeating release tests.
+
+## 250-build SaaS Completion Block 29 — tracked customer service — 2026-10-02
+
+- [x] B141 define bounded billing, account, technical, data and other support cases while rejecting credentials and secrets.
+- [x] B142 persist company/requester identity, priority, status, idempotency identity and exact timestamps with additive startup parity.
+- [x] B143 expose authenticated requester-scoped list and idempotent create operations without widening administrator authority.
+- [x] B144 strictly validate support history at the browser boundary.
+- [x] B145 add bilingual customer-service creation, history, loading, empty, error and retry states to Billing & Support.
+- [ ] Pass the complete exact-head gate and push B141–B145 once. Keep the block unpublished until B146–B150 completes the ten-build publication batch.
