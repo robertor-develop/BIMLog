@@ -4271,4 +4271,14 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B153 add revision-safe Super Administrator self-assignment and controlled release without trusting a client-supplied actor.
 - [x] B154 reject malformed, duplicated or contradictory accountability data before rendering.
 - [x] B155 expose bilingual response deadlines, overdue state, ownership state, Assign to me and Release controls in Total Control.
-- [ ] Pass the complete exact-head gate and push B151–B155 once. This is the first unpublished five-build block after the accepted B141–B150 publication; publication and full authenticated Chrome smoke remain scheduled after B156–B160.
+- [x] Pass the complete exact-head gate and push B151–B155 once. Exact source `e5228e853cb48942bf944b520d2c41c576c17256` reached `origin/master`; this first five-build block remained unpublished until B160.
+
+
+## 250-build SaaS Completion Block 32 - scalable customer service - 2026-10-02
+
+- [x] B156 expose the accountable Super Administrator's visible name without widening authorization.
+- [x] B157 define bounded support search, workload, ownership, overdue and paging query values.
+- [x] B158 apply protected server-side filters with deterministic ordering and exact totals.
+- [x] B159 strictly validate support page metadata, identities and owner relationships before rendering.
+- [x] B160 add bilingual search, ownership, overdue, exact result and bounded paging controls to Total Control.
+- [ ] Pass the complete exact-head gate, push B156-B160 once, publish accumulated B151-B160 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.

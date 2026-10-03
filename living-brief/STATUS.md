@@ -3632,3 +3632,13 @@ The B141–B150 release is accepted at exact source `92c973b9102735b203f3250c2d8
 ## 250-build SaaS Completion Block 31 — accountable customer service — 2026-10-02
 
 B151–B155 add deterministic urgent and normal response targets, durable response/assignment fields, revision-safe Super Administrator self-assignment, strict browser validation, and bilingual ownership and deadline controls in Total Control. Assignment identity is always derived from the authenticated actor. Closed or resolved cases cannot be assigned, an existing owner cannot be displaced, and stale revisions fail closed. No existing customer record or production database has been changed in this push-only block. This is the first five-build block after the accepted B141–B150 publication; publication remains scheduled after B156–B160.
+
+
+## 250-build SaaS Completion Block 32 - scalable customer service - 2026-10-02
+
+- B156 exposes the assigned Super Administrator's visible identity without widening queue authorization.
+- B157 defines bounded search, workload, ownership, overdue and pagination query values.
+- B158 applies those filters on the protected server queue with deterministic order and exact totals.
+- B159 rejects malformed, duplicate and contradictory support pages before rendering.
+- B160 adds bilingual search, ownership, overdue, exact count and previous/next controls to Total Control.
+- Focused B156-B160 contracts pass at implementation source `334a9bbca8157ba061749921f465dd7d52886e02`. B151-B160 now reach the required publication boundary; complete gate, one push, controlled publication, exact live identity and full authenticated Chrome smoke are due.
