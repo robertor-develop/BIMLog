@@ -144,6 +144,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/support-case-unread-filter.behavior.ts
 - artifacts/api-server/src/routes/support-cases.behavior.ts
 - artifacts/api-server/src/routes/support-cases.ts
+- artifacts/api-server/src/routes/support-satisfaction-notification.behavior.ts
 - artifacts/api-server/src/routes/team-performance.ts
 - artifacts/api-server/src/routes/telegram-product.ts
 - artifacts/api-server/src/routes/transmittals.ts
