@@ -3684,3 +3684,8 @@ B191-B195 complete the customer-service resolution loop. The authenticated reque
 ## 250-build SaaS Completion Block 40 — customer closure authority — 2026-10-03
 
 B196-B200 remove the competing administrator close/reopen controls. Administrators resolve and hand the case to the customer; only the authenticated requester may accept and close or reopen with an audited reason. Total Control shows the bilingual pending-customer decision, and the shared timeline names customer closure and reopening explicitly. Focused Block 40 behavior and strict API/frontend typechecks pass. B191-B200 now reach the required publication and authenticated Chrome boundary.
+
+## SaaS Block 41 - support satisfaction foundation - 2026-10-03
+
+B201-B205 add one requester-owned satisfaction record for each closed support case, bounded one-to-five rating and credential-safe optional comment, additive exact-lineage persistence, protected idempotent customer APIs, strict browser validation and focused block acceptance. This is the first five-build block after the accepted B191-B200 publication; it remains unpublished until B210.
+

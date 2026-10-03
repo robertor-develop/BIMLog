@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "09378f1bd331ab0a89628a00cd952ac4f773d63f0179be39cd15c50669097d79",
+  "sourceSha256": "d1bcaac5f6de000479f4f49e1f12a6712a57a1ac11c56b958f4462aec1a479bb",
   "itemCount": 289,
   "counts": {
     "ACTIVE": 254,
@@ -5257,10 +5257,10 @@
       "currentAuthority": false
     },
     {
-      "id": "768e9ea0fb99d29e",
-      "sourceLine": 4368,
-      "heading": "250-build SaaS Completion Block 40 — customer closure authority — 2026-10-03",
-      "statement": "Pass the complete exact-head gate, push B196-B200 once, publish accumulated B191-B200, verify exact live identity and complete the full authenticated Chrome smoke.",
+      "id": "10617c29aca7f2b0",
+      "sourceLine": 4377,
+      "heading": "250-build SaaS Completion Block 41 — support satisfaction foundation — 2026-10-03",
+      "statement": "Pass the complete exact-head gate and push B201-B205 once. This first five-build block remains unpublished until B210.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -5269,8 +5269,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4368",
-        "250-build SaaS Completion Block 40 — customer closure authority — 2026-10-03"
+        "OPEN_LOOP.md:4377",
+        "250-build SaaS Completion Block 41 — support satisfaction foundation — 2026-10-03"
       ],
       "currentAuthority": false
     }

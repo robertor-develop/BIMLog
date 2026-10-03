@@ -4375,3 +4375,6 @@ The B181-B190 publication boundary is accepted at source `4310f5b8821b53d2db4f30
 - [x] B204 reject malformed or contradictory satisfaction projections at the browser boundary.
 - [x] B205 pass the complete focused support satisfaction foundation acceptance suite.
 - [ ] Pass the complete exact-head gate and push B201-B205 once. This first five-build block remains unpublished until B210.
+
+Block 41 release note: the exact-head complete gate and single GitHub push remain the active B205 closure step. Production schema and customer data remain unchanged; publication stays reserved for B210.
+

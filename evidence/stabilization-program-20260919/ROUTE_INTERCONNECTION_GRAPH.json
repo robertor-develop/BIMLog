@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 721,
+    "apiRoutes": 725,
     "frontendApiReferences": 279,
-    "routeOwnedTables": 67
+    "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
     {
@@ -8767,6 +8767,36 @@
     },
     {
       "method": "GET",
+      "path": "/support/cases/:id/satisfaction",
+      "owner": "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/support/cases/:id/satisfaction",
+      "owner": "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/support/cases/:id/satisfaction",
+      "owner": "artifacts/api-server/src/routes/support-case-satisfaction.ts",
+      "tables": [
+        "supportCaseSatisfactionTable",
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/support/cases/:id/satisfaction",
+      "owner": "artifacts/api-server/src/routes/support-case-satisfaction.ts",
+      "tables": [
+        "supportCaseSatisfactionTable",
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/support/cases",
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
@@ -10427,7 +10457,22 @@
     }
   ],
   "findings": {
-    "duplicateApiRoutes": [],
+    "duplicateApiRoutes": [
+      {
+        "key": "GET /support/cases/:id/satisfaction",
+        "owners": [
+          "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
+          "artifacts/api-server/src/routes/support-case-satisfaction.ts"
+        ]
+      },
+      {
+        "key": "POST /support/cases/:id/satisfaction",
+        "owners": [
+          "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
+          "artifacts/api-server/src/routes/support-case-satisfaction.ts"
+        ]
+      }
+    ],
     "sidebarTabsWithoutScreen": [],
     "screensWithoutSidebar": []
   }
