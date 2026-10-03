@@ -3680,3 +3680,7 @@ B186-B190 prevent unexplained case resolution. Resolving a case requires a bound
 ## 250-build SaaS Completion Block 39 — customer-controlled support closure — 2026-10-03
 
 B191-B195 complete the customer-service resolution loop. The authenticated requester may accept a resolved case and close it, or reopen a closed case with a bounded, secret-rejecting reason. Both operations are company/requester scoped, revision-safe, row-locked, transactional, attributable, notification-connected and visible in the bilingual service timeline. Prior resolution evidence remains historical context after reopening. Focused Block 39 behavior and strict API/frontend typechecks pass. This is the first five-build block after the accepted B181-B190 publication; publication remains scheduled after B200.
+
+## 250-build SaaS Completion Block 40 — customer closure authority — 2026-10-03
+
+B196-B200 remove the competing administrator close/reopen controls. Administrators resolve and hand the case to the customer; only the authenticated requester may accept and close or reopen with an audited reason. Total Control shows the bilingual pending-customer decision, and the shared timeline names customer closure and reopening explicitly. Focused Block 40 behavior and strict API/frontend typechecks pass. B191-B200 now reach the required publication and authenticated Chrome boundary.

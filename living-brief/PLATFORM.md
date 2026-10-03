@@ -134,6 +134,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/support-case-messages.behavior.ts
 - artifacts/api-server/src/routes/support-case-messages.ts
 - artifacts/api-server/src/routes/support-case-open-notification.behavior.ts
+- artifacts/api-server/src/routes/support-case-resolution-handoff.behavior.ts
 - artifacts/api-server/src/routes/support-case-resolution-route.behavior.ts
 - artifacts/api-server/src/routes/support-case-status-event.behavior.ts
 - artifacts/api-server/src/routes/support-case-status-notification.behavior.ts
@@ -1085,6 +1086,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/support-case-accountability.ts
 - artifacts/api-server/src/lib/support-case-assignment.behavior.ts
 - artifacts/api-server/src/lib/support-case-assignment.ts
+- artifacts/api-server/src/lib/support-case-closure-authority.behavior.ts
 - artifacts/api-server/src/lib/support-case-customer-action.behavior.ts
 - artifacts/api-server/src/lib/support-case-event.behavior.ts
 - artifacts/api-server/src/lib/support-case-event.ts

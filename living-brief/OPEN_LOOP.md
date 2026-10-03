@@ -4357,3 +4357,12 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [ ] Pass the complete exact-head gate and push B191-B195 once. This first five-build block remains unpublished until B200.
 
 The B181-B190 publication boundary is accepted at source `4310f5b8821b53d2db4f30d366c6801f6b3515fb`, Replit receipt `e575c6fe`; authenticated Chrome passed 64/64 desktop, 64/64 exact-390, 10/10 tablet, hard reload, independent-tab continuity and zero browser warnings or errors.
+
+## 250-build SaaS Completion Block 40 — customer closure authority — 2026-10-03
+
+- [x] B196 reserve resolved-case closure and reopening for the authenticated requester.
+- [x] B197 enforce the administrator resolution-to-customer handoff boundary.
+- [x] B198 replace competing administrator buttons with a bilingual awaiting-customer state.
+- [x] B199 name customer closure and reopening explicitly in the bilingual timeline.
+- [x] B200 pass the complete focused customer-closure authority acceptance suite.
+- [ ] Pass the complete exact-head gate, push B196-B200 once, publish accumulated B191-B200, verify exact live identity and complete the full authenticated Chrome smoke.

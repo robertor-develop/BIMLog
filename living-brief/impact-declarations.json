@@ -55829,6 +55829,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4d180d80446de6cb9169ee78416c231c2b03857616da312009025e3df3a5b028"
+    },
+    {
+      "taskId": "saas-block40-customer-closure-authority",
+      "reviewedThroughCommit": "6f72ba370c00d57cd73d0e755c31cf615da89824",
+      "reviewedAt": "2026-10-03T08:52:15Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer closure authority block preserves this authority without semantic change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer closure authority block preserves this authority without semantic change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer closure authority block preserves this authority without semantic change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer closure authority block preserves this authority without semantic change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Documents customer-exclusive closure authority and the administrator resolution handoff."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer closure authority block preserves this authority without semantic change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer closure authority block preserves this authority without semantic change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer closure authority block preserves this authority without semantic change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records completed B196-B200 and the ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks B196-B200 validation, push, publication and authenticated acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer closure authority block preserves this authority without semantic change."
+        }
+      ],
+      "reason": "B196-B200 remove competing administrator closure actions and complete the customer-owned decision boundary.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1ec7199bf13f4b8daae393d47ed529df437e68cbf686574f2d836effadcae1da"
     }
   ]
 }
