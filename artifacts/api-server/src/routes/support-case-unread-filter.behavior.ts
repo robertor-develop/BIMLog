@@ -1,0 +1,3 @@
+import assert from "node:assert/strict";import {readFileSync} from "node:fs";import {fileURLToPath} from "node:url";const source=readFileSync(fileURLToPath(new URL("./support-cases.ts",import.meta.url)),"utf8"),query=readFileSync(fileURLToPath(new URL("../lib/support-case-query.ts",import.meta.url)),"utf8");
+assert.ok(query.includes('attention:""|"unread"'));assert.ok(query.includes("SUPPORT_CASE_ATTENTION_INVALID"));assert.ok(source.includes('query.attention==="unread"'));assert.ok(source.includes('unreadCount(actorId,"customer")'));
+console.log("B173 bounded unread support attention filter: PASS");
