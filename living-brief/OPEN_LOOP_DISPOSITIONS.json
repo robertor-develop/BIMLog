@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "58c72c18459b84a85d96c45cf0ad6d0a307cee3709163b50714d07e5896881a1",
-  "itemCount": 287,
+  "sourceSha256": "7ea66b204a04fd2ecf8b5781dbd56845b437362b2be59a4c23b3a175ca6a0404",
+  "itemCount": 286,
   "counts": {
-    "ACTIVE": 252,
+    "ACTIVE": 251,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5217,24 +5217,6 @@
       "evidence": [
         "OPEN_LOOP.md:4243",
         "250-build SaaS Completion Block 28 — actionable sales workload — 2026-10-02"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "d38d18c70dad6f1e",
-      "sourceLine": 4284,
-      "heading": "250-build SaaS Completion Block 32 - scalable customer service - 2026-10-02",
-      "statement": "Pass the complete exact-head gate, push B156-B160 once, publish accumulated B151-B160 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:4284",
-        "250-build SaaS Completion Block 32 - scalable customer service - 2026-10-02"
       ],
       "currentAuthority": false
     }

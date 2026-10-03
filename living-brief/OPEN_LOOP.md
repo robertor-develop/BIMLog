@@ -4281,7 +4281,7 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B158 apply protected server-side filters with deterministic ordering and exact totals.
 - [x] B159 strictly validate support page metadata, identities and owner relationships before rendering.
 - [x] B160 add bilingual search, ownership, overdue, exact result and bounded paging controls to Total Control.
-- [ ] Pass the complete exact-head gate, push B156-B160 once, publish accumulated B151-B160 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B156-B160 once, publish accumulated B151-B160 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke. Accepted at exact reviewed source `e7afb10ffc1fd1672507e4967b449fa6954d9244`, Replit publication `37450fdc`, and identity-bound package `bimlog-e7afb10ffc1fd167-91b675efeb59deb7`; desktop 63/63, exact-390 63/63, tablet 10/10, hard reload, two-tab continuity and the application-console gate passed.
 
 - [x] Repair the publication-preflight assignment UPDATE RETURNING defect before database migration or deployment; focused support and API TypeScript checks pass at `3ba5a474`.
 
