@@ -3654,3 +3654,7 @@ The B151-B160 release is accepted at exact reviewed source `e7afb10ffc1fd1672507
 B161-B165 turn tracked support cases into a bounded two-way conversation: secret-safe retry identities, attributable additive storage, requester isolation, assigned-administrator reply authority, strict browser validation, and bilingual customer/operations history and reply states. Resolved and closed cases reject new messages. This is the first five-build block after the accepted B151-B160 publication; it remains unpublished until B166-B170 complete the next ten-build release batch.
 
 The block gate repaired the isolated artifact-proof fixture after the additive message table made its declared schema incomplete. The final release gate runs only from the clean reconciled exact head; no production database or customer record is changed at this five-build checkpoint.
+
+## 250-build SaaS Completion Block 34 — support conversation awareness — 2026-10-02
+
+B166-B170 add durable per-user read cursors to customer-service conversations. Customers remain company/requester scoped; administrators may acknowledge only cases assigned to themselves; every cursor must reference a message in the same case. The browser strictly validates the receipt and reports successful acknowledgement in English and Spanish. B161-B170 now reach the required publication boundary.

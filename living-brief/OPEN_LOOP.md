@@ -4296,3 +4296,12 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B165 add bilingual conversation history, reply, loading, empty, error and retry behavior for customers and support operations.
 - [x] Pass the complete exact-head gate and push B161-B165 once. This first five-build block remains unpublished until B170.
 - [x] Repair the disposable artifact-proof fixture after the additive message table made the release proof incomplete; require the complete declared schema before the final exact-head run.
+
+## 250-build SaaS Completion Block 34 — support conversation awareness — 2026-10-02
+
+- [x] B166 define strict deterministic support read acknowledgement semantics.
+- [x] B167 persist per-case, per-user read cursors with additive startup parity.
+- [x] B168 expose customer-scoped and assigned-administrator-scoped read operations tied to a message in the same case.
+- [x] B169 reject malformed support read receipts at the browser boundary.
+- [x] B170 mark loaded conversations read and report the result bilingually.
+- [ ] Pass the complete exact-head gate, push B166-B170, publish accumulated B161-B170, verify exact live identity and run the full authenticated Chrome smoke.

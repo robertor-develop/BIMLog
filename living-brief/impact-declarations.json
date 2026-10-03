@@ -55385,6 +55385,80 @@
       ],
       "reviewedChangeSha256": "49691c235e78eca976ce0646ff08df5a0fac08200125b5fce5a09cdaf5e0f9b7",
       "reason": "B161-B165 add governed two-way support conversations as the next sellable SaaS customer-service capability."
+    },
+    {
+      "taskId": "saas-block34-support-read-awareness",
+      "reviewedThroughCommit": "d91804ef2a6edf6b4511ddce6b07b6bf15240d97",
+      "reviewedAt": "2026-10-03T03:08:19Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The support read-awareness block preserves this authority without semantic change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The support read-awareness block preserves this authority without semantic change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The support read-awareness block preserves this authority without semantic change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The support read-awareness block preserves this authority without semantic change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Documents same-case cursors, requester isolation and assigned-administrator acknowledgement authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The support read-awareness block preserves this authority without semantic change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The support read-awareness block preserves this authority without semantic change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The support read-awareness block preserves this authority without semantic change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records completed B166-B170 and the B161-B170 publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes B166-B170 implementation and requires publication plus authenticated smoke."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The support read-awareness block preserves this authority without semantic change."
+        }
+      ],
+      "reason": "B166-B170 add governed per-user support conversation read awareness at the required ten-build publication boundary.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "88f822ee18d59b1e158b98d9605e7e498f79d2b888cb434739911446e8959ccb"
     }
   ]
 }

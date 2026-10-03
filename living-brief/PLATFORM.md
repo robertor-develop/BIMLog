@@ -1082,6 +1082,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/support-case-operations.ts
 - artifacts/api-server/src/lib/support-case-query.behavior.ts
 - artifacts/api-server/src/lib/support-case-query.ts
+- artifacts/api-server/src/lib/support-conversation-read-route.behavior.ts
+- artifacts/api-server/src/lib/support-conversation-read-schema.behavior.ts
+- artifacts/api-server/src/lib/support-conversation-read.behavior.ts
+- artifacts/api-server/src/lib/support-conversation-read.ts
 - artifacts/api-server/src/lib/team-performance-postgres-query.behavior.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
 - artifacts/api-server/src/lib/team-performance.behavior.ts

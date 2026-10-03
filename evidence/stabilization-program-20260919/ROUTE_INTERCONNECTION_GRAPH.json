@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 716,
+    "apiRoutes": 718,
     "frontendApiReferences": 277,
-    "routeOwnedTables": 65
+    "routeOwnedTables": 66
   },
   "compatibilityRedirects": [
     {
@@ -8700,6 +8700,7 @@
       "tables": [
         "supportCaseMessagesTable",
         "supportCasesTable",
+        "supportConversationReadsTable",
         "usersTable"
       ]
     },
@@ -8710,6 +8711,7 @@
       "tables": [
         "supportCaseMessagesTable",
         "supportCasesTable",
+        "supportConversationReadsTable",
         "usersTable"
       ]
     },
@@ -8720,6 +8722,7 @@
       "tables": [
         "supportCaseMessagesTable",
         "supportCasesTable",
+        "supportConversationReadsTable",
         "usersTable"
       ]
     },
@@ -8730,6 +8733,29 @@
       "tables": [
         "supportCaseMessagesTable",
         "supportCasesTable",
+        "supportConversationReadsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/support/cases/:id/messages/read",
+      "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
+      "tables": [
+        "supportCaseMessagesTable",
+        "supportCasesTable",
+        "supportConversationReadsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/support/cases/:id/messages/read",
+      "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
+      "tables": [
+        "supportCaseMessagesTable",
+        "supportCasesTable",
+        "supportConversationReadsTable",
         "usersTable"
       ]
     },

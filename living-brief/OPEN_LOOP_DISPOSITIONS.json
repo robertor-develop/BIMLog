@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "10c12bd70cd7d7a67eaf97d1870f8badb4ca75f72ae6bde7e3911b8effd7ef87",
-  "itemCount": 286,
+  "sourceSha256": "7f67dc5a30471706f2230f31122f305103a51edd895126756c2fa048a000cb28",
+  "itemCount": 287,
   "counts": {
-    "ACTIVE": 251,
+    "ACTIVE": 252,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5217,6 +5217,24 @@
       "evidence": [
         "OPEN_LOOP.md:4243",
         "250-build SaaS Completion Block 28 — actionable sales workload — 2026-10-02"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "105b0dd11d9e9954",
+      "sourceLine": 4307,
+      "heading": "250-build SaaS Completion Block 34 — support conversation awareness — 2026-10-02",
+      "statement": "Pass the complete exact-head gate, push B166-B170, publish accumulated B161-B170, verify exact live identity and run the full authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4307",
+        "250-build SaaS Completion Block 34 — support conversation awareness — 2026-10-02"
       ],
       "currentAuthority": false
     }
