@@ -16,3 +16,6 @@ export const supportCaseMessagesTable=pgTable("support_case_messages",{
   check("support_case_messages_author_role_chk",sql`${table.authorRole} in ('customer','administrator')`),uniqueIndex("support_case_messages_author_request_uidx").on(table.supportCaseId,table.authorUserId,table.requestKey),index("support_case_messages_case_created_idx").on(table.supportCaseId,table.createdAt,table.id),
 ]);
 export type SupportCaseMessage=typeof supportCaseMessagesTable.$inferSelect;
+export const supportConversationReadsTable=pgTable("support_conversation_reads",{
+  id:serial("id").primaryKey(),supportCaseId:integer("support_case_id").notNull().references(()=>supportCasesTable.id),userId:integer("user_id").notNull().references(()=>usersTable.id),lastReadMessageId:integer("last_read_message_id").notNull().references(()=>supportCaseMessagesTable.id),updatedAt:timestamp("updated_at").notNull().defaultNow(),
+},table=>[uniqueIndex("support_conversation_reads_case_user_uidx").on(table.supportCaseId,table.userId)]);

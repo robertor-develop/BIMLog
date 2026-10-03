@@ -475,6 +475,8 @@ queueDatabaseStartup(async () => {
     await pool.query(`CREATE TABLE IF NOT EXISTS support_case_messages (id serial PRIMARY KEY, support_case_id integer NOT NULL REFERENCES support_cases(id), author_user_id integer NOT NULL REFERENCES users(id), author_role text NOT NULL CONSTRAINT support_case_messages_author_role_chk CHECK (author_role IN ('customer','administrator')), body text NOT NULL, request_key text NOT NULL, fingerprint text NOT NULL, created_at timestamp NOT NULL DEFAULT now())`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS support_case_messages_author_request_uidx ON support_case_messages(support_case_id,author_user_id,request_key)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS support_case_messages_case_created_idx ON support_case_messages(support_case_id,created_at,id)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS support_conversation_reads (id serial PRIMARY KEY, support_case_id integer NOT NULL REFERENCES support_cases(id), user_id integer NOT NULL REFERENCES users(id), last_read_message_id integer NOT NULL REFERENCES support_case_messages(id), updated_at timestamp NOT NULL DEFAULT now())`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS support_conversation_reads_case_user_uidx ON support_conversation_reads(support_case_id,user_id)`);
     console.log("[migration] customer support case table ensured");
   } catch {
     console.error("[migration] customer support case migration failed");
