@@ -1,0 +1,3 @@
+import assert from "node:assert/strict";import {readFileSync} from "node:fs";import {fileURLToPath} from "node:url";
+const schema=readFileSync(fileURLToPath(new URL("../../../../lib/db/src/schema/support-cases.ts",import.meta.url)),"utf8"),startup=readFileSync(fileURLToPath(new URL("../app.ts",import.meta.url)),"utf8");
+for(const token of ["support_case_messages","support_case_id","author_user_id","author_role","request_key","fingerprint","support_case_messages_author_role_chk","support_case_messages_author_request_uidx","support_case_messages_case_created_idx"]){assert.ok(schema.includes(token),token);assert.ok(startup.includes(token),token);}console.log("B162 additive durable support message schema parity: PASS");
