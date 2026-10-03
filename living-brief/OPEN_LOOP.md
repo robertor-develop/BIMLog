@@ -4382,3 +4382,12 @@ Block 41 release note: the exact-head complete gate and single GitHub push remai
 Block 41 gate repair: the complete pre-push gate now refreshes workspace declarations before acceptance so additive schema exports cannot be validated against stale types. The full gate and single push remain pending; publication remains reserved for B210.
 
 Block 41 platform-audit repair: the route behavior fixture now verifies the canonical satisfaction path without resembling a second route registration. Focused acceptance and the blocking platform audit pass; the full exact-head gate remains required before push.
+
+## 250-build SaaS Completion Block 42 — support satisfaction experience — 2026-10-03
+
+- [x] B206 add a bilingual closed-case customer satisfaction journey with accessible loading, saved, error and retry states.
+- [x] B207 expose the exact customer rating to Super Administrators without widening customer scope.
+- [x] B208 notify only the accountable support owner atomically when a new rating is recorded, with no notification on idempotent replay.
+- [x] B209 expose a strict aggregate rating count, average and one-to-five distribution for service-quality operations.
+- [x] B210 pass the complete focused support satisfaction experience acceptance suite.
+- [ ] Pass the complete exact-head gate, push B201-B210, apply only the additive satisfaction schema through the governed production path, publish, verify exact live identity and run the full authenticated Chrome smoke.

@@ -3693,3 +3693,7 @@ B201-B205 add one requester-owned satisfaction record for each closed support ca
 Block 41 gate repair: workspace declarations are rebuilt before the complete acceptance chain, closing the stale-schema-export failure without changing production or the B210 publication cadence.
 
 Block 41 platform-audit repair: support satisfaction route acceptance no longer creates a false duplicate-registration identity, and the blocking audit returns to its accepted baseline.
+
+## SaaS Block 42 - support satisfaction experience - 2026-10-03
+
+B206-B210 connect the closed-case satisfaction foundation to a bilingual customer rating journey, exact Super Administrator case visibility, an atomic accountable-owner notification, and a strict aggregate service-quality summary. Focused Block 42 behavior plus API and frontend TypeScript pass. This is the B201-B210 publication boundary; exact-head gate, push, additive production schema, publication, exact live identity and full authenticated Chrome smoke remain required before live acceptance.
