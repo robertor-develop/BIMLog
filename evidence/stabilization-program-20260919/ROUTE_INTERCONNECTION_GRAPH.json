@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 725,
-    "frontendApiReferences": 279,
+    "apiRoutes": 727,
+    "frontendApiReferences": 282,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -8782,6 +8782,27 @@
       "path": "/support/cases/:id/satisfaction",
       "owner": "artifacts/api-server/src/routes/support-case-satisfaction.ts",
       "tables": [
+        "notificationsTable",
+        "supportCaseSatisfactionTable",
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/support/cases/:id/satisfaction",
+      "owner": "artifacts/api-server/src/routes/support-case-satisfaction.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseSatisfactionTable",
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/support/satisfaction-summary",
+      "owner": "artifacts/api-server/src/routes/support-case-satisfaction.ts",
+      "tables": [
+        "notificationsTable",
         "supportCaseSatisfactionTable",
         "supportCasesTable"
       ]
@@ -8791,6 +8812,7 @@
       "path": "/support/cases/:id/satisfaction",
       "owner": "artifacts/api-server/src/routes/support-case-satisfaction.ts",
       "tables": [
+        "notificationsTable",
         "supportCaseSatisfactionTable",
         "supportCasesTable"
       ]
@@ -9412,6 +9434,14 @@
       "apiPath": "${API_BASE}/api/v1/admin/support/cases/${item.id}/${path}"
     },
     {
+      "screen": "artifacts/bimlog/src/components/admin/SupportQualitySummary.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/support/satisfaction-summary"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/SupportSatisfactionSummary.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/support/cases/${caseId}/satisfaction"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/ai/AiControlPlanePanel.tsx",
       "apiPath": "${API_BASE}/api/v1/ai-control${path}"
     },
@@ -9438,6 +9468,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportConversation.tsx",
       "apiPath": "/api/v1/admin"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportSatisfaction.tsx",
+      "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/satisfaction"
     },
     {
       "screen": "artifacts/bimlog/src/components/dashboard/ResponsibilityWorkspace.tsx",
