@@ -1,7 +1,7 @@
 export const SUPPORT_CASE_STATUSES=["open","in_progress","resolved","closed"] as const;
 export type SupportCaseStatus=typeof SUPPORT_CASE_STATUSES[number];
 export type SupportCaseWorkload="urgent"|"waiting"|"resolved";
-const transitions:Record<SupportCaseStatus,readonly SupportCaseStatus[]>={open:["in_progress","resolved"],in_progress:["resolved"],resolved:["in_progress","closed"],closed:[]};
+const transitions:Record<SupportCaseStatus,readonly SupportCaseStatus[]>={open:["in_progress","resolved"],in_progress:["resolved"],resolved:[],closed:[]};
 
 export function parseSupportCaseStatusChange(value:unknown):Readonly<{expectedStatus:SupportCaseStatus;status:SupportCaseStatus;expectedUpdatedAt:Date;resolutionSummary:string|null}>{
   if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("SUPPORT_CASE_TRANSITION_INVALID");
