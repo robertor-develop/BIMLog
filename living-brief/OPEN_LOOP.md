@@ -4324,4 +4324,14 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B179 notify the requesting customer atomically when the assigned administrator replies.
 - [x] B180 notify the requesting customer atomically on lifecycle changes and open exact support conversations from notification links in both customer and operations workspaces.
 - [x] Pass the focused Block 36 regression and strict API/frontend typechecks.
-- [ ] Pass the complete exact-head gate, push B176-B180 once, publish accumulated B171-B180 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B176-B180 once, publish accumulated B171-B180 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke. Accepted source `b6dd9212915f240009514c6dba8bdc2986dcc1d0`; Replit receipt `8b41f697`; desktop 63/63, exact-390 63/63 and tablet 10/10 passed with zero browser warnings or errors.
+
+## 250-build SaaS Completion Block 37 — governed support timeline — 2026-10-03
+
+- [x] B181 define strict support-event kinds and before/after value contracts.
+- [x] B182 persist the opening event atomically with new-case creation.
+- [x] B183 persist assignment and release events atomically with ownership changes.
+- [x] B184 persist status events atomically with lifecycle transitions.
+- [x] B185 expose protected customer/operations timeline reads and one bilingual timeline in both workspaces.
+- [x] Pass the focused Block 37 regression and strict API/frontend typechecks.
+- [ ] Pass the complete exact-head gate and push B181-B185 once. This is the first five-build block after the accepted B171-B180 publication; publication remains scheduled after B190.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "f72f39161f7e0b3eb37477d028f2ab1c39ba3371e1be23ad8cb4760ef4973305",
+  "sourceSha256": "1951ec1d3c9c1db95981dbd8b6bf53b8019fa17e92688ff30e93aaf64e6ac8a8",
   "itemCount": 287,
   "counts": {
     "ACTIVE": 252,
@@ -5221,20 +5221,20 @@
       "currentAuthority": false
     },
     {
-      "id": "d511e28d9664bb5b",
-      "sourceLine": 4327,
-      "heading": "250-build SaaS Completion Block 36 — governed support notifications — 2026-10-03",
-      "statement": "Pass the complete exact-head gate, push B176-B180 once, publish accumulated B171-B180 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.",
+      "id": "4ed70dde8f7b89ad",
+      "sourceLine": 4337,
+      "heading": "250-build SaaS Completion Block 37 — governed support timeline — 2026-10-03",
+      "statement": "Pass the complete exact-head gate and push B181-B185 once. This is the first five-build block after the accepted B171-B180 publication; publication remains scheduled after B190.",
       "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
+      "workClass": "PRODUCT_WORK",
       "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:4327",
-        "250-build SaaS Completion Block 36 — governed support notifications — 2026-10-03"
+        "OPEN_LOOP.md:4337",
+        "250-build SaaS Completion Block 37 — governed support timeline — 2026-10-03"
       ],
       "currentAuthority": false
     }

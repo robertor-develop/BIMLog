@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 718,
-    "frontendApiReferences": 277,
-    "routeOwnedTables": 66
+    "apiRoutes": 720,
+    "frontendApiReferences": 278,
+    "routeOwnedTables": 67
   },
   "compatibilityRedirects": [
     {
@@ -8772,6 +8772,7 @@
       "tables": [
         "companiesTable",
         "notificationsTable",
+        "supportCaseEventsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -8783,6 +8784,7 @@
       "tables": [
         "companiesTable",
         "notificationsTable",
+        "supportCaseEventsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -8794,6 +8796,7 @@
       "tables": [
         "companiesTable",
         "notificationsTable",
+        "supportCaseEventsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -8805,6 +8808,7 @@
       "tables": [
         "companiesTable",
         "notificationsTable",
+        "supportCaseEventsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -8816,6 +8820,31 @@
       "tables": [
         "companiesTable",
         "notificationsTable",
+        "supportCaseEventsTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/support/cases/:id/events",
+      "owner": "artifacts/api-server/src/routes/support-cases.ts",
+      "tables": [
+        "companiesTable",
+        "notificationsTable",
+        "supportCaseEventsTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/support/cases/:id/events",
+      "owner": "artifacts/api-server/src/routes/support-cases.ts",
+      "tables": [
+        "companiesTable",
+        "notificationsTable",
+        "supportCaseEventsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -9355,6 +9384,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportCaseTimeline.tsx",
+      "apiPath": "${API_BASE}/api/v1/${admin"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportConversation.tsx",

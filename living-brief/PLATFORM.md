@@ -125,6 +125,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/submittals.ts
 - artifacts/api-server/src/routes/support-case-admin-list.behavior.ts
 - artifacts/api-server/src/routes/support-case-administrator-reply-notification.behavior.ts
+- artifacts/api-server/src/routes/support-case-assignment-event.behavior.ts
 - artifacts/api-server/src/routes/support-case-assignment.behavior.ts
 - artifacts/api-server/src/routes/support-case-awareness.behavior.ts
 - artifacts/api-server/src/routes/support-case-customer-reply-notification.behavior.ts
@@ -132,6 +133,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/support-case-messages.behavior.ts
 - artifacts/api-server/src/routes/support-case-messages.ts
 - artifacts/api-server/src/routes/support-case-open-notification.behavior.ts
+- artifacts/api-server/src/routes/support-case-status-event.behavior.ts
 - artifacts/api-server/src/routes/support-case-status-notification.behavior.ts
 - artifacts/api-server/src/routes/support-case-status.behavior.ts
 - artifacts/api-server/src/routes/support-case-unread-filter.behavior.ts
@@ -1081,11 +1083,14 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/support-case-accountability.ts
 - artifacts/api-server/src/lib/support-case-assignment.behavior.ts
 - artifacts/api-server/src/lib/support-case-assignment.ts
+- artifacts/api-server/src/lib/support-case-event.behavior.ts
+- artifacts/api-server/src/lib/support-case-event.ts
 - artifacts/api-server/src/lib/support-case-message-schema.behavior.ts
 - artifacts/api-server/src/lib/support-case-message.behavior.ts
 - artifacts/api-server/src/lib/support-case-message.ts
 - artifacts/api-server/src/lib/support-case-notification.behavior.ts
 - artifacts/api-server/src/lib/support-case-notification.ts
+- artifacts/api-server/src/lib/support-case-open-event.behavior.ts
 - artifacts/api-server/src/lib/support-case-operations.behavior.ts
 - artifacts/api-server/src/lib/support-case-operations.ts
 - artifacts/api-server/src/lib/support-case-query.behavior.ts
