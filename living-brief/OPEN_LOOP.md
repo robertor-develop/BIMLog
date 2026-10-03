@@ -4378,3 +4378,5 @@ The B181-B190 publication boundary is accepted at source `4310f5b8821b53d2db4f30
 
 Block 41 release note: the exact-head complete gate and single GitHub push remain the active B205 closure step. Production schema and customer data remain unchanged; publication stays reserved for B210.
 
+
+Block 41 gate repair: the complete pre-push gate now refreshes workspace declarations before acceptance so additive schema exports cannot be validated against stale types. The full gate and single push remain pending; publication remains reserved for B210.

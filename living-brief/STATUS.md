@@ -3689,3 +3689,5 @@ B196-B200 remove the competing administrator close/reopen controls. Administrato
 
 B201-B205 add one requester-owned satisfaction record for each closed support case, bounded one-to-five rating and credential-safe optional comment, additive exact-lineage persistence, protected idempotent customer APIs, strict browser validation and focused block acceptance. This is the first five-build block after the accepted B191-B200 publication; it remains unpublished until B210.
 
+
+Block 41 gate repair: workspace declarations are rebuilt before the complete acceptance chain, closing the stale-schema-export failure without changing production or the B210 publication cadence.
