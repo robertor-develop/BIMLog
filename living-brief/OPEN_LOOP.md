@@ -4304,4 +4304,14 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B168 expose customer-scoped and assigned-administrator-scoped read operations tied to a message in the same case.
 - [x] B169 reject malformed support read receipts at the browser boundary.
 - [x] B170 mark loaded conversations read and report the result bilingually.
-- [ ] Pass the complete exact-head gate, push B166-B170, publish accumulated B161-B170, verify exact live identity and run the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B166-B170, publish accumulated B161-B170, verify exact live identity and run the full authenticated Chrome smoke. Accepted at exact source `ff6f9d87ee52763e2e9c03a203d88511fe280cdd`, Replit deployment `610d139d`, and package `bimlog-ff6f9d87ee52763e-fd2a3f3dfafbaa8f`; desktop 63/63, exact-390 63/63, tablet 10/10, hard reload, two-tab continuity and console checks passed.
+
+## 250-build SaaS Completion Block 35 — unread customer-service attention — 2026-10-02
+
+- [x] B171 define deterministic role-aware unread conversation semantics and strict summary normalization.
+- [x] B172 expose requester-scoped and current-administrator-scoped unread summaries without widening case authorization.
+- [x] B173 add a bounded unread-only administrator queue filter with exact paging totals.
+- [x] B174 reject malformed, duplicate or contradictory unread summaries before rendering.
+- [x] B175 add bilingual unread badges, unread-only operations filtering and acknowledgement-driven badge refresh.
+- [x] Pass the focused Block 35 regression and strict API/frontend typechecks.
+- [ ] Pass the complete exact-head gate and push B171-B175 once. This is the first five-build block after the accepted B161-B170 publication; publication remains scheduled after B180.

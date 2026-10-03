@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "7f67dc5a30471706f2230f31122f305103a51edd895126756c2fa048a000cb28",
+  "sourceSha256": "a2b2df3473f454f1cb1e66e85a2cfdb812f8bada8532d903420504bbd4954112",
   "itemCount": 287,
   "counts": {
     "ACTIVE": 252,
@@ -5221,20 +5221,20 @@
       "currentAuthority": false
     },
     {
-      "id": "105b0dd11d9e9954",
-      "sourceLine": 4307,
-      "heading": "250-build SaaS Completion Block 34 — support conversation awareness — 2026-10-02",
-      "statement": "Pass the complete exact-head gate, push B166-B170, publish accumulated B161-B170, verify exact live identity and run the full authenticated Chrome smoke.",
+      "id": "e61302236e38a6af",
+      "sourceLine": 4317,
+      "heading": "250-build SaaS Completion Block 35 — unread customer-service attention — 2026-10-02",
+      "statement": "Pass the complete exact-head gate and push B171-B175 once. This is the first five-build block after the accepted B161-B170 publication; publication remains scheduled after B180.",
       "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
+      "workClass": "PRODUCT_WORK",
       "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:4307",
-        "250-build SaaS Completion Block 34 — support conversation awareness — 2026-10-02"
+        "OPEN_LOOP.md:4317",
+        "250-build SaaS Completion Block 35 — unread customer-service attention — 2026-10-02"
       ],
       "currentAuthority": false
     }

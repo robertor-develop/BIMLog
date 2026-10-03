@@ -55459,6 +55459,78 @@
         "package.json"
       ],
       "reviewedChangeSha256": "88f822ee18d59b1e158b98d9605e7e498f79d2b888cb434739911446e8959ccb"
+    },
+    {
+      "taskId": "saas-block35-unread-support-attention",
+      "reviewedThroughCommit": "95a1960642910a002b69344411506ca084297d4f",
+      "reviewedAt": "2026-10-03T03:56:05Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The unread support-attention block preserves this authority without semantic change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The unread support-attention block preserves this authority without semantic change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The unread support-attention block preserves this authority without semantic change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The unread support-attention block preserves this authority without semantic change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Documents role-aware unread summaries, bounded filtering and acknowledgement refresh."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and installers are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report family changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records accepted B161-B170 release and completed B171-B175 source work."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes B171-B175 implementation and retains publication at B180."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing audit history remains append-only."
+        }
+      ],
+      "reason": "B171-B175 connect support read cursors to role-aware unread summaries and bilingual attention controls.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "003e07de376f6906daa2d4969608a860190c6f93ffc7f147d3ab24988bddd5b8"
     }
   ]
 }
