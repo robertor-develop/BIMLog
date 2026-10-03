@@ -60,6 +60,7 @@ import edtEngineRouter from "./edt-engine";
 import onboardingRouter from "./onboarding";
 import commercialWorkspaceRouter from "./commercial-workspace";
 import supportCasesRouter from "./support-cases";
+import supportCaseMessagesRouter from "./support-case-messages";
 
 const router: IRouter = Router();
 
@@ -69,6 +70,7 @@ router.use(authRouter);
 router.use(onboardingRouter);
 router.use(commercialWorkspaceRouter);
 router.use(supportCasesRouter);
+router.use(supportCaseMessagesRouter);
 router.use(configRouter);
 router.use(projectsRouter);
 router.use(filesRouter);
