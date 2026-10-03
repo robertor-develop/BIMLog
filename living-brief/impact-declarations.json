@@ -55173,8 +55173,8 @@
     },
     {
       "taskId": "saas-block32-scalable-customer-service",
-      "reviewedThroughCommit": "3ba5a47417baf23e6a71cef7a7a628f7397ccef2",
-      "reviewedAt": "2026-10-03T00:58:30Z",
+      "reviewedThroughCommit": "8e1659fed81e4d4e1403e0e6a74d6eb8c210bb8c",
+      "reviewedAt": "2026-10-03T01:11:55Z",
       "status": "candidate",
       "authorities": [
         {
@@ -55239,8 +55239,8 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "4ad98517283d6a1651e17fb43c62139c12458d7c54c2261c1691e3d8a557c7bb",
-      "reason": "B156-B160 scale the canonical support queue, and publication preflight repairs the assignment UPDATE RETURNING projection before deployment."
+      "reviewedChangeSha256": "036e44afcd5acdcc83e9232a702a2d8330478cab464fd0ddcd37af4c017efb53",
+      "reason": "B156-B160 scale support; publication preflight repairs SQL projection and removes the newly disclosed vulnerable Sync Agent dependency chain before deployment."
     }
   ]
 }

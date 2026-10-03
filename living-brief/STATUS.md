@@ -3644,3 +3644,5 @@ B151–B155 add deterministic urgent and normal response targets, durable respon
 - Focused B156-B160 contracts pass at implementation source `334a9bbca8157ba061749921f465dd7d52886e02`. B151-B160 now reach the required publication boundary; complete gate, one push, controlled publication, exact live identity and full authenticated Chrome smoke are due.
 
 - Publication preflight found and repaired an invalid aliased column in the support assignment UPDATE RETURNING projection at source `3ba5a474`; the assignment response remains join-free and named owner identity remains on the protected list query.
+
+- The repeated release gate detected newly published GHSA-vfj7-8cjw-p6xm against the Sync Agent's chokidar 3 dependency. Source `8e1659fe` upgrades the watcher to chokidar 4.0.3, removes the vulnerable production chain, and retains the existing watched-folder contract.

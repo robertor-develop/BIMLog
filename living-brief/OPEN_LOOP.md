@@ -4284,3 +4284,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [ ] Pass the complete exact-head gate, push B156-B160 once, publish accumulated B151-B160 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
 
 - [x] Repair the publication-preflight assignment UPDATE RETURNING defect before database migration or deployment; focused support and API TypeScript checks pass at `3ba5a474`.
+
+- [x] Remove the newly disclosed high-severity braces production chain by upgrading the Sync Agent watcher to chokidar 4.0.3; require clean production audit, provenance and complete gate before publication.
