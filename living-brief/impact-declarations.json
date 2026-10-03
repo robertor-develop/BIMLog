@@ -55524,13 +55524,14 @@
       ],
       "reason": "B171-B175 connect support read cursors to role-aware unread summaries and bilingual attention controls.",
       "reviewedChangedPaths": [
+        "evidence/saas-completion-20261001/BLOCK_35_B171_B175.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "003e07de376f6906daa2d4969608a860190c6f93ffc7f147d3ab24988bddd5b8"
+      "reviewedChangeSha256": "4ed018687ab88299782162fece6e20ed4765018bc52c3ff5dc572e8d9c050a98"
     }
   ]
 }
