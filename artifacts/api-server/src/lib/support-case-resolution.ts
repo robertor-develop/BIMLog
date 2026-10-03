@@ -1,0 +1,2 @@
+const MIN=10,MAX=2000;
+export function parseSupportResolution(value:unknown):string{if(typeof value!=="string")throw new Error("SUPPORT_RESOLUTION_INVALID");const text=value.trim().replace(/\r\n?/g,"\n");if(text.length<MIN||text.length>MAX)throw new Error("SUPPORT_RESOLUTION_INVALID");if(/(?:password|passwd|api[_ -]?key|secret|token)\s*[:=]/i.test(text))throw new Error("SUPPORT_RESOLUTION_SECRET_REJECTED");return text;}
