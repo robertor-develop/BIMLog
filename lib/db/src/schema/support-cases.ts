@@ -14,6 +14,11 @@ export const supportCaseEventsTable=pgTable("support_case_events",{
 },table=>[check("support_case_events_type_chk",sql`${table.eventType} in ('opened','assigned','released','status_changed')`),index("support_case_events_case_created_idx").on(table.supportCaseId,table.createdAt,table.id)]);
 export type SupportCaseEvent=typeof supportCaseEventsTable.$inferSelect;
 
+export const supportCaseSatisfactionTable=pgTable("support_case_satisfaction",{
+  id:serial("id").primaryKey(),supportCaseId:integer("support_case_id").notNull().references(()=>supportCasesTable.id),requesterUserId:integer("requester_user_id").notNull().references(()=>usersTable.id),rating:integer("rating").notNull(),comment:text("comment"),requestKey:text("request_key").notNull(),fingerprint:text("fingerprint").notNull(),createdAt:timestamp("created_at").notNull().defaultNow(),updatedAt:timestamp("updated_at").notNull().defaultNow(),
+},table=>[check("support_case_satisfaction_rating_chk",sql`${table.rating} between 1 and 5`),uniqueIndex("support_case_satisfaction_case_uidx").on(table.supportCaseId),uniqueIndex("support_case_satisfaction_requester_key_uidx").on(table.requesterUserId,table.requestKey)]);
+export type SupportCaseSatisfaction=typeof supportCaseSatisfactionTable.$inferSelect;
+
 export const supportCaseMessagesTable=pgTable("support_case_messages",{
   id:serial("id").primaryKey(),supportCaseId:integer("support_case_id").notNull().references(()=>supportCasesTable.id),authorUserId:integer("author_user_id").notNull().references(()=>usersTable.id),authorRole:text("author_role").notNull(),body:text("body").notNull(),requestKey:text("request_key").notNull(),fingerprint:text("fingerprint").notNull(),createdAt:timestamp("created_at").notNull().defaultNow(),
 },table=>[
