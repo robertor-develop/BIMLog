@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 712,
-    "frontendApiReferences": 276,
-    "routeOwnedTables": 64
+    "apiRoutes": 716,
+    "frontendApiReferences": 277,
+    "routeOwnedTables": 65
   },
   "compatibilityRedirects": [
     {
@@ -8695,6 +8695,46 @@
     },
     {
       "method": "GET",
+      "path": "/support/cases/:id/messages",
+      "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
+      "tables": [
+        "supportCaseMessagesTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/support/cases/:id/messages",
+      "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
+      "tables": [
+        "supportCaseMessagesTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/support/cases/:id/messages",
+      "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
+      "tables": [
+        "supportCaseMessagesTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/support/cases/:id/messages",
+      "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
+      "tables": [
+        "supportCaseMessagesTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/support/cases",
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
@@ -9278,6 +9318,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportConversation.tsx",
+      "apiPath": "/api/v1/admin"
     },
     {
       "screen": "artifacts/bimlog/src/components/dashboard/ResponsibilityWorkspace.tsx",

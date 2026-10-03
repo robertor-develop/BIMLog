@@ -3648,3 +3648,9 @@ B151–B155 add deterministic urgent and normal response targets, durable respon
 - The repeated release gate detected newly published GHSA-vfj7-8cjw-p6xm against the Sync Agent's chokidar 3 dependency. Source `8e1659fe` upgrades the watcher to chokidar 4.0.3, removes the vulnerable production chain, and retains the existing watched-folder contract.
 
 The B151-B160 release is accepted at exact reviewed source `e7afb10ffc1fd1672507e4967b449fa6954d9244`, Replit publication `37450fdc`, release `v1.05.N18-P37`, and identity-bound package `bimlog-e7afb10ffc1fd167-91b675efeb59deb7`. The governed database receipt returned `schemaAction=NONE` after the additive response/assignment fields and response-due index were applied to both governed targets. Authenticated Chrome passed all 63 routes on desktop and exact-390, ten principal tablet workspaces, hard reload, independent-tab continuity, and the application-console gate. The only console failures were the expected Lens Next `127.0.0.1:8766` loopback probes while Navisworks was absent.
+
+## 250-build SaaS Completion Block 33 — governed customer-service conversations — 2026-10-02
+
+B161-B165 turn tracked support cases into a bounded two-way conversation: secret-safe retry identities, attributable additive storage, requester isolation, assigned-administrator reply authority, strict browser validation, and bilingual customer/operations history and reply states. Resolved and closed cases reject new messages. This is the first five-build block after the accepted B151-B160 publication; it remains unpublished until B166-B170 complete the next ten-build release batch.
+
+The block gate repaired the isolated artifact-proof fixture after the additive message table made its declared schema incomplete. The final release gate runs only from the clean reconciled exact head; no production database or customer record is changed at this five-build checkpoint.

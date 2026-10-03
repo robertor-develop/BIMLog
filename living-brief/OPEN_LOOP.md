@@ -4286,3 +4286,13 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] Repair the publication-preflight assignment UPDATE RETURNING defect before database migration or deployment; focused support and API TypeScript checks pass at `3ba5a474`.
 
 - [x] Remove the newly disclosed high-severity braces production chain by upgrading the Sync Agent watcher to chokidar 4.0.3; require clean production audit, provenance and complete gate before publication.
+
+## 250-build SaaS Completion Block 33 — governed customer-service conversations — 2026-10-02
+
+- [x] B161 define bounded, secret-rejecting and retry-safe support messages.
+- [x] B162 persist attributable customer and administrator messages with additive schema/startup parity.
+- [x] B163 expose requester-scoped and Super Administrator-scoped conversation operations; only the assigned administrator may reply.
+- [x] B164 reject malformed, duplicated or contradictory conversation records before rendering.
+- [x] B165 add bilingual conversation history, reply, loading, empty, error and retry behavior for customers and support operations.
+- [x] Pass the complete exact-head gate and push B161-B165 once. This first five-build block remains unpublished until B170.
+- [x] Repair the disposable artifact-proof fixture after the additive message table made the release proof incomplete; require the complete declared schema before the final exact-head run.
