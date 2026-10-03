@@ -4365,4 +4365,13 @@ The B181-B190 publication boundary is accepted at source `4310f5b8821b53d2db4f30
 - [x] B198 replace competing administrator buttons with a bilingual awaiting-customer state.
 - [x] B199 name customer closure and reopening explicitly in the bilingual timeline.
 - [x] B200 pass the complete focused customer-closure authority acceptance suite.
-- [ ] Pass the complete exact-head gate, push B196-B200 once, publish accumulated B191-B200, verify exact live identity and complete the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B196-B200 once, publish accumulated B191-B200, verify exact live identity and complete the full authenticated Chrome smoke. Accepted source `90ab9e04824b1a995df72b137274bf8bbe5b6c9b`; Replit receipt `a742b7b3`; desktop 64/64, exact-390 64/64 and tablet 10/10 passed with zero browser warnings or errors.
+
+## 250-build SaaS Completion Block 41 — support satisfaction foundation — 2026-10-03
+
+- [x] B201 define bounded, credential-safe one-to-five support satisfaction input.
+- [x] B202 add exact additive satisfaction persistence with rating, case and requester identity constraints.
+- [x] B203 expose requester-scoped GET/POST satisfaction APIs only for closed cases, with idempotent replay and conflict handling.
+- [x] B204 reject malformed or contradictory satisfaction projections at the browser boundary.
+- [x] B205 pass the complete focused support satisfaction foundation acceptance suite.
+- [ ] Pass the complete exact-head gate and push B201-B205 once. This first five-build block remains unpublished until B210.
