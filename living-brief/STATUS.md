@@ -3672,3 +3672,7 @@ B176-B180 connect tracked customer-service activity to the existing governed in-
 ## 250-build SaaS Completion Block 37 — governed support timeline — 2026-10-03
 
 B181-B185 add the missing durable ownership and lifecycle record to tracked customer service. Opening, assignment, release and status changes write typed events inside the same transaction as the authoritative case mutation. Protected customer reads require the exact company/requester scope; operations reads retain Super Administrator authorization. Both workspaces show the same bilingual chronological service record, and the API exposes no event update or delete surface. Focused Block 37 behavior and strict API/frontend typechecks pass. This is the first five-build block after the accepted B171-B180 publication, so publication remains scheduled after B190.
+
+## 250-build SaaS Completion Block 38 — accountable support resolution — 2026-10-03
+
+B186-B190 prevent unexplained case resolution. Resolving a case requires a bounded, secret-rejecting summary and atomically records the authenticated resolver plus resolution time with the status/event/notification transaction. Customer and operations projections reject partial or contradictory resolution identities. Both bilingual workspaces expose the resolution, while reopening preserves the prior record as historical context. Focused Block 38 behavior and strict API/frontend typechecks pass. B181-B190 now reach the required ten-build publication and authenticated Chrome acceptance boundary.

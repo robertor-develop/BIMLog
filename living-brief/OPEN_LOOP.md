@@ -4334,4 +4334,14 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B184 persist status events atomically with lifecycle transitions.
 - [x] B185 expose protected customer/operations timeline reads and one bilingual timeline in both workspaces.
 - [x] Pass the focused Block 37 regression and strict API/frontend typechecks.
-- [ ] Pass the complete exact-head gate and push B181-B185 once. This is the first five-build block after the accepted B171-B180 publication; publication remains scheduled after B190.
+- [x] Pass the complete exact-head gate and push B181-B185 once. Exact source `ae8cf3a0e0667bbad11da6c7604c0632204f7017` reached `origin/master`; publication remains scheduled after B190.
+
+## 250-build SaaS Completion Block 38 — accountable support resolution — 2026-10-03
+
+- [x] B186 define a bounded, secret-rejecting resolution summary.
+- [x] B187 persist resolution summary, authenticated resolver and resolution time with additive startup parity.
+- [x] B188 require and persist resolution accountability atomically during revision-safe lifecycle transition.
+- [x] B189 reject partial, malformed or contradictory resolution projections at both browser boundaries.
+- [x] B190 expose bilingual resolution entry and visible resolution details to customers and support operations.
+- [x] Pass the focused Block 38 regression and strict API/frontend typechecks.
+- [ ] Pass the complete exact-head gate, push B186-B190 once, publish accumulated B181-B190 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
