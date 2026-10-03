@@ -11,3 +11,14 @@ export function parseSupportCaseStatusChange(value:unknown):Readonly<{expectedSt
   return Object.freeze({expectedStatus:expectedStatus as SupportCaseStatus,status:status as SupportCaseStatus,expectedUpdatedAt,resolutionSummary});
 }
 export function supportCaseWorkload(input:{status:SupportCaseStatus;priority:"normal"|"urgent"}):SupportCaseWorkload{return input.status==="resolved"||input.status==="closed"?"resolved":input.priority==="urgent"?"urgent":"waiting";}
+
+export type CustomerSupportCaseAction="close"|"reopen";
+export function parseCustomerSupportCaseAction(value:unknown):Readonly<{action:CustomerSupportCaseAction;expectedUpdatedAt:Date;reason:string|null}>{
+  if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("SUPPORT_CASE_CUSTOMER_ACTION_INVALID");
+  const raw=value as Record<string,unknown>,action=raw.action,expectedUpdatedAt=new Date(String(raw.expectedUpdatedAt??""));
+  if((action!=="close"&&action!=="reopen")||!Number.isFinite(expectedUpdatedAt.getTime()))throw new Error("SUPPORT_CASE_CUSTOMER_ACTION_INVALID");
+  if(action==="close"&&raw.reason!==undefined)throw new Error("SUPPORT_CASE_CUSTOMER_ACTION_INVALID");
+  const reason=action==="reopen"?String(raw.reason??"").trim().replace(/\r\n?/g,"\n"):null;
+  if(action==="reopen"&&(reason!.length<10||reason!.length>1000||/(?:password|passwd|api[_ -]?key|secret|token)\s*[:=]/i.test(reason!)))throw new Error("SUPPORT_CASE_CUSTOMER_ACTION_INVALID");
+  return Object.freeze({action,expectedUpdatedAt,reason});
+}
