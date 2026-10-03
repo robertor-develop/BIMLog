@@ -55173,8 +55173,8 @@
     },
     {
       "taskId": "saas-block32-scalable-customer-service",
-      "reviewedThroughCommit": "334a9bbca8157ba061749921f465dd7d52886e02",
-      "reviewedAt": "2026-10-03T00:24:00Z",
+      "reviewedThroughCommit": "3ba5a47417baf23e6a71cef7a7a628f7397ccef2",
+      "reviewedAt": "2026-10-03T00:58:30Z",
       "status": "candidate",
       "authorities": [
         {
@@ -55236,12 +55236,11 @@
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "9ccd66135b455336c0f39c347655c299c6e4564d5ce716c3c2aec96ed9119efb",
-      "reason": "B156-B160 scale the canonical support queue with named ownership, allowlisted filters, exact totals and strict bilingual browser truth."
+      "reviewedChangeSha256": "4ad98517283d6a1651e17fb43c62139c12458d7c54c2261c1691e3d8a557c7bb",
+      "reason": "B156-B160 scale the canonical support queue, and publication preflight repairs the assignment UPDATE RETURNING projection before deployment."
     }
   ]
 }

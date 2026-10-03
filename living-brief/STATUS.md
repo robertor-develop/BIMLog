@@ -3642,3 +3642,5 @@ B151–B155 add deterministic urgent and normal response targets, durable respon
 - B159 rejects malformed, duplicate and contradictory support pages before rendering.
 - B160 adds bilingual search, ownership, overdue, exact count and previous/next controls to Total Control.
 - Focused B156-B160 contracts pass at implementation source `334a9bbca8157ba061749921f465dd7d52886e02`. B151-B160 now reach the required publication boundary; complete gate, one push, controlled publication, exact live identity and full authenticated Chrome smoke are due.
+
+- Publication preflight found and repaired an invalid aliased column in the support assignment UPDATE RETURNING projection at source `3ba5a474`; the assignment response remains join-free and named owner identity remains on the protected list query.

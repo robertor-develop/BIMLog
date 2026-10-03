@@ -4282,3 +4282,5 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B159 strictly validate support page metadata, identities and owner relationships before rendering.
 - [x] B160 add bilingual search, ownership, overdue, exact result and bounded paging controls to Total Control.
 - [ ] Pass the complete exact-head gate, push B156-B160 once, publish accumulated B151-B160 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
+
+- [x] Repair the publication-preflight assignment UPDATE RETURNING defect before database migration or deployment; focused support and API TypeScript checks pass at `3ba5a474`.
