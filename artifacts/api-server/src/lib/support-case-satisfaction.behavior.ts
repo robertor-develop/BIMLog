@@ -1,0 +1,5 @@
+import assert from "node:assert/strict";import {parseSupportCaseSatisfaction,supportSatisfactionFingerprint} from "./support-case-satisfaction";
+const parsed=parseSupportCaseSatisfaction({rating:5,comment:"The answer was clear and complete.",requestKey:"support_rating_1234567890"});assert.equal(parsed.rating,5);assert.equal(parsed.comment,"The answer was clear and complete.");assert.equal(supportSatisfactionFingerprint(parsed).length,64);
+assert.equal(parseSupportCaseSatisfaction({rating:3,comment:"",requestKey:"support_rating_1234567891"}).comment,null);
+for(const value of [null,{rating:0,requestKey:"support_rating_1234567890"},{rating:6,requestKey:"support_rating_1234567890"},{rating:4,comment:"bad",requestKey:"support_rating_1234567890"},{rating:4,comment:"password=secret-value",requestKey:"support_rating_1234567890"},{rating:4,comment:"Good",requestKey:"short"}])assert.throws(()=>parseSupportCaseSatisfaction(value));
+console.log("B201 bounded credential-safe support satisfaction contract: PASS");
