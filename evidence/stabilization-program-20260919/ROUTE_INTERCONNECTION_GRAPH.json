@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 720,
-    "frontendApiReferences": 278,
+    "apiRoutes": 721,
+    "frontendApiReferences": 279,
     "routeOwnedTables": 67
   },
   "compatibilityRedirects": [
@@ -8790,6 +8790,18 @@
       ]
     },
     {
+      "method": "PATCH",
+      "path": "/support/cases/:id/lifecycle",
+      "owner": "artifacts/api-server/src/routes/support-cases.ts",
+      "tables": [
+        "companiesTable",
+        "notificationsTable",
+        "supportCaseEventsTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
       "method": "GET",
       "path": "/admin/support/cases",
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
@@ -9384,6 +9396,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
+      "apiPath": "${API_BASE}/api/v1/support/cases/${item.id}/lifecycle"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportCaseTimeline.tsx",
