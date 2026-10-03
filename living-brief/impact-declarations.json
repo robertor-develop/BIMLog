@@ -55757,6 +55757,78 @@
         "scripts/test-saas-completion-block38.mjs"
       ],
       "reviewedChangeSha256": "653c7a494724b96e09d2b7a99aa0fff9660434a5b3db6a1ead2eed2c81172306"
+    },
+    {
+      "taskId": "saas-block39-customer-controlled-support-closure",
+      "reviewedThroughCommit": "57af1453a764b578909ee18b2bf458a443e7c478",
+      "reviewedAt": "2026-10-03T08:00:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer-controlled support closure block preserves this authority without semantic change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer-controlled support closure block preserves this authority without semantic change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer-controlled support closure block preserves this authority without semantic change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer-controlled support closure block preserves this authority without semantic change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Documents customer-controlled support closure, audited reopen reasons and protected projection."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer-controlled support closure block preserves this authority without semantic change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer-controlled support closure block preserves this authority without semantic change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer-controlled support closure block preserves this authority without semantic change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records completed B191-B195 and the push-only publication cadence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the B181-B190 publication boundary and tracks B191-B195 validation and push."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer-controlled support closure block preserves this authority without semantic change."
+        }
+      ],
+      "reason": "B191-B195 complete the requester-controlled support resolution, closure and reasoned-reopen lifecycle.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4d180d80446de6cb9169ee78416c231c2b03857616da312009025e3df3a5b028"
     }
   ]
 }

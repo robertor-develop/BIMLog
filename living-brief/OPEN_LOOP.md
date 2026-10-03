@@ -4345,3 +4345,15 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B190 expose bilingual resolution entry and visible resolution details to customers and support operations.
 - [x] Pass the focused Block 38 regression and strict API/frontend typechecks.
 - [ ] Pass the complete exact-head gate, push B186-B190 once, publish accumulated B181-B190 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
+
+## 250-build SaaS Completion Block 39 — customer-controlled support closure — 2026-10-03
+
+- [x] B191 define strict customer close/reopen intent and secret-rejecting reopen reasons.
+- [x] B192 persist lifecycle reasons as additive support-event accountability evidence.
+- [x] B193 expose a requester-scoped, revision-safe and atomic customer lifecycle operation.
+- [x] B194 project lifecycle reasons through the protected timeline with strict browser validation.
+- [x] B195 add bilingual accept-and-close and reasoned-reopen controls with stale-write recovery.
+- [x] Pass the focused Block 39 regression and strict API/frontend typechecks.
+- [ ] Pass the complete exact-head gate and push B191-B195 once. This first five-build block remains unpublished until B200.
+
+The B181-B190 publication boundary is accepted at source `4310f5b8821b53d2db4f30d366c6801f6b3515fb`, Replit receipt `e575c6fe`; authenticated Chrome passed 64/64 desktop, 64/64 exact-390, 10/10 tablet, hard reload, independent-tab continuity and zero browser warnings or errors.

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "60b6db3b078e211244ad6d6bf24cb2e6c9a84573eee156c186bf9e7dc37786e8",
-  "itemCount": 287,
+  "sourceSha256": "481e448f0f1f0d4a7c96e2f0069f65cbba5bc7d553b04967730328680c8e048f",
+  "itemCount": 288,
   "counts": {
-    "ACTIVE": 252,
+    "ACTIVE": 253,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5235,6 +5235,24 @@
       "evidence": [
         "OPEN_LOOP.md:4347",
         "250-build SaaS Completion Block 38 — accountable support resolution — 2026-10-03"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d92fb3e053f3f85c",
+      "sourceLine": 4357,
+      "heading": "250-build SaaS Completion Block 39 — customer-controlled support closure — 2026-10-03",
+      "statement": "Pass the complete exact-head gate and push B191-B195 once. This first five-build block remains unpublished until B200.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4357",
+        "250-build SaaS Completion Block 39 — customer-controlled support closure — 2026-10-03"
       ],
       "currentAuthority": false
     }

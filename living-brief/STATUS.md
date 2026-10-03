@@ -3676,3 +3676,7 @@ B181-B185 add the missing durable ownership and lifecycle record to tracked cust
 ## 250-build SaaS Completion Block 38 — accountable support resolution — 2026-10-03
 
 B186-B190 prevent unexplained case resolution. Resolving a case requires a bounded, secret-rejecting summary and atomically records the authenticated resolver plus resolution time with the status/event/notification transaction. Customer and operations projections reject partial or contradictory resolution identities. Both bilingual workspaces expose the resolution, while reopening preserves the prior record as historical context. Focused Block 38 behavior and strict API/frontend typechecks pass. B181-B190 now reach the required ten-build publication and authenticated Chrome acceptance boundary.
+
+## 250-build SaaS Completion Block 39 — customer-controlled support closure — 2026-10-03
+
+B191-B195 complete the customer-service resolution loop. The authenticated requester may accept a resolved case and close it, or reopen a closed case with a bounded, secret-rejecting reason. Both operations are company/requester scoped, revision-safe, row-locked, transactional, attributable, notification-connected and visible in the bilingual service timeline. Prior resolution evidence remains historical context after reopening. Focused Block 39 behavior and strict API/frontend typechecks pass. This is the first five-build block after the accepted B181-B190 publication; publication remains scheduled after B200.

@@ -128,6 +128,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/support-case-assignment-event.behavior.ts
 - artifacts/api-server/src/routes/support-case-assignment.behavior.ts
 - artifacts/api-server/src/routes/support-case-awareness.behavior.ts
+- artifacts/api-server/src/routes/support-case-customer-lifecycle.behavior.ts
 - artifacts/api-server/src/routes/support-case-customer-reply-notification.behavior.ts
 - artifacts/api-server/src/routes/support-case-list-query.behavior.ts
 - artifacts/api-server/src/routes/support-case-messages.behavior.ts
@@ -1084,8 +1085,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/support-case-accountability.ts
 - artifacts/api-server/src/lib/support-case-assignment.behavior.ts
 - artifacts/api-server/src/lib/support-case-assignment.ts
+- artifacts/api-server/src/lib/support-case-customer-action.behavior.ts
 - artifacts/api-server/src/lib/support-case-event.behavior.ts
 - artifacts/api-server/src/lib/support-case-event.ts
+- artifacts/api-server/src/lib/support-case-lifecycle-event.behavior.ts
 - artifacts/api-server/src/lib/support-case-message-schema.behavior.ts
 - artifacts/api-server/src/lib/support-case-message.behavior.ts
 - artifacts/api-server/src/lib/support-case-message.ts
