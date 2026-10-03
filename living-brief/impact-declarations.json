@@ -55532,6 +55532,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4ed018687ab88299782162fece6e20ed4765018bc52c3ff5dc572e8d9c050a98"
+    },
+    {
+      "taskId": "saas-block36-governed-support-notifications",
+      "reviewedThroughCommit": "fae9c418b5278e97891b58903103a660472b45e9",
+      "reviewedAt": "2026-10-03T05:05:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "reason": "The governed support-notification block preserves ecosystem authority without semantic change.",
+          "result": "reviewed_no_semantic_change",
+          "key": "ecosystem_doctrine"
+        },
+        {
+          "reason": "The governed support-notification block preserves product doctrine without semantic change.",
+          "result": "reviewed_no_semantic_change",
+          "key": "claude"
+        },
+        {
+          "reason": "Atomic delivery and exact-destination acceptance follow the existing quality authority.",
+          "result": "reviewed_no_semantic_change",
+          "key": "quality"
+        },
+        {
+          "reason": "The support-notification work preserves the current product vision without semantic change.",
+          "result": "reviewed_no_semantic_change",
+          "key": "vision"
+        },
+        {
+          "reason": "Documents atomic support notification routing and exact-case destinations.",
+          "result": "updated",
+          "key": "platform"
+        },
+        {
+          "reason": "Native, bridge, installer and Navisworks behavior are unchanged.",
+          "result": "reviewed_no_semantic_change",
+          "key": "plugin"
+        },
+        {
+          "reason": "No report family or exported document changes are included.",
+          "result": "reviewed_no_semantic_change",
+          "key": "report_design_system"
+        },
+        {
+          "reason": "No standards metadata or controlled vocabulary changes are included.",
+          "result": "reviewed_no_semantic_change",
+          "key": "standards_register"
+        },
+        {
+          "reason": "Records completed B176-B180 and the ten-build publication boundary.",
+          "result": "updated",
+          "key": "status"
+        },
+        {
+          "reason": "Closes B171-B175 push and tracks B176-B180 release acceptance.",
+          "result": "updated",
+          "key": "open_loop"
+        },
+        {
+          "reason": "Existing audit history remains append-only and unchanged.",
+          "result": "reviewed_no_semantic_change",
+          "key": "audit"
+        }
+      ],
+      "reason": "B176-B180 connect governed support activity to atomic in-app notifications with exact-case destinations.",
+      "reviewedChangedPaths": [
+        "evidence/saas-completion-20261001/BLOCK_36_B176_B180.md",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "77a5e1bbb59d1e39b8ea1cf8bcc9c2d3b2f78ab1b83ba94384fdc00f3bbfb7a8"
     }
   ]
 }

@@ -8698,6 +8698,7 @@
       "path": "/support/cases/:id/messages",
       "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
       "tables": [
+        "notificationsTable",
         "supportCaseMessagesTable",
         "supportCasesTable",
         "supportConversationReadsTable",
@@ -8709,6 +8710,7 @@
       "path": "/admin/support/cases/:id/messages",
       "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
       "tables": [
+        "notificationsTable",
         "supportCaseMessagesTable",
         "supportCasesTable",
         "supportConversationReadsTable",
@@ -8720,6 +8722,7 @@
       "path": "/support/cases/:id/messages",
       "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
       "tables": [
+        "notificationsTable",
         "supportCaseMessagesTable",
         "supportCasesTable",
         "supportConversationReadsTable",
@@ -8731,6 +8734,7 @@
       "path": "/admin/support/cases/:id/messages",
       "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
       "tables": [
+        "notificationsTable",
         "supportCaseMessagesTable",
         "supportCasesTable",
         "supportConversationReadsTable",
@@ -8742,6 +8746,7 @@
       "path": "/support/cases/:id/messages/read",
       "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
       "tables": [
+        "notificationsTable",
         "supportCaseMessagesTable",
         "supportCasesTable",
         "supportConversationReadsTable",
@@ -8753,6 +8758,7 @@
       "path": "/admin/support/cases/:id/messages/read",
       "owner": "artifacts/api-server/src/routes/support-case-messages.ts",
       "tables": [
+        "notificationsTable",
         "supportCaseMessagesTable",
         "supportCasesTable",
         "supportConversationReadsTable",
@@ -8765,6 +8771,7 @@
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
         "companiesTable",
+        "notificationsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -8775,6 +8782,7 @@
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
         "companiesTable",
+        "notificationsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -8785,6 +8793,7 @@
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
         "companiesTable",
+        "notificationsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -8795,6 +8804,7 @@
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
         "companiesTable",
+        "notificationsTable",
         "supportCasesTable",
         "usersTable"
       ]
@@ -8805,6 +8815,7 @@
       "owner": "artifacts/api-server/src/routes/support-cases.ts",
       "tables": [
         "companiesTable",
+        "notificationsTable",
         "supportCasesTable",
         "usersTable"
       ]

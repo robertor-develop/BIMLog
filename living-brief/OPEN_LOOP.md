@@ -4314,4 +4314,14 @@ The authenticated broad smoke also found bare /projects/:id links incorrectly re
 - [x] B174 reject malformed, duplicate or contradictory unread summaries before rendering.
 - [x] B175 add bilingual unread badges, unread-only operations filtering and acknowledgement-driven badge refresh.
 - [x] Pass the focused Block 35 regression and strict API/frontend typechecks.
-- [ ] Pass the complete exact-head gate and push B171-B175 once. This is the first five-build block after the accepted B161-B170 publication; publication remains scheduled after B180.
+- [x] Pass the complete exact-head gate and push B171-B175 once. Exact source `73895d872251600106bfc9ea0daed5938d14f4b5` reached `origin/master`; publication remains scheduled after B180.
+
+## 250-build SaaS Completion Block 36 — governed support notifications — 2026-10-03
+
+- [x] B176 define strict support-notification kinds, titles, messages and exact-case destinations.
+- [x] B177 notify all eligible Super Administrators atomically when a customer opens a support case, excluding the creator and duplicate replay.
+- [x] B178 notify the assigned support owner atomically when the customer replies, while leaving unassigned work in the existing queue.
+- [x] B179 notify the requesting customer atomically when the assigned administrator replies.
+- [x] B180 notify the requesting customer atomically on lifecycle changes and open exact support conversations from notification links in both customer and operations workspaces.
+- [x] Pass the focused Block 36 regression and strict API/frontend typechecks.
+- [ ] Pass the complete exact-head gate, push B176-B180 once, publish accumulated B171-B180 without Replit Agents, verify exact live identity and complete the full authenticated Chrome smoke.
