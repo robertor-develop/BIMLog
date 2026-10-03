@@ -56038,11 +56038,13 @@
       ],
       "reason": "B206-B210 connect customer satisfaction, accountable operations notification, administrator visibility and strict aggregate service-quality reporting without widening tenant or requester authority.",
       "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "638ff9bf67f5e89fc363e67a0d17b342a9d31a3dedf03b83611de38dc2469d73"
+      "reviewedChangeSha256": "1873aadf74c7800b32adfd2291c9782a5beeb7aa64e458903c15de712683c7bc"
     }
   ]
 }
