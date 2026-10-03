@@ -10,7 +10,7 @@ export const supportCasesTable=pgTable("support_cases",{
 ]);
 export type SupportCase=typeof supportCasesTable.$inferSelect;
 export const supportCaseEventsTable=pgTable("support_case_events",{
-  id:serial("id").primaryKey(),supportCaseId:integer("support_case_id").notNull().references(()=>supportCasesTable.id),actorUserId:integer("actor_user_id").notNull().references(()=>usersTable.id),eventType:text("event_type").notNull(),fromValue:text("from_value"),toValue:text("to_value"),createdAt:timestamp("created_at").notNull().defaultNow(),
+  id:serial("id").primaryKey(),supportCaseId:integer("support_case_id").notNull().references(()=>supportCasesTable.id),actorUserId:integer("actor_user_id").notNull().references(()=>usersTable.id),eventType:text("event_type").notNull(),fromValue:text("from_value"),toValue:text("to_value"),reason:text("reason"),createdAt:timestamp("created_at").notNull().defaultNow(),
 },table=>[check("support_case_events_type_chk",sql`${table.eventType} in ('opened','assigned','released','status_changed')`),index("support_case_events_case_created_idx").on(table.supportCaseId,table.createdAt,table.id)]);
 export type SupportCaseEvent=typeof supportCaseEventsTable.$inferSelect;
 

@@ -1,0 +1,4 @@
+import assert from "node:assert/strict";import {readFileSync} from "node:fs";import {supportCaseEvent} from "./support-case-event";
+const event=supportCaseEvent({type:"status_changed",actorUserId:7,fromValue:"closed",toValue:"in_progress",reason:"The reported problem returned."});
+assert.equal(event.reason,"The reported problem returned.");assert.throws(()=>supportCaseEvent({type:"opened",actorUserId:7,toValue:"open",reason:"Not permitted here"}));
+const schema=readFileSync(new URL("../../../../lib/db/src/schema/support-cases.ts",import.meta.url),"utf8"),app=readFileSync(new URL("../app.ts",import.meta.url),"utf8");assert.ok(schema.includes('reason:text("reason")'));assert.ok(app.includes("ADD COLUMN IF NOT EXISTS reason text"));console.log("B192 durable support lifecycle accountability: PASS");
