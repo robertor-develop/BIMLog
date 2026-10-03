@@ -469,6 +469,9 @@ queueDatabaseStartup(async () => {
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS response_due_at timestamp`);
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS assigned_to_user_id integer REFERENCES users(id)`);
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS assigned_at timestamp`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS resolution_summary text`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS resolved_by_user_id integer REFERENCES users(id)`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS resolved_at timestamp`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS support_cases_requester_request_key_uidx ON support_cases(requester_user_id,request_key)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS support_cases_company_created_idx ON support_cases(company_id,created_at DESC)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS support_cases_response_due_idx ON support_cases(status,response_due_at)`);
