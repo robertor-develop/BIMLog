@@ -3691,3 +3691,5 @@ B201-B205 add one requester-owned satisfaction record for each closed support ca
 
 
 Block 41 gate repair: workspace declarations are rebuilt before the complete acceptance chain, closing the stale-schema-export failure without changing production or the B210 publication cadence.
+
+Block 41 platform-audit repair: support satisfaction route acceptance no longer creates a false duplicate-registration identity, and the blocking audit returns to its accepted baseline.

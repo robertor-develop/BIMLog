@@ -4380,3 +4380,5 @@ Block 41 release note: the exact-head complete gate and single GitHub push remai
 
 
 Block 41 gate repair: the complete pre-push gate now refreshes workspace declarations before acceptance so additive schema exports cannot be validated against stale types. The full gate and single push remain pending; publication remains reserved for B210.
+
+Block 41 platform-audit repair: the route behavior fixture now verifies the canonical satisfaction path without resembling a second route registration. Focused acceptance and the blocking platform audit pass; the full exact-head gate remains required before push.

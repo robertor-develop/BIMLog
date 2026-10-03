@@ -55904,8 +55904,8 @@
     },
     {
       "taskId": "saas-block41-support-satisfaction-foundation",
-      "reviewedThroughCommit": "7c217a74840cc451f6e3d87560ec4e702bd4bb96",
-      "reviewedAt": "2026-10-03T09:40:00Z",
+      "reviewedThroughCommit": "4c8a711b2787ee261a541727074e43a789043c48",
+      "reviewedAt": "2026-10-03T10:04:30Z",
       "status": "candidate",
       "authorities": [
         {
@@ -55964,14 +55964,15 @@
           "reason": "The support satisfaction foundation preserves this authority without semantic change."
         }
       ],
-      "reason": "B201-B205 add a requester-owned, credential-safe and idempotent satisfaction foundation for closed support cases; the full-gate repair refreshes workspace declarations before API acceptance.",
+      "reason": "B201-B205 add a requester-owned, credential-safe and idempotent satisfaction foundation for closed support cases; the full-gate repairs refresh workspace declarations before API acceptance and keep route fixtures distinct from registrations.",
       "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "eb0e80ffdd81435fb950c34b69e14f93fd5313177897a3a6bad881e1e8e886a3"
+      "reviewedChangeSha256": "7c3aeaacde1aada7e126b746584ec2a14734f59e16cd6532683dcf183939a631"
     }
   ]
 }

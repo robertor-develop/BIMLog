@@ -8767,13 +8767,13 @@
     },
     {
       "method": "GET",
-      "path": "/support/cases/:id/satisfaction",
+      "path": "${satisfactionPath}",
       "owner": "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
       "tables": []
     },
     {
       "method": "POST",
-      "path": "/support/cases/:id/satisfaction",
+      "path": "${satisfactionPath}",
       "owner": "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
       "tables": []
     },
@@ -10457,22 +10457,7 @@
     }
   ],
   "findings": {
-    "duplicateApiRoutes": [
-      {
-        "key": "GET /support/cases/:id/satisfaction",
-        "owners": [
-          "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
-          "artifacts/api-server/src/routes/support-case-satisfaction.ts"
-        ]
-      },
-      {
-        "key": "POST /support/cases/:id/satisfaction",
-        "owners": [
-          "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
-          "artifacts/api-server/src/routes/support-case-satisfaction.ts"
-        ]
-      }
-    ],
+    "duplicateApiRoutes": [],
     "sidebarTabsWithoutScreen": [],
     "screensWithoutSidebar": []
   }
