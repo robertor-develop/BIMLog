@@ -3791,3 +3791,7 @@ Block 56 is accepted live at exact source `18d4550725b78f1369459484e19ffcdcc3233
 ## SaaS Completion Block 57 — commercial conversion continuity — 2026-10-04
 
 B281-B285 preserve a strict time-bounded selected offer through registration and onboarding, make its non-entitlement status explicit, clear it only after successful onboarding, and return a durable sales-inquiry reference and response deadline with idempotent replay. The focused block suite is registered in the complete release gate. This is the first five-build block after accepted B271-B280 and remains unpublished until B290. Live Stripe and SendGrid verification remains the commercial launch blocker.
+
+## SaaS Completion Block 58 — company subscription checkout continuity — 2026-10-04
+
+B286-B290 separate the global plan catalog from each authenticated company’s durable subscription truth, expose the active provider-customer binding, and fail checkout eligibility closed unless the exact company is prepared. Unprepared companies retain their selected offer and move into the durable sales setup flow instead of reaching a rejected checkout. B281-B290 now reach the required ten-build publication and authenticated Chrome boundary. Live Stripe and SendGrid verification remains the commercial launch blocker.

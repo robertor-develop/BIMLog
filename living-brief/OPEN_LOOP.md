@@ -4556,3 +4556,12 @@ Block 56 is accepted live at exact source `18d4550725b78f1369459484e19ffcdcc3233
 - [x] B284 return a durable sales-inquiry reference and response deadline, including replay.
 - [x] B285 bind focused acceptance and reconcile the five-build release boundary.
 - [ ] Pass the complete exact-head gate and push B281-B285 once. Publication remains reserved for B290.
+
+## SaaS Completion Block 58 — company subscription checkout continuity — 2026-10-04
+
+- [x] B286 separate global catalog readiness from actual company subscription truth.
+- [x] B287 project the authenticated company’s durable subscription status.
+- [x] B288 fail checkout eligibility closed on exact company authority and provider binding.
+- [x] B289 preserve the selected offer through a durable subscription setup request when checkout is not prepared.
+- [x] B290 bind focused acceptance and reach the B281-B290 ten-build publication boundary.
+- [ ] Pass the complete exact-head gate, push once, publish the exact source, and run the full authenticated Chrome smoke.
