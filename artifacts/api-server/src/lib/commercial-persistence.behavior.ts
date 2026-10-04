@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import { createPersistentOrderCheckout, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
+import crypto from "node:crypto";
+import { createPersistentOrderCheckout, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
 
 const calls: { text: string; values?: readonly unknown[] }[] = [];
 const client: CommercialQueryClient = { async query(text, values) {
@@ -36,3 +37,16 @@ assert.ok(writes.some(query=>query.includes("INSERT INTO commercial_orders")));
 assert.ok(writes.some(query=>query.includes("ON CONFLICT(company_id,idempotency_key)")));
 
 console.log("COMMERCIAL_PERSISTENCE_B222=PASS");
+
+const raw=JSON.stringify({id:"evt_company_7",type:"checkout.session.completed"}),digest=crypto.createHash("sha256").update(raw).digest("hex");
+const receiptClient:CommercialQueryClient={async query(text){
+  if(text.includes("FROM commercial_provider_bindings"))return {rows:[{id:"binding-company-7"}],rowCount:1};
+  if(text.includes("FROM commercial_provider_receipts"))return {rows:[],rowCount:0};
+  if(text.includes("INSERT INTO commercial_provider_receipts"))return {rows:[{id:"receipt-company-7"}],rowCount:1};
+  throw new Error(`Unexpected receipt query: ${text}`);
+}};
+const receipt=await persistVerifiedProviderReceipt(receiptClient,{id:"receipt-company-7",companyId:7,providerBindingId:"binding-company-7",providerEventReference:"evt_company_7",eventType:"checkout.session.completed",rawPayload:raw,payloadDigest:digest,signatureVerifiedAt:"2026-10-04T12:00:00Z"});
+assert.deepEqual(receipt,{id:"receipt-company-7",replayed:false});
+await assert.rejects(()=>persistVerifiedProviderReceipt(receiptClient,{id:"receipt-company-7",companyId:7,providerBindingId:"binding-company-7",providerEventReference:"evt_company_7",eventType:"checkout.session.completed",rawPayload:`${raw} `,payloadDigest:digest,signatureVerifiedAt:"2026-10-04T12:00:00Z"}),/digest/);
+
+console.log("COMMERCIAL_PERSISTENCE_B223=PASS");

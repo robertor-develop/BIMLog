@@ -57,4 +57,23 @@ export async function createPersistentOrderCheckout(client: CommercialQueryClien
   } catch (error) { await client.query("ROLLBACK"); throw error; }
 }
 
+export type PersistentProviderReceiptInput = Readonly<{ id:string; companyId:number; providerBindingId:string; providerEventReference:string; eventType:string; rawPayload:string; payloadDigest:string; signatureVerifiedAt:string }>;
+export async function persistVerifiedProviderReceipt(client:CommercialQueryClient,input:PersistentProviderReceiptInput):Promise<Readonly<{id:string;replayed:boolean}>>{
+  positiveInteger(input.companyId,"Company identity");id(input.id,"Receipt identity");id(input.providerBindingId,"Provider binding identity");id(input.providerEventReference,"Provider event identity");
+  if(!/^[a-z][a-z0-9._]{2,119}$/.test(input.eventType))throw new Error("Provider event type is invalid");
+  if(!input.rawPayload||Buffer.byteLength(input.rawPayload,"utf8")>1048576)throw new Error("Provider payload is invalid");
+  if(!/^[0-9a-f]{64}$/.test(input.payloadDigest)||commercialPersistenceInternals.sha256(input.rawPayload)!==input.payloadDigest)throw new Error("Provider payload digest is invalid");
+  const verifiedAt=new Date(input.signatureVerifiedAt);if(!Number.isFinite(verifiedAt.getTime()))throw new Error("Provider signature time is invalid");
+  const binding=await client.query(`SELECT id FROM commercial_provider_bindings WHERE id=$1 AND company_id=$2 AND provider='stripe' AND status='active'`,[input.providerBindingId,input.companyId]);
+  if(!binding.rows[0])throw new Error("Provider binding is unavailable");
+  const existing=await client.query(`SELECT id,payload_digest,event_type FROM commercial_provider_receipts WHERE provider='stripe' AND provider_event_reference=$1`,[input.providerEventReference]);
+  if(existing.rows[0]){
+    if(existing.rows[0].payload_digest!==input.payloadDigest||existing.rows[0].event_type!==input.eventType)throw new Error("Provider event replay conflicts with verified evidence");
+    return Object.freeze({id:id(existing.rows[0].id,"Existing receipt identity"),replayed:true});
+  }
+  const inserted=await client.query(`INSERT INTO commercial_provider_receipts(id,company_id,provider_binding_id,provider,provider_event_reference,event_type,payload_digest,raw_payload,signature_verified_at,processing_status) VALUES($1,$2,$3,'stripe',$4,$5,$6,$7,$8,'received') RETURNING id`,[input.id,input.companyId,input.providerBindingId,input.providerEventReference,input.eventType,input.payloadDigest,input.rawPayload,verifiedAt.toISOString()]);
+  if(!inserted.rows[0])throw new Error("Provider receipt was not persisted");
+  return Object.freeze({id:id(inserted.rows[0].id,"Persistent receipt identity"),replayed:false});
+}
+
 export const commercialPersistenceInternals = Object.freeze({ id, positiveInteger, sha256: (value: string) => crypto.createHash("sha256").update(value).digest("hex") });
