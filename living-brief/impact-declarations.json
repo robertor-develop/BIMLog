@@ -56125,6 +56125,84 @@
         "scripts/test-saas-completion-block43.mjs"
       ],
       "reviewedChangeSha256": "f5285b7d0c8eea1685f1000f2a4952f26b73ace1ff7f24b1a66e5ce90e02870c"
+    },
+    {
+      "taskId": "saas-block44-billing-evidence-persistence",
+      "reviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "reviewedAt": "2026-10-03T23:55:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 44 preserves canonical financial evidence and human authority without changing doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 44 follows the existing additive schema and ten-build release procedure."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Binds invoice, credit, dispute, provider receipt and audit-chain persistence to focused and production acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 44 advances the approved SaaS commercialization roadmap without changing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated platform authority now includes five additive billing evidence tables and their exact relationships."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 44 changes no Lens Native, bridge, installer or Navisworks behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 44 creates no customer-facing invoice document or report rendering claim."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 44 introduces no new standards claim or standards-register interpretation."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records pushed Block 43 and completed B216-B220 billing evidence persistence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the Block 43 push and tracks the exact B211-B220 publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 44 remains within the existing launch audit scope and does not change its conclusions."
+        }
+      ],
+      "reason": "B216-B220 persist invoices, approved credits/refunds, disputes, exact provider receipts and a digest-linked commercial audit chain while retaining provider activation as a later controlled block.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/commercial-subscription-migration.ts",
+        "evidence/saas-completion-20261003/BLOCK_44_B216_B220.md",
+        "evidence/saas-completion-20261003/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-saas-completion-block44.mjs"
+      ],
+      "reviewedChangeSha256": "4a19b264b4d88500703b159a89da1c41aff0451dae8258634f91581b07589aba"
     }
   ]
 }

@@ -7,12 +7,17 @@
     "authenticatedChrome": "PASS"
   },
   "currentBlock": {
+    "number": 44,
+    "builds": "216-220",
+    "status": "SOURCE_ACCEPTED_AWAITING_EXACT_HEAD_GATE_PUSH_PUBLICATION",
+    "pushDue": true,
+    "publicationDue": true
+  },
+  "priorPushedBlock": {
     "number": 43,
     "builds": "211-215",
-    "status": "SOURCE_ACCEPTED_AWAITING_EXACT_HEAD_GATE_AND_PUSH",
-    "pushDue": true,
-    "publicationDue": false
+    "sourceCommit": "175d8a5d4e7099d1bac0128bad13e1ef9f7b97a0"
   },
-  "unpublishedBuilds": 5,
+  "unpublishedBuilds": 10,
   "nextPublicationBoundary": 220
 }

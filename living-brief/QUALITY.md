@@ -604,3 +604,9 @@ Additional enforcement:
 - The focused SaaS Block 43 suite must verify every commercial table in both Drizzle schema and startup migration, startup registration, all focused schema behaviors, and the absence of destructive migration SQL.
 - Subscription, term, seat, order, provider-binding and checkout-attempt changes require root library and API strict TypeScript checks before the complete pre-push gate.
 - Builds 211–215 are not production accepted by source tests alone. They remain unpublished until the ten-build boundary at B220, when governed database receipts, exact live identity and full authenticated Chrome smoke are required.
+
+## Block 44 billing evidence persistence gate
+
+- The focused Block 44 suite must verify invoice, credit/refund, dispute, provider-receipt and commercial-audit tables in both Drizzle schema and additive startup migration.
+- Provider event references, invoice/checkout lineage, dispute identity, company audit sequence and event digests must remain uniquely constrained. Integer-cent amounts and bounded lifecycle states must fail closed.
+- B211–B220 require governed development/production database receipts, only the reviewed additive schema change, one publication, exact live identity and full authenticated Chrome acceptance before production status.

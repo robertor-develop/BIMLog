@@ -3705,3 +3705,9 @@ Block 42 is accepted live at exact source `34a1de6b54bbf3df71062651d6503ce27b8c4
 ## SaaS Block 43 - persistent commercial subscription authority - 2026-10-03
 
 B211-B215 establish the additive database authority required for sellable subscriptions: subscription and immutable term records, a seat ledger, an integer-cent order ledger, provider-customer bindings, and idempotent checkout attempts. The startup migration creates only those six tables and their constraints/indexes under an advisory lock, and the focused acceptance suite rejects destructive SQL and verifies startup registration. This is the first five-build block after the accepted B201-B210 publication; it is pushed as one source candidate and remains unpublished until B220.
+
+Block 43 is pushed at exact source `175d8a5d4e7099d1bac0128bad13e1ef9f7b97a0` and remains unpublished as the first half of the B211-B220 batch.
+
+## SaaS Block 44 - billing evidence persistence - 2026-10-03
+
+B216-B220 persist integer-cent invoices, approved credit/refund evidence, revision-safe disputes, exact raw provider receipts and an ordered digest-linked commercial audit chain. All records retain company, subscription, order, checkout, invoice and provider lineage as applicable. The additive startup migration and focused acceptance suite cover all five tables and their idempotency/uniqueness constraints without activating a provider or storing payment credentials. B211-B220 now reach the required push, governed database receipt/application, publication, exact live identity and full authenticated Chrome boundary.

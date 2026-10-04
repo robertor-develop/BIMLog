@@ -1,15 +1,13 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
+  "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "56d7e18495497c09c932645e2606686a24e056ab144fa7314d9e288dca478a91",
+  "bundleSha256": "216291b4e06fa774d663abc3cbf704a36e1f5b3edc4dfe869a6fd077a0a0a9ec",
   "impact": {
-    "baselineCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
+    "baselineCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
     "changedPaths": [
-      "artifacts/api-server/src/app.ts",
       "artifacts/api-server/src/lib/commercial-subscription-migration.ts",
-      "evidence/saas-completion-20261003/BLOCK_42_B206_B210.md",
-      "evidence/saas-completion-20261003/BLOCK_43_B211_B215.md",
+      "evidence/saas-completion-20261003/BLOCK_44_B216_B220.md",
       "evidence/saas-completion-20261003/BUILD_LEDGER.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -18,7 +16,7 @@
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
       "package.json",
-      "scripts/test-saas-completion-block43.mjs"
+      "scripts/test-saas-completion-block44.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -34,11 +32,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "claude",
@@ -46,23 +44,23 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "quality",
       "file": "QUALITY.md",
-      "sha256": "5f8577f161a8f00d0c98466e7f3bff2ea5b1e0b10059aa80592355010d4cc914",
-      "sourceChangedAt": "2026-10-03T23:30:00.000Z",
+      "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
+      "sourceChangedAt": "2026-10-03T23:55:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "vision",
@@ -70,23 +68,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "9e3cec7c359e5418af1dd6848dd2641e3dfff4345037394250051c3c8433a469",
-      "sourceChangedAt": "2026-10-03T23:30:00.000Z",
+      "sha256": "1184ace65e83019bfa073101408bbae6d32c2e6f99771143f4af4a1fc655ab9f",
+      "sourceChangedAt": "2026-10-03T23:55:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "plugin",
@@ -94,11 +92,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -106,11 +104,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "standards_register",
@@ -118,35 +116,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "960a292f60a64ad23a3cf1bcb4b9ea8a3e5b6a6eef8186cb61bc81f2fc6a62b1",
-      "sourceChangedAt": "2026-10-03T23:30:00.000Z",
+      "sha256": "60b41c7d07a91065c200c45515848d82752e68ff4a64e5977f3e9c609e0d80a5",
+      "sourceChangedAt": "2026-10-03T23:55:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "5fb82faa5f1347e16304a3114157ee9e0ba971853bef7ac274e69428ed9b31a8",
-      "sourceChangedAt": "2026-10-03T23:30:00.000Z",
+      "sha256": "d38e27e6e257d94d2b76eea2842645454215e91b9fc7ff38d07cb844fbcd3b31",
+      "sourceChangedAt": "2026-10-03T23:55:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     },
     {
       "key": "audit",
@@ -154,11 +152,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewedThroughCommit": "c713389ea047be553583c51a1647b583e8bd4b8f",
-      "semanticReviewTask": "saas-block43-commercial-subscription-authority",
+      "reconciledThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewedThroughCommit": "ac728634378d891695bd1185c7d03afbab2e506d",
+      "semanticReviewTask": "saas-block44-billing-evidence-persistence",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-03T23:30:00.000Z"
+      "semanticReviewedAt": "2026-10-03T23:55:00.000Z"
     }
   ]
 }

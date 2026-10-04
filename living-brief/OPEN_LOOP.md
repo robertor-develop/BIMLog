@@ -4401,4 +4401,13 @@ Block 42 reconciliation note: reviewed implementation authority is `abe49f7b5eea
 - [x] B213 add a company-scoped, idempotent commercial order ledger with integer-cent subtotal, tax and total authority.
 - [x] B214 persist provider-customer bindings and idempotent checkout attempts without storing payment credentials.
 - [x] B215 bind the six additive commercial tables to the governed startup migration and complete focused Block 43 acceptance.
-- [ ] Pass the complete exact-head gate and push B211-B215 once. This first five-build block remains unpublished until B220.
+- [x] Pass the complete exact-head gate and push B211-B215 once. Accepted pushed source `175d8a5d4e7099d1bac0128bad13e1ef9f7b97a0`; publication remains reserved for B220.
+
+## 250-build SaaS Completion Block 44 — billing evidence persistence — 2026-10-03
+
+- [x] B216 persist integer-cent invoices with exact subscription, order, checkout and provider lineage.
+- [x] B217 persist approved credits/refunds with bounded reasons and provider-event idempotency.
+- [x] B218 persist revision-safe disputes with evidence deadlines and terminal closure evidence.
+- [x] B219 persist exact provider receipts and an ordered digest-linked commercial audit chain.
+- [x] B220 bind all five tables to the additive startup migration and complete focused Block 44 acceptance.
+- [ ] Pass the complete exact-head gate, push B216-B220, apply only the additive B211-B220 commercial schema through the governed production path, publish once, verify exact live identity and run the full authenticated Chrome smoke.

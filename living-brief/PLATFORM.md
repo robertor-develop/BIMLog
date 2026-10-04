@@ -331,14 +331,17 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-change-order-draft.behavior.ts
 - artifacts/api-server/src/lib/commercial-change-order-draft.ts
 - artifacts/api-server/src/lib/commercial-checkout-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-credit-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.ts
+- artifacts/api-server/src/lib/commercial-dispute-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.ts
 - artifacts/api-server/src/lib/commercial-evidence-package.behavior.ts
 - artifacts/api-server/src/lib/commercial-evidence-package.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.ts
+- artifacts/api-server/src/lib/commercial-invoice-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-order-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-platform-readiness.behavior.ts
 - artifacts/api-server/src/lib/commercial-platform-readiness.ts
@@ -349,6 +352,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-provider-adapter.ts
 - artifacts/api-server/src/lib/commercial-provider-events.behavior.ts
 - artifacts/api-server/src/lib/commercial-provider-events.ts
+- artifacts/api-server/src/lib/commercial-receipt-audit-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry.ts
