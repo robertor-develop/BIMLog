@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {evaluateCommercialVerificationEvidence,parseCommercialLaunch,parseCommercialLiveVerification} from "./commercial-launch-client";
+import {evaluateCommercialVerificationEvidence,parseCommercialHealthIdentity,parseCommercialLaunch,parseCommercialLiveVerification} from "./commercial-launch-client";
 const steps=["catalog","provider","live_mode","webhook","portal","support"].map(id=>({id,status:"ready",owner:"bimlog_platform",title:id,configurationKeys:[]}));
 const ready=parseCommercialLaunch({status:"ready",providerMode:"live",ready:true,steps,requiredActionCount:0,checkedAt:"2026-10-04T12:00:00.000Z"});
 assert.equal(ready.steps.length,6);
@@ -13,4 +13,8 @@ assert.deepEqual(evaluateCommercialVerificationEvidence(live,"a".repeat(40),new 
 assert.equal(evaluateCommercialVerificationEvidence(live,"c".repeat(40),new Date("2026-10-04T12:10:00.000Z")).status,"source_mismatch");
 assert.equal(evaluateCommercialVerificationEvidence(live,"a".repeat(40),new Date("2026-10-04T12:15:00.000Z")).status,"expired");
 assert.equal(evaluateCommercialVerificationEvidence({...live,evidence:null},"a".repeat(40)).status,"missing");
-console.log("B266 source-bound commercial evidence decision: PASS");
+const identity=parseCommercialHealthIdentity({status:"ok",release:"2026.10.4",sourceCommit:"a".repeat(40),assetManifestSha256:"b".repeat(64),packageId:"bimlog-release",databaseMigrationLevel:"202610040001",identityFingerprint:"c".repeat(64),identityBound:true});
+assert.equal(identity.sourceCommit,"a".repeat(40));
+assert.throws(()=>parseCommercialHealthIdentity({...identity,identityBound:false}),/identity/);
+assert.throws(()=>parseCommercialHealthIdentity({...identity,sourceCommit:"unknown"}),/identity/);
+console.log("B267 strict live release identity browser contract: PASS");

@@ -3,6 +3,7 @@ export type CommercialLaunchDto={status:"ready"|"test_only"|"blocked";providerMo
 export type CommercialVerificationEvidenceDto={schemaVersion:"bimlog-commercial-verification-v1";sourceCommit:string;status:"configuration_blocked"|"verified"|"failed";verified:boolean;checkedAt:string;validUntil:string;checkCount:number;failedCheckIds:string[];evidenceSha256:string};
 export type CommercialLiveVerificationDto={status:"configuration_blocked"|"verified"|"failed";verified:boolean;checks:{id:string;status:"verified"|"failed";code:string}[];checkedAt:string;evidence:CommercialVerificationEvidenceDto|null};
 export type CommercialEvidenceDecision={status:"current"|"missing"|"source_mismatch"|"expired"|"not_verified";ready:boolean};
+export type CommercialHealthIdentityDto={status:"ok";release:string;sourceCommit:string;assetManifestSha256:string;packageId:string;databaseMigrationLevel:string;identityFingerprint:string;identityBound:true};
 const ids=["catalog","provider","live_mode","webhook","portal","support"] as const;
 const allowedKeys=new Set(["BIMLOG_STRIPE_PRICE_IDS","BIMLOG_COMMERCIAL_MODE","STRIPE_SECRET_KEY","BIMLOG_APP_ORIGIN","STRIPE_WEBHOOK_SECRET","STRIPE_PORTAL_CONFIGURATION_ID","SENDGRID_API_KEY","BIMLOG_SUPPORT_FROM_EMAIL","BIMLOG_SUPPORT_INBOX_EMAIL"]);
 export function parseCommercialLaunch(value:unknown):CommercialLaunchDto{
@@ -23,4 +24,10 @@ export function evaluateCommercialVerificationEvidence(live:CommercialLiveVerifi
   const checkedAt=Date.parse(live.evidence.checkedAt),validUntil=Date.parse(live.evidence.validUntil),at=now.getTime();
   if(!Number.isFinite(at)||checkedAt>at||validUntil<=at||validUntil<=checkedAt)return {status:"expired",ready:false};
   return {status:"current",ready:true};
+}
+export function parseCommercialHealthIdentity(value:unknown):CommercialHealthIdentityDto{
+  if(!value||typeof value!=="object")throw new Error("Live release identity is invalid.");
+  const item=value as Record<string,unknown>;
+  if(item.status!=="ok"||typeof item.release!=="string"||!item.release||typeof item.sourceCommit!=="string"||!/^[0-9a-f]{40}$/.test(item.sourceCommit)||typeof item.assetManifestSha256!=="string"||!/^[0-9a-f]{64}$/.test(item.assetManifestSha256)||typeof item.packageId!=="string"||!item.packageId||typeof item.databaseMigrationLevel!=="string"||!item.databaseMigrationLevel||typeof item.identityFingerprint!=="string"||!/^[0-9a-f]{64}$/.test(item.identityFingerprint)||item.identityBound!==true)throw new Error("Live release identity is invalid.");
+  return item as CommercialHealthIdentityDto;
 }
