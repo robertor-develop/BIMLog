@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { bindPersistentCheckoutSession, claimPersistentProviderReceipt, createPersistentOrderCheckout, persistPaidInvoiceWithAudit, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
+import { applyPersistentCheckoutCompletion, bindPersistentCheckoutSession, claimPersistentProviderReceipt, createPersistentOrderCheckout, persistPaidInvoiceWithAudit, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
 
 const calls: { text: string; values?: readonly unknown[] }[] = [];
 const client: CommercialQueryClient = { async query(text, values) {
@@ -77,3 +77,11 @@ const claimed=await claimPersistentProviderReceipt({async query(){return {rows:[
 assert.deepEqual(claimed,{id:"receipt-company-7",rawPayload:raw,payloadDigest:digest});
 await assert.rejects(()=>claimPersistentProviderReceipt({async query(){return {rows:[],rowCount:0};}},{id:"receipt-company-7",companyId:7,expectedEventType:"checkout.session.completed"}),/already claimed/);
 console.log("COMMERCIAL_PERSISTENCE_B227=PASS");
+
+const completionRaw=JSON.stringify({data:{object:{id:"cs_company_7",metadata:{company_id:"7",order_id:"order-company-7",subscription_id:"sub-company-7"}}}});
+const completionWrites:string[]=[];
+const completion=await applyPersistentCheckoutCompletion({async query(text){completionWrites.push(text);if(text.startsWith("SELECT r.raw_payload"))return {rows:[{raw_payload:completionRaw,payload_digest:crypto.createHash("sha256").update(completionRaw).digest("hex"),provider_session_reference:"cs_company_7"}],rowCount:1};return {rows:[],rowCount:null};}},{companyId:7,receiptId:"receipt-company-7",subscriptionId:"sub-company-7",orderId:"order-company-7",checkoutId:"checkout-company-7",completedAt:"2026-10-04T13:00:00Z"});
+assert.deepEqual(completion,{checkoutId:"checkout-company-7",orderId:"order-company-7",subscriptionId:"sub-company-7"});
+assert.ok(completionWrites.some(query=>query.includes("commercial_subscriptions SET status='active'")));
+assert.equal(completionWrites.at(-1),"COMMIT");
+console.log("COMMERCIAL_PERSISTENCE_B228=PASS");

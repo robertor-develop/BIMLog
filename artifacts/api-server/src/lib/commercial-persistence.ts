@@ -95,6 +95,24 @@ export async function claimPersistentProviderReceipt(client:CommercialQueryClien
   return Object.freeze({id:id(row.id,"Receipt identity"),rawPayload,payloadDigest});
 }
 
+export async function applyPersistentCheckoutCompletion(client:CommercialQueryClient,input:Readonly<{companyId:number;receiptId:string;subscriptionId:string;orderId:string;checkoutId:string;completedAt:string}>):Promise<Readonly<{checkoutId:string;orderId:string;subscriptionId:string}>>{
+  positiveInteger(input.companyId,"Company identity");for(const [value,label] of [[input.receiptId,"Receipt identity"],[input.subscriptionId,"Subscription identity"],[input.orderId,"Order identity"],[input.checkoutId,"Checkout identity"]] as const)id(value,label);
+  const completedAt=new Date(input.completedAt);if(!Number.isFinite(completedAt.getTime()))throw new Error("Checkout completion time is invalid");
+  await client.query("BEGIN");
+  try{
+    const result=await client.query(`SELECT r.raw_payload,r.payload_digest,c.provider_session_reference FROM commercial_provider_receipts r JOIN commercial_checkout_attempts c ON c.id=$2 AND c.company_id=r.company_id AND c.status='open' JOIN commercial_orders o ON o.id=$3 AND o.company_id=r.company_id AND o.subscription_id=$4 AND o.status IN ('ready','submitted') JOIN commercial_subscriptions s ON s.id=o.subscription_id AND s.company_id=r.company_id AND s.status IN ('pending','trialing') WHERE r.id=$1 AND r.company_id=$5 AND r.event_type='checkout.session.completed' AND r.processing_status='processing' FOR UPDATE`,[input.receiptId,input.checkoutId,input.orderId,input.subscriptionId,input.companyId]);
+    const row=result.rows[0];if(!row)throw new Error("Checkout completion lineage is unavailable");
+    const rawPayload=String(row.raw_payload??""),digest=String(row.payload_digest??"");if(commercialPersistenceInternals.sha256(rawPayload)!==digest)throw new Error("Checkout completion payload digest is invalid");
+    let payload:{data?:{object?:{id?:unknown;metadata?:Record<string,unknown>}}};try{payload=JSON.parse(rawPayload);}catch{throw new Error("Checkout completion payload is invalid JSON");}
+    const object=payload.data?.object;if(!object||object.id!==row.provider_session_reference||object.metadata?.company_id!==String(input.companyId)||object.metadata?.order_id!==input.orderId||object.metadata?.subscription_id!==input.subscriptionId)throw new Error("Checkout completion metadata lineage is invalid");
+    await client.query(`UPDATE commercial_checkout_attempts SET status='completed',completed_at=$2,updated_at=$2 WHERE id=$1`,[input.checkoutId,completedAt.toISOString()]);
+    await client.query(`UPDATE commercial_orders SET status='completed',completed_at=$2,updated_at=$2 WHERE id=$1`,[input.orderId,completedAt.toISOString()]);
+    await client.query(`UPDATE commercial_subscriptions SET status='active',started_at=COALESCE(started_at,$2),revision=revision+1,updated_at=$2 WHERE id=$1`,[input.subscriptionId,completedAt.toISOString()]);
+    await client.query(`UPDATE commercial_provider_receipts SET processing_status='applied',processed_at=$2,failure_code=NULL WHERE id=$1`,[input.receiptId,completedAt.toISOString()]);
+    await client.query("COMMIT");return Object.freeze({checkoutId:input.checkoutId,orderId:input.orderId,subscriptionId:input.subscriptionId});
+  }catch(error){await client.query("ROLLBACK");throw error;}
+}
+
 export type PersistentPaidInvoiceInput=Readonly<{id:string;companyId:number;subscriptionId:string;orderId:string;checkoutAttemptId:string;providerReceiptId:string;invoiceNumber:string;providerInvoiceReference:string;currency:string;subtotalCents:number;taxCents:number;issuedAt:string;paidAt:string}>;
 export async function persistPaidInvoiceWithAudit(client:CommercialQueryClient,input:PersistentPaidInvoiceInput):Promise<Readonly<{invoiceId:string;auditSequence:number;eventDigest:string}>>{
   positiveInteger(input.companyId,"Company identity");for(const [value,label] of [[input.id,"Invoice identity"],[input.subscriptionId,"Subscription identity"],[input.orderId,"Order identity"],[input.checkoutAttemptId,"Checkout identity"],[input.providerReceiptId,"Provider receipt identity"],[input.invoiceNumber,"Invoice number"],[input.providerInvoiceReference,"Provider invoice identity"]] as const)id(value,label);
