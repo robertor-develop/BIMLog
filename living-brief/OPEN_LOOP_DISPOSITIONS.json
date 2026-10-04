@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "63b8bfeba19977bd604c9830c504b41a3c340d332018892e411d23d180aaa7b4",
+  "sourceSha256": "ab07a70472741c1e9d1d864c546cf7e5b9ea3a1e864ce04cc4811010806e7cd7",
   "itemCount": 292,
   "counts": {
     "ACTIVE": 257,
@@ -5311,20 +5311,20 @@
       "currentAuthority": false
     },
     {
-      "id": "b9f3251371f5be23",
-      "sourceLine": 4465,
-      "heading": "250-build SaaS Completion Block 48 — customer billing self-service — 2026-10-04",
-      "statement": "Pass the complete exact-head gate, push B236-B240, publish accumulated B231-B240, verify exact live identity and run the full authenticated Chrome smoke.",
+      "id": "1321389d5c93001f",
+      "sourceLine": 4476,
+      "heading": "250-build SaaS Completion Block 49 — customer billing history — 2026-10-04",
+      "statement": "Pass the complete exact-head gate and push B241-B245 once. Publication remains reserved for B250.",
       "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
+      "workClass": "PRODUCT_WORK",
       "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:4465",
-        "250-build SaaS Completion Block 48 — customer billing self-service — 2026-10-04"
+        "OPEN_LOOP.md:4476",
+        "250-build SaaS Completion Block 49 — customer billing history — 2026-10-04"
       ],
       "currentAuthority": false
     }

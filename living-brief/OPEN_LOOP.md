@@ -4462,6 +4462,15 @@ The post-repair state seal keeps the authorization decision and generated eviden
 - [x] B238 open governed Stripe billing self-service for the active company/customer binding.
 - [x] B239 expose authenticated, company-scoped checkout and billing-portal commands with bounded errors.
 - [x] B240 connect strict bilingual Billing & Support controls and focused release acceptance.
-- [ ] Pass the complete exact-head gate, push B236-B240, publish accumulated B231-B240, verify exact live identity and run the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B236-B240, publish accumulated B231-B240, verify exact live identity and run the full authenticated Chrome smoke. Accepted source `b606e53b4d2f949e39f94e050d89ff9325d38324`; Replit receipt `9f89c101`; authenticated Chrome passed 63/63 desktop, 63/63 exact-390, 10/10 principal tablet, hard reload, independent-tab continuity and zero console warnings/errors.
 
 The Block 48 state seal keeps the ten-build publication and authenticated Chrome gate inside the reviewed reconciliation diff.
+
+## 250-build SaaS Completion Block 49 — customer billing history — 2026-10-04
+
+- [x] B241 project persistent subscription, invoices, credits and disputes through a company-scoped secret-safe customer contract.
+- [x] B242 expose authenticated billing history only to the existing company financial administrator or platform super administrator.
+- [x] B243 reject malformed billing-history amounts, statuses, timestamps and identities at the browser boundary.
+- [x] B244 expose bilingual responsive loading, retry, empty, invoice, credit and dispute states in Billing & Support.
+- [x] B245 bind the complete focused acceptance suite and five-build release evidence.
+- [ ] Pass the complete exact-head gate and push B241-B245 once. Publication remains reserved for B250.

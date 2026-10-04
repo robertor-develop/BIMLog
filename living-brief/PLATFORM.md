@@ -71,6 +71,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/autodesk.ts
 - artifacts/api-server/src/routes/change_orders.ts
 - artifacts/api-server/src/routes/clash_reports.ts
+- artifacts/api-server/src/routes/commercial-billing-history-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-provider-webhook.ts
 - artifacts/api-server/src/routes/commercial-workspace.behavior.ts
 - artifacts/api-server/src/routes/commercial-workspace.ts
@@ -329,6 +330,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/cloud-files.ts
 - artifacts/api-server/src/lib/commercial-billing-authority.behavior.ts
 - artifacts/api-server/src/lib/commercial-billing-authority.ts
+- artifacts/api-server/src/lib/commercial-billing-history.behavior.ts
+- artifacts/api-server/src/lib/commercial-billing-history.ts
 - artifacts/api-server/src/lib/commercial-billing-operations.behavior.ts
 - artifacts/api-server/src/lib/commercial-billing-operations.ts
 - artifacts/api-server/src/lib/commercial-change-approval.behavior.ts

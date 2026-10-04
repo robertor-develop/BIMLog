@@ -56493,6 +56493,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "980093cb98a72b26fed577455030788eaa770652151e6e3bb13437ae8dcd8360"
+    },
+    {
+      "taskId": "saas-block49-customer-billing-history",
+      "reviewedThroughCommit": "e4b63ddb2f8adf8a573d594b03207295eaab4ed1",
+      "reviewedAt": "2026-10-04T09:19:19Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 49 exposes existing company billing evidence without changing ecosystem doctrine or payment authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 49 follows the existing five-build implementation, verification and release workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 49 uses existing fail-closed scope, evidence and browser-boundary requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 49 advances the approved sellable SaaS experience without changing the product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform inventory records the billing-history server and browser modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 49 changes no Lens Native, bridge, package, installer or Navisworks behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 49 creates no formal PDF, Word, spreadsheet or customer report artifact."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 49 introduces no external standard, certification or compliance claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records B241-B245 customer billing history and the first five-build push boundary after B240."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the B240 live boundary and tracks B241-B245 as push-only with publication due at B250."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 49 reads the canonical commercial audit-backed records without creating a competing audit authority."
+        }
+      ],
+      "reason": "B241-B245 connect existing company-scoped invoices, credits and disputes to a strict bilingual customer history while withholding provider secrets and payment-method data.",
+      "reviewedChangedPaths": [
+        "evidence/saas-completion-20261003/BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "d63d081fbf58cdfd4c40562db8826b9ad37f93e3393cba65cc097d5512ceb66b"
     }
   ]
 }
