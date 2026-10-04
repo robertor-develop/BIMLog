@@ -343,6 +343,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.ts
 - artifacts/api-server/src/lib/commercial-invoice-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-order-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-persistence.behavior.ts
+- artifacts/api-server/src/lib/commercial-persistence.ts
 - artifacts/api-server/src/lib/commercial-platform-readiness.behavior.ts
 - artifacts/api-server/src/lib/commercial-platform-readiness.ts
 - artifacts/api-server/src/lib/commercial-potential-impact.behavior.ts

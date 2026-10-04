@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "d38e27e6e257d94d2b76eea2842645454215e91b9fc7ff38d07cb844fbcd3b31",
+  "sourceSha256": "7489445d73f6b9d7ade4f659f33d09bbe5551c10567e712b807ef2718fab4f8c",
   "itemCount": 289,
   "counts": {
-    "ACTIVE": 253,
-    "SUPERSEDED": 24,
+    "ACTIVE": 254,
+    "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -5257,20 +5257,20 @@
       "currentAuthority": false
     },
     {
-      "id": "065300787201012a",
-      "sourceLine": 4413,
-      "heading": "250-build SaaS Completion Block 44 — billing evidence persistence — 2026-10-03",
-      "statement": "Pass the complete exact-head gate, push B216-B220, apply only the additive B211-B220 commercial schema through the governed production path, publish once, verify exact live identity and run the full authenticated Chrome smoke.",
-      "classification": "SUPERSEDED",
-      "workClass": "STALE_CONTRADICTION",
+      "id": "72dbef06dd759972",
+      "sourceLine": 4424,
+      "heading": "250-build SaaS Completion Block 45 — durable commercial persistence bridge — 2026-10-03",
+      "statement": "Push B221-B225 once. This first five-build block remains unpublished until B230.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
-        "owner": "Historical evidence",
+        "owner": "Release engineering",
         "route": null,
-        "module": "living-brief/OPEN_LOOP.md"
+        "module": "docs/deployment"
       },
       "evidence": [
-        "living-brief/STATUS.md current authority",
-        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+        "OPEN_LOOP.md:4424",
+        "250-build SaaS Completion Block 45 — durable commercial persistence bridge — 2026-10-03"
       ],
       "currentAuthority": false
     }

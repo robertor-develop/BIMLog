@@ -4410,4 +4410,15 @@ Block 42 reconciliation note: reviewed implementation authority is `abe49f7b5eea
 - [x] B218 persist revision-safe disputes with evidence deadlines and terminal closure evidence.
 - [x] B219 persist exact provider receipts and an ordered digest-linked commercial audit chain.
 - [x] B220 bind all five tables to the additive startup migration and complete focused Block 44 acceptance.
-- [ ] Pass the complete exact-head gate, push B216-B220, apply only the additive B211-B220 commercial schema through the governed production path, publish once, verify exact live identity and run the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B216-B220, apply only the additive B211-B220 commercial schema through the governed production path, publish once, verify exact live identity and run the full authenticated Chrome smoke. Accepted source `589f5884596f6b0a8e15a8ef1d7e0e59a50a210d`; publication receipt `6a30bd98`.
+
+The B211-B220 publication boundary is accepted at source `589f5884596f6b0a8e15a8ef1d7e0e59a50a210d` under publication receipt `6a30bd98`. The governed additive commercial schema was applied and the full authenticated Chrome smoke passed.
+
+## 250-build SaaS Completion Block 45 — durable commercial persistence bridge — 2026-10-03
+
+- [x] B221 read exact company subscription, term, seat and provider-binding authority from persistent storage.
+- [x] B222 persist company-scoped orders and checkout attempts atomically with request replay and conflict controls.
+- [x] B223 persist signature-verified provider receipts with exact payload digest and provider-event replay protection.
+- [x] B224 persist paid invoices with complete commercial lineage and an ordered digest-linked audit event.
+- [x] B225 bind the persistence bridge to focused acceptance and the complete pre-push gate.
+- [ ] Push B221-B225 once. This first five-build block remains unpublished until B230.

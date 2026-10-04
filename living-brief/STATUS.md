@@ -3711,3 +3711,9 @@ Block 43 is pushed at exact source `175d8a5d4e7099d1bac0128bad13e1ef9f7b97a0` an
 ## SaaS Block 44 - billing evidence persistence - 2026-10-03
 
 B216-B220 persist integer-cent invoices, approved credit/refund evidence, revision-safe disputes, exact raw provider receipts and an ordered digest-linked commercial audit chain. All records retain company, subscription, order, checkout, invoice and provider lineage as applicable. The additive startup migration and focused acceptance suite cover all five tables and their idempotency/uniqueness constraints without activating a provider or storing payment credentials. B211-B220 now reach the required push, governed database receipt/application, publication, exact live identity and full authenticated Chrome boundary.
+
+Block 44 is accepted live at exact source `589f5884596f6b0a8e15a8ef1d7e0e59a50a210d` under publication receipt `6a30bd98`. The governed additive commercial schema was applied and the full authenticated Chrome smoke passed.
+
+## 250-build SaaS Completion Block 45 — durable commercial persistence bridge — 2026-10-03
+
+B221-B225 connect the accepted commercial schema to server-side persistence contracts. Reads retain exact company scope; order and checkout creation are atomic and idempotent; provider receipts require a verified signature time and exact payload digest; paid invoices require complete subscription, order, checkout and receipt lineage and append an ordered digest-linked audit event. The bridge stores no payment credentials and does not activate Stripe or move money. Focused behavior and strict API typechecks pass. This is the first five-build block after the accepted B211-B220 publication and remains unpublished until B230.
