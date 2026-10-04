@@ -1,23 +1,23 @@
 {
   "program": "saas-completion-20261003",
   "acceptedProduction": {
-    "buildsThrough": 270,
-    "sourceCommit": "e7f4b46d54d78f7a724cdc145309168933a4416f",
-    "publicationReceipt": "3fd052ff",
+    "buildsThrough": 280,
+    "sourceCommit": "18d4550725b78f1369459484e19ffcdcc323328c",
+    "publicationReceipt": "not-recorded-in-repository",
     "authenticatedChrome": "PASS_63_DESKTOP_63_EXACT390_10_TABLET_RELOAD_TWO_TAB_ZERO_CONSOLE"
   },
   "currentBlock": {
-    "number": 56,
-    "builds": "276-280",
-    "status": "PUBLICATION_CANDIDATE",
+    "number": 57,
+    "builds": "281-285",
+    "status": "PUSH_CANDIDATE",
     "pushDue": true,
-    "publicationDue": true
+    "publicationDue": false
   },
   "priorPushedBlock": {
-    "number": 55,
-    "builds": "271-275",
-    "sourceCommit": "743928e49344f716cfe6a50f858bd28299723af9"
+    "number": 56,
+    "builds": "276-280",
+    "sourceCommit": "18d4550725b78f1369459484e19ffcdcc323328c"
   },
-  "unpublishedBuilds": 10,
-  "nextPublicationBoundary": 280
+  "unpublishedBuilds": 5,
+  "nextPublicationBoundary": 290
 }
