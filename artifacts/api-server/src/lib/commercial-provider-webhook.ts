@@ -1,6 +1,9 @@
 import crypto from "node:crypto";
 import { inspectStripeCommercialConfiguration, verifyStripeWebhook } from "./commercial-provider-adapter";
-import type { CommercialQueryClient } from "./commercial-persistence";
+import {
+  persistVerifiedProviderReceipt,
+  type CommercialQueryClient,
+} from "./commercial-persistence";
 
 export type CommercialWebhookResult = Readonly<{
   accepted: true;
@@ -65,8 +68,28 @@ export async function acceptPersistentStripeWebhook(input: Readonly<{
     nowEpochSeconds,
     priorReceipts: [],
   });
-  parseVerifiedEnvelope(input.rawPayload);
-  void input.client;
+  const envelope = parseVerifiedEnvelope(input.rawPayload);
+  const customerReference = exactId(envelope.data?.object?.customer, "COMMERCIAL_WEBHOOK_CUSTOMER_MISSING");
+  const binding = await input.client.query(
+    `SELECT id,company_id FROM commercial_provider_bindings WHERE provider='stripe' AND environment=$1 AND customer_reference=$2 AND status='active' LIMIT 1`,
+    [configuration.mode, customerReference],
+  );
+  const bindingRow = binding.rows[0];
+  if (!bindingRow) throw new Error("COMMERCIAL_WEBHOOK_BINDING_UNAVAILABLE");
+  const companyId = Number(bindingRow.company_id);
+  if (!Number.isSafeInteger(companyId) || companyId < 1) throw new Error("COMMERCIAL_WEBHOOK_COMPANY_INVALID");
+  const providerBindingId = exactId(bindingRow.id, "COMMERCIAL_WEBHOOK_BINDING_INVALID");
+  const persisted = await persistVerifiedProviderReceipt(input.client, {
+    id: `receipt-${receipt.eventId}`,
+    companyId,
+    providerBindingId,
+    providerEventReference: receipt.eventId,
+    eventType: receipt.eventType,
+    rawPayload: input.rawPayload,
+    payloadDigest: receipt.payloadDigest,
+    signatureVerifiedAt: receipt.receivedAt,
+  });
+  if (persisted.replayed) return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "replayed" });
   return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "ignored" });
 }
 
