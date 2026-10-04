@@ -4433,3 +4433,5 @@ Block 45 gate repair: the reconciled Living Brief state is rebound to the final 
 - [x] B229 settle failed or unsupported receipts with bounded operational failure codes.
 - [x] B230 add focused lifecycle acceptance and reach the B221-B230 publication boundary.
 - [ ] Pass the complete exact-head gate, push B226-B230, publish B221-B230 once, verify exact live identity and run the full authenticated Chrome smoke.
+
+Block 46 gate repair: regenerate the Living Brief changed-path digest after the new Block 46 test and evidence files became tracked, then repeat the complete gate before push.

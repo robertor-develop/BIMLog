@@ -56339,14 +56339,16 @@
       ],
       "reason": "B226-B230 bind hosted checkout sessions, exclusive verified receipt processing, atomic checkout completion and bounded failure settlement to durable commercial authority without storing payment credentials.",
       "reviewedChangedPaths": [
+        "evidence/saas-completion-20261003/BLOCK_46_B226_B230.md",
         "evidence/saas-completion-20261003/BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-saas-completion-block46.mjs"
       ],
-      "reviewedChangeSha256": "1f92c628818434e7303f7e5dcfbf8dc03a30c03d43c627b1d211196b0813e197"
+      "reviewedChangeSha256": "9f0bbfc13adc15c367bf59dcc28dec3bfdd7d8ca6a3556e118ccf0424e405290"
     }
   ]
 }

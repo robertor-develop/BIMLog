@@ -3723,3 +3723,5 @@ The complete Block 45 gate detected and repaired a stale Living Brief commit bin
 ## 250-build SaaS Completion Block 46 — durable provider lifecycle — 2026-10-04
 
 B226-B230 bind hosted checkout sessions, exclusive verified-receipt claims, exact metadata lineage, atomic checkout/order/subscription completion and bounded failed or ignored receipt settlement to persistent commercial authority. No card credential or provider secret is stored. Focused behavior and strict API typechecks pass. B221-B230 now reach the required ten-build publication and authenticated Chrome boundary.
+
+The Block 46 gate detected that the pre-commit Living Brief state omitted the then-untracked focused test and evidence files from its changed-path digest. The state is regenerated after those files became tracked; product behavior and publication scope are unchanged.
