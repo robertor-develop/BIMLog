@@ -13,6 +13,7 @@ import {readCustomerBillingHistory} from "../lib/commercial-billing-history";
 import {parseBillingHistoryQuery} from "../lib/commercial-billing-history-query";
 import {deriveCommercialLaunchActivation} from "../lib/commercial-launch-activation";
 import {verifyCommercialLaunchLive} from "../lib/commercial-launch-live-verification";
+import {readCommercialLaunchVerificationHistory,recordCommercialLaunchVerification} from "../lib/commercial-launch-verification-store";
 
 const router:IRouter=Router();
 
@@ -22,9 +23,14 @@ router.get("/admin/commercial-launch",authMiddleware,isSuperAdminMiddleware,(_re
   res.json(deriveCommercialLaunchActivation(process.env));
 });
 
-router.post("/admin/commercial-launch/verify",authMiddleware,isSuperAdminMiddleware,async(_req,res)=>{
+router.post("/admin/commercial-launch/verify",authMiddleware,isSuperAdminMiddleware,async(req,res)=>{
   res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
-  try{res.json(await verifyCommercialLaunchLive(process.env));}catch{res.status(503).json({code:"COMMERCIAL_LIVE_VERIFICATION_UNAVAILABLE",error:"Provider verification is temporarily unavailable."});}
+  try{const live=await verifyCommercialLaunchLive(process.env);const receipt=await recordCommercialLaunchVerification(pool,req.user!.userId,live);res.json({...live,receipt});}catch{res.status(503).json({code:"COMMERCIAL_LIVE_VERIFICATION_UNAVAILABLE",error:"Provider verification is temporarily unavailable."});}
+});
+
+router.get("/admin/commercial-launch/verifications",authMiddleware,isSuperAdminMiddleware,async(_req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
+  try{res.json({items:await readCommercialLaunchVerificationHistory(pool,10)});}catch{res.status(503).json({code:"COMMERCIAL_VERIFICATION_HISTORY_UNAVAILABLE",error:"Commercial verification history is temporarily unavailable."});}
 });
 
 router.get("/commercial/workspace",authMiddleware,async(req,res)=>{

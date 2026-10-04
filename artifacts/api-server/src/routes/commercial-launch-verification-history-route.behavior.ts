@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+
+const source=fs.readFileSync(new URL("./commercial-workspace.ts",import.meta.url),"utf8");
+assert.match(source,/router\.post\("\/admin\/commercial-launch\/verify",authMiddleware,isSuperAdminMiddleware/);
+assert.match(source,/recordCommercialLaunchVerification\(pool,req\.user!\.userId,live\)/);
+assert.match(source,/router\.get\("\/admin\/commercial-launch\/verifications",authMiddleware,isSuperAdminMiddleware/);
+assert.match(source,/readCommercialLaunchVerificationHistory\(pool,10\)/);
+assert.match(source,/Cache-Control","private, no-store, max-age=0/);
+console.log("B273 protected commercial verification history routes: PASS");
