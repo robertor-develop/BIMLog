@@ -721,19 +721,37 @@
 }
 
 .lens-next-route-state {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 100vh;
   display: grid;
   place-content: center;
   gap: 0.5rem;
   padding: 2rem;
+  overflow-x: hidden;
   color: #17324d;
   background: #f5f7fa;
   text-align: center;
 }
 
+.lens-next-route-state select {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .lens-next-route-state span,
 .lens-next-route-state small {
   color: #64748b;
+}
+
+@media (max-width: 420px) {
+  .lens-next-route-state {
+    padding: 1rem;
+  }
 }
 
 .lens-next__active-model {
