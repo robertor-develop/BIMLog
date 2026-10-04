@@ -56853,8 +56853,8 @@
     },
     {
       "taskId": "saas-block54-current-live-source-verification",
-      "reviewedThroughCommit": "734a4377babb354b5642fa9fd80ce81f1a0fbc28",
-      "reviewedAt": "2026-10-04T15:24:00.000Z",
+      "reviewedThroughCommit": "07cb06a052da40e503481fd36cba603447c5fae1",
+      "reviewedAt": "2026-10-04T15:43:00.000Z",
       "status": "candidate",
       "authorities": [
         {
@@ -56898,13 +56898,13 @@
           "key": "standards_register"
         },
         {
-          "result": "reviewed_no_semantic_change",
-          "reason": "The accepted repair commit already records the reproduced defect, correction and pending repeat release gates; this seal changes only freshness metadata.",
+          "result": "updated",
+          "reason": "The narrative records the actual complete-gate failure, its focused repair and the required complete-gate repeat.",
           "key": "status"
         },
         {
-          "result": "reviewed_no_semantic_change",
-          "reason": "The accepted repair commit already records the reproduced defect, correction and pending repeat release gates; this seal changes only freshness metadata.",
+          "result": "updated",
+          "reason": "The narrative records the actual complete-gate failure, its focused repair and the required complete-gate repeat.",
           "key": "open_loop"
         },
         {
@@ -56913,11 +56913,14 @@
           "key": "audit"
         }
       ],
-      "reason": "The accepted exact-390 Lens Next repair is fully reconciled; this seal changes only freshness metadata.",
+      "reason": "The Block 54 exact-390 repair now preserves the established responsive acceptance structure; both focused Lens responsive contracts pass.",
       "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "9d475c65ce9f5ecf9ee3c2a83ede4f7cda959f3d756cba81222e512a49fa7731"
     }
   ]
 }
