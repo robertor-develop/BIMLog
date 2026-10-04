@@ -3757,3 +3757,7 @@ B246-B250 make the company billing history usable beyond the first fixed result 
 ## SaaS Completion Block 51 — commercial launch activation — 2026-10-04
 
 B251-B255 convert the existing Stripe, catalog, webhook, portal and SendGrid readiness checks into a secret-free operator activation plan. Only an authenticated Super Admin can read the new launch endpoint. Total Control presents the exact BIMLog-owned actions and configuration key names in English and Spanish, while the release preflight can fail closed when live sales services are incomplete. No credential value reaches the browser or release output, and this block does not claim that external provider configuration is complete. This is the first five-build block after the accepted B241-B250 publication and remains unpublished until B260.
+
+## SaaS Completion Block 52 — live commercial service verification — 2026-10-04
+
+B256-B260 verify that configured commercial resources exist and are usable before launch. The server performs bounded read-only checks for the Stripe account, all six recurring catalog prices, the exact production webhook, an active billing portal configuration, the SendGrid account, verified sender and support inbox. Only an authenticated Super Admin can start verification or see secret-free results. Total Control reports each check in English and Spanish without exposing provider identifiers or credentials. Verification creates no charge, subscription, portal session or email. B251-B260 reach the required ten-build publication and authenticated Chrome boundary.

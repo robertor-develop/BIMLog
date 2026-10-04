@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 732,
-    "frontendApiReferences": 285,
+    "apiRoutes": 733,
+    "frontendApiReferences": 286,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -2175,6 +2175,15 @@
     {
       "method": "GET",
       "path": "/admin/commercial-launch",
+      "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "tables": [
+        "companiesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/commercial-launch/verify",
       "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
       "tables": [
         "companiesTable",
@@ -9446,6 +9455,10 @@
     {
       "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/commercial-launch"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/commercial-launch/verify"
     },
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",

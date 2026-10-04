@@ -4492,3 +4492,12 @@ The Block 48 state seal keeps the ten-build publication and authenticated Chrome
 - [x] B254 add the bilingual Commercial Launch control surface to Total Control.
 - [x] B255 add the fail-closed live-sales preflight and focused block acceptance.
 - [ ] Pass the complete exact-head gate and push B251-B255 once. Publication and authenticated Chrome remain reserved for B260.
+
+## SaaS Completion Block 52 — live commercial service verification — 2026-10-04
+
+- [x] B256 add bounded read-only provider verification transport with allowlists, timeouts and response limits.
+- [x] B257 verify the Stripe account and all six recurring USD plan prices in the expected mode.
+- [x] B258 verify the exact production Stripe webhook and active billing portal configuration.
+- [x] B259 verify the SendGrid account, configured sender and support inbox without sending email.
+- [x] B260 expose protected Super Admin verification and bilingual Total Control results.
+- [ ] Pass the complete exact-head gate, push B256-B260, publish accumulated B251-B260, verify exact live identity and run the full authenticated Chrome smoke.

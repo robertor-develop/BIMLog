@@ -73,6 +73,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/clash_reports.ts
 - artifacts/api-server/src/routes/commercial-billing-history-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-activation-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-launch-live-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-provider-webhook.ts
 - artifacts/api-server/src/routes/commercial-workspace.behavior.ts
 - artifacts/api-server/src/routes/commercial-workspace.ts
@@ -357,6 +358,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-invoice-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-launch-activation.behavior.ts
 - artifacts/api-server/src/lib/commercial-launch-activation.ts
+- artifacts/api-server/src/lib/commercial-launch-live-verification.behavior.ts
+- artifacts/api-server/src/lib/commercial-launch-live-verification.ts
+- artifacts/api-server/src/lib/commercial-launch-verification-transport.behavior.ts
+- artifacts/api-server/src/lib/commercial-launch-verification-transport.ts
 - artifacts/api-server/src/lib/commercial-order-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-persistence.behavior.ts
 - artifacts/api-server/src/lib/commercial-persistence.ts
@@ -378,6 +383,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-sales-inquiry.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry.ts
 - artifacts/api-server/src/lib/commercial-seat-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-sendgrid-live-verification.behavior.ts
+- artifacts/api-server/src/lib/commercial-sendgrid-live-verification.ts
+- artifacts/api-server/src/lib/commercial-stripe-live-verification.behavior.ts
+- artifacts/api-server/src/lib/commercial-stripe-live-verification.ts
+- artifacts/api-server/src/lib/commercial-stripe-service-verification.behavior.ts
+- artifacts/api-server/src/lib/commercial-stripe-service-verification.ts
 - artifacts/api-server/src/lib/commercial-subscription-migration.ts
 - artifacts/api-server/src/lib/commercial-subscription-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-support-case-schema.behavior.ts
