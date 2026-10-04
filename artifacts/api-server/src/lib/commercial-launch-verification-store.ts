@@ -29,3 +29,9 @@ export async function readCommercialLaunchVerificationHistory(client:Verificatio
   const result=await client.query(`SELECT * FROM commercial_launch_verifications ORDER BY checked_at DESC,id DESC LIMIT $1`,[limit]);
   return result.rows.map(mapRow);
 }
+
+export async function readLatestCommercialLaunchVerification(client:VerificationClient){
+  const result=await client.query(`SELECT * FROM commercial_launch_verifications ORDER BY checked_at DESC,id DESC LIMIT 1`);
+  if(result.rows.length>1)throw new Error("Latest commercial verification query is invalid");
+  return result.rows.length===0?null:mapRow(result.rows[0]);
+}
