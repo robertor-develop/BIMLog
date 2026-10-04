@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {parseCommercialLaunch} from "./commercial-launch-client";
+import {parseCommercialLaunch,parseCommercialLiveVerification} from "./commercial-launch-client";
 const steps=["catalog","provider","live_mode","webhook","portal","support"].map(id=>({id,status:"ready",owner:"bimlog_platform",title:id,configurationKeys:[]}));
 const ready=parseCommercialLaunch({status:"ready",providerMode:"live",ready:true,steps,requiredActionCount:0,checkedAt:"2026-10-04T12:00:00.000Z"});
 assert.equal(ready.steps.length,6);
@@ -7,4 +7,5 @@ assert.throws(()=>parseCommercialLaunch({...ready,requiredActionCount:1}),/contr
 assert.throws(()=>parseCommercialLaunch({...ready,steps:ready.steps.slice(0,5)}),/invalid/);
 assert.throws(()=>parseCommercialLaunch({...ready,steps:ready.steps.map((step,index)=>index?step:{...step,configurationKeys:["ACTUAL_SECRET_VALUE"]})}),/step/);
 assert.throws(()=>parseCommercialLaunch({...ready,providerMode:"sandbox"}),/invalid/);
+const live=parseCommercialLiveVerification({status:"verified",verified:true,checks:[{id:"stripe_account",status:"verified",code:"stripe_account_verified"}],checkedAt:"2026-10-04T12:00:00.000Z"});assert.equal(live.verified,true);assert.throws(()=>parseCommercialLiveVerification({...live,verified:false}),/contradictory/);assert.throws(()=>parseCommercialLiveVerification({...live,checks:[{id:"",status:"verified",code:"ok"}]}),/check/);
 console.log("B253 strict commercial launch browser contract: PASS");

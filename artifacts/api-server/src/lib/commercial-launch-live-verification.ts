@@ -1,0 +1,6 @@
+import {deriveCommercialLaunchActivation} from "./commercial-launch-activation";import {createCommercialVerificationTransport,type CommercialVerificationTransport} from "./commercial-launch-verification-transport";import {verifyStripeAccountAndCatalog,type CommercialLiveCheck} from "./commercial-stripe-live-verification";import {verifyStripeWebhookAndPortal} from "./commercial-stripe-service-verification";import {verifySendGridSupport} from "./commercial-sendgrid-live-verification";
+export async function verifyCommercialLaunchLive(environment:NodeJS.ProcessEnv,transport:CommercialVerificationTransport=createCommercialVerificationTransport()){
+  const activation=deriveCommercialLaunchActivation(environment);if(!activation.ready)return Object.freeze({status:"configuration_blocked" as const,verified:false,checks:Object.freeze([] as CommercialLiveCheck[]),checkedAt:new Date().toISOString()});
+  const checks=Object.freeze((await Promise.all([verifyStripeAccountAndCatalog(environment,transport),verifyStripeWebhookAndPortal(environment,transport),verifySendGridSupport(environment,transport)])).flat()),verified=checks.every(item=>item.status==="verified");
+  return Object.freeze({status:verified?"verified" as const:"failed" as const,verified,checks,checkedAt:new Date().toISOString()});
+}

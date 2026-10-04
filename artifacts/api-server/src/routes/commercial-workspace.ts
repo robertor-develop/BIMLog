@@ -12,6 +12,7 @@ import {startCommercialBillingPortal} from "../lib/commercial-portal-command";
 import {readCustomerBillingHistory} from "../lib/commercial-billing-history";
 import {parseBillingHistoryQuery} from "../lib/commercial-billing-history-query";
 import {deriveCommercialLaunchActivation} from "../lib/commercial-launch-activation";
+import {verifyCommercialLaunchLive} from "../lib/commercial-launch-live-verification";
 
 const router:IRouter=Router();
 
@@ -19,6 +20,11 @@ router.get("/admin/commercial-launch",authMiddleware,isSuperAdminMiddleware,(_re
   res.set("Cache-Control","private, no-store, max-age=0");
   res.set("Vary","Authorization");
   res.json(deriveCommercialLaunchActivation(process.env));
+});
+
+router.post("/admin/commercial-launch/verify",authMiddleware,isSuperAdminMiddleware,async(_req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
+  try{res.json(await verifyCommercialLaunchLive(process.env));}catch{res.status(503).json({code:"COMMERCIAL_LIVE_VERIFICATION_UNAVAILABLE",error:"Provider verification is temporarily unavailable."});}
 });
 
 router.get("/commercial/workspace",authMiddleware,async(req,res)=>{
