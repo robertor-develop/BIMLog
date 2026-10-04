@@ -74,6 +74,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/commercial-billing-history-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-activation-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-live-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-launch-verification-history-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-provider-webhook.ts
 - artifacts/api-server/src/routes/commercial-workspace.behavior.ts
 - artifacts/api-server/src/routes/commercial-workspace.ts
@@ -362,6 +363,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-launch-live-verification.ts
 - artifacts/api-server/src/lib/commercial-launch-verification-evidence.behavior.ts
 - artifacts/api-server/src/lib/commercial-launch-verification-evidence.ts
+- artifacts/api-server/src/lib/commercial-launch-verification-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-launch-verification-store.behavior.ts
+- artifacts/api-server/src/lib/commercial-launch-verification-store.ts
 - artifacts/api-server/src/lib/commercial-launch-verification-transport.behavior.ts
 - artifacts/api-server/src/lib/commercial-launch-verification-transport.ts
 - artifacts/api-server/src/lib/commercial-order-schema.behavior.ts
