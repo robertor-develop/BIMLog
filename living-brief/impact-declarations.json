@@ -56352,8 +56352,8 @@
     },
     {
       "taskId": "saas-block47-commercial-provider-boundary",
-      "reviewedThroughCommit": "0e7ce0de1254315b2fb52d05001e312fc05616f1",
-      "reviewedAt": "2026-10-04T05:46:48.000Z",
+      "reviewedThroughCommit": "7e3b3951a9c536bd031f59758537b9d8d8a6bd6f",
+      "reviewedAt": "2026-10-04T06:33:33.000Z",
       "status": "candidate",
       "authorities": [
         {
@@ -56412,14 +56412,14 @@
           "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
         }
       ],
-      "reason": "B231-B235 connect exact Stripe signature verification, active company binding, durable replay-safe receipts and one-time checkout completion without storing payment credentials.",
+      "reason": "B231-B235 connect exact Stripe verification, durable processing and one-time checkout completion; the final narrative binding follows the generated inventory refresh.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "ce517445dd83474a3e8f7b5a50214deb84183c37fd1002f723ecc01cf749b157"
+      "reviewedChangeSha256": "76f2eb7a68eefa7905aa979828423d9c7b9fa89998d6dcdce47bd871735dd626"
     }
   ]
 }
