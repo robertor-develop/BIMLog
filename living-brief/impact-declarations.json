@@ -57202,6 +57202,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "saas-block58-company-subscription-checkout-continuity",
+      "reviewedThroughCommit": "9bc39558a7a1b8f52dd123a74dcd1b6ee5b33190",
+      "reviewedAt": "2026-10-04T21:00:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves human authority and durable company-scoped commercial records."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block follows the authorized five-build push and ten-build publication cadence."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block strengthens fail-closed checkout validation, continuity and deterministic acceptance coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block advances the approved sellable SaaS direction without changing BIMLog product strategy."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The company subscription and checkout handoff extend the documented commercial platform flow."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block changes no Native, bridge, installer, Autodesk or Navisworks behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block creates no formal customer PDF, spreadsheet or issued project report."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block introduces no external standard, certification or compliance claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records implemented B286-B290 company subscription checkout continuity and the publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records Block 58 completion, publication work and the remaining live-provider configuration blocker."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves company scope and exposes no provider credentials or payment details."
+        }
+      ],
+      "reason": "B286-B290 separate global catalog readiness from actual company subscription truth and preserve paid-offer continuity through exact checkout preparation.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9afdd4cf0639c638581d2374f1e531b4dc950c80c5424609d5f344f8c155c0b0"
     }
   ]
 }

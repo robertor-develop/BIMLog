@@ -3795,3 +3795,5 @@ B281-B285 preserve a strict time-bounded selected offer through registration and
 ## SaaS Completion Block 58 — company subscription checkout continuity — 2026-10-04
 
 B286-B290 separate the global plan catalog from each authenticated company’s durable subscription truth, expose the active provider-customer binding, and fail checkout eligibility closed unless the exact company is prepared. Unprepared companies retain their selected offer and move into the durable sales setup flow instead of reaching a rejected checkout. B281-B290 now reach the required ten-build publication and authenticated Chrome boundary. Live Stripe and SendGrid verification remains the commercial launch blocker.
+
+The B290 product checkpoint is `9bc39558a7a1b8f52dd123a74dcd1b6ee5b33190`; exact-head validation, push, publication and authenticated Chrome remain the active acceptance sequence.

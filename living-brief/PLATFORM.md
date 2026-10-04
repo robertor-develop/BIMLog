@@ -77,6 +77,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/commercial-launch-live-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-verification-history-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-provider-webhook.ts
+- artifacts/api-server/src/routes/commercial-workspace-subscription-truth.behavior.ts
 - artifacts/api-server/src/routes/commercial-workspace.behavior.ts
 - artifacts/api-server/src/routes/commercial-workspace.ts
 - artifacts/api-server/src/routes/company-master-catalogs.ts
