@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import {parseCommercialLaunch,parseCommercialLiveVerification} from "./commercial-launch-client";
+import {evaluateCommercialVerificationEvidence,parseCommercialLaunch,parseCommercialLiveVerification} from "./commercial-launch-client";
 const steps=["catalog","provider","live_mode","webhook","portal","support"].map(id=>({id,status:"ready",owner:"bimlog_platform",title:id,configurationKeys:[]}));
 const ready=parseCommercialLaunch({status:"ready",providerMode:"live",ready:true,steps,requiredActionCount:0,checkedAt:"2026-10-04T12:00:00.000Z"});
 assert.equal(ready.steps.length,6);
@@ -9,4 +9,8 @@ assert.throws(()=>parseCommercialLaunch({...ready,steps:ready.steps.map((step,in
 assert.throws(()=>parseCommercialLaunch({...ready,providerMode:"sandbox"}),/invalid/);
 const checkedAt="2026-10-04T12:00:00.000Z",checks=[{id:"stripe_account",status:"verified",code:"stripe_account_verified"}],evidence={schemaVersion:"bimlog-commercial-verification-v1",sourceCommit:"a".repeat(40),status:"verified",verified:true,checkedAt,validUntil:"2026-10-04T12:15:00.000Z",checkCount:1,failedCheckIds:[],evidenceSha256:"b".repeat(64)};
 const live=parseCommercialLiveVerification({status:"verified",verified:true,checks,checkedAt,evidence});assert.equal(live.evidence?.sourceCommit,"a".repeat(40));assert.throws(()=>parseCommercialLiveVerification({...live,verified:false}),/evidence|contradictory/);assert.throws(()=>parseCommercialLiveVerification({...live,checks:[{id:"",status:"verified",code:"ok"}]}),/check/);assert.throws(()=>parseCommercialLiveVerification({...live,evidence:{...evidence,checkCount:2}}),/evidence/);
-console.log("B253 strict commercial launch browser contract: PASS");
+assert.deepEqual(evaluateCommercialVerificationEvidence(live,"a".repeat(40),new Date("2026-10-04T12:10:00.000Z")),{status:"current",ready:true});
+assert.equal(evaluateCommercialVerificationEvidence(live,"c".repeat(40),new Date("2026-10-04T12:10:00.000Z")).status,"source_mismatch");
+assert.equal(evaluateCommercialVerificationEvidence(live,"a".repeat(40),new Date("2026-10-04T12:15:00.000Z")).status,"expired");
+assert.equal(evaluateCommercialVerificationEvidence({...live,evidence:null},"a".repeat(40)).status,"missing");
+console.log("B266 source-bound commercial evidence decision: PASS");
