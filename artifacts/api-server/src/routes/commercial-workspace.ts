@@ -13,7 +13,9 @@ import {readCustomerBillingHistory} from "../lib/commercial-billing-history";
 import {parseBillingHistoryQuery} from "../lib/commercial-billing-history-query";
 import {deriveCommercialLaunchActivation} from "../lib/commercial-launch-activation";
 import {verifyCommercialLaunchLive} from "../lib/commercial-launch-live-verification";
-import {readCommercialLaunchVerificationHistory,recordCommercialLaunchVerification} from "../lib/commercial-launch-verification-store";
+import {readCommercialLaunchVerificationHistory,readLatestCommercialLaunchVerification,recordCommercialLaunchVerification} from "../lib/commercial-launch-verification-store";
+import {deriveCommercialLaunchAuthorization} from "../lib/commercial-launch-authorization";
+import {resolveReleaseMetadata} from "../lib/release-metadata";
 
 const router:IRouter=Router();
 
@@ -31,6 +33,11 @@ router.post("/admin/commercial-launch/verify",authMiddleware,isSuperAdminMiddlew
 router.get("/admin/commercial-launch/verifications",authMiddleware,isSuperAdminMiddleware,async(_req,res)=>{
   res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
   try{res.json({items:await readCommercialLaunchVerificationHistory(pool,10)});}catch{res.status(503).json({code:"COMMERCIAL_VERIFICATION_HISTORY_UNAVAILABLE",error:"Commercial verification history is temporarily unavailable."});}
+});
+
+router.get("/admin/commercial-launch/authorization",authMiddleware,isSuperAdminMiddleware,async(_req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
+  try{const receipt=await readLatestCommercialLaunchVerification(pool);res.json(deriveCommercialLaunchAuthorization({sourceCommit:resolveReleaseMetadata(process.env).sourceCommit,receipt}));}catch{res.status(503).json({code:"COMMERCIAL_LAUNCH_AUTHORIZATION_UNAVAILABLE",error:"Commercial launch authorization is temporarily unavailable."});}
 });
 
 router.get("/commercial/workspace",authMiddleware,async(req,res)=>{
