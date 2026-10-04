@@ -199,3 +199,33 @@ export const commercialCreditNotesTable=pgTable("commercial_credit_notes",{
 ]);
 
 export type CommercialCreditNoteRecord=typeof commercialCreditNotesTable.$inferSelect;
+
+export const commercialDisputesTable=pgTable("commercial_disputes",{
+  id:text("id").primaryKey(),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  subscriptionId:text("subscription_id").notNull().references(()=>commercialSubscriptionsTable.id),
+  invoiceId:text("invoice_id").notNull().references(()=>commercialInvoicesTable.id),
+  provider:text("provider").notNull(),
+  providerDisputeReference:text("provider_dispute_reference").notNull(),
+  currency:text("currency").notNull(),
+  amountCents:integer("amount_cents").notNull(),
+  reasonCode:text("reason_code").notNull(),
+  status:text("status").notNull(),
+  evidenceDueAt:timestamp("evidence_due_at",{withTimezone:true}),
+  closedAt:timestamp("closed_at",{withTimezone:true}),
+  revision:integer("revision").notNull().default(1),
+  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+  updatedAt:timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_disputes_provider_chk",sql`${table.provider} in ('stripe')`),
+  check("commercial_disputes_currency_chk",sql`${table.currency} ~ '^[A-Z]{3}$'`),
+  check("commercial_disputes_amount_chk",sql`${table.amountCents}>0`),
+  check("commercial_disputes_status_chk",sql`${table.status} in ('needs_response','under_review','won','lost','withdrawn')`),
+  check("commercial_disputes_closed_chk",sql`${table.status} in ('needs_response','under_review') or ${table.closedAt} is not null`),
+  check("commercial_disputes_revision_chk",sql`${table.revision}>0`),
+  uniqueIndex("commercial_disputes_provider_ref_uidx").on(table.provider,table.providerDisputeReference),
+  index("commercial_disputes_company_status_idx").on(table.companyId,table.status,table.updatedAt.desc()),
+  index("commercial_disputes_invoice_idx").on(table.invoiceId),
+]);
+
+export type CommercialDisputeRecord=typeof commercialDisputesTable.$inferSelect;
