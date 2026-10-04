@@ -4446,3 +4446,5 @@ Block 46 is accepted live at source `a29f6f2a86d1d5a43e389cca1b9144e488b276bb`, 
 - [x] B234 expose the bounded public Stripe endpoint with secret-safe responses.
 - [x] B235 add focused behavior, release evidence and complete-gate registration.
 - [ ] Pass the complete exact-head gate and push B231-B235 once. Publication remains reserved for B240.
+
+Block 47 gate repair binds STATUS and OPEN_LOOP at or after the deterministic platform-inventory refresh, then repeats the complete exact-head gate before push.

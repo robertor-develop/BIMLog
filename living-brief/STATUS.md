@@ -3731,3 +3731,5 @@ Block 46 is accepted live at exact source `a29f6f2a86d1d5a43e389cca1b9144e488b27
 ## 250-build SaaS Completion Block 47 — verified commercial provider boundary — 2026-10-04
 
 B231-B235 connect the governed Stripe adapter to persistent commercial authority through an exact raw-body webhook boundary. Signatures and replay time are verified before parsing, active provider/customer binding determines company scope, receipts are durable and replay-safe, checkout completion applies once with exact lineage, and unsupported or failed events settle to bounded terminal evidence. Focused behavior and strict typechecks are required before push. This is the first five-build block after the accepted B221-B230 publication and remains unpublished until B240.
+
+Block 47 reconciliation refreshes the deterministic platform and route inventories after registering the webhook route; this changes no additional product behavior or publication cadence.
