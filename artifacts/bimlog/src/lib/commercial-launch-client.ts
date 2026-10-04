@@ -1,0 +1,13 @@
+export type CommercialLaunchStepDto={id:"catalog"|"provider"|"live_mode"|"webhook"|"portal"|"support";status:"ready"|"action_required";owner:"bimlog_platform";title:string;configurationKeys:string[]};
+export type CommercialLaunchDto={status:"ready"|"test_only"|"blocked";providerMode:"test"|"live"|"unavailable";ready:boolean;steps:CommercialLaunchStepDto[];requiredActionCount:number;checkedAt:string};
+const ids=["catalog","provider","live_mode","webhook","portal","support"] as const;
+const allowedKeys=new Set(["BIMLOG_STRIPE_PRICE_IDS","BIMLOG_COMMERCIAL_MODE","STRIPE_SECRET_KEY","BIMLOG_APP_ORIGIN","STRIPE_WEBHOOK_SECRET","STRIPE_PORTAL_CONFIGURATION_ID","SENDGRID_API_KEY","BIMLOG_SUPPORT_FROM_EMAIL","BIMLOG_SUPPORT_INBOX_EMAIL"]);
+export function parseCommercialLaunch(value:unknown):CommercialLaunchDto{
+  if(!value||typeof value!=="object")throw new Error("Commercial launch status is invalid.");
+  const item=value as Record<string,unknown>,steps=item.steps;
+  if(!["ready","test_only","blocked"].includes(String(item.status))||!["test","live","unavailable"].includes(String(item.providerMode))||typeof item.ready!=="boolean"||!Array.isArray(steps)||steps.length!==ids.length||!Number.isInteger(item.requiredActionCount)||typeof item.checkedAt!=="string"||!Number.isFinite(Date.parse(item.checkedAt)))throw new Error("Commercial launch status is invalid.");
+  const parsed=steps.map((raw,index)=>{if(!raw||typeof raw!=="object")throw new Error("Commercial launch step is invalid.");const step=raw as Record<string,unknown>;if(step.id!==ids[index]||!["ready","action_required"].includes(String(step.status))||step.owner!=="bimlog_platform"||typeof step.title!=="string"||!step.title.trim()||!Array.isArray(step.configurationKeys)||step.configurationKeys.some(key=>typeof key!=="string"||!allowedKeys.has(key)))throw new Error("Commercial launch step is invalid.");return step as unknown as CommercialLaunchStepDto;});
+  const required=parsed.filter(step=>step.status==="action_required").length;
+  if(required!==item.requiredActionCount||item.ready!==(item.status==="ready")||(item.status==="ready"&&required!==0))throw new Error("Commercial launch status is contradictory.");
+  return {...item,steps:parsed,requiredActionCount:required} as CommercialLaunchDto;
+}

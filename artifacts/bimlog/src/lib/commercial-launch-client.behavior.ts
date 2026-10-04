@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import {parseCommercialLaunch} from "./commercial-launch-client";
+const steps=["catalog","provider","live_mode","webhook","portal","support"].map(id=>({id,status:"ready",owner:"bimlog_platform",title:id,configurationKeys:[]}));
+const ready=parseCommercialLaunch({status:"ready",providerMode:"live",ready:true,steps,requiredActionCount:0,checkedAt:"2026-10-04T12:00:00.000Z"});
+assert.equal(ready.steps.length,6);
+assert.throws(()=>parseCommercialLaunch({...ready,requiredActionCount:1}),/contradictory/);
+assert.throws(()=>parseCommercialLaunch({...ready,steps:ready.steps.slice(0,5)}),/invalid/);
+assert.throws(()=>parseCommercialLaunch({...ready,steps:ready.steps.map((step,index)=>index?step:{...step,configurationKeys:["ACTUAL_SECRET_VALUE"]})}),/step/);
+assert.throws(()=>parseCommercialLaunch({...ready,providerMode:"sandbox"}),/invalid/);
+console.log("B253 strict commercial launch browser contract: PASS");
