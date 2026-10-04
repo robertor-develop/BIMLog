@@ -6,6 +6,7 @@
   "impact": {
     "baselineCommit": "e4b63ddb2f8adf8a573d594b03207295eaab4ed1",
     "changedPaths": [
+      "evidence/saas-completion-20261003/BLOCK_49_B241_B245.md",
       "evidence/saas-completion-20261003/BUILD_LEDGER.json",
       "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
       "living-brief/OPEN_LOOP.md",
@@ -13,7 +14,8 @@
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
-      "package.json"
+      "package.json",
+      "scripts/test-saas-completion-block49.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",

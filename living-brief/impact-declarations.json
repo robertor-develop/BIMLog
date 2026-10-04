@@ -56558,6 +56558,7 @@
       ],
       "reason": "B241-B245 connect existing company-scoped invoices, credits and disputes to a strict bilingual customer history while withholding provider secrets and payment-method data.",
       "reviewedChangedPaths": [
+        "evidence/saas-completion-20261003/BLOCK_49_B241_B245.md",
         "evidence/saas-completion-20261003/BUILD_LEDGER.json",
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
@@ -56565,9 +56566,10 @@
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-saas-completion-block49.mjs"
       ],
-      "reviewedChangeSha256": "d63d081fbf58cdfd4c40562db8826b9ad37f93e3393cba65cc097d5512ceb66b"
+      "reviewedChangeSha256": "ef84b54e1313793d04e73fa4b89d68e7e72efc36566bf06dd0dc84ece745105f"
     }
   ]
 }
