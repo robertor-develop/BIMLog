@@ -57,6 +57,15 @@ export async function createPersistentOrderCheckout(client: CommercialQueryClien
   } catch (error) { await client.query("ROLLBACK"); throw error; }
 }
 
+export async function bindPersistentCheckoutSession(client:CommercialQueryClient,input:Readonly<{companyId:number;checkoutId:string;providerBindingId:string;providerSessionReference:string;expiresAt:string}>):Promise<Readonly<{checkoutId:string;status:"open"}>>{
+  positiveInteger(input.companyId,"Company identity");id(input.checkoutId,"Checkout identity");id(input.providerBindingId,"Provider binding identity");
+  if(!/^cs_[A-Za-z0-9_]+$/.test(input.providerSessionReference))throw new Error("Provider checkout session identity is invalid");
+  const expiresAt=new Date(input.expiresAt);if(!Number.isFinite(expiresAt.getTime()))throw new Error("Provider checkout expiry is invalid");
+  const updated=await client.query(`UPDATE commercial_checkout_attempts SET provider_session_reference=$4,status='open',expires_at=$5,updated_at=now() WHERE id=$1 AND company_id=$2 AND provider_binding_id=$3 AND status='creating' RETURNING id`,[input.checkoutId,input.companyId,input.providerBindingId,input.providerSessionReference,expiresAt.toISOString()]);
+  if(!updated.rows[0])throw new Error("Checkout attempt is not ready for provider binding");
+  return Object.freeze({checkoutId:id(updated.rows[0].id,"Checkout identity"),status:"open" as const});
+}
+
 export type PersistentProviderReceiptInput = Readonly<{ id:string; companyId:number; providerBindingId:string; providerEventReference:string; eventType:string; rawPayload:string; payloadDigest:string; signatureVerifiedAt:string }>;
 export async function persistVerifiedProviderReceipt(client:CommercialQueryClient,input:PersistentProviderReceiptInput):Promise<Readonly<{id:string;replayed:boolean}>>{
   positiveInteger(input.companyId,"Company identity");id(input.id,"Receipt identity");id(input.providerBindingId,"Provider binding identity");id(input.providerEventReference,"Provider event identity");

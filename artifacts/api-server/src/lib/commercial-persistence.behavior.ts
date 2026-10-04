@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { createPersistentOrderCheckout, persistPaidInvoiceWithAudit, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
+import { bindPersistentCheckoutSession, createPersistentOrderCheckout, persistPaidInvoiceWithAudit, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
 
 const calls: { text: string; values?: readonly unknown[] }[] = [];
 const client: CommercialQueryClient = { async query(text, values) {
@@ -65,3 +65,10 @@ assert.ok(invoiceWrites.some(query=>query.includes("processing_status='applied'"
 assert.equal(invoiceWrites.at(-1),"COMMIT");
 
 console.log("COMMERCIAL_PERSISTENCE_B224=PASS");
+
+const checkoutBindingCalls:string[]=[];
+const checkoutBinding=await bindPersistentCheckoutSession({async query(text){checkoutBindingCalls.push(text);return {rows:[{id:"checkout-company-7"}],rowCount:1};}},{companyId:7,checkoutId:"checkout-company-7",providerBindingId:"binding-company-7",providerSessionReference:"cs_company_7",expiresAt:"2099-10-04T12:00:00Z"});
+assert.deepEqual(checkoutBinding,{checkoutId:"checkout-company-7",status:"open"});
+assert.match(checkoutBindingCalls[0],/status='creating'/);
+await assert.rejects(()=>bindPersistentCheckoutSession({async query(){return {rows:[],rowCount:0};}},{companyId:7,checkoutId:"checkout-company-7",providerBindingId:"binding-company-7",providerSessionReference:"cs_company_7",expiresAt:"2099-10-04T12:00:00Z"}),/not ready/);
+console.log("COMMERCIAL_PERSISTENCE_B226=PASS");
