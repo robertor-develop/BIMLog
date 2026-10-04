@@ -330,6 +330,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/cloud-files.ts
 - artifacts/api-server/src/lib/commercial-billing-authority.behavior.ts
 - artifacts/api-server/src/lib/commercial-billing-authority.ts
+- artifacts/api-server/src/lib/commercial-billing-history-query.behavior.ts
+- artifacts/api-server/src/lib/commercial-billing-history-query.ts
 - artifacts/api-server/src/lib/commercial-billing-history.behavior.ts
 - artifacts/api-server/src/lib/commercial-billing-history.ts
 - artifacts/api-server/src/lib/commercial-billing-operations.behavior.ts

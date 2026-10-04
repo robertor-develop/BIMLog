@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ab07a70472741c1e9d1d864c546cf7e5b9ea3a1e864ce04cc4811010806e7cd7",
-  "itemCount": 292,
+  "sourceSha256": "2f86d4ae3caf9ea4c263ddff111996e50078f8f01fd81290eb52f92318507032",
+  "itemCount": 293,
   "counts": {
     "ACTIVE": 257,
-    "SUPERSEDED": 23,
+    "SUPERSEDED": 24,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -5325,6 +5325,24 @@
       "evidence": [
         "OPEN_LOOP.md:4476",
         "250-build SaaS Completion Block 49 — customer billing history — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "b4822612fdc8ef29",
+      "sourceLine": 4485,
+      "heading": "250-build SaaS Completion Block 50 — scalable billing history — 2026-10-04",
+      "statement": "Pass the complete exact-head gate, push B241-B250, publish once, verify exact live identity and run the full authenticated Chrome smoke.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
       ],
       "currentAuthority": false
     }

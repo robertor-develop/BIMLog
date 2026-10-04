@@ -4474,3 +4474,12 @@ The Block 48 state seal keeps the ten-build publication and authenticated Chrome
 - [x] B244 expose bilingual responsive loading, retry, empty, invoice, credit and dispute states in Billing & Support.
 - [x] B245 bind the complete focused acceptance suite and five-build release evidence.
 - [ ] Pass the complete exact-head gate and push B241-B245 once. Publication remains reserved for B250.
+
+## 250-build SaaS Completion Block 50 — scalable billing history — 2026-10-04
+
+- [x] B246 define bounded invoice-status, page and page-size query values and reject duplicate or malformed parameters.
+- [x] B247 apply authenticated company scope, exact status filtering, deterministic ordering, total count and bounded SQL pagination.
+- [x] B248 validate pagination metadata and construct strict browser requests without accepting contradictory totals.
+- [x] B249 add bilingual status filtering, exact counts, filtered-empty feedback and accessible previous/next controls.
+- [x] B250 bind focused acceptance and reach the B241-B250 ten-build publication boundary.
+- [ ] Pass the complete exact-head gate, push B241-B250, publish once, verify exact live identity and run the full authenticated Chrome smoke.
