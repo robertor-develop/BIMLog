@@ -1,6 +1,7 @@
 import {sql} from "drizzle-orm";
 import {check,index,integer,pgTable,text,timestamp,uniqueIndex} from "drizzle-orm/pg-core";
 import {companiesTable} from "./users";
+import {usersTable} from "./users";
 
 export const commercialSubscriptionsTable=pgTable("commercial_subscriptions",{
   id:text("id").primaryKey(),
@@ -45,3 +46,27 @@ export const commercialSubscriptionTermsTable=pgTable("commercial_subscription_t
 
 export type CommercialSubscription=typeof commercialSubscriptionsTable.$inferSelect;
 export type CommercialSubscriptionTerm=typeof commercialSubscriptionTermsTable.$inferSelect;
+
+export const commercialSubscriptionSeatsTable=pgTable("commercial_subscription_seats",{
+  id:text("id").primaryKey(),
+  subscriptionId:text("subscription_id").notNull().references(()=>commercialSubscriptionsTable.id),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  seatNumber:integer("seat_number").notNull(),
+  status:text("status").notNull(),
+  assignedUserId:integer("assigned_user_id").references(()=>usersTable.id),
+  assignedAt:timestamp("assigned_at",{withTimezone:true}),
+  releasedAt:timestamp("released_at",{withTimezone:true}),
+  revision:integer("revision").notNull().default(1),
+  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+  updatedAt:timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_subscription_seats_number_chk",sql`${table.seatNumber}>0`),
+  check("commercial_subscription_seats_status_chk",sql`${table.status} in ('available','assigned','released','revoked')`),
+  check("commercial_subscription_seats_assignment_chk",sql`(${table.status}='assigned' and ${table.assignedUserId} is not null and ${table.assignedAt} is not null) or (${table.status}<>'assigned')`),
+  check("commercial_subscription_seats_revision_chk",sql`${table.revision}>0`),
+  uniqueIndex("commercial_subscription_seats_number_uidx").on(table.subscriptionId,table.seatNumber),
+  uniqueIndex("commercial_subscription_seats_active_user_uidx").on(table.subscriptionId,table.assignedUserId).where(sql`${table.status}='assigned'`),
+  index("commercial_subscription_seats_company_status_idx").on(table.companyId,table.status,table.seatNumber),
+]);
+
+export type CommercialSubscriptionSeat=typeof commercialSubscriptionSeatsTable.$inferSelect;
