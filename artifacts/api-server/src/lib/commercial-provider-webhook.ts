@@ -1,14 +1,17 @@
 import crypto from "node:crypto";
 import { inspectStripeCommercialConfiguration, verifyStripeWebhook } from "./commercial-provider-adapter";
 import {
+  applyPersistentCheckoutCompletion,
+  claimPersistentProviderReceipt,
   persistVerifiedProviderReceipt,
+  settlePersistentProviderReceipt,
   type CommercialQueryClient,
 } from "./commercial-persistence";
 
 export type CommercialWebhookResult = Readonly<{
   accepted: true;
   eventId: string;
-  outcome: "applied" | "ignored" | "replayed";
+  outcome: "applied" | "failed" | "ignored" | "replayed";
 }>;
 
 type StripeCheckoutObject = Readonly<{
@@ -90,7 +93,47 @@ export async function acceptPersistentStripeWebhook(input: Readonly<{
     signatureVerifiedAt: receipt.receivedAt,
   });
   if (persisted.replayed) return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "replayed" });
-  return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "ignored" });
+  if (receipt.eventType !== "checkout.session.completed") {
+    await settlePersistentProviderReceipt(input.client, {
+      id: persisted.id,
+      companyId,
+      outcome: "ignored",
+      failureCode: "UNSUPPORTED_EVENT_TYPE",
+      processedAt: input.now.toISOString(),
+    });
+    return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "ignored" });
+  }
+
+  await claimPersistentProviderReceipt(input.client, {
+    id: persisted.id,
+    companyId,
+    expectedEventType: receipt.eventType,
+  });
+  try {
+    const object = envelope.data?.object;
+    const checkout = await input.client.query(
+      `SELECT id FROM commercial_checkout_attempts WHERE company_id=$1 AND provider_binding_id=$2 AND provider_session_reference=$3 LIMIT 1`,
+      [companyId, providerBindingId, exactId(object?.id, "COMMERCIAL_WEBHOOK_SESSION_INVALID")],
+    );
+    await applyPersistentCheckoutCompletion(input.client, {
+      companyId,
+      receiptId: persisted.id,
+      subscriptionId: exactId(object?.metadata?.subscription_id, "COMMERCIAL_WEBHOOK_SUBSCRIPTION_INVALID"),
+      orderId: exactId(object?.metadata?.order_id, "COMMERCIAL_WEBHOOK_ORDER_INVALID"),
+      checkoutId: exactId(checkout.rows[0]?.id, "COMMERCIAL_WEBHOOK_CHECKOUT_UNAVAILABLE"),
+      completedAt: input.now.toISOString(),
+    });
+    return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "applied" });
+  } catch {
+    await settlePersistentProviderReceipt(input.client, {
+      id: persisted.id,
+      companyId,
+      outcome: "failed",
+      failureCode: "LINEAGE_NOT_FOUND",
+      processedAt: input.now.toISOString(),
+    });
+    return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "failed" });
+  }
 }
 
 export const commercialWebhookInternals = Object.freeze({
