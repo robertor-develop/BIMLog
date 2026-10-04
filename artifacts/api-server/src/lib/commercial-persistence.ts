@@ -85,6 +85,16 @@ export async function persistVerifiedProviderReceipt(client:CommercialQueryClien
   return Object.freeze({id:id(inserted.rows[0].id,"Persistent receipt identity"),replayed:false});
 }
 
+export async function claimPersistentProviderReceipt(client:CommercialQueryClient,input:Readonly<{id:string;companyId:number;expectedEventType:string}>):Promise<Readonly<{id:string;rawPayload:string;payloadDigest:string}>>{
+  id(input.id,"Receipt identity");positiveInteger(input.companyId,"Company identity");
+  if(!/^[a-z][a-z0-9._]{2,119}$/.test(input.expectedEventType))throw new Error("Provider event type is invalid");
+  const claimed=await client.query(`UPDATE commercial_provider_receipts SET processing_status='processing' WHERE id=$1 AND company_id=$2 AND provider='stripe' AND event_type=$3 AND processing_status='received' RETURNING id,raw_payload,payload_digest`,[input.id,input.companyId,input.expectedEventType]);
+  const row=claimed.rows[0];if(!row)throw new Error("Provider receipt is unavailable or already claimed");
+  const rawPayload=String(row.raw_payload??""),payloadDigest=String(row.payload_digest??"");
+  if(!/^[0-9a-f]{64}$/.test(payloadDigest)||commercialPersistenceInternals.sha256(rawPayload)!==payloadDigest)throw new Error("Claimed provider receipt digest is invalid");
+  return Object.freeze({id:id(row.id,"Receipt identity"),rawPayload,payloadDigest});
+}
+
 export type PersistentPaidInvoiceInput=Readonly<{id:string;companyId:number;subscriptionId:string;orderId:string;checkoutAttemptId:string;providerReceiptId:string;invoiceNumber:string;providerInvoiceReference:string;currency:string;subtotalCents:number;taxCents:number;issuedAt:string;paidAt:string}>;
 export async function persistPaidInvoiceWithAudit(client:CommercialQueryClient,input:PersistentPaidInvoiceInput):Promise<Readonly<{invoiceId:string;auditSequence:number;eventDigest:string}>>{
   positiveInteger(input.companyId,"Company identity");for(const [value,label] of [[input.id,"Invoice identity"],[input.subscriptionId,"Subscription identity"],[input.orderId,"Order identity"],[input.checkoutAttemptId,"Checkout identity"],[input.providerReceiptId,"Provider receipt identity"],[input.invoiceNumber,"Invoice number"],[input.providerInvoiceReference,"Provider invoice identity"]] as const)id(value,label);
