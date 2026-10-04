@@ -1,0 +1,5 @@
+import assert from "node:assert/strict";import {createCommercialVerificationTransport} from "./commercial-launch-verification-transport";
+let url="",authorization="";const transport=createCommercialVerificationTransport({fetchImpl:async(input,init)=>{url=String(input);authorization=new Headers(init?.headers).get("Authorization")??"";return new Response(JSON.stringify({id:"acct_safe"}),{status:200,headers:{"content-type":"application/json"}});}});
+assert.deepEqual(await transport({provider:"stripe",path:"/v1/account",authorization:"Bearer secret-never-returned"}),{status:200,body:{id:"acct_safe"}});assert.equal(url,"https://api.stripe.com/v1/account");assert.equal(authorization,"Bearer secret-never-returned");
+await assert.rejects(()=>transport({provider:"stripe",path:"/v3/user/profile",authorization:"Bearer x"}),/provider path/);await assert.rejects(()=>transport({provider:"sendgrid",path:"/v3/../secrets",authorization:"Bearer x"}),/path/);
+assert.throws(()=>createCommercialVerificationTransport({timeoutMs:999}),/timeout/);console.log("B256 bounded read-only commercial verification transport: PASS");
