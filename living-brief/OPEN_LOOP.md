@@ -4422,3 +4422,5 @@ The B211-B220 publication boundary is accepted at source `589f5884596f6b0a8e15a8
 - [x] B224 persist paid invoices with complete commercial lineage and an ordered digest-linked audit event.
 - [x] B225 bind the persistence bridge to focused acceptance and the complete pre-push gate.
 - [ ] Push B221-B225 once. This first five-build block remains unpublished until B230.
+
+Block 45 gate repair: the reconciled Living Brief state is rebound to the final Build 225 candidate ancestor before the complete gate is repeated. This metadata repair adds no product build and does not move the B230 publication boundary.

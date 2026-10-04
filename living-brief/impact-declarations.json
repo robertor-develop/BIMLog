@@ -56206,7 +56206,7 @@
     },
     {
       "taskId": "saas-block45-durable-commercial-persistence",
-      "reviewedThroughCommit": "211eb762ec40c5ff30c01f131bd4fe10a68030da",
+      "reviewedThroughCommit": "6ed021195ef6feb2b2d2e9d8f98356fa3957d0bf",
       "reviewedAt": "2026-10-04T00:30:00.000Z",
       "status": "candidate",
       "authorities": [
@@ -56268,9 +56268,12 @@
       ],
       "reason": "B221-B225 connect the accepted commercial schema to company-scoped reads, atomic order checkout creation, verified provider receipts and paid invoice audit persistence without activating a payment provider or storing credentials.",
       "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "1a82d1001b267172e79c5b0386f5d469f2483bfb68c7daada8cdd969cfa26b68"
     }
   ]
 }
