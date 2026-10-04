@@ -4424,3 +4424,12 @@ The B211-B220 publication boundary is accepted at source `589f5884596f6b0a8e15a8
 - [ ] Push B221-B225 once. This first five-build block remains unpublished until B230.
 
 Block 45 gate repair: the reconciled Living Brief state is rebound to the final Build 225 candidate ancestor before the complete gate is repeated. This metadata repair adds no product build and does not move the B230 publication boundary.
+
+## 250-build SaaS Completion Block 46 — durable provider lifecycle — 2026-10-04
+
+- [x] B226 bind the exact hosted provider session to a creating checkout attempt.
+- [x] B227 claim each verified receipt once and recheck its immutable payload digest.
+- [x] B228 apply checkout completion atomically after exact company, order, subscription and session lineage verification.
+- [x] B229 settle failed or unsupported receipts with bounded operational failure codes.
+- [x] B230 add focused lifecycle acceptance and reach the B221-B230 publication boundary.
+- [ ] Pass the complete exact-head gate, push B226-B230, publish B221-B230 once, verify exact live identity and run the full authenticated Chrome smoke.

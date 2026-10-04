@@ -3719,3 +3719,7 @@ Block 44 is accepted live at exact source `589f5884596f6b0a8e15a8ef1d7e0e59a50a2
 B221-B225 connect the accepted commercial schema to server-side persistence contracts. Reads retain exact company scope; order and checkout creation are atomic and idempotent; provider receipts require a verified signature time and exact payload digest; paid invoices require complete subscription, order, checkout and receipt lineage and append an ordered digest-linked audit event. The bridge stores no payment credentials and does not activate Stripe or move money. Focused behavior and strict API typechecks pass. This is the first five-build block after the accepted B211-B220 publication and remains unpublished until B230.
 
 The complete Block 45 gate detected and repaired a stale Living Brief commit binding created by the final Build 225 amendment. The reconciled state now points to an exact ancestor of the release candidate; product behavior and the B230 publication boundary are unchanged.
+
+## 250-build SaaS Completion Block 46 — durable provider lifecycle — 2026-10-04
+
+B226-B230 bind hosted checkout sessions, exclusive verified-receipt claims, exact metadata lineage, atomic checkout/order/subscription completion and bounded failed or ignored receipt settlement to persistent commercial authority. No card credential or provider secret is stored. Focused behavior and strict API typechecks pass. B221-B230 now reach the required ten-build publication and authenticated Chrome boundary.
