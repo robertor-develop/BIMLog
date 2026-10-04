@@ -7,17 +7,17 @@
     "authenticatedChrome": "PASS_63_DESKTOP_63_EXACT390_10_TABLET_RELOAD_TWO_TAB_ZERO_CONSOLE"
   },
   "currentBlock": {
-    "number": 55,
-    "builds": "271-275",
-    "status": "PUSH_CANDIDATE",
+    "number": 56,
+    "builds": "276-280",
+    "status": "PUBLICATION_CANDIDATE",
     "pushDue": true,
-    "publicationDue": false
+    "publicationDue": true
   },
   "priorPushedBlock": {
-    "number": 54,
-    "builds": "266-270",
-    "sourceCommit": "e7f4b46d54d78f7a724cdc145309168933a4416f"
+    "number": 55,
+    "builds": "271-275",
+    "sourceCommit": "743928e49344f716cfe6a50f858bd28299723af9"
   },
-  "unpublishedBuilds": 5,
+  "unpublishedBuilds": 10,
   "nextPublicationBoundary": 280
 }
