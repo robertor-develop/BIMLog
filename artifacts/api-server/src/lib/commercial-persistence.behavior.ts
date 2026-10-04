@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
+import { createPersistentOrderCheckout, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
 
 const calls: { text: string; values?: readonly unknown[] }[] = [];
 const client: CommercialQueryClient = { async query(text, values) {
@@ -21,3 +21,18 @@ assert.deepEqual(calls[2].values, ["sub-company-7", 7]);
 assert.rejects(() => readPersistentCommercialAuthority(client, 0), /Company identity/);
 
 console.log("COMMERCIAL_PERSISTENCE_B221=PASS");
+
+const writes: string[]=[];
+const writeClient:CommercialQueryClient={async query(text){writes.push(text);
+  if(text.startsWith("SELECT s.id"))return {rows:[{id:"sub-company-7"}],rowCount:1};
+  if(text.startsWith("SELECT id,fingerprint"))return {rows:[],rowCount:0};
+  if(text.includes("RETURNING id"))return {rows:[{id:"checkout-company-7"}],rowCount:1};
+  return {rows:[],rowCount:null};
+}};
+const checkout=await createPersistentOrderCheckout(writeClient,{companyId:7,userId:42,subscriptionId:"sub-company-7",providerBindingId:"binding-company-7",orderId:"order-company-7",checkoutId:"checkout-company-7",requestKey:"request-company-7",idempotencyKey:"checkout-key-company-7",fingerprint:"a".repeat(64),currency:"USD",subtotalCents:10000,taxCents:700,expiresAt:"2026-10-04T12:00:00Z"});
+assert.deepEqual(checkout,{orderId:"order-company-7",checkoutId:"checkout-company-7",replayed:false});
+assert.equal(writes[0],"BEGIN");assert.equal(writes.at(-1),"COMMIT");
+assert.ok(writes.some(query=>query.includes("INSERT INTO commercial_orders")));
+assert.ok(writes.some(query=>query.includes("ON CONFLICT(company_id,idempotency_key)")));
+
+console.log("COMMERCIAL_PERSISTENCE_B222=PASS");
