@@ -1,0 +1,10 @@
+import fs from "node:fs";
+import assert from "node:assert/strict";
+const source=fs.readFileSync(new URL("./commercial-workspace.ts",import.meta.url),"utf8");
+assert.match(source,/router\.get\("\/commercial\/billing-history",authMiddleware/);
+assert.match(source,/resolveCommercialBillingAuthority\(pool,\{userId:actor\.userId,companyId:actor\.companyId\}\);requireCommercialBillingManager\(authority\)/);
+assert.match(source,/readCustomerBillingHistory\(pool,actor\.companyId\)/);
+assert.match(source,/Cache-Control","private, no-store, max-age=0/);
+assert.match(source,/BILLING_AUTHORITY_REQUIRED/);assert.match(source,/BILLING_HISTORY_UNAVAILABLE/);
+assert.doesNotMatch(source,/req\.(body|query)\.companyId/);
+console.log("B242 authenticated company billing history route: PASS");

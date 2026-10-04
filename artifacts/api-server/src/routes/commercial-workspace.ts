@@ -9,6 +9,7 @@ import {inspectCommercialPlatformReadiness} from "../lib/commercial-platform-rea
 import {requireCommercialBillingManager,resolveCommercialBillingAuthority} from "../lib/commercial-billing-authority";
 import {startCommercialCheckout} from "../lib/commercial-checkout-command";
 import {startCommercialBillingPortal} from "../lib/commercial-portal-command";
+import {readCustomerBillingHistory} from "../lib/commercial-billing-history";
 
 const router:IRouter=Router();
 
@@ -44,6 +45,18 @@ router.post("/commercial/billing-portal",authMiddleware,async(req,res)=>{
     const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);
     res.status(201).json(await startCommercialBillingPortal({client:pool,environment:process.env,companyId:actor.companyId,userId:actor.userId}));
   }catch(error){const message=error instanceof Error?error.message:"Billing self-service unavailable";const denied=/administrator authority/.test(message);res.status(denied?403:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":"BILLING_PORTAL_UNAVAILABLE",error:message});}
+});
+
+router.get("/commercial/billing-history",authMiddleware,async(req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");
+  res.set("Vary","Authorization");
+  try{
+    const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);
+    res.json(await readCustomerBillingHistory(pool,actor.companyId));
+  }catch(error){
+    const message=error instanceof Error?error.message:"Billing history unavailable",denied=/administrator authority/.test(message);
+    res.status(denied?403:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":"BILLING_HISTORY_UNAVAILABLE",error:message});
+  }
 });
 
 export default router;
