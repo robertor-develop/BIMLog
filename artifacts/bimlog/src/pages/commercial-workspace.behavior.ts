@@ -9,6 +9,8 @@ for(const token of ["Ready to sell live subscriptions","Subscriptions are not re
 assert.doesNotMatch(source,/price_[A-Za-z0-9_]+/);
 for(const token of ["parseCommercialCheckoutReturn","Checkout received","Checkout cancelled","verifying the provider confirmation","No subscription change was claimed"])assert.match(source,new RegExp(token));
 for(const token of ["Billing self-service","Autoservicio de facturación","Start secure checkout","Manage billing","requestCommercialHostedDestination","data.billingAuthority.canManageBilling"])assert.match(source,new RegExp(token));
+for(const token of ["deriveCommercialCheckoutEligibility","readCommercialIntent","Request subscription setup","Solicitar configuración de suscripción","providerCustomerBound","Your selected offer will be included in the request","new URLSearchParams"])assert.match(source,new RegExp(token));
+assert.match(source,/checkoutEligibility\?\.ready\?<Button/);assert.match(source,/data\.subscriptionStatus!=="active"/);
 assert.match(source,/data\.actions\.map/);assert.match(source,/action\.status==="blocked"/);assert.match(source,/Button disabled/);
 assert.match(source,/minmax\(min\(240px,100%\),1fr\)/);assert.match(source,/Waiting for:/);assert.match(source,/action\.blockers\.map/);assert.doesNotMatch(source,/Ready \/ Listo|Setup required \/ Requiere configuración/);
 assert.match(source,/AbortController/);assert.match(source,/parseCommercialWorkspace/);assert.doesNotMatch(source,/stripe.*secret/i);
