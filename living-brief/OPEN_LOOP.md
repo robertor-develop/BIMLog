@@ -4483,3 +4483,12 @@ The Block 48 state seal keeps the ten-build publication and authenticated Chrome
 - [x] B249 add bilingual status filtering, exact counts, filtered-empty feedback and accessible previous/next controls.
 - [x] B250 bind focused acceptance and reach the B241-B250 ten-build publication boundary.
 - [ ] Pass the complete exact-head gate, push B241-B250, publish once, verify exact live identity and run the full authenticated Chrome smoke.
+
+## SaaS Completion Block 51 — commercial launch activation — 2026-10-04
+
+- [x] B251 derive a secret-free BIMLog-owned activation step for each commercial launch blocker.
+- [x] B252 expose the activation plan only through authenticated Super Admin authority.
+- [x] B253 validate exact launch state, step order and safe configuration-key names in the browser.
+- [x] B254 add the bilingual Commercial Launch control surface to Total Control.
+- [x] B255 add the fail-closed live-sales preflight and focused block acceptance.
+- [ ] Pass the complete exact-head gate and push B251-B255 once. Publication and authenticated Chrome remain reserved for B260.

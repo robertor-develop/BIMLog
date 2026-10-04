@@ -1,0 +1,4 @@
+import {fileURLToPath} from "node:url";
+import {deriveCommercialLaunchActivation} from "../artifacts/api-server/src/lib/commercial-launch-activation";
+export function commercialLaunchPreflight(environment:NodeJS.ProcessEnv){const activation=deriveCommercialLaunchActivation(environment);return Object.freeze({ready:activation.ready,status:activation.status,providerMode:activation.providerMode,requiredActionCount:activation.requiredActionCount,actions:activation.steps.filter(step=>step.status==="action_required").map(step=>({id:step.id,configurationKeys:step.configurationKeys}))});}
+if(process.argv[1]&&fileURLToPath(import.meta.url)===process.argv[1]){const report=commercialLaunchPreflight(process.env);process.stdout.write(`${JSON.stringify(report,null,2)}\n`);if(process.argv.includes("--require-live")&&!report.ready)process.exitCode=1;}

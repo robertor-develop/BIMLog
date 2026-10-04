@@ -72,6 +72,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/change_orders.ts
 - artifacts/api-server/src/routes/clash_reports.ts
 - artifacts/api-server/src/routes/commercial-billing-history-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-launch-activation-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-provider-webhook.ts
 - artifacts/api-server/src/routes/commercial-workspace.behavior.ts
 - artifacts/api-server/src/routes/commercial-workspace.ts
@@ -354,6 +355,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.ts
 - artifacts/api-server/src/lib/commercial-invoice-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-launch-activation.behavior.ts
+- artifacts/api-server/src/lib/commercial-launch-activation.ts
 - artifacts/api-server/src/lib/commercial-order-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-persistence.behavior.ts
 - artifacts/api-server/src/lib/commercial-persistence.ts

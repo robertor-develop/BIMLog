@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2f86d4ae3caf9ea4c263ddff111996e50078f8f01fd81290eb52f92318507032",
-  "itemCount": 293,
+  "sourceSha256": "ddf2507fc377885338cdbd66b67367c45750f7245292d610025547cb3cf47764",
+  "itemCount": 294,
   "counts": {
-    "ACTIVE": 257,
+    "ACTIVE": 258,
     "SUPERSEDED": 24,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5343,6 +5343,24 @@
       "evidence": [
         "living-brief/STATUS.md current authority",
         "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "176a07e61220be7f",
+      "sourceLine": 4494,
+      "heading": "SaaS Completion Block 51 — commercial launch activation — 2026-10-04",
+      "statement": "Pass the complete exact-head gate and push B251-B255 once. Publication and authenticated Chrome remain reserved for B260.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4494",
+        "SaaS Completion Block 51 — commercial launch activation — 2026-10-04"
       ],
       "currentAuthority": false
     }
