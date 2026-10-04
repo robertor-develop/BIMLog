@@ -4556,4 +4556,3 @@ Block 56 is accepted live at exact source `18d4550725b78f1369459484e19ffcdcc3233
 - [x] B284 return a durable sales-inquiry reference and response deadline, including replay.
 - [x] B285 bind focused acceptance and reconcile the five-build release boundary.
 - [ ] Pass the complete exact-head gate and push B281-B285 once. Publication remains reserved for B290.
-- [ ] Configure authenticated live Stripe and SendGrid resources and create a current exact-source receipt before claiming commercial launch readiness.

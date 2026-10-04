@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "65e091cdaed7eb99ac7112a243ba63c5adc5e458d2e462146cb10fe023c9eac8",
-  "itemCount": 306,
+  "sourceSha256": "6165646684ee7b7b2cf7f3090d43f02a6a87b853e1a24d5a604d2152c35f5dc4",
+  "itemCount": 305,
   "counts": {
     "ACTIVE": 269,
-    "SUPERSEDED": 25,
+    "SUPERSEDED": 24,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -60,10 +60,6 @@
     {
       "canonicalId": "3ced6667f9264a42",
       "duplicateId": "5989814b604e270c"
-    },
-    {
-      "canonicalId": "63c6b60d9eb892d2",
-      "duplicateId": "92674efa55934e56"
     }
   ],
   "items": [
@@ -5563,24 +5559,6 @@
       "evidence": [
         "OPEN_LOOP.md:4558",
         "SaaS Completion Block 57 — commercial conversion continuity — 2026-10-04"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "92674efa55934e56",
-      "sourceLine": 4559,
-      "heading": "SaaS Completion Block 57 — commercial conversion continuity — 2026-10-04",
-      "statement": "Configure authenticated live Stripe and SendGrid resources and create a current exact-source receipt before claiming commercial launch readiness.",
-      "classification": "SUPERSEDED",
-      "workClass": "STALE_CONTRADICTION",
-      "ownership": {
-        "owner": "Historical evidence",
-        "route": null,
-        "module": "living-brief/OPEN_LOOP.md"
-      },
-      "evidence": [
-        "canonical-open-loop:63c6b60d9eb892d2",
-        "duplicate-source:92674efa55934e56"
       ],
       "currentAuthority": false
     }

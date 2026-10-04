@@ -57129,10 +57129,11 @@
       ],
       "reason": "B281-B285 preserve selected commercial intent across registration and onboarding and return a durable replay-safe sales inquiry receipt.",
       "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "7b9240b4d122041caa8609da5767bb76c1c908835a271add3329d005fca2d0c2"
+      "reviewedChangeSha256": "df7d194d8c8facf8d0927ab43ac7a128a1d3c80f454abc1b5c5ab1d83d443495"
     }
   ]
 }

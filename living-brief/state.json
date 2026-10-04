@@ -2,10 +2,11 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "b8b06c0402a4add9a3a893863e79f2c1efea2080",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "70009f887396d242c0bc6cb0c44d4e6addc802b26acb2b2b3b0cf63f55d4ff64",
+  "bundleSha256": "495418f04d9ba4f906d497ac310c4edf5959697f087fd19f05008f39ac2d200c",
   "impact": {
     "baselineCommit": "b8b06c0402a4add9a3a893863e79f2c1efea2080",
     "changedPaths": [
+      "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/impact-declarations.json"
     ],
@@ -127,9 +128,9 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "65e091cdaed7eb99ac7112a243ba63c5adc5e458d2e462146cb10fe023c9eac8",
-      "sourceChangedAt": "2026-10-04T15:37:20-04:00",
-      "changeState": "accepted",
+      "sha256": "6165646684ee7b7b2cf7f3090d43f02a6a87b853e1a24d5a604d2152c35f5dc4",
+      "sourceChangedAt": "2026-10-04T19:30:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "b8b06c0402a4add9a3a893863e79f2c1efea2080",
       "semanticReviewedThroughCommit": "b8b06c0402a4add9a3a893863e79f2c1efea2080",
       "semanticReviewTask": "saas-block57-commercial-conversion-continuity",
