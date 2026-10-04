@@ -16,6 +16,8 @@ import {verifyCommercialLaunchLive} from "../lib/commercial-launch-live-verifica
 import {readCommercialLaunchVerificationHistory,readLatestCommercialLaunchVerification,recordCommercialLaunchVerification} from "../lib/commercial-launch-verification-store";
 import {deriveCommercialLaunchAuthorization} from "../lib/commercial-launch-authorization";
 import {resolveReleaseMetadata} from "../lib/release-metadata";
+import {readPersistentCommercialAuthority} from "../lib/commercial-persistence";
+import type {CommercialSubscriptionStatus} from "../lib/commercial-workspace-runtime";
 
 const router:IRouter=Router();
 
@@ -51,7 +53,11 @@ router.get("/commercial/workspace",authMiddleware,async(req,res)=>{
     const access=await effectiveCommercialAccessForUser(actor.userId);
     const platform=inspectCommercialPlatformReadiness(process.env);
     const billingAuthority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});
-    res.json({...deriveCommercialRuntimeWorkspace({companyId:company.id,companyName:company.name,memberCount:Number(members?.count??0),commercialAccess:access.any,billingIdentityComplete:Boolean(company.address?.trim()&&company.phone?.trim()),...platform,platformChecks:platform.checks}),billingAuthority:{canManageBilling:billingAuthority.canManageBilling,role:billingAuthority.role}});
+    const commercialAuthority=await readPersistentCommercialAuthority(pool,company.id);
+    const rawStatus=commercialAuthority?.subscription.status;
+    const subscriptionStatus=(rawStatus===undefined?"not_configured":rawStatus) as CommercialSubscriptionStatus;
+    if(!["not_configured","pending","trialing","active","past_due","suspended","canceling"].includes(subscriptionStatus))throw new Error("Commercial subscription status is invalid");
+    res.json({...deriveCommercialRuntimeWorkspace({companyId:company.id,companyName:company.name,memberCount:Number(members?.count??0),commercialAccess:access.any,subscriptionStatus,catalogConfigured:platform.subscriptionConfigured,billingIdentityComplete:Boolean(company.address?.trim()&&company.phone?.trim()),...platform,platformChecks:platform.checks}),billingAuthority:{canManageBilling:billingAuthority.canManageBilling,role:billingAuthority.role}});
   }catch{res.status(503).json({code:"COMMERCIAL_WORKSPACE_UNAVAILABLE",error:"Commercial workspace status is temporarily unavailable."});}
 });
 
