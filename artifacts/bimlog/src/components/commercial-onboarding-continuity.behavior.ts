@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const source=fs.readFileSync(new URL("./OnboardingFlow.tsx",import.meta.url),"utf8");
+assert.match(source,/useState\(\(\)=>readCommercialIntent\(\)\)/);
+assert.match(source,/Selected offer/);
+assert.match(source,/free account requires no payment method/);
+assert.match(source,/does not grant paid access or replace a confirmed agreement/);
+assert.match(source,/onboarding\/complete[\s\S]*clearCommercialIntent\(\)[\s\S]*onDone/);
+assert.doesNotMatch(source,/Close setup[^]*clearCommercialIntent/);
+console.log("B283 onboarding truthfully consumes selected commercial intent: PASS");
