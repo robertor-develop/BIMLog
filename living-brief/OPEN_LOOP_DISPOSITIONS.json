@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "fdd7ab3c987f6075253e654ca515f4d7f132c6f0e161f5fe4c3b57154f53bc29",
-  "itemCount": 296,
+  "sourceSha256": "f92325bfa8662b6500b52cc2b1433b783526f54907cb5c9d0b26718fd2e1bf6c",
+  "itemCount": 299,
   "counts": {
-    "ACTIVE": 260,
+    "ACTIVE": 263,
     "SUPERSEDED": 24,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5397,6 +5397,60 @@
       "evidence": [
         "OPEN_LOOP.md:4514",
         "SaaS Completion Block 53 — source-bound commercial verification evidence — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "8a8b8692dd317b45",
+      "sourceLine": 4517,
+      "heading": "Commercial verification release — B266-B270",
+      "statement": "Complete exact-head gate and push B266-B270 with B261-B265.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4517",
+        "Commercial verification release — B266-B270"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "a50faef1e21a52c7",
+      "sourceLine": 4518,
+      "heading": "Commercial verification release — B266-B270",
+      "statement": "Publish the exact reconciled source and run full authenticated desktop, 390px mobile and principal tablet Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4518",
+        "Commercial verification release — B266-B270"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6977741c7172508c",
+      "sourceLine": 4519,
+      "heading": "Commercial verification release — B266-B270",
+      "statement": "Configure authenticated live Stripe catalog/account/webhook/portal resources and SendGrid sender/support resources, then create a current exact-source verification receipt. Until then BIMLog must report commercial launch as blocked.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4519",
+        "Commercial verification release — B266-B270"
       ],
       "currentAuthority": false
     }

@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 733,
-    "frontendApiReferences": 286,
+    "frontendApiReferences": 287,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -9457,10 +9457,6 @@
       "apiPath": "${API_BASE}/api/v1/admin/commercial-launch"
     },
     {
-      "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
-      "apiPath": "${API_BASE}/api/v1/admin/commercial-launch/verify"
-    },
-    {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries"
     },
@@ -9751,6 +9747,14 @@
     {
       "screen": "artifacts/bimlog/src/lib/commercial-billing-history-client.ts",
       "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/billing-history"
+    },
+    {
+      "screen": "artifacts/bimlog/src/lib/commercial-launch-verification-workflow.ts",
+      "apiPath": "${apiBase}/api/v1/healthz"
+    },
+    {
+      "screen": "artifacts/bimlog/src/lib/commercial-launch-verification-workflow.ts",
+      "apiPath": "${apiBase}/api/v1/admin/commercial-launch/verify"
     },
     {
       "screen": "artifacts/bimlog/src/lib/commercial-workspace-client.ts",
