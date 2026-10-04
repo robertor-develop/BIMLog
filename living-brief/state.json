@@ -1,19 +1,12 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+  "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
   "bundleSha256": "a6c39e14c9fbcd93aefcbce16d2dd90b65d65e76040b5a55b6267de37f01760e",
   "impact": {
-    "baselineCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+    "baselineCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
     "changedPaths": [
-      "evidence/saas-completion-20261003/BUILD_LEDGER.json",
-      "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
-      "living-brief/OPEN_LOOP.md",
-      "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-      "living-brief/PLATFORM.md",
-      "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json",
-      "package.json"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -28,11 +21,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "claude",
@@ -40,11 +33,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "quality",
@@ -52,11 +45,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "vision",
@@ -64,23 +57,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "1a37880b82db9d2f31b9d6f54f3a7628dd22ea41c02db55ec4412e91ab838269",
-      "sourceChangedAt": "2026-10-04T13:00:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "sourceChangedAt": "2026-10-04T08:03:16-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "plugin",
@@ -88,11 +81,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "report_design_system",
@@ -100,11 +93,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "standards_register",
@@ -112,35 +105,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
       "sha256": "c108951b0d78d85439844e8aeb969f77f2e52c3576642ba454768ded555f2d42",
-      "sourceChangedAt": "2026-10-04T13:00:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "sourceChangedAt": "2026-10-04T08:03:16-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
       "sha256": "ddf2507fc377885338cdbd66b67367c45750f7245292d610025547cb3cf47764",
-      "sourceChangedAt": "2026-10-04T13:00:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "sourceChangedAt": "2026-10-04T08:03:16-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     },
     {
       "key": "audit",
@@ -148,11 +141,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
-      "semanticReviewedThroughCommit": "c0320a93db27ffff34a71159e2f4d133511de1a6",
+      "reconciledThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
+      "semanticReviewedThroughCommit": "dbae20ed1feb630f79e87d6fcf15c597414c0000",
       "semanticReviewTask": "saas-block51-commercial-launch-activation",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-04T13:00:00Z"
+      "semanticReviewedAt": "2026-10-04T12:42:00Z"
     }
   ]
 }
