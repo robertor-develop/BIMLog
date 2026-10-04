@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "9ebcc2992232b9e8242b4de14d3fe4effff277d31bfe83932817ef72cf5981ce",
-  "itemCount": 302,
+  "sourceSha256": "b4cf805a43112f0964061bad1971464b54821b05f320fe2ffdc8d202659d43c0",
+  "itemCount": 304,
   "counts": {
-    "ACTIVE": 266,
+    "ACTIVE": 268,
     "SUPERSEDED": 24,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5505,6 +5505,42 @@
       "evidence": [
         "OPEN_LOOP.md:4533",
         "SaaS Completion Block 55 — durable commercial verification history — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0d56499bc62c0c1f",
+      "sourceLine": 4544,
+      "heading": "SaaS Completion Block 56 — current commercial launch authorization — 2026-10-04",
+      "statement": "Pass the complete exact-head gate, push once, publish the exact source, and run the full authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4544",
+        "SaaS Completion Block 56 — current commercial launch authorization — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "63c6b60d9eb892d2",
+      "sourceLine": 4545,
+      "heading": "SaaS Completion Block 56 — current commercial launch authorization — 2026-10-04",
+      "statement": "Configure authenticated live Stripe and SendGrid resources and create a current exact-source receipt before claiming commercial launch readiness.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4545",
+        "SaaS Completion Block 56 — current commercial launch authorization — 2026-10-04"
       ],
       "currentAuthority": false
     }

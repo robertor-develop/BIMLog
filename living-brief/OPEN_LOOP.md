@@ -4543,3 +4543,5 @@ Block 55 focused acceptance passes at B275. Complete exact-head acceptance and t
 - [x] B280 bind focused acceptance and reach the B271-B280 ten-build publication boundary.
 - [ ] Pass the complete exact-head gate, push once, publish the exact source, and run the full authenticated Chrome smoke.
 - [ ] Configure authenticated live Stripe and SendGrid resources and create a current exact-source receipt before claiming commercial launch readiness.
+
+The B280 acceptance reconciliation is bound to product checkpoint `fe74c23131732156328fcb1e6bca9da58c17d3b5`; complete exact-head validation, push, exact-source publication and authenticated Chrome remain required before this boundary is accepted.
