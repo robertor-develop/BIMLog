@@ -4512,3 +4512,8 @@ Block 52 is accepted at exact source `3681fa0994958a92c1156949494ab5955de4508e`,
 - [x] B264 display the source, validity and evidence digest bilingually in Total Control.
 - [x] B265 fail launch closed on stale, mismatched, malformed or unverified evidence.
 - [ ] Pass the complete exact-head gate and push B261-B265 once. Publication and authenticated Chrome remain reserved for B270.
+# Commercial verification release — B266-B270
+
+- [ ] Complete exact-head gate and push B266-B270 with B261-B265.
+- [ ] Publish the exact reconciled source and run full authenticated desktop, 390px mobile and principal tablet Chrome smoke.
+- [ ] Configure authenticated live Stripe catalog/account/webhook/portal resources and SendGrid sender/support resources, then create a current exact-source verification receipt. Until then BIMLog must report commercial launch as blocked.
