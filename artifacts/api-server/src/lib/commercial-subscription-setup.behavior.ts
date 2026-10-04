@@ -1,0 +1,7 @@
+import assert from "node:assert/strict";
+import {prepareCompanySubscription} from "./commercial-subscription-setup";
+const calls:string[]=[];const client={query:async(text:string)=>{calls.push(text);if(text.startsWith("SELECT * FROM commercial_subscriptions")||text.startsWith("SELECT s.id"))return {rows:[],rowCount:0};return {rows:[{id:47}],rowCount:1};}};
+const result=await prepareCompanySubscription({client,environment:{STRIPE_SECRET_KEY:"sk_test_abcdefghijklmnop",STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijklmnop",BIMLOG_STRIPE_PRICE_IDS:"team.annual=price_team_annual",BIMLOG_APP_ORIGIN:"https://bimlog.app"},companyId:47,userId:9,companyName:"BIM Tech",billingEmail:"owner@example.com",requestKey:"subscription-setup-47-0001",plan:"team",cycle:"annual",transport:async request=>{assert.equal(request.path,"/v1/customers");assert.match(request.headers["Idempotency-Key"],/^customer-/);return {status:200,body:{id:"cus_company_47",metadata:{company_id:"47"}}};}});
+assert.equal(result.status,"pending");assert.equal(result.replayed,false);assert.ok(calls.some(text=>text.includes("INSERT INTO commercial_subscriptions")));
+await assert.rejects(()=>prepareCompanySubscription({client,environment:{},companyId:47,userId:9,companyName:"BIM Tech",billingEmail:"owner@example.com",requestKey:"short",plan:"team",cycle:"annual"}),/request identity/);
+console.log("B293 end-to-end company subscription preparation: PASS");
