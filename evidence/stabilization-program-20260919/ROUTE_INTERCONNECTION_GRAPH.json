@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 727,
+    "apiRoutes": 728,
     "frontendApiReferences": 282,
     "routeOwnedTables": 68
   },
@@ -2165,6 +2165,12 @@
         "lensViewpointSequenceCountersTable",
         "filesTable"
       ]
+    },
+    {
+      "method": "POST",
+      "path": "/commercial/providers/stripe/webhook",
+      "owner": "artifacts/api-server/src/routes/commercial-provider-webhook.ts",
+      "tables": []
     },
     {
       "method": "GET",

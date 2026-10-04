@@ -56349,6 +56349,77 @@
         "scripts/test-saas-completion-block46.mjs"
       ],
       "reviewedChangeSha256": "9f0bbfc13adc15c367bf59dcc28dec3bfdd7d8ca6a3556e118ccf0424e405290"
+    },
+    {
+      "taskId": "saas-block47-commercial-provider-boundary",
+      "reviewedThroughCommit": "0e7ce0de1254315b2fb52d05001e312fc05616f1",
+      "reviewedAt": "2026-10-04T05:46:48.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records accepted Block 46 production evidence and the completed B231-B235 provider webhook boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the Block 46 release boundary and tracks the Block 47 push-only boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 47 preserves the existing authority while adding a bounded verified commercial provider webhook boundary."
+        }
+      ],
+      "reason": "B231-B235 connect exact Stripe signature verification, active company binding, durable replay-safe receipts and one-time checkout completion without storing payment credentials.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ce517445dd83474a3e8f7b5a50214deb84183c37fd1002f723ecc01cf749b157"
     }
   ]
 }

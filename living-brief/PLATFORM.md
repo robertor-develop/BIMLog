@@ -71,6 +71,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/autodesk.ts
 - artifacts/api-server/src/routes/change_orders.ts
 - artifacts/api-server/src/routes/clash_reports.ts
+- artifacts/api-server/src/routes/commercial-provider-webhook.ts
 - artifacts/api-server/src/routes/commercial-workspace.ts
 - artifacts/api-server/src/routes/company-master-catalogs.ts
 - artifacts/api-server/src/routes/company-pricing-templates.ts
@@ -156,6 +157,7 @@ It changes only when the code structure or curated architectural facts change.
 - authRouter
 - onboardingRouter
 - commercialWorkspaceRouter
+- commercialProviderWebhookRouter
 - supportCasesRouter
 - supportCaseSatisfactionRouter
 - supportCaseMessagesRouter
@@ -354,6 +356,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-provider-adapter.ts
 - artifacts/api-server/src/lib/commercial-provider-events.behavior.ts
 - artifacts/api-server/src/lib/commercial-provider-events.ts
+- artifacts/api-server/src/lib/commercial-provider-webhook.behavior.ts
+- artifacts/api-server/src/lib/commercial-provider-webhook.ts
 - artifacts/api-server/src/lib/commercial-receipt-audit-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry.behavior.ts

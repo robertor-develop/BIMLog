@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "7767a7daa4458ff1a0f009e2571b5f1afe921b307fdb4d02dd07c5e38e90bb9b",
-  "itemCount": 290,
+  "sourceSha256": "65e6c9d3a51357f6d8ced9a9262629ee7d77b914e34312288f8b93d2b1dc69e2",
+  "itemCount": 291,
   "counts": {
-    "ACTIVE": 255,
+    "ACTIVE": 256,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5289,6 +5289,24 @@
       "evidence": [
         "OPEN_LOOP.md:4435",
         "250-build SaaS Completion Block 46 — durable provider lifecycle — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "822fffe5164c9fa1",
+      "sourceLine": 4448,
+      "heading": "250-build SaaS Completion Block 47 — verified commercial provider boundary — 2026-10-04",
+      "statement": "Pass the complete exact-head gate and push B231-B235 once. Publication remains reserved for B240.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4448",
+        "250-build SaaS Completion Block 47 — verified commercial provider boundary — 2026-10-04"
       ],
       "currentAuthority": false
     }
