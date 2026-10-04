@@ -70,3 +70,30 @@ export const commercialSubscriptionSeatsTable=pgTable("commercial_subscription_s
 ]);
 
 export type CommercialSubscriptionSeat=typeof commercialSubscriptionSeatsTable.$inferSelect;
+
+export const commercialOrdersTable=pgTable("commercial_orders",{
+  id:text("id").primaryKey(),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  subscriptionId:text("subscription_id").notNull().references(()=>commercialSubscriptionsTable.id),
+  requestKey:text("request_key").notNull(),
+  fingerprint:text("fingerprint").notNull(),
+  status:text("status").notNull(),
+  currency:text("currency").notNull(),
+  subtotalCents:integer("subtotal_cents").notNull(),
+  taxCents:integer("tax_cents"),
+  totalCents:integer("total_cents"),
+  createdByUserId:integer("created_by_user_id").notNull().references(()=>usersTable.id),
+  submittedAt:timestamp("submitted_at",{withTimezone:true}),
+  completedAt:timestamp("completed_at",{withTimezone:true}),
+  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+  updatedAt:timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_orders_status_chk",sql`${table.status} in ('draft','ready','submitted','completed','canceled','failed')`),
+  check("commercial_orders_currency_chk",sql`${table.currency} ~ '^[A-Z]{3}$'`),
+  check("commercial_orders_amounts_chk",sql`${table.subtotalCents}>=0 and (${table.taxCents} is null or ${table.taxCents}>=0) and (${table.totalCents} is null or ${table.totalCents}>=0)`),
+  check("commercial_orders_total_chk",sql`${table.totalCents} is null or (${table.taxCents} is not null and ${table.totalCents}=${table.subtotalCents}+${table.taxCents})`),
+  uniqueIndex("commercial_orders_company_request_uidx").on(table.companyId,table.requestKey),
+  index("commercial_orders_subscription_time_idx").on(table.subscriptionId,table.createdAt.desc()),
+]);
+
+export type CommercialOrder=typeof commercialOrdersTable.$inferSelect;
