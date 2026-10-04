@@ -3761,3 +3761,7 @@ B251-B255 convert the existing Stripe, catalog, webhook, portal and SendGrid rea
 ## SaaS Completion Block 52 — live commercial service verification — 2026-10-04
 
 B256-B260 verify that configured commercial resources exist and are usable before launch. The server performs bounded read-only checks for the Stripe account, all six recurring catalog prices, the exact production webhook, an active billing portal configuration, the SendGrid account, verified sender and support inbox. Only an authenticated Super Admin can start verification or see secret-free results. Total Control reports each check in English and Spanish without exposing provider identifiers or credentials. Verification creates no charge, subscription, portal session or email. B251-B260 reach the required ten-build publication and authenticated Chrome boundary.
+
+## SaaS Completion Block 53 — source-bound commercial verification evidence — 2026-10-04
+
+B261-B265 bind each live commercial verification to the exact deployed source, a 15-minute validity window and a deterministic secret-safe evidence digest. The browser strictly rejects malformed or contradictory evidence, Total Control shows operators the source and validity in English and Spanish, and the release check fails closed on stale, mismatched or unverified receipts. The block does not fabricate provider configuration and production remains honestly blocked until authenticated Stripe and SendGrid resources exist. This is the first five-build block after the accepted B251-B260 publication and remains unpublished until B270.

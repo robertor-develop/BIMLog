@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2b47a3de03b382f1908e43c2df85e2805e94354d42b89bc20bc0a2ea3cd97f90",
-  "itemCount": 295,
+  "sourceSha256": "fdd7ab3c987f6075253e654ca515f4d7f132c6f0e161f5fe4c3b57154f53bc29",
+  "itemCount": 296,
   "counts": {
-    "ACTIVE": 259,
+    "ACTIVE": 260,
     "SUPERSEDED": 24,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5379,6 +5379,24 @@
       "evidence": [
         "OPEN_LOOP.md:4503",
         "SaaS Completion Block 52 — live commercial service verification — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "79e4ddb2abbf8193",
+      "sourceLine": 4514,
+      "heading": "SaaS Completion Block 53 — source-bound commercial verification evidence — 2026-10-04",
+      "statement": "Pass the complete exact-head gate and push B261-B265 once. Publication and authenticated Chrome remain reserved for B270.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4514",
+        "SaaS Completion Block 53 — source-bound commercial verification evidence — 2026-10-04"
       ],
       "currentAuthority": false
     }

@@ -360,6 +360,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-launch-activation.ts
 - artifacts/api-server/src/lib/commercial-launch-live-verification.behavior.ts
 - artifacts/api-server/src/lib/commercial-launch-live-verification.ts
+- artifacts/api-server/src/lib/commercial-launch-verification-evidence.behavior.ts
+- artifacts/api-server/src/lib/commercial-launch-verification-evidence.ts
 - artifacts/api-server/src/lib/commercial-launch-verification-transport.behavior.ts
 - artifacts/api-server/src/lib/commercial-launch-verification-transport.ts
 - artifacts/api-server/src/lib/commercial-order-schema.behavior.ts
