@@ -7,17 +7,17 @@
     "authenticatedChrome": "PASS"
   },
   "currentBlock": {
-    "number": 47,
-    "builds": "231-235",
-    "status": "SOURCE_CANDIDATE_AWAITING_EXACT_HEAD_GATE_AND_PUSH",
+    "number": 48,
+    "builds": "236-240",
+    "status": "SOURCE_CANDIDATE_AWAITING_EXACT_HEAD_GATE_PUSH_PUBLICATION_AND_SMOKE",
     "pushDue": true,
-    "publicationDue": false
+    "publicationDue": true
   },
   "priorPushedBlock": {
-    "number": 46,
-    "builds": "226-230",
-    "sourceCommit": "a29f6f2a86d1d5a43e389cca1b9144e488b276bb"
+    "number": 47,
+    "builds": "231-235",
+    "sourceCommit": "949d5424beb30f963b1d63cd0714b1e8911c3e5b"
   },
-  "unpublishedBuilds": 5,
+  "unpublishedBuilds": 10,
   "nextPublicationBoundary": 240
 }

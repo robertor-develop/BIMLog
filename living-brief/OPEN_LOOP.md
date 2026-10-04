@@ -4454,3 +4454,12 @@ The final state-seal amendment keeps these narrative files inside the exact revi
 The authorization-matrix repair records the Stripe callback as an intentionally service-public route protected by provider signature and binding verification, then repeats the focused and complete gates.
 
 The post-repair state seal keeps the authorization decision and generated evidence in one exact reviewed diff before the gate is repeated.
+
+## 250-build SaaS Completion Block 48 — customer billing self-service — 2026-10-04
+
+- [x] B236 authorize billing changes only for an active company financial administrator or platform super administrator.
+- [x] B237 create replay-safe hosted checkout from the exact prepared subscription, catalog price and active provider/customer binding.
+- [x] B238 open governed Stripe billing self-service for the active company/customer binding.
+- [x] B239 expose authenticated, company-scoped checkout and billing-portal commands with bounded errors.
+- [x] B240 connect strict bilingual Billing & Support controls and focused release acceptance.
+- [ ] Pass the complete exact-head gate, push B236-B240, publish accumulated B231-B240, verify exact live identity and run the full authenticated Chrome smoke.

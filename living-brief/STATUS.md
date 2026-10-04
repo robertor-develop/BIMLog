@@ -3739,3 +3739,7 @@ The final Block 47 state seal includes the narrative authority in the same revie
 The final gate also classifies the signed Stripe service callback explicitly in the endpoint authority matrix; its raw-body signature, replay-window and active-binding checks remain mandatory.
 
 The post-repair state seal includes this authorization decision in the same reviewed narrative and generated-metadata diff.
+
+## 250-build SaaS Completion Block 48 — customer billing self-service — 2026-10-04
+
+B236-B240 use BIMLog's existing active financial-administrator grant as the company billing authority, create replay-safe Stripe-hosted checkout from the exact prepared company subscription and catalog slot, open the Stripe billing portal only for the active company/customer binding, expose both commands behind authenticated company scope, and connect strict bilingual Billing & Support controls. Provider secrets and payment credentials remain server-side. Focused Block 48 behavior and strict API/frontend typechecks pass. B231-B240 now reach the required ten-build publication and authenticated Chrome boundary.
