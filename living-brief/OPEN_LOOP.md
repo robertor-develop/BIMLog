@@ -4566,4 +4566,4 @@ Block 56 is accepted live at exact source `18d4550725b78f1369459484e19ffcdcc3233
 - [x] B288 fail checkout eligibility closed on exact company authority and provider binding.
 - [x] B289 preserve the selected offer through a durable subscription setup request when checkout is not prepared.
 - [x] B290 bind focused acceptance and reach the B281-B290 ten-build publication boundary.
-- [ ] Pass the complete exact-head gate, push once, publish the exact source, and run the full authenticated Chrome smoke.
+- [ ] Validate and release accumulated B281-B290 at the ten-build boundary, then verify exact live identity and the complete authenticated Chrome matrix.
