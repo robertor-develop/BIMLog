@@ -4374,7 +4374,7 @@ The B181-B190 publication boundary is accepted at source `4310f5b8821b53d2db4f30
 - [x] B203 expose requester-scoped GET/POST satisfaction APIs only for closed cases, with idempotent replay and conflict handling.
 - [x] B204 reject malformed or contradictory satisfaction projections at the browser boundary.
 - [x] B205 pass the complete focused support satisfaction foundation acceptance suite.
-- [ ] Pass the complete exact-head gate and push B201-B205 once. This first five-build block remains unpublished until B210.
+- [x] Pass the complete exact-head gate and push B201-B205 once. B201-B210 were accepted together at source `34a1de6b54bbf3df71062651d6503ce27b8c4f9c` under Replit receipt `4545b346`.
 
 Block 41 release note: the exact-head complete gate and single GitHub push remain the active B205 closure step. Production schema and customer data remain unchanged; publication stays reserved for B210.
 
@@ -4390,6 +4390,15 @@ Block 41 platform-audit repair: the route behavior fixture now verifies the cano
 - [x] B208 notify only the accountable support owner atomically when a new rating is recorded, with no notification on idempotent replay.
 - [x] B209 expose a strict aggregate rating count, average and one-to-five distribution for service-quality operations.
 - [x] B210 pass the complete focused support satisfaction experience acceptance suite.
-- [ ] Pass the complete exact-head gate, push B201-B210, apply only the additive satisfaction schema through the governed production path, publish, verify exact live identity and run the full authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push B201-B210, apply only the additive satisfaction schema through the governed production path, publish, verify exact live identity and run the full authenticated Chrome smoke. Accepted source `34a1de6b54bbf3df71062651d6503ce27b8c4f9c`; Replit receipt `4545b346`; repeated database receipt `schemaAction=NONE`; authenticated Chrome 64/64 desktop, 64/64 exact-390 and 10/10 tablet plus hard reload and independent-tab continuity with zero browser warnings or errors.
 
 Block 42 reconciliation note: reviewed implementation authority is `abe49f7b5eeaa5b332730b9787754b4db5cb3869`; generated platform, route, disposition and state metadata are refreshed without widening product scope.
+
+## 250-build SaaS Completion Block 43 — persistent commercial subscription authority — 2026-10-03
+
+- [x] B211 persist company subscriptions and immutable commercial terms with integer-cent prices and bounded lifecycle states.
+- [x] B212 add an auditable seat ledger that supports assigned, reserved, suspended and released capacity without inventing users during intake.
+- [x] B213 add a company-scoped, idempotent commercial order ledger with integer-cent subtotal, tax and total authority.
+- [x] B214 persist provider-customer bindings and idempotent checkout attempts without storing payment credentials.
+- [x] B215 bind the six additive commercial tables to the governed startup migration and complete focused Block 43 acceptance.
+- [ ] Pass the complete exact-head gate and push B211-B215 once. This first five-build block remains unpublished until B220.

@@ -82,6 +82,7 @@ import { ensureEdtEngineSchema } from "./lib/edt-engine-migration";
 import { requestDiagnostics } from "./middlewares/request-diagnostics";
 import { governedCorsOptions, resolveSessionSecret, securityHeaders } from "./lib/runtime-security";
 import { startOnboardingMigration } from "./lib/onboarding-migration";
+import { startCommercialSubscriptionMigration } from "./lib/commercial-subscription-migration";
 
 const ENV_MODE =
   process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -166,6 +167,7 @@ const lensNextPublishingStartupBarrier = queueDatabaseStartup(() =>
   }),
 );
 void queueDatabaseStartup(() => startOnboardingMigration().then(() => console.log("[migration] onboarding profiles ensured")));
+void queueDatabaseStartup(() => startCommercialSubscriptionMigration().then(() => console.log("[migration] commercial subscription authority ensured")));
 
 app.disable("etag");
 app.set("trust proxy", 1);

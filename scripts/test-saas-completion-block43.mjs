@@ -1,0 +1,11 @@
+import {execFileSync} from "node:child_process";
+import {readFileSync} from "node:fs";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),".."),tsx=path.join(root,"artifacts/api-server/node_modules/tsx/dist/cli.mjs");
+for(const file of ["commercial-subscription-schema.behavior.ts","commercial-seat-schema.behavior.ts","commercial-order-schema.behavior.ts","commercial-checkout-schema.behavior.ts"])execFileSync(process.execPath,[tsx,path.join(root,"artifacts/api-server/src/lib",file)],{stdio:"inherit"});
+const schema=readFileSync(path.join(root,"lib/db/src/schema/commercial-subscriptions.ts"),"utf8"),migration=readFileSync(path.join(root,"artifacts/api-server/src/lib/commercial-subscription-migration.ts"),"utf8"),app=readFileSync(path.join(root,"artifacts/api-server/src/app.ts"),"utf8");
+for(const table of ["commercial_subscriptions","commercial_subscription_terms","commercial_subscription_seats","commercial_orders","commercial_provider_bindings","commercial_checkout_attempts"])if(!schema.includes(table)||!migration.includes(table))throw new Error(`schema/startup parity missing ${table}`);
+if(/DROP TABLE|TRUNCATE|DELETE FROM/i.test(migration))throw new Error("commercial migration must remain additive");
+if(!app.includes("startCommercialSubscriptionMigration"))throw new Error("commercial migration missing from startup queue");
+console.log("B215 Block 43 commercial persistence and startup parity: PASS");

@@ -598,3 +598,9 @@ Additional enforcement:
 - The initial entry must remain at least 5% below the Build 201 baseline of 511,219 bytes.
 - Non-entry, non-spreadsheet chunks must remain at or below 250 KiB; route-owned chunks at or below 225 KiB; total browser JavaScript at or below 4 MiB.
 - Feedback and capture editing must remain bounded dynamic chunks. Deferred mounts require teardown cancellation, and editor state requires exact file identity.
+
+## Block 43 commercial persistence gate
+
+- The focused SaaS Block 43 suite must verify every commercial table in both Drizzle schema and startup migration, startup registration, all focused schema behaviors, and the absence of destructive migration SQL.
+- Subscription, term, seat, order, provider-binding and checkout-attempt changes require root library and API strict TypeScript checks before the complete pre-push gate.
+- Builds 211–215 are not production accepted by source tests alone. They remain unpublished until the ten-build boundary at B220, when governed database receipts, exact live identity and full authenticated Chrome smoke are required.

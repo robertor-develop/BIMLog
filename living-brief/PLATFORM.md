@@ -330,6 +330,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-change-approval.ts
 - artifacts/api-server/src/lib/commercial-change-order-draft.behavior.ts
 - artifacts/api-server/src/lib/commercial-change-order-draft.ts
+- artifacts/api-server/src/lib/commercial-checkout-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.ts
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
@@ -338,6 +339,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-evidence-package.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.ts
+- artifacts/api-server/src/lib/commercial-order-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-platform-readiness.behavior.ts
 - artifacts/api-server/src/lib/commercial-platform-readiness.ts
 - artifacts/api-server/src/lib/commercial-potential-impact.behavior.ts
@@ -350,6 +352,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-sales-inquiry-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry.behavior.ts
 - artifacts/api-server/src/lib/commercial-sales-inquiry.ts
+- artifacts/api-server/src/lib/commercial-seat-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-subscription-migration.ts
+- artifacts/api-server/src/lib/commercial-subscription-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-support-case-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-support-case.behavior.ts
 - artifacts/api-server/src/lib/commercial-support-case.ts
@@ -1199,6 +1204,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/change-orders.ts
 - lib/db/src/schema/clash_reports.ts
 - lib/db/src/schema/commercial-entitlements.ts
+- lib/db/src/schema/commercial-subscriptions.ts
 - lib/db/src/schema/company_profiles.ts
 - lib/db/src/schema/config.ts
 - lib/db/src/schema/connector-foundation.ts
