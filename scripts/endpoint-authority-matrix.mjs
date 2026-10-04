@@ -22,6 +22,10 @@ const publicRules = [
   /^autodesk\.ts\|GET\|\/autodesk\/(token|login|callback)$/,
   /^connections\.ts\|GET\|\/connections\/:provider\/callback$/,
   /^telegram-product\.ts\|POST\|\/webhooks\/telegram\/:adapterId$/,
+  // Stripe calls this service-to-service endpoint without an interactive BIMLog
+  // session. The route verifies the exact raw body, HMAC signature, replay
+  // window and active provider/customer binding before any state transition.
+  /^commercial-provider-webhook\.ts\|POST\|\/commercial\/providers\/stripe\/webhook$/,
 ];
 
 const serviceScopedFiles = new Set([

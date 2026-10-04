@@ -3735,3 +3735,5 @@ B231-B235 connect the governed Stripe adapter to persistent commercial authority
 Block 47 reconciliation refreshes the deterministic platform and route inventories after registering the webhook route; this changes no additional product behavior or publication cadence.
 
 The final Block 47 state seal includes the narrative authority in the same reviewed reconciliation diff as its generated disposition and impact metadata.
+
+The final gate also classifies the signed Stripe service callback explicitly in the endpoint authority matrix; its raw-body signature, replay-window and active-binding checks remain mandatory.

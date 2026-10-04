@@ -4450,3 +4450,5 @@ Block 46 is accepted live at source `a29f6f2a86d1d5a43e389cca1b9144e488b276bb`, 
 Block 47 gate repair binds STATUS and OPEN_LOOP at or after the deterministic platform-inventory refresh, then repeats the complete exact-head gate before push.
 
 The final state-seal amendment keeps these narrative files inside the exact reviewed reconciliation diff; no additional build or release action is introduced.
+
+The authorization-matrix repair records the Stripe callback as an intentionally service-public route protected by provider signature and binding verification, then repeats the focused and complete gates.
