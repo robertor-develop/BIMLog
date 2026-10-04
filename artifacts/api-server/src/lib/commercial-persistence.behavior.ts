@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { applyPersistentCheckoutCompletion, bindPersistentCheckoutSession, claimPersistentProviderReceipt, createPersistentOrderCheckout, persistPaidInvoiceWithAudit, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
+import { applyPersistentCheckoutCompletion, bindPersistentCheckoutSession, claimPersistentProviderReceipt, createPersistentOrderCheckout, persistPaidInvoiceWithAudit, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, settlePersistentProviderReceipt, type CommercialQueryClient } from "./commercial-persistence";
 
 const calls: { text: string; values?: readonly unknown[] }[] = [];
 const client: CommercialQueryClient = { async query(text, values) {
@@ -85,3 +85,8 @@ assert.deepEqual(completion,{checkoutId:"checkout-company-7",orderId:"order-comp
 assert.ok(completionWrites.some(query=>query.includes("commercial_subscriptions SET status='active'")));
 assert.equal(completionWrites.at(-1),"COMMIT");
 console.log("COMMERCIAL_PERSISTENCE_B228=PASS");
+
+const settlement=await settlePersistentProviderReceipt({async query(){return {rows:[{id:"receipt-company-7",processing_status:"failed"}],rowCount:1};}},{id:"receipt-company-7",companyId:7,outcome:"failed",failureCode:"LINEAGE_NOT_FOUND",processedAt:"2026-10-04T13:05:00Z"});
+assert.deepEqual(settlement,{id:"receipt-company-7",status:"failed"});
+await assert.rejects(()=>settlePersistentProviderReceipt({async query(){return {rows:[],rowCount:0};}},{id:"receipt-company-7",companyId:7,outcome:"ignored",failureCode:"LINEAGE_NOT_FOUND",processedAt:"2026-10-04T13:05:00Z"}),/unsupported-event/);
+console.log("COMMERCIAL_PERSISTENCE_B229=PASS");

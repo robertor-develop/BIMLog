@@ -113,6 +113,17 @@ export async function applyPersistentCheckoutCompletion(client:CommercialQueryCl
   }catch(error){await client.query("ROLLBACK");throw error;}
 }
 
+const providerFailureCodes=["LINEAGE_NOT_FOUND","AMOUNT_MISMATCH","UNSUPPORTED_EVENT_TYPE","TRANSIENT_PROVIDER_FAILURE"] as const;
+export async function settlePersistentProviderReceipt(client:CommercialQueryClient,input:Readonly<{id:string;companyId:number;outcome:"failed"|"ignored";failureCode:(typeof providerFailureCodes)[number];processedAt:string}>):Promise<Readonly<{id:string;status:"failed"|"ignored"}>>{
+  id(input.id,"Receipt identity");positiveInteger(input.companyId,"Company identity");
+  if(!providerFailureCodes.includes(input.failureCode))throw new Error("Provider failure code is invalid");
+  if(input.outcome==="ignored"&&input.failureCode!=="UNSUPPORTED_EVENT_TYPE")throw new Error("Ignored provider receipts require the unsupported-event code");
+  const processedAt=new Date(input.processedAt);if(!Number.isFinite(processedAt.getTime()))throw new Error("Provider receipt settlement time is invalid");
+  const updated=await client.query(`UPDATE commercial_provider_receipts SET processing_status=$3,processed_at=$4,failure_code=$5 WHERE id=$1 AND company_id=$2 AND processing_status IN ('received','processing') RETURNING id,processing_status`,[input.id,input.companyId,input.outcome,processedAt.toISOString(),input.failureCode]);
+  if(!updated.rows[0])throw new Error("Provider receipt cannot be settled from its current state");
+  return Object.freeze({id:id(updated.rows[0].id,"Receipt identity"),status:input.outcome});
+}
+
 export type PersistentPaidInvoiceInput=Readonly<{id:string;companyId:number;subscriptionId:string;orderId:string;checkoutAttemptId:string;providerReceiptId:string;invoiceNumber:string;providerInvoiceReference:string;currency:string;subtotalCents:number;taxCents:number;issuedAt:string;paidAt:string}>;
 export async function persistPaidInvoiceWithAudit(client:CommercialQueryClient,input:PersistentPaidInvoiceInput):Promise<Readonly<{invoiceId:string;auditSequence:number;eventDigest:string}>>{
   positiveInteger(input.companyId,"Company identity");for(const [value,label] of [[input.id,"Invoice identity"],[input.subscriptionId,"Subscription identity"],[input.orderId,"Order identity"],[input.checkoutAttemptId,"Checkout identity"],[input.providerReceiptId,"Provider receipt identity"],[input.invoiceNumber,"Invoice number"],[input.providerInvoiceReference,"Provider invoice identity"]] as const)id(value,label);
