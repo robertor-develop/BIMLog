@@ -171,3 +171,31 @@ export const commercialInvoicesTable=pgTable("commercial_invoices",{
 ]);
 
 export type CommercialInvoiceRecord=typeof commercialInvoicesTable.$inferSelect;
+
+export const commercialCreditNotesTable=pgTable("commercial_credit_notes",{
+  id:text("id").primaryKey(),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  subscriptionId:text("subscription_id").notNull().references(()=>commercialSubscriptionsTable.id),
+  invoiceId:text("invoice_id").notNull().references(()=>commercialInvoicesTable.id),
+  creditNumber:text("credit_number").notNull(),
+  provider:text("provider").notNull(),
+  providerEventReference:text("provider_event_reference").notNull(),
+  currency:text("currency").notNull(),
+  amountCents:integer("amount_cents").notNull(),
+  reason:text("reason").notNull(),
+  status:text("status").notNull(),
+  approvedByUserId:integer("approved_by_user_id").notNull().references(()=>usersTable.id),
+  issuedAt:timestamp("issued_at",{withTimezone:true}).notNull(),
+  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_credit_notes_provider_chk",sql`${table.provider} in ('stripe')`),
+  check("commercial_credit_notes_currency_chk",sql`${table.currency} ~ '^[A-Z]{3}$'`),
+  check("commercial_credit_notes_amount_chk",sql`${table.amountCents}>0`),
+  check("commercial_credit_notes_reason_chk",sql`char_length(${table.reason}) between 3 and 500`),
+  check("commercial_credit_notes_status_chk",sql`${table.status} in ('issued','void')`),
+  uniqueIndex("commercial_credit_notes_number_uidx").on(table.creditNumber),
+  uniqueIndex("commercial_credit_notes_provider_event_uidx").on(table.provider,table.providerEventReference),
+  index("commercial_credit_notes_invoice_time_idx").on(table.invoiceId,table.issuedAt.desc()),
+]);
+
+export type CommercialCreditNoteRecord=typeof commercialCreditNotesTable.$inferSelect;
