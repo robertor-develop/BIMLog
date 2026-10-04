@@ -1,0 +1,12 @@
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."), tsx = path.join(root, "artifacts/api-server/node_modules/tsx/dist/cli.mjs");
+execFileSync(process.execPath, [tsx, path.join(root, "artifacts/api-server/src/lib/commercial-provider-webhook.behavior.ts")], { stdio: "inherit" });
+const app = readFileSync(path.join(root, "artifacts/api-server/src/app.ts"), "utf8"), routes = readFileSync(path.join(root, "artifacts/api-server/src/routes/commercial-provider-webhook.ts"), "utf8"), index = readFileSync(path.join(root, "artifacts/api-server/src/routes/index.ts"), "utf8");
+for (const required of ["STRIPE_COMMERCIAL_WEBHOOK_RE", 'express.raw({ limit: "1mb"', "verify: captureRawBody"]) if (!app.includes(required)) throw new Error(`B235 raw-body boundary missing: ${required}`);
+for (const required of ['router.post("/commercial/providers/stripe/webhook"', 'req.header("stripe-signature")', 'rawBody.toString("utf8")', 'res.status(200).json({ received: true']) if (!routes.includes(required)) throw new Error(`B235 route contract missing: ${required}`);
+if (routes.includes("authMiddleware")) throw new Error("Stripe webhook transport must not depend on an interactive user session");
+if (!index.includes("commercialProviderWebhookRouter")) throw new Error("Commercial provider webhook router is not registered");
+console.log("B235 Block 47 commercial provider HTTP boundary acceptance: PASS");

@@ -3725,3 +3725,9 @@ The complete Block 45 gate detected and repaired a stale Living Brief commit bin
 B226-B230 bind hosted checkout sessions, exclusive verified-receipt claims, exact metadata lineage, atomic checkout/order/subscription completion and bounded failed or ignored receipt settlement to persistent commercial authority. No card credential or provider secret is stored. Focused behavior and strict API typechecks pass. B221-B230 now reach the required ten-build publication and authenticated Chrome boundary.
 
 The Block 46 gate detected that the pre-commit Living Brief state omitted the then-untracked focused test and evidence files from its changed-path digest. The state is regenerated after those files became tracked; product behavior and publication scope are unchanged.
+
+Block 46 is accepted live at exact source `a29f6f2a86d1d5a43e389cca1b9144e488b276bb` under Replit receipt `57b4fb85`. Authenticated Chrome passed 64/64 desktop, 64/64 exact-390, 10/10 tablet, hard reload, independent-tab continuity and zero browser warnings or errors.
+
+## 250-build SaaS Completion Block 47 — verified commercial provider boundary — 2026-10-04
+
+B231-B235 connect the governed Stripe adapter to persistent commercial authority through an exact raw-body webhook boundary. Signatures and replay time are verified before parsing, active provider/customer binding determines company scope, receipts are durable and replay-safe, checkout completion applies once with exact lineage, and unsupported or failed events settle to bounded terminal evidence. Focused behavior and strict typechecks are required before push. This is the first five-build block after the accepted B221-B230 publication and remains unpublished until B240.

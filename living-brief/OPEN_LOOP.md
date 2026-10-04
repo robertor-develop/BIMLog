@@ -4435,3 +4435,14 @@ Block 45 gate repair: the reconciled Living Brief state is rebound to the final 
 - [ ] Pass the complete exact-head gate, push B226-B230, publish B221-B230 once, verify exact live identity and run the full authenticated Chrome smoke.
 
 Block 46 gate repair: regenerate the Living Brief changed-path digest after the new Block 46 test and evidence files became tracked, then repeat the complete gate before push.
+
+Block 46 is accepted live at source `a29f6f2a86d1d5a43e389cca1b9144e488b276bb`, Replit receipt `57b4fb85`; the full authenticated Chrome matrix passed.
+
+## 250-build SaaS Completion Block 47 — verified commercial provider boundary — 2026-10-04
+
+- [x] B231 verify the exact raw Stripe payload and replay window before application parsing.
+- [x] B232 bind signed customer identity to one active company/provider record and persist replay-safe evidence.
+- [x] B233 claim and apply checkout completion once with exact stored lineage and durable failure settlement.
+- [x] B234 expose the bounded public Stripe endpoint with secret-safe responses.
+- [x] B235 add focused behavior, release evidence and complete-gate registration.
+- [ ] Pass the complete exact-head gate and push B231-B235 once. Publication remains reserved for B240.
