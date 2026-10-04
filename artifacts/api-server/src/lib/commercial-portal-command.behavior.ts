@@ -1,0 +1,8 @@
+import assert from "node:assert/strict";
+import {startCommercialBillingPortal} from "./commercial-portal-command";
+const client={query:async(text:string)=>text.includes("FROM commercial_subscriptions")?{rows:[{id:"sub-7",company_id:7,status:"active"}],rowCount:1}:text.includes("commercial_provider_bindings")?{rows:[{id:"binding-7",provider:"stripe",customer_reference:"cus_company_7"}],rowCount:1}:{rows:[],rowCount:0}};
+const environment={STRIPE_SECRET_KEY:"sk_test_abcdefghijkl",STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijkl",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_test",BIMLOG_APP_ORIGIN:"https://bimlog.app"};
+const result=await startCommercialBillingPortal({client,environment,companyId:7,userId:4,now:new Date("2026-10-04T12:00:00Z"),transport:async request=>{assert.equal(request.path,"/v1/billing_portal/sessions");assert.equal(request.body.get("customer"),"cus_company_7");return {status:200,body:{id:"bps_company_7",url:"https://billing.stripe.com/p/session_7",customer:"cus_company_7"}};}});
+assert.equal(result.url,"https://billing.stripe.com/p/session_7");
+assert.equal(result.expiresAt,"2026-10-04T12:10:00.000Z");
+console.log("commercial portal command behavior passed");
