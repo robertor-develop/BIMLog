@@ -8,6 +8,7 @@ for(const token of ["Plan checkout coverage","Cobertura de pago por plan","data.
 for(const token of ["Ready to sell live subscriptions","Subscriptions are not ready for sale","Checkout is in test mode","Customers do not need to enter provider settings","salesLaunchBlockers.map"])assert.match(source,new RegExp(token));
 assert.doesNotMatch(source,/price_[A-Za-z0-9_]+/);
 for(const token of ["parseCommercialCheckoutReturn","Checkout received","Checkout cancelled","verifying the provider confirmation","No subscription change was claimed"])assert.match(source,new RegExp(token));
+for(const token of ["Billing self-service","Autoservicio de facturación","Start secure checkout","Manage billing","requestCommercialHostedDestination","data.billingAuthority.canManageBilling"])assert.match(source,new RegExp(token));
 assert.match(source,/data\.actions\.map/);assert.match(source,/action\.status==="blocked"/);assert.match(source,/Button disabled/);
 assert.match(source,/minmax\(min\(240px,100%\),1fr\)/);assert.match(source,/Waiting for:/);assert.match(source,/action\.blockers\.map/);assert.doesNotMatch(source,/Ready \/ Listo|Setup required \/ Requiere configuración/);
 assert.match(source,/AbortController/);assert.match(source,/parseCommercialWorkspace/);assert.doesNotMatch(source,/stripe.*secret/i);

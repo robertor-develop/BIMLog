@@ -1,0 +1,4 @@
+import {execFileSync} from "node:child_process";import path from "node:path";import {fileURLToPath} from "node:url";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),".."),tsx=path.join(root,"artifacts/api-server/node_modules/tsx/dist/cli.mjs");
+for(const file of ["artifacts/api-server/src/lib/commercial-billing-authority.behavior.ts","artifacts/api-server/src/lib/commercial-checkout-command.behavior.ts","artifacts/api-server/src/lib/commercial-portal-command.behavior.ts","artifacts/api-server/src/routes/commercial-workspace.behavior.ts","artifacts/bimlog/src/lib/commercial-workspace-client.behavior.ts","artifacts/bimlog/src/pages/commercial-workspace.behavior.ts"])execFileSync(process.execPath,[tsx,path.join(root,file)],{stdio:"inherit"});
+console.log("B236-B240 Block 48 customer billing acceptance: PASS");
