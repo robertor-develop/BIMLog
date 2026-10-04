@@ -206,6 +206,7 @@ const jsonTypeMatcher = (req: Request): boolean => {
 const RAW_BODY_BYPASS_RE = /\/clash-reports\/(plugin-sync|lens-sync)$/;
 const RAW_BODY_BYPASS_MAX_BYTES = 500 * 1024 * 1024; // mirror express.json's 500mb cap
 const TELEGRAM_WEBHOOK_RE = /^\/api\/v1\/webhooks\/telegram\//;
+const STRIPE_COMMERCIAL_WEBHOOK_RE = /^\/api\/v1\/commercial\/providers\/stripe\/webhook$/;
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (req.method !== "POST" || !RAW_BODY_BYPASS_RE.test(req.path))
     return next();
@@ -244,6 +245,19 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   req.on("error", () => finish(() => next()));
 });
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (!STRIPE_COMMERCIAL_WEBHOOK_RE.test(req.path)) return next();
+  const ct = (req.headers["content-type"] || "").toLowerCase();
+  if (!ct.includes("application/json")) {
+    res.status(415).json({ code: "COMMERCIAL_WEBHOOK_CONTENT_TYPE_INVALID", error: "Content-Type must be application/json." });
+    return;
+  }
+  next();
+});
+app.use(
+  "/api/v1/commercial/providers/stripe/webhook",
+  express.raw({ limit: "1mb", type: "application/json", verify: captureRawBody }),
+);
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (!TELEGRAM_WEBHOOK_RE.test(req.path)) return next();
   const ct = (req.headers["content-type"] || "").toLowerCase();
