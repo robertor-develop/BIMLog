@@ -748,12 +748,6 @@
   color: #64748b;
 }
 
-@media (max-width: 420px) {
-  .lens-next-route-state {
-    padding: 1rem;
-  }
-}
-
 .lens-next__active-model {
   min-width: 0;
   border: 1px solid #dbe4ee;
@@ -1157,6 +1151,7 @@
   }
 }
 @media (max-width: 420px) {
+  .lens-next-route-state { padding: 1rem; }
   .lens-next { width: 100%; min-width: 0; overflow-x: hidden; }
   .lens-next__header, .lens-next__connections, .lens-next__actions, .lens-next__pagination, .lens-next__sync-readiness, .lens-next__sync-recovery { align-items: stretch; flex-direction: column; }
   .lens-next__header-actions, .lens-next__presentation-toolbar, .lens-next__presentation-toggle { width: 100%; flex-wrap: wrap; }
