@@ -1,0 +1,8 @@
+import assert from "node:assert/strict";
+import {persistSubscriptionSetup,type CommercialQueryClient} from "./commercial-persistence";
+const calls:{text:string;values?:readonly unknown[]}[]=[];const client:CommercialQueryClient={query:async(text,values)=>{calls.push({text,values});if(text.startsWith("SELECT s.id"))return {rows:[],rowCount:0};return {rows:[{id:47}],rowCount:1};}};
+const input={companyId:47,userId:9,subscriptionId:"subscription-company-47",bindingId:"binding-company-47",planCode:"team" as const,billingCycle:"annual" as const,seatQuantity:5,providerEnvironment:"live" as const,providerCustomerReference:"cus_company_47"};
+assert.deepEqual(await persistSubscriptionSetup(client,input),{subscriptionId:input.subscriptionId,providerBindingId:input.bindingId,replayed:false});assert.equal(calls[0].text,"BEGIN");assert.match(calls[1].text,/companies WHERE id=\$1 FOR UPDATE/);assert.match(calls[3].text,/INSERT INTO commercial_subscriptions/);assert.match(calls[4].text,/INSERT INTO commercial_provider_bindings/);assert.equal(calls.at(-1)?.text,"COMMIT");
+const replayClient:CommercialQueryClient={query:async(text)=>text.startsWith("SELECT s.id")?{rows:[{id:input.subscriptionId,plan_code:"team",billing_cycle:"annual",seat_quantity:5,provider_binding_id:input.bindingId,environment:"live",customer_reference:"cus_company_47"}],rowCount:1}:{rows:[{id:47}],rowCount:1}};assert.equal((await persistSubscriptionSetup(replayClient,input)).replayed,true);
+await assert.rejects(()=>persistSubscriptionSetup(replayClient,{...input,planCode:"business"}),/different commercial subscription/);
+console.log("B292 atomic subscription and provider binding persistence: PASS");

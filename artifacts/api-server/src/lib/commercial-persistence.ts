@@ -32,6 +32,26 @@ export async function readPersistentCommercialAuthority(client: CommercialQueryC
   return Object.freeze({ subscription: Object.freeze(subscription.rows[0]), terms: Object.freeze(terms.rows.map(Object.freeze)), seats: Object.freeze(seats.rows.map(Object.freeze)), providerBindings: Object.freeze(bindings.rows.map(Object.freeze)) });
 }
 
+export type PersistentSubscriptionSetupInput=Readonly<{companyId:number;userId:number;subscriptionId:string;bindingId:string;planCode:"professional"|"team"|"business";billingCycle:"monthly"|"annual";seatQuantity:number;providerEnvironment:"test"|"live";providerCustomerReference:string}>;
+export async function persistSubscriptionSetup(client:CommercialQueryClient,input:PersistentSubscriptionSetupInput):Promise<Readonly<{subscriptionId:string;providerBindingId:string;replayed:boolean}>>{
+  positiveInteger(input.companyId,"Company identity");positiveInteger(input.userId,"User identity");id(input.subscriptionId,"Subscription identity");id(input.bindingId,"Provider binding identity");
+  if(!["professional","team","business"].includes(input.planCode)||!["monthly","annual"].includes(input.billingCycle)||!Number.isSafeInteger(input.seatQuantity)||input.seatQuantity<1||input.seatQuantity>10000)throw new Error("Subscription setup offer is invalid");
+  if(!["test","live"].includes(input.providerEnvironment)||!/^cus_[A-Za-z0-9_]{6,}$/.test(input.providerCustomerReference))throw new Error("Subscription setup provider binding is invalid");
+  await client.query("BEGIN");
+  try{
+    await client.query(`SELECT id FROM companies WHERE id=$1 FOR UPDATE`,[input.companyId]);
+    const existing=await client.query(`SELECT s.id,s.plan_code,s.billing_cycle,s.seat_quantity,b.id provider_binding_id,b.environment,b.customer_reference FROM commercial_subscriptions s LEFT JOIN commercial_provider_bindings b ON b.company_id=s.company_id AND b.provider='stripe' AND b.status='active' WHERE s.company_id=$1 AND s.status IN ('pending','trialing','active','past_due','suspended','canceling') ORDER BY s.created_at DESC LIMIT 1`,[input.companyId]);
+    if(existing.rows[0]){
+      const row=existing.rows[0],matches=row.plan_code===input.planCode&&row.billing_cycle===input.billingCycle&&Number(row.seat_quantity)===input.seatQuantity&&row.environment===input.providerEnvironment&&row.customer_reference===input.providerCustomerReference;
+      if(!matches)throw new Error("Company already has a different commercial subscription authority");
+      await client.query("COMMIT");return Object.freeze({subscriptionId:id(row.id,"Existing subscription identity"),providerBindingId:id(row.provider_binding_id,"Existing provider binding identity"),replayed:true});
+    }
+    await client.query(`INSERT INTO commercial_subscriptions(id,company_id,plan_code,billing_cycle,status,currency,seat_quantity) VALUES($1,$2,$3,$4,'pending','USD',$5)`,[input.subscriptionId,input.companyId,input.planCode,input.billingCycle,input.seatQuantity]);
+    await client.query(`INSERT INTO commercial_provider_bindings(id,company_id,provider,environment,customer_reference,status) VALUES($1,$2,'stripe',$3,$4,'active')`,[input.bindingId,input.companyId,input.providerEnvironment,input.providerCustomerReference]);
+    await client.query("COMMIT");return Object.freeze({subscriptionId:input.subscriptionId,providerBindingId:input.bindingId,replayed:false});
+  }catch(error){await client.query("ROLLBACK");throw error;}
+}
+
 export type PersistentCheckoutInput = Readonly<{ companyId: number; userId: number; subscriptionId: string; providerBindingId: string; orderId: string; checkoutId: string; requestKey: string; idempotencyKey: string; fingerprint: string; currency: string; subtotalCents: number; taxCents: number; expiresAt: string }>;
 
 export async function createPersistentOrderCheckout(client: CommercialQueryClient, input: PersistentCheckoutInput): Promise<Readonly<{ orderId: string; checkoutId: string; replayed: boolean }>> {
