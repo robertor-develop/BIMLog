@@ -97,3 +97,43 @@ export const commercialOrdersTable=pgTable("commercial_orders",{
 ]);
 
 export type CommercialOrder=typeof commercialOrdersTable.$inferSelect;
+
+export const commercialProviderBindingsTable=pgTable("commercial_provider_bindings",{
+  id:text("id").primaryKey(),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  provider:text("provider").notNull(),
+  environment:text("environment").notNull(),
+  customerReference:text("customer_reference").notNull(),
+  status:text("status").notNull(),
+  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+  updatedAt:timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_provider_bindings_provider_chk",sql`${table.provider} in ('stripe')`),
+  check("commercial_provider_bindings_environment_chk",sql`${table.environment} in ('test','live')`),
+  check("commercial_provider_bindings_status_chk",sql`${table.status} in ('active','revoked')`),
+  uniqueIndex("commercial_provider_bindings_company_provider_uidx").on(table.companyId,table.provider,table.environment),
+  uniqueIndex("commercial_provider_bindings_customer_uidx").on(table.provider,table.environment,table.customerReference),
+]);
+
+export const commercialCheckoutAttemptsTable=pgTable("commercial_checkout_attempts",{
+  id:text("id").primaryKey(),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  orderId:text("order_id").notNull().references(()=>commercialOrdersTable.id),
+  providerBindingId:text("provider_binding_id").notNull().references(()=>commercialProviderBindingsTable.id),
+  idempotencyKey:text("idempotency_key").notNull(),
+  requestFingerprint:text("request_fingerprint").notNull(),
+  providerSessionReference:text("provider_session_reference"),
+  status:text("status").notNull(),
+  expiresAt:timestamp("expires_at",{withTimezone:true}).notNull(),
+  completedAt:timestamp("completed_at",{withTimezone:true}),
+  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+  updatedAt:timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_checkout_attempts_status_chk",sql`${table.status} in ('creating','open','completed','expired','canceled','failed')`),
+  uniqueIndex("commercial_checkout_attempts_company_key_uidx").on(table.companyId,table.idempotencyKey),
+  uniqueIndex("commercial_checkout_attempts_provider_session_uidx").on(table.providerBindingId,table.providerSessionReference).where(sql`${table.providerSessionReference} is not null`),
+  index("commercial_checkout_attempts_order_time_idx").on(table.orderId,table.createdAt.desc()),
+]);
+
+export type CommercialProviderBinding=typeof commercialProviderBindingsTable.$inferSelect;
+export type CommercialCheckoutAttempt=typeof commercialCheckoutAttemptsTable.$inferSelect;
