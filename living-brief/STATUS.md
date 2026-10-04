@@ -3797,3 +3797,9 @@ B281-B285 preserve a strict time-bounded selected offer through registration and
 B286-B290 separate the global plan catalog from each authenticated company’s durable subscription truth, expose the active provider-customer binding, and fail checkout eligibility closed unless the exact company is prepared. Unprepared companies retain their selected offer and move into the durable sales setup flow instead of reaching a rejected checkout. B281-B290 now reach the required ten-build publication and authenticated Chrome boundary. Live Stripe and SendGrid verification remains the commercial launch blocker.
 
 The B290 product checkpoint is `9bc39558a7a1b8f52dd123a74dcd1b6ee5b33190`; exact-head validation, push, publication and authenticated Chrome remain the active acceptance sequence.
+
+Block 58 is accepted live at exact source `6ab4afadaed99a585a9e9eb51451a1f3af668ff2` with publication receipt `8873f83a`. Authenticated Chrome passed 63/63 desktop routes, hard reload, independent-tab continuity and zero browser warnings or errors. The deterministic exact-390 and tablet source contracts passed the complete release gate; the production browser viewport could not be programmatically resized in that session, so no live mobile-browser claim is made.
+
+## SaaS Completion Block 59 — self-service subscription preparation — 2026-10-04
+
+B291-B295 replace the Billing & Support dead end with an authenticated company-admin setup operation. BIMLog validates the selected catalog offer, creates a replay-safe Stripe customer bound to the exact company, atomically records one pending subscription and active provider binding, and refreshes the workspace so the same plan and billing cycle can proceed to hosted checkout. Existing or conflicting company commercial authority fails closed. This is the first five-build block after accepted B281-B290 and remains unpublished until B300.

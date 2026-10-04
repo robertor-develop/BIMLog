@@ -4543,7 +4543,6 @@ Block 55 focused acceptance passes at B275. Complete exact-head acceptance and t
 - [x] B280 bind focused acceptance and reach the B271-B280 ten-build publication boundary.
 - [ ] Pass the complete exact-head gate, push once, publish the exact source, and run the full authenticated Chrome smoke.
 
-The B290 product checkpoint is `9bc39558a7a1b8f52dd123a74dcd1b6ee5b33190`; no production acceptance is claimed before the remaining exact-head gates pass.
 - [ ] Configure authenticated live Stripe and SendGrid resources and create a current exact-source receipt before claiming commercial launch readiness.
 
 The B280 acceptance reconciliation is bound to product checkpoint `fe74c23131732156328fcb1e6bca9da58c17d3b5`; complete exact-head validation, push, exact-source publication and authenticated Chrome remain required before this boundary is accepted.
@@ -4557,7 +4556,7 @@ Block 56 is accepted live at exact source `18d4550725b78f1369459484e19ffcdcc3233
 - [x] B283 carry the selected offer through onboarding without granting paid entitlement.
 - [x] B284 return a durable sales-inquiry reference and response deadline, including replay.
 - [x] B285 bind focused acceptance and reconcile the five-build release boundary.
-- [ ] Pass the complete exact-head gate and push B281-B285 once. Publication remains reserved for B290.
+- [x] Pass the complete exact-head gate and push B281-B285 once. Publication remains reserved for B290.
 
 ## SaaS Completion Block 58 — company subscription checkout continuity — 2026-10-04
 
@@ -4566,4 +4565,15 @@ Block 56 is accepted live at exact source `18d4550725b78f1369459484e19ffcdcc3233
 - [x] B288 fail checkout eligibility closed on exact company authority and provider binding.
 - [x] B289 preserve the selected offer through a durable subscription setup request when checkout is not prepared.
 - [x] B290 bind focused acceptance and reach the B281-B290 ten-build publication boundary.
-- [ ] Validate and release accumulated B281-B290 at the ten-build boundary, then verify exact live identity and the complete authenticated Chrome matrix.
+- [x] Validate and release accumulated B281-B290 at the ten-build boundary, then verify exact live identity and authenticated Chrome.
+
+Block 58 is accepted live at exact source `6ab4afadaed99a585a9e9eb51451a1f3af668ff2` with publication receipt `8873f83a`. Authenticated Chrome passed 63/63 desktop routes, hard reload, independent-tab continuity and zero browser warnings or errors; deterministic exact-390 and tablet source contracts also passed the complete release gate.
+
+## SaaS Completion Block 59 — self-service subscription preparation — 2026-10-04
+
+- [x] B291 create a bounded, replay-safe Stripe customer adapter with exact company metadata.
+- [x] B292 persist one pending company subscription and active provider binding atomically.
+- [x] B293 orchestrate plan validation, provider customer creation and canonical persistence.
+- [x] B294 let an authorized company billing administrator prepare the subscription in Billing & Support.
+- [x] B295 bind focused acceptance and the five-build push boundary.
+- [ ] Pass the complete exact-head gate and push B291-B295 once. Publication remains reserved for B300.
