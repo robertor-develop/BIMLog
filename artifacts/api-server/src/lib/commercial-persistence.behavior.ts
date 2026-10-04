@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { createPersistentOrderCheckout, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
+import { createPersistentOrderCheckout, persistPaidInvoiceWithAudit, persistVerifiedProviderReceipt, readPersistentCommercialAuthority, type CommercialQueryClient } from "./commercial-persistence";
 
 const calls: { text: string; values?: readonly unknown[] }[] = [];
 const client: CommercialQueryClient = { async query(text, values) {
@@ -50,3 +50,18 @@ assert.deepEqual(receipt,{id:"receipt-company-7",replayed:false});
 await assert.rejects(()=>persistVerifiedProviderReceipt(receiptClient,{id:"receipt-company-7",companyId:7,providerBindingId:"binding-company-7",providerEventReference:"evt_company_7",eventType:"checkout.session.completed",rawPayload:`${raw} `,payloadDigest:digest,signatureVerifiedAt:"2026-10-04T12:00:00Z"}),/digest/);
 
 console.log("COMMERCIAL_PERSISTENCE_B223=PASS");
+
+const invoiceWrites:string[]=[];
+const invoiceClient:CommercialQueryClient={async query(text){invoiceWrites.push(text);
+  if(text.startsWith("SELECT s.id"))return {rows:[{id:"sub-company-7"}],rowCount:1};
+  if(text.startsWith("INSERT INTO commercial_invoices"))return {rows:[{id:"invoice-company-7"}],rowCount:1};
+  if(text.startsWith("SELECT sequence"))return {rows:[{sequence:4,event_digest:"b".repeat(64)}],rowCount:1};
+  return {rows:[],rowCount:null};
+}};
+const paid=await persistPaidInvoiceWithAudit(invoiceClient,{id:"invoice-company-7",companyId:7,subscriptionId:"sub-company-7",orderId:"order-company-7",checkoutAttemptId:"checkout-company-7",providerReceiptId:"receipt-company-7",invoiceNumber:"INV-COMPANY-7",providerInvoiceReference:"in_company_7",currency:"USD",subtotalCents:10000,taxCents:700,issuedAt:"2026-10-04T12:00:00Z",paidAt:"2026-10-04T12:01:00Z"});
+assert.equal(paid.auditSequence,5);assert.match(paid.eventDigest,/^[0-9a-f]{64}$/);
+assert.ok(invoiceWrites.some(query=>query.includes("INSERT INTO commercial_audit_events")));
+assert.ok(invoiceWrites.some(query=>query.includes("processing_status='applied'")));
+assert.equal(invoiceWrites.at(-1),"COMMIT");
+
+console.log("COMMERCIAL_PERSISTENCE_B224=PASS");

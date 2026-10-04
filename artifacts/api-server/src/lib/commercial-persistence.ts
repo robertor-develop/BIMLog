@@ -76,4 +76,26 @@ export async function persistVerifiedProviderReceipt(client:CommercialQueryClien
   return Object.freeze({id:id(inserted.rows[0].id,"Persistent receipt identity"),replayed:false});
 }
 
+export type PersistentPaidInvoiceInput=Readonly<{id:string;companyId:number;subscriptionId:string;orderId:string;checkoutAttemptId:string;providerReceiptId:string;invoiceNumber:string;providerInvoiceReference:string;currency:string;subtotalCents:number;taxCents:number;issuedAt:string;paidAt:string}>;
+export async function persistPaidInvoiceWithAudit(client:CommercialQueryClient,input:PersistentPaidInvoiceInput):Promise<Readonly<{invoiceId:string;auditSequence:number;eventDigest:string}>>{
+  positiveInteger(input.companyId,"Company identity");for(const [value,label] of [[input.id,"Invoice identity"],[input.subscriptionId,"Subscription identity"],[input.orderId,"Order identity"],[input.checkoutAttemptId,"Checkout identity"],[input.providerReceiptId,"Provider receipt identity"],[input.invoiceNumber,"Invoice number"],[input.providerInvoiceReference,"Provider invoice identity"]] as const)id(value,label);
+  if(!/^[A-Z]{3}$/.test(input.currency)||!Number.isSafeInteger(input.subtotalCents)||input.subtotalCents<0||!Number.isSafeInteger(input.taxCents)||input.taxCents<0)throw new Error("Invoice amount is invalid");
+  const issuedAt=new Date(input.issuedAt),paidAt=new Date(input.paidAt);if(!Number.isFinite(issuedAt.getTime())||!Number.isFinite(paidAt.getTime())||paidAt<issuedAt)throw new Error("Invoice time is invalid");
+  await client.query("BEGIN");
+  try{
+    const lineage=await client.query(`SELECT s.id FROM commercial_subscriptions s JOIN commercial_orders o ON o.id=$2 AND o.subscription_id=s.id AND o.company_id=s.company_id JOIN commercial_checkout_attempts c ON c.id=$3 AND c.order_id=o.id AND c.company_id=s.company_id AND c.status='completed' JOIN commercial_provider_receipts r ON r.id=$4 AND r.company_id=s.company_id AND r.processing_status IN ('processing','applied') WHERE s.id=$1 AND s.company_id=$5 FOR UPDATE`,[input.subscriptionId,input.orderId,input.checkoutAttemptId,input.providerReceiptId,input.companyId]);
+    if(!lineage.rows[0])throw new Error("Paid invoice lineage is invalid");
+    const totalCents=input.subtotalCents+input.taxCents;
+    const invoice=await client.query(`INSERT INTO commercial_invoices(id,company_id,subscription_id,order_id,checkout_attempt_id,invoice_number,provider,provider_invoice_reference,currency,subtotal_cents,tax_cents,total_cents,status,issued_at,paid_at) VALUES($1,$2,$3,$4,$5,$6,'stripe',$7,$8,$9,$10,$11,'paid',$12,$13) ON CONFLICT(provider,provider_invoice_reference) DO NOTHING RETURNING id`,[input.id,input.companyId,input.subscriptionId,input.orderId,input.checkoutAttemptId,input.invoiceNumber,input.providerInvoiceReference,input.currency,input.subtotalCents,input.taxCents,totalCents,issuedAt.toISOString(),paidAt.toISOString()]);
+    if(!invoice.rows[0])throw new Error("Provider invoice was already persisted");
+    const prior=await client.query(`SELECT sequence,event_digest FROM commercial_audit_events WHERE company_id=$1 ORDER BY sequence DESC LIMIT 1 FOR UPDATE`,[input.companyId]);
+    const auditSequence=prior.rows[0]?positiveInteger(prior.rows[0].sequence,"Prior audit sequence")+1:1;
+    const previousEventDigest=prior.rows[0]?String(prior.rows[0].event_digest):null;
+    const eventDigest=commercialPersistenceInternals.sha256(JSON.stringify({companyId:input.companyId,subscriptionId:input.subscriptionId,providerReceiptId:input.providerReceiptId,sequence:auditSequence,eventType:"invoice.paid",entityType:"commercial_invoice",entityId:input.id,previousEventDigest,occurredAt:paidAt.toISOString()}));
+    await client.query(`INSERT INTO commercial_audit_events(id,company_id,subscription_id,provider_receipt_id,sequence,event_type,entity_type,entity_id,event_digest,previous_event_digest,occurred_at) VALUES($1,$2,$3,$4,$5,'invoice.paid','commercial_invoice',$6,$7,$8,$9)`,[`audit-${input.id}`,input.companyId,input.subscriptionId,input.providerReceiptId,auditSequence,input.id,eventDigest,previousEventDigest,paidAt.toISOString()]);
+    await client.query(`UPDATE commercial_provider_receipts SET processing_status='applied',processed_at=$2,failure_code=NULL WHERE id=$1`,[input.providerReceiptId,paidAt.toISOString()]);
+    await client.query("COMMIT");return Object.freeze({invoiceId:input.id,auditSequence,eventDigest});
+  }catch(error){await client.query("ROLLBACK");throw error;}
+}
+
 export const commercialPersistenceInternals = Object.freeze({ id, positiveInteger, sha256: (value: string) => crypto.createHash("sha256").update(value).digest("hex") });
