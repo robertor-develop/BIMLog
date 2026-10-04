@@ -1,6 +1,12 @@
 import { COMMERCIAL_OFFERS, type BillingCycle } from "./commercial-offers";
 export type CommercialIntent={plan:string;billing:BillingCycle;useCase:string};
+type CommercialIntentEnvelope={version:1;intent:CommercialIntent;savedAt:string};
+export const COMMERCIAL_INTENT_STORAGE_KEY="bimlog.commercial-intent.v1";
+const MAX_INTENT_AGE_MS=7*24*60*60*1000;
 const ids=new Set([...COMMERCIAL_OFFERS.map(x=>x.id),"founding"]);
 export function parseCommercialIntent(search:string):CommercialIntent|null{const p=new URLSearchParams(search.startsWith("?")?search.slice(1):search);const plan=p.get("plan")??"";const billing=p.get("billing");if(!ids.has(plan)||(billing!=="monthly"&&billing!=="annual"))return null;return{plan,billing,useCase:(p.get("useCase")??"").trim().slice(0,120)};}
 export function intentLabel(value:CommercialIntent){const offer=COMMERCIAL_OFFERS.find(x=>x.id===value.plan);return value.plan==="founding"?"Founding Partner program":`${offer?.name??value.plan} plan (${value.billing})`;}
-export function rememberCommercialIntent(value:CommercialIntent|null,storage:Pick<Storage,"setItem">=sessionStorage){if(value)storage.setItem("bimlog.commercial-intent.v1",JSON.stringify(value));}
+function validIntent(value:unknown):value is CommercialIntent{if(!value||typeof value!=="object"||Array.isArray(value))return false;const item=value as Record<string,unknown>;return typeof item.plan==="string"&&ids.has(item.plan)&&(item.billing==="monthly"||item.billing==="annual")&&typeof item.useCase==="string"&&item.useCase.length<=120;}
+export function rememberCommercialIntent(value:CommercialIntent|null,storage:Pick<Storage,"setItem">=sessionStorage,now=new Date()){if(value)storage.setItem(COMMERCIAL_INTENT_STORAGE_KEY,JSON.stringify({version:1,intent:value,savedAt:now.toISOString()} satisfies CommercialIntentEnvelope));}
+export function readCommercialIntent(storage:Pick<Storage,"getItem"|"removeItem">=sessionStorage,now=new Date()):CommercialIntent|null{const raw=storage.getItem(COMMERCIAL_INTENT_STORAGE_KEY);if(!raw)return null;try{const envelope=JSON.parse(raw) as Record<string,unknown>;const savedAt=typeof envelope.savedAt==="string"?new Date(envelope.savedAt):null;if(envelope.version!==1||!validIntent(envelope.intent)||!savedAt||!Number.isFinite(savedAt.getTime())||savedAt.getTime()>now.getTime()+60_000||now.getTime()-savedAt.getTime()>MAX_INTENT_AGE_MS)throw new Error("invalid");return envelope.intent;}catch{storage.removeItem(COMMERCIAL_INTENT_STORAGE_KEY);return null;}}
+export function clearCommercialIntent(storage:Pick<Storage,"removeItem">=sessionStorage){storage.removeItem(COMMERCIAL_INTENT_STORAGE_KEY);}
