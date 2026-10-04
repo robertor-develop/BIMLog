@@ -56635,15 +56635,17 @@
       ],
       "reason": "B246-B250 add bounded status filtering and pagination to the existing company-scoped billing history while withholding provider secrets and payment-method data.",
       "reviewedChangedPaths": [
+        "evidence/saas-completion-20261003/BLOCK_50_B246_B250.md",
         "evidence/saas-completion-20261003/BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-saas-completion-block50.mjs"
       ],
-      "reviewedChangeSha256": "4fd0f96a69b2af7c5feac51a8253e5f5b57426b231114157447b2f3b0c331ad0"
+      "reviewedChangeSha256": "405dec7d0add3777ae17a245a3c862ac81b87aabeeb366212c1eedd0adbc0346"
     }
   ]
 }

@@ -6,13 +6,15 @@
   "impact": {
     "baselineCommit": "db23bbebdb211eb70e27868f0f429ffca64e2131",
     "changedPaths": [
+      "evidence/saas-completion-20261003/BLOCK_50_B246_B250.md",
       "evidence/saas-completion-20261003/BUILD_LEDGER.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
-      "package.json"
+      "package.json",
+      "scripts/test-saas-completion-block50.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
