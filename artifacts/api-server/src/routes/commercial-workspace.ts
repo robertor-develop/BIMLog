@@ -2,7 +2,7 @@ import {Router,type IRouter} from "express";
 import {db,pool} from "@workspace/db";
 import {companiesTable,usersTable} from "@workspace/db/schema";
 import {eq,sql} from "drizzle-orm";
-import {authMiddleware} from "../middlewares/auth";
+import {authMiddleware,isSuperAdminMiddleware} from "../middlewares/auth";
 import {effectiveCommercialAccessForUser} from "../lib/commercial-entitlement";
 import {deriveCommercialRuntimeWorkspace} from "../lib/commercial-workspace-runtime";
 import {inspectCommercialPlatformReadiness} from "../lib/commercial-platform-readiness";
@@ -11,8 +11,15 @@ import {startCommercialCheckout} from "../lib/commercial-checkout-command";
 import {startCommercialBillingPortal} from "../lib/commercial-portal-command";
 import {readCustomerBillingHistory} from "../lib/commercial-billing-history";
 import {parseBillingHistoryQuery} from "../lib/commercial-billing-history-query";
+import {deriveCommercialLaunchActivation} from "../lib/commercial-launch-activation";
 
 const router:IRouter=Router();
+
+router.get("/admin/commercial-launch",authMiddleware,isSuperAdminMiddleware,(_req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");
+  res.set("Vary","Authorization");
+  res.json(deriveCommercialLaunchActivation(process.env));
+});
 
 router.get("/commercial/workspace",authMiddleware,async(req,res)=>{
   res.set("Cache-Control","private, no-store, max-age=0");
