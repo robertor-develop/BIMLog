@@ -1,5 +1,5 @@
 import {sql} from "drizzle-orm";
-import {check,index,integer,pgTable,text,timestamp,uniqueIndex} from "drizzle-orm/pg-core";
+import {boolean,check,index,integer,pgTable,text,timestamp,uniqueIndex} from "drizzle-orm/pg-core";
 import {companiesTable} from "./users";
 import {usersTable} from "./users";
 
@@ -285,7 +285,7 @@ export const commercialLaunchVerificationsTable=pgTable("commercial_launch_verif
   actorUserId:integer("actor_user_id").notNull().references(()=>usersTable.id),
   sourceCommit:text("source_commit").notNull(),
   status:text("status").notNull(),
-  verified:text("verified").notNull(),
+  verified:boolean("verified").notNull(),
   checkedAt:timestamp("checked_at",{withTimezone:true}).notNull(),
   validUntil:timestamp("valid_until",{withTimezone:true}).notNull(),
   checkCount:integer("check_count").notNull(),
@@ -296,7 +296,6 @@ export const commercialLaunchVerificationsTable=pgTable("commercial_launch_verif
 },table=>[
   check("commercial_launch_verifications_source_chk",sql`${table.sourceCommit} ~ '^[0-9a-f]{40}$'`),
   check("commercial_launch_verifications_status_chk",sql`${table.status} in ('configuration_blocked','verified','failed')`),
-  check("commercial_launch_verifications_verified_chk",sql`${table.verified} in ('true','false')`),
   check("commercial_launch_verifications_count_chk",sql`${table.checkCount}>=0 and ${table.checkCount}<=32`),
   check("commercial_launch_verifications_digest_chk",sql`${table.evidenceSha256} ~ '^[0-9a-f]{64}$'`),
   check("commercial_launch_verifications_window_chk",sql`${table.validUntil}>${table.checkedAt}`),
