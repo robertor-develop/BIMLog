@@ -5,6 +5,7 @@ export type CommercialLiveVerificationDto={status:"configuration_blocked"|"verif
 export type CommercialEvidenceDecision={status:"current"|"missing"|"source_mismatch"|"expired"|"not_verified";ready:boolean};
 export type CommercialHealthIdentityDto={status:"ok";release:string;sourceCommit:string;assetManifestSha256:string;packageId:string;databaseMigrationLevel:string;identityFingerprint:string;identityBound:true};
 export type CommercialVerificationHistoryItem={id:string;actorUserId:number;sourceCommit:string;status:"configuration_blocked"|"verified"|"failed";verified:boolean;checkedAt:string;validUntil:string;checkCount:number;failedCheckIds:string[];checks:{id:string;status:"verified"|"failed";code:string}[];evidenceSha256:string;recordedAt:string};
+export type CommercialLaunchAuthorizationDto={status:"current"|"missing"|"source_mismatch"|"expired"|"not_verified";ready:boolean;sourceCommit:string;receipt:CommercialVerificationHistoryItem|null;evaluatedAt:string};
 const ids=["catalog","provider","live_mode","webhook","portal","support"] as const;
 const allowedKeys=new Set(["BIMLOG_STRIPE_PRICE_IDS","BIMLOG_COMMERCIAL_MODE","STRIPE_SECRET_KEY","BIMLOG_APP_ORIGIN","STRIPE_WEBHOOK_SECRET","STRIPE_PORTAL_CONFIGURATION_ID","SENDGRID_API_KEY","BIMLOG_SUPPORT_FROM_EMAIL","BIMLOG_SUPPORT_INBOX_EMAIL"]);
 export function parseCommercialLaunch(value:unknown):CommercialLaunchDto{
@@ -39,4 +40,13 @@ export function parseCommercialVerificationHistory(value:unknown):CommercialVeri
     const checks=item.checks.map(check=>{if(!check||typeof check!=="object")throw new Error("Commercial verification history is invalid.");const entry=check as Record<string,unknown>;if(typeof entry.id!=="string"||!entry.id||!["verified","failed"].includes(String(entry.status))||typeof entry.code!=="string"||!entry.code)throw new Error("Commercial verification history is invalid.");return entry as {id:string;status:"verified"|"failed";code:string};});
     if(item.verified!==(item.status==="verified")||item.failedCheckIds.length!==checks.filter(check=>check.status==="failed").length)return (()=>{throw new Error("Commercial verification history is contradictory.");})();
     return {...item,checks} as CommercialVerificationHistoryItem;});
+}
+export function parseCommercialLaunchAuthorization(value:unknown):CommercialLaunchAuthorizationDto{
+  if(!value||typeof value!=="object")throw new Error("Commercial launch authorization is invalid.");
+  const item=value as Record<string,unknown>,status=String(item.status);
+  if(!["current","missing","source_mismatch","expired","not_verified"].includes(status)||typeof item.ready!=="boolean"||item.ready!==(status==="current")||typeof item.sourceCommit!=="string"||!/^[0-9a-f]{40}$/.test(item.sourceCommit)||typeof item.evaluatedAt!=="string"||!Number.isFinite(Date.parse(item.evaluatedAt)))throw new Error("Commercial launch authorization is invalid.");
+  let receipt:CommercialVerificationHistoryItem|null=null;
+  if(item.receipt!==null){const parsed=parseCommercialVerificationHistory({items:[item.receipt]});receipt=parsed[0];}
+  if((status==="missing")!==(receipt===null)||(status==="current"&&receipt?.sourceCommit!==item.sourceCommit))throw new Error("Commercial launch authorization is contradictory.");
+  return {...item,status,receipt} as CommercialLaunchAuthorizationDto;
 }
