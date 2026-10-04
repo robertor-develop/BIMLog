@@ -8,6 +8,7 @@ import { intentLabel, parseCommercialIntent, rememberCommercialIntent } from "@/
 import { recordConversionEvent } from "@/lib/conversion-funnel";
 import { useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
+import { parseSalesInquiryReceipt, type SalesInquiryReceipt } from "@/lib/sales-inquiry-receipt";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -37,6 +38,7 @@ export function Contact() {
   const [form, setForm] = useState({ fullName: "", email: "", companyName: "", country: "", interest: intent ? intentLabel(intent) : "", message: intent?.useCase ? `Primary use case: ${intent.useCase}` : "" });
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [receipt,setReceipt]=useState<SalesInquiryReceipt|null>(null);
   const [requestKey]=useState(()=>crypto.randomUUID());
   useEffect(()=>{if(intent)recordConversionEvent("contact_started");},[]);
 
@@ -53,7 +55,7 @@ export function Contact() {
         body: JSON.stringify({...form,plan:intent?.plan??null,billingCycle:intent?.billing??null,useCase:intent?.useCase||null,requestKey}),
       });
       const d = await r.json();
-      if (r.ok&&d.success) { recordConversionEvent("contact_submitted"); setStatus("sent"); }
+      if (r.ok&&d.success) { const accepted=parseSalesInquiryReceipt(d);setReceipt(accepted);recordConversionEvent("contact_submitted"); setStatus("sent"); }
       else { setStatus("error"); setErrorMsg(d.error || tt("Something went wrong. Please try again.","Ocurrió un error. Inténtelo de nuevo.")); }
     } catch {
       setStatus("error"); setErrorMsg(tt("Could not connect. Your information was not claimed as received.","No se pudo conectar. Su información no se registró como recibida."));
@@ -112,6 +114,7 @@ export function Contact() {
                 <div style={{ fontSize: 14, color: "hsl(var(--muted-foreground))", lineHeight: 1.7 }}>
                   {tt("Thank you for reaching out. We will reply within one business day to","Gracias por comunicarse. Responderemos dentro de un día hábil a")} <strong>{form.email}</strong>.
                 </div>
+                {receipt&&<div role="status" style={{marginTop:16,padding:12,border:"1px solid #22c55e44",borderRadius:8}}><div><strong>{tt("Inquiry reference","Referencia de solicitud")}:</strong> {receipt.reference}</div><div><strong>{tt("Response due","Respuesta prevista")}:</strong> {new Date(receipt.responseDueAt).toLocaleString()}</div>{receipt.replayed&&<small>{tt("Your earlier matching submission was found; no duplicate inquiry was created.","Se encontró su solicitud anterior coincidente; no se creó una solicitud duplicada.")}</small>}</div>}
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>

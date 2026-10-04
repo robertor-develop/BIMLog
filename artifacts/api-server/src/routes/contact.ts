@@ -20,14 +20,16 @@ router.post("/contact", async (req, res) => {
     const input=parseSalesInquiryInput(req.body);
     const fingerprint=salesInquiryFingerprint(input);
     try{
-      const receivedAt=new Date();
-      const [created]=await db.insert(contactSubmissionsTable).values({...input,fingerprint,status:"new",createdAt:receivedAt,updatedAt:receivedAt,responseDueAt:salesInquiryResponseDueAt(receivedAt)}).returning({id:contactSubmissionsTable.id,status:contactSubmissionsTable.status});
-      res.status(201).json({success:true,inquiryId:created.id,status:created.status,replayed:false});
+      const receivedAt=new Date(),responseDueAt=salesInquiryResponseDueAt(receivedAt);
+      const [created]=await db.insert(contactSubmissionsTable).values({...input,fingerprint,status:"new",createdAt:receivedAt,updatedAt:receivedAt,responseDueAt}).returning({id:contactSubmissionsTable.id,status:contactSubmissionsTable.status});
+      res.status(201).json({success:true,inquiryId:created.id,status:created.status,responseDueAt:responseDueAt.toISOString(),replayed:false});
     }catch(error){
       if((error as {code?:unknown})?.code!=="23505")throw error;
-      const [existing]=await db.select({id:contactSubmissionsTable.id,fingerprint:contactSubmissionsTable.fingerprint,status:contactSubmissionsTable.status}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.requestKey,input.requestKey)).limit(1);
+      const [existing]=await db.select({id:contactSubmissionsTable.id,fingerprint:contactSubmissionsTable.fingerprint,status:contactSubmissionsTable.status,responseDueAt:contactSubmissionsTable.responseDueAt,createdAt:contactSubmissionsTable.createdAt}).from(contactSubmissionsTable).where(eq(contactSubmissionsTable.requestKey,input.requestKey)).limit(1);
       if(!existing||existing.fingerprint!==fingerprint){res.status(409).json({code:"SALES_INQUIRY_REQUEST_CONFLICT",error:"This inquiry request identity was already used for different information."});return;}
-      res.json({success:true,inquiryId:existing.id,status:existing.status,replayed:true});
+      const responseDueAt=existing.responseDueAt??salesInquiryResponseDueAt(existing.createdAt);
+      if(!existing.responseDueAt)await db.update(contactSubmissionsTable).set({responseDueAt}).where(and(eq(contactSubmissionsTable.id,existing.id),isNull(contactSubmissionsTable.responseDueAt)));
+      res.json({success:true,inquiryId:existing.id,status:existing.status,responseDueAt:responseDueAt.toISOString(),replayed:true});
     }
   } catch (error) {
     if(error instanceof Error&&/is required|is invalid|not accepted/.test(error.message)){res.status(400).json({code:"SALES_INQUIRY_INVALID",error:error.message});return;}
