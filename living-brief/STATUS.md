@@ -3803,3 +3803,5 @@ Block 58 is accepted live at exact source `6ab4afadaed99a585a9e9eb51451a1f3af668
 ## SaaS Completion Block 59 — self-service subscription preparation — 2026-10-04
 
 B291-B295 replace the Billing & Support dead end with an authenticated company-admin setup operation. BIMLog validates the selected catalog offer, creates a replay-safe Stripe customer bound to the exact company, atomically records one pending subscription and active provider binding, and refreshes the workspace so the same plan and billing cycle can proceed to hosted checkout. Existing or conflicting company commercial authority fails closed. This is the first five-build block after accepted B281-B290 and remains unpublished until B300.
+
+The Block 59 acceptance reconciliation is bound to product checkpoint `67d523293f6d5f9f34f3188a3379a194cb293abd`; exact-head validation and the authorized single push remain the active closure steps.

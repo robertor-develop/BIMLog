@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a93983794cd4f0eded781580b07edf494610300af8c877763bf91533f6506f71",
-  "itemCount": 306,
+  "sourceSha256": "01745d4fca58cdca5c090689f056f0509d0f6f9fa9973f033e467eb1480be578",
+  "itemCount": 305,
   "counts": {
-    "ACTIVE": 270,
+    "ACTIVE": 269,
     "SUPERSEDED": 24,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5528,7 +5528,7 @@
     },
     {
       "id": "63c6b60d9eb892d2",
-      "sourceLine": 4547,
+      "sourceLine": 4546,
       "heading": "SaaS Completion Block 56 — current commercial launch authorization — 2026-10-04",
       "statement": "Configure authenticated live Stripe and SendGrid resources and create a current exact-source receipt before claiming commercial launch readiness.",
       "classification": "ACTIVE",
@@ -5539,34 +5539,16 @@
         "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:4547",
+        "OPEN_LOOP.md:4546",
         "SaaS Completion Block 56 — current commercial launch authorization — 2026-10-04"
       ],
       "currentAuthority": false
     },
     {
-      "id": "dc27163f0b947124",
-      "sourceLine": 4560,
-      "heading": "SaaS Completion Block 57 — commercial conversion continuity — 2026-10-04",
-      "statement": "Pass the complete exact-head gate and push B281-B285 once. Publication remains reserved for B290.",
-      "classification": "ACTIVE",
-      "workClass": "PRODUCT_WORK",
-      "ownership": {
-        "owner": "Commercial",
-        "route": "/projects/:id/financial/apu",
-        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:4560",
-        "SaaS Completion Block 57 — commercial conversion continuity — 2026-10-04"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "d492e4a58bb52386",
-      "sourceLine": 4569,
-      "heading": "SaaS Completion Block 58 — company subscription checkout continuity — 2026-10-04",
-      "statement": "Validate and release accumulated B281-B290 at the ten-build boundary, then verify exact live identity and the complete authenticated Chrome matrix.",
+      "id": "e1a2c0cd4dc096f1",
+      "sourceLine": 4579,
+      "heading": "SaaS Completion Block 59 — self-service subscription preparation — 2026-10-04",
+      "statement": "Pass the complete exact-head gate and push B291-B295 once. Publication remains reserved for B300.",
       "classification": "ACTIVE",
       "workClass": "PRODUCT_WORK",
       "ownership": {
@@ -5575,8 +5557,8 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:4569",
-        "SaaS Completion Block 58 — company subscription checkout continuity — 2026-10-04"
+        "OPEN_LOOP.md:4579",
+        "SaaS Completion Block 59 — self-service subscription preparation — 2026-10-04"
       ],
       "currentAuthority": false
     }

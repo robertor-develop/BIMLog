@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 735,
-    "frontendApiReferences": 289,
+    "apiRoutes": 736,
+    "frontendApiReferences": 290,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -2220,6 +2220,15 @@
     {
       "method": "POST",
       "path": "/commercial/checkout",
+      "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "tables": [
+        "companiesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/commercial/subscription-setup",
       "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
       "tables": [
         "companiesTable",
@@ -9785,6 +9794,10 @@
     {
       "screen": "artifacts/bimlog/src/lib/commercial-workspace-client.ts",
       "apiPath": "${base}/api/v1/commercial/${input.action}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/lib/commercial-workspace-client.ts",
+      "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/subscription-setup"
     },
     {
       "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",

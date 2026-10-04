@@ -349,6 +349,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-checkout-command.ts
 - artifacts/api-server/src/lib/commercial-checkout-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-credit-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-customer-setup.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.ts
 - artifacts/api-server/src/lib/commercial-dispute-schema.behavior.ts
@@ -401,6 +402,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-stripe-service-verification.ts
 - artifacts/api-server/src/lib/commercial-subscription-migration.ts
 - artifacts/api-server/src/lib/commercial-subscription-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-subscription-setup-persistence.behavior.ts
+- artifacts/api-server/src/lib/commercial-subscription-setup.behavior.ts
+- artifacts/api-server/src/lib/commercial-subscription-setup.ts
 - artifacts/api-server/src/lib/commercial-support-case-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-support-case.behavior.ts
 - artifacts/api-server/src/lib/commercial-support-case.ts

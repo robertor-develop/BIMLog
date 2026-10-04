@@ -4577,3 +4577,5 @@ Block 58 is accepted live at exact source `6ab4afadaed99a585a9e9eb51451a1f3af668
 - [x] B294 let an authorized company billing administrator prepare the subscription in Billing & Support.
 - [x] B295 bind focused acceptance and the five-build push boundary.
 - [ ] Pass the complete exact-head gate and push B291-B295 once. Publication remains reserved for B300.
+
+The B295 product checkpoint is `67d523293f6d5f9f34f3188a3379a194cb293abd`; this later reconciliation unit records its complete module impact before the exact-head release gate.
