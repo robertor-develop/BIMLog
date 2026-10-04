@@ -4518,3 +4518,5 @@ Block 52 is accepted at exact source `3681fa0994958a92c1156949494ab5955de4508e`,
 - [ ] Publish the exact reconciled source and run full authenticated desktop, 390px mobile and principal tablet Chrome smoke.
 - [ ] Configure authenticated live Stripe catalog/account/webhook/portal resources and SendGrid sender/support resources, then create a current exact-source verification receipt. Until then BIMLog must report commercial launch as blocked.
 - [x] Pass focused Block 54 contracts and frontend TypeScript at the B270 product checkpoint.
+- [x] Diagnose and repair the exact-390 Lens Next project-selector overflow found by the first post-publication Chrome smoke; focused regression and frontend TypeScript pass at repair commit `7e4961e30ffd56a803cf44d60a621ccdce2ec8c7`.
+- [ ] Repeat the complete exact-head gate, push the repaired source, republish, verify exact live identity and rerun desktop 63-route, exact-390 63-route, tablet, reload, independent-tab and console acceptance.

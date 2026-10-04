@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "f92325bfa8662b6500b52cc2b1433b783526f54907cb5c9d0b26718fd2e1bf6c",
-  "itemCount": 299,
+  "sourceSha256": "d4ceda5569729a792822de29c948b8e0ac8b59e48564142529c67a8d43f752b3",
+  "itemCount": 300,
   "counts": {
-    "ACTIVE": 263,
+    "ACTIVE": 264,
     "SUPERSEDED": 24,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5450,6 +5450,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4519",
+        "Commercial verification release — B266-B270"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "29363a59b108860c",
+      "sourceLine": 4522,
+      "heading": "Commercial verification release — B266-B270",
+      "statement": "Repeat the complete exact-head gate, push the repaired source, republish, verify exact live identity and rerun desktop 63-route, exact-390 63-route, tablet, reload, independent-tab and console acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4522",
         "Commercial verification release — B266-B270"
       ],
       "currentAuthority": false
