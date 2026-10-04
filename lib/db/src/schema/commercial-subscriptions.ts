@@ -137,3 +137,37 @@ export const commercialCheckoutAttemptsTable=pgTable("commercial_checkout_attemp
 
 export type CommercialProviderBinding=typeof commercialProviderBindingsTable.$inferSelect;
 export type CommercialCheckoutAttempt=typeof commercialCheckoutAttemptsTable.$inferSelect;
+
+export const commercialInvoicesTable=pgTable("commercial_invoices",{
+  id:text("id").primaryKey(),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  subscriptionId:text("subscription_id").notNull().references(()=>commercialSubscriptionsTable.id),
+  orderId:text("order_id").notNull().references(()=>commercialOrdersTable.id),
+  checkoutAttemptId:text("checkout_attempt_id").notNull().references(()=>commercialCheckoutAttemptsTable.id),
+  invoiceNumber:text("invoice_number").notNull(),
+  provider:text("provider").notNull(),
+  providerInvoiceReference:text("provider_invoice_reference").notNull(),
+  currency:text("currency").notNull(),
+  subtotalCents:integer("subtotal_cents").notNull(),
+  taxCents:integer("tax_cents").notNull(),
+  totalCents:integer("total_cents").notNull(),
+  status:text("status").notNull(),
+  issuedAt:timestamp("issued_at",{withTimezone:true}).notNull(),
+  dueAt:timestamp("due_at",{withTimezone:true}),
+  paidAt:timestamp("paid_at",{withTimezone:true}),
+  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+  updatedAt:timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_invoices_provider_chk",sql`${table.provider} in ('stripe')`),
+  check("commercial_invoices_currency_chk",sql`${table.currency} ~ '^[A-Z]{3}$'`),
+  check("commercial_invoices_status_chk",sql`${table.status} in ('draft','open','paid','void','uncollectible')`),
+  check("commercial_invoices_amounts_chk",sql`${table.subtotalCents}>=0 and ${table.taxCents}>=0 and ${table.totalCents}=${table.subtotalCents}+${table.taxCents}`),
+  check("commercial_invoices_paid_chk",sql`${table.status}<>'paid' or ${table.paidAt} is not null`),
+  uniqueIndex("commercial_invoices_number_uidx").on(table.invoiceNumber),
+  uniqueIndex("commercial_invoices_provider_ref_uidx").on(table.provider,table.providerInvoiceReference),
+  uniqueIndex("commercial_invoices_checkout_uidx").on(table.checkoutAttemptId),
+  index("commercial_invoices_company_time_idx").on(table.companyId,table.issuedAt.desc()),
+  index("commercial_invoices_subscription_time_idx").on(table.subscriptionId,table.issuedAt.desc()),
+]);
+
+export type CommercialInvoiceRecord=typeof commercialInvoicesTable.$inferSelect;
