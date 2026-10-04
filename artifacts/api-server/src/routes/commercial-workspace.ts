@@ -18,6 +18,7 @@ import {deriveCommercialLaunchAuthorization} from "../lib/commercial-launch-auth
 import {resolveReleaseMetadata} from "../lib/release-metadata";
 import {readPersistentCommercialAuthority} from "../lib/commercial-persistence";
 import type {CommercialSubscriptionStatus} from "../lib/commercial-workspace-runtime";
+import {prepareCompanySubscription} from "../lib/commercial-subscription-setup";
 
 const router:IRouter=Router();
 
@@ -71,6 +72,17 @@ router.post("/commercial/checkout",authMiddleware,async(req,res)=>{
     const result=await startCommercialCheckout({client:pool,environment:process.env,companyId:actor.companyId,userId:actor.userId,requestKey,plan:req.body?.plan,cycle:req.body?.cycle});
     res.status(201).json(result);
   }catch(error){const message=error instanceof Error?error.message:"Checkout unavailable";const denied=/administrator authority/.test(message);res.status(denied?403:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":"CHECKOUT_UNAVAILABLE",error:message});}
+});
+
+router.post("/commercial/subscription-setup",authMiddleware,async(req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");
+  try{
+    const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);
+    const [identity]=await db.select({companyName:companiesTable.name,billingEmail:usersTable.email}).from(companiesTable).innerJoin(usersTable,eq(usersTable.id,actor.userId)).where(eq(companiesTable.id,actor.companyId)).limit(1);
+    if(!identity)throw new Error("Company billing identity is unavailable");
+    const result=await prepareCompanySubscription({client:pool,environment:process.env,companyId:actor.companyId,userId:actor.userId,companyName:identity.companyName,billingEmail:identity.billingEmail,requestKey:String(req.body?.requestKey??"").trim(),plan:req.body?.plan,cycle:req.body?.cycle});
+    res.status(result.replayed?200:201).json(result);
+  }catch(error){const message=error instanceof Error?error.message:"Subscription setup unavailable",denied=/administrator authority/.test(message),invalid=/request identity|offer is invalid|supported checkout/.test(message);res.status(denied?403:invalid?400:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":invalid?"SUBSCRIPTION_SETUP_INVALID":"SUBSCRIPTION_SETUP_UNAVAILABLE",error:message});}
 });
 
 router.post("/commercial/billing-portal",authMiddleware,async(req,res)=>{

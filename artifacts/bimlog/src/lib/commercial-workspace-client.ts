@@ -54,3 +54,10 @@ export async function requestCommercialHostedDestination(input:{token:string;act
   if(url.protocol!=="https:"||url.hostname!==expected)throw new Error("Billing service returned an untrusted destination.");
   return {url:url.toString()};
 }
+
+export async function requestCommercialSubscriptionSetup(input:{token:string;plan:"professional"|"team"|"business";cycle:"monthly"|"annual";requestKey:string;fetchImpl?:typeof fetch}){
+  const response=await (input.fetchImpl??fetch)(`${import.meta.env.BASE_URL.replace(/\/$/,"")}/api/v1/commercial/subscription-setup`,{method:"POST",headers:{Authorization:`Bearer ${input.token}`,"Content-Type":"application/json"},body:JSON.stringify({plan:input.plan,cycle:input.cycle,requestKey:input.requestKey})});
+  const payload=await response.json().catch(()=>({})) as Record<string,unknown>;if(!response.ok)throw new Error(typeof payload.error==="string"?payload.error:"Subscription setup is unavailable.");
+  if(typeof payload.subscriptionId!=="string"||typeof payload.providerBindingId!=="string"||payload.status!=="pending"||typeof payload.replayed!=="boolean")throw new Error("Subscription setup returned an invalid receipt.");
+  return {subscriptionId:payload.subscriptionId,providerBindingId:payload.providerBindingId,status:"pending" as const,replayed:payload.replayed};
+}
