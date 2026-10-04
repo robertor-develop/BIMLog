@@ -229,3 +229,53 @@ export const commercialDisputesTable=pgTable("commercial_disputes",{
 ]);
 
 export type CommercialDisputeRecord=typeof commercialDisputesTable.$inferSelect;
+
+export const commercialProviderReceiptsTable=pgTable("commercial_provider_receipts",{
+  id:text("id").primaryKey(),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  providerBindingId:text("provider_binding_id").notNull().references(()=>commercialProviderBindingsTable.id),
+  provider:text("provider").notNull(),
+  providerEventReference:text("provider_event_reference").notNull(),
+  eventType:text("event_type").notNull(),
+  payloadDigest:text("payload_digest").notNull(),
+  rawPayload:text("raw_payload").notNull(),
+  signatureVerifiedAt:timestamp("signature_verified_at",{withTimezone:true}).notNull(),
+  processingStatus:text("processing_status").notNull(),
+  processedAt:timestamp("processed_at",{withTimezone:true}),
+  failureCode:text("failure_code"),
+  receivedAt:timestamp("received_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_provider_receipts_provider_chk",sql`${table.provider} in ('stripe')`),
+  check("commercial_provider_receipts_digest_chk",sql`${table.payloadDigest} ~ '^[0-9a-f]{64}$'`),
+  check("commercial_provider_receipts_status_chk",sql`${table.processingStatus} in ('received','processing','applied','ignored','failed')`),
+  check("commercial_provider_receipts_processed_chk",sql`${table.processingStatus} in ('received','processing') or ${table.processedAt} is not null`),
+  uniqueIndex("commercial_provider_receipts_event_uidx").on(table.provider,table.providerEventReference),
+  index("commercial_provider_receipts_company_time_idx").on(table.companyId,table.receivedAt.desc()),
+  index("commercial_provider_receipts_status_time_idx").on(table.processingStatus,table.receivedAt),
+]);
+
+export const commercialAuditEventsTable=pgTable("commercial_audit_events",{
+  id:text("id").primaryKey(),
+  companyId:integer("company_id").notNull().references(()=>companiesTable.id),
+  subscriptionId:text("subscription_id").references(()=>commercialSubscriptionsTable.id),
+  providerReceiptId:text("provider_receipt_id").references(()=>commercialProviderReceiptsTable.id),
+  sequence:integer("sequence").notNull(),
+  eventType:text("event_type").notNull(),
+  entityType:text("entity_type").notNull(),
+  entityId:text("entity_id").notNull(),
+  actorUserId:integer("actor_user_id").references(()=>usersTable.id),
+  eventDigest:text("event_digest").notNull(),
+  previousEventDigest:text("previous_event_digest"),
+  occurredAt:timestamp("occurred_at",{withTimezone:true}).notNull(),
+  createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_audit_events_sequence_chk",sql`${table.sequence}>0`),
+  check("commercial_audit_events_digest_chk",sql`${table.eventDigest} ~ '^[0-9a-f]{64}$'`),
+  check("commercial_audit_events_previous_digest_chk",sql`${table.previousEventDigest} is null or ${table.previousEventDigest} ~ '^[0-9a-f]{64}$'`),
+  uniqueIndex("commercial_audit_events_company_sequence_uidx").on(table.companyId,table.sequence),
+  uniqueIndex("commercial_audit_events_digest_uidx").on(table.companyId,table.eventDigest),
+  index("commercial_audit_events_entity_time_idx").on(table.companyId,table.entityType,table.entityId,table.occurredAt),
+]);
+
+export type CommercialProviderReceiptRecord=typeof commercialProviderReceiptsTable.$inferSelect;
+export type CommercialAuditEventRecord=typeof commercialAuditEventsTable.$inferSelect;
