@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "b4cf805a43112f0964061bad1971464b54821b05f320fe2ffdc8d202659d43c0",
-  "itemCount": 304,
+  "sourceSha256": "65e091cdaed7eb99ac7112a243ba63c5adc5e458d2e462146cb10fe023c9eac8",
+  "itemCount": 306,
   "counts": {
-    "ACTIVE": 268,
-    "SUPERSEDED": 24,
+    "ACTIVE": 269,
+    "SUPERSEDED": 25,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -60,6 +60,10 @@
     {
       "canonicalId": "3ced6667f9264a42",
       "duplicateId": "5989814b604e270c"
+    },
+    {
+      "canonicalId": "63c6b60d9eb892d2",
+      "duplicateId": "92674efa55934e56"
     }
   ],
   "items": [
@@ -5541,6 +5545,42 @@
       "evidence": [
         "OPEN_LOOP.md:4545",
         "SaaS Completion Block 56 — current commercial launch authorization — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "dc27163f0b947124",
+      "sourceLine": 4558,
+      "heading": "SaaS Completion Block 57 — commercial conversion continuity — 2026-10-04",
+      "statement": "Pass the complete exact-head gate and push B281-B285 once. Publication remains reserved for B290.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4558",
+        "SaaS Completion Block 57 — commercial conversion continuity — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "92674efa55934e56",
+      "sourceLine": 4559,
+      "heading": "SaaS Completion Block 57 — commercial conversion continuity — 2026-10-04",
+      "statement": "Configure authenticated live Stripe and SendGrid resources and create a current exact-source receipt before claiming commercial launch readiness.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "canonical-open-loop:63c6b60d9eb892d2",
+        "duplicate-source:92674efa55934e56"
       ],
       "currentAuthority": false
     }
