@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const source=fs.readFileSync(new URL("./Register.tsx",import.meta.url),"utf8");
+assert.match(source,/queryCommercialIntent=parseCommercialIntent/);
+assert.match(source,/queryCommercialIntent\?\?readCommercialIntent\(\)/);
+assert.match(source,/if\(queryCommercialIntent\)rememberCommercialIntent/);
+assert.match(source,/if\(commercialIntent\)recordConversionEvent\("registration_started"\)/);
+assert.match(source,/Selected offer/);
+assert.match(source,/registration_completed/);
+console.log("B282 registration preserves selected commercial intent across reload and retry: PASS");

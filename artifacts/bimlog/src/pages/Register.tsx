@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { AlertCircle } from "lucide-react";
 import { AuthLayout } from "@/components/AuthLayout";
 import { readInvitationToken, invitationError } from "@/lib/invitation-ui";
-import { intentLabel, parseCommercialIntent, rememberCommercialIntent } from "@/lib/commercial-intent";
+import { intentLabel, parseCommercialIntent, readCommercialIntent, rememberCommercialIntent } from "@/lib/commercial-intent";
 import { recordConversionEvent } from "@/lib/conversion-funnel";
 
 export function Register() {
@@ -20,8 +20,9 @@ export function Register() {
   const [inviteLoading,setInviteLoading]=useState(Boolean(inviteToken));
   const [accepting,setAccepting]=useState(false);
   const [journey,setJourney]=useState("create");
-  const commercialIntent=parseCommercialIntent(window.location.search);
-  useEffect(()=>{rememberCommercialIntent(commercialIntent);if(commercialIntent)recordConversionEvent("registration_started");},[]);
+  const queryCommercialIntent=parseCommercialIntent(window.location.search);
+  const commercialIntent=queryCommercialIntent??readCommercialIntent();
+  useEffect(()=>{if(queryCommercialIntent)rememberCommercialIntent(queryCommercialIntent);if(commercialIntent)recordConversionEvent("registration_started");},[]);
   const invitedEmail =
     new URLSearchParams(window.location.search)
       .get("email")
