@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "628985f4b42d3d5be750740541ce215bada5d6d8b7375ea1366ab92ed9cc4756",
-  "itemCount": 291,
+  "sourceSha256": "63b8bfeba19977bd604c9830c504b41a3c340d332018892e411d23d180aaa7b4",
+  "itemCount": 292,
   "counts": {
-    "ACTIVE": 256,
+    "ACTIVE": 257,
     "SUPERSEDED": 23,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5307,6 +5307,24 @@
       "evidence": [
         "OPEN_LOOP.md:4448",
         "250-build SaaS Completion Block 47 — verified commercial provider boundary — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "b9f3251371f5be23",
+      "sourceLine": 4465,
+      "heading": "250-build SaaS Completion Block 48 — customer billing self-service — 2026-10-04",
+      "statement": "Pass the complete exact-head gate, push B236-B240, publish accumulated B231-B240, verify exact live identity and run the full authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4465",
+        "250-build SaaS Completion Block 48 — customer billing self-service — 2026-10-04"
       ],
       "currentAuthority": false
     }

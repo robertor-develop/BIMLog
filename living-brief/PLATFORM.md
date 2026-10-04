@@ -72,6 +72,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/change_orders.ts
 - artifacts/api-server/src/routes/clash_reports.ts
 - artifacts/api-server/src/routes/commercial-provider-webhook.ts
+- artifacts/api-server/src/routes/commercial-workspace.behavior.ts
 - artifacts/api-server/src/routes/commercial-workspace.ts
 - artifacts/api-server/src/routes/company-master-catalogs.ts
 - artifacts/api-server/src/routes/company-pricing-templates.ts
@@ -326,12 +327,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/clash-report-provenance.ts
 - artifacts/api-server/src/lib/clash-visual-package-truth.ts
 - artifacts/api-server/src/lib/cloud-files.ts
+- artifacts/api-server/src/lib/commercial-billing-authority.behavior.ts
+- artifacts/api-server/src/lib/commercial-billing-authority.ts
 - artifacts/api-server/src/lib/commercial-billing-operations.behavior.ts
 - artifacts/api-server/src/lib/commercial-billing-operations.ts
 - artifacts/api-server/src/lib/commercial-change-approval.behavior.ts
 - artifacts/api-server/src/lib/commercial-change-approval.ts
 - artifacts/api-server/src/lib/commercial-change-order-draft.behavior.ts
 - artifacts/api-server/src/lib/commercial-change-order-draft.ts
+- artifacts/api-server/src/lib/commercial-checkout-command.behavior.ts
+- artifacts/api-server/src/lib/commercial-checkout-command.ts
 - artifacts/api-server/src/lib/commercial-checkout-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-credit-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.behavior.ts
@@ -349,6 +354,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-persistence.ts
 - artifacts/api-server/src/lib/commercial-platform-readiness.behavior.ts
 - artifacts/api-server/src/lib/commercial-platform-readiness.ts
+- artifacts/api-server/src/lib/commercial-portal-command.behavior.ts
+- artifacts/api-server/src/lib/commercial-portal-command.ts
 - artifacts/api-server/src/lib/commercial-potential-impact.behavior.ts
 - artifacts/api-server/src/lib/commercial-potential-impact.ts
 - artifacts/api-server/src/lib/commercial-project-scope.ts

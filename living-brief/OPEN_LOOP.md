@@ -4463,3 +4463,5 @@ The post-repair state seal keeps the authorization decision and generated eviden
 - [x] B239 expose authenticated, company-scoped checkout and billing-portal commands with bounded errors.
 - [x] B240 connect strict bilingual Billing & Support controls and focused release acceptance.
 - [ ] Pass the complete exact-head gate, push B236-B240, publish accumulated B231-B240, verify exact live identity and run the full authenticated Chrome smoke.
+
+The Block 48 state seal keeps the ten-build publication and authenticated Chrome gate inside the reviewed reconciliation diff.
