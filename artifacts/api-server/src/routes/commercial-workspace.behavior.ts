@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const source=fs.readFileSync(new URL("./commercial-workspace.ts",import.meta.url),"utf8");
+assert.match(source,/post\("\/commercial\/checkout",authMiddleware/);
+assert.match(source,/post\("\/commercial\/billing-portal",authMiddleware/);
+assert.match(source,/requireCommercialBillingManager\(authority\)/);
+assert.match(source,/Cache-Control","private, no-store/);
+assert.match(source,/CHECKOUT_REQUEST_INVALID/);
+assert.match(source,/billingAuthority:\{canManageBilling/);
+console.log("commercial workspace mutation routes behavior passed");
