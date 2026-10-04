@@ -279,3 +279,29 @@ export const commercialAuditEventsTable=pgTable("commercial_audit_events",{
 
 export type CommercialProviderReceiptRecord=typeof commercialProviderReceiptsTable.$inferSelect;
 export type CommercialAuditEventRecord=typeof commercialAuditEventsTable.$inferSelect;
+
+export const commercialLaunchVerificationsTable=pgTable("commercial_launch_verifications",{
+  id:text("id").primaryKey(),
+  actorUserId:integer("actor_user_id").notNull().references(()=>usersTable.id),
+  sourceCommit:text("source_commit").notNull(),
+  status:text("status").notNull(),
+  verified:text("verified").notNull(),
+  checkedAt:timestamp("checked_at",{withTimezone:true}).notNull(),
+  validUntil:timestamp("valid_until",{withTimezone:true}).notNull(),
+  checkCount:integer("check_count").notNull(),
+  failedCheckIdsJson:text("failed_check_ids_json").notNull(),
+  checksJson:text("checks_json").notNull(),
+  evidenceSha256:text("evidence_sha256").notNull(),
+  recordedAt:timestamp("recorded_at",{withTimezone:true}).notNull().defaultNow(),
+},table=>[
+  check("commercial_launch_verifications_source_chk",sql`${table.sourceCommit} ~ '^[0-9a-f]{40}$'`),
+  check("commercial_launch_verifications_status_chk",sql`${table.status} in ('configuration_blocked','verified','failed')`),
+  check("commercial_launch_verifications_verified_chk",sql`${table.verified} in ('true','false')`),
+  check("commercial_launch_verifications_count_chk",sql`${table.checkCount}>=0 and ${table.checkCount}<=32`),
+  check("commercial_launch_verifications_digest_chk",sql`${table.evidenceSha256} ~ '^[0-9a-f]{64}$'`),
+  check("commercial_launch_verifications_window_chk",sql`${table.validUntil}>${table.checkedAt}`),
+  uniqueIndex("commercial_launch_verifications_digest_uidx").on(table.evidenceSha256),
+  index("commercial_launch_verifications_source_time_idx").on(table.sourceCommit,table.checkedAt.desc()),
+]);
+
+export type CommercialLaunchVerificationRecord=typeof commercialLaunchVerificationsTable.$inferSelect;
