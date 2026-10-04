@@ -10,6 +10,7 @@ import {requireCommercialBillingManager,resolveCommercialBillingAuthority} from 
 import {startCommercialCheckout} from "../lib/commercial-checkout-command";
 import {startCommercialBillingPortal} from "../lib/commercial-portal-command";
 import {readCustomerBillingHistory} from "../lib/commercial-billing-history";
+import {parseBillingHistoryQuery} from "../lib/commercial-billing-history-query";
 
 const router:IRouter=Router();
 
@@ -52,10 +53,10 @@ router.get("/commercial/billing-history",authMiddleware,async(req,res)=>{
   res.set("Vary","Authorization");
   try{
     const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);
-    res.json(await readCustomerBillingHistory(pool,actor.companyId));
+    res.json(await readCustomerBillingHistory(pool,actor.companyId,parseBillingHistoryQuery(req.query)));
   }catch(error){
-    const message=error instanceof Error?error.message:"Billing history unavailable",denied=/administrator authority/.test(message);
-    res.status(denied?403:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":"BILLING_HISTORY_UNAVAILABLE",error:message});
+    const message=error instanceof Error?error.message:"Billing history unavailable",denied=/administrator authority/.test(message),invalid=/Billing (status|page|page size)|Duplicate billing query/.test(message);
+    res.status(denied?403:invalid?400:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":invalid?"BILLING_HISTORY_QUERY_INVALID":"BILLING_HISTORY_UNAVAILABLE",error:message});
   }
 });
 
