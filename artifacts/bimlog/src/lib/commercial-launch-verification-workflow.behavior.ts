@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import {verifyCommercialLaunchForLiveSource} from "./commercial-launch-verification-workflow";
+const source="a".repeat(40),checkedAt="2026-10-04T12:00:00.000Z";
+const health={status:"ok",release:"2026.10.4",sourceCommit:source,assetManifestSha256:"b".repeat(64),packageId:"bimlog-release",databaseMigrationLevel:"202610040001",identityFingerprint:"c".repeat(64),identityBound:true};
+const live={status:"verified",verified:true,checks:[{id:"stripe",status:"verified",code:"ok"}],checkedAt,evidence:{schemaVersion:"bimlog-commercial-verification-v1",sourceCommit:source,status:"verified",verified:true,checkedAt,validUntil:"2026-10-04T12:15:00.000Z",checkCount:1,failedCheckIds:[],evidenceSha256:"d".repeat(64)}};
+const response=(body:unknown)=>Promise.resolve(new Response(JSON.stringify(body),{status:200,headers:{"content-type":"application/json"}}));
+let index=0;const requests:string[]=[];const result=await verifyCommercialLaunchForLiveSource({token:"token",now:new Date("2026-10-04T12:05:00.000Z"),fetchImpl:async(input,init)=>{requests.push(`${init?.method??"GET"} ${input}`);return response([health,live,health][index++]);}});
+assert.equal(result.decision.ready,true);assert.deepEqual(requests,["GET /api/v1/healthz","POST /api/v1/admin/commercial-launch/verify","GET /api/v1/healthz"]);
+index=0;await assert.rejects(()=>verifyCommercialLaunchForLiveSource({token:"token",fetchImpl:async()=>response([health,live,{...health,sourceCommit:"e".repeat(40)}][index++])}),/changed during verification/);
+console.log("B268 race-safe live commercial verification workflow: PASS");
