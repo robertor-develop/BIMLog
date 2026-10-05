@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const component=readFileSync("artifacts/bimlog/src/components/layout/PageAssistant.tsx","utf8");
+const css=readFileSync("artifacts/bimlog/src/index.css","utf8");
+for(const token of ["ReactPointerEvent","aria-live=\"polite\"","aria-busy={busy}","bimlog-assistant-minimized",":draft","aria-pressed"] )assert.ok(component.includes(token),token);
+assert.match(css,/prefers-reduced-motion:reduce/);
+assert.match(css,/forced-colors:active/);
+assert.match(css,/pointer:coarse/);
+assert.match(css,/min-width:44px/);
+console.log("PASS assistant responsive accessibility and draft continuity");
