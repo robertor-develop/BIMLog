@@ -58207,6 +58207,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "hosted-page-assistant-spanish-readiness-count-repair",
+      "reviewedThroughCommit": "9d0d49678ab508630df6640f8322a3235403462b",
+      "reviewedAt": "2026-10-05T23:15:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Spanish readiness localization repair preserves the existing BIMLog product and ecosystem doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair follows the existing test, publication, and authenticated acceptance workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair completes bilingual output and adds focused regression coverage without weakening quality gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not change BIMLog product vision or intended customer outcomes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page assistant architecture remains unchanged; only the readiness count label is localized."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page assistant repair does not affect Lens Next Native behavior or packaging."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not alter governed report behavior, layout, export, or presentation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair introduces no new standards claim, citation, or standards metadata."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Current status already requires bilingual authenticated assistant acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing open loop already requires republishing and repeating authenticated assistant acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This bounded corrective localization repair requires no historical audit narrative change."
+        }
+      ],
+      "reason": "Authenticated Spanish-mode smoke showed the six-item readiness count copied from English page evidence while the remaining response was translated; the repair renders the authoritative count in the selected assistant language.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
