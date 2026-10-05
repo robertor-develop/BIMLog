@@ -4591,3 +4591,15 @@ The B295 product checkpoint is `67d523293f6d5f9f34f3188a3379a194cb293abd`; this 
 - [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.
 
 The B300 product checkpoint is `58e5b65d156bc5b59daf7dad54f929a844dc36a9`; this reconciliation records the implemented authority and the remaining external-service launch condition.
+
+Block 60 is accepted live at exact source `8a47d5ab385e0488551f265c25855307ec8dace1` with publication receipt `1d4521ce`. Authenticated Chrome passed 63/63 desktop, 63/63 exact-390 and 10/10 tablet routes plus hard reload, independent-tab continuity and zero browser warnings or errors. Production database reconciliation returned `schemaAction=NONE`.
+
+## SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04
+
+- [x] B301 require subscription-mode, complete and paid Stripe checkout facts.
+- [x] B302 revalidate exact session, customer, subscription, currency, amount and order lineage inside activation.
+- [x] B303 classify rejected confirmations precisely without persisting secrets.
+- [x] B304 state verification pending after redirect until signed canonical confirmation succeeds.
+- [x] B305 bind focused acceptance, evidence and the five-build release boundary.
+- [ ] Pass the complete exact-head gate and push B301-B305 once. Publication and authenticated Chrome smoke remain reserved for B310.
+- [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.

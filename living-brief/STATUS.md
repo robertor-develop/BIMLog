@@ -3811,3 +3811,9 @@ The Block 59 acceptance reconciliation is bound to product checkpoint `67d523293
 B296-B300 expose the authenticated company’s exact prepared plan, billing cycle and seat count; reject any checkout selection that differs from that authority; align and lock the bilingual Billing & Support controls to it; and make Stripe customer retries company-stable. Provider references, credentials and payment data remain server-side. B291-B300 now reach the required ten-build publication and authenticated Chrome boundary.
 
 The B300 product checkpoint is `58e5b65d156bc5b59daf7dad54f929a844dc36a9`; complete exact-head validation, one push, exact-source publication and authenticated Chrome remain the active acceptance sequence. Live Stripe and SendGrid readiness must still verify successfully before BIMLog claims live commercial launch readiness.
+
+Block 60 is accepted live at exact source `8a47d5ab385e0488551f265c25855307ec8dace1` with publication receipt `1d4521ce`. Authenticated Chrome passed 63/63 desktop, 63/63 exact-390 and 10/10 tablet routes plus hard reload, independent-tab continuity and zero browser warnings or errors. Production database reconciliation returned `schemaAction=NONE`.
+
+## SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04
+
+B301-B305 require Stripe checkout completion to prove subscription mode, complete and paid state, then repeat exact session, customer, subscription, currency, amount, company and order checks inside the activation transaction. Rejections receive precise secret-safe classifications, and the browser return states that verification is pending until signed canonical confirmation succeeds. This is the first five-build block after the accepted B291-B300 publication and remains unpublished until B310. Live Stripe and SendGrid readiness remains external and must verify before commercial launch is claimed.
