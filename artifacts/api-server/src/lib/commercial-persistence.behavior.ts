@@ -88,5 +88,7 @@ console.log("COMMERCIAL_PERSISTENCE_B228=PASS");
 
 const settlement=await settlePersistentProviderReceipt({async query(){return {rows:[{id:"receipt-company-7",processing_status:"failed"}],rowCount:1};}},{id:"receipt-company-7",companyId:7,outcome:"failed",failureCode:"LINEAGE_NOT_FOUND",processedAt:"2026-10-04T13:05:00Z"});
 assert.deepEqual(settlement,{id:"receipt-company-7",status:"failed"});
+const unsupportedStateSettlement=await settlePersistentProviderReceipt({async query(){return {rows:[{id:"receipt-company-8",processing_status:"failed"}],rowCount:1};}},{id:"receipt-company-8",companyId:8,outcome:"failed",failureCode:"UNSUPPORTED_STATE",processedAt:"2026-10-04T13:06:00Z"});
+assert.deepEqual(unsupportedStateSettlement,{id:"receipt-company-8",status:"failed"});
 await assert.rejects(()=>settlePersistentProviderReceipt({async query(){return {rows:[],rowCount:0};}},{id:"receipt-company-7",companyId:7,outcome:"ignored",failureCode:"LINEAGE_NOT_FOUND",processedAt:"2026-10-04T13:05:00Z"}),/unsupported-event/);
 console.log("COMMERCIAL_PERSISTENCE_B229=PASS");

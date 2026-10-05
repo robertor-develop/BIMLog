@@ -133,7 +133,7 @@ export async function applyPersistentCheckoutCompletion(client:CommercialQueryCl
   }catch(error){await client.query("ROLLBACK");throw error;}
 }
 
-const providerFailureCodes=["LINEAGE_NOT_FOUND","AMOUNT_MISMATCH","UNSUPPORTED_EVENT_TYPE","TRANSIENT_PROVIDER_FAILURE"] as const;
+const providerFailureCodes=["LINEAGE_NOT_FOUND","AMOUNT_MISMATCH","UNSUPPORTED_STATE","UNSUPPORTED_EVENT_TYPE","TRANSIENT_PROVIDER_FAILURE"] as const;
 export async function settlePersistentProviderReceipt(client:CommercialQueryClient,input:Readonly<{id:string;companyId:number;outcome:"failed"|"ignored";failureCode:(typeof providerFailureCodes)[number];processedAt:string}>):Promise<Readonly<{id:string;status:"failed"|"ignored"}>>{
   id(input.id,"Receipt identity");positiveInteger(input.companyId,"Company identity");
   if(!providerFailureCodes.includes(input.failureCode))throw new Error("Provider failure code is invalid");
