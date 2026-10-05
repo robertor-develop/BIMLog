@@ -3850,3 +3850,7 @@ UX121-UX125 select one presentation-only next action from canonical responsibili
 - Authenticated Chrome smoke found that the optional loopback desktop bridge can be unavailable in production.
 - The page assistant now returns bounded guidance from visible page and control labels instead of exposing a raw fetch failure. It still never reads form values and does not gain repair execution authority.
 - Focused assistant acceptance, frontend typecheck, Living Brief integrity, production build, republish and repeat authenticated Chrome smoke are the acceptance gates.
+
+## Hosted BIMLog Dedicated Agent Block 1 — 2026-10-05
+
+PA131–PA135 replace the customer-facing loopback/desktop assistant dependency with a bounded hosted foundation. The block defines a strict response contract, collects semantic page evidence without reading form values, registers the versioned BIMLog Dedicated Agent separately from its Anthropic transport, enforces authenticated project membership at the Agent Gateway, returns agent/instruction receipts, and rejects unverified responses in the browser. Existing feedback consent, repair authority and Job Intake relationship behavior remain unchanged. Focused contract, registry, context, gateway and consolidated assistant acceptance plus API/frontend typechecks pass. This is the first five-build block and remains unpublished until PA140 reaches the ten-build boundary.

@@ -4646,3 +4646,12 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - Push the smoke-discovered fallback hotfix and reconciled Living Brief to the canonical release branch and `master`.
 - Republish the exact accepted source commit.
 - Repeat authenticated Chrome smoke: open Job Intake, open Ask BIMLog, request missing setup, confirm useful page guidance without a raw fetch error, and confirm Submit feedback opens the governed feedback receiver while no permanent feedback launcher is present.
+
+## Hosted BIMLog Dedicated Agent Block 1 — 2026-10-05
+
+- [x] PA131 define the dedicated-agent contract and strict structured response boundary.
+- [x] PA132 collect bounded semantic page evidence without reading user-entered form values.
+- [x] PA133 register a versioned BIMLog Dedicated Agent independently from the provider model.
+- [x] PA134 add authenticated tenant/project-scoped hosted gateway execution and response receipts.
+- [x] PA135 remove localhost/desktop customer dependencies and require verified hosted agent receipts in the panel.
+- [ ] Complete PA136–PA140 human-facing lanes, contextual actions, panel workspace controls, responsive accessibility, then publish the exact ten-build interval and run authenticated live Chrome smoke with the required terminology questions.

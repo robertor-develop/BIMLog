@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 741,
-    "frontendApiReferences": 294,
+    "apiRoutes": 743,
+    "frontendApiReferences": 296,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -941,6 +941,22 @@
         "featureFlagsTable",
         "adminActionsLogTable",
         "namingConventionsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/assistant/ask",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/assistant/ask",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
       ]
     },
     {
@@ -9702,6 +9718,14 @@
     {
       "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
       "apiPath": "/api/v1/repairs"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+      "apiPath": "/api/v1/projects/${context.projectId}/assistant/ask"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+      "apiPath": "/api/v1/assistant/ask"
     },
     {
       "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ccb6d2b573bf7aaaa5c4c5d9b6bf9c2107952de33092b0f303d477f6b7588fbd",
-  "itemCount": 315,
+  "sourceSha256": "739967a456ee844b97b8c9e3f82c429ec7a70f37d4e9ac4d70ab10fdd5ba19ea",
+  "itemCount": 316,
   "counts": {
-    "ACTIVE": 276,
+    "ACTIVE": 277,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5747,6 +5747,24 @@
       "evidence": [
         "OPEN_LOOP.md:4643",
         "Page-aware assistant release gates — 2026-10-05"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2eb8dd83051a2703",
+      "sourceLine": 4657,
+      "heading": "Hosted BIMLog Dedicated Agent Block 1 — 2026-10-05",
+      "statement": "Complete PA136–PA140 human-facing lanes, contextual actions, panel workspace controls, responsive accessibility, then publish the exact ten-build interval and run authenticated live Chrome smoke with the required terminology questions.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4657",
+        "Hosted BIMLog Dedicated Agent Block 1 — 2026-10-05"
       ],
       "currentAuthority": false
     }
