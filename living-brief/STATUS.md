@@ -3827,3 +3827,5 @@ The repeated gate then confirmed an eighth legitimate historical duplicate loop 
 ## SaaS Completion Block 62 — public legal-information path — 2026-10-05
 
 B306-B310 govern one bilingual Terms, Privacy and Legal Notice map and effective date; connect every document directly; expose canonical `/legal-notice` while preserving the legacy `/disclaimer` URL; and bind public footer, authenticated Info navigation, semantic landmarks and overlay-free reading into focused acceptance. The approved legal document text remains unchanged. B301-B310 now reach the required ten-build publication and authenticated Chrome boundary.
+
+The B310 product checkpoint is `5c215dd8021dcba82a15d52ace45954a1147da86`; complete exact-head validation, push, exact-source publication and authenticated Chrome remain the active acceptance sequence.

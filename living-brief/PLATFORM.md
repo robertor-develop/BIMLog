@@ -1400,6 +1400,7 @@ It changes only when the code structure or curated architectural facts change.
 - /reset-password
 - /privacy
 - /terms
+- /legal-notice
 - /disclaimer
 - /data-retention
 - /dashboard

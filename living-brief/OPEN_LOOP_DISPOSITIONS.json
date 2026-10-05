@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "5fff0d1102f267a6eadf7a089b9539500b4fdcfc002618f57f5675dcbeac509f",
-  "itemCount": 309,
+  "sourceSha256": "19cb2d8a15ea02f347652ab8be0dd8801a8b1e780d0b92b412b38ded073928f7",
+  "itemCount": 311,
   "counts": {
-    "ACTIVE": 272,
-    "SUPERSEDED": 25,
+    "ACTIVE": 273,
+    "SUPERSEDED": 26,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -64,6 +64,10 @@
     {
       "canonicalId": "e1b80d75396de1b7",
       "duplicateId": "131943d18117b3d4"
+    },
+    {
+      "canonicalId": "e1b80d75396de1b7",
+      "duplicateId": "ee06604f748f05d4"
     }
   ],
   "items": [
@@ -5604,7 +5608,7 @@
     },
     {
       "id": "2154fa313c2f5f5f",
-      "sourceLine": 4604,
+      "sourceLine": 4606,
       "heading": "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04",
       "statement": "Pass the complete exact-head gate and push B301-B305 once. Publication and authenticated Chrome smoke remain reserved for B310.",
       "classification": "ACTIVE",
@@ -5615,14 +5619,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:4604",
+        "OPEN_LOOP.md:4606",
         "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04"
       ],
       "currentAuthority": false
     },
     {
       "id": "131943d18117b3d4",
-      "sourceLine": 4605,
+      "sourceLine": 4607,
       "heading": "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04",
       "statement": "Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.",
       "classification": "SUPERSEDED",
@@ -5635,6 +5639,42 @@
       "evidence": [
         "canonical-open-loop:e1b80d75396de1b7",
         "duplicate-source:131943d18117b3d4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7773e84268ad0737",
+      "sourceLine": 4622,
+      "heading": "SaaS Completion Block 62 — public legal-information path — 2026-10-05",
+      "statement": "Pass the complete exact-head gate, push B301-B310, publish the exact source and run the full authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4622",
+        "SaaS Completion Block 62 — public legal-information path — 2026-10-05"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ee06604f748f05d4",
+      "sourceLine": 4623,
+      "heading": "SaaS Completion Block 62 — public legal-information path — 2026-10-05",
+      "statement": "Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "canonical-open-loop:e1b80d75396de1b7",
+        "duplicate-source:ee06604f748f05d4"
       ],
       "currentAuthority": false
     }

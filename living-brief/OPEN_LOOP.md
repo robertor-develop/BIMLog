@@ -4590,6 +4590,8 @@ The B295 product checkpoint is `67d523293f6d5f9f34f3188a3379a194cb293abd`; this 
 - [ ] Pass the complete exact-head gate, push once, publish the exact source and run the full authenticated Chrome smoke.
 - [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.
 
+The B310 product checkpoint is `5c215dd8021dcba82a15d52ace45954a1147da86`; this reconciliation records its complete module impact before the exact-head release gate.
+
 The B300 product checkpoint is `58e5b65d156bc5b59daf7dad54f929a844dc36a9`; this reconciliation records the implemented authority and the remaining external-service launch condition.
 
 Block 60 is accepted live at exact source `8a47d5ab385e0488551f265c25855307ec8dace1` with publication receipt `1d4521ce`. Authenticated Chrome passed 63/63 desktop, 63/63 exact-390 and 10/10 tablet routes plus hard reload, independent-tab continuity and zero browser warnings or errors. Production database reconciliation returned `schemaAction=NONE`.
