@@ -3,12 +3,13 @@ import { useI18n } from "@/lib/i18n";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft } from "lucide-react";
 import { LegalDocumentNav } from "@/components/legal/LegalDocumentNav";
+import { LEGAL_EFFECTIVE_DATE, legalDocument } from "@/lib/legal-information";
 
 const CONTENT = {
   en: {
-    title: "Terms of Service",
-    effectiveDate: "March 21, 2026",
-    lastUpdated: "March 21, 2026",
+    title: legalDocument("terms").en,
+    effectiveDate: LEGAL_EFFECTIVE_DATE.en,
+    lastUpdated: LEGAL_EFFECTIVE_DATE.en,
     sections: [
       {
         heading: "1. Agreement",
@@ -65,9 +66,9 @@ const CONTENT = {
     ],
   },
   es: {
-    title: "Términos de Servicio",
-    effectiveDate: "21 de marzo de 2026",
-    lastUpdated: "21 de marzo de 2026",
+    title: legalDocument("terms").es,
+    effectiveDate: LEGAL_EFFECTIVE_DATE.es,
+    lastUpdated: LEGAL_EFFECTIVE_DATE.es,
     sections: [
       {
         heading: "1. Acuerdo",
@@ -131,7 +132,7 @@ export function Terms() {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <div style={{ maxWidth: 760, margin: "0 auto", padding: "40px 24px", flex: 1 }}>
+      <main id="main-content" style={{ width: "100%", maxWidth: 760, margin: "0 auto", padding: "40px 24px", flex: 1 }}>
         <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, color: "hsl(var(--muted-foreground))", textDecoration: "none", marginBottom: 32 }}>
           <ChevronLeft style={{ width: 14, height: 14 }} />
           {t("legal.backToHome")}
@@ -142,12 +143,12 @@ export function Terms() {
         <div style={{ marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(var(--primary))", background: "hsl(var(--primary)/0.08)", padding: "3px 10px", borderRadius: 4 }}>Legal</span>
         </div>
-        <h1 style={{ fontSize: 28, fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: 8, fontFamily: "var(--font-display)" }}>{content.title}</h1>
+        <h1 id="terms-title" style={{ fontSize: 28, fontWeight: 800, color: "hsl(var(--foreground))", marginBottom: 8, fontFamily: "var(--font-display)" }}>{content.title}</h1>
         <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{t("legal.effectiveDate")}: {content.effectiveDate}</div>
         <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{t("legal.lastUpdated")}: {content.lastUpdated}</div>
         <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 32 }}>BIMCapital Partners INC · 7901 4th Street North, STE 300 · St. Petersburg, FL 33702 · info@ignitesmart.ai</div>
 
-        <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 32 }}>
+        <article aria-labelledby="terms-title" style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 32 }}>
           {content.sections.map((sec, i) => (
             <div key={i} style={{ marginBottom: 32 }}>
               <h2 style={{ fontSize: 15, fontWeight: 700, color: "hsl(var(--foreground))", marginBottom: 10, fontFamily: "var(--font-display)" }}>{sec.heading}</h2>
@@ -156,8 +157,8 @@ export function Terms() {
               ))}
             </div>
           ))}
-        </div>
-      </div>
+        </article>
+      </main>
       <Footer />
     </div>
   );
