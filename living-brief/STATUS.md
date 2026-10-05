@@ -3831,3 +3831,9 @@ B306-B310 govern one bilingual Terms, Privacy and Legal Notice map and effective
 The full release gate exposed two deterministic evidence defects before publication. Route inventory guard detection could read into the following route and misclassify a public legal page, and the historical duplicate-loop assertion still expected eight groups after the verified inventory reached nine. Repair commit `f7cd3c8d1e2bf328455041fdcc29ef985945419a` bounds classification to each exact route, regenerates the route and responsive inventories, and updates the audit count without changing product behavior.
 
 The B310 product checkpoint is `5c215dd8021dcba82a15d52ace45954a1147da86`; complete exact-head validation, push, exact-source publication and authenticated Chrome remain the active acceptance sequence.
+
+Block 62 is accepted live at exact source `f73e7c48033e78669611ef543a567f441603c6e4` with Replit publication receipt `ce15d674`. Authenticated Chrome passed 63/63 authoritative desktop routes, 63/63 exact-390 routes and 10/10 tablet routes, plus hard reload, independent-tab continuity and zero browser warnings or errors.
+
+## Human Orientation UX Block 1 — next action and responsibility clarity — 2026-10-05
+
+UX121-UX125 select one presentation-only next action from canonical responsibility records; expose it as a bilingual source-opening card; limit the default Headquarters list to five; translate internal status and missing-context codes; place company summaries behind disclosure; and label grouped current source revisions without creating or mutating a parallel task store. Focused behavior and strict frontend typechecking pass. This is the first five-build block after the accepted B301-B310 publication and remains unpublished until the next five-build block reaches the ten-build boundary.

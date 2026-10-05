@@ -4590,6 +4590,17 @@ The B295 product checkpoint is `67d523293f6d5f9f34f3188a3379a194cb293abd`; this 
 - [ ] Pass the complete exact-head gate, push once, publish the exact source and run the full authenticated Chrome smoke.
 - [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.
 
+Block 62 is accepted live at exact source `f73e7c48033e78669611ef543a567f441603c6e4` with publication receipt `ce15d674`; its full authenticated Chrome matrix passed.
+
+## Human Orientation UX Block 1 — next action and responsibility clarity — 2026-10-05
+
+- [x] UX121 define deterministic next-action presentation from canonical records.
+- [x] UX122 expose one bilingual next action that opens the authorized source.
+- [x] UX123 limit the default responsibility list and translate internal codes.
+- [x] UX124 group only identical source routes and label the current revision.
+- [x] UX125 bind loading, error, empty, populated, source and exact-390 contracts.
+- [ ] Pass the complete exact-head gate and push UX121-UX125 once. Publication remains reserved for UX130.
+
 The B310 product checkpoint is `5c215dd8021dcba82a15d52ace45954a1147da86`; this reconciliation records its complete module impact before the exact-head release gate.
 
 The B300 product checkpoint is `58e5b65d156bc5b59daf7dad54f929a844dc36a9`; this reconciliation records the implemented authority and the remaining external-service launch condition.

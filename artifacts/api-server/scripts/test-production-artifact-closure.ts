@@ -598,7 +598,10 @@ async function waitForResponse(
   pathname: string,
   accepted: (status: number) => boolean,
 ) {
-  for (let attempt = 0; attempt < 240; attempt += 1) {
+  const pollingBudgetMs = process.platform === "win32" ? 12_000 : 6_000;
+  const pollingIntervalMs = 25;
+  const maximumAttempts = Math.ceil(pollingBudgetMs / pollingIntervalMs);
+  for (let attempt = 0; attempt < maximumAttempts; attempt += 1) {
     const response = await fetch(`http://127.0.0.1:${port}${pathname}`).catch(
       () => null,
     );
@@ -608,10 +611,10 @@ async function waitForResponse(
         `Production artifact exited before readiness. ${stdout}\n${stderr}`,
       );
     }
-    await new Promise((resolve) => setTimeout(resolve, 25));
+    await new Promise((resolve) => setTimeout(resolve, pollingIntervalMs));
   }
   throw new Error(
-    `Production artifact did not satisfy ${pathname} within 6 seconds. ${stdout}\n${stderr}`,
+    `Production artifact did not satisfy ${pathname} within ${pollingBudgetMs}ms. ${stdout}\n${stderr}`,
   );
 }
 

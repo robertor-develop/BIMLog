@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "dd6f9ae1cd78ebe3a9675a9d32cfdd94af0d4f03992b5223cb525d97adee99b7",
-  "itemCount": 311,
+  "sourceSha256": "b35a749637c9e5b05f905774fb66f927db347c22fbc6bc25c3e1351508477267",
+  "itemCount": 312,
   "counts": {
-    "ACTIVE": 273,
+    "ACTIVE": 274,
     "SUPERSEDED": 26,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5607,8 +5607,26 @@
       "currentAuthority": false
     },
     {
+      "id": "54d1c6e419b0e9b0",
+      "sourceLine": 4602,
+      "heading": "Human Orientation UX Block 1 — next action and responsibility clarity — 2026-10-05",
+      "statement": "Pass the complete exact-head gate and push UX121-UX125 once. Publication remains reserved for UX130.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4602",
+        "Human Orientation UX Block 1 — next action and responsibility clarity — 2026-10-05"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "2154fa313c2f5f5f",
-      "sourceLine": 4606,
+      "sourceLine": 4617,
       "heading": "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04",
       "statement": "Pass the complete exact-head gate and push B301-B305 once. Publication and authenticated Chrome smoke remain reserved for B310.",
       "classification": "ACTIVE",
@@ -5619,14 +5637,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:4606",
+        "OPEN_LOOP.md:4617",
         "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04"
       ],
       "currentAuthority": false
     },
     {
       "id": "131943d18117b3d4",
-      "sourceLine": 4607,
+      "sourceLine": 4618,
       "heading": "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04",
       "statement": "Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.",
       "classification": "SUPERSEDED",
@@ -5644,7 +5662,7 @@
     },
     {
       "id": "7773e84268ad0737",
-      "sourceLine": 4623,
+      "sourceLine": 4634,
       "heading": "SaaS Completion Block 62 — public legal-information path — 2026-10-05",
       "statement": "Pass the complete exact-head gate, push B301-B310, publish the exact source and run the full authenticated Chrome smoke.",
       "classification": "ACTIVE",
@@ -5655,14 +5673,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4623",
+        "OPEN_LOOP.md:4634",
         "SaaS Completion Block 62 — public legal-information path — 2026-10-05"
       ],
       "currentAuthority": false
     },
     {
       "id": "ee06604f748f05d4",
-      "sourceLine": 4624,
+      "sourceLine": 4635,
       "heading": "SaaS Completion Block 62 — public legal-information path — 2026-10-05",
       "statement": "Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.",
       "classification": "SUPERSEDED",
