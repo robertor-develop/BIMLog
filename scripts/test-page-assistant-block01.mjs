@@ -8,7 +8,7 @@ const app=read("artifacts/bimlog/src/App.tsx");
 const intake=read("artifacts/bimlog/src/components/job-intake/CompanyJobMap.tsx")+read("artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx");
 const authority=read("artifacts/api-server/src/lib/repair-authority.ts")+read("artifacts/api-server/src/routes/repairs.ts");
 
-for(const token of ["Explain this","Explicar esto","Show me where","Mostrarme dónde","What’s missing?","¿Qué falta?","Your question","Tu pregunta","Submit feedback","Enviar comentarios","Repair authorization","Autorización de reparación"]) assert.ok(assistant.includes(token),token);
+for(const token of ["Explain this","Explicar esto","Show me where","Mostrarme dónde","What’s missing?","¿Qué falta?","Your question","Tu pregunta","Submit feedback","Enviar comentarios","Ask a question","Hacer una pregunta","Assistant actions","Acciones del asistente","Repair authorization","Autorización de reparación"]) assert.ok(assistant.includes(token),token);
 assert.match(context,/input:not\(\[type=password\]\)/);
 assert.ok(!context.includes(".value"),"page context must not read field values");
 assert.match(feedback,/bimlog:feedback-open/);
