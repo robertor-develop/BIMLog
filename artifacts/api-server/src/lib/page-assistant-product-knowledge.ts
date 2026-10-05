@@ -1,4 +1,5 @@
 export type AssistantKnowledgeEntry = { terms: string[]; en: string; es: string };
+export type GroundedAssistantAnswer = { answer: string; highlightLabels: string[]; grounding: "canonical-product-knowledge" | "visible-page-readiness" };
 
 export const BIMLOG_PAGE_ASSISTANT_KNOWLEDGE: AssistantKnowledgeEntry[] = [
   { terms: ["perspective", "perspectiva"], en: "Perspective classifies the contract direction: Owner / prime contract is money owed to the service provider; Commitment / subcontract is money the project owes to a vendor, consultant, or subcontractor.", es: "Perspectiva clasifica la dirección del contrato: Contrato principal / cliente es dinero adeudado al proveedor del servicio; Compromiso / subcontrato es dinero que el proyecto debe a un proveedor, consultor o subcontratista." },
@@ -13,4 +14,48 @@ export function relevantBimlogKnowledge(question: string, pageText: string[], la
     .filter(entry => entry.terms.some(term => source.includes(term)))
     .slice(0, 5)
     .map(entry => language === "es" ? entry.es : entry.en);
+}
+
+const readinessPatterns = [
+  /scope item.*positive quantity.*planned labor hours/i,
+  /positive unit rate.*scope item/i,
+  /negotiated number.*contract profile/i,
+  /assign at least one contract item.*contract profile/i,
+  /describe the submittal delivery strategy/i,
+  /complete the required final confirmations/i,
+  /elemento.*alcance.*cantidad positiva.*horas/i,
+  /precio unitario positivo/i,
+  /n[uú]mero negociado.*perfil/i,
+  /asign.*contract item.*perfil/i,
+  /estrategia.*submittal/i,
+  /confirmaciones finales requeridas/i,
+];
+
+export function groundedAssistantAnswer(
+  question: string,
+  controls: string[],
+  pageText: string[],
+  language: "en" | "es",
+  requestedAction: "explain" | "locate" | "missing",
+  locatedControl: string | null,
+): GroundedAssistantAnswer | null {
+  const spanish = language === "es";
+  if (requestedAction === "missing") {
+    const remaining = pageText.filter(line => readinessPatterns.some(pattern => pattern.test(line))).slice(0, 8);
+    const count = pageText.find(line => /\d+ required item\(s\) remaining|\d+ elemento\(s\) requerido/i.test(line));
+    if (!remaining.length && !count) return null;
+    const intro = spanish ? "La página muestra estos requisitos pendientes:" : "The page shows these requirements still pending:";
+    const details = remaining.length ? remaining.map(line => `• ${line}`).join(" ") : (spanish ? "Revisa la lista visible «Pendiente» en esta página." : "Review the visible “Still required” list on this page.");
+    return { answer: `${count ? `${count}. ` : ""}${intro} ${details}`, highlightLabels: [], grounding: "visible-page-readiness" };
+  }
+
+  const normalized = question.toLocaleLowerCase(spanish ? "es" : "en");
+  const entry = BIMLOG_PAGE_ASSISTANT_KNOWLEDGE.find(item => item.terms.some(term => normalized.includes(term)));
+  if (!entry) return null;
+  const explanation = spanish ? entry.es : entry.en;
+  const exactControl = locatedControl || controls.find(label => entry.terms.some(term => label.toLocaleLowerCase(spanish ? "es" : "en").includes(term))) || null;
+  const next = exactControl
+    ? (spanish ? `Usa el control visible «${exactControl}» para revisar o cambiar este valor.` : `Use the visible “${exactControl}” control to review or change this value.`)
+    : (spanish ? "No hay un control visible con ese nombre en la sección actual." : "There is no visible control with that name in the current section.");
+  return { answer: `${explanation} ${next}`, highlightLabels: exactControl ? [exactControl] : [], grounding: "canonical-product-knowledge" };
 }

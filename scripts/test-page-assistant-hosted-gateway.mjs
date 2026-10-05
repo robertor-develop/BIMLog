@@ -9,5 +9,7 @@ assert.match(route, /parseAssistantAnswer/);
 assert.match(route, /instructionDigest/);
 assert.match(route, /agentVersion/);
 assert.match(route, /transport: "hosted"/);
+assert.match(route, /groundedAssistantAnswer/);
+assert.ok(route.indexOf("if (grounded)") < route.indexOf("const anthropic = await getAnthropicClientForUser"), "canonical product/page evidence must resolve before optional provider execution");
 assert.doesNotMatch(route, /127\.0\.0\.1|localhost|desktop assistant/i);
 console.log("PASS authenticated hosted BIMLog Agent Gateway");

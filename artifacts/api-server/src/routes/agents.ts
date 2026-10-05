@@ -10,7 +10,7 @@ import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { randomUUID } from "node:crypto";
 import { BIMLOG_ASSISTANT_MAX_QUESTION, cleanAssistantList, cleanAssistantText, parseAssistantAnswer } from "../lib/page-assistant-agent-contract";
 import { resolveBimlogDedicatedAgent } from "../lib/page-assistant-agent-registry";
-import { relevantBimlogKnowledge } from "../lib/page-assistant-product-knowledge";
+import { groundedAssistantAnswer, relevantBimlogKnowledge } from "../lib/page-assistant-product-knowledge";
 import { classifyAssistantAction, locateVisibleControl } from "../lib/page-assistant-actions";
 
 const router: Router = Router();
@@ -28,11 +28,15 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
     const knowledge = relevantBimlogKnowledge(question, pageText, context.language === "es" ? "es" : "en");
     const requestedAction = classifyAssistantAction(question);
     const locatedControl = requestedAction === "locate" ? locateVisibleControl(question, controls, cleanAssistantText(context.focusedControl, 120) || null) : null;
+    const agent = resolveBimlogDedicatedAgent();
+    const grounded = groundedAssistantAnswer(question, controls, pageText, context.language === "es" ? "es" : "en", requestedAction, locatedControl);
+    if (grounded) {
+      return res.json({ ...grounded, transport: "hosted", contextual: true, receipt: { runId: randomUUID(), agentId: agent.agentId, agentVersion: agent.version, contractVersion: agent.contractVersion, instructionDigest: agent.instructionDigest } });
+    }
     const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).map((item: any) => ({
       role: item?.role === "assistant" ? "assistant" : "user",
       content: cleanAssistantText(item?.text, 2000),
     })).filter((item: any) => item.content) : [];
-    const agent = resolveBimlogDedicatedAgent();
     const anthropic = await getAnthropicClientForUser({ userId: req.user.userId, projectId, feature: "page_assistant" });
     const message = await anthropic.messages.create({
       model: agent.model,
