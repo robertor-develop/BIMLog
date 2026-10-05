@@ -11,6 +11,15 @@ assert.deepEqual(groundedAssistantAnswer("What is Counterparty?", ["Counterparty
   grounding: "canonical-product-knowledge",
 });
 assert.match(groundedAssistantAnswer("What is missing?", [], ["6 required item(s) remaining", "Enter a positive unit rate for every scope item."], "en", "missing", null)?.answer || "", /Enter a positive unit rate/);
+const compactReadinessAnswer = groundedAssistantAnswer("What is missing?", [], [
+  "6 required item(s) remaining",
+  "Enter the negotiated number for every contract profile.",
+  "Assign at least one Contract Item to every contract profile.",
+  "Describe the Submittal delivery strategy.",
+], "en", "missing", null)?.answer || "";
+assert.match(compactReadinessAnswer, /Give each scope item a name, positive quantity and positive planned labor hours\./);
+assert.match(compactReadinessAnswer, /Enter a positive unit rate for every scope item\./);
+assert.match(compactReadinessAnswer, /Complete the required final confirmations\./);
 assert.doesNotMatch(groundedAssistantAnswer("What is missing?", [], ["Perspective", "Commitment \/ subcontract"], "en", "missing", null)?.answer || "", /Perspective/);
 const readinessAnswer = groundedAssistantAnswer("What is missing?", [], [
   "6 required item(s) remaining",

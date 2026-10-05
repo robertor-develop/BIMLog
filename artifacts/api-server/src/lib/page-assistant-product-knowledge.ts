@@ -35,10 +35,17 @@ export function groundedAssistantAnswer(
 ): GroundedAssistantAnswer | null {
   const spanish = language === "es";
   if (requestedAction === "missing") {
-    const remaining = readinessRequirements
+    const matched = readinessRequirements
       .filter(requirement => pageText.some(line => requirement.patterns.some(pattern => pattern.test(line))))
       .map(requirement => spanish ? requirement.es : requirement.en);
     const count = pageText.find(line => /\d+ required item\(s\) remaining|\d+ elemento\(s\) requerido/i.test(line));
+    const requiredCount = count ? Number(count.match(/\d+/)?.[0] || 0) : 0;
+    // Intake's compact page context may omit button labels from the visible
+    // "Still required" list. When its authoritative count says all six
+    // canonical requirements remain, return that complete canonical set.
+    const remaining = matched.length > 0 && requiredCount === readinessRequirements.length
+      ? readinessRequirements.map(requirement => spanish ? requirement.es : requirement.en)
+      : matched;
     if (!remaining.length && !count) return null;
     const intro = spanish ? "La página muestra estos requisitos pendientes:" : "The page shows these requirements still pending:";
     const details = remaining.length ? remaining.map(line => `• ${line}`).join(" ") : (spanish ? "Revisa la lista visible «Pendiente» en esta página." : "Review the visible “Still required” list on this page.");
