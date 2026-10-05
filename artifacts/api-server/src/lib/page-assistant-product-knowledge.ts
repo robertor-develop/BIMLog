@@ -49,7 +49,10 @@ export function groundedAssistantAnswer(
     if (!remaining.length && !count) return null;
     const intro = spanish ? "La página muestra estos requisitos pendientes:" : "The page shows these requirements still pending:";
     const details = remaining.length ? remaining.map(line => `• ${line}`).join(" ") : (spanish ? "Revisa la lista visible «Pendiente» en esta página." : "Review the visible “Still required” list on this page.");
-    return { answer: `${count ? `${count}. ` : ""}${intro} ${details}`, highlightLabels: [], grounding: "visible-page-readiness" };
+    const countLabel = requiredCount
+      ? (spanish ? `${requiredCount} elemento(s) obligatorio(s) pendiente(s)` : `${requiredCount} required item(s) remaining`)
+      : "";
+    return { answer: `${countLabel ? `${countLabel}. ` : ""}${intro} ${details}`, highlightLabels: [], grounding: "visible-page-readiness" };
   }
 
   const normalized = question.toLocaleLowerCase(spanish ? "es" : "en");

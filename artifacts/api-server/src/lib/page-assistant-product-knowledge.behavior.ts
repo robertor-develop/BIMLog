@@ -20,6 +20,13 @@ const compactReadinessAnswer = groundedAssistantAnswer("What is missing?", [], [
 assert.match(compactReadinessAnswer, /Give each scope item a name, positive quantity and positive planned labor hours\./);
 assert.match(compactReadinessAnswer, /Enter a positive unit rate for every scope item\./);
 assert.match(compactReadinessAnswer, /Complete the required final confirmations\./);
+const spanishCompactReadinessAnswer = groundedAssistantAnswer("¿Qué falta?", [], [
+  "6 required item(s) remaining",
+  "Enter the negotiated number for every contract profile.",
+], "es", "missing", null)?.answer || "";
+assert.match(spanishCompactReadinessAnswer, /^6 elemento\(s\) obligatorio\(s\) pendiente\(s\)\./);
+assert.doesNotMatch(spanishCompactReadinessAnswer, /required item\(s\) remaining/);
+assert.match(spanishCompactReadinessAnswer, /Completa las confirmaciones finales requeridas\./);
 assert.doesNotMatch(groundedAssistantAnswer("What is missing?", [], ["Perspective", "Commitment \/ subcontract"], "en", "missing", null)?.answer || "", /Perspective/);
 const readinessAnswer = groundedAssistantAnswer("What is missing?", [], [
   "6 required item(s) remaining",
