@@ -3805,3 +3805,9 @@ Block 58 is accepted live at exact source `6ab4afadaed99a585a9e9eb51451a1f3af668
 B291-B295 replace the Billing & Support dead end with an authenticated company-admin setup operation. BIMLog validates the selected catalog offer, creates a replay-safe Stripe customer bound to the exact company, atomically records one pending subscription and active provider binding, and refreshes the workspace so the same plan and billing cycle can proceed to hosted checkout. Existing or conflicting company commercial authority fails closed. This is the first five-build block after accepted B281-B290 and remains unpublished until B300.
 
 The Block 59 acceptance reconciliation is bound to product checkpoint `67d523293f6d5f9f34f3188a3379a194cb293abd`; exact-head validation and the authorized single push remain the active closure steps.
+
+## SaaS Completion Block 60 — prepared-offer checkout continuity — 2026-10-04
+
+B296-B300 expose the authenticated company’s exact prepared plan, billing cycle and seat count; reject any checkout selection that differs from that authority; align and lock the bilingual Billing & Support controls to it; and make Stripe customer retries company-stable. Provider references, credentials and payment data remain server-side. B291-B300 now reach the required ten-build publication and authenticated Chrome boundary.
+
+The B300 product checkpoint is `58e5b65d156bc5b59daf7dad54f929a844dc36a9`; complete exact-head validation, one push, exact-source publication and authenticated Chrome remain the active acceptance sequence. Live Stripe and SendGrid readiness must still verify successfully before BIMLog claims live commercial launch readiness.

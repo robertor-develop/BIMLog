@@ -4579,3 +4579,15 @@ Block 58 is accepted live at exact source `6ab4afadaed99a585a9e9eb51451a1f3af668
 - [ ] Pass the complete exact-head gate and push B291-B295 once. Publication remains reserved for B300.
 
 The B295 product checkpoint is `67d523293f6d5f9f34f3188a3379a194cb293abd`; this later reconciliation unit records its complete module impact before the exact-head release gate.
+
+## SaaS Completion Block 60 — prepared-offer checkout continuity — 2026-10-04
+
+- [x] B296 project the canonical prepared company offer to the authenticated workspace.
+- [x] B297 require the selected checkout plan and cycle to match canonical authority.
+- [x] B298 align, display and lock the bilingual billing controls to the prepared offer.
+- [x] B299 use company-stable customer idempotency and return the exact setup receipt.
+- [x] B300 bind focused acceptance and the B291-B300 publication boundary.
+- [ ] Pass the complete exact-head gate, push once, publish the exact source and run the full authenticated Chrome smoke.
+- [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.
+
+The B300 product checkpoint is `58e5b65d156bc5b59daf7dad54f929a844dc36a9`; this reconciliation records the implemented authority and the remaining external-service launch condition.
