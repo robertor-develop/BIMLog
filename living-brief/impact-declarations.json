@@ -58071,6 +58071,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "82379058236cd84e6280d2dcfde49477d4441c1f75fc63c9774497c4c6e8a416"
+    },
+    {
+      "taskId": "hosted-bimlog-agent-ai-inventory-repair",
+      "reviewedThroughCommit": "ea74147a9d7b72ae2bbe432363dc58613a6bc0b3",
+      "reviewedAt": "2026-10-05T21:33:06.245Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The regenerated inventory records the existing controlled hosted assistant and changes no product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-gate repair follows the existing exact-head generated-evidence workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated inventory restores existing AI governance coverage without weakening acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated inventory repair does not change BIMLog product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The inventory now records the authenticated Anthropic acquisition already implemented in the hosted gateway."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated API inventory does not affect Lens Next Native."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The inventory repair does not affect report behavior or presentation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The inventory repair introduces no standards claim or metadata."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing status accurately records the hosted grounding repair and remaining release gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing open loop already requires republish and repeated authenticated acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated inventory repair requires no historical audit narrative change."
+        }
+      ],
+      "reason": "The exact-head release gate found the generated AI entry-point inventory stale after the hosted assistant route gained governed provider acquisition; regeneration records the 46th governed entry without product behavior changes.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
