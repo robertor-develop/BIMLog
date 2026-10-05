@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft } from "lucide-react";
+import { LegalDocumentNav } from "@/components/legal/LegalDocumentNav";
 
 const CONTENT = {
   en: {
@@ -135,6 +136,8 @@ export function Terms() {
           <ChevronLeft style={{ width: 14, height: 14 }} />
           {t("legal.backToHome")}
         </Link>
+
+        <LegalDocumentNav current="terms" />
 
         <div style={{ marginBottom: 8 }}>
           <span style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "hsl(var(--primary))", background: "hsl(var(--primary)/0.08)", padding: "3px 10px", borderRadius: 4 }}>Legal</span>
