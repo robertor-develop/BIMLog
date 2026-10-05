@@ -4641,3 +4641,8 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Push and publish the exact ten-build interval only under the applicable release authorization, then run authenticated Chrome smoke on the live source.
 - [ ] Verify one real paired Codex question/answer in English and Spanish on the deployed page; local bridge contracts do not replace live conversational proof.
 - [ ] Connect a supported development execution bridge before any authorized proposal can advance from authorized to implementing, testing, deployed and verified.
+## 2026-10-05 — Page assistant production fallback hotfix
+
+- Push the smoke-discovered fallback hotfix and reconciled Living Brief to the canonical release branch and `master`.
+- Republish the exact accepted source commit.
+- Repeat authenticated Chrome smoke: open Job Intake, open Ask BIMLog, request missing setup, confirm useful page guidance without a raw fetch error, and confirm Submit feedback opens the governed feedback receiver while no permanent feedback launcher is present.

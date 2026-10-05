@@ -3845,3 +3845,8 @@ UX121-UX125 select one presentation-only next action from canonical responsibili
 - Platform repair reports now preserve exact scope digests, server-side hashed per-user PIN confirmation, attempt limits, one-hour authorization, same-company delegation controlled only by Global Super Admin, and immutable events. Development execution remains explicitly unconnected and cannot claim a repair started or completed.
 - Job Intake company engagement now requires explicit service-provider and customer choices, explains that the relationship is optional, and links directly to setup without automatically connecting the first two companies.
 - Local focused acceptance, frontend/API typechecks, dependency audit, platform audit, route-graph reconciliation and database-safety checks pass. Push, publication, live conversational proof and authenticated production Chrome smoke remain separate release gates.
+## 2026-10-05 — Page assistant production fallback hotfix
+
+- Authenticated Chrome smoke found that the optional loopback desktop bridge can be unavailable in production.
+- The page assistant now returns bounded guidance from visible page and control labels instead of exposing a raw fetch failure. It still never reads form values and does not gain repair execution authority.
+- Focused assistant acceptance, frontend typecheck, Living Brief integrity, production build, republish and repeat authenticated Chrome smoke are the acceptance gates.

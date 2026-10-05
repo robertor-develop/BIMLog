@@ -57784,6 +57784,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "af893784cabb753a20e09aa2f32cbb8721bc9a56e183e51e359132575c1aac65"
+    },
+    {
+      "taskId": "page-assistant-production-fallback-hotfix",
+      "reviewedThroughCommit": "b33377d8af60d06a2b452264d9b4bef5a68104e0",
+      "reviewedAt": "2026-10-05T18:41:16Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded production fallback hotfix does not change this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded production fallback hotfix does not change this authority."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The authenticated Chrome defect is fail-soft: page guidance remains usable and the optional conversational bridge is identified without a raw fetch error."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded production fallback hotfix does not change this authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded production fallback hotfix does not change this authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded production fallback hotfix does not change this authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded production fallback hotfix does not change this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded production fallback hotfix does not change this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the production-smoke hotfix and required republish verification."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks republish and repeat authenticated Chrome acceptance for the smoke-discovered defect."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded production fallback hotfix does not change this authority."
+        }
+      ],
+      "reason": "Authenticated production smoke exposed an unavailable desktop bridge. The hotfix preserves page-aware guidance from visible labels when the optional bridge is absent, without reading form values or enabling execution.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7fe81c9ef1ae0c35c5bc8b937fa4cb2c6dc368a0e08ddebeed7aa7c75f8fce72"
     }
   ]
 }
