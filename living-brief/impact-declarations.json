@@ -58139,6 +58139,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "hosted-page-assistant-compact-readiness-repair",
+      "reviewedThroughCommit": "488ef9b687a475546907a6c047bab181e6a14092",
+      "reviewedAt": "2026-10-05T22:45:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The compact readiness repair preserves the existing BIMLog product and ecosystem doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair follows the existing test, publication, and authenticated acceptance workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair strengthens grounded completeness and adds regression coverage without weakening quality gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not change BIMLog product vision or intended customer outcomes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing hosted page assistant architecture remains unchanged; only readiness answer completion is repaired."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page assistant repair does not affect Lens Next Native behavior or packaging."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not alter governed report behavior, layout, export, or presentation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair introduces no new standards claim, citation, or standards metadata."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Current status already records the hosted grounding repair and required republish acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing open loop already requires republishing and repeating authenticated assistant acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This bounded corrective repair requires no historical audit narrative change."
+        }
+      ],
+      "reason": "Authenticated production smoke showed a six-item Intake readiness count with only three listed requirements because compact page context omitted button labels; the repair returns the complete canonical set when the authoritative count confirms all six remain.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
