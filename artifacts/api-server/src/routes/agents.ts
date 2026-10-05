@@ -11,6 +11,7 @@ import { randomUUID } from "node:crypto";
 import { BIMLOG_ASSISTANT_MAX_QUESTION, cleanAssistantList, cleanAssistantText, parseAssistantAnswer } from "../lib/page-assistant-agent-contract";
 import { resolveBimlogDedicatedAgent } from "../lib/page-assistant-agent-registry";
 import { relevantBimlogKnowledge } from "../lib/page-assistant-product-knowledge";
+import { classifyAssistantAction, locateVisibleControl } from "../lib/page-assistant-actions";
 
 const router: Router = Router();
 
@@ -25,6 +26,8 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
     const controls = cleanAssistantList(context.controls, 60, 120);
     const pageText = cleanAssistantList(context.pageText, 120, 240);
     const knowledge = relevantBimlogKnowledge(question, pageText, context.language === "es" ? "es" : "en");
+    const requestedAction = classifyAssistantAction(question);
+    const locatedControl = requestedAction === "locate" ? locateVisibleControl(question, controls, cleanAssistantText(context.focusedControl, 120) || null) : null;
     const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).map((item: any) => ({
       role: item?.role === "assistant" ? "assistant" : "user",
       content: cleanAssistantText(item?.text, 2000),
@@ -35,11 +38,12 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
       model: agent.model,
       max_tokens: 900,
       system: `${agent.instructions}\nAnswer language: ${language}.`,
-      messages: [...history, { role: "user", content: JSON.stringify({ question, page: cleanAssistantText(context.page, 160), section: cleanAssistantText(context.section, 160), route: cleanAssistantText(context.route, 300), visibleControls: controls, visiblePageText: pageText, approvedProductKnowledge: knowledge }) }],
+      messages: [...history, { role: "user", content: JSON.stringify({ question, requestedAction, locatedControl, page: cleanAssistantText(context.page, 160), section: cleanAssistantText(context.section, 160), route: cleanAssistantText(context.route, 300), visibleControls: controls, visiblePageText: pageText, approvedProductKnowledge: knowledge }) }],
     });
     const block = message.content.find((item: any) => item.type === "text") as any;
     if (!block?.text) return res.status(502).json({ error: "BIMLog could not produce an answer." });
     const parsed = parseAssistantAnswer(block.text, controls);
+    if (locatedControl && !parsed.highlightLabels.includes(locatedControl)) parsed.highlightLabels.unshift(locatedControl);
     res.json({ ...parsed, transport: "hosted", contextual: true, receipt: { runId: randomUUID(), agentId: agent.agentId, agentVersion: agent.version, contractVersion: agent.contractVersion, instructionDigest: agent.instructionDigest } });
   } catch (err) {
     if (sendAiUsageError(res, err)) return;
