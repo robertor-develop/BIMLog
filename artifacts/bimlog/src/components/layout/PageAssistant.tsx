@@ -22,7 +22,7 @@ export function PageAssistant() {
   const contextKey=`bimlog-assistant:${context.projectId ?? "global"}`;
   const isSuperAdmin=Boolean((user as {isSuperAdmin?:boolean}|null)?.isSuperAdmin);
   useEffect(()=>{try{setMessages(JSON.parse(sessionStorage.getItem(contextKey)||"[]").slice(-12));}catch{setMessages([]);}},[contextKey]);
-  useEffect(()=>{try{sessionStorage.setItem(contextKey,JSON.stringify(messages.slice(-12)));}catch{}},[messages,contextKey]);
+  useEffect(()=>{try{sessionStorage.setItem(contextKey,JSON.stringify(messages.slice(-12)));}catch(cause){console.warn("[page-assistant] conversation persistence unavailable",cause);}},[messages,contextKey]);
   useEffect(()=>{const receive=(event:MessageEvent)=>{if(event.origin!==BRIDGE||event.data?.type!=="bimlog-assistant-paired"||typeof event.data.token!=="string")return;sessionStorage.setItem("bimlog-assistant-token",event.data.token);setBridgeToken(event.data.token);setError("");};window.addEventListener("message",receive);return()=>window.removeEventListener("message",receive);},[]);
   useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.altKey&&event.shiftKey&&event.key.toLowerCase()==="a"){event.preventDefault();setOpen(value=>!value);}if(event.key==="Escape"&&open){event.preventDefault();setOpen(false);opener.current?.focus();}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);},[open]);
   useEffect(()=>{if(open)window.setTimeout(()=>input.current?.focus(),0);},[open]);

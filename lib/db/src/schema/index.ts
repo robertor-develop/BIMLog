@@ -68,3 +68,4 @@ export * from "./enterprise-identity";
 export * from "./connector-foundation";
 export * from "./onboarding";
 export * from "./coordination-knowledge";
+export * from "./platform-repairs";

@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 736,
-    "frontendApiReferences": 290,
+    "apiRoutes": 741,
+    "frontendApiReferences": 294,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -6487,6 +6487,36 @@
       ]
     },
     {
+      "method": "GET",
+      "path": "/repairs",
+      "owner": "artifacts/api-server/src/routes/repairs.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/repairs",
+      "owner": "artifacts/api-server/src/routes/repairs.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/repairs/pin",
+      "owner": "artifacts/api-server/src/routes/repairs.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/repairs/delegates",
+      "owner": "artifacts/api-server/src/routes/repairs.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/repairs/:id/authorize",
+      "owner": "artifacts/api-server/src/routes/repairs.ts",
+      "tables": []
+    },
+    {
       "method": "POST",
       "path": "/projects/:projectId/reports/current-view/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
@@ -9668,6 +9698,22 @@
     {
       "screen": "artifacts/bimlog/src/components/layout/Navbar.tsx",
       "apiPath": "${BASE}/api/v1/users/me/company-profile"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+      "apiPath": "/api/v1/repairs"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+      "apiPath": "/api/v1/repairs/pin"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+      "apiPath": "/api/v1/repairs/${repair.id}/authorize"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+      "apiPath": "/api/v1/repairs/delegates"
     },
     {
       "screen": "artifacts/bimlog/src/components/layout/ProjectHome.tsx",

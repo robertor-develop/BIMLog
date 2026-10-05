@@ -235,7 +235,8 @@
     "test:saas-block60": "node scripts/test-saas-completion-block60.mjs",
     "test:saas-block61": "node scripts/test-saas-completion-block61.mjs",
     "test:saas-block62": "node scripts/test-saas-completion-block62.mjs",
-    "test:ux-human-orientation-block01": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/next-action.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/human-orientation-block01.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/pages/responsibility-workspace-ui.behavior.ts"
+    "test:ux-human-orientation-block01": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/next-action.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/human-orientation-block01.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/pages/responsibility-workspace-ui.behavior.ts",
+    "test:page-assistant-block01": "node scripts/test-page-assistant-block01.mjs && node scripts/test-bimlog-assistant-bridge.mjs && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/repair-authority.behavior.ts"
   },
   "private": true,
   "devDependencies": {
