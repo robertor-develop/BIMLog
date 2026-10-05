@@ -4603,3 +4603,5 @@ Block 60 is accepted live at exact source `8a47d5ab385e0488551f265c25855307ec8da
 - [x] B305 bind focused acceptance, evidence and the five-build release boundary.
 - [ ] Pass the complete exact-head gate and push B301-B305 once. Publication and authenticated Chrome smoke remain reserved for B310.
 - [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.
+
+The B305 product checkpoint is `b8e6e9679949fbffb70732d266d72de584517bb9`; this reconciliation records its complete module impact before the exact-head release gate.

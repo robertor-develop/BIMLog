@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "300df72541b39dc1f814a130eed5699140c914ee055f7e52cd3fbe0afd1f301d",
-  "itemCount": 307,
+  "sourceSha256": "20ab82d6f9b9b2dc25d5e467bcdb0577c49f9551cc29966656844222d918e3d4",
+  "itemCount": 309,
   "counts": {
-    "ACTIVE": 271,
-    "SUPERSEDED": 24,
+    "ACTIVE": 272,
+    "SUPERSEDED": 25,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -60,6 +60,10 @@
     {
       "canonicalId": "3ced6667f9264a42",
       "duplicateId": "5989814b604e270c"
+    },
+    {
+      "canonicalId": "e1b80d75396de1b7",
+      "duplicateId": "131943d18117b3d4"
     }
   ],
   "items": [
@@ -5595,6 +5599,42 @@
       "evidence": [
         "OPEN_LOOP.md:4591",
         "SaaS Completion Block 60 — prepared-offer checkout continuity — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2154fa313c2f5f5f",
+      "sourceLine": 4604,
+      "heading": "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04",
+      "statement": "Pass the complete exact-head gate and push B301-B305 once. Publication and authenticated Chrome smoke remain reserved for B310.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4604",
+        "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "131943d18117b3d4",
+      "sourceLine": 4605,
+      "heading": "SaaS Completion Block 61 — payment-confirmation integrity — 2026-10-04",
+      "statement": "Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "canonical-open-loop:e1b80d75396de1b7",
+        "duplicate-source:131943d18117b3d4"
       ],
       "currentAuthority": false
     }
