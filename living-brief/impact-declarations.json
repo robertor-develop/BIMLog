@@ -58000,6 +58000,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5fb5b53712226420ce56692aebfd8d9aa77ce2e6759ec2fce335656707cf93a8"
+    },
+    {
+      "taskId": "hosted-bimlog-agent-live-grounding-hotfix",
+      "reviewedThroughCommit": "6fb6c50d93e06817214d50d68cc0c32c0e7df336",
+      "reviewedAt": "2026-10-05T21:03:04.486Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted grounding repair preserves controlled AI, one source of truth and truthful-evidence doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair follows the existing authenticated release, failure-repair and browser acceptance workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality rules already prohibit silent fallback and invented page requirements; focused coverage now enforces them."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded assistant reliability repair does not change BIMLog product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing hosted agent architecture remains authoritative; recognized terms now resolve from its canonical knowledge before optional provider execution."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair changes Platform and API assistant behavior only and does not affect Lens Next Native."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not change report generation, layout or evidence packaging."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair introduces no standards title, edition or compliance claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the live smoke defects, deterministic hosted grounding repair and remaining republish gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the exact republish and repeated authenticated Chrome acceptance still required."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The status and open-loop records capture this bounded correction without changing historical audit authority."
+        }
+      ],
+      "reason": "The post-publication assistant repair makes recognized BIMLog terminology and visible readiness answers deterministic inside the authenticated hosted gateway, eliminating provider drift without changing authority or hidden form-value boundaries.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "82379058236cd84e6280d2dcfde49477d4441c1f75fc63c9774497c4c6e8a416"
     }
   ]
 }

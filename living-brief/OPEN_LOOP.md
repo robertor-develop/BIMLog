@@ -4664,3 +4664,5 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] PA139 add drag, resize, dock, minimize and restore workspace controls.
 - [x] PA140 complete responsive accessibility and unsent-draft continuity.
 - [ ] Pass the complete exact-head gate, push PA131–PA140, publish the exact source, then run authenticated Chrome terminology, lane, feedback, panel and console smoke; repair and repeat publication until it passes.
+- [x] Diagnose the first live-smoke failure: stale pre-refresh history was distinct from current behavior, but Counterparty provider execution returned 502 and the model invented a missing Perspective requirement.
+- [ ] Push and republish the deterministic hosted-grounding repair, then repeat the full authenticated Chrome terminology, missing-setup, bilingual, feedback, panel-control and console smoke until it passes.

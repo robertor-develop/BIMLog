@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3dd2089438e4c5d2c13572b910f1f676e265eb05c7a394848355e6f4577fe55b",
-  "itemCount": 317,
+  "sourceSha256": "936785d4bb34fc18bcae1a874f18138a74c4bd231fcd4efa57093e129e1d826f",
+  "itemCount": 318,
   "counts": {
-    "ACTIVE": 278,
+    "ACTIVE": 279,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5782,6 +5782,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4666",
+        "Hosted BIMLog Dedicated Agent Block 2 — 2026-10-05"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "4d31af4ebcee7195",
+      "sourceLine": 4668,
+      "heading": "Hosted BIMLog Dedicated Agent Block 2 — 2026-10-05",
+      "statement": "Push and republish the deterministic hosted-grounding repair, then repeat the full authenticated Chrome terminology, missing-setup, bilingual, feedback, panel-control and console smoke until it passes.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4668",
         "Hosted BIMLog Dedicated Agent Block 2 — 2026-10-05"
       ],
       "currentAuthority": false
