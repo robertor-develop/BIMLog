@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import crypto from "node:crypto";
-import { acceptPersistentStripeWebhook, type CommercialWebhookResult } from "./commercial-provider-webhook";
+import { acceptPersistentStripeWebhook, classifyCommercialCheckoutFailure, type CommercialWebhookResult } from "./commercial-provider-webhook";
 import type { CommercialQueryClient } from "./commercial-persistence";
 
 const now = new Date("2026-10-04T12:00:00.000Z");
@@ -46,6 +46,9 @@ const unsupportedRaw = JSON.stringify({ id: "evt_webhook_unsupported", type: "cu
 assert.equal((await accept(unsupportedRaw, unsupportedState.client)).outcome, "ignored");
 const failedState = clientFor(appliedRaw, { missingLineage: true });
 assert.equal((await accept(appliedRaw, failedState.client)).outcome, "failed");
+assert.equal(classifyCommercialCheckoutFailure(new Error("Checkout amount mismatch")),"AMOUNT_MISMATCH");
+assert.equal(classifyCommercialCheckoutFailure(new Error("Payment status unsupported")),"UNSUPPORTED_STATE");
+assert.equal(classifyCommercialCheckoutFailure(new Error("Checkout lineage missing")),"LINEAGE_NOT_FOUND");
 let queried = false;
 await assert.rejects(() => acceptPersistentStripeWebhook({ client: { async query() { queried = true; return { rows: [], rowCount: 0 }; } }, environment, rawPayload: appliedRaw, signatureHeader: "t=1,v1=invalid", now }), /timestamp|signature/);
 assert.equal(queried, false);

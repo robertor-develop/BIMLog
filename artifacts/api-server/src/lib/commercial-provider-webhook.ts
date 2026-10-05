@@ -44,6 +44,13 @@ function exactId(value: unknown, code: string): string {
   return value;
 }
 
+export function classifyCommercialCheckoutFailure(error:unknown):"LINEAGE_NOT_FOUND"|"AMOUNT_MISMATCH"|"UNSUPPORTED_STATE"{
+  const message=error instanceof Error?error.message:"";
+  if(/amount|currency/i.test(message))return "AMOUNT_MISMATCH";
+  if(/payment|status|mode/i.test(message))return "UNSUPPORTED_STATE";
+  return "LINEAGE_NOT_FOUND";
+}
+
 export function validateStripeCheckoutCompletion(object: StripeCheckoutObject | undefined): Readonly<{
   sessionId:string;customerReference:string;providerSubscriptionReference:string;currency:string;amountTotalCents:number;
 }> {
@@ -144,12 +151,12 @@ export async function acceptPersistentStripeWebhook(input: Readonly<{
       completedAt: input.now.toISOString(),
     });
     return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "applied" });
-  } catch {
+  } catch(error) {
     await settlePersistentProviderReceipt(input.client, {
       id: persisted.id,
       companyId,
       outcome: "failed",
-      failureCode: "LINEAGE_NOT_FOUND",
+      failureCode: classifyCommercialCheckoutFailure(error),
       processedAt: input.now.toISOString(),
     });
     return Object.freeze({ accepted: true, eventId: receipt.eventId, outcome: "failed" });
