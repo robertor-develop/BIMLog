@@ -10,6 +10,7 @@ import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { randomUUID } from "node:crypto";
 import { BIMLOG_ASSISTANT_MAX_QUESTION, cleanAssistantList, cleanAssistantText, parseAssistantAnswer } from "../lib/page-assistant-agent-contract";
 import { resolveBimlogDedicatedAgent } from "../lib/page-assistant-agent-registry";
+import { relevantBimlogKnowledge } from "../lib/page-assistant-product-knowledge";
 
 const router: Router = Router();
 
@@ -23,6 +24,7 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
     const language = context.language === "es" ? "Spanish" : "English";
     const controls = cleanAssistantList(context.controls, 60, 120);
     const pageText = cleanAssistantList(context.pageText, 120, 240);
+    const knowledge = relevantBimlogKnowledge(question, pageText, context.language === "es" ? "es" : "en");
     const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).map((item: any) => ({
       role: item?.role === "assistant" ? "assistant" : "user",
       content: cleanAssistantText(item?.text, 2000),
@@ -33,7 +35,7 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
       model: agent.model,
       max_tokens: 900,
       system: `${agent.instructions}\nAnswer language: ${language}.`,
-      messages: [...history, { role: "user", content: JSON.stringify({ question, page: cleanAssistantText(context.page, 160), section: cleanAssistantText(context.section, 160), route: cleanAssistantText(context.route, 300), visibleControls: controls, visiblePageText: pageText }) }],
+      messages: [...history, { role: "user", content: JSON.stringify({ question, page: cleanAssistantText(context.page, 160), section: cleanAssistantText(context.section, 160), route: cleanAssistantText(context.route, 300), visibleControls: controls, visiblePageText: pageText, approvedProductKnowledge: knowledge }) }],
     });
     const block = message.content.find((item: any) => item.type === "text") as any;
     if (!block?.text) return res.status(502).json({ error: "BIMLog could not produce an answer." });
