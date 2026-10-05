@@ -4605,3 +4605,5 @@ Block 60 is accepted live at exact source `8a47d5ab385e0488551f265c25855307ec8da
 - [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.
 
 The B305 product checkpoint is `b8e6e9679949fbffb70732d266d72de584517bb9`; this reconciliation records its complete module impact before the exact-head release gate.
+
+The first full gate found that `UNSUPPORTED_STATE` was absent from the canonical provider-receipt settlement type. Repair checkpoint `5f0115d6a84223e9bdc7243f06b5befcb05679fc` adds the missing classification and focused regression coverage; the failed stage passes and the complete exact-head gate must now repeat.

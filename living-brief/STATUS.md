@@ -3819,3 +3819,5 @@ Block 60 is accepted live at exact source `8a47d5ab385e0488551f265c25855307ec8da
 B301-B305 require Stripe checkout completion to prove subscription mode, complete and paid state, then repeat exact session, customer, subscription, currency, amount, company and order checks inside the activation transaction. Rejections receive precise secret-safe classifications, and the browser return states that verification is pending until signed canonical confirmation succeeds. This is the first five-build block after the accepted B291-B300 publication and remains unpublished until B310. Live Stripe and SendGrid readiness remains external and must verify before commercial launch is claimed.
 
 The B305 product checkpoint is `b8e6e9679949fbffb70732d266d72de584517bb9`; exact-head validation and the authorized single push remain the active closure steps.
+
+The first complete gate exposed a missing `UNSUPPORTED_STATE` member in the canonical provider-receipt settlement type. Repair checkpoint `5f0115d6a84223e9bdc7243f06b5befcb05679fc` adds the classification and regression coverage; the exact failed stage passes before the complete gate repeats.
