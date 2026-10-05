@@ -29,4 +29,7 @@ assert.match(intake,/Customer/);
 assert.ok(!intake.includes("Connect first two companies"));
 assert.match(assistant,/Alt\+Shift\+A/);
 assert.match(assistant,/event\.key===["']Escape["']/);
+assert.match(assistant,/localPageGuidance/);
+assert.match(assistant,/desktop bridge unavailable; using page guidance/);
+assert.match(assistant,/Page guidance is available/);
 console.log("PA130 page assistant consolidated acceptance: PASS");

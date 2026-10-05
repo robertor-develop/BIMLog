@@ -10,6 +10,28 @@ type Repair = { id: string; payload: { issue: string; scope: string }; scope_dig
 const BRIDGE = "http://127.0.0.1:8798";
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
+function localPageGuidance(context: ReturnType<typeof collectPageAssistantContext>, question: string, language: "en" | "es") {
+  const missingQuestion = /missing|falta|obligatori|required/i.test(question);
+  const locationQuestion = /where|d[oó]nde|control|next|siguiente/i.test(question);
+  const requirementPattern = /^(give|enter|assign|describe|complete|select|add|configure|ingres|asign|describ|complet|seleccion|agreg|configur)/i;
+  const requirements = context.controls.filter(label => requirementPattern.test(label)).slice(0, 6);
+  if (missingQuestion && requirements.length) {
+    return language === "es"
+      ? `En ${context.page}, los elementos visibles que todavía requieren atención son: ${requirements.join("; ")}. Esta lista proviene de los controles visibles de la página.`
+      : `On ${context.page}, the visible items that still need attention are: ${requirements.join("; ")}. This list comes from the controls currently visible on the page.`;
+  }
+  const target = context.focusedControl || context.controls[0];
+  if (locationQuestion && target) {
+    return language === "es"
+      ? `Usa el control visible “${target}” en ${context.section || context.page}. Lo resalté para que puedas encontrarlo sin salir de la página.`
+      : `Use the visible “${target}” control in ${context.section || context.page}. I highlighted it so you can find it without leaving the page.`;
+  }
+  const controls = context.controls.slice(0, 5);
+  return language === "es"
+    ? `${context.page} corresponde a ${context.section || "la página actual"}. Los controles visibles principales son: ${controls.join("; ") || "ninguno"}. Puedes continuar trabajando sin perder los valores del formulario.`
+    : `${context.page} is the ${context.section || "current page"} context. The main visible controls are: ${controls.join("; ") || "none"}. You can continue working without losing form values.`;
+}
+
 export function PageAssistant() {
   const [location] = useLocation();
   const { token, user } = useAuthStore();
@@ -31,7 +53,7 @@ export function PageAssistant() {
   const starters=[{label:tt("Explain this","Explicar esto"),question:tt("Explain the focused section and its visible controls.","Explica la sección enfocada y sus controles visibles.")},{label:tt("Show me where","Mostrarme dónde"),question:tt("Show me the exact visible control I should use next.","Muéstrame el control visible exacto que debo usar a continuación.")},{label:tt("What’s missing?","¿Qué falta?"),question:tt("What required setup is missing on this page? Do not invent requirements.","¿Qué configuración obligatoria falta en esta página? No inventes requisitos.")}];
   async function api(path:string,init?:RequestInit){const response=await fetch(`${API_BASE}${path}`,{...init,headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`,...init?.headers}});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.message||data.error||tt("Request failed.","La solicitud falló."));return data;}
   async function loadRepairs(){try{const data=await api("/api/v1/repairs");setRepairs(data.proposals||[]);setCanAuthorize(data.canAuthorize===true);setExecutionConnected(data.executionConnected===true);}catch(cause){setError(cause instanceof Error?cause.message:tt("Repair review is unavailable.","La revisión de reparaciones no está disponible."));}}
-  async function ask(next=question){if(!next.trim()||busy)return;setBusy(true);setError("");setNotice("");setProposal(null);const submitted:Message={role:"user",text:next.trim(),projectId:context.projectId};setMessages(current=>[...current,submitted]);setQuestion("");try{const response=await fetch(`${BRIDGE}/ask`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${bridgeToken}`},body:JSON.stringify({question:submitted.text,context,history:messages.slice(-8)})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||tt("Assistant connection failed.","Falló la conexión del asistente."));setMessages(current=>[...current,{role:"assistant",text:data.answer,projectId:context.projectId}]);setProposal(data.proposal||null);highlightAssistantControls(data.highlightLabels||[]);}catch(cause){setError(cause instanceof Error?cause.message:tt("Assistant connection failed.","Falló la conexión del asistente."));}finally{setBusy(false);}}
+  async function ask(next=question){if(!next.trim()||busy)return;setBusy(true);setError("");setNotice("");setProposal(null);const submitted:Message={role:"user",text:next.trim(),projectId:context.projectId};setMessages(current=>[...current,submitted]);setQuestion("");try{const response=await fetch(`${BRIDGE}/ask`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${bridgeToken}`},body:JSON.stringify({question:submitted.text,context,history:messages.slice(-8)})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||tt("Assistant connection failed.","Falló la conexión del asistente."));setMessages(current=>[...current,{role:"assistant",text:data.answer,projectId:context.projectId}]);setProposal(data.proposal||null);highlightAssistantControls(data.highlightLabels||[]);}catch(cause){console.warn("[page-assistant] desktop bridge unavailable; using page guidance",cause);const answer=localPageGuidance(context,submitted.text,lang);setMessages(current=>[...current,{role:"assistant",text:answer,projectId:context.projectId}]);const target=context.focusedControl||context.controls[0];highlightAssistantControls(target?[target]:[]);setNotice(tt("Page guidance is available. Connect the desktop assistant for a conversational answer.","La orientación de página está disponible. Conecta el asistente de escritorio para una respuesta conversacional."));}finally{setBusy(false);}}
   function connect(){window.open(`${BRIDGE}/pair`,"bimlog-assistant-pair","popup,width=680,height=640");}
   function submitFeedback(){const latest=[...messages].reverse().find(item=>item.role==="user")?.text||question;window.dispatchEvent(new CustomEvent("bimlog:feedback-open",{detail:{feedbackType:"bug",message:latest?`${latest}\n\nPage: ${context.route}`:""}}));}
   async function reportRepair(){const issue=[...messages].reverse().find(item=>item.role==="user")?.text;if(!issue||!proposal)return;try{const data=await api("/api/v1/repairs",{method:"POST",body:JSON.stringify({issue,page:context.route,projectId:context.projectId,scope:proposal,tests:tt("Reproduce the issue, run affected regression tests, and verify the repaired page in Chrome.","Reproducir el problema, ejecutar las pruebas de regresión afectadas y verificar la página reparada en Chrome.")})});setNotice(tt(`Repair proposal ${data.id} was recorded for review. No development work has started.`,`La propuesta de reparación ${data.id} fue registrada para revisión. No ha comenzado trabajo de desarrollo.`));await loadRepairs();}catch(cause){setError(cause instanceof Error?cause.message:tt("Repair report failed.","Falló el reporte de reparación."));}}
