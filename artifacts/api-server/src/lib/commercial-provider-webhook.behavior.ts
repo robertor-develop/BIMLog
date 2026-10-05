@@ -24,7 +24,7 @@ function clientFor(rawPayload: string, options: Readonly<{ replay?: boolean; mis
     if (text.includes("INSERT INTO commercial_provider_receipts")) return { rows: [{ id: "receipt-evt_webhook_231" }], rowCount: 1 };
     if (text.includes("processing_status='processing'") && text.includes("RETURNING id,raw_payload")) return { rows: [{ id: "receipt-evt_webhook_231", raw_payload: rawPayload, payload_digest: payloadDigest }], rowCount: 1 };
     if (text.includes("FROM commercial_checkout_attempts") && text.includes("provider_session_reference=$3")) return options.missingLineage ? { rows: [], rowCount: 0 } : { rows: [{ id: "checkout-webhook-231" }], rowCount: 1 };
-    if (text.startsWith("SELECT r.raw_payload")) return { rows: [{ raw_payload: rawPayload, payload_digest: payloadDigest, provider_session_reference: "cs_webhook_231" }], rowCount: 1 };
+    if (text.startsWith("SELECT r.raw_payload")) return { rows: [{ raw_payload: rawPayload, payload_digest: payloadDigest, provider_session_reference: "cs_webhook_231",customer_reference:"cus_webhook_231",currency:"USD",total_cents:24900 }], rowCount: 1 };
     if (text.includes("processing_status=$3")) return { rows: [{ id: "receipt-evt_webhook_231", processing_status: options.missingLineage ? "failed" : "ignored" }], rowCount: 1 };
     if (text === "BEGIN" || text === "COMMIT" || text === "ROLLBACK" || text.startsWith("UPDATE commercial_")) return { rows: [], rowCount: null };
     throw new Error(`Unexpected webhook query: ${text}`);
