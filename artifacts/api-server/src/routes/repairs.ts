@@ -1,0 +1,12 @@
+import { Router, type IRouter } from "express";
+import { authMiddleware } from "../middlewares/auth";
+import { authorizeRepair, configureRepairPin, listRepairs, RepairAuthorityError, reportRepair, setRepairDelegate, type RepairActor } from "../lib/repair-authority";
+const router: IRouter = Router(); router.use("/repairs", authMiddleware);
+const actor = (req: any): RepairActor => ({ userId: req.user.userId, companyId: req.user.companyId, isSuperAdmin: req.user.isSuperAdmin === true });
+const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any, res: any) => { try { await handler(req, res); } catch (error) { if (error instanceof RepairAuthorityError) return res.status(error.status).json({ error: error.code, message: error.message }); console.error("[repairs] failed safely"); return res.status(500).json({ error: "REPAIR_FAILURE", message: "Repair request failed safely." }); } };
+router.get("/repairs", run(async (req, res) => res.json(await listRepairs(actor(req)))));
+router.post("/repairs", run(async (req, res) => res.status(201).json(await reportRepair(actor(req), req.body))));
+router.post("/repairs/pin", run(async (req, res) => res.json(await configureRepairPin(actor(req), req.body.pin, req.body.currentPin))));
+router.post("/repairs/delegates", run(async (req, res) => res.json(await setRepairDelegate(actor(req), req.body))));
+router.post("/repairs/:id/authorize", run(async (req, res) => res.json(await authorizeRepair(actor(req), String(req.params.id), req.body))));
+export default router;

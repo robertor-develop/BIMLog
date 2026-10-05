@@ -63,6 +63,7 @@ import commercialProviderWebhookRouter from "./commercial-provider-webhook";
 import supportCasesRouter from "./support-cases";
 import supportCaseSatisfactionRouter from "./support-case-satisfaction";
 import supportCaseMessagesRouter from "./support-case-messages";
+import repairsRouter from "./repairs";
 
 const router: IRouter = Router();
 
@@ -75,6 +76,7 @@ router.use(commercialProviderWebhookRouter);
 router.use(supportCasesRouter);
 router.use(supportCaseSatisfactionRouter);
 router.use(supportCaseMessagesRouter);
+router.use(repairsRouter);
 router.use(configRouter);
 router.use(projectsRouter);
 router.use(filesRouter);

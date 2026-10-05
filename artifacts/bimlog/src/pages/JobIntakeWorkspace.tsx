@@ -1718,7 +1718,7 @@ export function JobIntakeWorkspace() {
                     />
                   </label>
                 </div>
-                <details><summary>{tt("Companies and agreements (optional advanced setup)", "Empresas y acuerdos (configuración avanzada opcional)")}</summary><CompanyJobMap data={data} companies={authoritativeCompanies} contacts={directoryEntries} setData={setData} tt={tt}/></details>
+                <details id="ji-company-agreements"><summary>{tt("Companies and agreements (optional advanced setup)", "Empresas y acuerdos (configuración avanzada opcional)")}</summary><CompanyJobMap data={data} companies={authoritativeCompanies} contacts={directoryEntries} setData={setData} tt={tt}/></details>
               </section>
               <section className="ji-card" id="ji-contract">
                 <h2>
@@ -1845,7 +1845,7 @@ export function JobIntakeWorkspace() {
                           <option value="draft">{tt("Draft", "Borrador")}</option><option value="executed">{tt("Executed", "Ejecutado")}</option><option value="superseded">{tt("Superseded", "Reemplazado")}</option><option value="terminated">{tt("Terminated", "Terminado")}</option><option value="completed">{tt("Completed", "Completado")}</option>
                         </select>
                       </label>
-                      <label>{tt("Company engagement", "Relación entre empresas")}<select value={data.commercial.contracts?.[0]?.engagementId || ""} onChange={(e)=>changeContract(0,"engagementId",e.target.value)}><option value="">{tt("Not assigned", "Sin asignar")}</option>{(data.relationships?.engagements||[]).map((edge:any)=><option key={edge.id} value={edge.id}>{edge.id}</option>)}</select></label>
+                      <label>{tt("Service relationship (optional)", "Relación de servicio (opcional)")}<select value={data.commercial.contracts?.[0]?.engagementId || ""} onChange={(e)=>changeContract(0,"engagementId",e.target.value)}><option value="">{tt("No relationship selected", "Sin relación seleccionada")}</option>{(data.relationships?.engagements||[]).map((edge:any)=>{const provider=(data.relationships?.participants||[]).find((item:any)=>item.id===edge.providerParticipantId),customer=(data.relationships?.participants||[]).find((item:any)=>item.id===edge.customerParticipantId);return <option key={edge.id} value={edge.id}>{provider?.companyName||tt("Provider","Proveedor")} → {customer?.companyName||tt("Customer","Cliente")}</option>})}</select><span className="ji-small">{tt("Links this contract to the company that provides the service and the company that hires it.","Vincula este contrato con la empresa que presta el servicio y la empresa que la contrata.")}</span><button type="button" onClick={()=>{const target=document.getElementById("ji-company-agreements") as HTMLDetailsElement|null;if(target){target.open=true;target.scrollIntoView({behavior:"smooth",block:"center"});}}}>{tt("Set up company relationship","Configurar relación entre empresas")}</button></label>
                       <label>
                         {tt("Perspective", "Perspectiva")}
                         <select
@@ -2002,7 +2002,7 @@ export function JobIntakeWorkspace() {
                                   {(data.commercial.contracts || []).filter((candidate:any)=>candidate.id!==contract.id).map((candidate:any)=><option key={candidate.id} value={candidate.id}>{candidate.title || candidate.contractNumber || candidate.id}</option>)}
                                 </select>
                               </label>
-                              <label>{tt("Company engagement", "Relación entre empresas")}<select value={contract.engagementId || ""} onChange={(event)=>changeContract(index,"engagementId",event.target.value)}><option value="">{tt("Not assigned", "Sin asignar")}</option>{(data.relationships?.engagements||[]).map((edge:any)=><option key={edge.id} value={edge.id}>{edge.id}</option>)}</select></label>
+                              <label>{tt("Service relationship (optional)", "Relación de servicio (opcional)")}<select value={contract.engagementId || ""} onChange={(event)=>changeContract(index,"engagementId",event.target.value)}><option value="">{tt("No relationship selected", "Sin relación seleccionada")}</option>{(data.relationships?.engagements||[]).map((edge:any)=>{const provider=(data.relationships?.participants||[]).find((item:any)=>item.id===edge.providerParticipantId),customer=(data.relationships?.participants||[]).find((item:any)=>item.id===edge.customerParticipantId);return <option key={edge.id} value={edge.id}>{provider?.companyName||tt("Provider","Proveedor")} → {customer?.companyName||tt("Customer","Cliente")}</option>})}</select></label>
                               <label>
                                 {tt("Perspective", "Perspectiva")}
                                 <select

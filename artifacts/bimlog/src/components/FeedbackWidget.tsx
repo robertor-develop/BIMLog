@@ -61,7 +61,7 @@ function getModule(path: string) {
     .join(" ");
 }
 
-export function FeedbackWidget() {
+export function FeedbackWidget({ launcher = true }: { launcher?: boolean } = {}) {
   const [location] = useLocation();
   const search = useSearch();
   const { token, user } = useAuthStore();
@@ -114,6 +114,17 @@ export function FeedbackWidget() {
   }, [audioUrl]);
   useEffect(() => { if (!token) terminateMedia(); }, [token]);
   useEffect(() => { if(error) errorRef.current?.focus(); }, [error]);
+  useEffect(() => {
+    const openFromAssistant = (event: Event) => {
+      const detail = (event as CustomEvent<{ message?: string; feedbackType?: string }>).detail;
+      setReviewing(false);
+      setFeedbackType(TYPE_OPTIONS.some(option => option.value === detail?.feedbackType) ? detail!.feedbackType! : "bug");
+      if (detail?.message) setMessage(detail.message.slice(0, 4000));
+      setOpen(true);
+    };
+    window.addEventListener("bimlog:feedback-open", openFromAssistant);
+    return () => window.removeEventListener("bimlog:feedback-open", openFromAssistant);
+  }, []);
   useEffect(() => () => terminateMedia(), [location]);
   useEffect(() => {
     if (!token || location !== "/feedback") return;
@@ -321,7 +332,7 @@ export function FeedbackWidget() {
 
   return (
     <>
-      <button
+      {launcher && <button
         ref={openerRef}
         type="button"
         onClick={() => { setReviewing(false); setOpen(true); }}
@@ -346,7 +357,7 @@ export function FeedbackWidget() {
         }}
       >
         <MessageSquare size={21} />
-      </button>
+      </button>}
 
       {open && (
         <div

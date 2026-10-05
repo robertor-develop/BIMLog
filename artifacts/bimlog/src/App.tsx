@@ -58,6 +58,7 @@ const Features = namedPage(() => import("@/pages/Features"), "Features");
 const LensNextWorkspace = namedPage(() => import("@/features/lens-next/LensNextWorkspace"), "LensNextWorkspace");
 const NotFound = lazy(() => loadDeploymentModule(() => import("@/pages/not-found")));
 const FeedbackWidget = namedPage(() => import("@/components/FeedbackWidget"), "FeedbackWidget");
+const PageAssistant = namedPage(() => import("@/components/layout/PageAssistant"), "PageAssistant");
 
 const queryClient = new QueryClient();
 
@@ -200,7 +201,7 @@ function DeferredFeedbackWidget() {
   }, [token]);
 
   if (!token || !ready) return null;
-  return <Suspense fallback={null}><FeedbackWidget /></Suspense>;
+  return <Suspense fallback={null}><FeedbackWidget launcher={false} /></Suspense>;
 }
 
 function Router() {
@@ -348,6 +349,7 @@ function App() {
               </main>
             </div>
             <DeferredFeedbackWidget />
+            <Suspense fallback={null}><PageAssistant /></Suspense>
           </WouterRouter>
           <Toaster />
         </TooltipProvider>
