@@ -4655,3 +4655,12 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] PA134 add authenticated tenant/project-scoped hosted gateway execution and response receipts.
 - [x] PA135 remove localhost/desktop customer dependencies and require verified hosted agent receipts in the panel.
 - [ ] Complete PA136–PA140 human-facing lanes, contextual actions, panel workspace controls, responsive accessibility, then publish the exact ten-build interval and run authenticated live Chrome smoke with the required terminology questions.
+
+## Hosted BIMLog Dedicated Agent Block 2 — 2026-10-05
+
+- [x] PA136 expose Question and Feedback as the two ordinary-user lanes.
+- [x] PA137 ground contextual BIMLog terminology in approved product knowledge.
+- [x] PA138 resolve Show me where and What is missing actions against exact visible evidence.
+- [x] PA139 add drag, resize, dock, minimize and restore workspace controls.
+- [x] PA140 complete responsive accessibility and unsent-draft continuity.
+- [ ] Pass the complete exact-head gate, push PA131–PA140, publish the exact source, then run authenticated Chrome terminology, lane, feedback, panel and console smoke; repair and repeat publication until it passes.

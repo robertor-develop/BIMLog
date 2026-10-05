@@ -958,10 +958,14 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/outlook-project-routing.behavior.ts
 - artifacts/api-server/src/lib/outlook-project-routing.ts
 - artifacts/api-server/src/lib/overdue-notifier.ts
+- artifacts/api-server/src/lib/page-assistant-actions.behavior.ts
+- artifacts/api-server/src/lib/page-assistant-actions.ts
 - artifacts/api-server/src/lib/page-assistant-agent-contract.behavior.ts
 - artifacts/api-server/src/lib/page-assistant-agent-contract.ts
 - artifacts/api-server/src/lib/page-assistant-agent-registry.behavior.ts
 - artifacts/api-server/src/lib/page-assistant-agent-registry.ts
+- artifacts/api-server/src/lib/page-assistant-product-knowledge.behavior.ts
+- artifacts/api-server/src/lib/page-assistant-product-knowledge.ts
 - artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
 - artifacts/api-server/src/lib/pdf-route-authorization.behavior.ts

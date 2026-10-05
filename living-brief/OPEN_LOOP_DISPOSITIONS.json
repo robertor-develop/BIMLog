@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "739967a456ee844b97b8c9e3f82c429ec7a70f37d4e9ac4d70ab10fdd5ba19ea",
-  "itemCount": 316,
+  "sourceSha256": "3dd2089438e4c5d2c13572b910f1f676e265eb05c7a394848355e6f4577fe55b",
+  "itemCount": 317,
   "counts": {
-    "ACTIVE": 277,
+    "ACTIVE": 278,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5765,6 +5765,24 @@
       "evidence": [
         "OPEN_LOOP.md:4657",
         "Hosted BIMLog Dedicated Agent Block 1 — 2026-10-05"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "4fbdc0cba46b78d4",
+      "sourceLine": 4666,
+      "heading": "Hosted BIMLog Dedicated Agent Block 2 — 2026-10-05",
+      "statement": "Pass the complete exact-head gate, push PA131–PA140, publish the exact source, then run authenticated Chrome terminology, lane, feedback, panel and console smoke; repair and repeat publication until it passes.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4666",
+        "Hosted BIMLog Dedicated Agent Block 2 — 2026-10-05"
       ],
       "currentAuthority": false
     }

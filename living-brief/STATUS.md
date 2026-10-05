@@ -3854,3 +3854,7 @@ UX121-UX125 select one presentation-only next action from canonical responsibili
 ## Hosted BIMLog Dedicated Agent Block 1 — 2026-10-05
 
 PA131–PA135 replace the customer-facing loopback/desktop assistant dependency with a bounded hosted foundation. The block defines a strict response contract, collects semantic page evidence without reading form values, registers the versioned BIMLog Dedicated Agent separately from its Anthropic transport, enforces authenticated project membership at the Agent Gateway, returns agent/instruction receipts, and rejects unverified responses in the browser. Existing feedback consent, repair authority and Job Intake relationship behavior remain unchanged. Focused contract, registry, context, gateway and consolidated assistant acceptance plus API/frontend typechecks pass. This is the first five-build block and remains unpublished until PA140 reaches the ten-build boundary.
+
+## Hosted BIMLog Dedicated Agent Block 2 — 2026-10-05
+
+PA136–PA140 present explicit Question and Feedback lanes, ground Perspective, Counterparty, Company Engagement and APU explanations in approved BIMLog knowledge, resolve exact visible controls for location requests, add left/right docking, floating drag, resize and minimize controls, and preserve conversation plus unsent question drafts. Mobile, touch, keyboard, reduced-motion and forced-colors behavior is covered by focused acceptance. PA131–PA140 now reach the ten-build push, publication and authenticated Chrome boundary.
