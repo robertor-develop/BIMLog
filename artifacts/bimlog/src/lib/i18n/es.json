@@ -202,7 +202,7 @@
   "footer.legal": "Legal",
   "footer.privacy": "Política de Privacidad",
   "footer.terms": "Términos de Servicio",
-  "footer.disclaimer": "Aviso Legal de la Plataforma",
+  "footer.disclaimer": "Aviso Legal",
   "footer.dataRetention": "Política de Retención de Datos",
   "footer.connect": "Contacto",
   "footer.website": "Sitio Web",
@@ -213,6 +213,6 @@
   "legal.backToHome": "Volver al Inicio",
   "legal.privacy.title": "Política de Privacidad",
   "legal.terms.title": "Términos de Servicio",
-  "legal.disclaimer.title": "Aviso Legal de la Plataforma",
+  "legal.disclaimer.title": "Aviso Legal",
   "legal.dataRetention.title": "Política de Retención de Datos"
 }

@@ -59,7 +59,7 @@ export function Footer() {
             {colHead(t("footer.legal"))}
             {hoverLink("/privacy", t("footer.privacy"))}
             {hoverLink("/terms", t("footer.terms"))}
-            {hoverLink("/disclaimer", t("footer.disclaimer"))}
+            {hoverLink("/legal-notice", t("footer.disclaimer"))}
             {hoverLink("/data-retention", t("footer.dataRetention"))}
           </div>
 

@@ -215,6 +215,7 @@ function Router() {
       {/* Legal pages - public */}
       <Route path="/privacy" component={Privacy} />
       <Route path="/terms" component={Terms} />
+      <Route path="/legal-notice" component={Disclaimer} />
       <Route path="/disclaimer" component={Disclaimer} />
       <Route path="/data-retention" component={DataRetention} />
 

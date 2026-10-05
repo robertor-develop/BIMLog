@@ -11,7 +11,7 @@ const INFO_LINKS = [
   { en: "Contact", es: "Contacto", href: "/contact" },
   { en: "Privacy Policy", es: "Politica de Privacidad", href: "/privacy" },
   { en: "Terms of Service", es: "Terminos del Servicio", href: "/terms" },
-  { en: "Platform Disclaimer", es: "Aviso Legal de la Plataforma", href: "/disclaimer" },
+  { en: "Legal Notice", es: "Aviso Legal", href: "/legal-notice" },
   { en: "Data Retention", es: "Retencion de Datos", href: "/data-retention" },
 ];
 
