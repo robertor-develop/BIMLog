@@ -8,6 +8,7 @@ export type PageAssistantContext = {
   language: AssistantLanguage;
   focusedControl: string | null;
   controls: string[];
+  pageText: string[];
 };
 
 const clean = (value: unknown, maximum = 120) => String(value ?? "").replace(/[\u0000-\u001f]/g, " ").trim().slice(0, maximum);
@@ -30,6 +31,10 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     .filter((element) => !element.closest("[data-page-assistant]"))
     .filter((element) => element instanceof HTMLElement && element.offsetParent !== null)
     .map(controlLabel).filter(Boolean);
+  const pageText = Array.from(document.querySelectorAll("main h1, main h2, main h3, main p, main label, main option, main summary, main li"))
+    .filter((element) => element instanceof HTMLOptionElement || (element instanceof HTMLElement && element.offsetParent !== null))
+    .filter((element) => !element.closest("[data-page-assistant]"))
+    .map((element) => clean(element.textContent, 240)).filter(Boolean);
   return {
     route,
     page: clean(heading?.textContent || document.title, 160),
@@ -38,6 +43,7 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     language,
     focusedControl: focused ? controlLabel(focused) || null : null,
     controls: [...new Set(controls)].slice(0, 60),
+    pageText: [...new Set(pageText)].slice(0, 120),
   };
 }
 
