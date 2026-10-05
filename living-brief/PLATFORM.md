@@ -123,6 +123,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/onboarding.ts
 - artifacts/api-server/src/routes/project_directory.ts
 - artifacts/api-server/src/routes/projects.ts
+- artifacts/api-server/src/routes/repairs.ts
 - artifacts/api-server/src/routes/reports.ts
 - artifacts/api-server/src/routes/rfis.ts
 - artifacts/api-server/src/routes/sales-inquiry-action-workload.behavior.ts
@@ -168,6 +169,7 @@ It changes only when the code structure or curated architectural facts change.
 - supportCasesRouter
 - supportCaseSatisfactionRouter
 - supportCaseMessagesRouter
+- repairsRouter
 - configRouter
 - projectsRouter
 - filesRouter
@@ -1026,6 +1028,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/provider-governance.ts
 - artifacts/api-server/src/lib/release-metadata.behavior.ts
 - artifacts/api-server/src/lib/release-metadata.ts
+- artifacts/api-server/src/lib/repair-authority-migration.ts
+- artifacts/api-server/src/lib/repair-authority.behavior.ts
+- artifacts/api-server/src/lib/repair-authority.ts
 - artifacts/api-server/src/lib/report-view-capabilities.behavior.ts
 - artifacts/api-server/src/lib/report-view-capabilities.ts
 - artifacts/api-server/src/lib/report-view-ownership.behavior.ts
@@ -1293,6 +1298,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/meeting-minutes.ts
 - lib/db/src/schema/notifications.ts
 - lib/db/src/schema/onboarding.ts
+- lib/db/src/schema/platform-repairs.ts
 - lib/db/src/schema/platform-settings.ts
 - lib/db/src/schema/project-directory.ts
 - lib/db/src/schema/project-milestones.ts

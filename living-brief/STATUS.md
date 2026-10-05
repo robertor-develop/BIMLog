@@ -3837,3 +3837,11 @@ Block 62 is accepted live at exact source `f73e7c48033e78669611ef543a567f441603c
 ## Human Orientation UX Block 1 — next action and responsibility clarity — 2026-10-05
 
 UX121-UX125 select one presentation-only next action from canonical responsibility records; expose it as a bilingual source-opening card; limit the default Headquarters list to five; translate internal status and missing-context codes; place company summaries behind disclosure; and label grouped current source revisions without creating or mutating a parallel task store. Focused behavior and strict frontend typechecking pass. This is the first five-build block after the accepted B301-B310 publication and remains unpublished until the next five-build block reaches the ten-build boundary.
+# Page-aware assistant and feedback consolidation — 2026-10-05
+
+- PA126–PA130 implement an authenticated English/Spanish page assistant with bounded route, project, section, focused-control and visible-control context; form values and password controls are excluded.
+- The assistant uses a paired loopback Codex runtime with Low reasoning, read-only sandboxing, no network, no tools, no approvals and honest connection failures.
+- The standalone floating Feedback launcher is removed. “Submit feedback” inside the assistant opens the existing governed feedback form with the issue and page prefilled; file, screen and voice consent plus final submission remain explicit.
+- Platform repair reports now preserve exact scope digests, server-side hashed per-user PIN confirmation, attempt limits, one-hour authorization, same-company delegation controlled only by Global Super Admin, and immutable events. Development execution remains explicitly unconnected and cannot claim a repair started or completed.
+- Job Intake company engagement now requires explicit service-provider and customer choices, explains that the relationship is optional, and links directly to setup without automatically connecting the first two companies.
+- Local focused acceptance, frontend/API typechecks, dependency audit, platform audit, route-graph reconciliation and database-safety checks pass. Push, publication, live conversational proof and authenticated production Chrome smoke remain separate release gates.

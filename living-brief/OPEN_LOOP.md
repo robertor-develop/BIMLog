@@ -4633,3 +4633,11 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] B310 bind public/footer/authenticated navigation, accessibility and release acceptance.
 - [ ] Pass the complete exact-head gate, push B301-B310, publish the exact source and run the full authenticated Chrome smoke.
 - [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.
+# Page-aware assistant release gates — 2026-10-05
+
+- [x] Implement PA126–PA130 page context, restricted paired runtime, scoped repair authority, assistant-owned feedback entry and explicit Company Engagement setup.
+- [x] Preserve the existing feedback evidence, consent, receipt and reviewer workflows while removing its always-visible floating launcher.
+- [x] Keep repair execution truthfully disconnected until a verified development claim/status bridge exists.
+- [ ] Push and publish the exact ten-build interval only under the applicable release authorization, then run authenticated Chrome smoke on the live source.
+- [ ] Verify one real paired Codex question/answer in English and Spanish on the deployed page; local bridge contracts do not replace live conversational proof.
+- [ ] Connect a supported development execution bridge before any authorized proposal can advance from authorized to implementing, testing, deployed and verified.

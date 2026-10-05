@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "b35a749637c9e5b05f905774fb66f927db347c22fbc6bc25c3e1351508477267",
-  "itemCount": 312,
+  "sourceSha256": "a9a66d60bcacad42aebbbde2d08058ef7ba011f6415748758b89164df569e525",
+  "itemCount": 315,
   "counts": {
-    "ACTIVE": 274,
-    "SUPERSEDED": 26,
+    "ACTIVE": 276,
+    "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -5693,6 +5693,60 @@
       "evidence": [
         "canonical-open-loop:e1b80d75396de1b7",
         "duplicate-source:ee06604f748f05d4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "73e92115e48882fe",
+      "sourceLine": 4641,
+      "heading": "Page-aware assistant release gates — 2026-10-05",
+      "statement": "Push and publish the exact ten-build interval only under the applicable release authorization, then run authenticated Chrome smoke on the live source.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "feaac8be346816e3",
+      "sourceLine": 4642,
+      "heading": "Page-aware assistant release gates — 2026-10-05",
+      "statement": "Verify one real paired Codex question/answer in English and Spanish on the deployed page; local bridge contracts do not replace live conversational proof.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4642",
+        "Page-aware assistant release gates — 2026-10-05"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6fcefbcab411b702",
+      "sourceLine": 4643,
+      "heading": "Page-aware assistant release gates — 2026-10-05",
+      "statement": "Connect a supported development execution bridge before any authorized proposal can advance from authorized to implementing, testing, deployed and verified.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4643",
+        "Page-aware assistant release gates — 2026-10-05"
       ],
       "currentAuthority": false
     }
