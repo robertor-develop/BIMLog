@@ -3828,4 +3828,6 @@ The repeated gate then confirmed an eighth legitimate historical duplicate loop 
 
 B306-B310 govern one bilingual Terms, Privacy and Legal Notice map and effective date; connect every document directly; expose canonical `/legal-notice` while preserving the legacy `/disclaimer` URL; and bind public footer, authenticated Info navigation, semantic landmarks and overlay-free reading into focused acceptance. The approved legal document text remains unchanged. B301-B310 now reach the required ten-build publication and authenticated Chrome boundary.
 
+The full release gate exposed two deterministic evidence defects before publication. Route inventory guard detection could read into the following route and misclassify a public legal page, and the historical duplicate-loop assertion still expected eight groups after the verified inventory reached nine. Repair commit `f7cd3c8d1e2bf328455041fdcc29ef985945419a` bounds classification to each exact route, regenerates the route and responsive inventories, and updates the audit count without changing product behavior.
+
 The B310 product checkpoint is `5c215dd8021dcba82a15d52ace45954a1147da86`; complete exact-head validation, push, exact-source publication and authenticated Chrome remain the active acceptance sequence.

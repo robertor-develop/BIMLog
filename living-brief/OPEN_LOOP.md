@@ -4615,6 +4615,7 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 ## SaaS Completion Block 62 — public legal-information path — 2026-10-05
 
 - [x] B306 govern bilingual legal-document identities, one effective date and direct cross-navigation.
+- [x] Repair the release evidence so every public legal route is classified from its own JSX boundary and all nine verified historical duplicate groups remain explicitly reconciled.
 - [x] B307 complete the semantic bilingual public Terms path.
 - [x] B308 complete the semantic bilingual public Privacy path.
 - [x] B309 establish canonical public Legal Notice and preserve the legacy URL.
