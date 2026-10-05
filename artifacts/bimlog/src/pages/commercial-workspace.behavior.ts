@@ -7,8 +7,9 @@ for(const token of ["BIMLog service readiness","Preparación de servicios BIMLog
 for(const token of ["Plan checkout coverage","Cobertura de pago por plan","data.catalogCoverage.map","Monthly billing","Annual billing","BIMLog correction required"])assert.match(source,new RegExp(token));
 for(const token of ["Ready to sell live subscriptions","Subscriptions are not ready for sale","Checkout is in test mode","Customers do not need to enter provider settings","salesLaunchBlockers.map"])assert.match(source,new RegExp(token));
 assert.doesNotMatch(source,/price_[A-Za-z0-9_]+/);
-for(const token of ["parseCommercialCheckoutReturn","Checkout received","Checkout cancelled","verifying the provider confirmation","No subscription change was claimed"])assert.match(source,new RegExp(token));
+for(const token of ["parseCommercialCheckoutReturn","Checkout submitted — verification pending","Checkout cancelled","signed payment confirmation","No subscription change was claimed"])assert.match(source,new RegExp(token));
 for(const token of ["Billing self-service","Autoservicio de facturación","Start secure checkout","Manage billing","requestCommercialHostedDestination","data.billingAuthority.canManageBilling"])assert.match(source,new RegExp(token));
+for(const token of ["Checkout submitted — verification pending","Pago enviado — verificación pendiente","signed payment confirmation","confirmación firmada del pago"])assert.match(source,new RegExp(token));
 for(const token of ["deriveCommercialCheckoutEligibility","readCommercialIntent","Prepare subscription","Preparar suscripción","requestCommercialSubscriptionSetup","providerCustomerBound","Prepare this company subscription once"])assert.match(source,new RegExp(token));
 for(const token of ["Prepared offer","Oferta preparada","data.preparedSubscription.seatQuantity","Boolean(data.preparedSubscription)"])assert.match(source,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
 assert.match(source,/checkoutEligibility\?\.ready\?<Button/);assert.match(source,/data\.subscriptionStatus!=="active"/);
