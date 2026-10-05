@@ -16,19 +16,13 @@ export function relevantBimlogKnowledge(question: string, pageText: string[], la
     .map(entry => language === "es" ? entry.es : entry.en);
 }
 
-const readinessPatterns = [
-  /scope item.*positive quantity.*planned labor hours/i,
-  /positive unit rate.*scope item/i,
-  /negotiated number.*contract profile/i,
-  /assign at least one contract item.*contract profile/i,
-  /describe the submittal delivery strategy/i,
-  /complete the required final confirmations/i,
-  /elemento.*alcance.*cantidad positiva.*horas/i,
-  /precio unitario positivo/i,
-  /n[uú]mero negociado.*perfil/i,
-  /asign.*contract item.*perfil/i,
-  /estrategia.*submittal/i,
-  /confirmaciones finales requeridas/i,
+const readinessRequirements = [
+  { patterns: [/scope item.*positive quantity.*planned labor hours/i, /elemento.*alcance.*cantidad positiva.*horas/i], en: "Give each scope item a name, positive quantity and positive planned labor hours.", es: "Asigna a cada elemento de alcance un nombre, una cantidad positiva y horas de trabajo planificadas positivas." },
+  { patterns: [/positive unit rate.*scope item/i, /precio unitario positivo/i], en: "Enter a positive unit rate for every scope item.", es: "Ingresa un precio unitario positivo para cada elemento de alcance." },
+  { patterns: [/negotiated number.*contract profile/i, /n[uú]mero negociado.*perfil/i], en: "Enter the negotiated number for every contract profile.", es: "Ingresa el número negociado para cada perfil de contrato." },
+  { patterns: [/assign at least one contract item.*contract profile/i, /asign.*contract item.*perfil/i], en: "Assign at least one Contract Item to every contract profile.", es: "Asigna al menos un Contract Item a cada perfil de contrato." },
+  { patterns: [/describe the submittal delivery strategy/i, /estrategia.*submittal/i], en: "Describe the Submittal delivery strategy.", es: "Describe la estrategia de entrega de Submittals." },
+  { patterns: [/complete the required final confirmations/i, /confirmaciones finales requeridas/i], en: "Complete the required final confirmations.", es: "Completa las confirmaciones finales requeridas." },
 ];
 
 export function groundedAssistantAnswer(
@@ -41,7 +35,9 @@ export function groundedAssistantAnswer(
 ): GroundedAssistantAnswer | null {
   const spanish = language === "es";
   if (requestedAction === "missing") {
-    const remaining = pageText.filter(line => readinessPatterns.some(pattern => pattern.test(line))).slice(0, 8);
+    const remaining = readinessRequirements
+      .filter(requirement => pageText.some(line => requirement.patterns.some(pattern => pattern.test(line))))
+      .map(requirement => spanish ? requirement.es : requirement.en);
     const count = pageText.find(line => /\d+ required item\(s\) remaining|\d+ elemento\(s\) requerido/i.test(line));
     if (!remaining.length && !count) return null;
     const intro = spanish ? "La página muestra estos requisitos pendientes:" : "The page shows these requirements still pending:";

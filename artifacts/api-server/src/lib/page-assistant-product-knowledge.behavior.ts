@@ -12,4 +12,22 @@ assert.deepEqual(groundedAssistantAnswer("What is Counterparty?", ["Counterparty
 });
 assert.match(groundedAssistantAnswer("What is missing?", [], ["6 required item(s) remaining", "Enter a positive unit rate for every scope item."], "en", "missing", null)?.answer || "", /Enter a positive unit rate/);
 assert.doesNotMatch(groundedAssistantAnswer("What is missing?", [], ["Perspective", "Commitment \/ subcontract"], "en", "missing", null)?.answer || "", /Perspective/);
+const readinessAnswer = groundedAssistantAnswer("What is missing?", [], [
+  "6 required item(s) remaining",
+  "What remains for this section Enter the negotiated number for every contract profile. Assign at least one Contract Item to every contract profile.",
+  "Enter the negotiated number for every contract profile.",
+  "Assign at least one Contract Item to every contract profile.",
+  "Give each scope item a name, positive quantity and positive planned labor hours.",
+  "Enter a positive unit rate for every scope item.",
+  "Describe the Submittal delivery strategy.",
+  "Complete the required final confirmations.",
+], "en", "missing", null)?.answer || "";
+for (const requirement of [
+  "Give each scope item a name, positive quantity and positive planned labor hours.",
+  "Enter a positive unit rate for every scope item.",
+  "Enter the negotiated number for every contract profile.",
+  "Assign at least one Contract Item to every contract profile.",
+  "Describe the Submittal delivery strategy.",
+  "Complete the required final confirmations.",
+]) assert.equal(readinessAnswer.split(requirement).length - 1, 1, `expected one canonical readiness item: ${requirement}`);
 console.log("PASS BIMLog contextual product knowledge");
