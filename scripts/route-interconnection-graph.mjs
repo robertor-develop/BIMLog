@@ -20,11 +20,13 @@ export function buildRouteInterconnectionGraph() {
   const frontendFiles = walk(path.join(root, "artifacts/bimlog/src")).filter(file => /\.(?:ts|tsx)$/.test(file));
   const apiFiles = walk(path.join(root, "artifacts/api-server/src/routes")).filter(file => file.endsWith(".ts"));
 
-  const frontendRoutes = [...app.matchAll(/<Route(?:\s+path="([^"]+)")?(?:\s+component=\{([^}]+)\})?/g)].map((match, index) => {
+  const routeMatches = [...app.matchAll(/<Route(?:\s+path="([^"]+)")?(?:\s+component=\{([^}]+)\})?/g)];
+  const frontendRoutes = routeMatches.map((match, index) => {
     const routePath = match[1] ?? "*";
-    const tail = app.slice(match.index, match.index + 320);
-    const guard = /<ProjectRoute\b/.test(tail) ? "project" : /<AccessRoute\b/.test(tail) ? "access" : /<ProtectedRoute\b/.test(tail) ? "authenticated" : "public";
-    const target = match[2]?.trim() ?? tail.match(/component=\{([^}]+)\}/)?.[1]?.trim() ?? "inline";
+    const nextRouteIndex = routeMatches[index + 1]?.index ?? app.length;
+    const routeSource = app.slice(match.index, nextRouteIndex);
+    const guard = /<ProjectRoute\b/.test(routeSource) ? "project" : /<AccessRoute\b/.test(routeSource) ? "access" : /<ProtectedRoute\b/.test(routeSource) ? "authenticated" : "public";
+    const target = match[2]?.trim() ?? routeSource.match(/component=\{([^}]+)\}/)?.[1]?.trim() ?? "inline";
     return { order: index + 1, path: routePath, guard, target };
   });
 

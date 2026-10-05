@@ -10,7 +10,7 @@ assert.equal(inventory.schemaVersion, 2, "open-loop inventory uses the typed own
 assert.equal((openLoop.match(/CURRENT_OPEN_LOOP_AUTHORITY/g) ?? []).length, 1, "exactly one current authority marker exists");
 assert.match(inventory.currentAuthority.heading, /^Current open-loop authority/);
 assert.deepEqual(inventory.duplicateStatements, [], "duplicate unchecked statements are prohibited");
-assert.equal(inventory.reconciledDuplicateGroups.length, 8, "all eight discovered historical duplicate loops remain explicitly reconciled");
+assert.equal(inventory.reconciledDuplicateGroups.length, 9, "all nine discovered historical duplicate loops remain explicitly reconciled");
 
 const allowed = new Set(["PRODUCT_WORK", "FIELD_EVIDENCE", "PROVIDER_EVIDENCE", "STALE_CONTRADICTION"]);
 for (const item of inventory.items) {
