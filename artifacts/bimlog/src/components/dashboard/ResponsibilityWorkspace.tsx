@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { NextActionCard } from "@/components/dashboard/NextActionCard";
 import { selectNextAction } from "@/lib/next-action";
 import { responsibilityGapLabel, responsibilityStatusLabel } from "@/lib/responsibility-presentation";
+import { groupCurrentResponsibilitySources, responsibilitySourceLabel } from "@/lib/responsibility-source";
 
 type Scope = "my_work" | "my_company" | "authorized_projects";
 type Group = "all" | "due" | "overdue" | "blocked" | "noResponse";
@@ -47,7 +48,8 @@ export function ResponsibilityWorkspace({ token, lang }: { token?: string; lang:
   }, [scope, token]);
   const visible = useMemo(() => (payload?.items ?? []).filter(item => group === "all" || item.classification.groups[group]), [payload, group]);
   const nextAction = useMemo(() => selectNextAction(visible), [visible]);
-  const displayed = expanded ? visible : visible.slice(0, 5);
+  const sourceGroups = useMemo(() => groupCurrentResponsibilitySources(visible), [visible]);
+  const displayed = expanded ? sourceGroups : sourceGroups.slice(0, 5);
   const scopeLabels: Record<Scope, string> = es ? { my_work: "Mi trabajo", my_company: "Mi empresa", authorized_projects: "Proyectos autorizados" } : { my_work: "My Work", my_company: "My Company", authorized_projects: "Authorized Projects" };
   const groupLabels: Record<Group, string> = es ? { all: "Todo", due: "Vence hoy", overdue: "Vencido", blocked: "Bloqueado", noResponse: "Sin respuesta" } : { all: "All", due: "Due today", overdue: "Overdue", blocked: "Blocked", noResponse: "No response" };
   return <section aria-labelledby="responsibility-heading" style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 16, marginBottom: 20, background: "hsl(var(--card))" }}>
@@ -74,13 +76,14 @@ export function ResponsibilityWorkspace({ token, lang }: { token?: string; lang:
     {state === "error" && <p role="alert">{es ? "No se pudo cargar. Actualice para intentar de nuevo." : "Could not load. Refresh to try again."}</p>}
     {state === "ready" && visible.length === 0 && <p>{es ? "No hay acciones en esta vista." : "No actions in this view."}</p>}
     {visible.length > 0 && <><ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 8 }}>
-      {displayed.map(item => <li key={item.key} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 12 }}>
+      {displayed.map(({ current: item, relatedCount, sourceIdentity }) => <li key={sourceIdentity} style={{ border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}><div><strong>{item.title}</strong><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{item.project.code} · {item.project.name} · {responsibilityStatusLabel(item.status, lang)}</div></div><button onClick={() => navigate(item.action.openLink)} style={{ cursor: "pointer", borderRadius: 6, border: "1px solid #2563eb", padding: "6px 10px", background: "#2563eb", color: "white" }}>{item.action.label}</button></div>
         <div style={{ fontSize: 11, marginTop: 8 }}>{es ? "Responsable" : "Owner"}: {item.owner.person || item.owner.company || (es ? "No asignado" : "Unassigned")} · {es ? "Fecha límite" : "Deadline"}: {item.deadline ? new Date(item.deadline).toLocaleDateString() : (es ? "No definida" : "Not set")}</div>
+        <div style={{ fontSize: 10, marginTop: 5, color: "hsl(var(--muted-foreground))" }}>{responsibilitySourceLabel(item.action.openLink, lang)} · {es ? "Revisión actual" : "Current revision"}{relatedCount > 1 ? ` · ${relatedCount} ${es ? "registros relacionados" : "related records"}` : ""}</div>
         {item.contextGaps.length > 0 && <div style={{ fontSize: 11, color: "#92400e", marginTop: 5 }}>{es ? "Contexto faltante" : "Missing context"}: {item.contextGaps.map(gap => responsibilityGapLabel(gap, lang)).join(", ")}</div>}
         {item.action.lensEvidenceLink && <button onClick={() => navigate(item.action.lensEvidenceLink!)} style={{ border: 0, padding: 0, marginTop: 7, background: "none", color: "#2563eb", cursor: "pointer", textDecoration: "underline" }}>{es ? "Abrir evidencia vinculada de Lens" : "Open linked Lens evidence"}</button>}
         <div style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", marginTop: 6 }}>{item.action.publishUpdateMeaning}</div>
       </li>)}
-    </ul>{visible.length > 5 && <button type="button" aria-expanded={expanded} onClick={() => setExpanded(value => !value)} style={{ marginTop: 10, border: "1px solid hsl(var(--border))", borderRadius: 7, padding: "7px 10px", background: "transparent", cursor: "pointer", fontWeight: 700 }}>{expanded ? (es ? "Mostrar menos" : "Show fewer") : (es ? `Ver las ${visible.length} acciones` : `View all ${visible.length} actions`)}</button>}</>}
+    </ul>{sourceGroups.length > 5 && <button type="button" aria-expanded={expanded} onClick={() => setExpanded(value => !value)} style={{ marginTop: 10, border: "1px solid hsl(var(--border))", borderRadius: 7, padding: "7px 10px", background: "transparent", cursor: "pointer", fontWeight: 700 }}>{expanded ? (es ? "Mostrar menos" : "Show fewer") : (es ? `Ver las ${sourceGroups.length} acciones` : `View all ${sourceGroups.length} actions`)}</button>}</>}
   </section>;
 }
