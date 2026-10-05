@@ -4609,3 +4609,13 @@ The B305 product checkpoint is `b8e6e9679949fbffb70732d266d72de584517bb9`; this 
 The first full gate found that `UNSUPPORTED_STATE` was absent from the canonical provider-receipt settlement type. Repair checkpoint `5f0115d6a84223e9bdc7243f06b5befcb05679fc` adds the missing classification and focused regression coverage; the failed stage passes and the complete exact-head gate must now repeat.
 
 The repeated gate identified an eighth legitimate historical duplicate loop because Block 61 restates the still-active live Stripe/SendGrid condition. Audit repair `bc2419c49e80368acd96ee55aa84b4e32f5fd253` updates the exact reconciled count; the affected audit stages pass and the complete exact-head gate must repeat again.
+
+## SaaS Completion Block 62 — public legal-information path — 2026-10-05
+
+- [x] B306 govern bilingual legal-document identities, one effective date and direct cross-navigation.
+- [x] B307 complete the semantic bilingual public Terms path.
+- [x] B308 complete the semantic bilingual public Privacy path.
+- [x] B309 establish canonical public Legal Notice and preserve the legacy URL.
+- [x] B310 bind public/footer/authenticated navigation, accessibility and release acceptance.
+- [ ] Pass the complete exact-head gate, push B301-B310, publish the exact source and run the full authenticated Chrome smoke.
+- [ ] Configure and verify authenticated live Stripe and SendGrid resources before claiming live commercial launch readiness.

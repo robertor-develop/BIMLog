@@ -3823,3 +3823,7 @@ The B305 product checkpoint is `b8e6e9679949fbffb70732d266d72de584517bb9`; exact
 The first complete gate exposed a missing `UNSUPPORTED_STATE` member in the canonical provider-receipt settlement type. Repair checkpoint `5f0115d6a84223e9bdc7243f06b5befcb05679fc` adds the classification and regression coverage; the exact failed stage passes before the complete gate repeats.
 
 The repeated gate then confirmed an eighth legitimate historical duplicate loop after Block 61 repeated the still-active live Stripe/SendGrid condition. Audit repair `bc2419c49e80368acd96ee55aa84b4e32f5fd253` updates the exact reconciled count; Blocks 38 and 39 pass before another complete-gate restart.
+
+## SaaS Completion Block 62 — public legal-information path — 2026-10-05
+
+B306-B310 govern one bilingual Terms, Privacy and Legal Notice map and effective date; connect every document directly; expose canonical `/legal-notice` while preserving the legacy `/disclaimer` URL; and bind public footer, authenticated Info navigation, semantic landmarks and overlay-free reading into focused acceptance. The approved legal document text remains unchanged. B301-B310 now reach the required ten-build publication and authenticated Chrome boundary.

@@ -51,6 +51,13 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/legal-notice",
+      "owner": "Disclaimer",
+      "availability": "shipping",
+      "boundary": "public",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/disclaimer",
       "owner": "Disclaimer",
       "availability": "shipping",

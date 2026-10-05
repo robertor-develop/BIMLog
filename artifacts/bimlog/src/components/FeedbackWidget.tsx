@@ -19,6 +19,7 @@ const PUBLIC_PATHS = new Set([
   "/reset-password",
   "/privacy",
   "/terms",
+  "/legal-notice",
   "/disclaimer",
   "/data-retention",
   "/pricing",
