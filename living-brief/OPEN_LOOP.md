@@ -4607,3 +4607,5 @@ Block 60 is accepted live at exact source `8a47d5ab385e0488551f265c25855307ec8da
 The B305 product checkpoint is `b8e6e9679949fbffb70732d266d72de584517bb9`; this reconciliation records its complete module impact before the exact-head release gate.
 
 The first full gate found that `UNSUPPORTED_STATE` was absent from the canonical provider-receipt settlement type. Repair checkpoint `5f0115d6a84223e9bdc7243f06b5befcb05679fc` adds the missing classification and focused regression coverage; the failed stage passes and the complete exact-head gate must now repeat.
+
+The repeated gate identified an eighth legitimate historical duplicate loop because Block 61 restates the still-active live Stripe/SendGrid condition. Audit repair `bc2419c49e80368acd96ee55aa84b4e32f5fd253` updates the exact reconciled count; the affected audit stages pass and the complete exact-head gate must repeat again.

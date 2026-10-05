@@ -57421,8 +57421,8 @@
     },
     {
       "taskId": "saas-block61-payment-confirmation-integrity",
-      "reviewedThroughCommit": "5f0115d6a84223e9bdc7243f06b5befcb05679fc",
-      "reviewedAt": "2026-10-05T02:55:41Z",
+      "reviewedThroughCommit": "bc2419c49e80368acd96ee55aa84b4e32f5fd253",
+      "reviewedAt": "2026-10-05T03:21:45Z",
       "status": "candidate",
       "authorities": [
         {
@@ -57481,14 +57481,14 @@
           "reason": "Provider secrets and payment payloads remain server-side while rejection records use bounded classifications."
         }
       ],
-      "reason": "B301-B305 require an exact completed paid subscription checkout, revalidate provider and order lineage inside the activation transaction, and persist the resulting unsupported-state classification through the canonical settlement contract.",
+      "reason": "B301-B305 require an exact completed paid subscription checkout, revalidate provider and order lineage inside activation, persist unsupported-state classification, and keep deterministic audit coverage aligned with the newly reconciled provider loop.",
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "c1c104b7ec115c8763ccd2e2394efb401d081ffba7eac5a2929cc11e8f56a3e9"
+      "reviewedChangeSha256": "edb3e2a1fe4e0889149f5694c27d65c7184e90f60365afc5fdba36a0dc92ee19"
     }
   ]
 }

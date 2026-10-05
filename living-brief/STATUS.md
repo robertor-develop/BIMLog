@@ -3821,3 +3821,5 @@ B301-B305 require Stripe checkout completion to prove subscription mode, complet
 The B305 product checkpoint is `b8e6e9679949fbffb70732d266d72de584517bb9`; exact-head validation and the authorized single push remain the active closure steps.
 
 The first complete gate exposed a missing `UNSUPPORTED_STATE` member in the canonical provider-receipt settlement type. Repair checkpoint `5f0115d6a84223e9bdc7243f06b5befcb05679fc` adds the classification and regression coverage; the exact failed stage passes before the complete gate repeats.
+
+The repeated gate then confirmed an eighth legitimate historical duplicate loop after Block 61 repeated the still-active live Stripe/SendGrid condition. Audit repair `bc2419c49e80368acd96ee55aa84b4e32f5fd253` updates the exact reconciled count; Blocks 38 and 39 pass before another complete-gate restart.
