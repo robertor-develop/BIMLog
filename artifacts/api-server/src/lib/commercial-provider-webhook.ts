@@ -17,6 +17,12 @@ export type CommercialWebhookResult = Readonly<{
 type StripeCheckoutObject = Readonly<{
   id?: unknown;
   customer?: unknown;
+  subscription?: unknown;
+  mode?: unknown;
+  status?: unknown;
+  payment_status?: unknown;
+  currency?: unknown;
+  amount_total?: unknown;
   metadata?: Readonly<Record<string, unknown>>;
 }>;
 
@@ -36,6 +42,19 @@ function parseVerifiedEnvelope(rawPayload: string): StripeWebhookEnvelope {
 function exactId(value: unknown, code: string): string {
   if (typeof value !== "string" || !/^[A-Za-z0-9][A-Za-z0-9._:-]{2,127}$/.test(value)) throw new Error(code);
   return value;
+}
+
+export function validateStripeCheckoutCompletion(object: StripeCheckoutObject | undefined): Readonly<{
+  sessionId:string;customerReference:string;providerSubscriptionReference:string;currency:string;amountTotalCents:number;
+}> {
+  if(!object)throw new Error("COMMERCIAL_WEBHOOK_SESSION_INVALID");
+  const sessionId=exactId(object.id,"COMMERCIAL_WEBHOOK_SESSION_INVALID");
+  const customerReference=exactId(object.customer,"COMMERCIAL_WEBHOOK_CUSTOMER_MISSING");
+  const providerSubscriptionReference=exactId(object.subscription,"COMMERCIAL_WEBHOOK_PROVIDER_SUBSCRIPTION_MISSING");
+  if(object.mode!=="subscription"||object.status!=="complete"||object.payment_status!=="paid")throw new Error("COMMERCIAL_WEBHOOK_PAYMENT_INCOMPLETE");
+  if(typeof object.currency!=="string"||!/^[a-z]{3}$/.test(object.currency))throw new Error("COMMERCIAL_WEBHOOK_CURRENCY_INVALID");
+  if(!Number.isSafeInteger(object.amount_total)||Number(object.amount_total)<0)throw new Error("COMMERCIAL_WEBHOOK_AMOUNT_INVALID");
+  return Object.freeze({sessionId,customerReference,providerSubscriptionReference,currency:object.currency.toUpperCase(),amountTotalCents:Number(object.amount_total)});
 }
 
 export function inspectCommercialWebhookEnvironment(environment: NodeJS.ProcessEnv): Readonly<{
@@ -72,7 +91,8 @@ export async function acceptPersistentStripeWebhook(input: Readonly<{
     priorReceipts: [],
   });
   const envelope = parseVerifiedEnvelope(input.rawPayload);
-  const customerReference = exactId(envelope.data?.object?.customer, "COMMERCIAL_WEBHOOK_CUSTOMER_MISSING");
+  const completion=receipt.eventType==="checkout.session.completed"?validateStripeCheckoutCompletion(envelope.data?.object):null;
+  const customerReference = completion?.customerReference??exactId(envelope.data?.object?.customer, "COMMERCIAL_WEBHOOK_CUSTOMER_MISSING");
   const binding = await input.client.query(
     `SELECT id,company_id FROM commercial_provider_bindings WHERE provider='stripe' AND environment=$1 AND customer_reference=$2 AND status='active' LIMIT 1`,
     [configuration.mode, customerReference],
