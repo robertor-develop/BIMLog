@@ -16,16 +16,30 @@ const clean = (value: unknown, maximum = 120) => String(value ?? "").replace(/[\
 function controlLabel(element: Element): string {
   const labelled = clean(element.getAttribute("aria-label") || element.getAttribute("title"));
   if (labelled) return labelled;
-  if (element instanceof HTMLInputElement && element.labels?.[0]) return clean(element.labels[0].textContent);
-  if (element instanceof HTMLSelectElement && element.labels?.[0]) return clean(element.labels[0].textContent);
-  if (element instanceof HTMLTextAreaElement && element.labels?.[0]) return clean(element.labels[0].textContent);
+  const label = element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement
+    ? element.labels?.[0]
+    : null;
+  if (label) {
+    const explicit = clean(label.getAttribute("data-assistant-label"));
+    if (explicit) return explicit;
+    // A label's textContent also contains option values, help text and button
+    // captions. Only its own leading text describes the control.
+    const ownText = Array.from(label.childNodes)
+      .filter((node) => node.nodeType === Node.TEXT_NODE)
+      .map((node) => node.textContent || "")
+      .join(" ");
+    if (clean(ownText)) return clean(ownText);
+  }
   return clean(element.textContent || element.getAttribute("placeholder"));
 }
 
 export function collectPageAssistantContext(language: AssistantLanguage): PageAssistantContext {
   const route = `${window.location.pathname}${window.location.search}`.slice(0, 300);
   const project = window.location.pathname.match(/^\/projects\/(\d+)/);
-  const heading = document.querySelector("main h1, main h2");
+  const heading = document.querySelector("main h1");
+  const routePage = /^\/projects\/\d+\/intake\/?$/.test(window.location.pathname)
+    ? (language === "es" ? "Ingreso y configuración del trabajo" : "Job Intake & Setup")
+    : "";
   const focused = document.activeElement?.matches("button,input,select,textarea,a[href]") ? document.activeElement : null;
   const controls = Array.from(document.querySelectorAll("main button:not([disabled]), main input:not([type=password]), main select, main textarea, main a[href]"))
     .filter((element) => !element.closest("[data-page-assistant]"))
@@ -38,7 +52,7 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     .map((element) => clean(element.textContent, 240)).filter(Boolean);
   return {
     route,
-    page: clean(heading?.textContent || document.title, 160),
+    page: clean(routePage || heading?.textContent || document.title, 160),
     section: clean(focused?.closest("section,fieldset,details")?.querySelector("h2,h3,legend,summary")?.textContent, 160),
     projectId: project ? Number(project[1]) : null,
     language,
