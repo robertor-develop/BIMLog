@@ -6,12 +6,9 @@ import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { runBriefingAgent } from "../agents/briefing-agent";
 import { runClashAgent } from "../agents/clash-agent";
 import { runRfiAgent } from "../agents/rfi-agent";
-import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
-import { randomUUID } from "node:crypto";
-import { BIMLOG_ASSISTANT_MAX_QUESTION, cleanAssistantList, cleanAssistantText, parseAssistantAnswer } from "../lib/page-assistant-agent-contract";
-import { resolveBimlogDedicatedAgent } from "../lib/page-assistant-agent-registry";
-import { groundedAssistantAnswer, relevantBimlogKnowledge } from "../lib/page-assistant-product-knowledge";
-import { classifyAssistantAction, locateVisibleControl } from "../lib/page-assistant-actions";
+import { sendAiUsageError } from "../lib/ai-usage";
+import { BIMLOG_ASSISTANT_MAX_QUESTION, cleanAssistantList, cleanAssistantText } from "../lib/page-assistant-agent-contract";
+import { askBimlogMain04 } from "../lib/main04-agent-transport";
 
 const router: Router = Router();
 
@@ -22,33 +19,17 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
     const question = cleanAssistantText(req.body?.question, BIMLOG_ASSISTANT_MAX_QUESTION);
     if (!question) return res.status(400).json({ error: "A question is required." });
     const context = (req.body?.context || {}) as AssistantContext;
-    const language = context.language === "es" ? "Spanish" : "English";
     const controls = cleanAssistantList(context.controls, 60, 120);
     const pageText = cleanAssistantList(context.pageText, 120, 240);
-    const knowledge = relevantBimlogKnowledge(question, pageText, context.language === "es" ? "es" : "en");
-    const requestedAction = classifyAssistantAction(question);
-    const locatedControl = requestedAction === "locate" ? locateVisibleControl(question, controls, cleanAssistantText(context.focusedControl, 120) || null) : null;
-    const agent = resolveBimlogDedicatedAgent();
-    const grounded = groundedAssistantAnswer(question, controls, pageText, context.language === "es" ? "es" : "en", requestedAction, locatedControl);
-    if (grounded) {
-      return res.json({ ...grounded, transport: "hosted", contextual: true, receipt: { runId: randomUUID(), agentId: agent.agentId, agentVersion: agent.version, contractVersion: agent.contractVersion, instructionDigest: agent.instructionDigest } });
-    }
     const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).map((item: any) => ({
       role: item?.role === "assistant" ? "assistant" : "user",
       content: cleanAssistantText(item?.text, 2000),
     })).filter((item: any) => item.content) : [];
-    const anthropic = await getAnthropicClientForUser({ userId: req.user.userId, projectId, feature: "page_assistant" });
-    const message = await anthropic.messages.create({
-      model: agent.model,
-      max_tokens: 900,
-      system: `${agent.instructions}\nAnswer language: ${language}.`,
-      messages: [...history, { role: "user", content: JSON.stringify({ question, requestedAction, locatedControl, page: cleanAssistantText(context.page, 160), section: cleanAssistantText(context.section, 160), route: cleanAssistantText(context.route, 300), visibleControls: controls, visiblePageText: pageText, approvedProductKnowledge: knowledge }) }],
+    const result = await askBimlogMain04({
+      question, userId: req.user.userId, projectId,
+      context: { route: cleanAssistantText(context.route, 300), page: cleanAssistantText(context.page, 160), section: cleanAssistantText(context.section, 160), language: context.language === "es" ? "es" : "en", focusedControl: cleanAssistantText(context.focusedControl, 120), controls, pageText, history },
     });
-    const block = message.content.find((item: any) => item.type === "text") as any;
-    if (!block?.text) return res.status(502).json({ error: "BIMLog could not produce an answer." });
-    const parsed = parseAssistantAnswer(block.text, controls);
-    if (locatedControl && !parsed.highlightLabels.includes(locatedControl)) parsed.highlightLabels.unshift(locatedControl);
-    res.json({ ...parsed, transport: "hosted", contextual: true, receipt: { runId: randomUUID(), agentId: agent.agentId, agentVersion: agent.version, contractVersion: agent.contractVersion, instructionDigest: agent.instructionDigest } });
+    res.json({ answer: result.answer, highlightLabels: [], proposal: null, transport: "main04", contextual: true, agent: { threadId: result.threadId, requestId: result.requestId, answerDigest: result.answerDigest } });
   } catch (err) {
     if (sendAiUsageError(res, err)) return;
     res.status(502).json({ error: "BIMLog's hosted assistant is temporarily unavailable.", code: "ASSISTANT_PROVIDER_UNAVAILABLE" });
