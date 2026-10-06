@@ -139,6 +139,8 @@ router.post("/feedback", authMiddleware, async (req, res) => {
         const [acknowledgment] = await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "submission_acknowledged", reason: "Your feedback was received and is ready for review.", afterState: { status: "new", version: 1, receiptId: row.stableId, release: FEEDBACK_RELEASE } }).returning({ id: feedbackAuditEventsTable.id });
         const reviewers = await tx.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.isSuperAdmin, true));
         await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "submission_notification_outbox_created", afterState: { sourceEventId: acknowledgment.id, reviewerUserIds: reviewers.map(reviewer => reviewer.id), customerUserId: user.userId, state: "pending", release: FEEDBACK_RELEASE } });
+        await tx.execute(sql`INSERT INTO feedback_operations_outbox(feedback_id,company_id,project_id,contract_version,target_agent_id) VALUES(${row.id},${actor.companyId},${projectId},'feedback-case/v1','01a10d7d-ffa2-71e2-a085-ec1b954a3d4f') ON CONFLICT(feedback_id) DO NOTHING`);
+        await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "central_feedback_agent_outbox_created", afterState: { contractVersion: "feedback-case/v1", targetAgentId: "01a10d7d-ffa2-71e2-a085-ec1b954a3d4f", state: "pending" } });
         return { status: 201, row, replayed: false, acknowledgmentId: acknowledgment.id, reviewerIds: reviewers.map(reviewer => reviewer.id) } as const;
       });
     if (!("row" in outcome)) return res.status(outcome.status).json({ code: outcome.code, error: outcome.error });
