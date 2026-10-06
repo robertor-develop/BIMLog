@@ -9,9 +9,19 @@ const blockerStages: Record<string, JobIntakeStage> = {
   delivery: "delivery", team: "team", internal_rates: "team", confirmations: "review",
 };
 
+const blockerAnchors: Record<string, string> = {
+  job_name: "ji-job-name", job_code: "ji-job-code", client: "ji-client",
+  scope: "ji-scope", edt_source: "ji-scope", pricing: "ji-scope",
+  contract_title: "ji-contract-title", contract_number: "ji-contract-contractNumber",
+  counterparty: "ji-contract-counterpartyName", contract_assignment: "ji-contract-item-assignment",
+  budget_mapping: "ji-scope", budget_snapshot: "ji-contract",
+  delivery: "ji-submittal-strategy", team: "ji-team", internal_rates: "ji-team",
+  confirmations: "ji-review",
+};
+
 export function jobIntakeBlockerDestination(code: string) {
   const stage = blockerStages[code] ?? "review";
-  return { stage, item: `ji-${stage}` };
+  return { stage, item: blockerAnchors[code] ?? `ji-${stage}` };
 }
 
 export function jobIntakeActivationPreview(data: any, completion: any, commercial: boolean) {

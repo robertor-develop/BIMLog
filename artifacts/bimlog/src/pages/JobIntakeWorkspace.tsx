@@ -899,7 +899,14 @@ export function JobIntakeWorkspace() {
     setActive(destination.stage);
     preserveJobIntakeActiveStage(projectId, destination.stage);
     preserveJobIntakeActiveItem(projectId, destination.item);
-    window.requestAnimationFrame(() => document.getElementById(destination.item)?.scrollIntoView({ block: "start" }));
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById(destination.item);
+      target?.scrollIntoView({ block: "center", behavior: "smooth" });
+      target?.setAttribute("data-assistant-highlight", "true");
+      const focusable = target?.matches("input,select,textarea,button") ? target : target?.querySelector("input,select,textarea,button");
+      if (focusable instanceof HTMLElement) focusable.focus({ preventScroll: true });
+      window.setTimeout(() => target?.removeAttribute("data-assistant-highlight"), 5000);
+    });
   };
   const stageMissingCodes: Record<string, string[]> = {
     contract: ["contract_title", "contract_number", "counterparty", "contract_assignment", "budget_mapping", "budget_snapshot"],
@@ -1617,7 +1624,7 @@ export function JobIntakeWorkspace() {
                     ["jobCode", tt("Job code", "Código del trabajo")],
                     ["location", tt("Location", "Ubicación")],
                   ].map(([field, label]) => (
-                    <label key={field}>
+                    <label key={field} id={`ji-${field.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)}`} data-assistant-label={label}>
                       {label}
                       <input
                         value={data.identity[field]}
@@ -1628,7 +1635,7 @@ export function JobIntakeWorkspace() {
                     </label>
                   ))}
                   {clientCatalogError && <p role="alert">{tt("Client catalog could not be loaded; client selection is paused.", "No se pudo cargar el catálogo de clientes; la selección de cliente está en pausa.")}</p>}
-                  <label>
+                  <label id="ji-client" data-assistant-label={tt("Client company", "Empresa cliente")}>
                     {tt("Client company", "Empresa cliente")}
                     <select
                       value={data.identity.clientCompanyId || ""}
@@ -1797,7 +1804,7 @@ export function JobIntakeWorkspace() {
                           tt("Payment terms", "Términos de pago"),
                         ],
                       ].map(([field, label]) => (
-                        <label key={field}>
+                        <label key={field} id={`ji-contract-${field}`} data-assistant-label={label}>
                           {label}
                           {field === "counterpartyName" ? (
                             <select
@@ -2172,7 +2179,7 @@ export function JobIntakeWorkspace() {
                   onError={setError}
                   onNotice={setNotice}
                 />
-                {(data.scopeItems || []).map((item:any, index:number)=><div className="ji-row" key={`owner-${item.id}`}><strong>{item.name || item.id}</strong><div className="ji-grid"><label>{tt("Responsible company", "Empresa responsable")}<select value={item.responsibleParticipantId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,responsibleParticipantId:event.target.value}:candidate))}><option value="">{tt("Unassigned", "Sin asignar")}</option>{(data.relationships?.participants || []).map((participant:any)=><option key={participant.id} value={participant.id}>{participant.companyName}</option>)}</select></label><label>{tt("Authoritative agreement", "Acuerdo autorizado")}<select value={item.contractId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,contractId:event.target.value}:candidate))}>{(data.commercial.contracts || []).map((contract:any)=><option key={contract.id} value={contract.id}>{contract.title || contract.contractNumber || contract.id}</option>)}</select></label></div></div>)}
+                {(data.scopeItems || []).map((item:any, index:number)=><div className="ji-row" key={`owner-${item.id}`}><strong>{item.name || item.id}</strong><div className="ji-grid"><label>{tt("Responsible company", "Empresa responsable")}<select value={item.responsibleParticipantId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,responsibleParticipantId:event.target.value}:candidate))}><option value="">{tt("Unassigned", "Sin asignar")}</option>{(data.relationships?.participants || []).map((participant:any)=><option key={participant.id} value={participant.id}>{participant.companyName}</option>)}</select></label><label id={index===0?"ji-contract-item-assignment":undefined} data-assistant-label={tt("Contract Item agreement assignment", "Asignación contractual de la Partida")}>{tt("Authoritative agreement", "Acuerdo autorizado")}<select value={item.contractId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,contractId:event.target.value}:candidate))}>{(data.commercial.contracts || []).map((contract:any)=><option key={contract.id} value={contract.id}>{contract.title || contract.contractNumber || contract.id}</option>)}</select></label></div></div>)}
                 <LegacyProjectClassificationNotice data={data} setData={setData} tt={tt} />
 
               </section>
@@ -2201,7 +2208,7 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
                 <div className="ji-grid">
-                  <label>
+                  <label id="ji-submittal-strategy" data-assistant-label={tt("Submittal strategy", "Estrategia de submittals")}>
                     {tt("Budget governance", "Gobernanza del presupuesto")}
                     <select
                       value={data.governance?.budgetPolicy || "standard"}
