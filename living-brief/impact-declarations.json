@@ -58275,6 +58275,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "replit-critical-proxy-address-security-repair",
+      "reviewedThroughCommit": "66bc10b185469fcab801ad773594e5c62e43b10d",
+      "reviewedAt": "2026-10-05T23:50:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The dependency security repair preserves BIMLog product and ecosystem doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair follows the mandated fail-closed publication and retest workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair removes a critical proxy trust vulnerability without weakening any release gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not change BIMLog product vision or customer outcomes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Express runtime architecture remains unchanged; its transitive proxy address validator is updated to the fixed release."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The server dependency repair does not affect Lens Next Native behavior or packaging."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not alter governed reports, exports, or presentation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair introduces no standards claim or standards metadata."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The current release remains pending republish and authenticated acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The open publication and authenticated-smoke requirement remains in force."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This bounded dependency remediation requires no historical audit narrative change."
+        }
+      ],
+      "reason": "Replit blocked publication after identifying proxy-addr 2.0.7 as a critical trust-boundary vulnerability; the workspace override and lockfile now resolve Express to fixed proxy-addr 2.0.8, with provenance and production advisory audits passing.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
