@@ -77,13 +77,16 @@ for (const file of fs.readdirSync(routesRoot).filter((name) => name.endsWith(".t
     const text = call.getText(sourceFile);
     const key = `${file}|${method}|${routePath}`;
     const isPublic = publicRules.some((rule) => rule.test(key));
-    const directAuth = /\bauthMiddleware\b/.test(text);
+    const directSessionAuth = /\bauthMiddleware\b/.test(text);
+    const directServiceAuth = /\brequireCentralFeedbackAgent\b/.test(text);
+    const directAuth = directSessionAuth || directServiceAuth;
     const authenticated = isPublic ? false : directAuth || fileAuth || serviceScopedFiles.has(file);
     const projectScoped = routePath.includes(":projectId");
     const directProjectGuard = /\brequire(ProjectMember|Permission)\s*\(/.test(text);
     const mountedProjectGuard = fileProjectGuard;
     const serviceScope = serviceScopedFiles.has(file) && projectScoped;
-    const role = /isSuperAdminMiddleware|requireSuper\(/.test(text) ? "super_admin"
+    const role = directServiceAuth ? "authenticated_service"
+      : /isSuperAdminMiddleware|requireSuper\(/.test(text) ? "super_admin"
       : /require(ProjectMember|Permission)\([^)]*(project_admin|admin)/.test(text) ? "project_admin_or_super_admin"
       : authenticated ? "authenticated_user" : "public";
     const objectParams = [...routePath.matchAll(/:([A-Za-z][A-Za-z0-9]*)/g)].map((match) => match[1]).filter((name) => name !== "projectId");

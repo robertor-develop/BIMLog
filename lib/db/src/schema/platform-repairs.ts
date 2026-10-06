@@ -16,3 +16,7 @@ export const platformRepairProposalsTable=pgTable("platform_repair_proposals",{
 export const platformRepairEventsTable=pgTable("platform_repair_events",{
   id:uuid("id").primaryKey(),companyId:integer("company_id").notNull(),actorId:integer("actor_id").notNull().references(()=>usersTable.id),proposalId:uuid("proposal_id"),action:text("action").notNull(),evidence:jsonb("evidence").notNull().default({}),createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
 });
+
+export const platformRepairBridgesTable=pgTable("platform_repair_bridges",{
+  bridgeId:text("bridge_id").primaryKey(),lastSeenAt:timestamp("last_seen_at",{withTimezone:true}).notNull().defaultNow(),version:text("version").notNull(),metadata:jsonb("metadata").notNull().default({}),
+});

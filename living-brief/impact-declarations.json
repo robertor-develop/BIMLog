@@ -58143,7 +58143,7 @@
     {
       "taskId": "hosted-page-assistant-compact-readiness-repair",
       "reviewedThroughCommit": "488ef9b687a475546907a6c047bab181e6a14092",
-      "reviewedAt": "2026-10-05T22:45:00.000Z",
+      "reviewedAt": "2026-10-05T22:45:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58211,7 +58211,7 @@
     {
       "taskId": "hosted-page-assistant-spanish-readiness-count-repair",
       "reviewedThroughCommit": "9d0d49678ab508630df6640f8322a3235403462b",
-      "reviewedAt": "2026-10-05T23:15:00.000Z",
+      "reviewedAt": "2026-10-05T23:15:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58279,7 +58279,7 @@
     {
       "taskId": "replit-critical-proxy-address-security-repair",
       "reviewedThroughCommit": "66bc10b185469fcab801ad773594e5c62e43b10d",
-      "reviewedAt": "2026-10-05T23:50:00.000Z",
+      "reviewedAt": "2026-10-05T23:50:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58347,7 +58347,7 @@
     {
       "taskId": "hosted-page-assistant-language-switch-readiness-repair",
       "reviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "reviewedAt": "2026-10-05T23:59:00.000Z",
+      "reviewedAt": "2026-10-05T23:59:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58411,6 +58411,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "assistant-dedicated-routing-block02",
+      "reviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "reviewedAt": "2026-10-06T02:15:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the separate Conversation, Feedback, and PIN-authorized Repair routes and their remaining publication gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assistant routing block preserves this authority while adding bounded tenant-scoped delivery contracts."
+        }
+      ],
+      "reason": "PA141-PA150 preserve three separate exact agent routes, add truthful connection and progress states, and add tenant-scoped outbox, lease, idempotency, conflict, and recovery controls.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/routes/feedback.ts",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/db/src/schema/feedback-items.ts",
+        "lib/db/src/schema/platform-repairs.ts",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/endpoint-authority-matrix.mjs",
+        "scripts/test-assistant-routing-block02.mjs"
+      ],
+      "reviewedChangeSha256": "906e9ce513c3e5edf9438f4649c7834a8ad6d6dfce291faf05896f38e150c004"
     }
   ]
 }

@@ -260,6 +260,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/apu-library-retirement.behavior.ts
 - artifacts/api-server/src/lib/apu-library-reuse.behavior.ts
 - artifacts/api-server/src/lib/apu-library-reuse.ts
+- artifacts/api-server/src/lib/assistant-route-registry.ts
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.behavior.ts
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.ts
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts

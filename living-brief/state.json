@@ -1,16 +1,25 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
+  "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "77f4b9d926b21136407ae033627b84c3e11d405087d55b430660b45ea11ebd4c",
+  "bundleSha256": "b607a11906cc7a40a062ee866f242a74e1bd7995d65a0cfb6991f95459c376ab",
   "impact": {
-    "baselineCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
+    "baselineCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
     "changedPaths": [
-      "living-brief/impact-declarations.json"
+      "artifacts/api-server/src/routes/feedback.ts",
+      "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+      "lib/db/src/schema/feedback-items.ts",
+      "lib/db/src/schema/platform-repairs.ts",
+      "living-brief/PLATFORM.md",
+      "living-brief/STATUS.md",
+      "living-brief/impact-declarations.json",
+      "scripts/endpoint-authority-matrix.mjs",
+      "scripts/test-assistant-routing-block02.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -21,11 +30,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "claude",
@@ -33,11 +42,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "quality",
@@ -45,11 +54,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "vision",
@@ -57,23 +66,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "fc07634ea9f092459bf7926cb5eecc68e527bcb51dee39877b1518de6b6293f3",
-      "sourceChangedAt": "2026-10-05T15:59:56-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "sha256": "301fff0f0c3af3d0ab11a697cf05b220b9a3bca38b93383200fa2cace9d56f65",
+      "sourceChangedAt": "2026-10-06T02:15:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "plugin",
@@ -81,11 +90,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -93,11 +102,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "standards_register",
@@ -105,23 +114,23 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "8ec1eb13e376c6abb33ae055945518cf569ff76a8a93e49dd3bf4c5ef70ba71e",
-      "sourceChangedAt": "2026-10-05T18:07:31-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "sha256": "1692145cd62e7c19ed3df9f836aef80f301df20e09b4dd6baba296456259a52b",
+      "sourceChangedAt": "2026-10-06T02:15:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "open_loop",
@@ -129,11 +138,11 @@
       "sha256": "936785d4bb34fc18bcae1a874f18138a74c4bd231fcd4efa57093e129e1d826f",
       "sourceChangedAt": "2026-10-05T17:04:45-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     },
     {
       "key": "audit",
@@ -141,11 +150,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
-      "semanticReviewTask": "hosted-page-assistant-language-switch-readiness-repair",
+      "reconciledThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
+      "semanticReviewTask": "assistant-dedicated-routing-block02",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-05T23:59:00.000Z"
+      "semanticReviewedAt": "2026-10-06T02:15:00.000Z"
     }
   ]
 }

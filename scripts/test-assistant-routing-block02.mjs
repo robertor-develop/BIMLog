@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const read=path=>readFileSync(new URL(`../${path}`,import.meta.url),"utf8");
+const registry=read("artifacts/api-server/src/lib/assistant-route-registry.ts");
+const feedback=read("artifacts/api-server/src/routes/feedback.ts");
+const migration=read("artifacts/api-server/src/lib/feedback-schema-migration.ts");
+const repair=read("artifacts/api-server/src/lib/repair-authority.ts");
+for(const id of ["01a10a95-a2e5-73d3-a471-6738addc7e42","01a10d7d-ffa2-71e2-a085-ec1b954a3d4f","01a0eaec-81ed-7381-a9fc-74fb7e1d9c37"])assert.equal(registry.split(id).length,2,`exact route ${id}`);
+assert.match(registry,/ASSISTANT_ROUTE_IDENTITY_COLLISION/);
+assert.match(migration,/feedback_operations_outbox/);
+assert.match(feedback,/central_feedback_agent_outbox_created/);
+assert.match(feedback,/BIMLOG_FEEDBACK_AGENT_KEY/);
+assert.match(feedback,/FOR UPDATE SKIP LOCKED/);
+assert.match(feedback,/FEEDBACK_AGENT_RESULT_CONFLICT/);
+assert.match(feedback,/operationsRoute/);
+assert.match(repair,/targetThreadId:BIMLOG_ASSISTANT_ROUTES\.repair\.threadId/);
+assert.doesNotMatch(feedback,/ordinary conversation|assistant\/ask/);
+console.log("PA150 separate Conversation, Feedback and Repair route acceptance: PASS");

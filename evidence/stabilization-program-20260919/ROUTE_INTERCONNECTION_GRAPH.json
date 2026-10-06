@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 743,
+    "apiRoutes": 747,
     "frontendApiReferences": 296,
     "routeOwnedTables": 68
   },
@@ -3683,6 +3683,28 @@
     },
     {
       "method": "POST",
+      "path": "/feedback-agent/claim",
+      "owner": "artifacts/api-server/src/routes/feedback.ts",
+      "tables": [
+        "notificationsTable",
+        "projectMembersTable",
+        "projectsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/feedback-agent/:outboxId/result",
+      "owner": "artifacts/api-server/src/routes/feedback.ts",
+      "tables": [
+        "notificationsTable",
+        "projectMembersTable",
+        "projectsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "POST",
       "path": "/feedback",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
@@ -6501,6 +6523,18 @@
         "projectMembersTable",
         "meetingAttendeesTable"
       ]
+    },
+    {
+      "method": "POST",
+      "path": "/repair-execution/claim",
+      "owner": "artifacts/api-server/src/routes/repairs.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/repair-execution/:id/progress",
+      "owner": "artifacts/api-server/src/routes/repairs.ts",
+      "tables": []
     },
     {
       "method": "GET",
