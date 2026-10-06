@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "5b6e7e7b77cf3ac9414a25f48e19e6989f6211f113b86cf0abbd75009aa16fc3",
-  "itemCount": 320,
+  "sourceSha256": "ff17c966770b52d99f98386fe321773a625f5bff7b84aa9d4bc3d6dd89e83447",
+  "itemCount": 324,
   "counts": {
-    "ACTIVE": 281,
+    "ACTIVE": 285,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5837,6 +5837,78 @@
       "evidence": [
         "OPEN_LOOP.md:4675",
         "Job Intake P0 Repair — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "891d7ec3840ce2ba",
+      "sourceLine": 4681,
+      "heading": "Job Intake recovered-allocation production repair — 2026-10-06",
+      "statement": "Republish the exact accepted repair source and verify in authenticated production Chrome that project 63 autosaves, reloads and no longer reports `FIN_DECIMAL_INVALID`.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4681",
+        "Job Intake recovered-allocation production repair — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0cda9b27fc95d831",
+      "sourceLine": 4685,
+      "heading": "BIMLog agent dock correction — 2026-10-06",
+      "statement": "Replace the desktop floating overlay with a full-height right dock that resizes the BIMLog application, preserves page state and never obscures form controls.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4685",
+        "BIMLog agent dock correction — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "fd2b8615cab1bba9",
+      "sourceLine": 4686,
+      "heading": "BIMLog agent dock correction — 2026-10-06",
+      "statement": "Keep Question primary and place Show me where, Feedback/status, page guide/work status and authorized Fix/PIN inside clear expandable sections.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Feedback",
+        "route": "/feedback",
+        "module": "artifacts/bimlog/src/components/FeedbackWidget.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4686",
+        "BIMLog agent dock correction — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d76239d3532fd331",
+      "sourceLine": 4687,
+      "heading": "BIMLog agent dock correction — 2026-10-06",
+      "statement": "Provide deliberate narrow-screen full-screen/drawer behavior and complete authenticated live desktop/mobile acceptance for reflow, exact-control guidance, feedback and authorized Fix.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Feedback",
+        "route": "/feedback",
+        "module": "artifacts/bimlog/src/components/FeedbackWidget.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4687",
+        "BIMLog agent dock correction — 2026-10-06"
       ],
       "currentAuthority": false
     }

@@ -58563,6 +58563,77 @@
         "scripts/test-job-intake-actionability.mjs"
       ],
       "reviewedChangeSha256": "009b5e7ac8632b3ee7ba6853f7e8b084c958006e8710377a3665830d597533a2"
+    },
+    {
+      "taskId": "job-intake-recovered-allocation-production-repair",
+      "reviewedThroughCommit": "376c96a240f3bf62a1bfc4eabfa79b6fd6afd00a",
+      "reviewedAt": "2026-10-06T14:48:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser-recovery repair preserves this authority and keeps canonical server-side financial validation unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the production FIN_DECIMAL_INVALID cause, bounded recovery repair and remaining live acceptance boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records exact-source republication, authenticated save verification and the authorized BIMLog agent dock correction."
+        }
+      ],
+      "reason": "Authenticated Chrome found that an obsolete hidden browser-recovery allocation with a floating-point tail blocked every Intake save; BIMLog now canonicalizes only safe optional recovered values, removes invalid optional values, preserves canonical values exactly and retries autosave with a visible notice.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8601469d925a2b95a1b45e7d79a29ed68f09f6cfa5409ccb05e7cdd73f79254e"
     }
   ]
 }

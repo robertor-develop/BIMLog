@@ -4673,3 +4673,15 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Correct contradictory requirement projection, stale control context, optional-control suggestions, raw assistant formatting, exact blocker navigation and undiagnosed save-conflict handling in one five-build block.
 - [ ] Publish the exact ten-build interval containing Feedback Agent commissioning plus the Job Intake P0 repair.
 - [ ] Complete a fresh authenticated visible-Chrome journey from blank synthetic Intake through save, reload, exact blocker links, bilingual assistant guidance, activation and resulting Job Operations records. A route-load count, prepared fixture or source-text assertion cannot close this item.
+
+## Job Intake recovered-allocation production repair — 2026-10-06
+
+- [x] Repair obsolete hidden optional allocation values in BIMLog browser recovery without weakening canonical server-side decimal validation.
+- [x] Cover non-canonical numeric tails, invalid optional values and already-canonical allocation strings in the draft-resume regression suite.
+- [ ] Republish the exact accepted repair source and verify in authenticated production Chrome that project 63 autosaves, reloads and no longer reports `FIN_DECIMAL_INVALID`.
+
+## BIMLog agent dock correction — 2026-10-06
+
+- [ ] Replace the desktop floating overlay with a full-height right dock that resizes the BIMLog application, preserves page state and never obscures form controls.
+- [ ] Keep Question primary and place Show me where, Feedback/status, page guide/work status and authorized Fix/PIN inside clear expandable sections.
+- [ ] Provide deliberate narrow-screen full-screen/drawer behavior and complete authenticated live desktop/mobile acceptance for reflow, exact-control guidance, feedback and authorized Fix.
