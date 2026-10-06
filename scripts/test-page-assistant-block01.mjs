@@ -8,7 +8,7 @@ const app=read("artifacts/bimlog/src/App.tsx");
 const intake=read("artifacts/bimlog/src/components/job-intake/CompanyJobMap.tsx")+read("artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx");
 const authority=read("artifacts/api-server/src/lib/repair-authority.ts")+read("artifacts/api-server/src/routes/repairs.ts");
 
-for(const token of ["Explain this","Explicar esto","Show me where","Mostrarme dónde","What’s missing?","¿Qué falta?","Your question","Tu pregunta","Submit feedback","Enviar comentarios","Ask a question","Hacer una pregunta","Assistant actions","Acciones del asistente","Repair authorization","Autorización de reparación"]) assert.ok(assistant.includes(token),token);
+for(const token of ["Explain this page","Explicar esta página","Show me where","Muéstrame dónde","Check required setup","Revisar configuración obligatoria","Your question","Tu pregunta","Submit feedback","Enviar comentarios","Ask a question","Hacer una pregunta","Page guide and work status","Guía de página y estado del trabajo","Fix with authorization","Corregir con autorización"]) assert.ok(assistant.includes(token),token);
 assert.match(context,/input:not\(\[type=password\]\)/);
 assert.ok(!context.includes(".value"),"page context must not read field values");
 assert.match(feedback,/bimlog:feedback-open/);
@@ -23,7 +23,7 @@ assert.match(authority,/REPAIR_DELEGATION_FORBIDDEN/);
 assert.match(authority,/company_id=\$2/);
 assert.match(authority,/BIMLOG_ORION_BRIDGE_KEY/);
 assert.match(authority,/FOR UPDATE SKIP LOCKED/);
-assert.match(assistant,/canAuthorize&&<button[^>]+aria-pressed=\{lane==="repair"\}/);
+assert.match(assistant,/canAuthorize&&<details className="page-assistant-section page-assistant-repairs"/);
 assert.match(assistant,/Create PIN-gated repair/);
 assert.match(authority,/platform_repair_bridges/);
 assert.match(authority,/last_seen_at>now\(\)-interval '5 minutes'/);
