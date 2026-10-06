@@ -29,5 +29,8 @@ assert.match(assistant,/Alt\+Shift\+A/);
 assert.match(assistant,/event\.key===["']Escape["']/);
 assert.match(assistant,/bimlog-dedicated-agent/);
 assert.match(assistant,/transport!=="hosted"/);
+assert.match(assistant,/page-assistant-repair-progress/);
+assert.match(assistant,/execution_receipt\?\.message/);
+assert.match(assistant,/setInterval\(\(\)=>void loadRepairs\(\),15000\)/);
 assert.doesNotMatch(assistant,/127\.0\.0\.1|localhost|Connect desktop assistant|Conectar asistente de escritorio/i);
 console.log("PA130 page assistant consolidated acceptance: PASS");
