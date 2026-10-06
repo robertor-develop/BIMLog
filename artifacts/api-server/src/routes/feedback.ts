@@ -20,6 +20,7 @@ import { eligibleFeedbackTelegramRecipientIds } from "../lib/feedback-telegram-w
 import { feedbackScanBackfillProgress } from "../lib/feedback-scan-worker";
 import { feedbackBackupProgress } from "../lib/feedback-backup-worker";
 import { BIMLOG_ASSISTANT_ROUTES } from "../lib/assistant-route-registry";
+import { FEEDBACK_AGENT_LEASE_SECONDS, FEEDBACK_AGENT_MAX_ATTEMPTS, feedbackAgentMac, feedbackAgentRequestBytes, feedbackAgentResponseBytes, safeFeedbackAgentMacEqual } from "../lib/feedback-agent-wire";
 
 const router = Router();
 const upload = boundedMultipart(createMemoryUpload({ fileSize: FEEDBACK_MAX_FILE_BYTES, files: 1, fields: 6, parts: 7 }).array("files", 1));
@@ -40,7 +41,20 @@ function requireCentralFeedbackAgent(req: Request, res: Response, next: NextFunc
   if (expected.length < 32 || supplied.length !== expected.length || !timingSafeEqual(Buffer.from(expected), Buffer.from(supplied))) {
     return res.status(401).json({ code: "FEEDBACK_AGENT_DENIED", error: "Central Feedback Dedicated Agent credentials are required" });
   }
+  const nonce=String(req.get("x-feedback-nonce")||""),signature=String(req.get("x-feedback-signature")||"");
+  const raw=(req as Request&{rawBody?:Buffer}).rawBody?.toString("utf8")??JSON.stringify(req.body??{});
+  const expectedSignature=feedbackAgentMac(expected,feedbackAgentRequestBytes(nonce,req.originalUrl,raw));
+  if(!/^[0-9a-f-]{36}$/.test(nonce)||!safeFeedbackAgentMacEqual(signature,expectedSignature)){
+    return res.status(401).json({code:"FEEDBACK_AGENT_SIGNATURE_DENIED",error:"A fresh signed Feedback Agent request is required"});
+  }
   return next();
+}
+function feedbackAgentJson(req:Request,res:Response,status:number,payload:unknown){
+  const raw=JSON.stringify(payload),nonce=String(req.get("x-feedback-nonce")||""),key=process.env.BIMLOG_FEEDBACK_AGENT_KEY||"";
+  res.setHeader("Content-Type","application/json; charset=utf-8");
+  res.setHeader("Cache-Control","no-store");
+  res.setHeader("X-Feedback-Signature",feedbackAgentMac(key,feedbackAgentResponseBytes(nonce,status,raw)));
+  return res.status(status).send(raw);
 }
 const TRANSITIONS: Record<string, Set<string>> = {
   new: new Set(["triaged", "rejected"]), triaged: new Set(["accepted", "deferred", "rejected"]),
@@ -125,8 +139,28 @@ async function accessible(id: number, user: NonNullable<Express.Request["user"]>
   return row;
 }
 
-router.post("/feedback-agent/claim",requireCentralFeedbackAgent,async(req,res)=>{try{const worker=bounded(req.body?.worker,120)||"central-feedback-agent";const claimed=await db.transaction(async tx=>{const result=await tx.execute(sql`WITH candidate AS (SELECT id FROM feedback_operations_outbox WHERE target_agent_id=${BIMLOG_ASSISTANT_ROUTES.feedback.threadId} AND state IN ('pending','retry-required') AND next_attempt_at<=now() AND (lease_expires_at IS NULL OR lease_expires_at<=now()) ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 1) UPDATE feedback_operations_outbox o SET state='claimed',attempts=attempts+1,lease_owner=${worker},lease_expires_at=now()+interval '5 minutes',updated_at=now() FROM candidate WHERE o.id=candidate.id RETURNING o.*`);const row=(result as any).rows?.[0];if(!row)return null;const [feedback]=await tx.select().from(feedbackItemsTable).where(eq(feedbackItemsTable.id,Number(row.feedback_id))).limit(1);return {outbox:row,case:feedback?customerFeedbackDto(feedback):null};});return res.json({contractVersion:"feedback-case/v1",targetAgentId:BIMLOG_ASSISTANT_ROUTES.feedback.threadId,case:claimed});}catch(error){console.error("[feedback-agent] claim failed",error instanceof Error?error.name:"unknown");return res.status(500).json({code:"FEEDBACK_AGENT_CLAIM_FAILED",error:"Feedback claim failed safely"});}});
-router.post("/feedback-agent/:outboxId/result",requireCentralFeedbackAgent,async(req,res)=>{const id=Number(req.params.outboxId),state=bounded(req.body?.state,24),worker=bounded(req.body?.worker,120),caseRevision=Number(req.body?.caseRevision);if(!Number.isSafeInteger(id)||!['delivered','retry-required','blocked'].includes(state)||!worker||!Number.isSafeInteger(caseRevision))return res.status(400).json({code:"FEEDBACK_AGENT_RESULT_INVALID",error:"Exact outbox, worker, state and case revision are required"});const result=await db.execute(sql`UPDATE feedback_operations_outbox SET state=${state},lease_owner=NULL,lease_expires_at=NULL,last_error_code=${bounded(req.body?.errorCode,80)||null},next_attempt_at=CASE WHEN ${state}='retry-required' THEN now()+interval '5 minutes' ELSE next_attempt_at END,updated_at=now() WHERE id=${id} AND state='claimed' AND lease_owner=${worker} AND EXISTS(SELECT 1 FROM feedback_items f WHERE f.id=feedback_id AND f.version=${caseRevision}) RETURNING *`);const row=(result as any).rows?.[0];if(!row)return res.status(409).json({code:"FEEDBACK_AGENT_RESULT_CONFLICT",error:"Case revision or lease changed"});return res.json({success:true,state:row.state});});
+router.post("/feedback-agent/claim",requireCentralFeedbackAgent,async(req,res)=>{try{
+  const worker=bounded(req.body?.worker,120),contractVersion=bounded(req.body?.contractVersion,80),targetAgentId=bounded(req.body?.targetAgentId,80);
+  if(!worker||contractVersion!==BIMLOG_ASSISTANT_ROUTES.feedback.contractVersion||targetAgentId!==BIMLOG_ASSISTANT_ROUTES.feedback.threadId)return feedbackAgentJson(req,res,400,{code:"FEEDBACK_AGENT_CLAIM_INVALID",error:"Exact worker, contract version and destination are required"});
+  const claimed=await db.transaction(async tx=>{
+    await tx.execute(sql`UPDATE feedback_operations_outbox SET state='blocked',lease_owner=NULL,lease_token=NULL,lease_expires_at=NULL,last_error_code='FEEDBACK_AGENT_ATTEMPTS_EXHAUSTED',updated_at=now() WHERE state='claimed' AND lease_expires_at<=now() AND attempts>=${FEEDBACK_AGENT_MAX_ATTEMPTS}`);
+    const leaseToken=randomUUID();
+    const result=await tx.execute(sql`WITH candidate AS (SELECT id FROM feedback_operations_outbox WHERE target_agent_id=${BIMLOG_ASSISTANT_ROUTES.feedback.threadId} AND attempts<${FEEDBACK_AGENT_MAX_ATTEMPTS} AND next_attempt_at<=now() AND (state IN ('pending','retry-required') OR (state='claimed' AND lease_expires_at<=now())) ORDER BY id FOR UPDATE SKIP LOCKED LIMIT 1) UPDATE feedback_operations_outbox o SET state='claimed',attempts=attempts+1,lease_owner=${worker},lease_token=${leaseToken},lease_expires_at=now()+(${FEEDBACK_AGENT_LEASE_SECONDS}*interval '1 second'),receipt_id=NULL,receipt_revision=NULL,case_digest=NULL,settled_at=NULL,last_error_code=NULL,updated_at=now() FROM candidate WHERE o.id=candidate.id RETURNING o.*`);
+    const row=(result as any).rows?.[0];if(!row)return null;
+    const [feedback]=await tx.select().from(feedbackItemsTable).where(eq(feedbackItemsTable.id,Number(row.feedback_id))).limit(1);
+    return feedback?{outbox:row,case:customerFeedbackDto(feedback)}:null;
+  });
+  return feedbackAgentJson(req,res,200,{contractVersion:BIMLOG_ASSISTANT_ROUTES.feedback.contractVersion,targetAgentId:BIMLOG_ASSISTANT_ROUTES.feedback.threadId,case:claimed});
+}catch(error){console.error("[feedback-agent] claim failed",error instanceof Error?error.name:"unknown");return feedbackAgentJson(req,res,500,{code:"FEEDBACK_AGENT_CLAIM_FAILED",error:"Feedback claim failed safely"});}});
+router.post("/feedback-agent/:outboxId/result",requireCentralFeedbackAgent,async(req,res)=>{try{
+  const id=Number(req.params.outboxId),state=bounded(req.body?.state,24),worker=bounded(req.body?.worker,120),caseRevision=Number(req.body?.caseRevision),leaseToken=bounded(req.body?.leaseToken,128),receiptId=bounded(req.body?.receiptId,180),caseDigest=bounded(req.body?.caseDigest,64);
+  if(!Number.isSafeInteger(id)||id<=0||state!=="delivered"||!worker||!Number.isSafeInteger(caseRevision)||caseRevision<=0||!leaseToken||!/^bimlog-feedback-[a-f0-9]{64}$/.test(receiptId)||!/^[a-f0-9]{64}$/.test(caseDigest))return feedbackAgentJson(req,res,400,{code:"FEEDBACK_AGENT_RESULT_INVALID",error:"Exact outbox, worker, delivered state, revision, lease and receipt are required"});
+  const result=await db.execute(sql`UPDATE feedback_operations_outbox SET state='delivered',receipt_id=${receiptId},receipt_revision=${caseRevision},case_digest=${caseDigest},settled_at=now(),last_error_code=NULL,updated_at=now() WHERE id=${id} AND state='claimed' AND lease_owner=${worker} AND lease_token=${leaseToken} AND lease_expires_at>now() AND EXISTS(SELECT 1 FROM feedback_items f WHERE f.id=feedback_id AND f.version=${caseRevision}) RETURNING *`);
+  let row=(result as any).rows?.[0];
+  if(!row){const replay=await db.execute(sql`SELECT * FROM feedback_operations_outbox WHERE id=${id} AND state='delivered' AND lease_owner=${worker} AND lease_token=${leaseToken} AND receipt_id=${receiptId} AND receipt_revision=${caseRevision} AND case_digest=${caseDigest}`);row=(replay as any).rows?.[0];}
+  if(!row)return feedbackAgentJson(req,res,409,{code:"FEEDBACK_AGENT_RESULT_CONFLICT",error:"Case revision, receipt, or lease changed"});
+  return feedbackAgentJson(req,res,200,{success:true,state:"delivered",receiptId:row.receipt_id,caseRevision:Number(row.receipt_revision),leaseToken:row.lease_token});
+}catch(error){console.error("[feedback-agent] result failed",error instanceof Error?error.name:"unknown");return feedbackAgentJson(req,res,500,{code:"FEEDBACK_AGENT_RESULT_FAILED",error:"Feedback result failed safely"});}});
 
 router.post("/feedback", authMiddleware, async (req, res) => {
   try {
