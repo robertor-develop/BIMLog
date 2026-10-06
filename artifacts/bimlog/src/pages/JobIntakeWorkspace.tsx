@@ -232,7 +232,14 @@ export function JobIntakeWorkspace() {
       setIntake(current);
       setData(loadedData);
       setSaveState(canRecover ? "unsaved" : "saved");
-      if (canRecover)
+      if (canRecover && recovered?.repairedOptionalAllocations)
+        setNotice(
+          tt(
+            "Recovered your browser draft and repaired an obsolete optional production-allocation value. Autosave is retrying now.",
+            "Se recuperó el borrador del navegador y se reparó un valor opcional obsoleto de asignación de producción. El guardado automático se reintenta ahora.",
+          ),
+        );
+      else if (canRecover)
         setNotice(
           tt(
             "Recovered unsaved Contract Items from this browser. Autosave is retrying now.",

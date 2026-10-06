@@ -81,7 +81,40 @@ export type JobIntakeRecovery<T = any> = {
   revision: number;
   data: T;
   preservedAt?: string;
+  repairedOptionalAllocations?: number;
 };
+
+const canonicalOptionalAllocation = (value: unknown) => {
+  if (value == null || value === "") return { value: undefined, repaired: false };
+  const text = String(value).trim();
+  if (/^(?:0|[1-9]\d{0,23})(?:\.\d{1,6})?$/.test(text))
+    return { value: text, repaired: false };
+  if (!/^\d+(?:\.\d+)?$/.test(text)) return { value: undefined, repaired: true };
+  const numeric = Number(text);
+  if (!Number.isFinite(numeric) || numeric < 0 || numeric >= 1e24)
+    return { value: undefined, repaired: true };
+  const rounded = numeric.toFixed(6).replace(/\.?0+$/, "");
+  return { value: rounded, repaired: true };
+};
+
+export function repairJobIntakeRecoveryData<T>(data: T) {
+  if (!data || typeof data !== "object" || !Array.isArray((data as any).scopeItems))
+    return { data, repairedOptionalAllocations: 0 };
+  let repairedOptionalAllocations = 0;
+  const scopeItems = (data as any).scopeItems.map((item: any) => {
+    if (!item || typeof item !== "object" || !("productionAllocation" in item)) return item;
+    const repaired = canonicalOptionalAllocation(item.productionAllocation);
+    if (!repaired.repaired) return item;
+    repairedOptionalAllocations += 1;
+    const next = { ...item };
+    if (repaired.value === undefined) delete next.productionAllocation;
+    else next.productionAllocation = repaired.value;
+    return next;
+  });
+  return repairedOptionalAllocations
+    ? { data: { ...(data as any), scopeItems } as T, repairedOptionalAllocations }
+    : { data, repairedOptionalAllocations };
+}
 
 export function jobIntakeIsCanonicalReadOnly(intake: { status?: string; activatedContractId?: unknown } | null | undefined) {
   return Boolean(intake?.status === "activated" && intake.activatedContractId);
@@ -108,9 +141,10 @@ export function resolveJobIntakeRecovery<T>(
 export function readJobIntakeRecovery(projectId: number): JobIntakeRecovery | null {
   try {
     const parsed = JSON.parse(window.localStorage.getItem(recoveryKey(projectId)) || "null");
-    return parsed && typeof parsed === "object" && Number.isInteger(parsed.revision) && parsed.data && typeof parsed.data === "object"
-      ? parsed as JobIntakeRecovery
-      : null;
+    if (!(parsed && typeof parsed === "object" && Number.isInteger(parsed.revision) && parsed.data && typeof parsed.data === "object"))
+      return null;
+    const repaired = repairJobIntakeRecoveryData(parsed.data);
+    return { ...parsed, data: repaired.data, repairedOptionalAllocations: repaired.repairedOptionalAllocations } as JobIntakeRecovery;
   } catch {
     return null;
   }

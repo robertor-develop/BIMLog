@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { preserveJobIntakeActiveItem, readJobIntakeActiveItem, resolveJobIntakeRecovery } from "./job-intake-workspace-state";
+import { preserveJobIntakeActiveItem, readJobIntakeActiveItem, repairJobIntakeRecoveryData, resolveJobIntakeRecovery } from "./job-intake-workspace-state";
 
 const server = { identity: { jobName: "Server" } };
 const draft = { identity: { jobName: "Browser draft" } };
@@ -14,6 +14,15 @@ const newer = resolveJobIntakeRecovery(7, server, { revision: 8, data: draft });
 assert.equal(newer.resume, false);
 assert.equal(newer.retainNewer, true);
 assert.deepEqual(newer.data, server);
+
+const repairedFloat = repairJobIntakeRecoveryData({ scopeItems: [{ productionAllocation: "1200.0000000000002" }] });
+assert.equal(repairedFloat.repairedOptionalAllocations, 1);
+assert.equal(repairedFloat.data.scopeItems[0].productionAllocation, "1200");
+const repairedInvalid = repairJobIntakeRecoveryData({ scopeItems: [{ productionAllocation: "not-a-number" }] });
+assert.equal(repairedInvalid.repairedOptionalAllocations, 1);
+assert.equal(Object.hasOwn(repairedInvalid.data.scopeItems[0], "productionAllocation"), false);
+const exactAllocation = { scopeItems: [{ productionAllocation: "1200.125" }] };
+assert.equal(repairJobIntakeRecoveryData(exactAllocation).data, exactAllocation);
 
 const stored = new Map<string, string>();
 (globalThis as any).window = {
