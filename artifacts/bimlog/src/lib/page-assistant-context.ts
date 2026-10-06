@@ -45,7 +45,7 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     .filter((element) => !element.closest("[data-page-assistant]"))
     .filter((element) => element instanceof HTMLElement && element.offsetParent !== null)
     .map(controlLabel).filter(Boolean);
-  const evidenceElements = Array.from(document.querySelectorAll("main [role=status], main li, main h1, main h2, main h3, main p, main label, main option, main summary"));
+  const evidenceElements = Array.from(document.querySelectorAll("main [role=status], main [role=alert], main li, main h1, main h2, main h3, main p, main label, main option, main summary"));
   const pageText = evidenceElements
     .filter((element) => element instanceof HTMLOptionElement || (element instanceof HTMLElement && element.offsetParent !== null))
     .filter((element) => !element.closest("[data-page-assistant]"))
