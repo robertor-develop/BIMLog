@@ -116,11 +116,12 @@ export function FeedbackWidget({ launcher = true }: { launcher?: boolean } = {})
   useEffect(() => { if(error) errorRef.current?.focus(); }, [error]);
   useEffect(() => {
     const openFromAssistant = (event: Event) => {
-      const detail = (event as CustomEvent<{ message?: string; feedbackType?: string }>).detail;
-      setReviewing(false);
+      const detail = (event as CustomEvent<{ message?: string; feedbackType?: string; viewStatus?: boolean }>).detail;
+      setReviewing(detail?.viewStatus===true);
       setFeedbackType(TYPE_OPTIONS.some(option => option.value === detail?.feedbackType) ? detail!.feedbackType! : "bug");
       if (detail?.message) setMessage(detail.message.slice(0, 4000));
       setOpen(true);
+      if(detail?.viewStatus===true)void loadMine();
     };
     window.addEventListener("bimlog:feedback-open", openFromAssistant);
     return () => window.removeEventListener("bimlog:feedback-open", openFromAssistant);
@@ -313,6 +314,7 @@ export function FeedbackWidget({ launcher = true }: { launcher?: boolean } = {})
       const stableId=String(data.receipt?.id||data.feedback?.stableId||tt("feedback","comentario")),notificationState=String(data.notificationState||"unavailable");
       const notificationTruth=notificationState==="delivered"?tt("The reviewer alert was delivered.","La alerta al revisor fue entregada."):notificationState==="blocked"?tt("The reviewer alert is blocked, but your feedback remains safely recorded.","La alerta al revisor está bloqueada, pero su comentario permanece registrado de forma segura."):notificationState==="retry-required"?tt("The reviewer alert needs reconciliation; your feedback remains safely recorded.","La alerta al revisor requiere reconciliación; su comentario permanece registrado de forma segura."):notificationState==="pending"||notificationState==="previously-attempted"?tt("The reviewer alert is pending; your feedback remains safely recorded.","La alerta al revisor está pendiente; su comentario permanece registrado de forma segura."):tt("Reviewer alert status is unavailable; your feedback remains safely recorded.","El estado de la alerta al revisor no está disponible; su comentario permanece registrado de forma segura.");
       setSuccess(tt(`Received as ${stableId}. ${notificationTruth}`, `Recibido como ${stableId}. ${notificationTruth}`));
+      window.dispatchEvent(new CustomEvent("bimlog:feedback-receipt",{detail:{stableId,notificationState,status:"new"}}));
       setTimeout(() => { terminateMedia(); setOpen(false); window.setTimeout(() => openerRef.current?.focus(), 0); }, 900);
     } catch (err) {
       setError(err instanceof Error ? err.message : tt("Feedback was not submitted.", "No se envió el comentario."));
