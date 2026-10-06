@@ -1351,6 +1351,7 @@ body.bimlog-assistant-docked[data-assistant-collapsed="true"][data-assistant-doc
 .page-assistant-window-controls button{display:grid;place-items:center;min-width:36px;min-height:36px;border:0;border-radius:8px;background:transparent;color:#fff;padding:7px}
 .page-assistant-window-controls button:hover,.page-assistant-window-controls button[aria-pressed="true"]{background:#ffffff24}
 .page-assistant-window-controls button:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.page-assistant-case-receipt{display:grid;gap:5px;padding:10px;border:1px solid #bfdbfe;border-radius:9px;background:#eff6ff;color:#173b67;font-size:12px}.page-assistant-case-receipt strong{font-size:13px}.page-assistant-case-receipt button{margin-top:3px}
 .page-assistant-panel[data-collapsed="true"]{width:var(--bimlog-agent-collapsed-width)!important;min-width:var(--bimlog-agent-collapsed-width)}
 .page-assistant-panel[data-collapsed="true"]>:not(header):not(.page-assistant-resize-handle){display:none}
 .page-assistant-panel[data-collapsed="true"]>header{height:100%;min-height:100%;align-items:flex-start;justify-content:center;padding:12px 8px}
