@@ -32,6 +32,7 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
     res.json({ answer: result.answer, highlightLabels: [], proposal: null, transport: "main04", contextual: true, agent: { threadId: result.threadId, requestId: result.requestId, answerDigest: result.answerDigest } });
   } catch (err) {
     if (sendAiUsageError(res, err)) return;
+    console.error(JSON.stringify({ event: "main04_assistant_error", code: err instanceof Error ? err.message : "UNKNOWN" }));
     res.status(502).json({ error: "BIMLog's hosted assistant is temporarily unavailable.", code: "ASSISTANT_PROVIDER_UNAVAILABLE" });
   }
 }
