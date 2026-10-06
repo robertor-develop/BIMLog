@@ -4,8 +4,12 @@ const component=readFileSync("artifacts/bimlog/src/components/layout/PageAssista
 const css=readFileSync("artifacts/bimlog/src/index.css","utf8");
 for(const token of ["BIMLOG DEDICATED AGENT","Ask a question","Show me where","Submit feedback","Page guide and work status","Fix with authorization","bimlog-assistant-docked"])assert.ok(component.includes(token)||css.includes(token),token);
 assert.match(component,/document\.body\.classList\.toggle\("bimlog-assistant-docked",open\)/);
+for(const token of ["Dock assistant left","Dock assistant right","Collapse assistant","Restore assistant","Resize assistant","bimlog-assistant:dock-side","bimlog-assistant:dock-width","bimlog-assistant:collapsed"])assert.ok(component.includes(token),token);
+assert.match(component,/Math\.min\(560,Math\.max\(340,/);
 assert.match(css,/body\.bimlog-assistant-docked #root\{width:calc\(100% - var\(--bimlog-agent-dock-width\)\)/);
-assert.match(css,/\.page-assistant-panel\{inset:0 0 0 auto!important/);
+assert.match(css,/data-assistant-dock-side="left"/);
+assert.match(css,/data-assistant-dock-side="right"/);
+assert.match(css,/data-collapsed="true"/);
 assert.match(css,/@media\(max-width:900px\).*width:100vw!important/s);
-assert.doesNotMatch(component,/Float panel|Dock left|Dock right|startDrag/);
+assert.doesNotMatch(component,/Float panel|startDrag|data-dock="float"/);
 console.log("PASS assistant full-height push-layout workspace");
