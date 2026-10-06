@@ -58343,6 +58343,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "hosted-page-assistant-language-switch-readiness-repair",
+      "reviewedThroughCommit": "ac844a6ee1a232962d7b0dad16ce763e9a3d9289",
+      "reviewedAt": "2026-10-05T23:59:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The language-switch readiness repair preserves BIMLog product and ecosystem doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair follows the required production-defect, gate, republish, and authenticated-smoke workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair adds mixed-language render regression coverage without weakening release gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not change BIMLog product vision or customer outcomes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted assistant architecture is unchanged; authoritative Intake readiness evidence remains recognized during bilingual render transitions."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not affect Lens Next Native behavior or packaging."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair does not alter governed reports, exports, or presentation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair introduces no standards claim or metadata."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release remains subject to republish and bilingual authenticated assistant acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The open publication and authenticated-smoke requirement remains in force."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This bounded bilingual render repair requires no historical audit narrative change."
+        }
+      ],
+      "reason": "Authenticated English smoke immediately after switching from Spanish retained Spanish readiness evidence for one render pass, so the authoritative six-item count was missed and only one requirement was returned; the parser now accepts the canonical Spanish obligatorio label during that transition.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
