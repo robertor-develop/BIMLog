@@ -1401,3 +1401,8 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] The Intake draft saves before membership mutation, reloads authoritative membership afterward, and makes the added member available to the existing contract, Contract Item, Work Package, hours, cost, and incentive assignment controls.
 - [x] Existing membership, assignment, company/project isolation, database, and schema contracts are reused unchanged.
 - [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+# Project-retirement concurrency correction — 2026-10-06
+
+- The retirement transaction now locks the project row before validating the preview identity and updating archival status. This preserves concurrent-change protection without relying on a JavaScript-round-tripped PostgreSQL timestamp equality predicate.
+- The complete project-dependent table contract is reconciled to 148 tables. Hard deletion remains disabled; retirement preserves project history and does not alter company-scoped reusable APU, workflow, governance, catalog, or document assets.
+- Focused retirement proof, library/API typechecks, database safety, secret exposure, and mojibake checks pass locally. Push, publication, and authenticated live retirement verification remain pending.

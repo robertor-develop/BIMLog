@@ -2391,3 +2391,9 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Corrective Builds 6–10 consolidated focused, Intake, Generic APU, Job Operations, budget-governance, typecheck, full production-build, and deterministic runtime-closure gates pass.
 - [ ] Push exact P16 source, publish through the approved Replit Shell flow, and live-verify version, health, and representative Builds 6–10 Intake controls in Chrome.
 - [ ] Continue with the next unresolved smoke-test finding; do not repeat completed Builds 1–10 work.
+# Project-retirement concurrency correction — 2026-10-06
+
+- [x] Replace the lossy timestamp equality update with a row lock, exact post-lock preview comparison, and bounded status update.
+- [x] Reconcile the dependent-table preservation count to the schema-proven total of 148.
+- [ ] Push and publish the exact accepted candidate, then prove live preview/retirement and verify company-scoped reusable libraries remain unchanged.
+- [ ] Retire only Roberto's explicitly identified fake/test project containers; preserve the three requested projects and all unrelated global projects.

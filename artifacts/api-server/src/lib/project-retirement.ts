@@ -1,8 +1,8 @@
 import { db } from "@workspace/db";
 import { adminActionsLogTable, filesTable, projectMembersTable, projectsTable, usersTable } from "@workspace/db/schema";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 
-export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 137;
+export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 148;
 
 export class ProjectRetirementError extends Error {
   constructor(public readonly code: string, public readonly status: number, message: string) {
@@ -47,6 +47,11 @@ export async function previewProjectRetirement(actor: Actor, projectId: number, 
 
 export async function retireProject(actor: Actor, projectId: number, adminRoles: string[], input: { confirmation?: unknown; expectedUpdatedAt?: unknown }) {
   return db.transaction(async (tx) => {
+    // Lock the row before reading it so the verified preview identity remains
+    // stable through the archive update. PostgreSQL can retain more timestamp
+    // precision than JavaScript Date/ISO, so an equality predicate on the
+    // round-tripped timestamp can reject an otherwise unchanged project.
+    await tx.execute(sql`SELECT id FROM projects WHERE id = ${projectId} FOR UPDATE`);
     const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
     if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
     const email = await requireAuthority(tx, actor, project, adminRoles);
@@ -58,7 +63,7 @@ export async function retireProject(actor: Actor, projectId: number, adminRoles:
     const impact = await counts(tx, projectId);
     const retiredAt = new Date();
     const [updated] = await tx.update(projectsTable).set({ status: "archived", updatedAt: retiredAt })
-      .where(and(eq(projectsTable.id, projectId), eq(projectsTable.updatedAt, project.updatedAt))).returning();
+      .where(eq(projectsTable.id, projectId)).returning();
     if (!updated) throw new ProjectRetirementError("PROJECT_RETIREMENT_CONCURRENT_CHANGE", 409, "The project changed during retirement. No retirement was committed.");
     await tx.insert(adminActionsLogTable).values({ adminUserId: actor.userId, adminEmail: email, action: "retire_project",
       targetType: "project", targetId: String(projectId), details: { projectName: project.name, projectCode: project.code,

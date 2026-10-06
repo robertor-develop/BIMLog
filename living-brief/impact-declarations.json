@@ -21930,6 +21930,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4fc68245bdec729c7737bd390def9974c0316476a95f792abb55928f7fd514ff"
+    },
+    {
+      "taskId": "project-retirement-concurrency-correction-20261006",
+      "reviewedThroughCommit": "63983e72c8530460d967c00f82b94b27a99cac13",
+      "reviewedAt": "2026-10-06T13:47:51.728Z",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_after_implementation_before_publication",
+      "summary": "Corrects project retirement concurrency without weakening preview freshness or preservation boundaries and reconciles the schema-proven dependent-table count.",
+      "workstreams": [
+        "project-retirement-cleanup"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Project and company authority boundaries remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the permanent row-lock and no-hard-delete implementation rule."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed and evidence requirements remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product scope change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established archive/preservation lifecycle is unchanged; this bounded correction repairs its concurrency implementation and count proof."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and Navisworks are unaffected."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reports and exports are unaffected."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records implementation and local validation status."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records pending publication and live cleanup verification."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No separate contemporaneous audit artifact is claimed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/project-retirement.ts",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/test-project-retirement.mjs"
+      ],
+      "reviewedChangeSha256": "b3239b0983493e29eef41726da85299ba9355810e464e2435241fa553b5e498c"
     }
   ]
 }

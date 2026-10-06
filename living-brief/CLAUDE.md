@@ -758,3 +758,6 @@ capture to decision to report to audit trail.
 - AI should assist without surprising users with cost. Cheap text assist and expensive file reading
   are separate actions.
 - Platform should move toward structured data that supports decisions, not just stored documents.
+# Project-retirement verification note — 2026-10-06
+
+Project archival must retain the row-lock concurrency contract and schema-derived preservation count. Do not restore an `updated_at` equality predicate based on a JavaScript Date round trip; verify preview freshness after acquiring the project row lock. Hard deletion remains disabled.
