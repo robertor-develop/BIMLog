@@ -4698,3 +4698,9 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Verify fresh English and Spanish missing-setup answers, exact-field highlighting, dock continuity and zero new browser errors after publication.
 - [x] Diagnose the first live acceptance failure: canonical ready-state evidence did not outrank completed-field instructional copy, and the assistant privacy notice still described the former no-values contract.
 - [ ] Republish the precedence and privacy-copy correction, then repeat the same authenticated question until the answer states that no required setup is missing without provider invention.
+# MAIN 04.00 page-question release closure (2026-10-06)
+
+- [x] Remove deterministic/local and generic-provider answers from authenticated Page Assistant questions.
+- [x] Bind question transport and response verification to exact BIMLog Dedicated Agent MAIN 04.00 thread `01a10a95-a2e5-73d3-a471-6738addc7e42`.
+- [x] Reject Feedback, MAIN-00, Lumen MAIN, other MAIN identities, empty answers, and receipt-only responses.
+- [ ] Configure the two protected bridge values in the Operations and BIMLog production runtimes, publish the exact release, and prove in authenticated Chrome that an exact question receives MAIN 04.00's actual answer in the panel.

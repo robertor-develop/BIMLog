@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "29b1300726105b6a8d4b0369cce703942088137f019da0e8842c99f1b0457c9d",
-  "itemCount": 325,
+  "sourceSha256": "133e50bc91adeeabfb3c50c11c7cb12c022ce441c3a042a633d3d7eaae296d78",
+  "itemCount": 326,
   "counts": {
-    "ACTIVE": 286,
+    "ACTIVE": 287,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5927,6 +5927,24 @@
       "evidence": [
         "OPEN_LOOP.md:4700",
         "Job Intake assistant grounding production correction — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "fad91f07979b22cf",
+      "sourceLine": 4706,
+      "heading": "MAIN 04.00 page-question release closure (2026-10-06)",
+      "statement": "Configure the two protected bridge values in the Operations and BIMLog production runtimes, publish the exact release, and prove in authenticated Chrome that an exact question receives MAIN 04.00's actual answer in the panel.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4706",
+        "MAIN 04.00 page-question release closure (2026-10-06)"
       ],
       "currentAuthority": false
     }
