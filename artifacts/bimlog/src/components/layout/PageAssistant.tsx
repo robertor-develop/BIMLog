@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { BookOpen, Bot, MapPin, MessageSquarePlus, Send, ShieldCheck, X } from "lucide-react";
+import type { PointerEvent as ReactPointerEvent } from "react";
+import { BookOpen, Bot, ChevronsLeft, ChevronsRight, MapPin, MessageSquarePlus, PanelLeft, PanelRight, Send, ShieldCheck, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { collectPageAssistantContext, highlightAssistantControls } from "@/lib/page-assistant-context";
@@ -12,6 +13,7 @@ export function PageAssistant() {
   const { token, user } = useAuthStore();
   const { lang, setLang, tt } = useI18n();
   const [open,setOpen]=useState(false),[question,setQuestion]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[proposal,setProposal]=useState<string|null>(null),[repairScope,setRepairScope]=useState("");
+  const [dockSide,setDockSide]=useState<"left"|"right">(()=>localStorage.getItem("bimlog-assistant:dock-side")==="left"?"left":"right"),[dockWidth,setDockWidth]=useState(()=>Math.min(560,Math.max(340,Number(localStorage.getItem("bimlog-assistant:dock-width"))||420))),[collapsed,setCollapsed]=useState(()=>localStorage.getItem("bimlog-assistant:collapsed")==="true");
   const [messages,setMessages]=useState<Message[]>([]),[feedbackReceipt,setFeedbackReceipt]=useState<{stableId:string;status:string}|null>(null);
   const [repairs,setRepairs]=useState<Repair[]>([]),[canAuthorize,setCanAuthorize]=useState(false),[executionConnected,setExecutionConnected]=useState(false),[pin,setPin]=useState(""),[newPin,setNewPin]=useState(""),[delegateEmail,setDelegateEmail]=useState("");
   const input=useRef<HTMLTextAreaElement|null>(null),opener=useRef<HTMLButtonElement|null>(null);
@@ -24,7 +26,8 @@ export function PageAssistant() {
   useEffect(()=>{try{sessionStorage.setItem(contextKey,JSON.stringify(messages.slice(-12)));}catch(cause){console.warn("[page-assistant] conversation persistence unavailable",cause);}},[messages,contextKey]);
   useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.altKey&&event.shiftKey&&event.key.toLowerCase()==="a"){event.preventDefault();setOpen(value=>!value);}if(event.key==="Escape"&&open){event.preventDefault();setOpen(false);opener.current?.focus();}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);},[open]);
   useEffect(()=>{if(open)window.setTimeout(()=>input.current?.focus(),0);},[open]);
-  useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open);return()=>document.body.classList.remove("bimlog-assistant-docked");},[open]);
+  useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open);document.body.dataset.assistantDockSide=dockSide;document.body.dataset.assistantCollapsed=collapsed?"true":"false";document.body.style.setProperty("--bimlog-agent-dock-width",`${dockWidth}px`);return()=>{document.body.classList.remove("bimlog-assistant-docked");delete document.body.dataset.assistantDockSide;delete document.body.dataset.assistantCollapsed;document.body.style.removeProperty("--bimlog-agent-dock-width");};},[open,dockSide,dockWidth,collapsed]);
+  useEffect(()=>{localStorage.setItem("bimlog-assistant:dock-side",dockSide);localStorage.setItem("bimlog-assistant:dock-width",String(dockWidth));localStorage.setItem("bimlog-assistant:collapsed",String(collapsed));},[dockSide,dockWidth,collapsed]);
   useEffect(()=>{if(open&&token)void loadRepairs();},[open,token]);
   useEffect(()=>{if(!open||!token)return;const refresh=window.setInterval(()=>void loadRepairs(),15000);return()=>window.clearInterval(refresh);},[open,token]);
   useEffect(()=>{const received=(event:Event)=>{const detail=(event as CustomEvent<{stableId?:string;status?:string}>).detail;if(!detail?.stableId)return;setFeedbackReceipt({stableId:detail.stableId,status:detail.status||"new"});setNotice(tt(`Feedback ${detail.stableId} was received by Operations.`,`Operations recibió el comentario ${detail.stableId}.`));};window.addEventListener("bimlog:feedback-receipt",received);return()=>window.removeEventListener("bimlog:feedback-receipt",received);},[lang]);
@@ -34,6 +37,7 @@ export function PageAssistant() {
   async function loadRepairs(){try{const data=await api("/api/v1/repairs");setRepairs(data.proposals||[]);setCanAuthorize(data.canAuthorize===true);setExecutionConnected(data.executionConnected===true);}catch(cause){setError(cause instanceof Error?cause.message:tt("Repair review is unavailable.","La revisión de reparaciones no está disponible."));}}
   async function ask(next=question){if(!next.trim()||busy)return;const currentContext=collectPageAssistantContext(lang);setBusy(true);setError("");setNotice("");setProposal(null);const submitted:Message={role:"user",text:next.trim(),projectId:currentContext.projectId};setMessages(current=>[...current,submitted]);setQuestion("");try{const path=currentContext.projectId?`/api/v1/projects/${currentContext.projectId}/assistant/ask`:"/api/v1/assistant/ask";const data=await api(path,{method:"POST",body:JSON.stringify({question:submitted.text,context:currentContext,history:messages.slice(-8)})});if(data.transport!=="hosted"||data.contextual!==true||data.receipt?.agentId!=="bimlog-dedicated-agent"||typeof data.receipt?.instructionDigest!=="string")throw new Error(tt("The BIMLog Dedicated Agent did not verify its response.","El Agente Dedicado de BIMLog no verificó su respuesta."));const plainAnswer=String(data.answer||"").replace(/\*\*([^*]+)\*\*/g,"$1").replace(/`([^`]+)`/g,"$1");setMessages(current=>[...current,{role:"assistant",text:plainAnswer,projectId:currentContext.projectId}]);if(typeof data.proposal==="string"&&data.proposal.trim())setProposal(data.proposal.trim());highlightAssistantControls(data.highlightLabels||[]);}catch(cause){setError(cause instanceof Error?cause.message:tt("BIMLog's hosted assistant is temporarily unavailable.","El asistente alojado de BIMLog no está disponible temporalmente."));}finally{setBusy(false);}}
   function submitFeedback(viewStatus=false){const latest=[...messages].reverse().find(item=>item.role==="user")?.text||question;window.dispatchEvent(new CustomEvent("bimlog:feedback-open",{detail:{feedbackType:"bug",message:latest?`${latest}\n\nPage: ${context.route}`:"",viewStatus}}));}
+  function startResize(event:ReactPointerEvent<HTMLDivElement>){if(window.matchMedia("(max-width: 900px)").matches)return;event.currentTarget.setPointerCapture(event.pointerId);const startX=event.clientX,startWidth=dockWidth;const move=(next:PointerEvent)=>setDockWidth(Math.min(560,Math.max(340,startWidth+(dockSide==="right"?startX-next.clientX:next.clientX-startX))));const stop=()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",stop);};window.addEventListener("pointermove",move);window.addEventListener("pointerup",stop,{once:true});}
   async function reportRepair(){const issue=[...messages].reverse().find(item=>item.role==="user")?.text||question.trim();const scope=(proposal||repairScope).trim();if(!issue||!scope)return;try{const data=await api("/api/v1/repairs",{method:"POST",body:JSON.stringify({issue,page:context.route,projectId:context.projectId,scope,tests:tt("Reproduce the issue, run affected regression tests, and verify the repaired page in Chrome.","Reproducir el problema, ejecutar las pruebas de regresión afectadas y verificar la página reparada en Chrome.")})});setNotice(tt(`Repair proposal ${data.id} was recorded. Confirm its exact scope with your repair PIN to send it to Orion MAIN.`,`La propuesta de reparación ${data.id} fue registrada. Confirma su alcance exacto con tu PIN de reparación para enviarla a Orion MAIN.`));setRepairScope("");await loadRepairs();}catch(cause){setError(cause instanceof Error?cause.message:tt("Repair report failed.","Falló el reporte de reparación."));}}
   async function configurePin(){try{await api("/api/v1/repairs/pin",{method:"POST",body:JSON.stringify({pin:newPin})});setNewPin("");setNotice(tt("Your repair PIN is configured.","Tu PIN de reparación está configurado."));}catch(cause){setError(cause instanceof Error?cause.message:tt("PIN setup failed.","Falló la configuración del PIN."));}}
   async function authorize(repair:Repair){try{const data=await api(`/api/v1/repairs/${repair.id}/authorize`,{method:"POST",body:JSON.stringify({pin,scopeDigest:repair.scope_digest,confirmed:true})});setPin("");setNotice(data.message);await loadRepairs();}catch(cause){setError(cause instanceof Error?cause.message:tt("Authorization failed.","Falló la autorización."));}}
@@ -43,10 +47,16 @@ export function PageAssistant() {
       <button ref={opener} type="button" className="page-assistant-launcher" aria-expanded={open} aria-controls="bimlog-page-assistant" aria-keyshortcuts="Alt+Shift+A" onClick={()=>setOpen(value=>!value)}>
         <Bot size={18}/><span>{tt("Ask BIMLog","Preguntar a BIMLog")}</span>
       </button>
-      {open&&<aside id="bimlog-page-assistant" className="page-assistant-panel" role="dialog" aria-modal="false" aria-label={tt("BIMLog page assistant","Asistente de página BIMLog")}>
+      {open&&<aside id="bimlog-page-assistant" className="page-assistant-panel" data-dock={dockSide} data-collapsed={collapsed?"true":"false"} role="dialog" aria-modal="false" aria-label={tt("BIMLog page assistant","Asistente de página BIMLog")}>
+        <div className="page-assistant-resize-handle" role="separator" aria-orientation="vertical" aria-label={tt("Resize assistant","Cambiar tamaño del asistente")} onPointerDown={startResize}/>
         <header>
           <div><small>{tt("BIMLOG DEDICATED AGENT","AGENTE DEDICADO BIMLOG")}</small><strong>{context.page||tt("Current page","Página actual")}</strong></div>
-          <button type="button" className="page-assistant-close" aria-label={tt("Close assistant","Cerrar asistente")} onClick={()=>setOpen(false)}><X/></button>
+          <nav className="page-assistant-window-controls" aria-label={tt("Assistant window controls","Controles de la ventana del asistente")}>
+            <button type="button" aria-label={tt("Dock assistant left","Acoplar asistente a la izquierda")} aria-pressed={dockSide==="left"} onClick={()=>setDockSide("left")}><PanelLeft size={18}/></button>
+            <button type="button" aria-label={tt("Dock assistant right","Acoplar asistente a la derecha")} aria-pressed={dockSide==="right"} onClick={()=>setDockSide("right")}><PanelRight size={18}/></button>
+            <button type="button" aria-label={collapsed?tt("Restore assistant","Restaurar asistente"):tt("Collapse assistant","Contraer asistente")} onClick={()=>setCollapsed(value=>!value)}>{collapsed?<ChevronsLeft size={18}/>:<ChevronsRight size={18}/>}</button>
+            <button type="button" className="page-assistant-close" aria-label={tt("Close assistant","Cerrar asistente")} onClick={()=>setOpen(false)}><X size={20}/></button>
+          </nav>
         </header>
         <div className="page-assistant-context"><span>{context.route}</span>{context.projectId&&<span>{tt("Project","Proyecto")} {context.projectId}</span>}<button type="button" onClick={()=>setLang(lang==="en"?"es":"en")}>{lang==="en"?"Español":"English"}</button></div>
 
@@ -92,3 +102,4 @@ export function PageAssistant() {
     </div>
   );
 }
+
