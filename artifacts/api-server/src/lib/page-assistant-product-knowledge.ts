@@ -38,7 +38,11 @@ export function groundedAssistantAnswer(
     const matched = readinessRequirements
       .filter(requirement => pageText.some(line => requirement.patterns.some(pattern => pattern.test(line))))
       .map(requirement => spanish ? requirement.es : requirement.en);
-    const count = pageText.find(line => /\d+ required item\(s\) remaining|\d+ elemento\(s\) requerido/i.test(line));
+    // Language switching can briefly produce a mixed-language context because
+    // the assistant and page translate in separate React render passes. Accept
+    // both of BIMLog's canonical Spanish adjectives so the authoritative count
+    // is never lost during that transition.
+    const count = pageText.find(line => /\d+ required item\(s\) remaining|\d+ elemento\(s\) (?:obligatorio|requerido)/i.test(line));
     const requiredCount = count ? Number(count.match(/\d+/)?.[0] || 0) : 0;
     // Intake's compact page context may omit button labels from the visible
     // "Still required" list. When its authoritative count says all six

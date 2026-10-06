@@ -27,6 +27,19 @@ const spanishCompactReadinessAnswer = groundedAssistantAnswer("¿Qué falta?", [
 assert.match(spanishCompactReadinessAnswer, /^6 elemento\(s\) obligatorio\(s\) pendiente\(s\)\./);
 assert.doesNotMatch(spanishCompactReadinessAnswer, /required item\(s\) remaining/);
 assert.match(spanishCompactReadinessAnswer, /Completa las confirmaciones finales requeridas\./);
+const mixedLanguageReadinessAnswer = groundedAssistantAnswer("What is missing?", [], [
+  "6 elemento(s) obligatorio(s) pendiente(s)",
+  "Describe the Submittal delivery strategy.",
+], "en", "missing", null)?.answer || "";
+assert.match(mixedLanguageReadinessAnswer, /^6 required item\(s\) remaining\./);
+for (const requirement of [
+  "Give each scope item a name, positive quantity and positive planned labor hours.",
+  "Enter a positive unit rate for every scope item.",
+  "Enter the negotiated number for every contract profile.",
+  "Assign at least one Contract Item to every contract profile.",
+  "Describe the Submittal delivery strategy.",
+  "Complete the required final confirmations.",
+]) assert.equal(mixedLanguageReadinessAnswer.split(requirement).length - 1, 1, `expected one mixed-language readiness item: ${requirement}`);
 assert.doesNotMatch(groundedAssistantAnswer("What is missing?", [], ["Perspective", "Commitment \/ subcontract"], "en", "missing", null)?.answer || "", /Perspective/);
 const readinessAnswer = groundedAssistantAnswer("What is missing?", [], [
   "6 required item(s) remaining",
