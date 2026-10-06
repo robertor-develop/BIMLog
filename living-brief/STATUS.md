@@ -3920,3 +3920,7 @@ The first exact-source publication exposed a precedence defect during authentica
 Authenticated Chrome exposed a false-positive acceptance: the transport returned an answer, but a later ordinary question asking for Delivery method, Contract Item name, quantity and unit rate received an unrelated generic APU definition. The page collector allowed unselected dropdown options and earlier descriptive copy to consume its bounded evidence before current selected values.
 
 The correction places visible non-password control values first, removes unselected options from prose evidence, preserves compact label/value pairs for more controls, and directs MAIN 04.00 to treat each supplied page snapshot and exact current question as authoritative instead of substituting stale conversation topics. Focused context behavior, frontend/API typechecks, and the Operations connector test pass locally. Exact-source publication and repeated ordinary-question Chrome acceptance remain required.
+
+## MAIN 04.00 FIFO question serialization — 2026-10-06
+
+The existing authenticated BIMLog question path now owns one process-wide FIFO dispatch queue. Each submission freezes its exact question, page snapshot, actor and unique request ID before enqueue. Only one MAIN 04.00 bridge request may execute at a time; a failure releases the queue for the next request. The returned thread and request IDs remain mandatory, so simultaneous users receive only the answer correlated to their own submission. No customer task, new agent, Lumen behavior or other product path changes.

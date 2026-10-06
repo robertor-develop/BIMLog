@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "6a9985951803465022c1f10a0f2d55560f484860813f11a01e7ceda60b22e32f",
-  "itemCount": 327,
+  "sourceSha256": "db71d0fc2fc6b3c5eecf0559866dddd850972ad0d8a188300a4a04190dbf7cec",
+  "itemCount": 328,
   "counts": {
-    "ACTIVE": 288,
+    "ACTIVE": 289,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5962,6 +5962,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4708",
+        "MAIN 04.00 page-question release closure (2026-10-06)"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "acf4c03663144e97",
+      "sourceLine": 4710,
+      "heading": "MAIN 04.00 page-question release closure (2026-10-06)",
+      "statement": "Publish the FIFO source and prove concurrent authenticated questions complete without active-writer failures or crossed answers.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4710",
         "MAIN 04.00 page-question release closure (2026-10-06)"
       ],
       "currentAuthority": false

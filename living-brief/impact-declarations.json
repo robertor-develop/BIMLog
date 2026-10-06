@@ -59072,6 +59072,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "daeda63954546508b2bac2c049a89e19a3082a90be50d4620bbaec81a1b466b6"
+    },
+    {
+      "taskId": "bimlog-main04-fifo-question-serialization",
+      "reviewedThroughCommit": "d81b219ef35b8c4ffeff3db74e24394325b30d5f",
+      "reviewedAt": "2026-10-06T20:45:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded FIFO preserves product ownership and destination authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded FIFO preserves the operating agreement."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The queue improves concurrency correctness within the existing path."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product objective changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new agent or product architecture is introduced."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens and plugin behavior are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards mapping changes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit authority changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records FIFO serialization and exact correlation behavior."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records source completion and live concurrency acceptance."
+        }
+      ],
+      "reason": "Serialize the existing MAIN 04.00 question path so concurrent submissions preserve FIFO order and exact answer correlation without active-writer failures.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/main04-agent-transport.behavior.ts",
+        "artifacts/api-server/src/lib/main04-agent-transport.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "be9a31c7c7f5c17e3f686720cf11d212b485f63ce78d71ce450dcd26cf8dfc92"
     }
   ]
 }

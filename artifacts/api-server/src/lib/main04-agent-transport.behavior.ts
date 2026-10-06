@@ -26,4 +26,26 @@ const wrongDestinationFetch: typeof fetch = async (_url, init) => {
 };
 await assert.rejects(() => askBimlogMain04({ question: "Only MAIN 04.00", context, userId: 7, projectId: 63 }, { fetch: wrongDestinationFetch, environment: { BIMLOG_MAIN04_BRIDGE_URL: "https://connector.example.test/bimlog", BIMLOG_MAIN04_BRIDGE_TOKEN: "secret" } }), /MAIN04_DESTINATION_MISMATCH/);
 
+const dispatchOrder: string[] = [];
+let active = 0;
+let maximumActive = 0;
+const fifoFetch: typeof fetch = async (_url, init) => {
+  const request = JSON.parse(String(init?.body));
+  dispatchOrder.push(request.question);
+  active += 1;
+  maximumActive = Math.max(maximumActive, active);
+  await new Promise(resolve => setTimeout(resolve, request.question === "first exact question" ? 20 : 1));
+  active -= 1;
+  return new Response(JSON.stringify({ threadId: BIMLOG_MAIN04_THREAD_ID, requestId: request.requestId, answer: `answer for ${request.question}` }), { status: 200, headers: { "content-type": "application/json" } });
+};
+const fifoEnvironment = { BIMLOG_MAIN04_BRIDGE_URL: "https://connector.example.test/bimlog", BIMLOG_MAIN04_BRIDGE_TOKEN: "secret" };
+const concurrent = await Promise.all([
+  askBimlogMain04({ question: "first exact question", context, userId: 7, projectId: 63 }, { fetch: fifoFetch, environment: fifoEnvironment }),
+  askBimlogMain04({ question: "second exact question", context, userId: 8, projectId: 63 }, { fetch: fifoFetch, environment: fifoEnvironment }),
+  askBimlogMain04({ question: "third exact question", context, userId: 9, projectId: 64 }, { fetch: fifoFetch, environment: fifoEnvironment }),
+]);
+assert.deepEqual(dispatchOrder, ["first exact question", "second exact question", "third exact question"], "simultaneous questions must dispatch in FIFO order");
+assert.equal(maximumActive, 1, "only one MAIN 04.00 request may be active at a time");
+assert.deepEqual(concurrent.map(item => item.answer), ["answer for first exact question", "answer for second exact question", "answer for third exact question"], "each answer must return to its own request");
+
 console.log("main04-agent-transport.behavior: PASS");

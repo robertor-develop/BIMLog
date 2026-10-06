@@ -4706,3 +4706,5 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Configure the two protected bridge values in the Operations and BIMLog production runtimes, publish the exact release, and prove in authenticated Chrome that an exact question receives MAIN 04.00's actual answer in the panel.
 - [x] Reproduce the real live failure with an ordinary multi-field question; record the unrelated APU answer as a production grounding defect rather than acceptance.
 - [ ] Publish the value-first context and current-question prompt repair, then ask several ordinary questions in sequence and verify every answer against the visible controls.
+- [x] Serialize simultaneous MAIN 04.00 questions through one BIMLog-owned FIFO and preserve exact request/answer correlation.
+- [ ] Publish the FIFO source and prove concurrent authenticated questions complete without active-writer failures or crossed answers.
