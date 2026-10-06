@@ -58415,7 +58415,7 @@
     {
       "taskId": "assistant-dedicated-routing-block02",
       "reviewedThroughCommit": "ba59b266617415cc3d8ba8a24a6c2ae53d4ff1b9",
-      "reviewedAt": "2026-10-06T02:15:00.000Z",
+      "reviewedAt": "2026-10-06T02:15:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58491,7 +58491,7 @@
     {
       "taskId": "job-intake-p0-feedback-commissioning",
       "reviewedThroughCommit": "17cc2075c1d55046bf60e2a6ada95860c4af3a56",
-      "reviewedAt": "2026-10-06T14:07:39.000Z",
+      "reviewedAt": "2026-10-06T14:07:39Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58567,7 +58567,7 @@
     {
       "taskId": "job-intake-recovered-allocation-production-repair",
       "reviewedThroughCommit": "376c96a240f3bf62a1bfc4eabfa79b6fd6afd00a",
-      "reviewedAt": "2026-10-06T14:48:00.000Z",
+      "reviewedAt": "2026-10-06T14:48:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58638,7 +58638,7 @@
     {
       "taskId": "bimlog-dedicated-agent-dock-block01",
       "reviewedThroughCommit": "e42d3da063ae6755b431208d2292754ce7f48d6d",
-      "reviewedAt": "2026-10-06T15:09:00.000Z",
+      "reviewedAt": "2026-10-06T15:09:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58709,7 +58709,7 @@
     {
       "taskId": "bimlog-dedicated-agent-dock-block02",
       "reviewedThroughCommit": "40faa76c9306ac05646c898bcf2b2a3266859e11",
-      "reviewedAt": "2026-10-06T15:30:00.000Z",
+      "reviewedAt": "2026-10-06T15:30:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -58776,6 +58776,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0a56bd9faad129ffce532d0d26e9b649a9729e8251e24a71b411db4a47c57c6c"
+    },
+    {
+      "taskId": "job-intake-assistant-grounding-production-correction",
+      "reviewedThroughCommit": "9b5bec08aee43538f3737d7803e6d9c8eb084253",
+      "reviewedAt": "2026-10-06T16:55:29.9263408Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The corrective assistant grounding preserves product doctrine and canonical Intake authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The corrective assistant grounding follows the existing production defect and release workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction adds focused behavioral evidence while retaining full build and live Chrome gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction improves human guidance without changing BIMLog product scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated platform inventory will be refreshed by the state command; no platform boundary changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens or Navisworks plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or artifact identity changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards applicability or claim changes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The current production correction is recorded in STATUS and OPEN_LOOP."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the production guidance root cause, correction, local evidence and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records completed source corrections and the remaining full build, publication and live acceptance."
+        }
+      ],
+      "reason": "Correct the production Job Intake assistant so canonical ready-state guidance is deterministic, visible non-password values ground answers, exact blocker controls are highlighted and required-stage items are directly actionable.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/page-assistant-product-knowledge.behavior.ts",
+        "artifacts/api-server/src/lib/page-assistant-product-knowledge.ts",
+        "artifacts/bimlog/src/lib/page-assistant-context.behavior.ts",
+        "artifacts/bimlog/src/lib/page-assistant-context.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "341e255286f6fd5bd6afa5cdb16a48f2a6c612e06a2251f80c366e005ac83752"
     }
   ]
 }

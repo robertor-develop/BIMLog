@@ -46,6 +46,18 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     .filter((element) => element instanceof HTMLElement && element.offsetParent !== null)
     .map(controlLabel).filter(Boolean);
   const evidenceElements = Array.from(document.querySelectorAll("main [role=status], main [role=alert], main li, main h1, main h2, main h3, main p, main label, main option, main summary"));
+  const visibleValues = Array.from(document.querySelectorAll("main input:not([type=password]), main select, main textarea"))
+    .filter((element) => element instanceof HTMLElement && element.offsetParent !== null)
+    .filter((element) => !element.closest("[data-page-assistant]"))
+    .map((element) => {
+      const value = element instanceof HTMLSelectElement
+        ? element.selectedOptions[0]?.textContent
+        : element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement
+          ? element.value
+          : "";
+      return value ? clean(`${controlLabel(element)}: ${value}`, 240) : "";
+    })
+    .filter(Boolean);
   const pageText = evidenceElements
     .filter((element) => element instanceof HTMLOptionElement || (element instanceof HTMLElement && element.offsetParent !== null))
     .filter((element) => !element.closest("[data-page-assistant]"))
@@ -58,7 +70,7 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     language,
     focusedControl: focused ? controlLabel(focused) || null : null,
     controls: [...new Set(controls)].slice(0, 60),
-    pageText: [...new Set(pageText)].slice(0, 120),
+    pageText: [...new Set([...pageText, ...visibleValues])].slice(0, 120),
   };
 }
 

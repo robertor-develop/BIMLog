@@ -4688,3 +4688,11 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Complete the second five-build dock block with bounded width, left/right push docking, collapse/restore, persisted case receipt and focused acceptance.
 - [ ] Publish the exact ten-build interval and run authenticated live desktop/mobile acceptance for open/close, side switch, bounded resize, collapse/restore, state preservation, content reflow, expandable sections, exact-field guidance, Feedback/status, authorized/unauthorized Fix/PIN and zero horizontal overflow.
 - [ ] Record the one-shot Central Operations commissioning result and complete a real feedback round trip with stable case/receipt ID and visible status/history; local source contracts are not live receipt evidence.
+
+## Job Intake assistant grounding production correction — 2026-10-06
+
+- [x] Make the 100%-ready Intake answer deterministic so it cannot depend on hosted-provider availability or invent a required setup item.
+- [x] Include visible non-password selected values in bounded assistant context and map supported blockers to exact control labels.
+- [x] Expose clickable required-item actions in the current Intake stage using the canonical blocker mapping.
+- [ ] Pass the full build and release gate, push and republish the exact corrective source, then repeat authenticated Chrome acceptance on project 63 and an incomplete safe draft.
+- [ ] Verify fresh English and Spanish missing-setup answers, exact-field highlighting, dock continuity and zero new browser errors after publication.

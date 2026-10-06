@@ -11,6 +11,9 @@ assert.deepEqual(groundedAssistantAnswer("What is Counterparty?", ["Counterparty
   grounding: "canonical-product-knowledge",
 });
 assert.match(groundedAssistantAnswer("What is missing?", [], ["6 required item(s) remaining", "Enter a positive unit rate for every scope item."], "en", "missing", null)?.answer || "", /Enter a positive unit rate/);
+const highlightedMissing = groundedAssistantAnswer("What is missing?", ["Submittal strategy"], ["1 required item(s) remaining", "Describe the Submittal delivery strategy."], "en", "missing", null);
+assert.deepEqual(highlightedMissing?.highlightLabels, ["Submittal strategy"]);
+assert.match(groundedAssistantAnswer("What is missing?", [], ["Setup readiness 100 %", "Draft ready to activate", "Optional items remaining 4"], "en", "missing", null)?.answer || "", /No required setup is missing/);
 const compactReadinessAnswer = groundedAssistantAnswer("What is missing?", [], [
   "6 required item(s) remaining",
   "Enter the negotiated number for every contract profile.",

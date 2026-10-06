@@ -947,6 +947,11 @@ export function JobIntakeWorkspace() {
     missingItems.filter((item: { key: string; label: string }) =>
       stageMissingCodes[stage].includes(item.key),
     );
+  const activeStageMissing = active === "contract" || active === "delivery" || active === "team"
+    ? missingForStage(active)
+    : active === "review"
+      ? missingItems.filter((item: { key: string }) => item.key === "confirmations")
+      : [];
   const stageConfirmationPending = (field: "contractConfirmed" | "deliveryConfirmed" | "teamConfirmed") =>
     !data.review[field];
   const openFinalReview = () => {
@@ -1246,6 +1251,17 @@ export function JobIntakeWorkspace() {
               })}
             </aside>
             <div className="ji-stages">
+              {activeStageMissing.length > 0 && (
+                <section className="ji-row" aria-label={tt("Required items in this section", "Elementos obligatorios de esta sección")}>
+                  <strong>{tt("Complete these required items", "Complete estos elementos obligatorios")}</strong>
+                  <p>{tt("Each item opens and highlights its exact field.", "Cada elemento abre y resalta su campo exacto.")}</p>
+                  <div className="ji-actions">
+                    {activeStageMissing.map((item: { key: string; label: string }) => (
+                      <button type="button" key={item.key} onClick={() => openBlocker(item.key)}>{item.label}</button>
+                    ))}
+                  </div>
+                </section>
+              )}
               <div className="ji-field-legend" role="note"><span><strong>{tt("Required", "Obligatorio")}</strong> — {tt("must be complete before activation", "debe completarse antes de activar")}</span><span>{tt("Optional", "Opcional")} — {tt("add only when it applies", "agregue solo cuando corresponda")}</span></div>
               <div
                 className="ji-actions"

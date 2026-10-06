@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2f38f45bb4aafea596429ffee87c71b170eafbed61b2ac58e0c0635d0999f565",
-  "itemCount": 322,
+  "sourceSha256": "e16b57585a3ea13dd7608973f3fa3c0407dddc6ac19405d6b8c4e815405d6c80",
+  "itemCount": 324,
   "counts": {
-    "ACTIVE": 283,
+    "ACTIVE": 285,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5873,6 +5873,42 @@
       "evidence": [
         "OPEN_LOOP.md:4690",
         "BIMLog agent dock correction — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "47c32f134b0656d5",
+      "sourceLine": 4697,
+      "heading": "Job Intake assistant grounding production correction — 2026-10-06",
+      "statement": "Pass the full build and release gate, push and republish the exact corrective source, then repeat authenticated Chrome acceptance on project 63 and an incomplete safe draft.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4697",
+        "Job Intake assistant grounding production correction — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f2cce9a8f0451d2a",
+      "sourceLine": 4698,
+      "heading": "Job Intake assistant grounding production correction — 2026-10-06",
+      "statement": "Verify fresh English and Spanish missing-setup answers, exact-field highlighting, dock continuity and zero new browser errors after publication.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Job Intake",
+        "route": "/projects/:id/intake",
+        "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4698",
+        "Job Intake assistant grounding production correction — 2026-10-06"
       ],
       "currentAuthority": false
     }
