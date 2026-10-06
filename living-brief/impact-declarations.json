@@ -58634,6 +58634,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8601469d925a2b95a1b45e7d79a29ed68f09f6cfa5409ccb05e7cdd73f79254e"
+    },
+    {
+      "taskId": "bimlog-dedicated-agent-dock-block01",
+      "reviewedThroughCommit": "e42d3da063ae6755b431208d2292754ce7f48d6d",
+      "reviewedAt": "2026-10-06T15:09:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMLog Dedicated Agent dock preserves this authority while simplifying presentation and responsive workspace behavior."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the accepted live Intake recovery repair and the first five-build Dedicated Agent dock implementation."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP closes the live Intake recovery gate and records the second dock block, ten-build publication and authenticated responsive acceptance still required."
+        }
+      ],
+      "reason": "AD156-AD160 replace the obstructive floating assistant with a full-height right dock that pushes BIMLog content left, uses a full-screen narrow layout, keeps Question primary and places location guidance, feedback, page status and authorized Fix in expandable sections.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "812bebe0a2388609cc609a3ed9d5cde3c51bdc49f7553e9150d043525f2002c3"
     }
   ]
 }

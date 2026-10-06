@@ -4678,10 +4678,11 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 
 - [x] Repair obsolete hidden optional allocation values in BIMLog browser recovery without weakening canonical server-side decimal validation.
 - [x] Cover non-canonical numeric tails, invalid optional values and already-canonical allocation strings in the draft-resume regression suite.
-- [ ] Republish the exact accepted repair source and verify in authenticated production Chrome that project 63 autosaves, reloads and no longer reports `FIN_DECIMAL_INVALID`.
+- [x] Republish the exact accepted repair source and verify in authenticated production Chrome that project 63 autosaves, reloads and no longer reports `FIN_DECIMAL_INVALID`.
 
 ## BIMLog agent dock correction — 2026-10-06
 
-- [ ] Replace the desktop floating overlay with a full-height right dock that resizes the BIMLog application, preserves page state and never obscures form controls.
-- [ ] Keep Question primary and place Show me where, Feedback/status, page guide/work status and authorized Fix/PIN inside clear expandable sections.
-- [ ] Provide deliberate narrow-screen full-screen/drawer behavior and complete authenticated live desktop/mobile acceptance for reflow, exact-control guidance, feedback and authorized Fix.
+- [x] Replace the desktop floating overlay with a full-height right dock that resizes the BIMLog application, preserves page state and never obscures form controls.
+- [x] Keep Question primary and place Show me where, Feedback/status, page guide/work status and authorized Fix/PIN inside clear expandable sections.
+- [x] Provide deliberate narrow-screen full-screen behavior and focused source acceptance for reflow, exact-control guidance, feedback and authorized Fix.
+- [ ] Complete the second five-build dock block, publish the exact ten-build interval and run authenticated live desktop/mobile acceptance for open/close, content reflow, expandable sections, exact-field guidance, Feedback/status, authorized Fix/PIN and zero horizontal overflow.
