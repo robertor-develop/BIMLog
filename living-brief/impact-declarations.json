@@ -58852,6 +58852,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "341e255286f6fd5bd6afa5cdb16a48f2a6c612e06a2251f80c366e005ac83752"
+    },
+    {
+      "taskId": "job-intake-assistant-live-precedence-correction",
+      "reviewedThroughCommit": "9c8c2f67e346cf957f71ad26c325309bbcd94f4e",
+      "reviewedAt": "2026-10-06T17:21:13.6437167Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live-smoke corrective repair preserves this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the failed first live acceptance and the canonical ready-state precedence plus truthful privacy-copy correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records the failed live answer, completed diagnosis and mandatory republish/retest."
+        }
+      ],
+      "reason": "Make canonical ready-to-activate evidence decisive before completed-field instruction scans and correct the assistant visible-value privacy notice.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/page-assistant-product-knowledge.behavior.ts",
+        "artifacts/api-server/src/lib/page-assistant-product-knowledge.ts",
+        "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3919a8f9d188380ac0d34f267785010c51d6af8468f98c0a2a6552fb491b718a"
     }
   ]
 }

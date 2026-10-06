@@ -14,6 +14,7 @@ assert.match(groundedAssistantAnswer("What is missing?", [], ["6 required item(s
 const highlightedMissing = groundedAssistantAnswer("What is missing?", ["Submittal strategy"], ["1 required item(s) remaining", "Describe the Submittal delivery strategy."], "en", "missing", null);
 assert.deepEqual(highlightedMissing?.highlightLabels, ["Submittal strategy"]);
 assert.match(groundedAssistantAnswer("What is missing?", [], ["Setup readiness 100 %", "Draft ready to activate", "Optional items remaining 4"], "en", "missing", null)?.answer || "", /No required setup is missing/);
+assert.match(groundedAssistantAnswer("¿Qué falta completar en esta página?", ["Submittal strategy"], ["Borrador listo para activar", "Describe la estrategia de entrega de Submittals."], "es", "missing", null)?.answer || "", /No faltan requisitos obligatorios/);
 const compactReadinessAnswer = groundedAssistantAnswer("What is missing?", [], [
   "6 required item(s) remaining",
   "Enter the negotiated number for every contract profile.",

@@ -35,6 +35,21 @@ export function groundedAssistantAnswer(
 ): GroundedAssistantAnswer | null {
   const spanish = language === "es";
   if (requestedAction === "missing") {
+    // The canonical page readiness state outranks instructional copy elsewhere
+    // on the page. A ready Intake can still display labels and explanatory
+    // sentences for completed fields; those must never be reclassified as
+    // missing requirements.
+    const ready = pageText.some(line => /draft ready to activate|borrador listo para activar/i.test(line))
+      || pageText.some(line => /setup readiness\s*100\s*%|preparaci[oó]n de configuraci[oó]n\s*100\s*%/i.test(line));
+    if (ready) {
+      return {
+        answer: spanish
+          ? "No faltan requisitos obligatorios. La configuración está lista para activar; los elementos que aún aparecen están marcados como opcionales."
+          : "No required setup is missing. The job is ready to activate; the remaining items shown on the page are optional.",
+        highlightLabels: [],
+        grounding: "visible-page-readiness",
+      };
+    }
     const matchedRequirements = readinessRequirements
       .filter(requirement => pageText.some(line => requirement.patterns.some(pattern => pattern.test(line))));
     const matched = matchedRequirements.map(requirement => spanish ? requirement.es : requirement.en);
@@ -47,17 +62,6 @@ export function groundedAssistantAnswer(
     // The count is presentation evidence, not permission to invent omitted
     // requirements. Only repeat requirements actually present in the page.
     const remaining = matched;
-    const ready = pageText.some(line => /draft ready to activate|borrador listo para activar/i.test(line))
-      || pageText.some(line => /setup readiness\s*100\s*%|preparaci[oó]n de configuraci[oó]n\s*100\s*%/i.test(line));
-    if (!remaining.length && !count && ready) {
-      return {
-        answer: spanish
-          ? "No faltan requisitos obligatorios. La configuración está lista para activar; los elementos que aún aparecen están marcados como opcionales."
-          : "No required setup is missing. The job is ready to activate; the remaining items shown on the page are optional.",
-        highlightLabels: [],
-        grounding: "visible-page-readiness",
-      };
-    }
     if (!remaining.length && !count) return null;
     const intro = spanish ? "La página muestra estos requisitos pendientes:" : "The page shows these requirements still pending:";
     const details = remaining.length ? remaining.map(line => `• ${line}`).join(" ") : (spanish ? "Revisa la lista visible «Pendiente» en esta página." : "Review the visible “Still required” list on this page.");

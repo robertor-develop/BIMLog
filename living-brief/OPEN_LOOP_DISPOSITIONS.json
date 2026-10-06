@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "e16b57585a3ea13dd7608973f3fa3c0407dddc6ac19405d6b8c4e815405d6c80",
-  "itemCount": 324,
+  "sourceSha256": "29b1300726105b6a8d4b0369cce703942088137f019da0e8842c99f1b0457c9d",
+  "itemCount": 325,
   "counts": {
-    "ACTIVE": 285,
+    "ACTIVE": 286,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5908,6 +5908,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4698",
+        "Job Intake assistant grounding production correction — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d91db9cd854a4467",
+      "sourceLine": 4700,
+      "heading": "Job Intake assistant grounding production correction — 2026-10-06",
+      "statement": "Republish the precedence and privacy-copy correction, then repeat the same authenticated question until the answer states that no required setup is missing without provider invention.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4700",
         "Job Intake assistant grounding production correction — 2026-10-06"
       ],
       "currentAuthority": false

@@ -4696,3 +4696,5 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Expose clickable required-item actions in the current Intake stage using the canonical blocker mapping.
 - [ ] Pass the full build and release gate, push and republish the exact corrective source, then repeat authenticated Chrome acceptance on project 63 and an incomplete safe draft.
 - [ ] Verify fresh English and Spanish missing-setup answers, exact-field highlighting, dock continuity and zero new browser errors after publication.
+- [x] Diagnose the first live acceptance failure: canonical ready-state evidence did not outrank completed-field instructional copy, and the assistant privacy notice still described the former no-values contract.
+- [ ] Republish the precedence and privacy-copy correction, then repeat the same authenticated question until the answer states that no required setup is missing without provider invention.

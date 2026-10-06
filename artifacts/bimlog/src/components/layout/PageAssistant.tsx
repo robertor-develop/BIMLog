@@ -64,7 +64,7 @@ export function PageAssistant() {
         <details className="page-assistant-section page-assistant-question" open>
           <summary><Bot size={17}/><span>{tt("Ask a question","Hacer una pregunta")}</span></summary>
           <div className="page-assistant-messages" aria-live="polite" aria-busy={busy}>
-            {!messages.length&&<p>{tt("Ask about this page without losing your work. Form values are never sent.","Pregunta sobre esta página sin perder tu trabajo. Nunca se envían los valores del formulario.")}</p>}
+            {!messages.length&&<p>{tt("Ask about this page without losing your work. BIMLog sends visible page labels and non-password values to ground the answer; passwords are never sent.","Pregunta sobre esta página sin perder tu trabajo. BIMLog envía etiquetas visibles y valores que no sean contraseñas para fundamentar la respuesta; las contraseñas nunca se envían.")}</p>}
             {messages.map((message,index)=><article key={index} data-role={message.role}><strong>{message.role==="user"?tt("You","Tú"):"BIMLog"}</strong><p>{message.text}</p>{message.projectId!==context.projectId&&<small>{tt("From another project context","De otro contexto de proyecto")}</small>}</article>)}
           </div>
           {error&&<div role="alert" className="page-assistant-error">{error}</div>}
