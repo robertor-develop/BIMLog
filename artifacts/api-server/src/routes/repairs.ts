@@ -1,9 +1,12 @@
 import { Router, type IRouter } from "express";
 import { authMiddleware } from "../middlewares/auth";
-import { authorizeRepair, configureRepairPin, listRepairs, RepairAuthorityError, reportRepair, setRepairDelegate, type RepairActor } from "../lib/repair-authority";
-const router: IRouter = Router(); router.use("/repairs", authMiddleware);
+import { authorizeRepair, claimRepairExecution, configureRepairPin, listRepairs, RepairAuthorityError, reportRepair, setRepairDelegate, updateRepairExecution, type RepairActor } from "../lib/repair-authority";
+const router: IRouter = Router();
 const actor = (req: any): RepairActor => ({ userId: req.user.userId, companyId: req.user.companyId, isSuperAdmin: req.user.isSuperAdmin === true });
 const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any, res: any) => { try { await handler(req, res); } catch (error) { if (error instanceof RepairAuthorityError) return res.status(error.status).json({ error: error.code, message: error.message }); console.error("[repairs] failed safely"); return res.status(500).json({ error: "REPAIR_FAILURE", message: "Repair request failed safely." }); } };
+router.post("/repair-execution/claim",run(async(req,res)=>res.json(await claimRepairExecution(req.get("x-bimlog-repair-bridge-key"),req.body||{}))));
+router.post("/repair-execution/:id/progress",run(async(req,res)=>res.json(await updateRepairExecution(req.get("x-bimlog-repair-bridge-key"),String(req.params.id),req.body||{}))));
+router.use("/repairs", authMiddleware);
 router.get("/repairs", run(async (req, res) => res.json(await listRepairs(actor(req)))));
 router.post("/repairs", run(async (req, res) => res.status(201).json(await reportRepair(actor(req), req.body))));
 router.post("/repairs/pin", run(async (req, res) => res.json(await configureRepairPin(actor(req), req.body.pin, req.body.currentPin))));

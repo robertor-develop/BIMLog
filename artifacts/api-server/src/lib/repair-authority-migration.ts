@@ -21,5 +21,9 @@ export function ensureRepairAuthoritySchema() {
       id uuid PRIMARY KEY, company_id integer NOT NULL, actor_id integer NOT NULL REFERENCES users(id), proposal_id uuid,
       action text NOT NULL, evidence jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now()
     );
+    CREATE TABLE IF NOT EXISTS platform_repair_bridges (
+      bridge_id text PRIMARY KEY, last_seen_at timestamptz NOT NULL DEFAULT now(), version text NOT NULL,
+      metadata jsonb NOT NULL DEFAULT '{}'::jsonb
+    );
   `).then(() => undefined);
 }
