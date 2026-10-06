@@ -33,6 +33,12 @@ function controlLabel(element: Element): string {
   return clean(element.textContent || element.getAttribute("placeholder"));
 }
 
+function controlValue(element: Element): string {
+  if (element instanceof HTMLSelectElement) return clean(element.selectedOptions[0]?.textContent, 120);
+  if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) return clean(element.value, 120);
+  return "";
+}
+
 export function collectPageAssistantContext(language: AssistantLanguage): PageAssistantContext {
   const route = `${window.location.pathname}${window.location.search}`.slice(0, 300);
   const project = window.location.pathname.match(/^\/projects\/(\d+)/);
@@ -44,17 +50,19 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
   const controls = Array.from(document.querySelectorAll("main button:not([disabled]), main input:not([type=password]), main select, main textarea, main a[href]"))
     .filter((element) => !element.closest("[data-page-assistant]"))
     .filter((element) => element instanceof HTMLElement && element.offsetParent !== null)
-    .map(controlLabel).filter(Boolean);
-  const evidenceElements = Array.from(document.querySelectorAll("main [role=status], main [role=alert], main li, main h1, main h2, main h3, main p, main label, main option, main summary"));
+    .map((element) => {
+      const label = controlLabel(element);
+      const value = controlValue(element);
+      return value ? clean(`${label}: ${value}`, 240) : label;
+    }).filter(Boolean);
+  // Selected control values are the most useful page evidence. Do not flood the
+  // payload with every unselected option, which can push current values out.
+  const evidenceElements = Array.from(document.querySelectorAll("main [role=status], main [role=alert], main h1, main h2, main h3, main p, main summary"));
   const visibleValues = Array.from(document.querySelectorAll("main input:not([type=password]), main select, main textarea"))
     .filter((element) => element instanceof HTMLElement && element.offsetParent !== null)
     .filter((element) => !element.closest("[data-page-assistant]"))
     .map((element) => {
-      const value = element instanceof HTMLSelectElement
-        ? element.selectedOptions[0]?.textContent
-        : element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement
-          ? element.value
-          : "";
+      const value = controlValue(element);
       return value ? clean(`${controlLabel(element)}: ${value}`, 240) : "";
     })
     .filter(Boolean);
@@ -69,8 +77,8 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     projectId: project ? Number(project[1]) : null,
     language,
     focusedControl: focused ? controlLabel(focused) || null : null,
-    controls: [...new Set(controls)].slice(0, 60),
-    pageText: [...new Set([...pageText, ...visibleValues])].slice(0, 120),
+    controls: [...new Set(controls)].slice(0, 80),
+    pageText: [...new Set([...visibleValues, ...pageText])].slice(0, 120),
   };
 }
 

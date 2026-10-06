@@ -58998,6 +58998,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "05d53a27d09a730236558908d64a49a2613c90d2e0306dc98f95cc011867ccb6"
+    },
+    {
+      "taskId": "bimlog-main04-live-grounding-repair",
+      "reviewedThroughCommit": "a99275c8c880d43d952bad0a988f5ba207e18ea7",
+      "reviewedAt": "2026-10-06T20:00:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live grounding repair preserves this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the reproduced production grounding failure and corrective behavior."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP requires exact-source publication and repeated live ordinary-question acceptance."
+        }
+      ],
+      "reason": "Keep current selected control values inside bounded page evidence and require MAIN 04.00 to answer the exact current question from that snapshot.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/routes/agents.ts",
+        "artifacts/bimlog/src/lib/page-assistant-context.behavior.ts",
+        "artifacts/bimlog/src/lib/page-assistant-context.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "daeda63954546508b2bac2c049a89e19a3082a90be50d4620bbaec81a1b466b6"
     }
   ]
 }

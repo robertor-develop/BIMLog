@@ -19,7 +19,7 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
     const question = cleanAssistantText(req.body?.question, BIMLOG_ASSISTANT_MAX_QUESTION);
     if (!question) return res.status(400).json({ error: "A question is required." });
     const context = (req.body?.context || {}) as AssistantContext;
-    const controls = cleanAssistantList(context.controls, 60, 120);
+    const controls = cleanAssistantList(context.controls, 80, 240);
     const pageText = cleanAssistantList(context.pageText, 120, 240);
     const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).map((item: any) => ({
       role: item?.role === "assistant" ? "assistant" : "user",

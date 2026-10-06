@@ -3914,3 +3914,9 @@ The first exact-source publication exposed a precedence defect during authentica
 - The API sends the user's exact question and bounded visible page context through the protected bridge. It no longer answers from deterministic local rules or the generic Anthropic provider.
 - BIMLog accepts only a non-empty answer returned for the exact MAIN 04.00 thread and matching request. Feedback, MAIN-00, Lumen MAIN, other MAIN identities, and receipt-only responses are rejected.
 - The Operations connector lane and endpoint are published on `operations-dashboard/main`; BIMLog source is published on its deployment branch. Protected bridge configuration, Replit publication, and authenticated live Chrome acceptance remain required before this capability is considered live.
+
+## MAIN 04.00 live grounding repair — 2026-10-06
+
+Authenticated Chrome exposed a false-positive acceptance: the transport returned an answer, but a later ordinary question asking for Delivery method, Contract Item name, quantity and unit rate received an unrelated generic APU definition. The page collector allowed unselected dropdown options and earlier descriptive copy to consume its bounded evidence before current selected values.
+
+The correction places visible non-password control values first, removes unselected options from prose evidence, preserves compact label/value pairs for more controls, and directs MAIN 04.00 to treat each supplied page snapshot and exact current question as authoritative instead of substituting stale conversation topics. Focused context behavior, frontend/API typechecks, and the Operations connector test pass locally. Exact-source publication and repeated ordinary-question Chrome acceptance remain required.

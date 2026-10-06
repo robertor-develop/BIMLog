@@ -4704,3 +4704,5 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Bind question transport and response verification to exact BIMLog Dedicated Agent MAIN 04.00 thread `01a10a95-a2e5-73d3-a471-6738addc7e42`.
 - [x] Reject Feedback, MAIN-00, Lumen MAIN, other MAIN identities, empty answers, and receipt-only responses.
 - [ ] Configure the two protected bridge values in the Operations and BIMLog production runtimes, publish the exact release, and prove in authenticated Chrome that an exact question receives MAIN 04.00's actual answer in the panel.
+- [x] Reproduce the real live failure with an ordinary multi-field question; record the unrelated APU answer as a production grounding defect rather than acceptance.
+- [ ] Publish the value-first context and current-question prompt repair, then ask several ordinary questions in sequence and verify every answer against the visible controls.
