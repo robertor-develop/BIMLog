@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "db71d0fc2fc6b3c5eecf0559866dddd850972ad0d8a188300a4a04190dbf7cec",
-  "itemCount": 328,
+  "sourceSha256": "3397d74e9f064249f050d9f98139188dee5e14b219f3adc46465ac7d5088f9a7",
+  "itemCount": 329,
   "counts": {
-    "ACTIVE": 289,
+    "ACTIVE": 290,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5980,6 +5980,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4710",
+        "MAIN 04.00 page-question release closure (2026-10-06)"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "998300e5f55591ff",
+      "sourceLine": 4712,
+      "heading": "MAIN 04.00 page-question release closure (2026-10-06)",
+      "statement": "Publish the exact Atlas-parity source and prove through the authenticated BIMLog panel that an ordinary visible-page question returns MAIN 04.00's matching final answer.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4712",
         "MAIN 04.00 page-question release closure (2026-10-06)"
       ],
       "currentAuthority": false

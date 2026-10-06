@@ -3924,3 +3924,7 @@ The correction places visible non-password control values first, removes unselec
 ## MAIN 04.00 FIFO question serialization — 2026-10-06
 
 The existing authenticated BIMLog question path now owns one process-wide FIFO dispatch queue. Each submission freezes its exact question, page snapshot, actor and unique request ID before enqueue. Only one MAIN 04.00 bridge request may execute at a time; a failure releases the queue for the next request. The returned thread and request IDs remain mandatory, so simultaneous users receive only the answer correlated to their own submission. No customer task, new agent, Lumen behavior or other product path changes.
+
+## MAIN 04.00 Atlas-parity local transport — 2026-10-06
+
+The authenticated Page Assistant question lane now uses a BIMLog-owned loopback service modeled on Atlas: one FIFO, `codex queue` to the permanent BIMLog Dedicated Agent MAIN 04.00 thread, exact prompt/turn correlation from that thread's rollout, and the matching final answer returned to the originating browser request. The browser rejects every other thread, transport, request ID, empty answer or invalid digest. Operations and the former hosted assistant route are absent from this question path. A focused source contract, frontend typecheck, frontend production build and direct MAIN 04.00 canary pass; exact-source Replit publication and authenticated Chrome acceptance remain required.

@@ -4708,3 +4708,5 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Publish the value-first context and current-question prompt repair, then ask several ordinary questions in sequence and verify every answer against the visible controls.
 - [x] Serialize simultaneous MAIN 04.00 questions through one BIMLog-owned FIFO and preserve exact request/answer correlation.
 - [ ] Publish the FIFO source and prove concurrent authenticated questions complete without active-writer failures or crossed answers.
+- [x] Replace the hosted/Operations question route with the BIMLog-owned Atlas-parity loopback transport bound to permanent MAIN 04.00.
+- [ ] Publish the exact Atlas-parity source and prove through the authenticated BIMLog panel that an ordinary visible-page question returns MAIN 04.00's matching final answer.

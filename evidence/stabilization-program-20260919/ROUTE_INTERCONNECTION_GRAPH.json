@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 747,
-    "frontendApiReferences": 296,
+    "frontendApiReferences": 294,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -9752,14 +9752,6 @@
     {
       "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
       "apiPath": "/api/v1/repairs"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
-      "apiPath": "/api/v1/projects/${currentContext.projectId}/assistant/ask"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
-      "apiPath": "/api/v1/assistant/ask"
     },
     {
       "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",

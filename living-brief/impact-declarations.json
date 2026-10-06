@@ -58930,7 +58930,7 @@
     {
       "taskId": "bimlog-main04-exclusive-question-transport",
       "reviewedThroughCommit": "b756c19a4ebad46ec510f6b68266ddefb6a30f63",
-      "reviewedAt": "2026-10-06T19:18:00.000Z",
+      "reviewedAt": "2026-10-06T19:18:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59002,7 +59002,7 @@
     {
       "taskId": "bimlog-main04-live-grounding-repair",
       "reviewedThroughCommit": "a99275c8c880d43d952bad0a988f5ba207e18ea7",
-      "reviewedAt": "2026-10-06T20:00:00.000Z",
+      "reviewedAt": "2026-10-06T20:00:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59074,9 +59074,9 @@
       "reviewedChangeSha256": "daeda63954546508b2bac2c049a89e19a3082a90be50d4620bbaec81a1b466b6"
     },
     {
-      "taskId": "bimlog-main04-fifo-question-serialization",
-      "reviewedThroughCommit": "d81b219ef35b8c4ffeff3db74e24394325b30d5f",
-      "reviewedAt": "2026-10-06T20:45:00.000Z",
+      "taskId": "bimlog-main04-atlas-parity-local-transport",
+      "reviewedThroughCommit": "5915d37459b157e84f8ebcad807695b773cb5190",
+      "reviewedAt": "2026-10-06T23:20:05.483Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59092,7 +59092,7 @@
         {
           "key": "quality",
           "result": "reviewed_no_semantic_change",
-          "reason": "The queue improves concurrency correctness within the existing path."
+          "reason": "The transport adds exact prompt and turn correlation plus a focused regression contract."
         },
         {
           "key": "vision",
@@ -59102,7 +59102,7 @@
         {
           "key": "platform",
           "result": "reviewed_no_semantic_change",
-          "reason": "No new agent or product architecture is introduced."
+          "reason": "The BIMLog-owned loopback transport replaces the failed hosted connector while preserving the permanent MAIN 04.00 architecture."
         },
         {
           "key": "plugin",
@@ -59127,24 +59127,24 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "STATUS records FIFO serialization and exact correlation behavior."
+          "reason": "STATUS records the Atlas-parity transport and completed local validation."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "OPEN_LOOP records source completion and live concurrency acceptance."
+          "reason": "OPEN_LOOP records exact-source publication and authenticated panel acceptance."
         }
       ],
-      "reason": "Serialize the existing MAIN 04.00 question path so concurrent submissions preserve FIFO order and exact answer correlation without active-writer failures.",
+      "reason": "Adopt the proven Atlas local Codex FIFO pattern for BIMLog questions while preserving the exact permanent MAIN 04.00 identity and excluding Operations.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/main04-agent-transport.behavior.ts",
-        "artifacts/api-server/src/lib/main04-agent-transport.ts",
+        ".gitignore",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "be9a31c7c7f5c17e3f686720cf11d212b485f63ce78d71ce450dcd26cf8dfc92"
+      "reviewedChangeSha256": "7fc0b8cca14d93ca8c5208a1fb818c813fae33218dd89aade26483afcd466599"
     }
   ]
 }
