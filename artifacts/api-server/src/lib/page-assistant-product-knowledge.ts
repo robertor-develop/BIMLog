@@ -3,7 +3,7 @@ export type GroundedAssistantAnswer = { answer: string; highlightLabels: string[
 
 export const BIMLOG_PAGE_ASSISTANT_KNOWLEDGE: AssistantKnowledgeEntry[] = [
   { terms: ["perspective", "perspectiva"], en: "Perspective classifies the contract direction: Owner / prime contract is money owed to the service provider; Commitment / subcontract is money the project owes to a vendor, consultant, or subcontractor.", es: "Perspectiva clasifica la dirección del contrato: Contrato principal / cliente es dinero adeudado al proveedor del servicio; Compromiso / subcontrato es dinero que el proyecto debe a un proveedor, consultor o subcontratista." },
-  { terms: ["counterparty", "contraparte"], en: "Counterparty is the other legal company signing or performing under this specific contract profile.", es: "Contraparte es la otra empresa legal que firma o cumple este perfil de contrato específico." },
+  { terms: ["counterparty", "contraparte"], en: "Counterparty means the company on the other side of this contract. Example: if your company is hired by Blis, choose Blis. This field is required for each contract profile.", es: "Contraparte significa la empresa que está al otro lado de este contrato. Ejemplo: si Blis contrata a su empresa, seleccione Blis. Este campo es obligatorio para cada perfil de contrato." },
   { terms: ["company engagement", "service relationship", "relación de servicio", "vínculo empresarial"], en: "Company Engagement records which company provides the service and which company hires it. In Job Intake it is optional and must be selected explicitly; BIMLog does not connect companies automatically.", es: "Company Engagement registra qué empresa presta el servicio y cuál la contrata. En Job Intake es opcional y debe seleccionarse explícitamente; BIMLog no conecta empresas automáticamente." },
   { terms: ["apu", "unit rate", "precio unitario"], en: "An APU is a controlled unit-price analysis. A Contract Item uses the explicitly linked compatible APU version or its saved editable unit rate; BIMLog must not substitute another project's APU.", es: "Un APU es un análisis controlado de precio unitario. Un Contract Item usa la versión compatible vinculada explícitamente o su precio unitario guardado; BIMLog no debe sustituir el APU de otro proyecto." },
 ];
@@ -44,19 +44,21 @@ export function groundedAssistantAnswer(
     // is never lost during that transition.
     const count = pageText.find(line => /\d+ required item\(s\) remaining|\d+ elemento\(s\) (?:obligatorio|requerido)/i.test(line));
     const requiredCount = count ? Number(count.match(/\d+/)?.[0] || 0) : 0;
-    // Intake's compact page context may omit button labels from the visible
-    // "Still required" list. When its authoritative count says all six
-    // canonical requirements remain, return that complete canonical set.
-    const remaining = matched.length > 0 && requiredCount === readinessRequirements.length
-      ? readinessRequirements.map(requirement => spanish ? requirement.es : requirement.en)
-      : matched;
+    // The count is presentation evidence, not permission to invent omitted
+    // requirements. Only repeat requirements actually present in the page.
+    const remaining = matched;
     if (!remaining.length && !count) return null;
     const intro = spanish ? "La página muestra estos requisitos pendientes:" : "The page shows these requirements still pending:";
     const details = remaining.length ? remaining.map(line => `• ${line}`).join(" ") : (spanish ? "Revisa la lista visible «Pendiente» en esta página." : "Review the visible “Still required” list on this page.");
     const countLabel = requiredCount
       ? (spanish ? `${requiredCount} elemento(s) obligatorio(s) pendiente(s)` : `${requiredCount} required item(s) remaining`)
       : "";
-    return { answer: `${countLabel ? `${countLabel}. ` : ""}${intro} ${details}`, highlightLabels: [], grounding: "visible-page-readiness" };
+    const mismatch = requiredCount && requiredCount !== remaining.length
+      ? (spanish
+        ? ` La página muestra un conteo inconsistente (${requiredCount}) pero expone ${remaining.length} requisito(s); esto es un defecto de la página.`
+        : ` The page shows an inconsistent count (${requiredCount}) but exposes ${remaining.length} requirement(s); this is a page defect.`)
+      : "";
+    return { answer: `${countLabel ? `${countLabel}. ` : ""}${intro} ${details}${mismatch}`, highlightLabels: [], grounding: "visible-page-readiness" };
   }
 
   const normalized = question.toLocaleLowerCase(spanish ? "es" : "en");

@@ -12,5 +12,7 @@ export function locateVisibleControl(question: string, controls: string[], focus
   const query = new Set(words(question).filter(word => !["where", "show", "donde", "muestrame", "control"].includes(word)));
   const ranked = controls.map(label => ({ label, score: words(label).filter(word => query.has(word)).length })).sort((a, b) => b.score - a.score);
   if (ranked[0]?.score > 0) return ranked[0].label;
-  return focusedControl && controls.includes(focusedControl) ? focusedControl : null;
+  // A generic “show me the next control” must not inherit an arbitrary focused
+  // optional field. Return no match unless the question names the control.
+  return null;
 }

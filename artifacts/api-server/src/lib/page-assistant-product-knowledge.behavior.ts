@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import { groundedAssistantAnswer, relevantBimlogKnowledge } from "./page-assistant-product-knowledge";
 
 assert.match(relevantBimlogKnowledge("What is perspective?", ["Commitment / subcontract"], "en")[0], /contract direction/);
-assert.match(relevantBimlogKnowledge("¿Qué es contraparte?", ["Contrato"], "es")[0], /otra empresa legal/);
+assert.match(relevantBimlogKnowledge("¿Qué es contraparte?", ["Contrato"], "es")[0], /otro lado de este contrato/);
 assert.match(relevantBimlogKnowledge("Explain Company Engagement", [], "en")[0], /provides the service/);
 assert.deepEqual(relevantBimlogKnowledge("Where is the save button?", ["Save now"], "en"), []);
 assert.deepEqual(groundedAssistantAnswer("What is Counterparty?", ["Counterparty", "Perspective"], [], "en", "explain", null), {
-  answer: "Counterparty is the other legal company signing or performing under this specific contract profile. Use the visible “Counterparty” control to review or change this value.",
+  answer: "Counterparty means the company on the other side of this contract. Example: if your company is hired by Blis, choose Blis. This field is required for each contract profile. Use the visible “Counterparty” control to review or change this value.",
   highlightLabels: ["Counterparty"],
   grounding: "canonical-product-knowledge",
 });
@@ -17,29 +17,22 @@ const compactReadinessAnswer = groundedAssistantAnswer("What is missing?", [], [
   "Assign at least one Contract Item to every contract profile.",
   "Describe the Submittal delivery strategy.",
 ], "en", "missing", null)?.answer || "";
-assert.match(compactReadinessAnswer, /Give each scope item a name, positive quantity and positive planned labor hours\./);
-assert.match(compactReadinessAnswer, /Enter a positive unit rate for every scope item\./);
-assert.match(compactReadinessAnswer, /Complete the required final confirmations\./);
+assert.doesNotMatch(compactReadinessAnswer, /Give each scope item a name, positive quantity and positive planned labor hours\./);
+assert.match(compactReadinessAnswer, /inconsistent count/);
 const spanishCompactReadinessAnswer = groundedAssistantAnswer("¿Qué falta?", [], [
   "6 required item(s) remaining",
   "Enter the negotiated number for every contract profile.",
 ], "es", "missing", null)?.answer || "";
 assert.match(spanishCompactReadinessAnswer, /^6 elemento\(s\) obligatorio\(s\) pendiente\(s\)\./);
 assert.doesNotMatch(spanishCompactReadinessAnswer, /required item\(s\) remaining/);
-assert.match(spanishCompactReadinessAnswer, /Completa las confirmaciones finales requeridas\./);
+assert.match(spanishCompactReadinessAnswer, /conteo inconsistente/);
 const mixedLanguageReadinessAnswer = groundedAssistantAnswer("What is missing?", [], [
   "6 elemento(s) obligatorio(s) pendiente(s)",
   "Describe the Submittal delivery strategy.",
 ], "en", "missing", null)?.answer || "";
 assert.match(mixedLanguageReadinessAnswer, /^6 required item\(s\) remaining\./);
-for (const requirement of [
-  "Give each scope item a name, positive quantity and positive planned labor hours.",
-  "Enter a positive unit rate for every scope item.",
-  "Enter the negotiated number for every contract profile.",
-  "Assign at least one Contract Item to every contract profile.",
-  "Describe the Submittal delivery strategy.",
-  "Complete the required final confirmations.",
-]) assert.equal(mixedLanguageReadinessAnswer.split(requirement).length - 1, 1, `expected one mixed-language readiness item: ${requirement}`);
+assert.match(mixedLanguageReadinessAnswer, /Describe the Submittal delivery strategy\./);
+assert.match(mixedLanguageReadinessAnswer, /inconsistent count/);
 assert.doesNotMatch(groundedAssistantAnswer("What is missing?", [], ["Perspective", "Commitment \/ subcontract"], "en", "missing", null)?.answer || "", /Perspective/);
 const readinessAnswer = groundedAssistantAnswer("What is missing?", [], [
   "6 required item(s) remaining",
