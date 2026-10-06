@@ -2316,6 +2316,7 @@ Current policy direction:
 - Low-cost AI assist (description/email drafting) should be separate from high-cost file reading.
 - Heavy AI file reading must show a clear warning before use.
 - AI usage must be visible to the user and to super admin by user, project, feature, billing mode, and time period.
+- Feedback Agent commissioning: PA151–PA155 implement the signed and lease-fenced BIMLog producer contract required by the IgniteSmart Central Feedback consumer. Local source/typecheck gates pass. Production publication, exact-key configuration, one authorized synthetic live round trip, and downstream receipt/status confirmation remain release evidence until completed; synthetic consumer fixtures alone are not production proof.
 
 ## Watching
 
