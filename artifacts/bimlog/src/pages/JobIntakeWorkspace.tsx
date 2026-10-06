@@ -65,6 +65,9 @@ import {
 } from "@/lib/job-intake-document-contract";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+class JobIntakeRequestError extends Error {
+  constructor(message: string, readonly code: string, readonly status: number) { super(message); }
+}
 const reportIntakeWorkflowFailure = (code: "JOB_INTAKE_AUTOSAVE_RETRY_FAILED" | "JOB_INTAKE_AUTOSAVE_FAILED") =>
   console.error(JSON.stringify({ event: "bimlog_workflow_failure", code }));
 const stages = jobIntakeStages.filter(stage => stage !== "documents");
@@ -153,11 +156,13 @@ export function JobIntakeWorkspace() {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok)
-        throw new Error(
+        throw new JobIntakeRequestError(
           (language === "es" ? payload?.error?.es : payload?.error?.en) ||
             payload?.error?.en ||
             (typeof payload?.error === "string" ? payload.error : "") ||
             tt("The request failed.", "La solicitud falló."),
+          String(payload?.code || "JOB_INTAKE_REQUEST_FAILED"),
+          response.status,
         );
       return payload;
     },
@@ -327,7 +332,7 @@ export function JobIntakeWorkspace() {
     saveRetryRef.current = 0;
   }, [data]);
   const persist = useCallback(
-    async (snapshot: any, announce = false) => {
+    async (snapshot: any, announce = false): Promise<any> => {
       if (saveTimerRef.current) {
         window.clearTimeout(saveTimerRef.current);
         saveTimerRef.current = null;
@@ -340,7 +345,7 @@ export function JobIntakeWorkspace() {
         return currentIntake;
       pendingSaveRef.current = snapshot;
       if (!savePromiseRef.current) {
-        savePromiseRef.current = (async () => {
+        savePromiseRef.current = (async (): Promise<any> => {
           let lastResult = intakeRef.current;
           try {
             while (pendingSaveRef.current) {
@@ -379,11 +384,29 @@ export function JobIntakeWorkspace() {
             return lastResult;
           } catch (cause) {
             pendingSaveRef.current = dataRef.current;
+            if (cause instanceof JobIntakeRequestError && cause.code === "JOB_INTAKE_STALE") {
+              try {
+                const latest = await api(`/projects/${projectId}/intake`);
+                // A document/event-only revision can advance while the saved
+                // form payload remains identical. Rebase that harmless revision
+                // and let the queued snapshot save once more.
+                if (JSON.stringify(latest.data) === lastSavedRef.current) {
+                  revisionRef.current = latest.revision;
+                  intakeRef.current = latest;
+                  savePromiseRef.current = null;
+                  return await persist(dataRef.current, announce);
+                }
+              } catch {
+                // Preserve the original stale-write diagnosis below.
+              }
+            }
             setSaveState("error");
-            const autosaveError = cause instanceof Error ? cause.message : String(cause);
+            const autosaveError = cause instanceof JobIntakeRequestError
+              ? `${cause.message} [${cause.code}]`
+              : cause instanceof Error ? cause.message : String(cause);
             autosaveErrorRef.current = autosaveError;
             setError(autosaveError);
-            if (saveRetryRef.current < 2) {
+            if (!(cause instanceof JobIntakeRequestError && cause.status >= 400 && cause.status < 500) && saveRetryRef.current < 2) {
               saveRetryRef.current += 1;
               saveTimerRef.current = window.setTimeout(
                 () => void persist(dataRef.current).catch(() => reportIntakeWorkflowFailure("JOB_INTAKE_AUTOSAVE_RETRY_FAILED")),
@@ -396,7 +419,7 @@ export function JobIntakeWorkspace() {
           }
         })();
       }
-      const result = await savePromiseRef.current;
+      const result: any = await savePromiseRef.current;
       if (announce) {
         setNotice(
           tt(

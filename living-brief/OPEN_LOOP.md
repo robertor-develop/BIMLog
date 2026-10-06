@@ -4667,3 +4667,9 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Pass the complete exact-head gate, push PA131–PA140, publish the exact source, then run authenticated Chrome terminology, lane, feedback, panel and console smoke; repair and repeat publication until it passes.
 - [x] Diagnose the first live-smoke failure: stale pre-refresh history was distinct from current behavior, but Counterparty provider execution returned 502 and the model invented a missing Perspective requirement.
 - [ ] Push and republish the deterministic hosted-grounding repair, then repeat the full authenticated Chrome terminology, missing-setup, bilingual, feedback, panel-control and console smoke until it passes.
+
+## Job Intake P0 Repair — 2026-10-06
+
+- [x] Correct contradictory requirement projection, stale control context, optional-control suggestions, raw assistant formatting, exact blocker navigation and undiagnosed save-conflict handling in one five-build block.
+- [ ] Publish the exact ten-build interval containing Feedback Agent commissioning plus the Job Intake P0 repair.
+- [ ] Complete a fresh authenticated visible-Chrome journey from blank synthetic Intake through save, reload, exact blocker links, bilingual assistant guidance, activation and resulting Job Operations records. A route-load count, prepared fixture or source-text assertion cannot close this item.

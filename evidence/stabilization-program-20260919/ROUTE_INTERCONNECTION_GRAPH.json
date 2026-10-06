@@ -9755,7 +9755,7 @@
     },
     {
       "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
-      "apiPath": "/api/v1/projects/${context.projectId}/assistant/ask"
+      "apiPath": "/api/v1/projects/${currentContext.projectId}/assistant/ask"
     },
     {
       "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
