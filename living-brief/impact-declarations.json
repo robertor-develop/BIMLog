@@ -58705,6 +58705,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "812bebe0a2388609cc609a3ed9d5cde3c51bdc49f7553e9150d043525f2002c3"
+    },
+    {
+      "taskId": "bimlog-dedicated-agent-dock-block02",
+      "reviewedThroughCommit": "40faa76c9306ac05646c898bcf2b2a3266859e11",
+      "reviewedAt": "2026-10-06T15:30:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second Dedicated Agent dock block preserves this authority while completing bounded workspace controls and canonical feedback/repair presentation."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records AD161-AD165 behavior, local acceptance, and the remaining exact-source publication and live Chrome gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records the completed second block and the remaining Central Operations round trip plus live desktop/mobile acceptance."
+        }
+      ],
+      "reason": "AD161-AD165 add bounded 340-560 pixel resizing, persistent left/right push docking, collapse/restore/close, mobile restore behavior and persistent canonical Operations case receipts while preserving question, feedback and PIN-authorized Repair boundaries.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0a56bd9faad129ffce532d0d26e9b649a9729e8251e24a71b411db4a47c57c6c"
     }
   ]
 }

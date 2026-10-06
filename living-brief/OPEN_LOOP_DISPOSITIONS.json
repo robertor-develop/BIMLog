@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "57195340c73faa02e9fce651e76ed8a48102e8c4d545d15cb9fa5381a4845604",
-  "itemCount": 321,
+  "sourceSha256": "2f38f45bb4aafea596429ffee87c71b170eafbed61b2ac58e0c0635d0999f565",
+  "itemCount": 322,
   "counts": {
-    "ACTIVE": 282,
+    "ACTIVE": 283,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5841,10 +5841,10 @@
       "currentAuthority": false
     },
     {
-      "id": "ac50ab8dede310c4",
-      "sourceLine": 4688,
+      "id": "5807e847d9ee4b0b",
+      "sourceLine": 4689,
       "heading": "BIMLog agent dock correction — 2026-10-06",
-      "statement": "Complete the second five-build dock block, publish the exact ten-build interval and run authenticated live desktop/mobile acceptance for open/close, content reflow, expandable sections, exact-field guidance, Feedback/status, authorized Fix/PIN and zero horizontal overflow.",
+      "statement": "Publish the exact ten-build interval and run authenticated live desktop/mobile acceptance for open/close, side switch, bounded resize, collapse/restore, state preservation, content reflow, expandable sections, exact-field guidance, Feedback/status, authorized/unauthorized Fix/PIN and zero horizontal overflow.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -5853,7 +5853,25 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4688",
+        "OPEN_LOOP.md:4689",
+        "BIMLog agent dock correction — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f34c7a7ccb7a76a3",
+      "sourceLine": 4690,
+      "heading": "BIMLog agent dock correction — 2026-10-06",
+      "statement": "Record the one-shot Central Operations commissioning result and complete a real feedback round trip with stable case/receipt ID and visible status/history; local source contracts are not live receipt evidence.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Feedback",
+        "route": "/feedback",
+        "module": "artifacts/bimlog/src/components/FeedbackWidget.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4690",
         "BIMLog agent dock correction — 2026-10-06"
       ],
       "currentAuthority": false

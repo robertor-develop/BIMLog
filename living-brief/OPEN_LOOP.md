@@ -4685,4 +4685,6 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Replace the desktop floating overlay with a full-height right dock that resizes the BIMLog application, preserves page state and never obscures form controls.
 - [x] Keep Question primary and place Show me where, Feedback/status, page guide/work status and authorized Fix/PIN inside clear expandable sections.
 - [x] Provide deliberate narrow-screen full-screen behavior and focused source acceptance for reflow, exact-control guidance, feedback and authorized Fix.
-- [ ] Complete the second five-build dock block, publish the exact ten-build interval and run authenticated live desktop/mobile acceptance for open/close, content reflow, expandable sections, exact-field guidance, Feedback/status, authorized Fix/PIN and zero horizontal overflow.
+- [x] Complete the second five-build dock block with bounded width, left/right push docking, collapse/restore, persisted case receipt and focused acceptance.
+- [ ] Publish the exact ten-build interval and run authenticated live desktop/mobile acceptance for open/close, side switch, bounded resize, collapse/restore, state preservation, content reflow, expandable sections, exact-field guidance, Feedback/status, authorized/unauthorized Fix/PIN and zero horizontal overflow.
+- [ ] Record the one-shot Central Operations commissioning result and complete a real feedback round trip with stable case/receipt ID and visible status/history; local source contracts are not live receipt evidence.
