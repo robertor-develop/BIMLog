@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "07d7647868f525eef773666da5f46bbce6b07af3896d7e85eecf678afff9426f",
-  "itemCount": 337,
+  "sourceSha256": "ddddb8c7d4bbfe91027f7142161acff109e1113fc23099f9834184d8bf0ffbc1",
+  "itemCount": 338,
   "counts": {
-    "ACTIVE": 296,
+    "ACTIVE": 297,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6143,6 +6143,24 @@
       "evidence": [
         "living-brief/STATUS.md current authority",
         "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0e094669a68416ac",
+      "sourceLine": 4793,
+      "heading": "Production runtime reuse closure — 2026-10-07",
+      "statement": "Reconcile and push this release repair, rebuild it in Replit, republish, then require exact-source health and authenticated Chrome workflow acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4793",
+        "Production runtime reuse closure — 2026-10-07"
       ],
       "currentAuthority": false
     }

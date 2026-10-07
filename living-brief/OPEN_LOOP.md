@@ -4784,3 +4784,10 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Fail closed while inferring a build-time source unless exactly one distinct remote commit matches the canonical Replit snapshot tree.
 - [x] Pass a simulated Replit API production build with no build-time release variables and complete deterministic runtime closure.
 - [ ] Push the reconciled repair, republish once, and run exact-source health plus authenticated Chrome acceptance.
+
+## Production runtime reuse closure — 2026-10-07
+
+- [x] Reproduce the failed promotion and identify the stale `sharp` runtime package as the source of the missing `detect-libc` startup dependency.
+- [x] Reject a reusable production runtime whenever any required direct package version differs from the current installed graph.
+- [x] Complete a clean local API typecheck and deterministic runtime-closure rebuild at implementation commit `19633044bb978810dcb8c7cb8b4b69e00bc5a9dc`.
+- [ ] Reconcile and push this release repair, rebuild it in Replit, republish, then require exact-source health and authenticated Chrome workflow acceptance.

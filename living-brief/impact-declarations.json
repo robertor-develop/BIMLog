@@ -60055,6 +60055,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0bb61d5a9181b922fc411747c5175e371eea55c7f42c0a4131d540b35f45dff4"
+    },
+    {
+      "taskId": "production-runtime-reuse-version-closure",
+      "reviewedThroughCommit": "19633044bb978810dcb8c7cb8b4b69e00bc5a9dc",
+      "reviewedAt": "2026-10-07T19:20:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The release health failure showed that a source-matched runtime closure could retain older package versions. Reuse now verifies every required direct package against the current installed exact version and rebuilds on mismatch; product, schema, tenant, financial, Native and report behavior are unchanged."
+        }
+      ],
+      "reason": "Prevent stale installed dependency graphs from passing exact-source production runtime reuse validation.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4be4924ae2c492df64faad8e705812973980f2047fc3f3104492be0379e6d2e1"
     }
   ]
 }
