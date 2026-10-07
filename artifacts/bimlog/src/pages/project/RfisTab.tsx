@@ -33,6 +33,7 @@ import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { RfiImageCropEditor, type NormalizedCrop } from "@/components/rfi/RfiImageCropEditor";
 import { RfiSnippingWorkspace } from "@/components/rfi/RfiSnippingWorkspace";
 import { RfiImagePresentationControls } from "@/components/rfi/RfiImagePresentationControls";
+import { ReportsReturnBanner } from "@/components/layout/ReportsReturnBanner";
 import { logClientError } from "@/lib/client-log";
 import { parseOperationalDocumentReturn } from "@/lib/job-operations-daily-work";
 import { bootstrapLensNextBridgeSession, createLensNextApiClient, createLensNextBridgeClient } from "@/features/lens-next/lens-next-client";
@@ -1289,6 +1290,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
 
   return (
     <div style={{ position: "relative" }}>
+      <ReportsReturnBanner projectId={projectId} />
       {reportRequest && (
         <GenerateRfiReportModal
           projectId={projectId}

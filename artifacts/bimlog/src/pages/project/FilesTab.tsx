@@ -11,6 +11,7 @@ import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
 import { conventionResolverUrl, documentIdentity, fileIntakeCanSubmit, fileIntakeModeTruth, fileIntakePreview, fileIntakeRequiresConvention, newFileAttemptKey, type FileIntakeAttemptState, type FileIntakeMode } from "@/lib/file-intake-journey";
 import { parseOperationalDocumentReturn } from "@/lib/job-operations-daily-work";
+import { ReportsReturnBanner } from "@/components/layout/ReportsReturnBanner";
 
 interface ValidationDetail {
   field: string;
@@ -337,6 +338,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
 
   return (
     <div style={{ minWidth: 0 }}>
+      <ReportsReturnBanner projectId={projectId} />
       {/* Header */}
       <div className="section-header" style={{ marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 12 }}>
         <div style={{ minWidth: 0 }}>
