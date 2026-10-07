@@ -1,11 +1,30 @@
 import assert from "node:assert/strict";
-import { intakeOrigin, validatedReturn, withIntakeReturn, intakePrerequisiteReturn } from "./return-context";
+import { readFileSync } from "node:fs";
+import { intakeOrigin, validatedReturn, withIntakeReturn, intakePrerequisiteReturn, parseIntakeReturn } from "./return-context";
 const link=withIntakeReturn("/projects/7/convention",7,"delivery","ji-assignment-2");
 assert.equal(validatedReturn(link.split("?")[1],7),intakeOrigin(7,"delivery","ji-assignment-2"));
 for(const bad of ["https://evil.test/projects/7/intake","//evil.test/projects/7/intake","/projects/8/intake?stage=scope","/projects/7/intake?stage=nope","/projects/7/intake?token=secret"]) assert.equal(validatedReturn("returnTo="+encodeURIComponent(bad),7),null);
 console.log("UX017 exact same-project return context and unsafe-origin denial PASS");
 assert.equal(intakePrerequisiteReturn("returnTo="+encodeURIComponent("/projects/7/intake?stage=delivery")), "/projects/7/intake?stage=delivery");
 for (const bad of ["https://evil.test", "//evil.test/projects/7/intake", "/projects/0/intake", "/projects/7/intake?token=secret", "/projects/7/intake?stage=nope"]) assert.equal(intakePrerequisiteReturn("returnTo="+encodeURIComponent(bad)), null);
+const parsed = parseIntakeReturn("returnTo=" + encodeURIComponent("/projects/7/intake?stage=contract&item=ji-contract-2"));
+assert.deepEqual(parsed, { projectId: 7, stage: "contract", item: "ji-contract-2", href: "/projects/7/intake?stage=contract&item=ji-contract-2" });
+assert.equal(parseIntakeReturn("returnTo=" + encodeURIComponent("/projects/7/intake?stage=scope#escape")), null);
+
+const banner = readFileSync(new URL("../components/layout/IntakeReturnBanner.tsx", import.meta.url), "utf8");
+const financialShell = readFileSync(new URL("../components/layout/FinancialProjectShell.tsx", import.meta.url), "utf8");
+const projectDetail = readFileSync(new URL("../pages/ProjectDetail.tsx", import.meta.url), "utf8");
+const companyWorkflows = readFileSync(new URL("../pages/CompanyDeliveryWorkflows.tsx", import.meta.url), "utf8");
+const contracts = readFileSync(new URL("../pages/FinancialContractWorkspace.tsx", import.meta.url), "utf8");
+assert.match(banner, /Complete this prerequisite, then continue the same saved Intake draft/);
+assert.match(banner, /aria-label=\{tt\("Return to Job Intake"/);
+assert.equal((financialShell.match(/<IntakeReturnBanner/g) ?? []).length, 1);
+assert.equal((projectDetail.match(/<IntakeReturnBanner/g) ?? []).length, 1);
+assert.equal((companyWorkflows.match(/<IntakeReturnBanner/g) ?? []).length, 1);
+assert.match(contracts, /\.focus\(\{ preventScroll: false \}\)/);
+assert.match(contracts, /Opened from Job Intake/);
+assert.match(contracts, /fc-card-linked/);
+console.log("UX return journey: one visible bilingual recovery path and exact linked-contract focus PASS");
 
 import {projectHomeDestination} from "./project-home-destination";
 assert.equal(projectHomeDestination(7,"project_admin",{status:"activated"}),"/projects/7/operations");

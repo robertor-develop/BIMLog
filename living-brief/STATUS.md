@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Intake prerequisite continuity Block 1 candidate — 2026-10-07
+
+Five builds turn the existing secure Intake return parameter into a visible, consistent user journey. Project financial workspaces, Convention Builder and company delivery workflows now explain why the user left Intake and provide one bilingual action back to the exact saved stage. Contract links open, mark and keyboard-focus the exact accessible record; unavailable or unauthorized records retain an explicit recovery message. The strict parser rejects external, cross-project, malformed and extra-parameter destinations. This is the first five-build block in a new ten-build interval, so it will be pushed once after its complete gate and will remain unpublished until the following block.
+
 ## Canonical project journey Block 2 publication candidate — 2026-10-07
 
 The second five-build block makes Project Home explain the full setup-to-results lifecycle, prevents links into work and attention surfaces before activation, provides shortcuts that match the current project stage, connects contextual help back to the same project, and adds visible keyboard focus, reduced-motion handling and a permanent behavior contract. The focused Project Home flow and frontend typecheck pass. Together with Block 1, the interval now contains ten unpublished product builds and requires the complete exact-head gate, one push, publication, exact live-source verification and full authenticated Chrome smoke before another block begins.

@@ -45,7 +45,7 @@ const patchedResolutions = [
   "path-to-regexp@8.4.0",
   "picomatch@2.3.2",
   "qs@6.16.0",
-  "sharp@0.35.4",
+  "sharp@0.35.5",
   "tmp@0.2.7",
   "uuid@11.1.1",
 ];

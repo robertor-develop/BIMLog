@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Intake prerequisite continuity — Block 1 — 2026-10-07
+
+- [x] Parse one strict same-project Intake return context and reject external, cross-project or malformed destinations.
+- [x] Show one prominent bilingual return panel with the exact saved Intake stage and draft-continuity explanation.
+- [x] Use the same return path across project financial workspaces, Convention Builder and company delivery workflows.
+- [x] Open, identify and keyboard-focus the exact Contract selected from Intake; retain an explicit inaccessible-record recovery state.
+- [x] Add permanent continuity, security, single-control and accessibility regression coverage.
+- [ ] Push this five-build block once after the complete gate. Do not publish until the following five-build block reaches the ten-build boundary.
+
 ## Canonical project journey — Block 2 — 2026-10-07
 
 - [x] Show the current setup-to-results lifecycle stage from canonical Intake status.
