@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import { FileText, Trash2, Sparkles, Send } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
+import { ReportsReturnBanner } from "@/components/layout/ReportsReturnBanner";
 import { parseTransmittalEvidenceContext, type TransmittalEvidenceContext } from "@/lib/project-record-return";
 import { parseOperationalDocumentReturn } from "@/lib/job-operations-daily-work";
 
@@ -271,6 +272,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
 
   return (
     <div className="tab-content-wrapper">
+      <ReportsReturnBanner projectId={projectId} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
         <div>
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Transmittals", "Transmisiones")}</h2>
