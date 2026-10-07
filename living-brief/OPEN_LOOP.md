@@ -4712,3 +4712,5 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Publish the exact Atlas-parity source and prove through the authenticated BIMLog panel that an ordinary visible-page question returns MAIN 04.00's matching final answer.
 - [x] Replace the BIMLog dock controls and visual hierarchy with the production Atlas agent interaction structure while retaining the BIMLog blue palette and MAIN 04.00 route.
 - [ ] Publish the exact Atlas-UX source and verify authenticated desktop Chrome visual parity, selected-field value grounding, New conversation, ordinary question/answer, feedback entry and zero new browser errors.
+- [x] Refine the Atlas-parity panel to the compact Lumen workspace hierarchy while retaining BIMLog colors and authority boundaries.
+- [ ] Publish the exact Lumen-density refinement and verify its live header, recommended-next card, three actions, prompt/result surface, status strip, MAIN 04.00 answer and zero new browser errors.

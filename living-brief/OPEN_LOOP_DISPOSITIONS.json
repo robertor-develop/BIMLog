@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "756630ad0434d727d08a7d536bfe4cdb7d822234aab13cf629c6c0b0f6c76a4a",
-  "itemCount": 330,
+  "sourceSha256": "56a2d2dee63fb06fd5c2378ed5a47b9edb29ecf50480adee23864024683da703",
+  "itemCount": 331,
   "counts": {
-    "ACTIVE": 291,
+    "ACTIVE": 292,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6016,6 +6016,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4714",
+        "MAIN 04.00 page-question release closure (2026-10-06)"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1f49ed168edf39b8",
+      "sourceLine": 4716,
+      "heading": "MAIN 04.00 page-question release closure (2026-10-06)",
+      "statement": "Publish the exact Lumen-density refinement and verify its live header, recommended-next card, three actions, prompt/result surface, status strip, MAIN 04.00 answer and zero new browser errors.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4716",
         "MAIN 04.00 page-question release closure (2026-10-06)"
       ],
       "currentAuthority": false
