@@ -159,7 +159,7 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
   }
   const acceptedRemoteRef = `origin/${acceptedBranch}`;
   const acceptedCommit = process.env.BIMLOG_ACCEPTED_COMMIT?.trim().toLowerCase();
-  if (acceptedBranch !== "master" && !SHA40.test(acceptedCommit ?? "")) {
+  if (acceptedBranch !== "master" && !/^[0-9a-f]{40}$/.test(acceptedCommit ?? "")) {
     throw new Error("Named-branch production assembly requires BIMLOG_ACCEPTED_COMMIT.");
   }
   let remoteMasterCommit: string | undefined;
