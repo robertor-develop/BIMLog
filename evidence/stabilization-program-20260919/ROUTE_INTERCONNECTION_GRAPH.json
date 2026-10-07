@@ -5,7 +5,7 @@
     "frontendRoutes": 57,
     "projectTabs": 19,
     "sidebarTabs": 18,
-    "sidebarLinks": 4,
+    "sidebarLinks": 5,
     "apiRoutes": 747,
     "frontendApiReferences": 296,
     "routeOwnedTables": 68
@@ -482,6 +482,7 @@
     "integrations"
   ],
   "sidebarLinks": [
+    "/projects/:id",
     "/projects/:id/intake",
     "/projects/:id/operations",
     "/projects/:id/financial/apu",

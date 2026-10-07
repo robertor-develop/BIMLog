@@ -59149,7 +59149,7 @@
     {
       "taskId": "bimlog-main04-atlas-ux-parity",
       "reviewedThroughCommit": "b7a12e58c0513f00daeb6497c0ce0ecebb43a82a",
-      "reviewedAt": "2026-10-06T23:55:00.000Z",
+      "reviewedAt": "2026-10-06T23:55:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59220,7 +59220,7 @@
     {
       "taskId": "bimlog-main04-lumen-density-refinement",
       "reviewedThroughCommit": "91586c8638453b4e0330c3f1f0129e7359a7cd62",
-      "reviewedAt": "2026-10-07T00:36:00.000Z",
+      "reviewedAt": "2026-10-07T00:36:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59291,7 +59291,7 @@
     {
       "taskId": "bimlog-main04-100-percent-density-correction",
       "reviewedThroughCommit": "3981897d191bd501f8138618a7a0e76d18a6c1ad",
-      "reviewedAt": "2026-10-07T01:14:00.000Z",
+      "reviewedAt": "2026-10-07T01:14:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59362,7 +59362,7 @@
     {
       "taskId": "established-user-mobile-sign-in-correction",
       "reviewedThroughCommit": "583b9e1f92d2b67ecb5d392e4af01cc5e6cfe136",
-      "reviewedAt": "2026-10-06T20:00:00.000Z",
+      "reviewedAt": "2026-10-06T20:00:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59433,7 +59433,7 @@
     {
       "taskId": "iphone-page-assistant-hosted-transport-correction",
       "reviewedThroughCommit": "193b8df718943f2253df30065f83980b7d1286cb",
-      "reviewedAt": "2026-10-07T02:00:00.000Z",
+      "reviewedAt": "2026-10-07T02:00:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59505,7 +59505,7 @@
     {
       "taskId": "bimlog-agent-reviewed-voice-dictation",
       "reviewedThroughCommit": "fb516e7d7d941ec1c9e4eef6e24740662be3c8f6",
-      "reviewedAt": "2026-10-07T04:55:00.000Z",
+      "reviewedAt": "2026-10-07T04:55:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59572,6 +59572,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a61d0381c95245151e7d6ef73b759c05344abc2e8b0aea85258db09fed7d522d"
+    },
+    {
+      "taskId": "canonical-project-journey-block01",
+      "reviewedThroughCommit": "5677a1ebcefcb3e5257465b4ce2e94a8b2c3d14f",
+      "reviewedAt": "2026-10-07T07:04:07.0066592Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical project journey changes navigation and presentation only and preserve this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the canonical Project Home, deterministic next action, common project entry point, standardized navigation and the remaining ten-build publication gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records completion of all five canonical journey builds and keeps publication plus authenticated Chrome smoke due at the ten-build boundary."
+        }
+      ],
+      "reason": "Add a canonical Project Home, deterministic next action and consistent project navigation without changing business records or authorization.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0af748857867d6a7eb178ffa047bfb88d8c996e49c7c4cbf5fa7b0e66119ef6d"
     }
   ]
 }
