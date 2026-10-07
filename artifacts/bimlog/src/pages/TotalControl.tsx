@@ -522,7 +522,7 @@ function TCOverviewTab({ token, stats, companies, projects, onRefresh }: { token
             </div>
           )}
           <div style={{ display: "flex", gap: 10 }}>
-            <TCButton variant="primary" onClick={() => { setSelectedProject(null); setLocation(`/projects/${selectedProject.id}/analytics`); }}>Open Project</TCButton>
+            <TCButton variant="primary" onClick={() => { setSelectedProject(null); setLocation(`/projects/${selectedProject.id}`); }}>Open Project</TCButton>
           </div>
           {assignCode && (
             <AssignUserModal
@@ -820,7 +820,7 @@ function TCProjectsTab({ token }: { token: string }) {
                 <TCTd style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(String(p.createdAt)).toLocaleDateString()}</TCTd>
                 <TCTd>
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    <TCButton onClick={() => setLocation(`/projects/${p.id}/analytics`)}>View</TCButton>
+                    <TCButton onClick={() => setLocation(`/projects/${p.id}`)}>View</TCButton>
                     <TCButton onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</TCButton>
                     <TCButton onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</TCButton>
                   </div>

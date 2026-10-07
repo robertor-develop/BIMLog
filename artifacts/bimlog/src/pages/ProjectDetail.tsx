@@ -236,7 +236,7 @@ export function ProjectDetail() {
                 <p style={{ color: "hsl(var(--muted-foreground))", marginBottom: 16 }}>
                   {t("notFound.message")}
                 </p>
-                <Link href={`/projects/${projectId}/analytics`}>
+                <Link href={`/projects/${projectId}`}>
                   <Button variant="outline" size="sm">{t("notFound.backHome")}</Button>
                 </Link>
               </div>

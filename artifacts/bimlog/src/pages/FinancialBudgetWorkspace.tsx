@@ -213,7 +213,7 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
       <style>{exportStyles}</style>
       <header className="fb-header">
         <div>
-          <Link href={`/projects/${projectId}/analytics`} className="fb-back">
+          <Link href={`/projects/${projectId}`} className="fb-back">
             ← {tt("Project", "Proyecto")}
           </Link>
           <h1>{titles[mode]}</h1>

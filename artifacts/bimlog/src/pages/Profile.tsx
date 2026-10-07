@@ -1139,7 +1139,7 @@ export function Profile() {
                   </div>
                   <div style={{ textAlign: "right", flexShrink: 0 }}><Badge variant="outline" style={{ fontSize: 10 }}>{role.effective}</Badge>{role.legacy && <div title="Stored legacy role is preserved; effective access remains governed by current permissions." style={{ fontSize: 9, marginTop: 3, color: "hsl(var(--muted-foreground))" }}>Legacy label: {role.legacy.replace(/_/g, " ")}</div>}</div>
                   <Button size="sm" variant="outline" style={{ gap: 4, fontSize: 11, flexShrink: 0 }}
-                    onClick={() => navigate(`/projects/${proj.id}/analytics`)}>
+                    onClick={() => navigate(`/projects/${proj.id}`)}>
                     <ExternalLink style={{ width: 11, height: 11 }} />
                     Go to Project
                   </Button>

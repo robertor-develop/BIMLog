@@ -656,7 +656,7 @@ function ProjectsTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 11 }}>{new Date(String(p.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    <Button size="sm" variant="outline" onClick={() => setLocation(`/projects/${p.id}/analytics`)}>View</Button>
+                    <Button size="sm" variant="outline" onClick={() => setLocation(`/projects/${p.id}`)}>View</Button>
                     <Button size="sm" variant="outline" onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</Button>
                     <Button size="sm" variant="outline" onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</Button>
                   </div>

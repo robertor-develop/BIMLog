@@ -597,7 +597,7 @@ export function Dashboard() {
                 label={tt("Compliance Rate", "Tasa de cumplimiento")}
                 value={stats?.complianceRate === null || stats?.complianceRate === undefined ? "—" : `${stats.complianceRate}%`}
                 sub={tt("Completed uploads only", "Solo cargas completadas")}
-                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/analytics` : "/projects")}
+                navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}` : "/projects")}
               />
             </div>
           )}
