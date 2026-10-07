@@ -4714,3 +4714,8 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Publish the exact Atlas-UX source and verify authenticated desktop Chrome visual parity, selected-field value grounding, New conversation, ordinary question/answer, feedback entry and zero new browser errors.
 - [x] Refine the Atlas-parity panel to the compact Lumen workspace hierarchy while retaining BIMLog colors and authority boundaries.
 - [ ] Publish the exact Lumen-density refinement and verify its live header, recommended-next card, three actions, prompt/result surface, status strip, MAIN 04.00 answer and zero new browser errors.
+# 2026-10-06 — BIMLog agent 100% zoom density correction
+
+- Publish exact source `cc0013c863a410e6fc8dab949b22a3f2775cc2e3` after reconciliation.
+- In authenticated Chrome at 100% zoom, verify the question field, Ask action and latest answer are visible together in the BIMLog agent without obscuring the page.
+- Repeat one harmless MAIN 04.00 question and require the correlated answer plus a clean browser console.
