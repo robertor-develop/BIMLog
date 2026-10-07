@@ -37,7 +37,7 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
       ? lang === "es" ? "Presupuesto del Proyecto" : "Project Budget"
       : activeTab === "contracts"
         ? lang === "es" ? "Contratos y Compromisos" : "Contracts & Commitments"
-        : lang === "es" ? "APU genérico" : "Generic APU";
+        : lang === "es" ? "Planificador de Costos y Valor" : "Cost & Value Planner";
 
   if (isLoading) {
     return (
