@@ -7,6 +7,17 @@ export function intakeReturnActionHref(context: IntakeReturnContext): string {
   return `${context.href}${separator}resume=prerequisite`;
 }
 
+export function parseIntakeResume(search: string, projectId: number): IntakeReturnContext | null {
+  const params = new URLSearchParams(search);
+  if (params.get("resume") !== "prerequisite") return null;
+  if ([...params.keys()].some(key => !["stage", "item", "resume"].includes(key))) return null;
+  const stage = (params.get("stage") || "documents") as IntakeStage;
+  const item = params.get("item") || undefined;
+  if (!Number.isSafeInteger(projectId) || projectId < 1 || !stages.has(stage)) return null;
+  if (item && !/^ji-[a-zA-Z0-9_-]{1,100}$/.test(item)) return null;
+  return { projectId, stage, item, href: intakeOrigin(projectId, stage, item) };
+}
+
 export function parseIntakeReturn(search: string): IntakeReturnContext | null {
   const raw = new URLSearchParams(search).get("returnTo");
   if (!raw || raw.length > 500 || raw.includes("#") || raw.includes("\\")) return null;

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { intakeOrigin, intakeReturnActionHref, validatedReturn, withIntakeReturn, intakePrerequisiteReturn, parseIntakeReturn } from "./return-context";
+import { intakeOrigin, intakeReturnActionHref, validatedReturn, withIntakeReturn, intakePrerequisiteReturn, parseIntakeResume, parseIntakeReturn } from "./return-context";
 const link=withIntakeReturn("/projects/7/convention",7,"delivery","ji-assignment-2");
 assert.equal(validatedReturn(link.split("?")[1],7),intakeOrigin(7,"delivery","ji-assignment-2"));
 for(const bad of ["https://evil.test/projects/7/intake","//evil.test/projects/7/intake","/projects/8/intake?stage=scope","/projects/7/intake?stage=nope","/projects/7/intake?token=secret"]) assert.equal(validatedReturn("returnTo="+encodeURIComponent(bad),7),null);
@@ -10,6 +10,8 @@ for (const bad of ["https://evil.test", "//evil.test/projects/7/intake", "/proje
 const parsed = parseIntakeReturn("returnTo=" + encodeURIComponent("/projects/7/intake?stage=contract&item=ji-contract-2"));
 assert.deepEqual(parsed, { projectId: 7, stage: "contract", item: "ji-contract-2", href: "/projects/7/intake?stage=contract&item=ji-contract-2" });
 assert.equal(intakeReturnActionHref(parsed!), "/projects/7/intake?stage=contract&item=ji-contract-2&resume=prerequisite");
+assert.deepEqual(parseIntakeResume("stage=contract&item=ji-contract-2&resume=prerequisite", 7), parsed);
+for (const bad of ["stage=contract&resume=wrong", "stage=nope&resume=prerequisite", "stage=scope&resume=prerequisite&token=secret"]) assert.equal(parseIntakeResume(bad, 7), null);
 assert.equal(parseIntakeReturn("returnTo=" + encodeURIComponent("/projects/7/intake?stage=scope#escape")), null);
 
 const banner = readFileSync(new URL("../components/layout/IntakeReturnBanner.tsx", import.meta.url), "utf8");
