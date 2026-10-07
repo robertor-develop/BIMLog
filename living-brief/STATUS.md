@@ -1,8 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Intake prerequisite continuity Block 2 candidate — 2026-10-07
+
+Five builds complete the return half of the prerequisite journey. A return action now carries one strict, non-authoritative marker; Intake shows a compact bilingual confirmation, restores the exact saved stage, scrolls to and keyboard-focuses the exact returned field, and removes only the marker when the confirmation is dismissed. The permanent round-trip gate covers every Intake stage plus malformed, cross-purpose and extra-parameter denial. Together with Block 1 this reaches the ten-build publication boundary; the exact candidate requires the complete release gate, one push, controlled publication, exact live-source verification and full authenticated Chrome smoke.
+
 ## Intake prerequisite continuity Block 1 candidate — 2026-10-07
 
-Five builds turn the existing secure Intake return parameter into a visible, consistent user journey. Project financial workspaces, Convention Builder and company delivery workflows now explain why the user left Intake and provide one bilingual action back to the exact saved stage. Contract links open, mark and keyboard-focus the exact accessible record; unavailable or unauthorized records retain an explicit recovery message. The strict parser rejects external, cross-project, malformed and extra-parameter destinations. This is the first five-build block in a new ten-build interval, so it will be pushed once after its complete gate and will remain unpublished until the following block.
+Five builds turn the existing secure Intake return parameter into a visible, consistent user journey. Project financial workspaces, Convention Builder and company delivery workflows now explain why the user left Intake and provide one bilingual action back to the exact saved stage. Contract links open, mark and keyboard-focus the exact accessible record; unavailable or unauthorized records retain an explicit recovery message. The strict parser rejects external, cross-project, malformed and extra-parameter destinations. The block was pushed once at exact source `9bb4ed133b7ec3f1581860ee33cb45d319e41dc5` and remains unpublished until the Block 2 five-build boundary passes.
 
 ## Canonical project journey Block 2 publication candidate — 2026-10-07
 

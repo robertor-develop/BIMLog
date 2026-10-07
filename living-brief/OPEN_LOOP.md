@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Intake prerequisite continuity — Block 2 — 2026-10-07
+
+- [x] Mark an intentional prerequisite return without trusting arbitrary query parameters.
+- [x] Confirm visibly that the user returned to the same saved Intake draft.
+- [x] Restore the exact Intake stage from the verified return context.
+- [x] Scroll to, highlight and keyboard-focus the exact returned field or section.
+- [x] Add a permanent all-stage round-trip and unsafe-query regression gate.
+- [ ] Pass the complete exact-head gate, push once, publish Blocks 1–2, verify exact live source, and complete full authenticated Chrome smoke before another block.
+
 ## Intake prerequisite continuity — Block 1 — 2026-10-07
 
 - [x] Parse one strict same-project Intake return context and reject external, cross-project or malformed destinations.
@@ -7,7 +16,7 @@
 - [x] Use the same return path across project financial workspaces, Convention Builder and company delivery workflows.
 - [x] Open, identify and keyboard-focus the exact Contract selected from Intake; retain an explicit inaccessible-record recovery state.
 - [x] Add permanent continuity, security, single-control and accessibility regression coverage.
-- [ ] Push this five-build block once after the complete gate. Do not publish until the following five-build block reaches the ten-build boundary.
+- [x] Push this five-build block once at exact source `9bb4ed133b7ec3f1581860ee33cb45d319e41dc5`. Do not publish until the following five-build block reaches the ten-build boundary.
 
 ## Canonical project journey — Block 2 — 2026-10-07
 
