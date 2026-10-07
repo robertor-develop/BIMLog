@@ -10,6 +10,7 @@ import { Upload, Trash2, FileText, AlertCircle, CheckCircle2, Shield, Sparkles, 
 import { CvrMismatchModal } from "@/components/project/CvrMismatchModal";
 import { format } from "date-fns";
 import { conventionResolverUrl, documentIdentity, fileIntakeCanSubmit, fileIntakeModeTruth, fileIntakePreview, fileIntakeRequiresConvention, newFileAttemptKey, type FileIntakeAttemptState, type FileIntakeMode } from "@/lib/file-intake-journey";
+import { parseOperationalDocumentReturn } from "@/lib/job-operations-daily-work";
 
 interface ValidationDetail {
   field: string;
@@ -122,6 +123,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const tr = (en: string, es: string) => lang === "es" ? es : en;
   const [, setLocation] = useLocation();
   const search = useSearch();
+  const operationReturn = useMemo(() => parseOperationalDocumentReturn(search, projectId), [search, projectId]);
   const { data: files, isLoading, isError } = useListFiles(projectId);
   const { data: convention } = useGetConvention(projectId);
   const [showUpload] = useState(true);
@@ -447,6 +449,13 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
       )}
 
       {/* Upload form */}
+      {operationReturn && (
+        <section role="status" style={{ marginBottom: 14, padding: "12px 14px", border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF", color: "#1E3A8A" }}>
+          <strong>{tr("File evidence for the selected Operations task", "Evidencia de archivo para la tarea seleccionada de Operaciones")}</strong>
+          <p style={{ margin: "4px 0 8px" }}>{tr("Upload or select the required file here, then return to the exact task without losing your place.", "Cargue o seleccione aquí el archivo requerido y luego vuelva a la tarea exacta sin perder su lugar.")}</p>
+          <Link href={operationReturn.returnTo}>{tr("Return to selected task", "Volver a la tarea seleccionada")}</Link>
+        </section>
+      )}
       {showUpload && canWrite && (
         <UploadForm projectId={projectId} onClose={() => {}} />
       )}
