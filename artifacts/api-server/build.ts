@@ -153,11 +153,20 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
     });
   const canonicalHead = unwrapReplitPublishChain(localHistory);
   const replitEnvironment = Boolean(process.env.REPL_ID || process.env.REPL_SLUG);
+  const acceptedBranch = process.env.BIMLOG_ACCEPTED_BRANCH?.trim() || "master";
+  if (!/^(?!.*\.\.)(?!.*\/\/)[A-Za-z0-9][A-Za-z0-9._\/-]*$/.test(acceptedBranch)) {
+    throw new Error("BIMLOG_ACCEPTED_BRANCH must be an exact short branch name.");
+  }
+  const acceptedRemoteRef = `origin/${acceptedBranch}`;
+  const acceptedCommit = process.env.BIMLOG_ACCEPTED_COMMIT?.trim().toLowerCase();
+  if (acceptedBranch !== "master" && !SHA40.test(acceptedCommit ?? "")) {
+    throw new Error("Named-branch production assembly requires BIMLOG_ACCEPTED_COMMIT.");
+  }
   let remoteMasterCommit: string | undefined;
   let remoteMasterTree: string | undefined;
   let remoteMasterIsAncestor: boolean | undefined;
   if (replitEnvironment) {
-    const remoteHistory = git("log", "--first-parent", "--format=%H%x09%T%x09%s", "-64", "origin/master")
+    const remoteHistory = git("log", "--first-parent", "--format=%H%x09%T%x09%s", "-64", acceptedRemoteRef)
       .split(/\r?\n/)
       .filter(Boolean)
       .map(line => {
@@ -168,7 +177,7 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
     remoteMasterCommit = canonicalRemote.commit;
     remoteMasterTree = canonicalRemote.tree;
     try {
-      execFileSync("git", ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "merge-base", "--is-ancestor", "origin/master", "HEAD"], { stdio: "ignore" });
+      execFileSync("git", ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "merge-base", "--is-ancestor", acceptedRemoteRef, "HEAD"], { stdio: "ignore" });
       remoteMasterIsAncestor = true;
     } catch {
       remoteMasterIsAncestor = false;
@@ -181,6 +190,7 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
     remoteMasterCommit,
     remoteMasterTree,
     remoteMasterIsAncestor,
+    acceptedCommit,
     replitEnvironment,
   });
   try {

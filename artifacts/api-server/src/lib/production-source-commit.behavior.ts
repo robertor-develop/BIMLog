@@ -12,6 +12,8 @@ assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, r
 assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, headSubject: "Published your App", parentCommit: "d".repeat(40), parentTree: tree, remoteMasterCommit: remote, remoteMasterTree: tree, remoteMasterIsAncestor: true, replitEnvironment: true }), remote);
 assert.throws(() => resolveProductionSourceCommit({ headCommit: head, headTree: tree, remoteMasterCommit: remote, remoteMasterTree: "d".repeat(40), remoteMasterIsAncestor: true, replitEnvironment: true }), /differs/);
 assert.throws(() => resolveProductionSourceCommit({ headCommit: head, headTree: tree, remoteMasterCommit: remote, remoteMasterTree: tree, remoteMasterIsAncestor: false, replitEnvironment: true }), /not descended/);
+assert.equal(resolveProductionSourceCommit({ headCommit: head, headTree: tree, remoteMasterCommit: remote, remoteMasterTree: tree, remoteMasterIsAncestor: true, acceptedCommit: remote, replitEnvironment: true }), remote);
+assert.throws(() => resolveProductionSourceCommit({ headCommit: head, headTree: tree, remoteMasterCommit: remote, remoteMasterTree: tree, remoteMasterIsAncestor: true, acceptedCommit: "e".repeat(40), replitEnvironment: true }), /differs from the verified remote branch/);
 assert.equal(unwrapReplitPublishChain([
   { commit: "d".repeat(40), tree, subject: "Published your App" },
   { commit: "e".repeat(40), tree, subject: "Published your App" },

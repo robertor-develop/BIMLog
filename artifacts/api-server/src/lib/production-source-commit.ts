@@ -6,6 +6,7 @@ export type ProductionSourceCandidate = {
   remoteMasterCommit?: string;
   remoteMasterTree?: string;
   remoteMasterIsAncestor?: boolean;
+  acceptedCommit?: string;
   replitEnvironment: boolean;
   headSubject?: string;
   parentCommit?: string;
@@ -43,10 +44,14 @@ export function resolveProductionSourceCommit(candidate: ProductionSourceCandida
   if (!candidate.replitEnvironment) return headCommit;
 
   const remoteCommit = candidate.remoteMasterCommit?.trim().toLowerCase() ?? "";
-  if (!SHA40.test(remoteCommit)) throw new Error("Replit publication requires an exact origin/master commit.");
-  if (!candidate.remoteMasterIsAncestor) throw new Error("Replit publication HEAD is not descended from origin/master.");
+  if (!SHA40.test(remoteCommit)) throw new Error("Replit publication requires an exact accepted remote commit.");
+  const acceptedCommit = candidate.acceptedCommit?.trim().toLowerCase();
+  if (acceptedCommit && (!SHA40.test(acceptedCommit) || acceptedCommit !== remoteCommit)) {
+    throw new Error("Accepted production commit differs from the verified remote branch.");
+  }
+  if (!candidate.remoteMasterIsAncestor) throw new Error("Replit publication HEAD is not descended from the accepted remote source.");
   if (candidate.headTree.trim().toLowerCase() !== candidate.remoteMasterTree?.trim().toLowerCase()) {
-    throw new Error("Replit publication HEAD differs from the verified origin/master source tree.");
+    throw new Error("Replit publication HEAD differs from the verified accepted remote source tree.");
   }
   return remoteCommit;
 }
