@@ -1409,3 +1409,39 @@ body.bimlog-assistant-docked[data-assistant-collapsed="true"][data-assistant-doc
 .page-assistant-voice{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:88px;min-height:44px;padding:7px 11px;border:1px solid var(--bimlog-agent-line);border-radius:9px;background:#fff;color:var(--bimlog-agent-blue-dark);font-weight:750}
 .page-assistant-voice[aria-pressed=true]{border-color:var(--bimlog-agent-blue-dark);background:var(--bimlog-agent-blue-dark);color:#fff}
 .page-assistant-voice-status{margin:0;color:var(--bimlog-agent-muted);font-size:11px;line-height:1.35}
+/* A prerequisite opened from Job Intake always exposes the saved return path. */
+.intake-return-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid #b9d2ee;
+  border-left: 4px solid #2458c7;
+  border-radius: 10px;
+  background: #eef6ff;
+  color: #17243b;
+}
+.intake-return-banner div { display: grid; gap: 3px; }
+.intake-return-banner span { color: #475569; font-size: .875rem; line-height: 1.4; }
+.intake-return-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #2458c7;
+  border-radius: 8px;
+  background: #fff;
+  color: #174280;
+  font-weight: 700;
+  text-decoration: none;
+}
+.intake-return-action:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px; }
+@media (max-width: 640px) {
+  .intake-return-banner { align-items: stretch; flex-direction: column; }
+  .intake-return-action { width: 100%; box-sizing: border-box; }
+}
