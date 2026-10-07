@@ -59916,6 +59916,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "named-publication-branch-production-assembly-repair",
+      "reviewedThroughCommit": "bd1664cb617827ebf31885d8a8c33d4045d77358",
+      "reviewedAt": "2026-10-07T17:20:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production assembly repair applies the same explicit branch and commit binding already required by publication attestation; product, tenant, financial, database, Native and report behavior remain unchanged."
+        }
+      ],
+      "reason": "Make the production artifact builder honor the exact named branch and commit that the publication-source attestor already verifies, closing the Replit build failure without weakening source identity.",
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0b16981e39857276f9d8a2857ee958ccaa64f65023be2497a4a10f0c05387f49"
     }
   ]
 }
