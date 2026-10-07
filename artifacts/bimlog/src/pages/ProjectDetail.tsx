@@ -1,5 +1,6 @@
 import { ProjectHome } from "@/components/layout/ProjectHome";
 import { ProjectLocation } from "@/components/layout/ProjectLocation";
+import { IntakeReturnBanner } from "@/components/layout/IntakeReturnBanner";
 import React from "react";
 import { Link, useRoute, useLocation } from "wouter";
 import { useGetProject, useListMembers } from "@workspace/api-client-react";
@@ -215,6 +216,7 @@ export function ProjectDetail() {
 
         {/* Tab content */}
         <div className="page-content">
+          <IntakeReturnBanner projectId={projectId} />
           <React.Suspense
             fallback={(
               <div className="route-loading" role="status" aria-live="polite">

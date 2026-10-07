@@ -1,4 +1,5 @@
 import { ProjectLocation } from "./ProjectLocation";
+import { IntakeReturnBanner } from "./IntakeReturnBanner";
 import type { ReactNode } from "react";
 import { Link } from "wouter";
 import { ChevronLeft, Shield } from "lucide-react";
@@ -101,6 +102,7 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
           </div>
         </div>
         <div className="page-content financial-page-content">
+          <IntakeReturnBanner projectId={projectId} />
           {children}
         </div>
       </div>
