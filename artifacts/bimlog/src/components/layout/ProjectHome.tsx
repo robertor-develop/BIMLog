@@ -1,4 +1,5 @@
 import { ProjectNextAction } from "@/components/layout/ProjectNextAction";
+import { ProjectJourneyProgress } from "@/components/layout/ProjectJourneyProgress";
 import { projectJourneyAction } from "@/lib/project-journey";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
@@ -43,6 +44,7 @@ export function ProjectHome({ projectId, projectName, projectCode }: { projectId
     {state === "loading" && <section className="project-home-loading" role="status">{lang === "es" ? "Cargando el estado del proyecto…" : "Loading project status…"}</section>}
     {state === "error" && <section className="project-home-error" role="alert"><div><strong>{lang === "es" ? "No se pudo cargar el siguiente paso." : "The next step could not be loaded."}</strong><p>{lang === "es" ? "No se modificó ningún dato. Vuelva a intentar." : "No project data was changed. Retry the status check."}</p></div><button type="button" onClick={() => setRetry(value => value + 1)}><RefreshCw aria-hidden="true" />{lang === "es" ? "Reintentar" : "Retry"}</button></section>}
     {state === "ready" && <ProjectNextAction action={action} />}
+    {state === "ready" && <ProjectJourneyProgress status={intake?.status} />}
     <section className="project-home-workspaces" aria-labelledby="project-workspaces-title"><div className="project-home-section-heading"><h2 id="project-workspaces-title">{lang === "es" ? "Continuar por objetivo" : "Continue by goal"}</h2><p>{lang === "es" ? "Cada destino conserva el mismo proyecto." : "Every destination keeps the same project context."}</p></div><div className="project-home-grid">{cards.map(card => { const Icon = card.icon; return <Link key={card.href} className="project-home-card" href={card.href}><Icon aria-hidden="true" /><span><strong>{card.title}</strong><small>{card.detail}</small></span></Link>; })}</div></section>
   </main>;
 }
