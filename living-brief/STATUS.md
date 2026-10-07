@@ -1,8 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Canonical project journey Block 2 publication candidate — 2026-10-07
+
+The second five-build block makes Project Home explain the full setup-to-results lifecycle, prevents links into work and attention surfaces before activation, provides shortcuts that match the current project stage, connects contextual help back to the same project, and adds visible keyboard focus, reduced-motion handling and a permanent behavior contract. The focused Project Home flow and frontend typecheck pass. Together with Block 1, the interval now contains ten unpublished product builds and requires the complete exact-head gate, one push, publication, exact live-source verification and full authenticated Chrome smoke before another block begins.
+
 ## Canonical project journey Block 1 candidate — 2026-10-07
 
-Five builds replace the project-root redirect with a real Project Home, expose one deterministic next action from canonical Intake status, make `/projects/:id` the common project entry point, standardize project breadcrumbs and return navigation, and keep Setup, Work, Attention and Results visible without duplicating business records. Focused journey behavior, frontend typecheck and the production frontend build pass. This is the first five-build block in the publication interval: push is due now; publication and authenticated Chrome smoke are due after the following five-build block reaches ten unpublished builds.
+Five builds replace the project-root redirect with a real Project Home, expose one deterministic next action from canonical Intake status, make `/projects/:id` the common project entry point, standardize project breadcrumbs and return navigation, and keep Setup, Work, Attention and Results visible without duplicating business records. Focused journey behavior, frontend typecheck and the production frontend build pass. The block was pushed at exact source `797d122398ff8bbd8c7bffb916810c25fef05b0b`; it is included in the ten-build publication candidate with Block 2.
 
 The source-derived route inventory and open-loop disposition inventory were refreshed after these navigation changes; both remain release evidence rather than new product behavior.
 

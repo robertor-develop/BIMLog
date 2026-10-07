@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Canonical project journey — Block 2 — 2026-10-07
+
+- [x] Show the current setup-to-results lifecycle stage from canonical Intake status.
+- [x] Prevent premature Work and Attention navigation and explain the activation prerequisite.
+- [x] Provide common project shortcuts that match setup or active-work state.
+- [x] Connect contextual help back to the same Project Home.
+- [x] Add visible keyboard focus, reduced-motion behavior and a permanent lifecycle/availability/help regression contract.
+- [ ] Pass the complete exact-head gate and push once. Publish Blocks 1–2 as the required ten-build interval, verify exact live source, and complete full authenticated desktop/mobile Chrome smoke before another block.
+
 ## Canonical project journey — Block 1 — 2026-10-07
 
 - [x] Create a real Project Home with Setup, Work, Attention and Results destinations and one canonical next action.
@@ -8,7 +17,7 @@
 - [x] Return Intake, Budget, Profile, Total Control, Admin and Dashboard project entry points to Project Home.
 - [x] Pass focused behavior tests, frontend typecheck and the production frontend build.
 - [x] Refresh source-derived route and open-loop inventories, then reconcile this narrative after that generated evidence.
-- [ ] Push this five-build block once. Do not publish until the next five-build block completes the ten-build interval; then run the full authenticated Chrome smoke.
+- [x] Push this five-build block once at exact source `797d122398ff8bbd8c7bffb916810c25fef05b0b`. Publish it with Block 2 at the ten-build boundary, then run the full authenticated Chrome smoke.
 
 ## iPhone page-assistant `Load failed` correction — 2026-10-06
 
