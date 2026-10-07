@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## iPhone page-assistant `Load failed` correction — 2026-10-06
+
+- [x] Reproduce the architecture defect: the browser called `127.0.0.1:8789`, which resolves to the iPhone rather than the Windows MAIN 04 bridge host.
+- [x] Route global and project questions through BIMLog's authenticated same-origin assistant API while preserving exact MAIN 04.00 thread, request and answer-digest verification.
+- [x] Prove the protected hosted endpoint returns a real MAIN 04.00 answer and pass focused behavior, frontend typecheck and production build.
+- [ ] Push and publish the correction, then verify a real authenticated iPhone question returns its answer without `Load failed`.
+
 ## P37 publication repair — preserve onboarding tables — 2026-10-01
 
 - [x] Reject the Replit migration preview that proposed dropping `user_onboarding_profiles` and `email_verification_tokens`; no production data mutation was approved.

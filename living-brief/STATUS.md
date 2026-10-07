@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## iPhone page-assistant transport correction — 2026-10-06
+
+The page assistant no longer calls the browsing device's `127.0.0.1` MAIN 04 bridge. Authenticated global and project questions use BIMLog's same-origin API, which forwards through the protected FIFO transport to the exact BIMLog Dedicated Agent MAIN 04.00 thread and returns the verified answer envelope. The prior direct browser-to-localhost path worked only on the Windows bridge host and produced Safari `Load failed` on iPhone. Focused behavior, frontend typecheck/build, and a live authenticated hosted-endpoint probe passed at implementation commit `193b8df718943f2253df30065f83980b7d1286cb`; push, publication, and real iPhone acceptance remain release gates.
+
 ## P37 accepted publication — 2026-10-01
 
 P37 is live from canonical source `2f01eb92ad5ddc5358eabb45cb82c9c6d8597e01` under Replit receipt `d806fd15`. Two unsafe migration previews were cancelled without production mutation; the final `.desc().nullsFirst()` declaration produced exact development/production correspondence and no migration approval screen. Public health reports `v1.05.N18-P37`, `identityBound=true`, and the exact canonical source. Authenticated Chrome passed 44/44 desktop routes, 10/10 focused mobile/tablet routes, two-tab session continuity, and zero console warnings/errors.

@@ -59429,6 +59429,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9f8cc56a5b08386ea0f7373d8f117b6b86729d26e5abc442f69d5654e3361a74"
+    },
+    {
+      "taskId": "iphone-page-assistant-hosted-transport-correction",
+      "reviewedThroughCommit": "193b8df718943f2253df30065f83980b7d1286cb",
+      "reviewedAt": "2026-10-07T02:00:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The hosted page-assistant transport correction preserves this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the reproduced iPhone localhost failure, hosted correction and remaining release gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP requires push, publication and real iPhone acceptance."
+        }
+      ],
+      "reason": "Replace the browser-local MAIN 04 bridge call with BIMLog authenticated same-origin transport so iPhone users receive the exact dedicated-agent answer.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4fbea94d900e0a456b1a7b8c9d3ba9e66f218a7cc82f71e599ef8fe3b7ca75c6"
     }
   ]
 }
