@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { BarChart3, BriefcaseBusiness, CalendarDays, ClipboardList, FileCheck2, FolderOpen, RefreshCw, Users } from "lucide-react";
+import { BarChart3, BriefcaseBusiness, CalendarDays, CircleHelp, ClipboardList, FileCheck2, FolderOpen, RefreshCw, Users } from "lucide-react";
 import "./ProjectHome.css";
 
 type IntakeSummary = { status?: string; intake?: unknown } | null;
@@ -57,5 +57,6 @@ export function ProjectHome({ projectId, projectName, projectCode }: { projectId
     {state === "ready" && <ProjectJourneyProgress status={intake?.status} />}
     <section className="project-home-workspaces" aria-labelledby="project-workspaces-title"><div className="project-home-section-heading"><h2 id="project-workspaces-title">{lang === "es" ? "Continuar por objetivo" : "Continue by goal"}</h2><p>{lang === "es" ? "Cada destino conserva el mismo proyecto." : "Every destination keeps the same project context."}</p></div><div className="project-home-grid">{cards.map(card => { const Icon = card.icon; const content = <><Icon aria-hidden="true" /><span><strong>{card.title}</strong><small>{card.detail}</small></span>{!card.available && <em>{lang === "es" ? "Aún no disponible" : "Not available yet"}</em>}</>; return card.available ? <Link key={card.href} className="project-home-card" href={card.href}>{content}</Link> : <div key={card.href} className="project-home-card unavailable" aria-disabled="true">{content}</div>; })}</div></section>
     <section className="project-home-common" aria-labelledby="project-common-title"><div className="project-home-section-heading"><h2 id="project-common-title">{lang === "es" ? "Tareas comunes" : "Common tasks"}</h2><p>{lang === "es" ? "Accesos directos para esta etapa." : "Shortcuts for the current stage."}</p></div><div className="project-home-task-list">{commonTasks.map(task => { const Icon = task.icon; return <Link key={task.href} href={task.href}><Icon aria-hidden="true" />{lang === "es" ? task.es : task.en}</Link>; })}</div></section>
+    <aside className="project-home-help" aria-labelledby="project-home-help-title"><CircleHelp aria-hidden="true" /><div><strong id="project-home-help-title">{lang === "es" ? "¿No está seguro de qué hacer?" : "Not sure what to do?"}</strong><p>{lang === "es" ? "La guía explica esta página y regresa aquí sin perder el proyecto." : "The guide explains this page and returns here without losing the project."}</p></div><Link href={`/help?context=project-home&view=manual&from=${encodeURIComponent(`/projects/${projectId}`)}`}>{lang === "es" ? "Abrir guía" : "Open guide"}</Link></aside>
   </main>;
 }
