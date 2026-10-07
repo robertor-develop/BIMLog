@@ -1000,6 +1000,33 @@ export async function deployRuntimeClosure(
       if (packageManifest.name !== packageName) {
         throw new Error(`Runtime package identity mismatch: ${packageName}`);
       }
+      const expectedPackageManifestPath = requiredWorkspacePackages.includes(packageName)
+        ? path.join(
+            sourceWorkspaceRoot,
+            "lib",
+            packageName.slice(packageName.lastIndexOf("/") + 1),
+            "package.json",
+          )
+        : path.join(
+            sourceWorkspaceRoot,
+            "artifacts",
+            "api-server",
+            "node_modules",
+            packageName,
+            "package.json",
+          );
+      const expectedPackageManifest = JSON.parse(
+        await readFile(expectedPackageManifestPath, "utf8"),
+      );
+      if (
+        typeof packageManifest.version !== "string" ||
+        typeof expectedPackageManifest.version !== "string" ||
+        packageManifest.version !== expectedPackageManifest.version
+      ) {
+        throw new Error(
+          `Runtime package version mismatch: ${packageName} expected ${expectedPackageManifest.version ?? "missing"}, received ${packageManifest.version ?? "missing"}.`,
+        );
+      }
       if (requiredWorkspacePackages.includes(packageName)) {
         const sourceDirectory = path.join(packagePath, "src");
         await assertRegularDirectory(sourceDirectory, `${packageName} source`);
