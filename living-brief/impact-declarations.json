@@ -59640,6 +59640,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "canonical-project-journey-block02",
+      "reviewedThroughCommit": "a57d0c2e5e366d67ac6da896dc60ca5de4aa6458",
+      "reviewedAt": "2026-10-07T07:32:19.6641882Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The second canonical project journey block changes navigation presentation and guidance only and preserves this authority, tenant isolation, permissions, canonical records, financial semantics and Native behavior."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The derived inventory refresh does not change product truth; STATUS already records both canonical project journey blocks and the ten-build publication gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The derived inventory refresh does not change execution scope; OPEN_LOOP already records all five Block 2 builds and the publication plus authenticated smoke gates."
+        }
+      ],
+      "reason": "Complete the canonical Project Home flow with lifecycle, honest availability, stage-aware shortcuts, contextual help and accessibility behavior.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f0c5910a84ece884bc5cd60395fec6f74f929b190ff8f8f00889fc120003a291"
     }
   ]
 }
