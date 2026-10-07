@@ -5,7 +5,7 @@ import { IntakeDeliveryItems } from "@/components/job-intake/IntakeDeliveryItems
 import { EmailReadinessSection } from "@/components/job-intake/EmailReadinessSection";
 import { IntakeResumeNotice } from "@/components/job-intake/IntakeResumeNotice";
 import { isBimtechDeliveryCompany } from "@/lib/shop-drawing-delivery";
-import { withIntakeReturn } from "@/lib/return-context";
+import { parseIntakeResume, withIntakeReturn } from "@/lib/return-context";
 import { intakeReadinessLabel } from "@/lib/intake-readiness-presentation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useRoute } from "wouter";
@@ -323,10 +323,12 @@ export function JobIntakeWorkspace() {
 
   useEffect(() => {
     if (!intake) return;
-    const restored = readJobIntakeActiveStage(projectId);
+    const returnContext = parseIntakeResume(window.location.search, projectId);
+    const restored = returnContext?.stage ?? readJobIntakeActiveStage(projectId);
     setActive(restored === "documents" ? "identity" : restored);
+    preserveJobIntakeActiveStage(projectId, restored);
     if (restored === "documents") document.getElementById("ji-documents")?.setAttribute("open", "");
-    const item = readJobIntakeActiveItem(projectId);
+    const item = returnContext?.item ?? readJobIntakeActiveItem(projectId);
     preserveJobIntakeActiveItem(projectId, item);
     const target = item && /^ji-[a-zA-Z0-9_-]{1,100}$/.test(item) ? item : `ji-${restored}`;
     const frame = window.requestAnimationFrame(() =>

@@ -19,6 +19,7 @@ const financialShell = readFileSync(new URL("../components/layout/FinancialProje
 const projectDetail = readFileSync(new URL("../pages/ProjectDetail.tsx", import.meta.url), "utf8");
 const companyWorkflows = readFileSync(new URL("../pages/CompanyDeliveryWorkflows.tsx", import.meta.url), "utf8");
 const contracts = readFileSync(new URL("../pages/FinancialContractWorkspace.tsx", import.meta.url), "utf8");
+const intakeWorkspace = readFileSync(new URL("../pages/JobIntakeWorkspace.tsx", import.meta.url), "utf8");
 assert.match(banner, /Complete this prerequisite, then continue the same saved Intake draft/);
 assert.match(banner, /aria-label=\{tt\("Return to Job Intake"/);
 assert.equal((financialShell.match(/<IntakeReturnBanner/g) ?? []).length, 1);
@@ -27,6 +28,8 @@ assert.equal((companyWorkflows.match(/<IntakeReturnBanner/g) ?? []).length, 1);
 assert.match(contracts, /\.focus\(\{ preventScroll: false \}\)/);
 assert.match(contracts, /Opened from Job Intake/);
 assert.match(contracts, /fc-card-linked/);
+assert.match(intakeWorkspace, /returnContext\?\.stage \?\? readJobIntakeActiveStage/);
+assert.match(intakeWorkspace, /returnContext\?\.item \?\? readJobIntakeActiveItem/);
 console.log("UX return journey: one visible bilingual recovery path and exact linked-contract focus PASS");
 
 import {projectHomeDestination} from "./project-home-destination";
