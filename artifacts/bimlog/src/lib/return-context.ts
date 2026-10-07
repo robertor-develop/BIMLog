@@ -18,6 +18,10 @@ export function parseIntakeResume(search: string, projectId: number): IntakeRetu
   return { projectId, stage, item, href: intakeOrigin(projectId, stage, item) };
 }
 
+export function intakeResumeTarget(context: IntakeReturnContext): string {
+  return context.item ?? `ji-${context.stage}`;
+}
+
 export function parseIntakeReturn(search: string): IntakeReturnContext | null {
   const raw = new URLSearchParams(search).get("returnTo");
   if (!raw || raw.length > 500 || raw.includes("#") || raw.includes("\\")) return null;
