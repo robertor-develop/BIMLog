@@ -3984,4 +3984,6 @@ The following publication built successfully but failed its startup health gate 
 
 ## Human flow continuity Block 2 — 2026-10-07
 
+Reconciliation checkpoint: implementation commit `b1827a500c13a5a20a1ad0080d57a67ffaca7d45` is the reviewed five-build block boundary.
+
 The second continuity block removes independent, weak `returnTo` handling from adjacent project journeys. Naming now accepts only an exact same-project return and every Files entry preserves its file-intake resume state. Change Order and Transmittal creation share one bounded same-project parser instead of prefix-only checks. SendGrid setup preserves the exact Intake email-readiness control and explains the return before the user leaves Profile. Focused behavior and frontend typechecking are the block gate. This five-build block is pushed after acceptance and remains unpublished until the next block reaches the ten-build boundary.
