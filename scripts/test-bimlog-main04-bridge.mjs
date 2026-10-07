@@ -23,6 +23,10 @@ assert.ok(panel.includes("Include the selected field value"), "panel must expose
 assert.ok(panel.includes("New conversation"), "panel must expose the Atlas conversation reset");
 assert.ok(panel.includes("Show me where"), "panel must expose the Atlas location guide");
 assert.ok(panel.includes("Page guide and work status"), "panel must expose the Atlas page guide");
+assert.ok(panel.includes("RECOMMENDED NEXT"), "panel must expose the compact Lumen next-action card");
+assert.ok(panel.includes("Ask about this workspace"), "panel must expose the Lumen workspace prompt action");
+assert.ok(panel.includes("Request a fix"), "panel must expose the Lumen three-lane action row");
+assert.ok(panel.includes("Recent result"), "panel must expose the Lumen status strip");
 assert.doesNotMatch(panel, /page-assistant-resize|page-assistant-collapse/, "panel must not expose legacy dock controls");
 assert.match(context, /return value \? clean\(`\$\{label\}: \$\{value\}`/, "selected field context must include its visible value");
 assert.doesNotMatch(bridge, /operations/i, "bridge must not depend on Operations");

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, X } from "lucide-react";
+import { Bot, Minus, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { collectPageAssistantContext, highlightAssistantControls, selectedAssistantControl } from "@/lib/page-assistant-context";
@@ -47,28 +47,35 @@ export function PageAssistant() {
       </button>
       {open&&<aside id="bimlog-page-assistant" className="page-assistant-panel" role="dialog" aria-modal="false" aria-label={tt("BIMLog page assistant","Asistente de página BIMLog")}>
         <header>
-          <div><small>{tt("YOUR BIMLOG AGENT","TU AGENTE BIMLOG")}</small><strong>{context.page||tt("Here when you need help.","Aquí cuando necesites ayuda.")}</strong></div>
-          <button type="button" className="page-assistant-close" aria-label={tt("Close agent","Cerrar agente")} onClick={()=>setOpen(false)}><X size={20}/></button>
+          <div><small>{tt("YOUR BIMLOG AGENT","TU AGENTE BIMLOG")}</small><strong>{tt("Workspace guide","Guía del espacio de trabajo")}</strong><span>{tt("BIMLog Agent · connected","Agente BIMLog · conectado")}</span></div>
+          <nav className="page-assistant-header-actions"><button type="button" aria-label={tt("Minimize agent","Minimizar agente")} onClick={()=>setOpen(false)}><Minus size={16}/></button><button type="button" aria-label={tt("Close agent","Cerrar agente")} onClick={()=>setOpen(false)}><X size={16}/></button></nav>
         </header>
+        <section className="page-assistant-recommended">
+          <small>{tt("RECOMMENDED NEXT","SIGUIENTE RECOMENDADO")}</small>
+          <strong>{tt("Continue with this page","Continuar con esta página")}</strong>
+          <p>{tt("Ask the BIMLog Agent what needs attention without losing your place or changing project data.","Pregunta al Agente BIMLog qué necesita atención sin perder tu lugar ni cambiar datos del proyecto.")}</p>
+          <button type="button" onClick={()=>{setActiveTool("ask");input.current?.focus();}}>{tt("Ask about this workspace","Preguntar sobre este espacio")}</button>
+        </section>
+        <div className="page-assistant-section-label">{tt("ASK A QUESTION","HACER UNA PREGUNTA")}</div>
         <nav className="page-assistant-actions" aria-label={tt("Assistant actions","Acciones del asistente")}>
           <button type="button" aria-pressed={activeTool==="ask"} onClick={()=>setActiveTool("ask")}>{tt("Ask a question","Hacer una pregunta")}</button>
           <button type="button" aria-pressed={activeTool==="feedback"} onClick={()=>{setActiveTool("feedback");submitFeedback(false);}}>{tt("Submit feedback","Enviar comentarios")}</button>
-          {canAuthorize&&<button type="button" aria-pressed={activeTool==="fix"} onClick={()=>setActiveTool("fix")}>{tt("Fix","Corregir")}</button>}
+          <button type="button" aria-pressed={activeTool==="fix"} disabled={!canAuthorize} title={!canAuthorize?tt("Repair authorization is required.","Se requiere autorización de reparación."):undefined} onClick={()=>setActiveTool("fix")}>{tt("Request a fix","Solicitar corrección")}</button>
         </nav>
-        <p className="page-assistant-purpose">{tt("Answers explain this page. They cannot save, approve or activate work.","Las respuestas explican esta página. No pueden guardar, aprobar ni activar trabajo.")}</p>
 
         <section className="page-assistant-question" aria-label={tt("Conversation","Conversación")}>
-          <div className="page-assistant-messages" aria-live="polite" aria-busy={busy}>
-            {!messages.length&&<p>{tt("Ask about this page without losing your work. BIMLog sends visible page labels and non-password values to ground the answer; passwords are never sent.","Pregunta sobre esta página sin perder tu trabajo. BIMLog envía etiquetas visibles y valores que no sean contraseñas para fundamentar la respuesta; las contraseñas nunca se envían.")}</p>}
-            {messages.map((message,index)=><article key={index} data-role={message.role}><strong>{message.role==="user"?tt("You","Tú"):"BIMLog"}</strong><p>{message.text}</p>{message.projectId!==context.projectId&&<small>{tt("From another project context","De otro contexto de proyecto")}</small>}</article>)}
-          </div>
+          <form onSubmit={event=>{event.preventDefault();void ask();}}>
+            <label>{tt("Ask about this page","Pregunta sobre esta página")}<textarea ref={input} value={question} maxLength={2000} onChange={event=>setQuestion(event.target.value)} /></label>
+            <label className="page-assistant-selected"><input type="checkbox" checked={includeSelected} onChange={event=>setIncludeSelected(event.target.checked)}/>{tt("Include the selected field value","Incluir el valor del campo seleccionado")}</label>
+            <div className="page-assistant-form-actions"><button type="submit" disabled={busy||!question.trim()}>{busy?tt("BIMLog Agent is answering…","El Agente BIMLog está respondiendo…"):tt("Ask BIMLog Agent","Preguntar al Agente BIMLog")}</button><button type="button" onClick={newConversation}>{tt("New conversation","Nueva conversación")}</button></div>
+          </form>
           {error&&<div role="alert" className="page-assistant-error">{error}</div>}
           {notice&&<div role="status" className="page-assistant-notice">{notice}</div>}
-          <form onSubmit={event=>{event.preventDefault();void ask();}}>
-            <label>{tt("Your question","Tu pregunta")}<textarea ref={input} value={question} maxLength={2000} onChange={event=>setQuestion(event.target.value)} /></label>
-            <label className="page-assistant-selected"><input type="checkbox" checked={includeSelected} onChange={event=>setIncludeSelected(event.target.checked)}/>{tt("Include the selected field value","Incluir el valor del campo seleccionado")}</label>
-            <div className="page-assistant-form-actions"><button type="submit" disabled={busy||!question.trim()}>{busy?tt("Answering…","Respondiendo…"):tt("Ask","Preguntar")}</button><button type="button" onClick={newConversation}>{tt("New conversation","Nueva conversación")}</button></div>
-          </form>
+          <div className="page-assistant-messages" aria-live="polite" aria-busy={busy}>
+            {busy&&<p>{tt("Sending your question to the BIMLog Agent…","Enviando tu pregunta al Agente BIMLog…")}</p>}
+            {!busy&&!messages.length&&<p>{tt("Your BIMLog answer will appear here.","Tu respuesta de BIMLog aparecerá aquí.")}</p>}
+            {messages.slice(-2).map((message,index)=><article key={`${messages.length}-${index}`} data-role={message.role}><strong>{message.role==="user"?tt("You","Tú"):"BIMLog"}</strong><p>{message.text}</p>{message.projectId!==context.projectId&&<small>{tt("From another project context","De otro contexto de proyecto")}</small>}</article>)}
+          </div>
         </section>
 
         <details className="page-assistant-section">
@@ -98,6 +105,11 @@ export function PageAssistant() {
             {isSuperAdmin&&<section><strong>{tt("Delegate repair authority","Delegar autoridad de reparación")}</strong><label>{tt("Existing user email","Correo de usuario existente")}<input type="email" value={delegateEmail} onChange={event=>setDelegateEmail(event.target.value)}/></label><div><button type="button" disabled={!delegateEmail.includes("@")} onClick={()=>void delegate(true)}>{tt("Grant","Otorgar")}</button><button type="button" disabled={!delegateEmail.includes("@")} onClick={()=>void delegate(false)}>{tt("Revoke","Revocar")}</button></div></section>}
           </div>
         </details>}
+        <footer className="page-assistant-status-strip">
+          <div><small>{tt("Workspace","Espacio")}</small><strong>{context.page||tt("Current page","Página actual")}</strong></div>
+          <div><small>{tt("Agent","Agente")}</small><strong>{busy?tt("Answering","Respondiendo"):tt("Connected","Conectado")}</strong></div>
+          <div><small>{tt("Recent result","Resultado reciente")}</small><strong>{messages.some(item=>item.role==="assistant")?tt("Available","Disponible"):tt("None yet","Aún ninguno")}</strong></div>
+        </footer>
       </aside>}
     </div>
   );
