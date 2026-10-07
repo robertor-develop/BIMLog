@@ -9,7 +9,9 @@ export function parseChangeOriginContext(search: string, projectId: number): Cha
   const label = params.get("originLabel")?.trim() ?? "";
   const returnTo = safeProjectReturnTarget(params.get("returnTo"), projectId);
   if (!type || !/^[1-9]\d*$/.test(idText) || !label || !returnTo) return null;
-  return { type, id: Number(idText), label, returnTo };
+  const id = Number(idText);
+  if (!Number.isSafeInteger(id)) return null;
+  return { type, id, label, returnTo };
 }
 
 export type TransmittalEvidenceContext = { sourceType: string; sourceId: number; sourceLabel: string; sourceVersion: string; returnTo: string };
@@ -22,5 +24,7 @@ export function parseTransmittalEvidenceContext(search: string, projectId: numbe
   const sourceVersion = params.get("sourceVersion")?.trim() ?? "";
   const returnTo = safeProjectReturnTarget(params.get("returnTo"), projectId);
   if (!sourceType || !/^[1-9]\d*$/.test(sourceIdText) || !sourceLabel || !sourceVersion || !returnTo) return null;
-  return { sourceType, sourceId: Number(sourceIdText), sourceLabel, sourceVersion, returnTo };
+  const sourceId = Number(sourceIdText);
+  if (!Number.isSafeInteger(sourceId)) return null;
+  return { sourceType, sourceId, sourceLabel, sourceVersion, returnTo };
 }

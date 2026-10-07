@@ -4791,3 +4791,12 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Reject a reusable production runtime whenever any required direct package version differs from the current installed graph.
 - [x] Complete a clean local API typecheck and deterministic runtime-closure rebuild at implementation commit `19633044bb978810dcb8c7cb8b4b69e00bc5a9dc`.
 - [ ] Reconcile and push this release repair, rebuild it in Replit, republish, then require exact-source health and authenticated Chrome workflow acceptance.
+
+## Human flow continuity Block 2 — 2026-10-07
+
+- [x] Validate reusable return destinations against the exact project workspace.
+- [x] Preserve the Files intake context through Name Generator and reject unsafe return targets.
+- [x] Use one strict return parser for Change Order and Transmittal source journeys.
+- [x] Preserve and explain the exact Job Intake email-readiness return through Profile.
+- [x] Bind focused block acceptance and the five-build push boundary.
+- [ ] Publish only after the next five-build block completes the ten-build interval, then run the full authenticated Chrome smoke.
