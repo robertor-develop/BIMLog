@@ -1,20 +1,29 @@
 const stages = new Set(["documents", "identity", "contract", "scope", "delivery", "team", "review"]);
+export type IntakeStage = "documents" | "identity" | "contract" | "scope" | "delivery" | "team" | "review";
+export type IntakeReturnContext = { projectId: number; stage: IntakeStage; item?: string; href: string };
+
+export function parseIntakeReturn(search: string): IntakeReturnContext | null {
+  const raw = new URLSearchParams(search).get("returnTo");
+  if (!raw || raw.length > 500 || raw.includes("#") || raw.includes("\\")) return null;
+  const [pathname, query = ""] = raw.split("?");
+  const match = pathname.match(/^\/projects\/(\d+)\/intake$/);
+  const projectId = Number(match?.[1]);
+  if (!match || !Number.isSafeInteger(projectId) || projectId < 1) return null;
+  const params = new URLSearchParams(query);
+  const stage = (params.get("stage") || "documents") as IntakeStage;
+  if (!stages.has(stage) || [...params.keys()].some(key => !["stage", "item"].includes(key))) return null;
+  const item = params.get("item") || undefined;
+  if (item && !/^ji-[a-zA-Z0-9_-]{1,100}$/.test(item)) return null;
+  return { projectId, stage, item, href: intakeOrigin(projectId, stage, item) };
+}
 export function intakeOrigin(projectId: number, stage: string, item?: string): string {
   const query = new URLSearchParams({ stage: stages.has(stage) ? stage : "documents" });
   if (item && /^ji-[a-zA-Z0-9_-]{1,100}$/.test(item)) query.set("item", item);
   return `/projects/${projectId}/intake?${query}`;
 }
 export function validatedReturn(search: string, projectId: number): string | null {
-  const raw = new URLSearchParams(search).get("returnTo");
-  if (!raw || raw.length > 500 || !Number.isSafeInteger(projectId) || projectId < 1) return null;
-  const [pathname, query = ""] = raw.split("?");
-  if (pathname !== `/projects/${projectId}/intake` || raw.includes("#") || raw.includes("\\")) return null;
-  const params = new URLSearchParams(query);
-  const stage = params.get("stage") || "documents";
-  if (!stages.has(stage) || [...params.keys()].some(key => !["stage", "item"].includes(key))) return null;
-  const item = params.get("item");
-  if (item && !/^ji-[a-zA-Z0-9_-]{1,100}$/.test(item)) return null;
-  return intakeOrigin(projectId, stage, item || undefined);
+  const context = parseIntakeReturn(search);
+  return context?.projectId === projectId ? context.href : null;
 }
 export function withIntakeReturn(destination: string, projectId: number, stage: string, item?: string) {
   return `${destination}${destination.includes("?") ? "&" : "?"}returnTo=${encodeURIComponent(intakeOrigin(projectId, stage, item))}`;
@@ -22,7 +31,5 @@ export function withIntakeReturn(destination: string, projectId: number, stage: 
 
 /** Recovery on company-level prerequisites; the destination still enforces project access. */
 export function intakePrerequisiteReturn(search: string): string | null {
-  const raw = new URLSearchParams(search).get("returnTo");
-  const projectId = Number(raw?.match(/^\/projects\/(\d+)\/intake(?:\?|$)/)?.[1]);
-  return validatedReturn(search, projectId);
+  return parseIntakeReturn(search)?.href ?? null;
 }
