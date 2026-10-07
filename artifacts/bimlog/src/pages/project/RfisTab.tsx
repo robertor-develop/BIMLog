@@ -34,6 +34,7 @@ import { RfiImageCropEditor, type NormalizedCrop } from "@/components/rfi/RfiIma
 import { RfiSnippingWorkspace } from "@/components/rfi/RfiSnippingWorkspace";
 import { RfiImagePresentationControls } from "@/components/rfi/RfiImagePresentationControls";
 import { logClientError } from "@/lib/client-log";
+import { parseOperationalDocumentReturn } from "@/lib/job-operations-daily-work";
 import { bootstrapLensNextBridgeSession, createLensNextApiClient, createLensNextBridgeClient } from "@/features/lens-next/lens-next-client";
 import { openBimlogWorkingView } from "@/features/lens-next/lens-next-working-view";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
@@ -936,13 +937,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const rfisQueryClient = useQueryClient();
   const currentMember = members?.find(m => m.userId === user?.id || (m.userEmail && user?.email && m.userEmail.toLowerCase() === user.email.toLowerCase()));
   const canManageReportSettings = currentMember?.role === "project_admin" || Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin);
-  const launcher = (() => {
-    const search = new URLSearchParams(window.location.search);
-    const taskId = search.get("operationTaskId");
-    const returnTo = search.get("returnTo");
-    const validReturn = returnTo?.startsWith(`/projects/${projectId}/operations?taskId=`) ? returnTo : null;
-    return taskId && validReturn ? { taskId, returnTo: validReturn } : null;
-  })();
+  const launcher = parseOperationalDocumentReturn(window.location.search, projectId);
 
   // Prefill a new RFI from query params (e.g. navigated from a Lens viewpoint).
   useEffect(() => {

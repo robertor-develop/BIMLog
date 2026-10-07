@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { buildDailyWorkQueues, canonicalDocumentLauncher, nextTaskAction, operationalHourMetrics, taskCostBinding } from "./job-operations-daily-work";
+import { buildDailyWorkQueues, canonicalDocumentLauncher, nextTaskAction, operationalHourMetrics, parseOperationalDocumentReturn, taskCostBinding } from "./job-operations-daily-work";
 
 const tasks = [
   { id: "blocked", nameEn: "Resolve clash", status: "blocked", assigneeUserId: 7, dueDate: "2026-09-29", canControl: true, plannedHours: "10", actualHours: "4", progressPercent: 40 },
@@ -30,6 +30,9 @@ assert.equal(operationalHourMetrics(10, 12, 100).unused, 0);
 const launch = canonicalDocumentLauncher(7, "task-1", "rfi");
 assert.match(launch, /^\/projects\/7\/rfis\?create=1/);
 assert.match(decodeURIComponent(launch), /returnTo=\/projects\/7\/operations\?taskId=task-1/);
+assert.deepEqual(parseOperationalDocumentReturn(new URL(launch, "https://bimlog.app").search, 7), { taskId: "task-1", returnTo: "/projects/7/operations?taskId=task-1" });
+assert.equal(parseOperationalDocumentReturn("operationTaskId=task-1&returnTo=%2Fprojects%2F8%2Foperations%3FtaskId%3Dtask-1", 7), null);
+assert.equal(parseOperationalDocumentReturn("operationTaskId=task-1&returnTo=%2Fprojects%2F7%2Foperations%3FtaskId%3Dtask-2", 7), null);
 
 const page = fs.readFileSync(new URL("../pages/JobOperationsWorkspace.tsx", import.meta.url), "utf8");
 const rfi = fs.readFileSync(new URL("../pages/project/RfisTab.tsx", import.meta.url), "utf8");
