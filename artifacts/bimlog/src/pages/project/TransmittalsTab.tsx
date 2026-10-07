@@ -7,6 +7,7 @@ import { FileText, Trash2, Sparkles, Send } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { parseTransmittalEvidenceContext, type TransmittalEvidenceContext } from "@/lib/project-record-return";
+import { parseOperationalDocumentReturn } from "@/lib/job-operations-daily-work";
 
 interface Transmittal {
   id: number; number: string; title: string; purpose?: string;
@@ -79,15 +80,16 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   const [exportError, setExportError] = useState("");
   const [filter, setFilter] = useState("all");
   const evidenceContext = useMemo(() => parseTransmittalEvidenceContext(searchParams, projectId), [searchParams, projectId]);
+  const operationReturn = useMemo(() => parseOperationalDocumentReturn(searchParams, projectId), [searchParams, projectId]);
 
   useEffect(() => {
-    if (!evidenceContext) return;
+    if (!evidenceContext && !operationReturn) return;
     setShowForm(true);
     setForm(current => ({
       ...current,
-      title: current.title || evidenceContext.sourceLabel,
+      title: current.title || evidenceContext?.sourceLabel || t("Operations task transmittal", "Transmisión de tarea de Operaciones"),
     }));
-  }, [evidenceContext]);
+  }, [evidenceContext, operationReturn]);
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
@@ -354,6 +356,13 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
               <div style={{ marginTop: 2, fontSize: 12, color: "#475569" }}>{t("Exact version", "Versión exacta")}: {evidenceContext.sourceVersion} · ID {evidenceContext.sourceId}</div>
               <div style={{ marginTop: 6, fontSize: 12, color: "#475569" }}>{t("This evidence will be attached to the draft. Review the recipient below before issuing it.", "Esta evidencia se adjuntará al borrador. Revise el destinatario antes de emitirlo.")}</div>
               <a href={evidenceContext.returnTo} style={{ display: "inline-block", marginTop: 8, fontSize: 12, fontWeight: 800 }}>{t("Return to source", "Volver al origen")}</a>
+            </div>
+          )}
+          {operationReturn && (
+            <div role="status" style={{ marginBottom: 14, padding: 12, border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF" }}>
+              <div style={{ fontWeight: 800 }}>{t("Transmittal for the selected Operations task", "Transmisión para la tarea seleccionada de Operaciones")}</div>
+              <p style={{ margin: "4px 0 8px", fontSize: 12 }}>{t("Create the draft here, then return to the exact task without losing your place.", "Cree aquí el borrador y luego vuelva a la tarea exacta sin perder su lugar.")}</p>
+              <a href={operationReturn.returnTo} style={{ fontSize: 12, fontWeight: 800 }}>{t("Return to selected task", "Volver a la tarea seleccionada")}</a>
             </div>
           )}
           {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
