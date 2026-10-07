@@ -222,7 +222,7 @@ export function ProjectDetail() {
               </div>
             )}
           >
-          {tab === "home" && <ProjectHome projectId={projectId} role={memberRole} />}
+          {tab === "home" && <ProjectHome projectId={projectId} projectName={project.name} projectCode={project.code} />}
           {!isKnownTab && (
             <section
               role="alert"
