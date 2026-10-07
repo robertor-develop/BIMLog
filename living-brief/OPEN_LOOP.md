@@ -4739,3 +4739,4 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Provide truthful permission, device, no-speech, network and unsupported-browser guidance without storing microphone audio in BIMLog.
 - [x] Preserve MAIN 04 routing, FIFO/request correlation, tenant/authentication boundaries and Feedback/Fix separation.
 - [ ] Publish the exact release and verify desktop/mobile authenticated Chrome layout and controls without activating Roberto's microphone.
+- [x] Bind semantic review and generated Living Brief evidence to implementation commit `fb516e7d7d941ec1c9e4eef6e24740662be3c8f6` before release.

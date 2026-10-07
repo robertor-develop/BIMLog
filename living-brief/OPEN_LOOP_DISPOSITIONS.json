@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "be57451f16e32842dc98920f1f3919d6bab70050ae088709ba7f7e6e05e0b871",
-  "itemCount": 333,
+  "sourceSha256": "9912f266d15a05d60cbc105fc8ff7fc9bf805805f44b9dbf618e5276d4597c27",
+  "itemCount": 334,
   "counts": {
-    "ACTIVE": 293,
+    "ACTIVE": 294,
     "SUPERSEDED": 28,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6071,6 +6071,24 @@
       "evidence": [
         "OPEN_LOOP.md:4734",
         "Established-user mobile sign-in correction — 2026-10-06"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "b68c36188141fcb4",
+      "sourceLine": 4741,
+      "heading": "BIMLog Agent voice dictation — 2026-10-07",
+      "statement": "Publish the exact release and verify desktop/mobile authenticated Chrome layout and controls without activating Roberto's microphone.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4741",
+        "BIMLog Agent voice dictation — 2026-10-07"
       ],
       "currentAuthority": false
     }

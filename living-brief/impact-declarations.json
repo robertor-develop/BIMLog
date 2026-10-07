@@ -59501,6 +59501,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4fbea94d900e0a456b1a7b8c9d3ba9e66f218a7cc82f71e599ef8fe3b7ca75c6"
+    },
+    {
+      "taskId": "bimlog-agent-reviewed-voice-dictation",
+      "reviewedThroughCommit": "fb516e7d7d941ec1c9e4eef6e24740662be3c8f6",
+      "reviewedAt": "2026-10-07T04:55:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reviewed browser speech dictation preserves this authority and existing BIMLog assistant routing, tenancy, feedback separation and product behavior."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the reviewed voice-dictation implementation and remaining publication and live acceptance gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records exact-source publication and authenticated desktop/mobile acceptance as remaining."
+        }
+      ],
+      "reason": "Add explicit, reviewed browser speech dictation beside the BIMLog Agent question field without auto-submission or changing the dedicated-agent transport.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a61d0381c95245151e7d6ef73b759c05344abc2e8b0aea85258db09fed7d522d"
     }
   ]
 }
