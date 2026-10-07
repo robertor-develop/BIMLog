@@ -2,6 +2,11 @@ const stages = new Set(["documents", "identity", "contract", "scope", "delivery"
 export type IntakeStage = "documents" | "identity" | "contract" | "scope" | "delivery" | "team" | "review";
 export type IntakeReturnContext = { projectId: number; stage: IntakeStage; item?: string; href: string };
 
+export function intakeReturnActionHref(context: IntakeReturnContext): string {
+  const separator = context.href.includes("?") ? "&" : "?";
+  return `${context.href}${separator}resume=prerequisite`;
+}
+
 export function parseIntakeReturn(search: string): IntakeReturnContext | null {
   const raw = new URLSearchParams(search).get("returnTo");
   if (!raw || raw.length > 500 || raw.includes("#") || raw.includes("\\")) return null;
