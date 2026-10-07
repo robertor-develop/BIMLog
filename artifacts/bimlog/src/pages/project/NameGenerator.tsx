@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useGetConvention } from "@workspace/api-client-react";
 import { useI18n } from "@/lib/i18n";
+import { safeProjectReturnTarget } from "@/lib/return-context";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -163,7 +164,7 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
   const search = useSearch();
 
   // Read returnTo from query params
-  const returnTo = new URLSearchParams(search).get("returnTo");
+  const requestedReturnTo = new URLSearchParams(search).get("returnTo");
 
   // Read projectId from URL params as fallback (supports direct navigation via setLocation)
   const [matchGenerator, paramsGenerator] = useRoute("/projects/:id/generator");
@@ -174,6 +175,7 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
       ? parseInt(paramsTab!.id)
       : 0;
   const projectId = projectIdProp ?? urlProjectId;
+  const returnTo = safeProjectReturnTarget(requestedReturnTo, projectId);
 
   const { data: convention, isLoading, isError } = useGetConvention(projectId);
 

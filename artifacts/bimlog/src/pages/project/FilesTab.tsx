@@ -909,7 +909,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                                   </button>
 
                                   <button
-                                    onClick={e => { e.stopPropagation(); setLocation(`/projects/${projectId}/generator?returnTo=${encodeURIComponent(`/projects/${projectId}/files`)}`); }}
+                                    onClick={e => { e.stopPropagation(); setLocation(conventionResolverUrl(projectId)); }}
                                     style={{
                                       display: "inline-flex", alignItems: "center", gap: 5,
                                       padding: "6px 13px", borderRadius: 6,
@@ -1447,7 +1447,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
 
               {/* Customize Name button */}
               <button
-                onClick={() => setLocation(`/projects/${projectId}/generator?returnTo=${encodeURIComponent(`/projects/${projectId}/files`)}`)}
+                onClick={() => setLocation(conventionResolverUrl(projectId))}
                 style={{
                   display: "inline-flex", alignItems: "center", gap: 5,
                   padding: "7px 14px", borderRadius: 6,
