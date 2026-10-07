@@ -6,6 +6,7 @@ import path from "node:path";
 import {
   analyzeSql,
   collectSchemaContract,
+  resolvePublicationBranch,
   runStaticGate,
 } from "./check-database-safety.mjs";
 import { databaseToolResultFailed } from "../lib/db/scripts/sync-development-schema.mjs";
@@ -27,6 +28,30 @@ assert.deepEqual(
   `),
   [],
 );
+
+const releaseCommit = "a".repeat(40);
+assert.equal(resolvePublicationBranch({}), "master");
+assert.equal(
+  resolvePublicationBranch({
+    BIMLOG_ACCEPTED_BRANCH: "codex/bimlog-template-gap-block01-20260923",
+    BIMLOG_ACCEPTED_COMMIT: releaseCommit,
+  }),
+  "codex/bimlog-template-gap-block01-20260923",
+);
+assert.throws(
+  () => resolvePublicationBranch({ BIMLOG_ACCEPTED_BRANCH: "release/candidate" }),
+  /requires BIMLOG_ACCEPTED_COMMIT/,
+);
+for (const invalidBranch of ["refs/heads/main", "../main", "release//candidate", "release@{1}", "release.lock"]) {
+  assert.throws(
+    () =>
+      resolvePublicationBranch({
+        BIMLOG_ACCEPTED_BRANCH: invalidBranch,
+        BIMLOG_ACCEPTED_COMMIT: releaseCommit,
+      }),
+    /exact short branch name/,
+  );
+}
 
 const productionCatalog = {
   tables: [{ name: "records" }],
