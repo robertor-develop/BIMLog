@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "f00bb224d052db1850ab8a0073b7ab8fee23eebb61521207ea245e8fff10ae8b",
-  "itemCount": 331,
+  "sourceSha256": "116e0693b52987db5987cb4f612404c8225f0bd5b83ee91c28606dfdead70bf8",
+  "itemCount": 332,
   "counts": {
-    "ACTIVE": 292,
+    "ACTIVE": 293,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6035,6 +6035,24 @@
       "evidence": [
         "OPEN_LOOP.md:4716",
         "MAIN 04.00 page-question release closure (2026-10-06)"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1d53e13b9d42d076",
+      "sourceLine": 4727,
+      "heading": "Established-user mobile sign-in correction — 2026-10-06",
+      "statement": "Publish the exact source and verify a fresh mobile-width authenticated Headquarters load without the onboarding modal.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4727",
+        "Established-user mobile sign-in correction — 2026-10-06"
       ],
       "currentAuthority": false
     }

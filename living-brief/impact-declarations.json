@@ -59358,6 +59358,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4acf7b92d920d467382132bbd369d1ca89a8cddbb1b47aff30d7c7a04eb91650"
+    },
+    {
+      "taskId": "established-user-mobile-sign-in-correction",
+      "reviewedThroughCommit": "583b9e1f92d2b67ecb5d392e4af01cc5e6cfe136",
+      "reviewedAt": "2026-10-06T20:00:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established-user onboarding bypass preserves this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the reproduced new-device onboarding defect, bounded correction and remaining live gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP requires exact-source publication and fresh mobile-width authenticated acceptance."
+        }
+      ],
+      "reason": "Use server-reported existing project access to prevent the new-account email-verification wizard from blocking established users on each new device.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9f8cc56a5b08386ea0f7373d8f117b6b86729d26e5abc442f69d5654e3361a74"
     }
   ]
 }

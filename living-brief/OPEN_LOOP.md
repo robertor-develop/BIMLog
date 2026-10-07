@@ -4719,3 +4719,9 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - Publish exact source `3981897d191bd501f8138618a7a0e76d18a6c1ad` after reconciliation; this includes the live-found conversation-collapse specificity repair.
 - In authenticated Chrome at 100% zoom, verify the question field, Ask action and latest answer are visible together in the BIMLog agent without obscuring the page.
 - Repeat one harmless MAIN 04.00 question and require the correlated answer plus a clean browser console.
+
+## Established-user mobile sign-in correction — 2026-10-06
+
+- [x] Implement source `583b9e1f92d2b67ecb5d392e4af01cc5e6cfe136` so authenticated users with existing project access bypass new-account onboarding on a new browser or phone.
+- [x] Preserve the complete onboarding and email-verification flow for users without project access.
+- [ ] Publish the exact source and verify a fresh mobile-width authenticated Headquarters load without the onboarding modal.
