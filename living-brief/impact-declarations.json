@@ -59984,6 +59984,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "replit-build-tree-source-discovery",
+      "reviewedThroughCommit": "6efd67fc020528e404c7859c6605cc92e1605a4a",
+      "reviewedAt": "2026-10-07T18:50:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit build-time source discovery accepts only the unique remote commit whose Git tree exactly matches the canonical publication snapshot; explicit bindings still take precedence and product, tenant, financial, database, Native and report behavior remain unchanged."
+        }
+      ],
+      "reason": "Close the provider build-time environment gap without trusting an unverified branch or weakening exact source identity.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0bb61d5a9181b922fc411747c5175e371eea55c7f42c0a4131d540b35f45dff4"
     }
   ]
 }

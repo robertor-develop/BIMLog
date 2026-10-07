@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "c274bd29613db267c0c79544c00c7f601c4a2c2249b22e1ab852d04f5874fc88",
-  "itemCount": 336,
+  "sourceSha256": "07d7647868f525eef773666da5f46bbce6b07af3896d7e85eecf678afff9426f",
+  "itemCount": 337,
   "counts": {
     "ACTIVE": 296,
-    "SUPERSEDED": 28,
+    "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -6125,6 +6125,24 @@
       "evidence": [
         "OPEN_LOOP.md:4778",
         "BIMLog Agent voice dictation — 2026-10-07"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "257789ee3e700a33",
+      "sourceLine": 4786,
+      "heading": "Named release source publication closure — 2026-10-07",
+      "statement": "Push the reconciled repair, republish once, and run exact-source health plus authenticated Chrome acceptance.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
       ],
       "currentAuthority": false
     }

@@ -4777,3 +4777,10 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Preserve MAIN 04 routing, FIFO/request correlation, tenant/authentication boundaries and Feedback/Fix separation.
 - [ ] Publish the exact release and verify desktop/mobile authenticated Chrome layout and controls without activating Roberto's microphone.
 - [x] Bind semantic review and generated Living Brief evidence to implementation commit `fb516e7d7d941ec1c9e4eef6e24740662be3c8f6` before release.
+
+## Named release source publication closure — 2026-10-07
+
+- [x] Preserve explicit named-branch/commit validation for controlled build environments.
+- [x] Fail closed while inferring a build-time source unless exactly one distinct remote commit matches the canonical Replit snapshot tree.
+- [x] Pass a simulated Replit API production build with no build-time release variables and complete deterministic runtime closure.
+- [ ] Push the reconciled repair, republish once, and run exact-source health plus authenticated Chrome acceptance.
