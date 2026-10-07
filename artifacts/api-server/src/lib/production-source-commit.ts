@@ -15,6 +15,19 @@ export type ProductionSourceCandidate = {
 
 export type ProductionCommitIdentity = { commit: string; tree: string; subject: string };
 
+export function selectUniqueRemoteTreeMatch(
+  headTree: string,
+  candidates: readonly ProductionCommitIdentity[],
+): ProductionCommitIdentity {
+  const normalizedTree = headTree.trim().toLowerCase();
+  const matches = candidates.filter(candidate => candidate.tree.trim().toLowerCase() === normalizedTree);
+  const commits = new Map(matches.map(candidate => [candidate.commit.trim().toLowerCase(), candidate]));
+  if (commits.size !== 1) {
+    throw new Error(`Replit publication requires exactly one remote commit matching its source tree; found ${commits.size}.`);
+  }
+  return [...commits.values()][0];
+}
+
 export function unwrapReplitPublishChain(chain: readonly ProductionCommitIdentity[]): ProductionCommitIdentity {
   if (!chain.length) throw new Error("Remote master history is empty.");
   for (let index = 0; index < chain.length; index += 1) {

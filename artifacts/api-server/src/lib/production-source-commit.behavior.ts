@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveProductionSourceCommit, unwrapReplitPublishChain } from "./production-source-commit";
+import { resolveProductionSourceCommit, selectUniqueRemoteTreeMatch, unwrapReplitPublishChain } from "./production-source-commit";
 
 const head = "a".repeat(40);
 const remote = "b".repeat(40);
@@ -23,5 +23,18 @@ assert.throws(() => unwrapReplitPublishChain([
   { commit: "d".repeat(40), tree, subject: "Published your App" },
   { commit: remote, tree: "f".repeat(40), subject: "Canonical source" },
 ]), /changes/);
+assert.equal(selectUniqueRemoteTreeMatch(tree, [
+  { commit: remote, tree, subject: "Release source" },
+  { commit: "d".repeat(40), tree: "f".repeat(40), subject: "Other source" },
+]).commit, remote);
+assert.equal(selectUniqueRemoteTreeMatch(tree, [
+  { commit: remote, tree, subject: "Release source" },
+  { commit: remote, tree, subject: "Same commit through another remote ref" },
+]).commit, remote);
+assert.throws(() => selectUniqueRemoteTreeMatch(tree, []), /found 0/);
+assert.throws(() => selectUniqueRemoteTreeMatch(tree, [
+  { commit: remote, tree, subject: "First source" },
+  { commit: "d".repeat(40), tree, subject: "Second source" },
+]), /found 2/);
 
 console.log("production source commit behavior: PASS");

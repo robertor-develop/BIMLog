@@ -22,7 +22,7 @@ import {
   writeFile,
 } from "fs/promises";
 import { generatePlatformMd } from "./scripts/generate-platform-md";
-import { resolveProductionSourceCommit, unwrapReplitPublishChain } from "./src/lib/production-source-commit";
+import { resolveProductionSourceCommit, selectUniqueRemoteTreeMatch, unwrapReplitPublishChain } from "./src/lib/production-source-commit";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -153,13 +153,29 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
     });
   const canonicalHead = unwrapReplitPublishChain(localHistory);
   const replitEnvironment = Boolean(process.env.REPL_ID || process.env.REPL_SLUG);
-  const acceptedBranch = process.env.BIMLOG_ACCEPTED_BRANCH?.trim() || "master";
+  let acceptedBranch = process.env.BIMLOG_ACCEPTED_BRANCH?.trim();
+  if (replitEnvironment && !acceptedBranch) {
+    const remoteHeads = git("for-each-ref", "--format=%(objectname)%09%(tree)%09%(subject)", "refs/remotes/origin")
+      .split(/\r?\n/)
+      .filter(Boolean)
+      .map(line => {
+        const [commit, tree, ...subject] = line.split("\t");
+        return { commit, tree, subject: subject.join("\t") };
+      });
+    const matchedRemote = selectUniqueRemoteTreeMatch(canonicalHead.tree, remoteHeads);
+    acceptedBranch = git("for-each-ref", "--format=%(refname:strip=3)", "--points-at", matchedRemote.commit, "refs/remotes/origin")
+      .split(/\r?\n/)
+      .filter(branch => branch && branch !== "HEAD")
+      .sort()[0];
+    if (!acceptedBranch) throw new Error("Replit publication tree match has no accepted remote branch.");
+  }
+  acceptedBranch ||= "master";
   if (!/^(?!.*\.\.)(?!.*\/\/)[A-Za-z0-9][A-Za-z0-9._\/-]*$/.test(acceptedBranch)) {
     throw new Error("BIMLOG_ACCEPTED_BRANCH must be an exact short branch name.");
   }
   const acceptedRemoteRef = `origin/${acceptedBranch}`;
   const acceptedCommit = process.env.BIMLOG_ACCEPTED_COMMIT?.trim().toLowerCase();
-  if (acceptedBranch !== "master" && !/^[0-9a-f]{40}$/.test(acceptedCommit ?? "")) {
+  if (process.env.BIMLOG_ACCEPTED_BRANCH && acceptedBranch !== "master" && !/^[0-9a-f]{40}$/.test(acceptedCommit ?? "")) {
     throw new Error("Named-branch production assembly requires BIMLOG_ACCEPTED_COMMIT.");
   }
   let remoteMasterCommit: string | undefined;
