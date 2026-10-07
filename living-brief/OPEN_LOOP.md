@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Canonical project journey — Block 1 — 2026-10-07
+
+- [x] Create a real Project Home with Setup, Work, Attention and Results destinations and one canonical next action.
+- [x] Make the project root and project navigation return to Project Home.
+- [x] Standardize project breadcrumbs and remove the unrelated always-visible Analytics link.
+- [x] Return Intake, Budget, Profile, Total Control, Admin and Dashboard project entry points to Project Home.
+- [x] Pass focused behavior tests, frontend typecheck and the production frontend build.
+- [ ] Push this five-build block once. Do not publish until the next five-build block completes the ten-build interval; then run the full authenticated Chrome smoke.
+
 ## iPhone page-assistant `Load failed` correction — 2026-10-06
 
 - [x] Reproduce the architecture defect: the browser called `127.0.0.1:8789`, which resolves to the iPhone rather than the Windows MAIN 04 bridge host.
