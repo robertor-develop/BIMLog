@@ -3940,3 +3940,5 @@ The authenticated agent now applies the compact Lumen workspace rhythm requested
 ## BIMLog Dedicated Agent 100% zoom density correction — 2026-10-06
 
 The live visual check showed that the first Lumen-density layout still pushed the answer below the visible panel at 100% browser zoom. The correction reduces only presentation height: compact header and recommendation spacing, a 68-pixel prompt, shorter action and disclosure rows, a bounded scrollable answer area, and a smaller status strip. Question transport, MAIN 04.00 authority, feedback, repair authorization and page guidance are unchanged. Focused bridge acceptance, frontend typecheck and production build pass locally; exact-source publication and authenticated Chrome verification of simultaneous prompt-and-answer visibility remain required.
+
+The first compact publication exposed a higher-specificity legacy rule that collapsed the conversation region to zero height. Exact source `3981897d191bd501f8138618a7a0e76d18a6c1ad` overrides that rule explicitly and preserves a 190-pixel prompt-and-answer region before the secondary disclosures.

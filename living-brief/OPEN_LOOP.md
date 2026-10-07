@@ -4716,6 +4716,6 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Publish the exact Lumen-density refinement and verify its live header, recommended-next card, three actions, prompt/result surface, status strip, MAIN 04.00 answer and zero new browser errors.
 # 2026-10-06 — BIMLog agent 100% zoom density correction
 
-- Publish exact source `cc0013c863a410e6fc8dab949b22a3f2775cc2e3` after reconciliation.
+- Publish exact source `3981897d191bd501f8138618a7a0e76d18a6c1ad` after reconciliation; this includes the live-found conversation-collapse specificity repair.
 - In authenticated Chrome at 100% zoom, verify the question field, Ask action and latest answer are visible together in the BIMLog agent without obscuring the page.
 - Repeat one harmless MAIN 04.00 question and require the correlated answer plus a clean browser console.

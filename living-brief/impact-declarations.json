@@ -59290,7 +59290,7 @@
     },
     {
       "taskId": "bimlog-main04-100-percent-density-correction",
-      "reviewedThroughCommit": "cc0013c863a410e6fc8dab949b22a3f2775cc2e3",
+      "reviewedThroughCommit": "3981897d191bd501f8138618a7a0e76d18a6c1ad",
       "reviewedAt": "2026-10-07T01:14:00.000Z",
       "status": "candidate",
       "authorities": [
@@ -59357,7 +59357,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "6ce3ce572f4a3addc29283f1a14cca29c9b87ab4c6a09a68a91b3e40ba38580e"
+      "reviewedChangeSha256": "4acf7b92d920d467382132bbd369d1ca89a8cddbb1b47aff30d7c7a04eb91650"
     }
   ]
 }
