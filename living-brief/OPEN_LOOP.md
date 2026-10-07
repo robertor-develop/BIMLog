@@ -4710,3 +4710,5 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [ ] Publish the FIFO source and prove concurrent authenticated questions complete without active-writer failures or crossed answers.
 - [x] Replace the hosted/Operations question route with the BIMLog-owned Atlas-parity loopback transport bound to permanent MAIN 04.00.
 - [ ] Publish the exact Atlas-parity source and prove through the authenticated BIMLog panel that an ordinary visible-page question returns MAIN 04.00's matching final answer.
+- [x] Replace the BIMLog dock controls and visual hierarchy with the production Atlas agent interaction structure while retaining the BIMLog blue palette and MAIN 04.00 route.
+- [ ] Publish the exact Atlas-UX source and verify authenticated desktop Chrome visual parity, selected-field value grounding, New conversation, ordinary question/answer, feedback entry and zero new browser errors.

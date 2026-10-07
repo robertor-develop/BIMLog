@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3397d74e9f064249f050d9f98139188dee5e14b219f3adc46465ac7d5088f9a7",
-  "itemCount": 329,
+  "sourceSha256": "756630ad0434d727d08a7d536bfe4cdb7d822234aab13cf629c6c0b0f6c76a4a",
+  "itemCount": 330,
   "counts": {
-    "ACTIVE": 290,
+    "ACTIVE": 291,
     "SUPERSEDED": 27,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -5998,6 +5998,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:4712",
+        "MAIN 04.00 page-question release closure (2026-10-06)"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6be9a0a17cdfd314",
+      "sourceLine": 4714,
+      "heading": "MAIN 04.00 page-question release closure (2026-10-06)",
+      "statement": "Publish the exact Atlas-UX source and verify authenticated desktop Chrome visual parity, selected-field value grounding, New conversation, ordinary question/answer, feedback entry and zero new browser errors.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4714",
         "MAIN 04.00 page-question release closure (2026-10-06)"
       ],
       "currentAuthority": false

@@ -59145,6 +59145,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "7fc0b8cca14d93ca8c5208a1fb818c813fae33218dd89aade26483afcd466599"
+    },
+    {
+      "taskId": "bimlog-main04-atlas-ux-parity",
+      "reviewedThroughCommit": "b7a12e58c0513f00daeb6497c0ce0ecebb43a82a",
+      "reviewedAt": "2026-10-06T23:55:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Atlas interaction pattern preserves BIMLog product ownership and authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded presentation change preserves the operating agreement."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused UI and transport contracts plus typecheck and production build cover the change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The agent remains page-aware BIMLog guidance."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing permanent MAIN 04.00 FIFO transport is unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens and plugin behavior are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards mapping changes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit authority changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS records the Atlas UX parity candidate and completed local gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records exact-source publication and authenticated Atlas comparison."
+        }
+      ],
+      "reason": "Match the production Atlas agent UX and behavior in BIMLog while retaining only BIMLog branding, palette, context and MAIN 04.00 authority.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "bc9cb8d6c72be36af905c5f54c02d8d1d637c32a42c4b5217b1a61e4a922c657"
     }
   ]
 }
