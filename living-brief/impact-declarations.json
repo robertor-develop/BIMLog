@@ -59848,6 +59848,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f24d4cc30c73cad8368ada0369884ea03dc61d2cf20f7719950e45dc81c7c51b"
+    },
+    {
+      "taskId": "named-publication-branch-attestation-repair",
+      "reviewedThroughCommit": "324d979f9f7c091f73420ef45407172246897110",
+      "reviewedAt": "2026-10-07T14:24:16.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The named publication branch attestation repair aligns the release safety implementation with the documented governed branch path and preserves product, tenant, financial, database, Native and report behavior."
+        }
+      ],
+      "reason": "Repair the governed publication-source attestor so an explicitly named, commit-bound release branch is verified exactly instead of being rejected by a conflicting master-only check.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
