@@ -3993,3 +3993,9 @@ The second continuity block removes independent, weak `returnTo` handling from a
 Reconciliation checkpoint: implementation commit `1d0ca0a78497dc53f766fd6e3f0e4772e163cbe0` is the reviewed five-build and ten-build publication boundary.
 
 The third continuity block closes Operations evidence and EDT repair dead ends. RFI, Files and Transmittals accept only the exact launching task and expose a bilingual return. Delivery Workflow, Contract and Intake prerequisites preserve that exact task through a bounded return target. EDT repair links now use real `/intake` routes rather than obsolete aliases. Focused acceptance, frontend typechecking and the complete release gate protect the ten-build publication boundary.
+
+## Human flow continuity Block 4 — 2026-10-07
+
+Reconciliation checkpoint: implementation commit `33ae0acacb60d6352bba06aa16898ca9e7785977` is the reviewed five-build block boundary.
+
+The fourth continuity block closes the Reports evidence-history return path. Files, RFIs, Submittals, Meetings, Change Orders and Transmittals now recognize only their exact same-project Reports launch context and expose one visible bilingual return. Wrong-project, duplicate and additional query parameters fail closed. Focused behavior and frontend typechecking are the block gate. This five-build block remains unpublished until the following block reaches the ten-build publication boundary.

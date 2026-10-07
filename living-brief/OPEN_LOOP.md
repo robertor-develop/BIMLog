@@ -4813,3 +4813,14 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 - [x] Preserve the exact task through company Delivery Workflow setup.
 - [x] Correct EDT Contract, Workflow and Intake repair routes and bind block acceptance.
 - [ ] Pass the complete gate, push the five-build block, publish the accumulated ten builds and complete authenticated Chrome production smoke.
+
+## Human flow continuity Block 4 — 2026-10-07
+
+Reconciliation checkpoint: the completed implementation set is reviewed through `33ae0acacb60d6352bba06aa16898ca9e7785977`; publication remains scheduled at the next ten-build boundary.
+
+- [x] Accept only the exact same-project Reports workspace as an evidence-history return.
+- [x] Preserve a visible bilingual return from Files and RFIs to Reports.
+- [x] Preserve a visible bilingual return from Submittals and Meetings to Reports.
+- [x] Preserve a visible bilingual return from Change Orders and Transmittals to Reports.
+- [x] Bind all six evidence round trips and unsafe-return rejection to focused acceptance.
+- [ ] Push this five-build block and keep it unpublished until the next block completes the ten-build interval.
