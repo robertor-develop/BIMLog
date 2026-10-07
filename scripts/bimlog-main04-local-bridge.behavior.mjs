@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const source = readFileSync(new URL("./bimlog-main04-local-bridge.mjs", import.meta.url), "utf8");
+assert.match(source, /queue\.then\(work, work\)/);
+assert.match(source, /destinationThreadId !== THREAD_ID/);
+assert.match(source, /EXACT_QUESTION=/);
+assert.match(source, /payload\?\.turn_id === turnId/);
+assert.match(source, /timingSafeEqual/);
+assert.doesNotMatch(source, /MAIN-00|Feedback Agent|operations-dashboard/i);
+console.log("BIMLog MAIN 04 local bridge contract: PASS");
