@@ -7,6 +7,7 @@
 - [x] Standardize project breadcrumbs and remove the unrelated always-visible Analytics link.
 - [x] Return Intake, Budget, Profile, Total Control, Admin and Dashboard project entry points to Project Home.
 - [x] Pass focused behavior tests, frontend typecheck and the production frontend build.
+- [x] Refresh source-derived route and open-loop inventories, then reconcile this narrative after that generated evidence.
 - [ ] Push this five-build block once. Do not publish until the next five-build block completes the ten-build interval; then run the full authenticated Chrome smoke.
 
 ## iPhone page-assistant `Load failed` correction — 2026-10-06

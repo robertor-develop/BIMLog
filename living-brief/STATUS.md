@@ -4,6 +4,8 @@
 
 Five builds replace the project-root redirect with a real Project Home, expose one deterministic next action from canonical Intake status, make `/projects/:id` the common project entry point, standardize project breadcrumbs and return navigation, and keep Setup, Work, Attention and Results visible without duplicating business records. Focused journey behavior, frontend typecheck and the production frontend build pass. This is the first five-build block in the publication interval: push is due now; publication and authenticated Chrome smoke are due after the following five-build block reaches ten unpublished builds.
 
+The source-derived route inventory and open-loop disposition inventory were refreshed after these navigation changes; both remain release evidence rather than new product behavior.
+
 ## iPhone page-assistant transport correction — 2026-10-06
 
 The page assistant no longer calls the browsing device's `127.0.0.1` MAIN 04 bridge. Authenticated global and project questions use BIMLog's same-origin API, which forwards through the protected FIFO transport to the exact BIMLog Dedicated Agent MAIN 04.00 thread and returns the verified answer envelope. The prior direct browser-to-localhost path worked only on the Windows bridge host and produced Safari `Load failed` on iPhone. Focused behavior, frontend typecheck/build, and a live authenticated hosted-endpoint probe passed at implementation commit `193b8df718943f2253df30065f83980b7d1286cb`; push, publication, and real iPhone acceptance remain release gates.
