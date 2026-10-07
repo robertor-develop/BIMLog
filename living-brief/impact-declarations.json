@@ -59919,7 +59919,7 @@
     },
     {
       "taskId": "named-publication-branch-production-assembly-repair",
-      "reviewedThroughCommit": "bd1664cb617827ebf31885d8a8c33d4045d77358",
+      "reviewedThroughCommit": "3cdc8f736381c8530c9d11edad27d03d8a588ce5",
       "reviewedAt": "2026-10-07T17:20:00.000Z",
       "status": "candidate",
       "authorities": [
@@ -59981,10 +59981,9 @@
       ],
       "reason": "Make the production artifact builder honor the exact named branch and commit that the publication-source attestor already verifies, closing the Replit build failure without weakening source identity.",
       "reviewedChangedPaths": [
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "0b16981e39857276f9d8a2857ee958ccaa64f65023be2497a4a10f0c05387f49"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
