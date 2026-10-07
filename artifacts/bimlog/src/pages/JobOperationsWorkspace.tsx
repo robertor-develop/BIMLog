@@ -1407,6 +1407,7 @@ export function JobOperationsWorkspace() {
         {data.identity?.intakeId && <EdtPlanPreviewPanel
           projectId={projectId}
           intakeId={String(data.identity.intakeId)}
+          operationTaskId={new URLSearchParams(window.location.search).get("taskId")}
           loadPlan={() => api(`/projects/${projectId}/edt-engine/intakes/${encodeURIComponent(String(data.identity.intakeId))}/activation-candidate`)}
           tt={tt}
         />}

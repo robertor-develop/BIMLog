@@ -4,6 +4,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell";
+import { OperationsReturnBanner } from "@/components/layout/OperationsReturnBanner";
 import { ContractItemWorkflowPanel } from "@/components/commercial/ContractItemWorkflowPanel";
 import { ContractPaymentApplicationsPanel } from "@/components/commercial/ContractPaymentApplicationsPanel";
 import { ContractPaymentHistoryPanel } from "@/components/commercial/ContractPaymentHistoryPanel";
@@ -235,6 +236,7 @@ export function FinancialContractWorkspace() {
     return <FinancialProjectShell projectId={projectId} activeTab="contracts"><main role="alert" style={{ maxWidth: 760, margin: "24px auto", padding: 24, border: "1px solid #F0B4B4", borderRadius: 12, background: "#FFF7F7" }}><h1>{tt("Financial access denied", "Acceso financiero denegado")}</h1><p>{error}</p><button type="button" onClick={() => void load()}>{tt("Retry", "Reintentar")}</button></main></FinancialProjectShell>;
   }
   return <FinancialProjectShell projectId={projectId} activeTab="contracts"><div className="fc-page"><style>{styles}{detailStyles}{contractItemStyles}{paymentStyles}{paymentAdvancedStyles}{routedResponsiveStyles}{pricingReferenceStyles}</style>
+    <OperationsReturnBanner projectId={projectId} />
     <header className="fc-header"><div><Link href={`/projects/${projectId}/financial/budget`}>← {tt("Project Budget", "Presupuesto del Proyecto")}</Link><h1>{tt("Contracts & Commitments", "Contratos y Compromisos")}</h1><p>{tt("Exact, versioned contract terms and schedules of values", "Términos y SOV exactos y versionados")}</p></div><button onClick={() => setShowCreate(!showCreate)}>{showCreate ? tt("Close", "Cerrar") : tt("New contract", "Nuevo contrato")}</button></header>
     <section className="fc-boundary">{tt("Operational project control only. Approval is separate from signed-document execution. No accounting posting, invoice payment, bank movement, external portal, or automatic AI.", "Solo control operativo del proyecto. La aprobación está separada de la ejecución con documento firmado. Sin asientos contables, pago de facturas, movimientos bancarios, portal externo ni IA automática.")}</section>
     {error && <div className="fc-error" role="alert">{error}</div>}

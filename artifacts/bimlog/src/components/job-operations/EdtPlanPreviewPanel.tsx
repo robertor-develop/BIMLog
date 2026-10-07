@@ -7,15 +7,19 @@ export type EdtPlanPreview = { nodes: PlanNode[]; workItems: PlanWorkItem[]; sou
   workflowCount: number; governanceVerified: true; commercialVerified: true;
 } };
 
-export function edtReadinessRepair(code: string, projectId: number) {
+export function edtReadinessRepair(code: string, projectId: number, taskId?: string | null) {
+  const returnTo = Number.isSafeInteger(projectId) && projectId > 0 && taskId && /^[A-Za-z0-9_-]{1,120}$/.test(taskId)
+    ? `/projects/${projectId}/operations?taskId=${encodeURIComponent(taskId)}`
+    : `/projects/${projectId}/operations`;
+  const withReturn = (href: string) => `${href}${href.includes("?") ? "&" : "?"}returnTo=${encodeURIComponent(returnTo)}`;
   if (["EDT_CONTRACT_SOURCE_MISSING", "EDT_CONTRACT_SOURCE_MISMATCH"].includes(code))
-    return { missing: "Contract version", href: `/projects/${projectId}/financial/contracts?returnTo=job-operations` };
+    return { missing: "Contract version", href: withReturn(`/projects/${projectId}/financial/contracts`) };
   if (["EDT_WORKFLOW_SOURCE_MISSING", "EDT_WORKFLOW_SOURCE_MISMATCH"].includes(code))
-    return { missing: "Delivery Workflow binding", href: `/company-workflows?projectId=${projectId}&returnTo=job-operations` };
+    return { missing: "Delivery Workflow binding", href: withReturn(`/company-workflows?projectId=${projectId}`) };
   if (["EDT_GOVERNANCE_SOURCE_MISSING", "EDT_ACTIVATION_SOURCE_INCOMPLETE"].includes(code))
-    return { missing: "Governance source", href: `/projects/${projectId}/job-intake?stage=review&returnTo=job-operations` };
+    return { missing: "Governance source", href: withReturn(`/projects/${projectId}/intake?stage=review`) };
   if (["EDT_LOCATION_AMBIGUOUS", "EDT_PLAN_COVERAGE_MISMATCH", "EDT_TRADE_SOURCE_MISMATCH", "EDT_SOURCE_AMBIGUOUS", "EDT_SOURCE_NOT_ACTIVATED"].includes(code))
-    return { missing: "Intake scope", href: `/projects/${projectId}/job-intake?stage=scope&returnTo=job-operations` };
+    return { missing: "Intake scope", href: withReturn(`/projects/${projectId}/intake?stage=scope`) };
   return null;
 }
 
@@ -74,9 +78,10 @@ export function parseEdtPlanPreview(value: unknown): EdtPlanPreview {
   return { nodes, workItems, sourceFingerprint: input.sourceFingerprint };
 }
 
-export function EdtPlanPreviewPanel({ projectId, intakeId, loadPlan, tt }: {
+export function EdtPlanPreviewPanel({ projectId, intakeId, operationTaskId, loadPlan, tt }: {
   projectId: number;
   intakeId: string;
+  operationTaskId?: string | null;
   loadPlan: () => Promise<unknown>;
   tt: (english: string, spanish: string) => string;
 }) {
@@ -110,7 +115,7 @@ export function EdtPlanPreviewPanel({ projectId, intakeId, loadPlan, tt }: {
     </div>
     <div id="edt-preview-result">
       {status === "loading" && <p role="status">{tt("Verifying saved source records…", "Verificando registros guardados…")}</p>}
-      {status === "error" && <div className="jo-error" role="alert"><p>{error}</p>{edtReadinessRepair(errorCode, projectId) && <p><strong>{tt("Missing source", "Origen faltante")}:</strong> {edtReadinessRepair(errorCode, projectId)?.missing}. <Link href={edtReadinessRepair(errorCode, projectId)!.href}>{tt("Repair this source and return", "Reparar este origen y regresar")}</Link></p>}</div>}
+      {status === "error" && <div className="jo-error" role="alert"><p>{error}</p>{edtReadinessRepair(errorCode, projectId, operationTaskId) && <p><strong>{tt("Missing source", "Origen faltante")}:</strong> {edtReadinessRepair(errorCode, projectId, operationTaskId)?.missing}. <Link href={edtReadinessRepair(errorCode, projectId, operationTaskId)!.href}>{tt("Repair this source and return", "Reparar este origen y regresar")}</Link></p>}</div>}
       {status === "ready" && plan && <div role="status">
         <p>{tt("Verified read-only preview", "Vista previa verificada de solo lectura")}: {plan.nodes.length} {tt("nodes", "nodos")}, {plan.workItems.length} {tt("work items", "elementos de trabajo")}.</p>
         {plan.activationEvidence && <p className="jo-muted">{tt("Frozen Governance and Commercial sources verified; Delivery Workflow bindings", "Orígenes congelados de Gobernanza y Comercial verificados; vínculos de flujo de entrega")}: {plan.activationEvidence.workflowCount}. {tt("Governed EDT activation is not yet enabled.", "La activación gobernada de la EDT aún no está habilitada.")}</p>}

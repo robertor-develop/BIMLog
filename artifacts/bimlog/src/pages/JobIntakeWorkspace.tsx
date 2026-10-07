@@ -4,6 +4,7 @@ import { GenericResourcePlan } from "@/components/job-intake/GenericResourcePlan
 import { IntakeDeliveryItems } from "@/components/job-intake/IntakeDeliveryItems";
 import { EmailReadinessSection } from "@/components/job-intake/EmailReadinessSection";
 import { IntakeResumeNotice } from "@/components/job-intake/IntakeResumeNotice";
+import { OperationsReturnBanner } from "@/components/layout/OperationsReturnBanner";
 import { isBimtechDeliveryCompany } from "@/lib/shop-drawing-delivery";
 import { intakeResumeTarget, parseIntakeResume, withIntakeReturn } from "@/lib/return-context";
 import { intakeReadinessLabel } from "@/lib/intake-readiness-presentation";
@@ -1092,6 +1093,7 @@ export function JobIntakeWorkspace() {
       <style>{css}</style>
       <main className="ji">
         <IntakeResumeNotice projectId={projectId} />
+        <OperationsReturnBanner projectId={projectId} />
         <div className="ji-head">
           <div>
             <Link href={`/projects/${projectId}`}>
