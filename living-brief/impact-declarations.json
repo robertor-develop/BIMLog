@@ -59575,8 +59575,8 @@
     },
     {
       "taskId": "canonical-project-journey-block01",
-      "reviewedThroughCommit": "271f1df16634f435c4c651e1841ee71fd3633bb7",
-      "reviewedAt": "2026-10-07T07:06:15.6726585Z",
+      "reviewedThroughCommit": "74afba1dd89a091124a35e96d342318938e0a5e5",
+      "reviewedAt": "2026-10-07T07:16:16.5318639Z",
       "status": "candidate",
       "authorities": [
         {
@@ -59635,12 +59635,11 @@
           "reason": "The generated open-loop disposition refresh changes derived line references only; OPEN_LOOP already records all completed builds and remaining release gates."
         }
       ],
-      "reason": "Add a canonical Project Home, deterministic next action and consistent project navigation without changing business records or authorization.",
+      "reason": "Add the canonical project journey and update the local navigation harness to the same project identity contract without changing production business records or authorization.",
       "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "ef23de92a94ad6d04dde2f61efa1d4a2c92ae534d2e54dc59ad6811ce3ac5925"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
