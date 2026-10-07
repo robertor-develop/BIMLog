@@ -39,6 +39,15 @@ function controlValue(element: Element): string {
   return "";
 }
 
+export function selectedAssistantControl(): string | null {
+  const focused = document.activeElement;
+  if (!focused?.matches("button,input,select,textarea,a[href]") || focused.closest("[data-page-assistant]")) return null;
+  const label = controlLabel(focused);
+  const value = controlValue(focused);
+  if (!label && !value) return null;
+  return value ? clean(`${label}: ${value}`, 240) : label;
+}
+
 export function collectPageAssistantContext(language: AssistantLanguage): PageAssistantContext {
   const route = `${window.location.pathname}${window.location.search}`.slice(0, 300);
   const project = window.location.pathname.match(/^\/projects\/(\d+)/);
@@ -76,7 +85,7 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     section: clean(focused?.closest("section,fieldset,details")?.querySelector("h2,h3,legend,summary")?.textContent, 160),
     projectId: project ? Number(project[1]) : null,
     language,
-    focusedControl: focused ? controlLabel(focused) || null : null,
+    focusedControl: focused ? selectedAssistantControl() : null,
     controls: [...new Set(controls)].slice(0, 80),
     pageText: [...new Set([...visibleValues, ...pageText])].slice(0, 120),
   };
