@@ -88,16 +88,23 @@ export function canonicalDocumentLauncher(projectId: number, taskId: string, ent
 
 export type OperationalDocumentReturn = { taskId: string; returnTo: string };
 
+export function safeOperationsReturnTarget(value: string | null, projectId: number): OperationalDocumentReturn | null {
+  if (!value || !Number.isSafeInteger(projectId) || projectId < 1 || value.length > 500 || value.includes("#") || value.includes("\\")) return null;
+  const [pathname, query = ""] = value.split("?");
+  if (pathname !== `/projects/${projectId}/operations`) return null;
+  const params = new URLSearchParams(query);
+  const taskId = params.get("taskId")?.trim() ?? "";
+  if (!/^[A-Za-z0-9_-]{1,120}$/.test(taskId) || [...params.keys()].some(key => key !== "taskId")) return null;
+  return { taskId, returnTo: `${pathname}?taskId=${encodeURIComponent(taskId)}` };
+}
+
 /** Accept only the exact Operations task that launched the document workflow. */
 export function parseOperationalDocumentReturn(search: string, projectId: number): OperationalDocumentReturn | null {
   if (!Number.isSafeInteger(projectId) || projectId < 1) return null;
   const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const taskId = params.get("operationTaskId")?.trim() ?? "";
   const rawReturn = params.get("returnTo") ?? "";
-  if (!/^[A-Za-z0-9_-]{1,120}$/.test(taskId) || !rawReturn || rawReturn.length > 500 || rawReturn.includes("#") || rawReturn.includes("\\")) return null;
-  const [pathname, query = ""] = rawReturn.split("?");
-  if (pathname !== `/projects/${projectId}/operations`) return null;
-  const returnParams = new URLSearchParams(query);
-  if ([...returnParams.keys()].some(key => key !== "taskId") || returnParams.get("taskId") !== taskId) return null;
-  return { taskId, returnTo: `${pathname}?taskId=${encodeURIComponent(taskId)}` };
+  const target = safeOperationsReturnTarget(rawReturn, projectId);
+  if (!/^[A-Za-z0-9_-]{1,120}$/.test(taskId) || target?.taskId !== taskId) return null;
+  return target;
 }
