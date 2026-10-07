@@ -16,18 +16,26 @@ function enqueueMain04<T>(work: () => Promise<T>): Promise<T> {
 function bridgeConfiguration(environment: NodeJS.ProcessEnv = process.env) {
   const url = environment.BIMLOG_MAIN04_BRIDGE_URL?.trim();
   const token = environment.BIMLOG_MAIN04_BRIDGE_TOKEN?.trim();
+  const accessClientId = environment.BIMLOG_MAIN04_ACCESS_CLIENT_ID?.trim();
+  const accessClientSecret = environment.BIMLOG_MAIN04_ACCESS_CLIENT_SECRET?.trim();
   if (!url || !token) throw new Error("MAIN04_TRANSPORT_NOT_CONFIGURED");
+  if (Boolean(accessClientId) !== Boolean(accessClientSecret)) throw new Error("MAIN04_ACCESS_CONFIGURATION_INCOMPLETE");
   const parsed = new URL(url);
   if (parsed.protocol !== "https:" && parsed.hostname !== "127.0.0.1" && parsed.hostname !== "localhost") throw new Error("MAIN04_TRANSPORT_URL_REFUSED");
-  return { url: parsed.toString(), token };
+  return { url: parsed.toString(), token, accessClientId, accessClientSecret };
 }
 
 export async function askBimlogMain04(input: { question: string; context: Main04QuestionContext; userId: number; projectId: number | null }, dependencies: { fetch?: typeof fetch; environment?: NodeJS.ProcessEnv } = {}) {
-  const { url, token } = bridgeConfiguration(dependencies.environment);
+  const { url, token, accessClientId, accessClientSecret } = bridgeConfiguration(dependencies.environment);
   const requestId = randomUUID();
   const body = { schemaVersion: "bimlog-main04-question.v1", requestId, destinationThreadId: BIMLOG_MAIN04_THREAD_ID, question: input.question, context: input.context, actor: { userId: input.userId, projectId: input.projectId } };
   return enqueueMain04(async () => {
-    const response = await (dependencies.fetch ?? fetch)(url, { method: "POST", headers: { authorization: `Bearer ${token}`, "content-type": "application/json", "x-bimlog-request-id": requestId }, body: JSON.stringify(body), signal: AbortSignal.timeout(190_000) });
+    const headers: Record<string, string> = { authorization: `Bearer ${token}`, "content-type": "application/json", "x-bimlog-request-id": requestId };
+    if (accessClientId && accessClientSecret) {
+      headers["cf-access-client-id"] = accessClientId;
+      headers["cf-access-client-secret"] = accessClientSecret;
+    }
+    const response = await (dependencies.fetch ?? fetch)(url, { method: "POST", headers, body: JSON.stringify(body), signal: AbortSignal.timeout(190_000) });
     if (!response.ok) throw new Error(`MAIN04_TRANSPORT_FAILED_${response.status}`);
     const result = await response.json() as Main04BridgeResponse;
     if (result.threadId !== BIMLOG_MAIN04_THREAD_ID) throw new Error("MAIN04_DESTINATION_MISMATCH");

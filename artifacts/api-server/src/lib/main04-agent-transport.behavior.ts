@@ -14,6 +14,17 @@ assert.equal(captured.destinationThreadId, BIMLOG_MAIN04_THREAD_ID);
 assert.equal(result.answer, answer, "the panel answer must be the task's returned answer");
 assert.equal(result.answerDigest.length, 64);
 
+let protectedHeaders: Record<string, string> | undefined;
+const protectedFetch: typeof fetch = async (_url, init) => {
+  protectedHeaders = init?.headers as Record<string, string>;
+  const request = JSON.parse(String(init?.body));
+  return new Response(JSON.stringify({ threadId: BIMLOG_MAIN04_THREAD_ID, requestId: request.requestId, answer: "Protected answer" }), { status: 200, headers: { "content-type": "application/json" } });
+};
+await askBimlogMain04({ question: "Use protected access.", context, userId: 7, projectId: 63 }, { fetch: protectedFetch, environment: { BIMLOG_MAIN04_BRIDGE_URL: "https://connector.example.test/bimlog", BIMLOG_MAIN04_BRIDGE_TOKEN: "secret", BIMLOG_MAIN04_ACCESS_CLIENT_ID: "client-id", BIMLOG_MAIN04_ACCESS_CLIENT_SECRET: "client-secret" } });
+assert.equal(protectedHeaders?.["cf-access-client-id"], "client-id");
+assert.equal(protectedHeaders?.["cf-access-client-secret"], "client-secret");
+await assert.rejects(() => askBimlogMain04({ question: "Reject incomplete access.", context, userId: 7, projectId: 63 }, { fetch: protectedFetch, environment: { BIMLOG_MAIN04_BRIDGE_URL: "https://connector.example.test/bimlog", BIMLOG_MAIN04_BRIDGE_TOKEN: "secret", BIMLOG_MAIN04_ACCESS_CLIENT_ID: "client-id" } }), /MAIN04_ACCESS_CONFIGURATION_INCOMPLETE/);
+
 const receiptFetch: typeof fetch = async (_url, init) => {
   const request = JSON.parse(String(init?.body));
   return new Response(JSON.stringify({ threadId: BIMLOG_MAIN04_THREAD_ID, requestId: request.requestId, receipt: "accepted" }), { status: 200, headers: { "content-type": "application/json" } });
