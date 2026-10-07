@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Trash2, Search, ExternalLink, RefreshCw, X } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
+import { ReportsReturnBanner } from "@/components/layout/ReportsReturnBanner";
 import { isDebug } from "@/lib/debug";
 import { MeetingClashesPanel } from "./MeetingClashesPanel";
 import {
@@ -4417,6 +4418,7 @@ export function MeetingsTab({
 
   return (
     <div className="tab-content-wrapper">
+      <ReportsReturnBanner projectId={projectId} />
       <div
         style={{
           display: "flex",

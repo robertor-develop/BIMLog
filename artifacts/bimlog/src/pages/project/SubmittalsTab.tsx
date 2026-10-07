@@ -21,6 +21,7 @@ import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { SubmittalRegisterCoverage } from "@/components/SubmittalRegisterCoverage";
 import { SUBMITTAL_STATUS_BADGES as STATUS_BADGE, submittalStatusLabel } from "@/lib/submittal-status-presentation";
 import { OptionalSharePanel } from "@/components/OptionalSharePanel";
+import { ReportsReturnBanner } from "@/components/layout/ReportsReturnBanner";
 import { format, differenceInDays, isValid } from "date-fns";
 import {
   countSubmittalStates,
@@ -780,6 +781,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
 
   return (
     <div id="submittal-register-current-view">
+      <ReportsReturnBanner projectId={projectId} />
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
         <div>
