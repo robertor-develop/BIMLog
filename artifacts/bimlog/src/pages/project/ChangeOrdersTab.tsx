@@ -8,6 +8,7 @@ import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { ClipboardList, DollarSign, Calendar, Sparkles } from "lucide-react";
 import { OptionalSharePanel } from "@/components/OptionalSharePanel";
+import { parseChangeOriginContext, type ChangeOriginContext } from "@/lib/project-record-return";
 
 interface ChangeOrder {
   id: number; number: string; title: string; description?: string;
@@ -16,18 +17,6 @@ interface ChangeOrder {
 }
 
 const API = "/api/v1";
-
-export type ChangeOriginContext = { type: string; id: number; label: string; returnTo: string };
-
-export function parseChangeOriginContext(search: string, projectId: number): ChangeOriginContext | null {
-  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
-  const type = params.get("originType")?.trim() ?? "";
-  const idText = params.get("originId") ?? "";
-  const label = params.get("originLabel")?.trim() ?? "";
-  const returnTo = params.get("returnTo") ?? "";
-  if (!type || !/^[1-9]\d*$/.test(idText) || !label || !returnTo.startsWith(`/projects/${projectId}/`)) return null;
-  return { type, id: Number(idText), label, returnTo };
-}
 
 const STATUS_COLORS: Record<string, string> = {
   draft: "#6B7280", pending_approval: "#D97706", approved: "#16A34A",

@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import { FileText, Trash2, Sparkles, Send } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
+import { parseTransmittalEvidenceContext, type TransmittalEvidenceContext } from "@/lib/project-record-return";
 
 interface Transmittal {
   id: number; number: string; title: string; purpose?: string;
@@ -24,26 +25,6 @@ export function parseExactTransmittalDeepLink(search: string): ExactTransmittalD
   if (values.length !== 1 || !/^[1-9]\d*$/.test(values[0])) return { kind: "invalid" };
   const id = Number(values[0]);
   return Number.isSafeInteger(id) ? { kind: "valid", id } : { kind: "invalid" };
-}
-
-export type TransmittalEvidenceContext = {
-  sourceType: string;
-  sourceId: number;
-  sourceLabel: string;
-  sourceVersion: string;
-  returnTo: string;
-};
-
-export function parseTransmittalEvidenceContext(search: string, projectId: number): TransmittalEvidenceContext | null {
-  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
-  const sourceType = params.get("sourceType")?.trim() ?? "";
-  const sourceIdText = params.get("sourceId") ?? "";
-  const sourceLabel = params.get("sourceLabel")?.trim() ?? "";
-  const sourceVersion = params.get("sourceVersion")?.trim() ?? "";
-  const returnTo = params.get("returnTo") ?? "";
-  if (!sourceType || !/^[1-9]\d*$/.test(sourceIdText) || !sourceLabel || !sourceVersion) return null;
-  if (!returnTo.startsWith(`/projects/${projectId}/`)) return null;
-  return { sourceType, sourceId: Number(sourceIdText), sourceLabel, sourceVersion, returnTo };
 }
 
 const API = "/api/v1";
