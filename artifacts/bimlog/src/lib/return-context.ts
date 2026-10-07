@@ -45,6 +45,16 @@ export function validatedReturn(search: string, projectId: number): string | nul
   const context = parseIntakeReturn(search);
   return context?.projectId === projectId ? context.href : null;
 }
+
+/** Accept only an internal route that remains inside the exact project workspace. */
+export function safeProjectReturnTarget(value: string | null, projectId: number): string | null {
+  if (!value || value.length > 500 || value.includes("\\") || value.includes("#")) return null;
+  if (!Number.isSafeInteger(projectId) || projectId < 1) return null;
+  const [pathname, query = ""] = value.split("?");
+  if (!pathname.startsWith(`/projects/${projectId}/`)) return null;
+  if (pathname.includes("//") || pathname.split("/").some(segment => segment === ".." || segment === ".")) return null;
+  return query ? `${pathname}?${query}` : pathname;
+}
 export function withIntakeReturn(destination: string, projectId: number, stage: string, item?: string) {
   return `${destination}${destination.includes("?") ? "&" : "?"}returnTo=${encodeURIComponent(intakeOrigin(projectId, stage, item))}`;
 }
