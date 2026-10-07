@@ -4805,6 +4805,8 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 
 ## Human flow continuity Block 3 — 2026-10-07
 
+Reconciliation checkpoint: the completed implementation set is reviewed through `1d0ca0a78497dc53f766fd6e3f0e4772e163cbe0` before exact-source publication.
+
 - [x] Bind RFI creation to the exact Operations task and reject mismatched returns.
 - [x] Preserve a visible exact-task return through Files evidence intake.
 - [x] Preserve a visible exact-task return through Transmittal creation.
