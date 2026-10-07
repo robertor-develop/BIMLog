@@ -1,8 +1,16 @@
 import assert from "node:assert/strict";
-import { safeHelpResumeTarget } from "./task-journeys";
+import { journeyDestination, safeHelpResumeTarget } from "./task-journeys";
 
 const exact = "/help?view=guides&journey=setup&step=2&from=%2Fprojects%2F63%2Fintake%3Fstage%3Ddelivery";
 assert.equal(safeHelpResumeTarget(exact, 63), exact);
+assert.equal(
+  journeyDestination("/projects/63/intake?stage=delivery", "operations", exact),
+  `/projects/63/operations?helpReturn=${encodeURIComponent(exact)}`,
+);
+assert.equal(
+  journeyDestination("/projects/63/intake?stage=delivery", "convention", exact),
+  `/projects/63/convention?returnTo=${encodeURIComponent("/projects/63/intake?stage=delivery")}&helpReturn=${encodeURIComponent(exact)}`,
+);
 for (const unsafe of [
   "https://evil.test/help?from=%2Fprojects%2F63%2Fintake",
   "/help?from=%2Fprojects%2F62%2Fintake",

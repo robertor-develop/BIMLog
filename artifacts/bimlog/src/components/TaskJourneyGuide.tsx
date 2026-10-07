@@ -10,6 +10,7 @@ export function TaskJourneyGuide({ language, from }: { language: "en" | "es"; fr
   const step = journey.steps[index];
   const tx = (en: string, es: string) => language === "es" ? es : en;
   const project = projectContext(from);
+  const helpResume = `${window.location.pathname}${window.location.search}`;
   function select(id: string, nextIndex: number) {
     setJourneyId(id); setIndex(nextIndex);
     const params = new URLSearchParams(window.location.search);
@@ -27,7 +28,7 @@ export function TaskJourneyGuide({ language, from }: { language: "en" | "es"; fr
       <article aria-live="polite" aria-atomic="true"><p className="tj-eyebrow">{tx("Guide step", "Paso de la guía")} {index + 1} / {journey.steps.length}</p><h3>{step.title[language]}</h3><p>{step.action[language]}</p>
         <h4>{tx("Before moving on", "Antes de continuar")}</h4><p>{step.completion[language]}</p>
         <div className="tj-recovery"><h4>{tx("If you get stuck", "Si no puede continuar")}</h4><p>{step.recovery[language]}</p></div>
-        <div className="tj-actions"><a className="tj-primary" href={journeyDestination(from, step.destination)}>{project ? tx("Open this workspace", "Abrir este espacio") : tx("Choose a project", "Elegir un proyecto")}</a><a href={`/help?${manual}`}>{tx("Detailed instructions", "Instrucciones detalladas")}</a>{project && journey.id === "setup" && <a href={journeyDestination(from, "intake")}>{tx("Return to Job Intake", "Volver a la preparación")}</a>}</div>
+        <div className="tj-actions"><a className="tj-primary" href={journeyDestination(from, step.destination, helpResume)}>{project ? tx("Open this workspace", "Abrir este espacio") : tx("Choose a project", "Elegir un proyecto")}</a><a href={`/help?${manual}`}>{tx("Detailed instructions", "Instrucciones detalladas")}</a>{project && journey.id === "setup" && <a href={journeyDestination(from, "intake", helpResume)}>{tx("Return to Job Intake", "Volver a la preparación")}</a>}</div>
         <p className="tj-footnote">{tx("Save in the workspace before leaving. Browser Back returns to this guide step; the guide itself saves no project data.", "Guarde en el espacio de trabajo antes de salir. Atrás del navegador vuelve a este paso; la guía no guarda datos del proyecto.")}</p>
       </article></div>
   </section>;

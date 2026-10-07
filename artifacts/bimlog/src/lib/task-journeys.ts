@@ -28,12 +28,16 @@ export function projectContext(from: string): string | null {
   const match = /^\/projects\/([1-9]\d*)(?:\/[a-z][a-z0-9/-]*)?(?:\?[^#\\\r\n]*)?$/.exec(from);
   return match && Number.isSafeInteger(Number(match[1])) ? match[1] : null;
 }
-export function journeyDestination(from: string, destination: string): string {
+export function journeyDestination(from: string, destination: string, helpResume?: string): string {
   const id = projectContext(from);
   const allowed = TASK_JOURNEYS.some(j => j.steps.some(s => s.destination === destination));
   if (!id || !allowed) return "/dashboard";
   const target = `/projects/${id}/${destination}`;
-  return destination === "convention" ? `${target}?returnTo=${encodeURIComponent(from)}` : target;
+  const params = new URLSearchParams();
+  if (destination === "convention") params.set("returnTo", from);
+  const resume = safeHelpResumeTarget(helpResume, Number(id));
+  if (resume) params.set("helpReturn", resume);
+  return `${target}${params.size ? `?${params.toString()}` : ""}`;
 }
 export function safeHelpReturn(from: string): string {
   if (from === "/dashboard") return from;
