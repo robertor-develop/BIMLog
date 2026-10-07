@@ -3999,3 +3999,9 @@ The third continuity block closes Operations evidence and EDT repair dead ends. 
 Reconciliation checkpoint: implementation commit `33ae0acacb60d6352bba06aa16898ca9e7785977` is the reviewed five-build block boundary.
 
 The fourth continuity block closes the Reports evidence-history return path. Files, RFIs, Submittals, Meetings, Change Orders and Transmittals now recognize only their exact same-project Reports launch context and expose one visible bilingual return. Wrong-project, duplicate and additional query parameters fail closed. Focused behavior and frontend typechecking are the block gate. This five-build block remains unpublished until the following block reaches the ten-build publication boundary.
+
+## Human flow continuity Block 5 — 2026-10-07
+
+Reconciliation checkpoint: implementation commit `75052e3e5f1d500006523092556f8ce8e5130f29` is the reviewed five-build and ten-build publication boundary.
+
+The fifth continuity block closes the Help task-guide round trip. Workspace launches preserve the exact same-project Help view, journey and step through one bounded resume target. Every project workspace exposes a visible bilingual return to that step, while Help names the exact originating workspace and explains that its back action restores the original page. External, wrong-project, duplicate, malformed and extra-key resume targets fail closed. Focused behavior, frontend typechecking and the complete release gate protect publication of Blocks 4 and 5 together.

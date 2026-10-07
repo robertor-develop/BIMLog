@@ -60339,6 +60339,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1b644c2993763819f6395edbee9f467ace72a79a73b812e49876eaaa20460fdb"
+    },
+    {
+      "taskId": "human-flow-continuity-block05",
+      "reviewedThroughCommit": "75052e3e5f1d500006523092556f8ce8e5130f29",
+      "reviewedAt": "2026-10-07T23:34:36.131Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves exact same-project Help guide state through project workspace launches, exposes a visible bilingual resume control, and rejects ambiguous or unsafe context; tenant, financial authority, Native, provider, and record semantics remain unchanged."
+        }
+      ],
+      "reason": "Close Help task-guide workspace round trips with exact same-project resume context.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "09793200f64d16424b2c0af20995f5cc8783f0f4bf49b3ba5a6f38a686c10545"
     }
   ]
 }

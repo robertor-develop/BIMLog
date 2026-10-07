@@ -4823,4 +4823,15 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 - [x] Preserve a visible bilingual return from Submittals and Meetings to Reports.
 - [x] Preserve a visible bilingual return from Change Orders and Transmittals to Reports.
 - [x] Bind all six evidence round trips and unsafe-return rejection to focused acceptance.
-- [ ] Push this five-build block and keep it unpublished until the next block completes the ten-build interval.
+- [x] Push this five-build block and keep it unpublished until the next block completes the ten-build interval.
+
+## Human flow continuity Block 5 — 2026-10-07
+
+Reconciliation checkpoint: the completed implementation set is reviewed through `75052e3e5f1d500006523092556f8ce8e5130f29`; this block completes the ten-build publication interval with Block 4.
+
+- [x] Accept only an exact bounded Help route tied to the current project as a guide resume target.
+- [x] Carry the exact Help view, journey and step into every task-guide workspace launch.
+- [x] Expose one project-wide bilingual return to the originating Help guide step.
+- [x] Name the exact originating workspace on the Help return control and explain its behavior.
+- [x] Bind the complete Help-to-workspace round trip and unsafe-return rejection to focused acceptance.
+- [ ] Pass the complete gate, push, publish the accumulated ten builds and complete authenticated desktop/mobile Chrome smoke.
