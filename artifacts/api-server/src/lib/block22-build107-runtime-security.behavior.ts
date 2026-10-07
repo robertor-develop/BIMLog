@@ -23,6 +23,7 @@ assert.doesNotMatch(JSON.stringify(originEvents), /not a valid URL/);
 const headers = new Map<string, string>();
 securityHeaders({} as never, { setHeader: (name: string, value: string) => headers.set(name, value) } as never, () => undefined);
 for (const name of ["Content-Security-Policy", "Referrer-Policy", "X-Content-Type-Options", "X-Frame-Options", "Permissions-Policy"]) assert.ok(headers.has(name), name);
+assert.equal(headers.get("Permissions-Policy"), "camera=(), microphone=(self), geolocation=()");
 
 const app = fs.readFileSync(new URL("../app.ts", import.meta.url), "utf8");
 assert.doesNotMatch(app, /app\.use\(cors\(\)\)/);

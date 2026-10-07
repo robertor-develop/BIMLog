@@ -4732,3 +4732,10 @@ The repeated gate identified an eighth legitimate historical duplicate loop beca
 - [x] Implement source `583b9e1f92d2b67ecb5d392e4af01cc5e6cfe136` so authenticated users with existing project access bypass new-account onboarding on a new browser or phone.
 - [x] Preserve the complete onboarding and email-verification flow for users without project access.
 - [ ] Publish the exact source and verify a fresh mobile-width authenticated Headquarters load without the onboarding modal.
+## BIMLog Agent voice dictation — 2026-10-07
+
+- [x] Add an accessible bilingual Speak/Stop control beside the BIMLog Agent question field on desktop and mobile.
+- [x] Preserve the existing draft, append interim/final browser transcription and require manual Ask submission.
+- [x] Provide truthful permission, device, no-speech, network and unsupported-browser guidance without storing microphone audio in BIMLog.
+- [x] Preserve MAIN 04 routing, FIFO/request correlation, tenant/authentication boundaries and Feedback/Fix separation.
+- [ ] Publish the exact release and verify desktop/mobile authenticated Chrome layout and controls without activating Roberto's microphone.
