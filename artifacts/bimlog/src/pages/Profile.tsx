@@ -1655,7 +1655,11 @@ export function Profile() {
               </div>
             );
           })()}
-          {emailReturnTarget && <div style={{ marginTop: 12 }}><Button type="button" variant="outline" onClick={() => navigate(emailReturnTarget)}>{tt("Return to your work", "Volver a su trabajo")}</Button></div>}
+          {emailReturnTarget && <aside aria-label={tt("Return to previous work", "Volver al trabajo anterior")} style={{ marginTop: 12, padding: 12, border: "1px solid hsl(var(--border))", borderRadius: 8, background: "hsl(var(--muted) / 0.35)" }}>
+            <strong>{tt("Your previous work is preserved", "Su trabajo anterior está conservado")}</strong>
+            <p style={{ margin: "4px 0 10px", fontSize: 13 }}>{tt("Review email sending here, then return to the exact page and section where you started.", "Revise aquí el envío de correo y luego vuelva a la página y sección exactas donde comenzó.")}</p>
+            <Button type="button" variant="outline" onClick={() => navigate(emailReturnTarget)}>{tt("Return to your work", "Volver a su trabajo")}</Button>
+          </aside>}
         </SectionCard></div>
 
         {/* The server-governed catalog is the only provider discovery source. */}

@@ -15,7 +15,7 @@ export function EmailReadinessSection({ projectId, tt }: { projectId: number; tt
   }, []);
   const state = resolveEmailReadiness(connection);
   const copy = emailReadinessCopy(state);
-  const configure = () => navigate(`/profile?section=email-sending&returnTo=${encodeURIComponent(`/projects/${projectId}/intake?stage=delivery`)}`);
+  const configure = () => navigate(`/profile?section=email-sending&returnTo=${encodeURIComponent(`/projects/${projectId}/intake?stage=delivery&item=ji-email-readiness`)}`);
   return <section className="ji-card" id="ji-email-readiness" aria-labelledby="ji-email-readiness-title">
     <h2 id="ji-email-readiness-title">{tt("Email readiness", "Preparación de correo")}</h2>
     <p>{tt("Optional. Configure direct email delivery without blocking the rest of full setup.", "Opcional. Configure la entrega directa por correo sin bloquear el resto de la configuración completa.")}</p>
