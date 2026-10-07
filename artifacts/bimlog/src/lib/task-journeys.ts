@@ -39,6 +39,21 @@ export function safeHelpReturn(from: string): string {
   if (from === "/dashboard") return from;
   return projectContext(from) ? from : "/dashboard";
 }
+export function safeHelpResumeTarget(value: string | null | undefined, projectId: number): string | null {
+  if (!value || !Number.isSafeInteger(projectId) || projectId < 1 || value.includes("#")) return null;
+  const [path, query = ""] = value.split("?");
+  if (path !== "/help") return null;
+  const params = new URLSearchParams(query);
+  const allowed = new Set(["view", "journey", "step", "topic", "context", "from"]);
+  if ([...params.keys()].some((key) => !allowed.has(key) || params.getAll(key).length !== 1)) return null;
+  const from = params.get("from");
+  if (!from || projectContext(from) !== String(projectId)) return null;
+  const view = params.get("view");
+  if (view && !["manual", "guides", "troubleshooting", "releases"].includes(view)) return null;
+  const step = params.get("step");
+  if (step && !/^\d+$/.test(step)) return null;
+  return `${path}${query ? `?${params.toString()}` : ""}`;
+}
 export function journeySelection(search: string) {
   const params = new URLSearchParams(search);
   const journey = TASK_JOURNEYS.find(j => j.id === params.get("journey")) ?? TASK_JOURNEYS[0];
