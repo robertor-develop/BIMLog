@@ -2434,6 +2434,10 @@ export function JobIntakeWorkspace() {
                         )}
                   </button>}
                 </div>
+                {isActivated && canEnrich && <p className="ji-small" role="note">{tt(
+                  "This adds controlled Commercial drafts from the saved contract profiles. It does not duplicate work items, tasks, staffing, or activation.",
+                  "Esto agrega borradores Comerciales controlados desde los perfiles contractuales guardados. No duplica partidas, tareas, personal ni la activación.",
+                )}</p>}
               </section>
               </fieldset>
               <div className="ji-footer">
