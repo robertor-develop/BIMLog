@@ -142,6 +142,10 @@ router.post("/lens-next/model-bindings/resolve", authMiddleware, async (req, res
 router.get("/projects/workspace-register", authMiddleware, async (req, res) => {
   try {
     const userId = req.user!.userId;
+    const [[freshActor], adminRoles] = await Promise.all([
+      db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, userId)).limit(1),
+      getRolesByPermission("admin"),
+    ]);
     const memberRows = await db.select({ projectId: projectMembersTable.projectId, role: projectMembersTable.role })
       .from(projectMembersTable).where(eq(projectMembersTable.userId, userId));
     if (memberRows.length === 0) { res.json([]); return; }
@@ -155,7 +159,8 @@ router.get("/projects/workspace-register", authMiddleware, async (req, res) => {
       const workspaceGroup = project.status === "archived" ? "retired"
         : project.status === "testing" ? "testing" : "active";
       return { ...project, createdAt: project.createdAt.toISOString(), updatedAt: project.updatedAt.toISOString(),
-        memberCount: Number(members.value), fileCount: Number(files.value), userRole: roleMap.get(project.id) || "", workspaceGroup };
+        memberCount: Number(members.value), fileCount: Number(files.value), userRole: roleMap.get(project.id) || "", workspaceGroup,
+        canManageLifecycle: Boolean(freshActor?.isSuperAdmin || project.createdById === userId || adminRoles.includes(roleMap.get(project.id) || "")) };
     }));
     res.json(results);
   } catch (error) {

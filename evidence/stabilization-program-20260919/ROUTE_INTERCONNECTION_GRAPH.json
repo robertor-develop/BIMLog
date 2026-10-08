@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 749,
-    "frontendApiReferences": 297,
+    "apiRoutes": 750,
+    "frontendApiReferences": 298,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -6400,6 +6400,20 @@
       ]
     },
     {
+      "method": "POST",
+      "path": "/projects/:projectId/workspace-state",
+      "owner": "artifacts/api-server/src/routes/projects.ts",
+      "tables": [
+        "projectsTable",
+        "projectMembersTable",
+        "projectCompanyBindingVersionsTable",
+        "lensNextModelBindingsTable",
+        "filesTable",
+        "usersTable",
+        "companiesTable"
+      ]
+    },
+    {
       "method": "DELETE",
       "path": "/projects/:projectId",
       "owner": "artifacts/api-server/src/routes/projects.ts",
@@ -10049,6 +10063,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
       "apiPath": "${API_BASE}/api/v1/projects/${p.id}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+      "apiPath": "${API_BASE}/api/v1/projects/${project.id}/workspace-state"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",

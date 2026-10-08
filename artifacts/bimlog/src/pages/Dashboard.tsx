@@ -1026,6 +1026,7 @@ interface ProjectCardProps {
     userRole?: string;
     updatedAt?: string;
     workspaceGroup?: "active" | "testing" | "retired";
+    canManageLifecycle?: boolean;
   };
   onDelete: (id: number, name: string) => void;
   onRestore: () => void;
@@ -1037,7 +1038,7 @@ interface ProjectCardProps {
 export function ProjectCard({ project, onDelete, onRestore, onWorkspaceState, preferredTest, onPreferTest }: ProjectCardProps) {
   const { t, lang } = useI18n();
   const isActive = project.status === "active";
-  const isAdmin = project.userRole === "project_admin";
+  const isAdmin = project.canManageLifecycle === true;
   const isRetired = project.status === "archived";
   const { data: members } = useListMembers(project.id);
   const adminMember = (members as any[] | undefined)?.find((m: any) => m.role === "project_admin");

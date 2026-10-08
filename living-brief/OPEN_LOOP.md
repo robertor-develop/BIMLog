@@ -4902,3 +4902,15 @@ Release closure: exact source `c4152e19a040e77692bbcc10f74ee1588f7c1dd3` passed 
 - [x] Stabilize the Windows artifact proof with measured 15-second application-ready and 18-second wall-clock bounds after reproducible sustained-suite cold-start variance.
 - [ ] Pass the complete release gate, push the block, publish the accumulated ten builds and complete authenticated Chrome production smoke.
 
+Release closure: exact source `13759e262f215eadcd64edc8b86e85f60e5629d7` passed the complete release gate, push, controlled Replit publication and authenticated production Chrome smoke. The three named working projects remained active and the retirement preview was closed without mutation.
+
+## Headquarters project lifecycle Block 2 — 2026-10-08
+
+- [x] Replace name/description heuristics with an explicit, audited Active or Testing project state.
+- [x] Let authorized lifecycle managers move a project reversibly between Active and Testing without changing project records or company libraries.
+- [x] Let the user choose one preferred Testing workspace for routine browser QA instead of creating another test project.
+- [x] Explain Active, Testing and Retired behavior directly on every project card, including record and shared-library preservation.
+- [x] Align visible lifecycle controls with the server's existing creator, configured administrator and Super Administrator authority.
+- [x] Bind the complete bilingual Headquarters lifecycle workflow to focused API and frontend acceptance.
+- [ ] Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 3 completes the next ten-build interval.
+
