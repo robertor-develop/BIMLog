@@ -296,12 +296,16 @@ export function Dashboard() {
         project.location,
       ].some(value => String(value || "").toLowerCase().includes(query)))
       .sort((left: any, right: any) => {
+        if (projectStatus === "testing" || projectStatus === "all") {
+          if (left.id === preferredTestProjectId && right.id !== preferredTestProjectId) return -1;
+          if (right.id === preferredTestProjectId && left.id !== preferredTestProjectId) return 1;
+        }
         if (projectSort === "name_desc") return String(right.name || "").localeCompare(String(left.name || ""), undefined, { sensitivity: "base" });
         if (projectSort === "code_asc") return String(left.code || "").localeCompare(String(right.code || ""), undefined, { numeric: true, sensitivity: "base" });
         if (projectSort === "status_asc") return `${left.status || ""}-${left.name || ""}`.localeCompare(`${right.status || ""}-${right.name || ""}`, undefined, { sensitivity: "base" });
         return String(left.name || "").localeCompare(String(right.name || ""), undefined, { sensitivity: "base" });
       });
-  }, [allProjectRows, projectSearch, projectSort, projectStatus]);
+  }, [allProjectRows, preferredTestProjectId, projectSearch, projectSort, projectStatus]);
   const activeProjects = allProjectRows.filter((p: any) => p.status === "active");
   const workspaceCounts = allProjectRows.reduce((counts: Record<string, number>, project: any) => {
     const group = project.workspaceGroup || "active";
@@ -313,6 +317,13 @@ export function Dashboard() {
   const visibleProjectFiles = projectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
   const visibleProjectMembers = projectRows.reduce((sum: number, p: any) => sum + (p.memberCount || 0), 0);
   const preferredTestProject = allProjectRows.find((project: any) => project.id === preferredTestProjectId && project.workspaceGroup === "testing") ?? null;
+
+  useEffect(() => {
+    if (preferredTestProjectId !== null && allProjectRows.length > 0 && !preferredTestProject) {
+      localStorage.removeItem("bimlog:preferred-test-project");
+      setPreferredTestProjectId(null);
+    }
+  }, [allProjectRows, preferredTestProject, preferredTestProjectId]);
 
   function choosePreferredTestProject(projectId: number) {
     setPreferredTestProjectId(projectId);
