@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useRoute } from "wouter";
+import { Link, useRoute, useSearch } from "wouter";
 import {
   AlertTriangle,
   BriefcaseBusiness,
@@ -22,6 +22,7 @@ import {
 } from "@/components/PrintPdfButton";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import { parseActiveIntakeReturn } from "@/lib/active-intake-roundtrip";
 import { BudgetGovernancePanel } from "@/components/job-operations/BudgetGovernancePanel";
 import { TimeApprovalPanel } from "@/components/job-operations/TimeApprovalPanel";
 import { ProjectControlsDashboard } from "@/components/job-operations/ProjectControlsDashboard";
@@ -844,6 +845,7 @@ export function JobOperationsWorkspace() {
   const { language, tt } = useI18n();
   const [, route] = useRoute("/projects/:id/operations");
   const projectId = Number(route?.id);
+  const activeIntakeReturn = parseActiveIntakeReturn(useSearch(), projectId);
   const [data, setData] = useState<any>(null);
   const [drafts, setDrafts] = useState<Record<string, any>>({});
   const [packageDrafts, setPackageDrafts] = useState<Record<string, any>>({});
@@ -1367,6 +1369,12 @@ export function JobOperationsWorkspace() {
             </button>
           </div>
         </header>
+        {activeIntakeReturn && <section className="jo-card" role="status">
+          <span className="jo-chip">{tt("ACTIVE JOB SOURCE", "ORIGEN DEL TRABAJO ACTIVO")}</span>
+          <h2>{tt("Continue delivery here, then return to Intake review", "Continúe la entrega aquí y luego vuelva a la revisión de Ingreso")}</h2>
+          <p>{tt("Your active-job setup remains available as the source record. Returning opens its review section without losing this Operations work.", "La configuración del trabajo activo permanece disponible como registro de origen. Al volver se abre su sección de revisión sin perder este trabajo de Operaciones.")}</p>
+          <Link href={activeIntakeReturn.href}>{tt("Return to active Intake review", "Volver a la revisión del Ingreso activo")}</Link>
+        </section>}
         {data.available && <section className="jo-card jo-daily" aria-labelledby="daily-work-title">
           <span className="jo-chip">{tt("START HERE", "EMPIECE AQUÍ")}</span>
           <h2 id="daily-work-title">{tt("Today's work", "Trabajo de hoy")}</h2>
