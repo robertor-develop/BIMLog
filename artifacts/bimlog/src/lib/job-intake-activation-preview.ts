@@ -1,5 +1,6 @@
 import { expectedIntakeTaskCount } from "./intake-activation-task-count";
 import type { JobIntakeStage } from "./job-intake-workspace-state";
+import { withActiveIntakeReturn } from "./active-intake-roundtrip";
 
 const blockerStages: Record<string, JobIntakeStage> = {
   job_name: "identity", job_code: "identity", client: "identity",
@@ -65,7 +66,7 @@ export function jobIntakeActivationStructure(status: string, preview: ReturnType
 
 export function jobIntakeActiveChangeDestinations(projectId: number, contractsEnabled: boolean) {
   return {
-    operations: `/projects/${projectId}/operations`,
-    contracts: contractsEnabled ? `/projects/${projectId}/financial/contracts` : null,
+    operations: withActiveIntakeReturn(`/projects/${projectId}/operations`, projectId),
+    contracts: contractsEnabled ? withActiveIntakeReturn(`/projects/${projectId}/financial/contracts`, projectId) : null,
   };
 }

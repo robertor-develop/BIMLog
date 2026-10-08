@@ -14,7 +14,8 @@ export function activeIntakeConfirmationLabel(language: string) {
 
 export function activeIntakeNextActions(projectId: number, contractsEnabled: boolean) {
   return [
-    { key: "delivery", href: `/projects/${projectId}/operations`, en: "Manage delivery and staffing", es: "Gestionar entrega y personal" },
-    ...(contractsEnabled ? [{ key: "commercial", href: `/projects/${projectId}/financial/contracts`, en: "Review controlled contracts", es: "Revisar contratos controlados" }] : []),
+    { key: "delivery", href: withActiveIntakeReturn(`/projects/${projectId}/operations`, projectId), en: "Manage delivery and staffing", es: "Gestionar entrega y personal" },
+    ...(contractsEnabled ? [{ key: "commercial", href: withActiveIntakeReturn(`/projects/${projectId}/financial/contracts`, projectId), en: "Review controlled contracts", es: "Revisar contratos controlados" }] : []),
   ];
 }
+import { withActiveIntakeReturn } from "./active-intake-roundtrip";
