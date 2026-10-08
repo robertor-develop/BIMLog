@@ -34,6 +34,7 @@ import { useConfig } from "@/lib/config-context";
 import { jobIntakeSaveConfidence, type JobIntakeSaveState } from "@/lib/job-intake-save-confidence";
 import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActivationStructure, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
 import { jobIntakeLifecycle, jobIntakeLifecycleCopy } from "@/lib/job-intake-lifecycle";
+import { activeIntakeEditGuidance, activeIntakeConfirmationLabel, activeIntakeNextActions } from "@/lib/job-intake-active-review";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
   authoritativeCompanyOptions,
@@ -2361,6 +2362,7 @@ export function JobIntakeWorkspace() {
               <EmailReadinessSection projectId={projectId} tt={tt} />
               <section className="ji-card" id="ji-review">
                 <h2>6. {stageLabel("review")}</h2>
+                {isActivated && <p className="ji-small" role="note">{activeIntakeEditGuidance(canonicalReadOnly, language)}</p>}
                 {guide && (
                   <div className="ji-guide">
                     {isActivated ? tt("This job is active. Review the saved setup here and open the job workspace to continue delivery. Saving setup changes does not approve or execute contracts.", "Este trabajo está activo. Revise aquí la configuración guardada y abra el espacio de trabajo para continuar la entrega. Guardar cambios de configuración no aprueba ni ejecuta contratos.") : tt(
