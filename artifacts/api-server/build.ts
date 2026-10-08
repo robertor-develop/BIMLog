@@ -375,6 +375,7 @@ async function assembleRuntimeFromInstalledGraph(
   };
 
   let materialFileCount = 0;
+  const materializedHashBySource = new Map<string, string>();
   const graphBindings: Array<{
     name: string;
     version: string;
@@ -652,7 +653,7 @@ async function assembleRuntimeFromInstalledGraph(
       // Native copies avoid two JS streams per small dependency file. Large files retain
       // mid-file abortability, while every small-file boundary still checks cancellation.
       if ((await stat(source)).size <= 8 * 1024 * 1024) {
-        await copyFile(source, destination, fsConstants.COPYFILE_EXCL);
+        await copyFile(source, destination, fsConstants.COPYFILE_EXCL | fsConstants.COPYFILE_FICLONE);
       } else {
         await pipeline(
           createReadStream(source),
@@ -699,7 +700,7 @@ async function assembleRuntimeFromInstalledGraph(
         // Settle every write before propagating failure or cleaning a rejected closure.
         if (entry.isFile()) {
           fileBatch.push(copyRegularTree(sourceRoot, destinationRoot, path.join(resolvedSource, entry.name)));
-          if (fileBatch.length === 8) await finishBatch();
+          if (fileBatch.length === 16) await finishBatch();
         } else {
           await finishBatch();
           await copyRegularTree(sourceRoot, destinationRoot, path.join(resolvedSource, entry.name));
@@ -744,12 +745,17 @@ async function assembleRuntimeFromInstalledGraph(
         throw new Error(`Installed package version is missing: ${packageName}.`);
       }
       const lockBinding = assertLockBinding(packageName, manifest.version, declaredSpec, issuer);
+      let contentSha256 = materializedHashBySource.get(sourceKey);
+      if (!contentSha256) {
+        contentSha256 = await hashMaterializedPackage(destinationPackage);
+        materializedHashBySource.set(sourceKey, contentSha256);
+      }
       graphBindings.push({
         name: packageName,
         version: manifest.version,
         declaredSpec,
         sourceRealpath: sourcePackage,
-        contentSha256: await hashMaterializedPackage(destinationPackage),
+        contentSha256,
         lockKey: lockBinding.snapshotLockKey,
         packageLockKey: lockBinding.packageLockKey,
         snapshotLockKey: lockBinding.snapshotLockKey,
