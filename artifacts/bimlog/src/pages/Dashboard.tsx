@@ -241,6 +241,10 @@ export function Dashboard() {
   const [projectSearch, setProjectSearch] = useState("");
   const [projectStatus, setProjectStatus] = useState("active");
   const [projectSort, setProjectSort] = useState<"name_asc" | "name_desc" | "code_asc" | "status_asc">("name_asc");
+  const [preferredTestProjectId, setPreferredTestProjectId] = useState<number | null>(() => {
+    const value = Number(localStorage.getItem("bimlog:preferred-test-project"));
+    return Number.isInteger(value) && value > 0 ? value : null;
+  });
   const [showOperationalDetails, setShowOperationalDetails] = useState(false);
 
   useEffect(() => {
@@ -302,6 +306,13 @@ export function Dashboard() {
   const totalFiles = allProjectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
   const visibleProjectFiles = projectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
   const visibleProjectMembers = projectRows.reduce((sum: number, p: any) => sum + (p.memberCount || 0), 0);
+  const preferredTestProject = allProjectRows.find((project: any) => project.id === preferredTestProjectId && project.workspaceGroup === "testing") ?? null;
+
+  function choosePreferredTestProject(projectId: number) {
+    setPreferredTestProjectId(projectId);
+    localStorage.setItem("bimlog:preferred-test-project", String(projectId));
+    toast({ title: tt("Preferred test workspace saved for this browser.", "Espacio de pruebas preferido guardado en este navegador.") });
+  }
 
   async function handleRetire(projectId: number, _projectName: string) {
     setRetirementProjectId(projectId);
@@ -570,6 +581,16 @@ export function Dashboard() {
               <span>{tt("Sort", "Orden")}: {projectSort.replace(/_/g, " ")}</span>
               {projectSearch.trim() && <><span>·</span><span>{tt("Search", "Busqueda")}: {projectSearch.trim()}</span></>}
             </div>
+          </section>
+
+          <section aria-label={tt("Test workspace reuse", "Reutilización del espacio de pruebas")} style={{ marginBottom: 20, padding: "12px 16px", border: "1px solid #BFDBFE", borderRadius: 10, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div>
+              <strong style={{ display: "block", fontSize: 13 }}>{tt("Reuse one test workspace", "Reutiliza un solo espacio de pruebas")}</strong>
+              <span style={{ fontSize: 11, color: "#475569" }}>{preferredTestProject
+                ? tt(`Preferred: ${preferredTestProject.name} (${preferredTestProject.code}). Use it for routine QA before creating another project.`, `Preferido: ${preferredTestProject.name} (${preferredTestProject.code}). Úsalo para pruebas rutinarias antes de crear otro proyecto.`)
+                : tt("Choose a project from Testing. BIMLog will keep it visible as the preferred place for routine QA.", "Elige un proyecto en Pruebas. BIMLog lo mantendrá visible como el lugar preferido para pruebas rutinarias.")}</span>
+            </div>
+            {preferredTestProject && <Button type="button" variant="outline" onClick={() => setLocation(`/projects/${preferredTestProject.id}`)}>{tt("Open preferred test workspace", "Abrir espacio de pruebas preferido")}</Button>}
           </section>
 
           {/* AI Briefing banner */}
@@ -889,6 +910,8 @@ export function Dashboard() {
                         onDelete={handleRetire}
                         onRestore={() => setRestoreProject(project)}
                         onWorkspaceState={state => void handleWorkspaceState(project, state)}
+                        preferredTest={project.id === preferredTestProject?.id}
+                        onPreferTest={() => choosePreferredTestProject(project.id)}
                       />
                     ))}
                   </div>
@@ -1006,9 +1029,11 @@ interface ProjectCardProps {
   onDelete: (id: number, name: string) => void;
   onRestore: () => void;
   onWorkspaceState: (state: "active" | "testing") => void;
+  preferredTest: boolean;
+  onPreferTest: () => void;
 }
 
-export function ProjectCard({ project, onDelete, onRestore, onWorkspaceState }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, onRestore, onWorkspaceState, preferredTest, onPreferTest }: ProjectCardProps) {
   const { t, lang } = useI18n();
   const isActive = project.status === "active";
   const isAdmin = project.userRole === "project_admin";
@@ -1051,6 +1076,7 @@ export function ProjectCard({ project, onDelete, onRestore, onWorkspaceState }: 
               <Building2 style={{ width: 18, height: 18, color: "#2563EB" }} />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              {preferredTest && <span style={{ fontSize: 10, fontWeight: 800, color: "#1D4ED8", background: "#DBEAFE", padding: "2px 7px", borderRadius: 999 }}>{lang === "es" ? "PRUEBA PREFERIDA" : "PREFERRED TEST"}</span>}
               <span style={{
                 fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700,
                 color: "#D97706", background: "rgba(245,158,11,0.1)",
@@ -1139,6 +1165,11 @@ export function ProjectCard({ project, onDelete, onRestore, onWorkspaceState }: 
       {/* Retirement stays outside the project link and away from its entry action. */}
       {isAdmin && !isRetired && (
         <div style={{ position: "absolute", bottom: 0, right: 0, display: "flex", gap: 6, zIndex: 10 }}>
+          {project.status === "testing" && !preferredTest && <button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); onPreferTest(); }}
+            title={lang === "es" ? "Usar para pruebas rutinarias" : "Use for routine testing"}
+            style={{ minHeight: 28, padding: "0 9px", borderRadius: 6, background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1D4ED8", cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
+            {lang === "es" ? "Preferir" : "Prefer"}
+          </button>}
           <button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); onWorkspaceState(project.status === "testing" ? "active" : "testing"); }}
             title={project.status === "testing" ? (lang === "es" ? "Mover a Activos" : "Move to Active") : (lang === "es" ? "Mover a Pruebas" : "Move to Testing")}
             style={{ minHeight: 28, padding: "0 9px", borderRadius: 6, background: "#FFFBEB", border: "1px solid #FDE68A", color: "#92400E", cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
