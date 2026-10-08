@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import { Bot, Mic, Minus, X } from "lucide-react";
+import { Bot, Mic, Minus, PanelLeft, PanelRight, Plus, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { collectPageAssistantContext, highlightAssistantControls, selectedAssistantControl } from "@/lib/page-assistant-context";
+import { clampAssistantWidth, readAssistantWorkspace, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
 
 type Message = { role: "user" | "assistant"; text: string; projectId: number | null };
 type Repair = { id: string; payload: { issue: string; scope: string }; scope_digest: string; state: string; created_at?: string; execution_receipt?: { message?: string; updatedAt?: string; evidence?: Record<string,unknown> } | null };
@@ -20,6 +21,8 @@ export function PageAssistant() {
   const [includeSelected,setIncludeSelected]=useState(false),[activeTool,setActiveTool]=useState<"ask"|"feedback"|"fix">("ask");
   const [messages,setMessages]=useState<Message[]>([]),[feedbackReceipt,setFeedbackReceipt]=useState<{stableId:string;status:string;notificationState:string}|null>(null);
   const [voiceListening,setVoiceListening]=useState(false),[voiceStatus,setVoiceStatus]=useState("");
+  const initialWorkspace=useRef(readAssistantWorkspace(typeof window==="undefined"?null:window.localStorage));
+  const [panelWidth,setPanelWidth]=useState(initialWorkspace.current.width),[dock,setDock]=useState<AssistantDockSide>(initialWorkspace.current.dock),[collapsed,setCollapsed]=useState(false);
   const [repairs,setRepairs]=useState<Repair[]>([]),[canAuthorize,setCanAuthorize]=useState(false),[executionConnected,setExecutionConnected]=useState(false),[pin,setPin]=useState(""),[newPin,setNewPin]=useState(""),[delegateEmail,setDelegateEmail]=useState("");
   const input=useRef<HTMLTextAreaElement|null>(null),opener=useRef<HTMLButtonElement|null>(null),selectedField=useRef<string|null>(null),recognition=useRef<SpeechRecognitionLike|null>(null),voiceBase=useRef(""),voiceError=useRef("");
   const context=collectPageAssistantContext(lang);
@@ -32,7 +35,7 @@ export function PageAssistant() {
   useEffect(()=>{try{sessionStorage.setItem(contextKey,JSON.stringify(messages.slice(-12)));}catch(cause){console.warn("[page-assistant] conversation persistence unavailable",cause);}},[messages,contextKey]);
   useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.altKey&&event.shiftKey&&event.key.toLowerCase()==="a"){event.preventDefault();setOpen(value=>!value);}if(event.key==="Escape"&&open){event.preventDefault();setOpen(false);opener.current?.focus();}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);},[open]);
   useEffect(()=>{if(open)window.setTimeout(()=>input.current?.focus(),0);},[open]);
-  useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open);return()=>document.body.classList.remove("bimlog-assistant-docked");},[open]);
+  useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open);document.body.dataset.assistantDockSide=dock;document.body.dataset.assistantCollapsed=String(collapsed);document.documentElement.style.setProperty("--bimlog-agent-dock-width",`${panelWidth}px`);writeAssistantWorkspace(window.localStorage,panelWidth,dock);return()=>{document.body.classList.remove("bimlog-assistant-docked");delete document.body.dataset.assistantDockSide;delete document.body.dataset.assistantCollapsed;};},[open,panelWidth,dock,collapsed]);
   useEffect(()=>{if(open&&token)void loadRepairs();},[open,token]);
   useEffect(()=>{if(!open||!token)return;const refresh=window.setInterval(()=>void loadRepairs(),15000);return()=>window.clearInterval(refresh);},[open,token]);
   useEffect(()=>{
@@ -54,6 +57,8 @@ export function PageAssistant() {
   function submitFeedback(viewStatus=false){const latest=[...messages].reverse().find(item=>item.role==="user")?.text||question;window.dispatchEvent(new CustomEvent("bimlog:feedback-open",{detail:{feedbackType:"bug",message:latest?`${latest}\n\nPage: ${context.route}`:"",viewStatus}}));}
   function newConversation(){setMessages([]);setQuestion("");setError("");setNotice("");sessionStorage.removeItem(contextKey);sessionStorage.removeItem(`${contextKey}:draft`);input.current?.focus();}
   function toggleVoice(){const current=recognition.current;if(!current){input.current?.focus();setVoiceStatus(tt("Automatic browser transcription is unavailable here. Use the microphone on your phone keyboard to dictate into this box.","La transcripción automática del navegador no está disponible aquí. Usa el micrófono del teclado de tu teléfono para dictar en este campo."));return;}if(voiceListening){current.stop();return;}voiceBase.current=question;voiceError.current="";try{current.start();}catch{setVoiceStatus(tt("Dictation is already starting. Please wait a moment.","El dictado ya está iniciando. Espera un momento."));}}
+  function resizePanel(clientX:number){const next=dock==="right"?window.innerWidth-clientX:clientX;setPanelWidth(clampAssistantWidth(next,window.innerWidth));}
+  function startResize(event:React.PointerEvent<HTMLDivElement>){event.preventDefault();const move=(next:PointerEvent)=>resizePanel(next.clientX);const stop=()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",stop);};window.addEventListener("pointermove",move);window.addEventListener("pointerup",stop,{once:true});}
   async function reportRepair(){const issue=[...messages].reverse().find(item=>item.role==="user")?.text||question.trim();const scope=(proposal||repairScope).trim();if(!issue||!scope)return;try{const data=await api("/api/v1/repairs",{method:"POST",body:JSON.stringify({issue,page:context.route,projectId:context.projectId,scope,tests:tt("Reproduce the issue, run affected regression tests, and verify the repaired page in Chrome.","Reproducir el problema, ejecutar las pruebas de regresión afectadas y verificar la página reparada en Chrome.")})});setNotice(tt(`Repair proposal ${data.id} was recorded. Confirm its exact scope with your repair PIN to send it to Orion MAIN.`,`La propuesta de reparación ${data.id} fue registrada. Confirma su alcance exacto con tu PIN de reparación para enviarla a Orion MAIN.`));setRepairScope("");await loadRepairs();}catch(cause){setError(cause instanceof Error?cause.message:tt("Repair report failed.","Falló el reporte de reparación."));}}
   async function configurePin(){try{await api("/api/v1/repairs/pin",{method:"POST",body:JSON.stringify({pin:newPin})});setNewPin("");setNotice(tt("Your repair PIN is configured.","Tu PIN de reparación está configurado."));}catch(cause){setError(cause instanceof Error?cause.message:tt("PIN setup failed.","Falló la configuración del PIN."));}}
   async function authorize(repair:Repair){try{const data=await api(`/api/v1/repairs/${repair.id}/authorize`,{method:"POST",body:JSON.stringify({pin,scopeDigest:repair.scope_digest,confirmed:true})});setPin("");setNotice(data.message);await loadRepairs();}catch(cause){setError(cause instanceof Error?cause.message:tt("Authorization failed.","Falló la autorización."));}}
@@ -63,10 +68,11 @@ export function PageAssistant() {
       <button ref={opener} type="button" className="page-assistant-launcher" aria-expanded={open} aria-controls="bimlog-page-assistant" aria-keyshortcuts="Alt+Shift+A" onPointerDown={()=>{if(!open)selectedField.current=selectedAssistantControl();}} onClick={()=>setOpen(value=>!value)}>
         <Bot size={18}/><span>{tt("Ask BIMLog","Preguntar a BIMLog")}</span>
       </button>
-      {open&&<aside id="bimlog-page-assistant" className="page-assistant-panel" role="dialog" aria-modal="false" aria-label={tt("BIMLog page assistant","Asistente de página BIMLog")}>
+      {open&&<aside id="bimlog-page-assistant" className="page-assistant-panel" data-dock={dock} data-collapsed={collapsed} role="dialog" aria-modal="false" aria-label={tt("BIMLog page assistant","Asistente de página BIMLog")}>
+        <div className="page-assistant-resize-handle" role="separator" aria-orientation="vertical" aria-label={tt("Resize BIMLog Agent panel","Cambiar el ancho del panel del Agente BIMLog")} aria-valuemin={360} aria-valuemax={680} aria-valuenow={panelWidth} tabIndex={collapsed?-1:0} onPointerDown={startResize} onKeyDown={event=>{if(event.key!=="ArrowLeft"&&event.key!=="ArrowRight")return;event.preventDefault();const direction=event.key==="ArrowLeft"?-1:1;setPanelWidth(current=>clampAssistantWidth(current+(dock==="right"?-direction:direction)*20,window.innerWidth));}} />
         <header>
           <div><small>{tt("YOUR BIMLOG AGENT","TU AGENTE BIMLOG")}</small><strong>{tt("Workspace guide","Guía del espacio de trabajo")}</strong><span>{tt("BIMLog Agent · connected","Agente BIMLog · conectado")}</span></div>
-          <nav className="page-assistant-header-actions"><button type="button" aria-label={tt("Minimize agent","Minimizar agente")} onClick={()=>setOpen(false)}><Minus size={16}/></button><button type="button" aria-label={tt("Close agent","Cerrar agente")} onClick={()=>setOpen(false)}><X size={16}/></button></nav>
+          <nav className="page-assistant-header-actions page-assistant-window-controls"><button type="button" aria-label={dock==="right"?tt("Dock agent left","Acoplar agente a la izquierda"):tt("Dock agent right","Acoplar agente a la derecha")} onClick={()=>setDock(value=>value==="right"?"left":"right")}>{dock==="right"?<PanelLeft size={16}/>:<PanelRight size={16}/>}</button><button type="button" aria-pressed={collapsed} aria-label={collapsed?tt("Expand agent","Expandir agente"):tt("Minimize agent","Minimizar agente")} onClick={()=>setCollapsed(value=>!value)}>{collapsed?<Plus size={16}/>:<Minus size={16}/>}</button><button type="button" className="page-assistant-close" aria-label={tt("Close agent","Cerrar agente")} onClick={()=>setOpen(false)}><X size={16}/></button></nav>
         </header>
         <section className="page-assistant-recommended">
           <small>{tt("RECOMMENDED NEXT","SIGUIENTE RECOMENDADO")}</small>
