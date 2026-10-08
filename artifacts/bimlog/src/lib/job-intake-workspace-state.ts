@@ -116,7 +116,7 @@ export function repairJobIntakeRecoveryData<T>(data: T) {
     : { data, repairedOptionalAllocations };
 }
 
-export function jobIntakeIsCanonicalReadOnly(intake: { status?: string; activatedContractId?: unknown } | null | undefined) {
+export function jobIntakeIsCanonicalReadOnly(intake: { status?: string; activation?: unknown; activatedContractId?: unknown } | null | undefined) {
   return Boolean(jobIntakeIsActivated(intake) && intake?.activatedContractId);
 }
 
