@@ -20,4 +20,7 @@ assert.match(workspace, /No other contract was substituted/);
 assert.match(workspace, /does not belong to this project/);
 assert.match(workspace, /String\(contract\.id\) === requestedContract\) return true/);
 assert.match(workspace, /remains visible even if register filters do not match it/);
+assert.match(workspace, /Return to the same Intake step/);
+assert.match(workspace, /aria-current=\{contract\.id === requestedContract/);
+assert.match(workspace, /deepLink\.intakeReturn \? tt\("Opened from Job Intake"/);
 console.log("Contract deep link: bounded identity and exact same-project Intake origin PASS");
