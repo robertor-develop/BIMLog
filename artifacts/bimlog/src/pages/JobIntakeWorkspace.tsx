@@ -33,6 +33,7 @@ import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { jobIntakeSaveConfidence, type JobIntakeSaveState } from "@/lib/job-intake-save-confidence";
 import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
+import { jobIntakeLifecycle, jobIntakeLifecycleCopy } from "@/lib/job-intake-lifecycle";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
   authoritativeCompanyOptions,
@@ -128,6 +129,7 @@ export function JobIntakeWorkspace() {
   const [pricingTemplateOptionsError, setPricingTemplateOptionsError] = useState(false);
   const [pricingTemplateOptionsLoading, setPricingTemplateOptionsLoading] = useState(false);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [activationBusy, setActivationBusy] = useState(false);
   const [pdfSections, setPdfSections] = useState({ identity: true, scope: true, contracts: true, delivery: true, team: true, review: true });
   const revisionRef = useRef(0),
     projectIdRef = useRef(projectId),
@@ -788,6 +790,7 @@ export function JobIntakeWorkspace() {
   const activate = async () => {
     if (activationInFlightRef.current) return;
     activationInFlightRef.current = true;
+    setActivationBusy(true);
     setBusy(true);
     setError("");
     try {
@@ -851,6 +854,7 @@ export function JobIntakeWorkspace() {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
       activationInFlightRef.current = false;
+      setActivationBusy(false);
       setBusy(false);
     }
   };
@@ -877,6 +881,8 @@ export function JobIntakeWorkspace() {
   };
   const saveConfidence = jobIntakeSaveConfidence(saveState);
   const readinessLabel = intakeReadinessLabel(intake.status, Boolean(completion.ready), saveState, language);
+  const lifecycle = jobIntakeLifecycle(intake.status, Boolean(completion.ready), saveState, activationBusy);
+  const lifecycleCopy = jobIntakeLifecycleCopy(lifecycle, language);
   const configurationPolicy = intake.configurationPolicy ?? { source: "bimlog_default", enforcementMode: "optional" };
   const readiness = completion.readinessSummary ?? {
     setup: { percent: completion.percent ?? 0, ready: false, missingRequiredCount: completion.missingItems?.length ?? 0 },
@@ -1138,7 +1144,7 @@ export function JobIntakeWorkspace() {
               <span style={{ width: `${completion.percent}%` }} />
             </div>
             <div className="ji-small">
-              {intake.status === "activated" ? readinessLabel : firstMissing || readinessLabel}
+              <strong>{lifecycleCopy.label}</strong> · {lifecycle === "draft" ? firstMissing || lifecycleCopy.guidance : lifecycleCopy.guidance}
             </div>
           </div>
         </div>

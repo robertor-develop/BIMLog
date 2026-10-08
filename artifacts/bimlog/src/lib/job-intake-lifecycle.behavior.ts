@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { jobIntakeLifecycle, jobIntakeLifecycleCopy } from "./job-intake-lifecycle";
+import { readFileSync } from "node:fs";
 
 assert.equal(jobIntakeLifecycle("draft", false, "saved", false), "draft");
 assert.equal(jobIntakeLifecycle("draft", true, "unsaved", false), "draft");
@@ -10,4 +11,8 @@ assert.equal(jobIntakeLifecycle("activated", true, "unsaved", false), "changes_p
 assert.equal(jobIntakeLifecycle("activated", true, "error", false), "changes_pending");
 assert.match(jobIntakeLifecycleCopy("active", "en").guidance, /Continue delivery/);
 assert.match(jobIntakeLifecycleCopy("changes_pending", "es").guidance, /permanece intacta/);
+const workspace = readFileSync(new URL("../pages/JobIntakeWorkspace.tsx", import.meta.url), "utf8");
+assert.match(workspace, /setActivationBusy\(true\)/);
+assert.match(workspace, /setActivationBusy\(false\)/);
+assert.match(workspace, /lifecycleCopy\.label/);
 console.log("Job Intake lifecycle: Draft, Ready, Activating, Active, and Changes pending are distinct PASS");
