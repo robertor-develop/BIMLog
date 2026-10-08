@@ -13,6 +13,7 @@ import { ContractPoolPreparation } from "@/components/commercial/ContractPoolPre
 import { ContractRecordAccess } from "@/components/commercial/ContractRecordAccess";
 import { isIndependentContractActor } from "@/lib/contract-review-controls";
 import { emptyFinancialContractItem } from "@/lib/contract-item-rate-source";
+import { contractRegisterHref, parseContractDeepLink } from "@/lib/contract-deep-link";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type ContractItemDraft = { displayName: string; quantity: string; unit: string; unitRate: string; apuPlanVersion: string; workflowTemplate: string; industryTemplate: string };
@@ -66,7 +67,10 @@ export function FinancialContractWorkspace() {
   const lang = language;
   const [, params] = useRoute("/projects/:id/financial/contracts");
   const projectId = Number(params?.id);
-  const requestedContract = new URLSearchParams(useSearch()).get("contractId") || "";
+  const routeSearch = useSearch();
+  const deepLink = useMemo(() => parseContractDeepLink(routeSearch, projectId), [routeSearch, projectId]);
+  const requestedContract = deepLink.contractId || "";
+  const registerHref = contractRegisterHref(projectId, deepLink.intakeReturn);
   const [linkedContractError, setLinkedContractError] = useState(false);
   const detailRequest = useRef(0);
   const [data, setData] = useState<any>(null), [budget, setBudget] = useState<any>(null), [snapshot, setSnapshot] = useState<any>(null), [apu, setApu] = useState<any>(null);
@@ -278,7 +282,8 @@ export function FinancialContractWorkspace() {
       <p className="fc-active-summary">{activeSummary.join(" | ")}</p>
     </section>
     <section className="fc-summary"><div><span>{tt("Visible contracts", "Contratos visibles")}</span><strong>{filteredContracts.length}/{contracts.length}</strong></div><div><span>{tt("Executed commitment in view", "Compromiso ejecutado en vista")}</span><strong>{filteredExecutedTotal.toFixed(2)}</strong></div><div><span>{tt("Currencies in view", "Monedas en vista")}</span><strong>{Array.from(new Set(filteredContracts.map((contract: any) => contract.currency))).join(", ") || "-"}</strong></div></section>
-    {linkedContractError && <div className="fc-error" role="alert">{tt("The linked contract is unavailable or you do not have access. Choose an accessible contract below.", "El contrato vinculado no está disponible o no tiene acceso. Elija un contrato accesible abajo.")} <Link href={`/projects/${projectId}/financial/contracts`}>{tt("Return to contract register", "Volver al registro de contratos")}</Link></div>}
+    {deepLink.invalid && <div className="fc-error" role="alert">{tt("This contract link is invalid or does not belong to this project. No record was opened.", "Este enlace de contrato no es válido o no pertenece a este proyecto. No se abrió ningún registro.")} <Link href={registerHref}>{tt("Open the contract register", "Abrir el registro de contratos")}</Link></div>}
+    {linkedContractError && <div className="fc-error" role="alert">{tt("The linked contract is unavailable or you do not have access. No other contract was substituted.", "El contrato vinculado no está disponible o no tiene acceso. No se sustituyó por otro contrato.")} <Link href={registerHref}>{tt("Open the contract register", "Abrir el registro de contratos")}</Link></div>}
     <main className="fc-cards">{filteredContracts.map((contract: any) => <article id={`contract-${contract.id}`} key={contract.id} tabIndex={contract.id === requestedContract ? -1 : undefined} className={`fc-card${contract.id === requestedContract ? " fc-card-linked" : ""}`}>{contract.id === requestedContract && <p className="fc-linked-label" role="status">{tt("Opened from Job Intake", "Abierto desde Ingreso del Trabajo")}</p>}<div className="fc-card-head"><div><small>{contract.bimlogId}</small><h2>{contract.legalNumber} · {contract.title}</h2><p>{contract.counterpartyName} · {contract.perspective} · {contract.contractType}</p></div><span className={`fc-status ${contract.status}`}>{contract.status}</span></div><div className="fc-money"><span>{tt("Original", "Original")}<b>{contract.originalValue} {contract.currency}</b></span><span>{tt("Executed amendments", "Enmiendas ejecutadas")}<b>{contract.executedAmendmentTotal}</b></span><span>{tt("Current commitment", "Compromiso actual")}<b>{contract.currentCommitment}</b></span></div>{contract.pricingTemplateBinding && <p className="fc-pricing-reference">{tt("Reusable pricing reference", "Referencia de precios reutilizable")}: {contract.pricingTemplateBinding.name} · v{contract.pricingTemplateBinding.version} · {contract.pricingTemplateBinding.fingerprint} <small>{tt("Reference only; not the approved Contract Item rate", "Solo referencia; no es la tarifa aprobada de la Partida de Contrato")}</small></p>}<code>{contract.contentFingerprint}</code><div className="fc-actions">
       {contract.status === "draft" && <button disabled={busy === contract.id} onClick={() => void act(contract, "submit")}>{tt("Submit", "Enviar")}</button>}
       {contract.status === "submitted" && <>{isIndependentContractActor(contract.makerUserId, user?.id) && <button disabled={busy === contract.id} onClick={() => void act(contract, "start_review")}>{tt("Start review", "Iniciar revisión")}</button>}<button disabled={busy === contract.id} onClick={() => void act(contract, "withdraw")}>{tt("Withdraw", "Retirar")}</button></>}

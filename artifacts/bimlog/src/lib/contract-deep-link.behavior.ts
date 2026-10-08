@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { contractRegisterHref, parseContractDeepLink } from "./contract-deep-link";
+import { readFileSync } from "node:fs";
 
 const linked = parseContractDeepLink("contractId=contract-7&returnTo=" + encodeURIComponent("/projects/7/intake?stage=contract&item=ji-contract-2"), 7);
 assert.equal(linked.contractId, "contract-7");
@@ -13,4 +14,8 @@ for (const search of ["contractId=", "contractId=one&contractId=two", "contractI
   assert.equal(result.invalid, true);
 }
 assert.equal(parseContractDeepLink("contractId=contract-7&returnTo=" + encodeURIComponent("/projects/8/intake?stage=contract"), 7).invalid, true);
+const workspace = readFileSync(new URL("../pages/FinancialContractWorkspace.tsx", import.meta.url), "utf8");
+assert.match(workspace, /parseContractDeepLink\(routeSearch, projectId\)/);
+assert.match(workspace, /No other contract was substituted/);
+assert.match(workspace, /does not belong to this project/);
 console.log("Contract deep link: bounded identity and exact same-project Intake origin PASS");
