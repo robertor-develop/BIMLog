@@ -8,4 +8,9 @@ for (const key of ["memberships", "files", "rfis", "submittals", "lensViewpoints
   assert.match(inventory, new RegExp(`\\[\\"${key}\\"`), `${key} must be inventoried`);
 }
 assert.match(retirement, /recordCounts, totalInventoriedRecords:/);
+for (const protectedAuthority of ["APU library templates", "delivery workflow templates", "workflow governance policies", "company catalogs", "internal cost policies"]) {
+  assert.match(inventory, new RegExp(protectedAuthority), `${protectedAuthority} must be classified as company-owned and unaffected`);
+}
+assert.match(inventory, /retirementEffect: "preserved_read_only"/);
+assert.match(inventory, /retirementEffect: "unaffected"/);
 console.log("PASS project retirement dependency inventory");
