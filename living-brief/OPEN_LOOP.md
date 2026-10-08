@@ -4868,3 +4868,14 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 - [x] Keep Email readiness status and detail copy in the selected English or Spanish language.
 - [x] Bind legacy/current activation evidence and bilingual readiness to focused acceptance.
 - [ ] Push this five-build block and keep it unpublished until Block 9 completes the ten-build interval.
+
+## Human flow continuity Block 9 — 2026-10-08
+
+Reconciliation checkpoint: the completed implementation set is reviewed through `abb22bdf`; this block completes the ten-build publication interval with Block 8.
+
+- [x] Explain whether active Intake source configuration remains editable or is canonical evidence.
+- [x] Present canonical activation confirmations as recorded, non-editable evidence.
+- [x] Connect verified activation results to Operations and controlled contracts.
+- [x] Explain that Commercial enrichment cannot duplicate operational activation.
+- [x] Bind active Intake review and next-action continuity to focused acceptance.
+- [ ] Pass the complete gate, push Blocks 8 and 9, publish the exact source and complete authenticated Chrome smoke.

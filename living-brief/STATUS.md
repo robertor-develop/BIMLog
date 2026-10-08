@@ -4023,3 +4023,9 @@ The seventh continuity block makes the Job Intake lifecycle unambiguous. Draft, 
 Reconciliation checkpoint: implementation commit `98834b8e68f1d660d32b1d66a25454a0b621cdf1` is the reviewed five-build block boundary.
 
 Authenticated production inspection exposed a legacy active Intake whose persisted activation receipt and top-level active state were contradicted by a future-tense activation preview lower on the same page. The eighth continuity block makes the persisted receipt canonical activation evidence everywhere, uses one derived active state across lifecycle copy and actions, and labels Commercial creation as optional enrichment of an already-active job. Email readiness status and detail copy now remain in the selected English or Spanish language. Focused Blocks 7 and 8 behavior plus frontend typechecking pass locally. This five-build block is pushed after acceptance and remains unpublished until Block 9 completes the ten-build interval.
+
+## Human flow continuity Block 9 — 2026-10-08
+
+Reconciliation checkpoint: implementation commit `abb22bdf` is the reviewed five-build and ten-build publication boundary.
+
+The ninth continuity block makes the active Intake review behave as activation evidence rather than a second activation form. It explains whether the saved source is editable or canonical, labels and locks confirmations when the activated contract makes them historical evidence, links the verified created structure directly to Operations and controlled contracts, and explains that Commercial enrichment does not duplicate active work. Focused Block 9 behavior and frontend typechecking pass. Blocks 8 and 9 now require the complete exact-source gate, one push, controlled publication and authenticated Chrome acceptance.
