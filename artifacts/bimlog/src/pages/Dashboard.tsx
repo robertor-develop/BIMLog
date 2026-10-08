@@ -14,7 +14,7 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { OnboardingFlow, useOnboarding } from "@/components/OnboardingFlow";
 import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
-import { confirmAndRetireProject } from "@/lib/project-retirement";
+import { ProjectRetirementDialog } from "@/components/ProjectRetirementDialog";
 import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWorkspace";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -191,6 +191,7 @@ export function Dashboard() {
   const token = useAuthStore(s => s.token);
   const user = useAuthStore(s => s.user);
   const [showCreate, setShowCreate] = useState(false);
+  const [retirementProjectId, setRetirementProjectId] = useState<number | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportError, setExportError] = useState("");
   function handleProjectCreated(newId: number) {
@@ -305,16 +306,7 @@ export function Dashboard() {
   const visibleProjectMembers = projectRows.reduce((sum: number, p: any) => sum + (p.memberCount || 0), 0);
 
   async function handleRetire(projectId: number, _projectName: string) {
-    try {
-      const retired = await confirmAndRetireProject(projectId, (path, init) => fetch(`${API_BASE}/api/v1${path}`, {
-        ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) },
-      }));
-      if (!retired) return;
-      queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] });
-      toast({ title: "Project retired. All project records were preserved." });
-    } catch (err) {
-      toast({ title: err instanceof Error ? err.message : "Failed to retire project.", variant: "destructive" });
-    }
+    setRetirementProjectId(projectId);
   }
 
   async function exportCurrentViewPdf() {
@@ -464,6 +456,7 @@ export function Dashboard() {
       {onboardingVisible && (
         <OnboardingFlow onDone={() => { setOnboardingVisible(false); doneOnboarding(); }} />
       )}
+      {retirementProjectId !== null && token && <ProjectRetirementDialog projectId={retirementProjectId} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setRetirementProjectId(null)} onRetired={() => { setRetirementProjectId(null); queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] }); toast({ title: tt("Project retired. Every record was preserved.", "Proyecto retirado. Todos los registros fueron preservados.") }); }} />}
       <MasterSidebar />
 
       {/* Main scrollable area */}
