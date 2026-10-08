@@ -4005,3 +4005,9 @@ The fourth continuity block closes the Reports evidence-history return path. Fil
 Reconciliation checkpoint: implementation commit `75052e3e5f1d500006523092556f8ce8e5130f29` is the reviewed five-build and ten-build publication boundary.
 
 The fifth continuity block closes the Help task-guide round trip. Workspace launches preserve the exact same-project Help view, journey and step through one bounded resume target. Every project workspace exposes a visible bilingual return to that step, while Help names the exact originating workspace and explains that its back action restores the original page. External, wrong-project, duplicate, malformed and extra-key resume targets fail closed. Focused behavior, frontend typechecking and the complete release gate protect publication of Blocks 4 and 5 together.
+
+## Human flow continuity Block 6 — 2026-10-07
+
+Reconciliation checkpoint: implementation commit `d01aa3da065af1543933b686548bcca91cfd83da` is the reviewed five-build block boundary.
+
+The sixth continuity block closes the Intake-to-Contract record journey. Contract links now accept one bounded record identity and only an exact same-project Intake origin. The selected authorized contract opens and remains visible through register filters, receives focus and truthful source labeling, and exposes explicit returns to the same Intake step or the register. Invalid, missing and inaccessible links never substitute another record. Focused behavior and frontend typechecking are the block gate. This block remains unpublished until Block 7 completes the ten-build interval.

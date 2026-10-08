@@ -4835,3 +4835,14 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 - [x] Name the exact originating workspace on the Help return control and explain its behavior.
 - [x] Bind the complete Help-to-workspace round trip and unsafe-return rejection to focused acceptance.
 - [ ] Pass the complete gate, push, publish the accumulated ten builds and complete authenticated desktop/mobile Chrome smoke.
+
+## Human flow continuity Block 6 — 2026-10-07
+
+Reconciliation checkpoint: the completed implementation set is reviewed through `d01aa3da065af1543933b686548bcca91cfd83da`; publication remains scheduled after Block 7 reaches the ten-build boundary.
+
+- [x] Accept one bounded contract identity and only the exact same-project Intake origin.
+- [x] Open and focus the selected authorized contract without silently substituting another record.
+- [x] Keep the linked contract visible when retained register filters do not match it.
+- [x] Expose truthful source labeling and visible returns to the same Intake step and contract register.
+- [x] Bind invalid, missing, inaccessible and successful contract journeys to focused acceptance.
+- [ ] Pass the complete gate, push this five-build block and keep it unpublished until Block 7 completes the ten-build interval.

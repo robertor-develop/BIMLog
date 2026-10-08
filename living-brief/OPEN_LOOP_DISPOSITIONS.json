@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "30598494693634a25dd7a60bede452319789c0b52541147fd9d448277526ecd2",
-  "itemCount": 341,
+  "sourceSha256": "13317d4584a728c7f9245370f0b3d6f2402db9ed37cfdd92a889820d9f60fa05",
+  "itemCount": 342,
   "counts": {
-    "ACTIVE": 300,
+    "ACTIVE": 301,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6215,6 +6215,24 @@
       "evidence": [
         "OPEN_LOOP.md:4837",
         "Human flow continuity Block 5 — 2026-10-07"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c0f6d3d7df45de45",
+      "sourceLine": 4848,
+      "heading": "Human flow continuity Block 6 — 2026-10-07",
+      "statement": "Pass the complete gate, push this five-build block and keep it unpublished until Block 7 completes the ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4848",
+        "Human flow continuity Block 6 — 2026-10-07"
       ],
       "currentAuthority": false
     }
