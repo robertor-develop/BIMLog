@@ -1025,6 +1025,7 @@ interface ProjectCardProps {
     fileCount?: number;
     userRole?: string;
     updatedAt?: string;
+    workspaceGroup?: "active" | "testing" | "retired";
   };
   onDelete: (id: number, name: string) => void;
   onRestore: () => void;
@@ -1104,6 +1105,13 @@ export function ProjectCard({ project, onDelete, onRestore, onWorkspaceState, pr
               WebkitBoxOrient: "vertical", overflow: "hidden"
             }}>
               {project.description || t("dashboard.noDescription")}
+            </div>
+            <div style={{ marginBottom: 10, padding: "7px 9px", borderRadius: 7, background: isRetired ? "#F8FAFC" : project.status === "testing" ? "#FFFBEB" : "#F0FDF4", color: "#475569", fontSize: 10, lineHeight: 1.4 }}>
+              {isRetired
+                ? (lang === "es" ? "Solo lectura: se conservan todos los registros. Las bibliotecas compartidas de la empresa siguen disponibles." : "Read-only: every project record is preserved. Shared company libraries remain available.")
+                : project.status === "testing"
+                  ? (lang === "es" ? "Espacio de pruebas: úsalo para QA rutinaria. No afecta las bibliotecas compartidas de la empresa." : "Testing workspace: use it for routine QA. Shared company libraries are unaffected.")
+                  : (lang === "es" ? "Proyecto activo: trabajo operativo normal y registros editables según tus permisos." : "Active project: normal operational work with records editable under your permissions.")}
             </div>
 
             {/* Admin info — always visible */}
