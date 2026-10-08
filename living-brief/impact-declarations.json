@@ -60768,8 +60768,8 @@
     },
     {
       "taskId": "headquarters-project-lifecycle-block01",
-      "reviewedThroughCommit": "705613a55376b9dbcaec2a04b20a354e6c90b702",
-      "reviewedAt": "2026-10-08T15:36:23.7465202Z",
+      "reviewedThroughCommit": "1b224807678afe11a3174c4ac5d6b1ea19b0da63",
+      "reviewedAt": "2026-10-08T16:38:32.000Z",
       "status": "candidate",
       "authorities": [
         {
@@ -60835,7 +60835,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "25ddf9ee1e691801fd9e3eb01a659537f073ac6f0f73a802c1f295e8e4f1d30b"
+      "reviewedChangeSha256": "81475e831591ef5b45ce4f2cd75c3dbb69722fc5bd8b2135a13a20e4229af3a8"
     }
   ]
 }
