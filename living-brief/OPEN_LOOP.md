@@ -4879,3 +4879,14 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 - [x] Explain that Commercial enrichment cannot duplicate operational activation.
 - [x] Bind active Intake review and next-action continuity to focused acceptance.
 - [ ] Pass the complete gate, push Blocks 8 and 9, publish the exact source and complete authenticated Chrome smoke.
+
+Release closure: exact source `c4152e19a040e77692bbcc10f74ee1588f7c1dd3` passed the complete local gate, push and controlled Replit publication. Authenticated production Chrome verified active Intake truth and the authenticated project workspace family. The historical pending checkbox above is superseded by this release closure.
+
+## Human flow continuity Block 10 — 2026-10-08
+
+- [x] Define one exact active-Intake review return owned by the current project.
+- [x] Preserve that return on every active Intake exit to Operations and controlled contracts.
+- [x] Show the exact return visibly in Job Operations without changing operational state.
+- [x] Show the exact return visibly in the contract register without requiring a selected contract.
+- [x] Reject duplicate, cross-project and external return targets and bind the round trip to focused acceptance.
+- [ ] Push this five-build block and keep it unpublished until Block 11 completes the next ten-build interval.

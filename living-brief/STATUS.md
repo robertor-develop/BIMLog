@@ -4029,3 +4029,9 @@ Authenticated production inspection exposed a legacy active Intake whose persist
 Reconciliation checkpoint: implementation commit `abb22bdf` is the reviewed five-build and ten-build publication boundary.
 
 The ninth continuity block makes the active Intake review behave as activation evidence rather than a second activation form. It explains whether the saved source is editable or canonical, labels and locks confirmations when the activated contract makes them historical evidence, links the verified created structure directly to Operations and controlled contracts, and explains that Commercial enrichment does not duplicate active work. Focused Block 9 behavior and frontend typechecking pass. Blocks 8 and 9 now require the complete exact-source gate, one push, controlled publication and authenticated Chrome acceptance.
+
+Blocks 8 and 9 were subsequently pushed and published at exact source `c4152e19a040e77692bbcc10f74ee1588f7c1dd3`. Replit reported the release Live. Authenticated production Chrome verified the corrected active Intake in Spanish and exercised the complete authenticated project-workspace route family without a load or application failure.
+
+## Human flow continuity Block 10 — 2026-10-08
+
+The tenth continuity block preserves an exact, same-project return from active Intake review into Job Operations and the controlled contract register. The return opens the original Intake review step, rejects cross-project, duplicate and external targets, and explains at each destination that operational and contract work remain connected to the active source without becoming duplicate authorities. Focused behavior and frontend typechecking pass. This is the first five-build block after the accepted Blocks 8–9 publication, so it is pushed only and remains unpublished until Block 11 completes the next ten-build interval.
