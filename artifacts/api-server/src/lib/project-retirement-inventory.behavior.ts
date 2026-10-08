@@ -13,4 +13,7 @@ for (const protectedAuthority of ["APU library templates", "delivery workflow te
 }
 assert.match(inventory, /retirementEffect: "preserved_read_only"/);
 assert.match(inventory, /retirementEffect: "unaffected"/);
+assert.match(retirement, /export async function restoreProject/);
+assert.match(retirement, /action: "restore_project"/);
+assert.match(retirement, /eq\(projectsTable\.status, "archived"\)/);
 console.log("PASS project retirement dependency inventory");

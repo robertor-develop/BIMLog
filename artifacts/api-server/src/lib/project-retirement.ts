@@ -24,7 +24,7 @@ async function requireAuthority(executor: Executor, actor: Actor, project: { id:
   const [member] = await executor.select({ role: projectMembersTable.role, status: projectMembersTable.status })
     .from(projectMembersTable).where(and(eq(projectMembersTable.projectId, project.id), eq(projectMembersTable.userId, actor.userId))).limit(1);
   if (!member || member.status !== "active" || !adminRoles.includes(member.role))
-    throw new ProjectRetirementError("PROJECT_RETIREMENT_FORBIDDEN", 403, "Only an authorized project administrator can retire this project.");
+    throw new ProjectRetirementError("PROJECT_RETIREMENT_FORBIDDEN", 403, "Only an authorized project administrator can manage this project's retirement state.");
   return fresh.email;
 }
 
@@ -70,5 +70,29 @@ export async function retireProject(actor: Actor, projectId: number, adminRoles:
         completeProjectDependentTableCount: COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT, recordsPreserved: true, ...impact } });
     return { retired: true, alreadyRetired: false, projectId, status: "archived", retiredAt: retiredAt.toISOString(),
       completeProjectDependentTableCount: COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT, recordsPreserved: true, ...impact };
+  });
+}
+
+export async function restoreProject(actor: Actor, projectId: number, adminRoles: string[], input: { confirmation?: unknown; expectedUpdatedAt?: unknown }) {
+  return db.transaction(async (tx) => {
+    const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
+    const email = await requireAuthority(tx, actor, project, adminRoles);
+    if (project.status !== "archived")
+      throw new ProjectRetirementError("PROJECT_NOT_RETIRED", 409, "Only a retired project can be restored.");
+    if (input.confirmation !== project.code)
+      throw new ProjectRetirementError("PROJECT_RESTORATION_CONFIRMATION_MISMATCH", 409, `Type the exact project code "${project.code}" to confirm restoration.`);
+    if (input.expectedUpdatedAt !== project.updatedAt.toISOString())
+      throw new ProjectRetirementError("PROJECT_RESTORATION_PREVIEW_STALE", 409, "The project changed after the restoration preview.");
+    const restoredAt = new Date();
+    const [updated] = await tx.update(projectsTable).set({ status: "active", updatedAt: restoredAt })
+      .where(and(eq(projectsTable.id, projectId), eq(projectsTable.status, "archived"), eq(projectsTable.updatedAt, project.updatedAt))).returning();
+    if (!updated) throw new ProjectRetirementError("PROJECT_RESTORATION_CONCURRENT_CHANGE", 409, "The project changed during restoration. No restoration was committed.");
+    const recordCounts = await collectProjectRetirementInventory(projectId);
+    await tx.insert(adminActionsLogTable).values({ adminUserId: actor.userId, adminEmail: email, action: "restore_project",
+      targetType: "project", targetId: String(projectId), details: { projectName: project.name, projectCode: project.code,
+        previousStatus: "archived", newStatus: "active", restoredAt: restoredAt.toISOString(), recordsPreserved: true,
+        inventoryVersion: PROJECT_RETIREMENT_INVENTORY_VERSION, recordCounts } });
+    return { restored: true, projectId, status: "active", restoredAt: restoredAt.toISOString(), recordsPreserved: true, recordCounts };
   });
 }
