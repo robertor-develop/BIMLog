@@ -117,7 +117,11 @@ export function repairJobIntakeRecoveryData<T>(data: T) {
 }
 
 export function jobIntakeIsCanonicalReadOnly(intake: { status?: string; activatedContractId?: unknown } | null | undefined) {
-  return Boolean(intake?.status === "activated" && intake.activatedContractId);
+  return Boolean(jobIntakeIsActivated(intake) && intake?.activatedContractId);
+}
+
+export function jobIntakeIsActivated(intake: { status?: string; activation?: unknown } | null | undefined) {
+  return Boolean(intake?.status === "activated" || intake?.activation);
 }
 
 export function resolveJobIntakeRecovery<T>(

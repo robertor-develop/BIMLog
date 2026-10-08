@@ -55,6 +55,7 @@ import {
   readJobIntakeRecovery,
   removeJobIntakeRecovery,
   resolveJobIntakeRecovery,
+  jobIntakeIsActivated,
   jobIntakeIsCanonicalReadOnly,
   type JobIntakeStage,
 } from "@/lib/job-intake-workspace-state";
@@ -880,8 +881,10 @@ export function JobIntakeWorkspace() {
     totals: {},
   };
   const saveConfidence = jobIntakeSaveConfidence(saveState);
-  const readinessLabel = intakeReadinessLabel(intake.status, Boolean(completion.ready), saveState, language);
-  const lifecycle = jobIntakeLifecycle(intake.status, Boolean(completion.ready), saveState, activationBusy);
+  const isActivated = jobIntakeIsActivated(intake);
+  const effectiveStatus = isActivated ? "activated" : intake.status;
+  const readinessLabel = intakeReadinessLabel(effectiveStatus, Boolean(completion.ready), saveState, language);
+  const lifecycle = jobIntakeLifecycle(effectiveStatus, Boolean(completion.ready), saveState, activationBusy);
   const lifecycleCopy = jobIntakeLifecycleCopy(lifecycle, language);
   const configurationPolicy = intake.configurationPolicy ?? { source: "bimlog_default", enforcementMode: "optional" };
   const readiness = completion.readinessSummary ?? {
@@ -901,7 +904,7 @@ export function JobIntakeWorkspace() {
   };
   const canonicalReadOnly = jobIntakeIsCanonicalReadOnly(intake);
   const canEnrich =
-    intake.status === "activated" &&
+    isActivated &&
     !intake.activatedContractId &&
     capabilities.fullCommercialActivation;
   const firstMissing = completion.missingItems?.[0]
@@ -920,7 +923,7 @@ export function JobIntakeWorkspace() {
             : tt("Contract setup", "Configuración contractual"),
         delivery: tt("Delivery workflow", "Flujo de entrega"),
         team: tt("Resource budget", "Presupuesto de recursos"),
-        review: intake.status === "activated" ? tt("Review active setup", "Revisar configuración activa") : tt("Review & activate", "Revisar y activar"),
+        review: isActivated ? tt("Review active setup", "Revisar configuración activa") : tt("Review & activate", "Revisar y activar"),
       }) as any
     )[key];
   const categoryLabel = (value: string) =>
@@ -945,8 +948,8 @@ export function JobIntakeWorkspace() {
         key: item,
         label: item,
       }));
-  const activationPreview = jobIntakeActivationPreview(data, completion, canEnrich || (intake.status !== "activated" && capabilities.fullCommercialActivation));
-  const activationStructure = jobIntakeActivationStructure(intake.status, activationPreview, intake.activation);
+  const activationPreview = jobIntakeActivationPreview(data, completion, canEnrich || (!isActivated && capabilities.fullCommercialActivation));
+  const activationStructure = jobIntakeActivationStructure(effectiveStatus, activationPreview, intake.activation);
   const activeChangeDestinations = jobIntakeActiveChangeDestinations(projectId, capabilities.contracts);
   const openBlocker = (code: string) => {
     const destination = jobIntakeBlockerDestination(code);
@@ -1083,7 +1086,7 @@ export function JobIntakeWorkspace() {
         for (const assignment of data.team?.assignments ?? []) rows.push([tt("Team", "Equipo"), String(assignment.name || assignment.role || assignment.userId || "—"), `${assignment.plannedHours ?? "—"}h`, String(assignment.scopeItemId || "—")]);
       }
       if (pdfSections.review) rows.push(
-        [tt("Review", "Revisión"), tt("Setup coverage", "Cobertura de configuración"), `${completion.percent}%`, intake.status === "activated" ? readinessLabel : firstMissing || readinessLabel],
+        [tt("Review", "Revisión"), tt("Setup coverage", "Cobertura de configuración"), `${completion.percent}%`, isActivated ? readinessLabel : firstMissing || readinessLabel],
         [tt("Review", "Revisión"), tt("Status", "Estado"), String(intake.status || "draft"), intake.activation ? tt("Activated", "Activado") : tt("Not activated", "No activado")],
       );
       await downloadGovernedCurrentViewPdf(projectId, token, {
@@ -1139,7 +1142,7 @@ export function JobIntakeWorkspace() {
             </div>
           </div>
           <div className="ji-progress">
-            {intake.status === "activated" && <Link href={`/projects/${projectId}/operations`}>{tt("Open job workspace", "Abrir espacio de trabajo")}</Link>}
+            {isActivated && <Link href={`/projects/${projectId}/operations`}>{tt("Open job workspace", "Abrir espacio de trabajo")}</Link>}
             <strong>{completion.percent}%</strong> {tt("setup coverage", "cobertura de configuración")}
             <div className="ji-bar" role="progressbar" aria-label={tt("Setup readiness", "Preparación de la configuración")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={completion.percent}>
               <span style={{ width: `${completion.percent}%` }} />
@@ -1153,7 +1156,7 @@ export function JobIntakeWorkspace() {
           <div className="ji-readiness-card">
             <h2>{tt("Setup readiness", "Preparación de configuración")}</h2>
             <strong>{readiness.setup.percent}%</strong>
-            <p>{intake.status === "activated" || readiness.setup.ready ? readinessLabel : tt(`${readiness.setup.missingRequiredCount} required item(s) remaining`, `${readiness.setup.missingRequiredCount} elemento(s) obligatorio(s) pendiente(s)`)}</p>
+            <p>{isActivated || readiness.setup.ready ? readinessLabel : tt(`${readiness.setup.missingRequiredCount} required item(s) remaining`, `${readiness.setup.missingRequiredCount} elemento(s) obligatorio(s) pendiente(s)`)}</p>
           </div>
           <div id="job-intake-readiness-details" style={{ display: "contents" }}>
           <div className="ji-readiness-card">
@@ -2350,8 +2353,8 @@ export function JobIntakeWorkspace() {
               </section>
               <section className="ji-card" id="ji-team">
                 <h2>5. {tt("Resource budget", "Presupuesto de recursos")}</h2>
-                {data.team.projectLeaderUserId != null && <div className="ji-row"><p>{tt("The project leader from the saved setup is preserved. If that person is no longer available, leave the leader pending and choose one later in project administration.", "Se conserva el líder de la configuración guardada. Si ya no está disponible, déjelo pendiente y elíjalo después en la administración del proyecto.")}</p>{intake.status !== "activated" && <button type="button" onClick={() => change("team", "projectLeaderUserId", null)}>{tt("Leave project leader pending", "Dejar líder del proyecto pendiente")}</button>}</div>}
-                <GenericResourcePlan assignments={data.team.assignments} scopeItems={data.scopeItems} currency={data.identity.currency} budgetEnabled={capabilities.budget} canReleaseLegacyAssignment={intake.status !== "activated"} tt={tt}
+                {data.team.projectLeaderUserId != null && <div className="ji-row"><p>{tt("The project leader from the saved setup is preserved. If that person is no longer available, leave the leader pending and choose one later in project administration.", "Se conserva el líder de la configuración guardada. Si ya no está disponible, déjelo pendiente y elíjalo después en la administración del proyecto.")}</p>{!isActivated && <button type="button" onClick={() => change("team", "projectLeaderUserId", null)}>{tt("Leave project leader pending", "Dejar líder del proyecto pendiente")}</button>}</div>}
+                <GenericResourcePlan assignments={data.team.assignments} scopeItems={data.scopeItems} currency={data.identity.currency} budgetEnabled={capabilities.budget} canReleaseLegacyAssignment={!isActivated} tt={tt}
                   onChange={assignments => setData((old: any) => ({ ...old, team: { ...old.team, assignments }, review: { ...old.review, teamConfirmed: false } }))}/>
                 <p className="ji-small">{tt("Unassigned scope hours remain pending for later staffing. They do not prevent activation.", "Las horas sin personal quedan pendientes para asignarlas después. No impiden la activación.")}</p>
               </section>
@@ -2360,13 +2363,13 @@ export function JobIntakeWorkspace() {
                 <h2>6. {stageLabel("review")}</h2>
                 {guide && (
                   <div className="ji-guide">
-                    {intake.status === "activated" ? tt("This job is active. Review the saved setup here and open the job workspace to continue delivery. Saving setup changes does not approve or execute contracts.", "Este trabajo está activo. Revise aquí la configuración guardada y abra el espacio de trabajo para continuar la entrega. Guardar cambios de configuración no aprueba ni ejecuta contratos.") : tt(
+                    {isActivated ? tt("This job is active. Review the saved setup here and open the job workspace to continue delivery. Saving setup changes does not approve or execute contracts.", "Este trabajo está activo. Revise aquí la configuración guardada y abra el espacio de trabajo para continuar la entrega. Guardar cambios de configuración no aprueba ni ejecuta contratos.") : tt(
                       "Save first, review each applicable statement, then activate. Core activation creates operational work items, delivery tasks, and resource assignments. With the complete Commercial package it creates one controlled draft per contract profile and its assigned Contract Items; it never approves or executes contracts.",
                       "Guarde primero, revise cada declaraci\u00f3n aplicable y luego active. La activaci\u00f3n b\u00e1sica crea partidas operativas, tareas de entrega y asignaciones de recursos. Con el paquete Comercial completo crea un borrador controlado por perfil de contrato y sus Partidas de Contrato asignadas; nunca aprueba ni ejecuta contratos.",
                     )}
                   </div>
                 )}
-                <IntakeCommercialReadiness capabilities={capabilities} errors={commercialLoadErrors} activated={intake.status === "activated"} hasContracts={Boolean(intake.activatedContractId)} tt={tt} onRetry={() => void load()}/>
+                <IntakeCommercialReadiness capabilities={capabilities} errors={commercialLoadErrors} activated={isActivated} hasContracts={Boolean(intake.activatedContractId)} tt={tt} onRetry={() => void load()}/>
                 <div className="ji-grid">
                   {reviewItems.map(([field, label]) => (
                     <label className="ji-check" key={field}>
@@ -2406,7 +2409,7 @@ export function JobIntakeWorkspace() {
                   <p className="ji-small">{activationStructure.mode === "created" ? tt("This is the verified structure already created for the active job. Continue changes to delivery and staffing in Job Operations.", "Esta es la estructura verificada ya creada para el trabajo activo. Continúe los cambios de entrega y personal en Operaciones del Trabajo.") : tt("Future staffing remains pending and does not block activation. Named people can be assigned later in Job Operations.", "El personal futuro queda pendiente y no bloquea la activación. Las personas se pueden asignar después en Operaciones del Trabajo.")}</p>
                 </div>
                 <div className="ji-actions">
-                  {intake.status === "activated" && !canEnrich ? <Link className="ji-navigation-link ji-primary-link" href={activeChangeDestinations.operations}><Zap size={15} /> {tt("Open job workspace", "Abrir espacio de trabajo")}</Link> : <button
+                  {isActivated && !canEnrich ? <Link className="ji-navigation-link ji-primary-link" href={activeChangeDestinations.operations}><Zap size={15} /> {tt("Open job workspace", "Abrir espacio de trabajo")}</Link> : <button
                     className="primary"
                     disabled={
                       busy ||
@@ -2415,7 +2418,7 @@ export function JobIntakeWorkspace() {
                     onClick={activate}
                   >
                     <Zap size={15} />{" "}
-                    {intake.status === "activated"
+                    {isActivated
                       ? tt("Create Commercial records", "Crear registros comerciales")
                       : tt(
                           "Activate operational job",
@@ -2428,7 +2431,7 @@ export function JobIntakeWorkspace() {
               <div className="ji-footer">
                 <span>
                   <strong>{completion.percent}%</strong> ·{" "}
-                  {intake.status === "activated" ? readinessLabel : firstMissing || readinessLabel} ·{" "}
+                  {isActivated ? readinessLabel : firstMissing || readinessLabel} ·{" "}
                   <span
                     className={`ji-save-state ${saveState}`}
                     role="status"
@@ -2442,7 +2445,7 @@ export function JobIntakeWorkspace() {
                   disabled={
                     busy ||
                     saveState === "saving" ||
-                    (intake.status === "activated" && !canEnrich)
+                    (isActivated && !canEnrich)
                   }
                   onClick={save}
                 >
