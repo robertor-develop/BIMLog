@@ -952,6 +952,7 @@ export function JobIntakeWorkspace() {
   const activationPreview = jobIntakeActivationPreview(data, completion, canEnrich || (!isActivated && capabilities.fullCommercialActivation));
   const activationStructure = jobIntakeActivationStructure(effectiveStatus, activationPreview, intake.activation);
   const activeChangeDestinations = jobIntakeActiveChangeDestinations(projectId, capabilities.contracts);
+  const activeNextActions = activeIntakeNextActions(projectId, capabilities.contracts);
   const openBlocker = (code: string) => {
     const destination = jobIntakeBlockerDestination(code);
     setActive(destination.stage);
@@ -2411,6 +2412,9 @@ export function JobIntakeWorkspace() {
                     {activationStructure.contractDrafts > 0 && <div className="ji-stat"><strong>{activationStructure.contractDrafts}</strong><div>{tt("Controlled contract drafts", "Borradores contractuales controlados")}</div></div>}
                   </div>
                   <p className="ji-small">{activationStructure.mode === "created" ? tt("This is the verified structure already created for the active job. Continue changes to delivery and staffing in Job Operations.", "Esta es la estructura verificada ya creada para el trabajo activo. Continúe los cambios de entrega y personal en Operaciones del Trabajo.") : tt("Future staffing remains pending and does not block activation. Named people can be assigned later in Job Operations.", "El personal futuro queda pendiente y no bloquea la activación. Las personas se pueden asignar después en Operaciones del Trabajo.")}</p>
+                  {activationStructure.mode === "created" && <nav className="ji-actions" aria-label={tt("Continue active work", "Continuar trabajo activo")}>
+                    {activeNextActions.map(action => <Link key={action.key} className="ji-navigation-link" href={action.href}>{tt(action.en, action.es)}</Link>)}
+                  </nav>}
                 </div>
                 <div className="ji-actions">
                   {isActivated && !canEnrich ? <Link className="ji-navigation-link ji-primary-link" href={activeChangeDestinations.operations}><Zap size={15} /> {tt("Open job workspace", "Abrir espacio de trabajo")}</Link> : <button
