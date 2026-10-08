@@ -11,10 +11,10 @@ export function resolveEmailReadiness(connection?: SafeConnection | null): Email
 
 export function emailReadinessCopy(state: EmailReadinessState) {
   return {
-    not_configured: { label: "Not configured", detail: "Email is optional for setup. Configure it now or continue and send later." },
-    configured: { label: "Configured", detail: "Connection details are saved, but sending readiness has not been verified." },
-    unverified: { label: "Connected, sender unverified", detail: "The API key is accepted. Verify the sender before relying on direct delivery." },
-    ready: { label: "Ready", detail: "The current sender and provider are verified for direct BIMLog delivery." },
-    error: { label: "Needs attention", detail: "The provider could not verify this connection. Reconnect it before sending." },
+    not_configured: { label: { en: "Not configured", es: "No configurado" }, detail: { en: "Email is optional for setup. Configure it now or continue and send later.", es: "El correo es opcional durante la configuración. Configúrelo ahora o continúe y envíe más tarde." } },
+    configured: { label: { en: "Configured", es: "Configurado" }, detail: { en: "Connection details are saved, but sending readiness has not been verified.", es: "Los datos de conexión están guardados, pero aún no se ha verificado la capacidad de envío." } },
+    unverified: { label: { en: "Connected, sender unverified", es: "Conectado, remitente sin verificar" }, detail: { en: "The API key is accepted. Verify the sender before relying on direct delivery.", es: "La clave API fue aceptada. Verifique el remitente antes de depender del envío directo." } },
+    ready: { label: { en: "Ready", es: "Listo" }, detail: { en: "The current sender and provider are verified for direct BIMLog delivery.", es: "El remitente y el proveedor actuales están verificados para el envío directo de BIMLog." } },
+    error: { label: { en: "Needs attention", es: "Requiere atención" }, detail: { en: "The provider could not verify this connection. Reconnect it before sending.", es: "El proveedor no pudo verificar esta conexión. Vuelva a conectarla antes de enviar." } },
   }[state];
 }

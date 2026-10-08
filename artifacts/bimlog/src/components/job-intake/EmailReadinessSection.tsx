@@ -19,7 +19,7 @@ export function EmailReadinessSection({ projectId, tt }: { projectId: number; tt
   return <section className="ji-card" id="ji-email-readiness" aria-labelledby="ji-email-readiness-title">
     <h2 id="ji-email-readiness-title">{tt("Email readiness", "Preparación de correo")}</h2>
     <p>{tt("Optional. Configure direct email delivery without blocking the rest of full setup.", "Opcional. Configure la entrega directa por correo sin bloquear el resto de la configuración completa.")}</p>
-    {connection === undefined ? <p role="status">{tt("Checking email readiness...", "Verificando preparación de correo...")}</p> : <div className={state === "error" ? "ji-error" : state === "ready" ? "ji-ok" : "ji-guide"} role="status"><strong>{copy.label}</strong><p>{copy.detail}</p>{connection?.accountLabel && <p>{tt("Sender", "Remitente")}: {connection.accountLabel}</p>}</div>}
+    {connection === undefined ? <p role="status">{tt("Checking email readiness...", "Verificando preparación de correo...")}</p> : <div className={state === "error" ? "ji-error" : state === "ready" ? "ji-ok" : "ji-guide"} role="status"><strong>{tt(copy.label.en, copy.label.es)}</strong><p>{tt(copy.detail.en, copy.detail.es)}</p>{connection?.accountLabel && <p>{tt("Sender", "Remitente")}: {connection.accountLabel}</p>}</div>}
     <div className="ji-actions"><button type="button" onClick={configure}>{state === "not_configured" ? tt("Configure SendGrid", "Configurar SendGrid") : tt("Review email configuration", "Revisar configuración de correo")}</button><span className="ji-small">{tt("You can continue setup without email.", "Puede continuar la configuración sin correo.")}</span></div>
   </section>;
 }
