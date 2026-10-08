@@ -60697,7 +60697,7 @@
     },
     {
       "taskId": "human-flow-continuity-block10",
-      "reviewedThroughCommit": "7fa9b4bc8211a52bf4288ef2c539f6958f42e2b3",
+      "reviewedThroughCommit": "d34b6c8fac46b24d9b4357c02acadb94cf9c521c",
       "reviewedAt": "2026-10-08T05:20:28.732Z",
       "status": "candidate",
       "authorities": [
@@ -60759,10 +60759,12 @@
       ],
       "reason": "Preserve the user's exact active Intake review context through the two primary continuation destinations.",
       "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a76e2941b5b79f9e6b882afecaf83c065e7ef2c1bb8d6ebca23e8dc858588c38"
+      "reviewedChangeSha256": "3cfbc7ea6865a584c7c3b1fdaf8953756b48dc6afad98a2b0c9f0dceb65ed221"
     }
   ]
 }
