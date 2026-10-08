@@ -1,6 +1,6 @@
 import { db } from "@workspace/db";
 import { adminActionsLogTable, filesTable, projectMembersTable, projectsTable, usersTable } from "@workspace/db/schema";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, inArray } from "drizzle-orm";
 import { collectProjectRetirementInventory, PROJECT_RETIREMENT_INVENTORY_VERSION, PROJECT_RETIREMENT_OWNERSHIP, totalProjectRetirementRecords } from "./project-retirement-inventory";
 
 export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 137;
@@ -117,5 +117,54 @@ export async function setProjectWorkspaceState(actor: Actor, projectId: number, 
       targetType: "project", targetId: String(projectId), details: { projectName: project.name, projectCode: project.code,
         previousStatus: project.status, newStatus: state, changedAt: changedAt.toISOString(), recordsPreserved: true } });
     return { changed: true, projectId, status: state, updatedAt: changedAt.toISOString(), recordsPreserved: true };
+  });
+}
+
+export async function setProjectWorkspaceStateBatch(actor: Actor, adminRoles: string[], input: { state?: unknown; items?: unknown }) {
+  const state = input.state === "testing" ? "testing" : input.state === "active" ? "active" : null;
+  if (!state) throw new ProjectRetirementError("PROJECT_WORKSPACE_BATCH_STATE_INVALID", 400, "Workspace state must be active or testing.");
+  if (!Array.isArray(input.items) || input.items.length < 1 || input.items.length > 50)
+    throw new ProjectRetirementError("PROJECT_WORKSPACE_BATCH_SIZE_INVALID", 400, "Select between 1 and 50 projects.");
+  const items = input.items.map((raw) => {
+    const item = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
+    const projectId = Number(item.projectId);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || typeof item.expectedUpdatedAt !== "string")
+      throw new ProjectRetirementError("PROJECT_WORKSPACE_BATCH_ITEM_INVALID", 400, "Every selected project requires a valid id and version.");
+    return { projectId, expectedUpdatedAt: item.expectedUpdatedAt };
+  });
+  if (new Set(items.map(item => item.projectId)).size !== items.length)
+    throw new ProjectRetirementError("PROJECT_WORKSPACE_BATCH_DUPLICATE", 400, "Each project can appear only once.");
+
+  return db.transaction(async (tx) => {
+    const projects = await tx.select().from(projectsTable).where(inArray(projectsTable.id, items.map(item => item.projectId)));
+    const byId = new Map(projects.map(project => [project.id, project]));
+    const verified = [] as Array<{ project: typeof projects[number]; actorEmail: string }>;
+    for (const item of items) {
+      const project = byId.get(item.projectId);
+      if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, `Project ${item.projectId} was not found.`);
+      const actorEmail = await requireAuthority(tx, actor, project, adminRoles);
+      if (project.status === "archived")
+        throw new ProjectRetirementError("PROJECT_WORKSPACE_BATCH_RETIRED", 409, `Restore ${project.code} before changing its workspace state.`);
+      if (item.expectedUpdatedAt !== project.updatedAt.toISOString())
+        throw new ProjectRetirementError("PROJECT_WORKSPACE_BATCH_STALE", 409, `${project.code} changed after selection. No projects were changed.`);
+      verified.push({ project, actorEmail });
+    }
+
+    const results = [] as Array<{ projectId: number; status: string; changed: boolean; updatedAt: string }>;
+    for (const { project, actorEmail } of verified) {
+      if (project.status === state) {
+        results.push({ projectId: project.id, status: state, changed: false, updatedAt: project.updatedAt.toISOString() });
+        continue;
+      }
+      const changedAt = new Date();
+      const [updated] = await tx.update(projectsTable).set({ status: state, updatedAt: changedAt })
+        .where(and(eq(projectsTable.id, project.id), eq(projectsTable.updatedAt, project.updatedAt))).returning();
+      if (!updated) throw new ProjectRetirementError("PROJECT_WORKSPACE_BATCH_CONCURRENT_CHANGE", 409, `${project.code} changed while the batch was saving. No projects were changed.`);
+      await tx.insert(adminActionsLogTable).values({ adminUserId: actor.userId, adminEmail: actorEmail, action: "change_project_workspace_state_batch",
+        targetType: "project", targetId: String(project.id), details: { projectName: project.name, projectCode: project.code,
+          previousStatus: project.status, newStatus: state, changedAt: changedAt.toISOString(), recordsPreserved: true, batchSize: items.length } });
+      results.push({ projectId: project.id, status: state, changed: true, updatedAt: changedAt.toISOString() });
+    }
+    return { state, requestedCount: items.length, changedCount: results.filter(result => result.changed).length, recordsPreserved: true, results };
   });
 }
