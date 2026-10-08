@@ -238,14 +238,19 @@ export function Dashboard() {
 
   // ── Cross-project data ─────────────────────────────────────────────────────
   const [agg, setAgg] = useState<AggState>({ rfis: [], submittals: [], activity: [], files: [], loading: false });
-  const [projectSearch, setProjectSearch] = useState("");
-  const [projectStatus, setProjectStatus] = useState("active");
-  const [projectSort, setProjectSort] = useState<"name_asc" | "name_desc" | "code_asc" | "status_asc">("name_asc");
+  const savedProjectView = (() => { try { return JSON.parse(localStorage.getItem("bimlog:headquarters-project-view") || "{}"); } catch { return {}; } })();
+  const [projectSearch, setProjectSearch] = useState(typeof savedProjectView.search === "string" ? savedProjectView.search : "");
+  const [projectStatus, setProjectStatus] = useState(["active", "testing", "retired", "all"].includes(savedProjectView.status) ? savedProjectView.status : "active");
+  const [projectSort, setProjectSort] = useState<"name_asc" | "name_desc" | "code_asc" | "status_asc">(["name_asc", "name_desc", "code_asc", "status_asc"].includes(savedProjectView.sort) ? savedProjectView.sort : "name_asc");
   const [preferredTestProjectId, setPreferredTestProjectId] = useState<number | null>(() => {
     const value = Number(localStorage.getItem("bimlog:preferred-test-project"));
     return Number.isInteger(value) && value > 0 ? value : null;
   });
   const [showOperationalDetails, setShowOperationalDetails] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem("bimlog:headquarters-project-view", JSON.stringify({ search: projectSearch, status: projectStatus, sort: projectSort }));
+  }, [projectSearch, projectSort, projectStatus]);
 
   useEffect(() => {
     if (!projects || !token) return;
