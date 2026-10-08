@@ -1,6 +1,7 @@
 import { db } from "@workspace/db";
 import { adminActionsLogTable, filesTable, projectMembersTable, projectsTable, usersTable } from "@workspace/db/schema";
 import { and, count, eq } from "drizzle-orm";
+import { collectProjectRetirementInventory, PROJECT_RETIREMENT_INVENTORY_VERSION, totalProjectRetirementRecords } from "./project-retirement-inventory";
 
 export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 137;
 
@@ -39,9 +40,11 @@ export async function previewProjectRetirement(actor: Actor, projectId: number, 
   const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
   if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
   await requireAuthority(db, actor, project, adminRoles);
+  const recordCounts = await collectProjectRetirementInventory(projectId);
   return { projectId, projectName: project.name, projectCode: project.code, currentStatus: project.status,
     expectedUpdatedAt: project.updatedAt.toISOString(), confirmationText: project.code, strategy: "archive",
     completeProjectDependentTableCount: COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT, recordsPreserved: true,
+    inventoryVersion: PROJECT_RETIREMENT_INVENTORY_VERSION, recordCounts, totalInventoriedRecords: totalProjectRetirementRecords(recordCounts),
     ...(await counts(db, projectId)) };
 }
 
