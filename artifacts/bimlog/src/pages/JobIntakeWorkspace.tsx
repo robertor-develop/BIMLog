@@ -2372,12 +2372,14 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
                 <IntakeCommercialReadiness capabilities={capabilities} errors={commercialLoadErrors} activated={isActivated} hasContracts={Boolean(intake.activatedContractId)} tt={tt} onRetry={() => void load()}/>
+                {isActivated && <h3 className="ji-review-subheading">{activeIntakeConfirmationLabel(language)}</h3>}
                 <div className="ji-grid">
                   {reviewItems.map(([field, label]) => (
                     <label className="ji-check" key={field}>
                       <input
                         type="checkbox"
                         checked={data.review[field]}
+                        disabled={canonicalReadOnly}
                         onChange={(e) =>
                           change("review", field, e.target.checked)
                         }
