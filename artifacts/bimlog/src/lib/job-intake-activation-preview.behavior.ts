@@ -18,6 +18,9 @@ assert.equal(jobIntakeActivationMatches(preview, { workItems: [{}, {}], tasks: [
 assert.equal(jobIntakeActivationStructure("draft", preview, null).mode, "preview");
 assert.equal(jobIntakeActivationStructure("draft", preview, { workItems: [{}], tasks: [{}], assignments: [] }).mode, "created");
 assert.deepEqual(jobIntakeActivationStructure("activated", preview, { workItems: [{}, {}], tasks: [{}], assignments: [{}, {}, {}] }), { mode: "created", workItems: 2, tasks: 1, resourcePlans: 3, namedAssignments: 3, genericResourceDemands: 0, unassignedHours: "0", contractDrafts: 0 });
-assert.deepEqual(jobIntakeActiveChangeDestinations(41, true), { operations: "/projects/41/operations", contracts: "/projects/41/financial/contracts" });
+assert.deepEqual(jobIntakeActiveChangeDestinations(41, true), {
+  operations: "/projects/41/operations?returnTo=%2Fprojects%2F41%2Fintake%3Fstage%3Dreview%26item%3Dji-review",
+  contracts: "/projects/41/financial/contracts?returnTo=%2Fprojects%2F41%2Fintake%3Fstage%3Dreview%26item%3Dji-review",
+});
 assert.equal(jobIntakeActiveChangeDestinations(41, false).contracts, null);
 console.log("job intake activation preview behavior: PASS");
