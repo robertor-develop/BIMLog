@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2f917a912c976d1f41349c3397deb243b4c5adb33de6cbe3d49d0f6f8ee9c7d1",
-  "itemCount": 348,
+  "sourceSha256": "9f3863ba661fd4fea65ee14931d14383618730b592b3f5ae51d694a77f498dd3",
+  "itemCount": 349,
   "counts": {
-    "ACTIVE": 307,
+    "ACTIVE": 308,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6341,6 +6341,24 @@
       "evidence": [
         "OPEN_LOOP.md:4915",
         "Headquarters project lifecycle Block 2 — 2026-10-08"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "00da76a27a999630",
+      "sourceLine": 4924,
+      "heading": "Headquarters project lifecycle Block 3 — 2026-10-08",
+      "statement": "Pass the complete release gate, push Blocks 2 and 3, publish the exact ten-build source and complete authenticated Chrome production smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4924",
+        "Headquarters project lifecycle Block 3 — 2026-10-08"
       ],
       "currentAuthority": false
     }

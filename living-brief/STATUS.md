@@ -4048,5 +4048,9 @@ Release closure is exact source `13759e262f215eadcd64edc8b86e85f60e5629d7`, publ
 
 The second Headquarters cleanup block makes Testing an explicit project state rather than inferring it from names or descriptions. Existing lifecycle authority can move a non-retired project between Active and Testing with optimistic concurrency and immutable administrator audit evidence; records and reusable company libraries remain untouched. The Headquarters card exposes the reversible state control only when the same server authority says the user may manage lifecycle, explains each state in English and Spanish, and can remember one preferred Testing workspace in the current browser so routine QA reuses it. Focused behavior plus API and frontend typechecking pass. This is the first five-build half of the next ten-build interval, so it is pushed and remains unpublished until the following block.
 
+## Headquarters project lifecycle Block 3 — 2026-10-08
+
+The third Headquarters cleanup block turns the lifecycle register into a reusable daily workspace. Active, Testing, Retired and All counts are direct view controls; the chosen view, search and sort survive return navigation; and the preferred Testing project remains first where applicable. When a preferred QA project exists, New Project first offers that workspace and still exposes an explicit separate-project path. No project, customer record, company library or production data is mutated by these navigation and preference controls. Focused behavior and frontend typechecking pass. This block completes the ten-build interval with Block 2 and therefore requires the full release gate, exact push/publication and authenticated production Chrome smoke.
+
 
 

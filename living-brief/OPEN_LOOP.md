@@ -4914,3 +4914,12 @@ Release closure: exact source `13759e262f215eadcd64edc8b86e85f60e5629d7` passed 
 - [x] Bind the complete bilingual Headquarters lifecycle workflow to focused API and frontend acceptance.
 - [ ] Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 3 completes the next ten-build interval.
 
+## Headquarters project lifecycle Block 3 — 2026-10-08
+
+- [x] Show immediate Active, Testing, Retired and All counts as accessible Headquarters view controls.
+- [x] Keep the preferred Testing workspace first in Testing and All views and clear an obsolete preference safely.
+- [x] Restore the user's project search, lifecycle view and sort choice on return to Headquarters.
+- [x] Offer the preferred QA workspace before creating another project while retaining an explicit separate-project path.
+- [x] Bind lifecycle counts, persistence, QA-first ordering and the bilingual reuse decision to focused acceptance.
+- [ ] Pass the complete release gate, push Blocks 2 and 3, publish the exact ten-build source and complete authenticated Chrome production smoke.
+
