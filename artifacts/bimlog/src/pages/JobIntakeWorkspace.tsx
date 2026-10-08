@@ -2419,7 +2419,7 @@ export function JobIntakeWorkspace() {
                   >
                     <Zap size={15} />{" "}
                     {isActivated
-                      ? tt("Create Commercial records", "Crear registros comerciales")
+                      ? tt("Add Commercial records to active job", "Agregar registros Comerciales al trabajo activo")
                       : tt(
                           "Activate operational job",
                           "Activar trabajo operativo",
