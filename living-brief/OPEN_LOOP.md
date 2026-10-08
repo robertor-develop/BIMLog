@@ -4944,3 +4944,12 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [x] Preserve the remaining review queue, project records and reusable company libraries after each decision.
 - [x] Bind protected projects, QA reuse, candidate selection and guided review continuity to focused acceptance.
 - [ ] Pass the complete release gate, push the five-build block, publish the exact accumulated ten builds and complete authenticated desktop/mobile Chrome smoke.
+
+## BIMLog Agent workspace controls Block 1 — 2026-10-08
+
+- [x] Bound and persist the agent panel width without storing project or form data.
+- [x] Add pointer and keyboard resizing to the existing docked panel.
+- [x] Let users dock left or right and retain a reversible compact rail.
+- [x] Keep bilingual controls usable at 390 CSS pixels with mobile safe-area and input safeguards.
+- [x] Verify that every authenticated user can access guidance while project membership and repair authority remain enforced separately.
+- [ ] Push this five-build block and keep it unpublished until BIMLog Agent workspace controls Block 2 completes the next ten-build interval.

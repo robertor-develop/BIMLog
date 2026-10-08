@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "cd0dd2ba7bea005a346c7f81116be738414c3f67b858e96b348901defedcf5db",
-  "itemCount": 348,
+  "sourceSha256": "cf46b00de7edccd745db05ebc8a97013aa78e5b2d760f170649f688c14fc89ff",
+  "itemCount": 349,
   "counts": {
-    "ACTIVE": 307,
+    "ACTIVE": 308,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6341,6 +6341,24 @@
       "evidence": [
         "OPEN_LOOP.md:4946",
         "Headquarters project lifecycle Block 5 — 2026-10-08"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "dbabda0c6c35b669",
+      "sourceLine": 4955,
+      "heading": "BIMLog Agent workspace controls Block 1 — 2026-10-08",
+      "statement": "Push this five-build block and keep it unpublished until BIMLog Agent workspace controls Block 2 completes the next ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4955",
+        "BIMLog Agent workspace controls Block 1 — 2026-10-08"
       ],
       "currentAuthority": false
     }
