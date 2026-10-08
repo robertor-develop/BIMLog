@@ -60694,6 +60694,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "30e079cfed5af3680d8e9f557b749a3772763a0be7d0b2442dc733b52cac0593"
+    },
+    {
+      "taskId": "human-flow-continuity-block10",
+      "reviewedThroughCommit": "7fa9b4bc8211a52bf4288ef2c539f6958f42e2b3",
+      "reviewedAt": "2026-10-08T05:20:28.732Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves a bounded same-project navigation return without changing product, record, financial, tenant, provider, or Native authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves a bounded same-project navigation return without changing product, record, financial, tenant, provider, or Native authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves a bounded same-project navigation return without changing product, record, financial, tenant, provider, or Native authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves a bounded same-project navigation return without changing product, record, financial, tenant, provider, or Native authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves a bounded same-project navigation return without changing product, record, financial, tenant, provider, or Native authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves a bounded same-project navigation return without changing product, record, financial, tenant, provider, or Native authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves a bounded same-project navigation return without changing product, record, financial, tenant, provider, or Native authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves a bounded same-project navigation return without changing product, record, financial, tenant, provider, or Native authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The block result and its publication cadence are recorded in current implementation status."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The completed five-build scope and remaining push-only release gate are recorded in the active work register."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No append-only historical finding is required for this bounded navigation continuity change."
+        }
+      ],
+      "reason": "Preserve the user's exact active Intake review context through the two primary continuation destinations.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a76e2941b5b79f9e6b882afecaf83c065e7ef2c1bb8d6ebca23e8dc858588c38"
     }
   ]
 }
