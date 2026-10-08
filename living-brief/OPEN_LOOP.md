@@ -4846,3 +4846,14 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 - [x] Expose truthful source labeling and visible returns to the same Intake step and contract register.
 - [x] Bind invalid, missing, inaccessible and successful contract journeys to focused acceptance.
 - [ ] Pass the complete gate, push this five-build block and keep it unpublished until Block 7 completes the ten-build interval.
+
+## Human flow continuity Block 7 — 2026-10-07
+
+Reconciliation checkpoint: the completed implementation set is reviewed through `84a2a303bf78bfadc83a1abb9c596f3c70e344be`; this block completes the ten-build publication interval with Block 6.
+
+- [x] Distinguish Draft, Ready, Activating, Active and Changes pending without conflating setup coverage with execution.
+- [x] Present the verified structure already created after activation instead of a future-tense preview.
+- [x] Replace the completed disabled activation action with a primary Job Operations entry.
+- [x] Keep optional Commercial enrichment separate from operational activation.
+- [x] Bind lifecycle truth, idempotent retry verification and active-job continuation to focused acceptance.
+- [ ] Pass the release gate, push, publish the accumulated ten builds and complete authenticated Chrome production smoke.

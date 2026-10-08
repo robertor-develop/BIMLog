@@ -4011,3 +4011,9 @@ The fifth continuity block closes the Help task-guide round trip. Workspace laun
 Reconciliation checkpoint: implementation commit `d01aa3da065af1543933b686548bcca91cfd83da` is the reviewed five-build block boundary.
 
 The sixth continuity block closes the Intake-to-Contract record journey. Contract links now accept one bounded record identity and only an exact same-project Intake origin. The selected authorized contract opens and remains visible through register filters, receives focus and truthful source labeling, and exposes explicit returns to the same Intake step or the register. Invalid, missing and inaccessible links never substitute another record. Focused behavior and frontend typechecking are the block gate. This block remains unpublished until Block 7 completes the ten-build interval.
+
+## Human flow continuity Block 7 — 2026-10-07
+
+Reconciliation checkpoint: implementation commit `84a2a303bf78bfadc83a1abb9c596f3c70e344be` is the reviewed five-build and ten-build publication boundary.
+
+The seventh continuity block makes the Job Intake lifecycle unambiguous. Draft, Ready, Activating, Active and Changes pending are separate states with bilingual guidance. An active job shows the verified structure already created and leads directly to Job Operations instead of displaying a disabled activation action. Commercial enrichment remains a separate explicit action, and the existing idempotent activation verification remains bound to acceptance. Focused behavior, frontend typechecking and the release gate protect publication of Blocks 6 and 7 together.
