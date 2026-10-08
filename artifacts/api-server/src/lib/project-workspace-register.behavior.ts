@@ -7,7 +7,9 @@ const restore = await readFile(new URL("../../../bimlog/src/components/ProjectRe
 
 assert.ok(routes.indexOf('router.get("/projects/workspace-register"') < routes.indexOf('router.get("/projects/:projectId"'), "literal workspace register must precede project parameter route");
 assert.match(routes, /project\.status === "archived" \? "retired"/);
-assert.match(routes, /controlled \(\?:live \)\?\(\?:qa\|test\|production sample\)/i);
+assert.match(routes, /project\.status === "testing" \? "testing" : "active"/);
+assert.match(routes, /router\.post\("\/projects\/:projectId\/workspace-state"/);
+assert.doesNotMatch(routes, /syntheticEvidence/);
 for (const group of ["Active projects", "Testing projects", "Retired projects", "All projects"]) assert.match(dashboard, new RegExp(group));
 assert.match(dashboard, /ProjectRestoreDialog/);
 assert.match(restore, /Every preserved record remains attached/);

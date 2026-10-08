@@ -96,3 +96,26 @@ export async function restoreProject(actor: Actor, projectId: number, adminRoles
     return { restored: true, projectId, status: "active", restoredAt: restoredAt.toISOString(), recordsPreserved: true, recordCounts };
   });
 }
+
+export async function setProjectWorkspaceState(actor: Actor, projectId: number, adminRoles: string[], input: { state?: unknown; expectedUpdatedAt?: unknown }) {
+  return db.transaction(async (tx) => {
+    const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
+    const email = await requireAuthority(tx, actor, project, adminRoles);
+    if (project.status === "archived")
+      throw new ProjectRetirementError("PROJECT_WORKSPACE_STATE_RETIRED", 409, "Restore the project before changing its workspace state.");
+    const state = input.state === "testing" ? "testing" : input.state === "active" ? "active" : null;
+    if (!state) throw new ProjectRetirementError("PROJECT_WORKSPACE_STATE_INVALID", 400, "Workspace state must be active or testing.");
+    if (input.expectedUpdatedAt !== project.updatedAt.toISOString())
+      throw new ProjectRetirementError("PROJECT_WORKSPACE_STATE_STALE", 409, "The project changed before its workspace state was saved.");
+    if (project.status === state) return { changed: false, projectId, status: state, updatedAt: project.updatedAt.toISOString() };
+    const changedAt = new Date();
+    const [updated] = await tx.update(projectsTable).set({ status: state, updatedAt: changedAt })
+      .where(and(eq(projectsTable.id, projectId), eq(projectsTable.updatedAt, project.updatedAt))).returning();
+    if (!updated) throw new ProjectRetirementError("PROJECT_WORKSPACE_STATE_CONCURRENT_CHANGE", 409, "The project changed while its workspace state was being saved.");
+    await tx.insert(adminActionsLogTable).values({ adminUserId: actor.userId, adminEmail: email, action: "change_project_workspace_state",
+      targetType: "project", targetId: String(projectId), details: { projectName: project.name, projectCode: project.code,
+        previousStatus: project.status, newStatus: state, changedAt: changedAt.toISOString(), recordsPreserved: true } });
+    return { changed: true, projectId, status: state, updatedAt: changedAt.toISOString(), recordsPreserved: true };
+  });
+}

@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { waitForFeaturePolicyMigration } from "../lib/feature-policy-migration";
 import { normalizeLensNextModelKey, selectSingleAuthorizedLensNextBinding } from "../lib/lens-next-model-binding";
-import { previewProjectRetirement, ProjectRetirementError, restoreProject, retireProject } from "../lib/project-retirement";
+import { previewProjectRetirement, ProjectRetirementError, restoreProject, retireProject, setProjectWorkspaceState } from "../lib/project-retirement";
 
 const router: IRouter = Router();
 
@@ -152,9 +152,8 @@ router.get("/projects/workspace-register", authMiddleware, async (req, res) => {
         db.select({ value: count() }).from(projectMembersTable).where(eq(projectMembersTable.projectId, project.id)),
         db.select({ value: count() }).from(filesTable).where(eq(filesTable.projectId, project.id)),
       ]);
-      const syntheticEvidence = `${project.code} ${project.name} ${project.description || ""}`;
       const workspaceGroup = project.status === "archived" ? "retired"
-        : /(?:^|\s)QA[-_\s]|controlled (?:live )?(?:qa|test|production sample)|synthetic (?:acceptance|test)/i.test(syntheticEvidence) ? "testing" : "active";
+        : project.status === "testing" ? "testing" : "active";
       return { ...project, createdAt: project.createdAt.toISOString(), updatedAt: project.updatedAt.toISOString(),
         memberCount: Number(members.value), fileCount: Number(files.value), userRole: roleMap.get(project.id) || "", workspaceGroup };
     }));
@@ -289,6 +288,17 @@ router.post("/projects/:projectId/restore", authMiddleware, requireProjectMember
     const { projectId } = GetProjectParams.parse({ projectId: req.params.projectId });
     const adminRoles = await getRolesByPermission("admin");
     res.json(await restoreProject(req.user!, projectId, adminRoles, req.body || {}));
+  } catch (error) {
+    if (error instanceof ProjectRetirementError) { res.status(error.status).json({ error: error.message, code: error.code }); return; }
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+router.post("/projects/:projectId/workspace-state", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId } = GetProjectParams.parse({ projectId: req.params.projectId });
+    const adminRoles = await getRolesByPermission("admin");
+    res.json(await setProjectWorkspaceState(req.user!, projectId, adminRoles, req.body || {}));
   } catch (error) {
     if (error instanceof ProjectRetirementError) { res.status(error.status).json({ error: error.message, code: error.code }); return; }
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
