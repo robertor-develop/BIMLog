@@ -307,6 +307,24 @@ export function Dashboard() {
     setRetirementProjectId(projectId);
   }
 
+  async function handleWorkspaceState(project: any, state: "active" | "testing") {
+    if (!token || project.status === state) return;
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/projects/${project.id}/workspace-state`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ state, expectedUpdatedAt: project.updatedAt }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || tt("Could not change the project workspace.", "No se pudo cambiar el espacio del proyecto."));
+      await queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] });
+      toast({ title: state === "testing"
+        ? tt("Moved to Testing. Project records are unchanged.", "Movido a Pruebas. Los registros del proyecto no cambiaron.")
+        : tt("Moved to Active projects.", "Movido a Proyectos activos.") });
+    } catch (cause) {
+      toast({ title: cause instanceof Error ? cause.message : tt("Workspace update failed.", "Falló la actualización del espacio."), variant: "destructive" });
+    }
+  }
+
   async function exportCurrentViewPdf() {
     if (!token || isLoading || agg.loading) return;
     setExportingPdf(true);
@@ -870,6 +888,7 @@ export function Dashboard() {
                         project={project}
                         onDelete={handleRetire}
                         onRestore={() => setRestoreProject(project)}
+                        onWorkspaceState={state => void handleWorkspaceState(project, state)}
                       />
                     ))}
                   </div>
@@ -982,12 +1001,14 @@ interface ProjectCardProps {
     memberCount?: number;
     fileCount?: number;
     userRole?: string;
+    updatedAt?: string;
   };
   onDelete: (id: number, name: string) => void;
   onRestore: () => void;
+  onWorkspaceState: (state: "active" | "testing") => void;
 }
 
-export function ProjectCard({ project, onDelete, onRestore }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, onRestore, onWorkspaceState }: ProjectCardProps) {
   const { t, lang } = useI18n();
   const isActive = project.status === "active";
   const isAdmin = project.userRole === "project_admin";
@@ -1117,21 +1138,18 @@ export function ProjectCard({ project, onDelete, onRestore }: ProjectCardProps) 
 
       {/* Retirement stays outside the project link and away from its entry action. */}
       {isAdmin && !isRetired && (
-        <button
-          onClick={e => { e.preventDefault(); e.stopPropagation(); onDelete(project.id, project.name); }}
-          title={lang === "es" ? "Retirar proyecto" : "Retire project"}
-          aria-label={`${lang === "es" ? "Retirar proyecto" : "Retire project"}: ${project.name}`}
-          style={{
-            position: "absolute", bottom: 0, right: 0,
-            width: 26, height: 26, borderRadius: 6,
-            background: "#FEF2F2", border: "1px solid #FECACA",
-            color: "#DC2626", cursor: "pointer",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 10,
-          }}
-        >
-          <Trash2 style={{ width: 12, height: 12 }} />
-        </button>
+        <div style={{ position: "absolute", bottom: 0, right: 0, display: "flex", gap: 6, zIndex: 10 }}>
+          <button type="button" onClick={e => { e.preventDefault(); e.stopPropagation(); onWorkspaceState(project.status === "testing" ? "active" : "testing"); }}
+            title={project.status === "testing" ? (lang === "es" ? "Mover a Activos" : "Move to Active") : (lang === "es" ? "Mover a Pruebas" : "Move to Testing")}
+            style={{ minHeight: 28, padding: "0 9px", borderRadius: 6, background: "#FFFBEB", border: "1px solid #FDE68A", color: "#92400E", cursor: "pointer", fontSize: 11, fontWeight: 700 }}>
+            {project.status === "testing" ? (lang === "es" ? "Activar" : "Make active") : (lang === "es" ? "Marcar prueba" : "Mark testing")}
+          </button>
+          <button onClick={e => { e.preventDefault(); e.stopPropagation(); onDelete(project.id, project.name); }}
+            title={lang === "es" ? "Retirar proyecto" : "Retire project"} aria-label={`${lang === "es" ? "Retirar proyecto" : "Retire project"}: ${project.name}`}
+            style={{ width: 28, height: 28, borderRadius: 6, background: "#FEF2F2", border: "1px solid #FECACA", color: "#DC2626", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Trash2 style={{ width: 12, height: 12 }} />
+          </button>
+        </div>
       )}
       {isAdmin && isRetired && <button onClick={event => { event.preventDefault(); event.stopPropagation(); onRestore(); }} title={lang === "es" ? "Restaurar proyecto" : "Restore project"} style={{ position: "absolute", bottom: 0, right: 0, minHeight: 28, padding: "0 10px", borderRadius: 6, background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1D4ED8", cursor: "pointer", fontSize: 11, fontWeight: 700 }}>{lang === "es" ? "Restaurar" : "Restore"}</button>}
     </div>
