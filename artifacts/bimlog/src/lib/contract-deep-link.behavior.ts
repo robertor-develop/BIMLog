@@ -18,4 +18,6 @@ const workspace = readFileSync(new URL("../pages/FinancialContractWorkspace.tsx"
 assert.match(workspace, /parseContractDeepLink\(routeSearch, projectId\)/);
 assert.match(workspace, /No other contract was substituted/);
 assert.match(workspace, /does not belong to this project/);
+assert.match(workspace, /String\(contract\.id\) === requestedContract\) return true/);
+assert.match(workspace, /remains visible even if register filters do not match it/);
 console.log("Contract deep link: bounded identity and exact same-project Intake origin PASS");
