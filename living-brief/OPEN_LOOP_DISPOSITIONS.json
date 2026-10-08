@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "0e92e01dc54b8713594582f80ff6bf7d587e205748d6f77f8cc30a92415cc3f1",
-  "itemCount": 343,
+  "sourceSha256": "12f1a64b807785691ff4852c2bd88c138a36f26d690bbc492bc232f93001cea7",
+  "itemCount": 344,
   "counts": {
-    "ACTIVE": 302,
+    "ACTIVE": 303,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6251,6 +6251,24 @@
       "evidence": [
         "OPEN_LOOP.md:4859",
         "Human flow continuity Block 7 — 2026-10-07"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "520e758879ee4f35",
+      "sourceLine": 4870,
+      "heading": "Human flow continuity Block 8 — 2026-10-07",
+      "statement": "Push this five-build block and keep it unpublished until Block 9 completes the ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4870",
+        "Human flow continuity Block 8 — 2026-10-07"
       ],
       "currentAuthority": false
     }
