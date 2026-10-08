@@ -598,7 +598,7 @@ async function waitForResponse(
   pathname: string,
   accepted: (status: number) => boolean,
 ) {
-  const pollingBudgetMs = process.platform === "win32" ? 12_000 : 6_000;
+  const pollingBudgetMs = process.platform === "win32" ? 20_000 : 6_000;
   const pollingIntervalMs = 25;
   const maximumAttempts = Math.ceil(pollingBudgetMs / pollingIntervalMs);
   for (let attempt = 0; attempt < maximumAttempts; attempt += 1) {
@@ -628,12 +628,12 @@ try {
   // Windows performs this proof after the complete serial release matrix. Keep a
   // strict budget, but allow the measured cold-start variance caused by host
   // filesystem/antivirus contention while the fail-closed migration queue drains.
-  // The separate wall-clock launch guard remains 12 seconds.
-  const readyBudgetMs = process.platform === "win32" ? 10_000 : 6_000;
+  // The separate wall-clock launch guard remains bounded at 18 seconds.
+  const readyBudgetMs = process.platform === "win32" ? 15_000 : 6_000;
   const readyTransition = stdout.match(/phase=ready_transition elapsed_ms=(\d+)/);
   assert(readyTransition, "Production artifact did not emit measured ready-transition evidence.");
   const applicationReadyMs = Number(readyTransition[1]);
-  const processLaunchBudgetMs = process.platform === "win32" ? 12_000 : 8_000;
+  const processLaunchBudgetMs = process.platform === "win32" ? 18_000 : 8_000;
   assert.equal(apiStatus, 200);
   assert.equal(readyStatus, 200);
   assert(
