@@ -4017,3 +4017,9 @@ The sixth continuity block closes the Intake-to-Contract record journey. Contrac
 Reconciliation checkpoint: implementation commit `84a2a303bf78bfadc83a1abb9c596f3c70e344be` is the reviewed five-build and ten-build publication boundary.
 
 The seventh continuity block makes the Job Intake lifecycle unambiguous. Draft, Ready, Activating, Active and Changes pending are separate states with bilingual guidance. An active job shows the verified structure already created and leads directly to Job Operations instead of displaying a disabled activation action. Commercial enrichment remains a separate explicit action, and the existing idempotent activation verification remains bound to acceptance. Focused behavior, frontend typechecking and the release gate protect publication of Blocks 6 and 7 together.
+
+## Human flow continuity Block 8 — 2026-10-07
+
+Reconciliation checkpoint: implementation commit `694af52ac26b6625fe9165a78d69c1ce5ee79221` is the reviewed five-build block boundary.
+
+Authenticated production inspection exposed a legacy active Intake whose persisted activation receipt and top-level active state were contradicted by a future-tense activation preview lower on the same page. The eighth continuity block makes the persisted receipt canonical activation evidence everywhere, uses one derived active state across lifecycle copy and actions, and labels Commercial creation as optional enrichment of an already-active job. Email readiness status and detail copy now remain in the selected English or Spanish language. Focused Blocks 7 and 8 behavior plus frontend typechecking pass locally. This five-build block is pushed after acceptance and remains unpublished until Block 9 completes the ten-build interval.

@@ -4857,3 +4857,14 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 - [x] Keep optional Commercial enrichment separate from operational activation.
 - [x] Bind lifecycle truth, idempotent retry verification and active-job continuation to focused acceptance.
 - [ ] Pass the release gate, push, publish the accumulated ten builds and complete authenticated Chrome production smoke.
+
+## Human flow continuity Block 8 — 2026-10-07
+
+Reconciliation checkpoint: the completed implementation set is reviewed through `694af52ac26b6625fe9165a78d69c1ce5ee79221`; publication remains scheduled after Block 9 reaches the next ten-build boundary.
+
+- [x] Treat a persisted activation receipt as canonical proof that the operational job already exists.
+- [x] Use one derived active state across lifecycle guidance, readonly behavior, stage copy and primary actions.
+- [x] Present Commercial record creation as additive enrichment instead of a second activation.
+- [x] Keep Email readiness status and detail copy in the selected English or Spanish language.
+- [x] Bind legacy/current activation evidence and bilingual readiness to focused acceptance.
+- [ ] Push this five-build block and keep it unpublished until Block 9 completes the ten-build interval.
