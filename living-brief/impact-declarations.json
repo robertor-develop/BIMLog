@@ -61137,6 +61137,79 @@
         "scripts/prepare-artifact-proof-fixture.mjs"
       ],
       "reviewedChangeSha256": "4b4d6e400197fb4c1d6d11b5687083508caac394b8b168184613440076e126ac"
+    },
+    {
+      "taskId": "headquarters-project-lifecycle-block05",
+      "reviewedThroughCommit": "8206377e171af1542e0e277fef613d5b78132e7b",
+      "reviewedAt": "2026-10-08T22:10:00Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Block 5 records the protected working projects, preferred QA reuse, guided retirement queue and ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Block 5 records the protected working projects, preferred QA reuse, guided retirement queue and ten-build publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided cleanup journey preserves doctrine, tenant authority, reports, standards, Native scope, project evidence and reusable company libraries."
+        }
+      ],
+      "reason": "Reduce project-register clutter through the existing lifecycle and individual retirement authorities without deleting evidence or creating a duplicate archive model.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/pages/headquarters-lifecycle-block05.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "756e7b5c2087e849df5ff4dd2ae7bd4a76e511681d684ed7a83038daefabb8db"
     }
   ]
 }

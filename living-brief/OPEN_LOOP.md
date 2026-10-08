@@ -4933,4 +4933,14 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [x] Preserve every project record and reusable company library; keep retirement behind individual impact review and exact confirmation.
 - [x] Provide bilingual, keyboard-accessible selection summaries, error states and 44-pixel controls.
 - [x] Bind the complete cleanup workflow to focused API, UI and compiler acceptance.
-- [ ] Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 5 completes the next ten-build interval.
+- [x] Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 5 completes the next ten-build interval.
+
+## Headquarters project lifecycle Block 5 — 2026-10-08
+
+- [x] Identify 521 E TREMONT, ELARA EAST and IBQ as protected working projects in cleanup review.
+- [x] Keep the preferred Testing workspace out of retirement-review candidate selection so routine QA is reused.
+- [x] Select remaining Testing candidates directly without selecting protected or preferred workspaces.
+- [x] Review multiple retirement candidates sequentially through the existing per-project impact preview and exact confirmation.
+- [x] Preserve the remaining review queue, project records and reusable company libraries after each decision.
+- [x] Bind protected projects, QA reuse, candidate selection and guided review continuity to focused acceptance.
+- [ ] Pass the complete release gate, push the five-build block, publish the exact accumulated ten builds and complete authenticated desktop/mobile Chrome smoke.

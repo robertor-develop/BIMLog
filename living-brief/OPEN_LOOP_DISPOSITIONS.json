@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ac5ef491cda96a77b7e7b4f75294d6b291e5f3546b3f1b14a125b8b1ff723c02",
+  "sourceSha256": "cd0dd2ba7bea005a346c7f81116be738414c3f67b858e96b348901defedcf5db",
   "itemCount": 348,
   "counts": {
     "ACTIVE": 307,
@@ -6327,10 +6327,10 @@
       "currentAuthority": false
     },
     {
-      "id": "bd69fc90bd0afbcc",
-      "sourceLine": 4936,
-      "heading": "Headquarters project lifecycle Block 4 — 2026-10-08",
-      "statement": "Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 5 completes the next ten-build interval.",
+      "id": "12e664096ba837ee",
+      "sourceLine": 4946,
+      "heading": "Headquarters project lifecycle Block 5 — 2026-10-08",
+      "statement": "Pass the complete release gate, push the five-build block, publish the exact accumulated ten builds and complete authenticated desktop/mobile Chrome smoke.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -6339,8 +6339,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4936",
-        "Headquarters project lifecycle Block 4 — 2026-10-08"
+        "OPEN_LOOP.md:4946",
+        "Headquarters project lifecycle Block 5 — 2026-10-08"
       ],
       "currentAuthority": false
     }
