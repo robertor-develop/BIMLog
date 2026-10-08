@@ -4890,3 +4890,12 @@ Release closure: exact source `c4152e19a040e77692bbcc10f74ee1588f7c1dd3` passed 
 - [x] Show the exact return visibly in the contract register without requiring a selected contract.
 - [x] Reject duplicate, cross-project and external return targets and bind the round trip to focused acceptance.
 - [ ] Push this five-build block and keep it unpublished until Block 11 completes the next ten-build interval.
+
+## Headquarters project lifecycle Block 1 — 2026-10-08
+
+- [x] Inventory project-owned dependencies before an authorized retirement can be confirmed.
+- [x] Classify project records as preserved read-only and reusable company/platform libraries as unaffected.
+- [x] Show exact record counts, protected libraries and the required confirmation code in an in-page retirement preview.
+- [x] Restore retired projects through the same tenant and role authority with optimistic concurrency and immutable audit history.
+- [x] Separate Active, Testing, Retired and All Headquarters views while preserving the three named working projects as active.
+- [ ] Pass the complete release gate, push the block, publish the accumulated ten builds and complete authenticated Chrome production smoke.

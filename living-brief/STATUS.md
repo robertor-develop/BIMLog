@@ -4035,3 +4035,10 @@ Blocks 8 and 9 were subsequently pushed and published at exact source `c4152e19a
 ## Human flow continuity Block 10 — 2026-10-08
 
 The tenth continuity block preserves an exact, same-project return from active Intake review into Job Operations and the controlled contract register. The return opens the original Intake review step, rejects cross-project, duplicate and external targets, and explains at each destination that operational and contract work remain connected to the active source without becoming duplicate authorities. Focused behavior and frontend typechecking pass. This is the first five-build block after the accepted Blocks 8–9 publication, so it is pushed only and remains unpublished until Block 11 completes the next ten-build interval.
+
+## Headquarters project lifecycle Block 1 — 2026-10-08
+
+Reconciliation checkpoint: implementation and corrective commit `e14711016ce2f625f9d167335e736a65c385802b` is the reviewed five-build and ten-build publication boundary.
+
+The first Headquarters cleanup block adds a tenant-authorized dependency inventory before retirement, separates project-owned records from reusable company and platform libraries, shows exact retirement impact before confirmation, and provides governed restoration with optimistic concurrency and audit history. Headquarters now separates Active, Testing, Retired and All views; 521 ETREMONT TEST PROJECT, ELARA EAST and IBQ Lithium Extraction Plant remain ordinary active projects unless an authorized user explicitly changes their state. Retiring a project preserves its project records read-only and does not delete or detach company APU templates, workflows, governance, catalogs, internal cost profiles or platform authorities. Focused lifecycle behavior plus API and frontend typechecking pass. This block completes the ten-build interval with Human flow continuity Block 10 and therefore requires the complete release gate, push, publication and authenticated Chrome production acceptance.
+

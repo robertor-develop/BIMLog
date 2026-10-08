@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 747,
-    "frontendApiReferences": 296,
+    "apiRoutes": 749,
+    "frontendApiReferences": 297,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -6316,6 +6316,20 @@
       ]
     },
     {
+      "method": "GET",
+      "path": "/projects/workspace-register",
+      "owner": "artifacts/api-server/src/routes/projects.ts",
+      "tables": [
+        "projectsTable",
+        "projectMembersTable",
+        "projectCompanyBindingVersionsTable",
+        "lensNextModelBindingsTable",
+        "filesTable",
+        "usersTable",
+        "companiesTable"
+      ]
+    },
+    {
       "method": "POST",
       "path": "/projects",
       "owner": "artifacts/api-server/src/routes/projects.ts",
@@ -6360,6 +6374,20 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/retire",
+      "owner": "artifacts/api-server/src/routes/projects.ts",
+      "tables": [
+        "projectsTable",
+        "projectMembersTable",
+        "projectCompanyBindingVersionsTable",
+        "lensNextModelBindingsTable",
+        "filesTable",
+        "usersTable",
+        "companiesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/restore",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
         "projectsTable",
@@ -10008,6 +10036,10 @@
     },
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+      "apiPath": "${API_BASE}/api/v1/projects/workspace-register"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
       "apiPath": "${API_BASE}/api/v1/dashboard/stats"
     },
     {
@@ -10020,11 +10052,11 @@
     },
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
-      "apiPath": "/api/v1/projects"
+      "apiPath": "${API_BASE}/api/v1/dashboard/export-pdf"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
-      "apiPath": "${API_BASE}/api/v1/dashboard/export-pdf"
+      "apiPath": "/api/v1/projects"
     },
     {
       "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",

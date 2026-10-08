@@ -60765,6 +60765,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3cfbc7ea6865a584c7c3b1fdaf8953756b48dc6afad98a2b0c9f0dceb65ed221"
+    },
+    {
+      "taskId": "headquarters-project-lifecycle-block01",
+      "reviewedThroughCommit": "e14711016ce2f625f9d167335e736a65c385802b",
+      "reviewedAt": "2026-10-08T11:10:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Current status records the governed project lifecycle implementation and its ten-build publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The active register records the five completed lifecycle builds and remaining release acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
+        }
+      ],
+      "reason": "Make project cleanup safe, reversible and understandable while preserving reusable company libraries and retained project evidence.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "515d333364e25e9c2ac8c2c9918ec92bac677545fc358228b245412255033145"
     }
   ]
 }

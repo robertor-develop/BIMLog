@@ -1029,6 +1029,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-invitation-migration.ts
 - artifacts/api-server/src/lib/project-invitation-service.ts
 - artifacts/api-server/src/lib/project-invitation.behavior.ts
+- artifacts/api-server/src/lib/project-retirement-inventory.behavior.ts
+- artifacts/api-server/src/lib/project-retirement-inventory.ts
 - artifacts/api-server/src/lib/project-retirement.ts
 - artifacts/api-server/src/lib/project-role-readiness.behavior.ts
 - artifacts/api-server/src/lib/project-role-readiness.ts
@@ -1036,6 +1038,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-scope-structure.ts
 - artifacts/api-server/src/lib/project-setup-readiness.behavior.ts
 - artifacts/api-server/src/lib/project-setup-readiness.ts
+- artifacts/api-server/src/lib/project-workspace-register.behavior.ts
 - artifacts/api-server/src/lib/protected-provider-probe-executor.behavior.ts
 - artifacts/api-server/src/lib/protected-provider-probe-executor.ts
 - artifacts/api-server/src/lib/provider-governance.ts
