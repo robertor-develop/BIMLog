@@ -17,6 +17,7 @@ import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activit
 import { ProjectRetirementDialog } from "@/components/ProjectRetirementDialog";
 import { ProjectRestoreDialog } from "@/components/ProjectRestoreDialog";
 import { ProjectCleanupDialog } from "@/components/ProjectCleanupDialog";
+import { advanceCleanupReviewQueue, beginCleanupReviewQueue, cancelCleanupReviewQueue } from "@/lib/project-cleanup-review-queue";
 import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWorkspace";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -196,6 +197,7 @@ export function Dashboard() {
   const [showCreateDecision, setShowCreateDecision] = useState(false);
   const [showCleanup, setShowCleanup] = useState(false);
   const [retirementProjectId, setRetirementProjectId] = useState<number | null>(null);
+  const [cleanupReviewQueue, setCleanupReviewQueue] = useState(cancelCleanupReviewQueue);
   const [restoreProject, setRestoreProject] = useState<any | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportError, setExportError] = useState("");
@@ -508,9 +510,9 @@ export function Dashboard() {
       {onboardingVisible && (
         <OnboardingFlow onDone={() => { setOnboardingVisible(false); doneOnboarding(); }} />
       )}
-      {retirementProjectId !== null && token && <ProjectRetirementDialog projectId={retirementProjectId} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setRetirementProjectId(null)} onRetired={() => { setRetirementProjectId(null); queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] }); queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project retired. Every record was preserved.", "Proyecto retirado. Todos los registros fueron preservados.") }); }} />}
+      {retirementProjectId !== null && token && <ProjectRetirementDialog projectId={retirementProjectId} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => { setRetirementProjectId(null); if (cleanupReviewQueue.currentProjectId !== null) { setCleanupReviewQueue(cancelCleanupReviewQueue()); setShowCleanup(true); } }} onRetired={() => { const next = advanceCleanupReviewQueue(cleanupReviewQueue, retirementProjectId); setCleanupReviewQueue(next); setRetirementProjectId(next.currentProjectId); if (cleanupReviewQueue.currentProjectId !== retirementProjectId || next.currentProjectId === null) setShowCleanup(true); queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] }); queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: next.currentProjectId === null ? tt("Project retired. Every record was preserved.", "Proyecto retirado. Todos los registros fueron preservados.") : tt(`${next.projectIds.length} retirement review(s) remain.`, `Quedan ${next.projectIds.length} revisión(es) de retiro.`) }); }} />}
       {restoreProject && token && <ProjectRestoreDialog project={restoreProject} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setRestoreProject(null)} onRestored={() => { setRestoreProject(null); queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project restored to the active workspace.", "Proyecto restaurado al espacio de trabajo activo.") }); }} />}
-      {showCleanup && token && <ProjectCleanupDialog rows={projectRows} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setShowCleanup(false)} onChanged={() => { void queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project workspaces updated. Every project record was preserved.", "Espacios de proyectos actualizados. Se conservaron todos los registros.") }); }} onReviewRetirement={(projectId) => { setShowCleanup(false); setRetirementProjectId(projectId); }} />}
+      {showCleanup && token && <ProjectCleanupDialog rows={projectRows} lang={lang} preferredTestProjectId={preferredTestProjectId} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setShowCleanup(false)} onChanged={() => { void queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project workspaces updated. Every project record was preserved.", "Espacios de proyectos actualizados. Se conservaron todos los registros.") }); }} onReviewRetirement={(projectId) => { setCleanupReviewQueue(cancelCleanupReviewQueue()); setShowCleanup(false); setRetirementProjectId(projectId); }} onReviewRetirementQueue={(projectIds) => { const queue = beginCleanupReviewQueue(projectIds); setCleanupReviewQueue(queue); setShowCleanup(false); setRetirementProjectId(queue.currentProjectId); }} />}
       <MasterSidebar />
 
       {/* Main scrollable area */}
