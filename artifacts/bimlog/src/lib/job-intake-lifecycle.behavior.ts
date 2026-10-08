@@ -15,4 +15,7 @@ const workspace = readFileSync(new URL("../pages/JobIntakeWorkspace.tsx", import
 assert.match(workspace, /setActivationBusy\(true\)/);
 assert.match(workspace, /setActivationBusy\(false\)/);
 assert.match(workspace, /lifecycleCopy\.label/);
+assert.doesNotMatch(workspace, /tt\("Job activated", "Trabajo activado"\)/);
+assert.match(workspace, /ji-primary-link" href=\{activeChangeDestinations\.operations\}/);
+assert.match(workspace, /intake\.status === "activated" && !canEnrich \? <Link/);
 console.log("Job Intake lifecycle: Draft, Ready, Activating, Active, and Changes pending are distinct PASS");
