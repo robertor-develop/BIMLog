@@ -60414,7 +60414,7 @@
     {
       "taskId": "human-flow-continuity-block06",
       "reviewedThroughCommit": "d01aa3da065af1543933b686548bcca91cfd83da",
-      "reviewedAt": "2026-10-07T23:59:00.000Z",
+      "reviewedAt": "2026-10-07T23:59:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -60485,7 +60485,7 @@
     {
       "taskId": "human-flow-continuity-block07",
       "reviewedThroughCommit": "84a2a303bf78bfadc83a1abb9c596f3c70e344be",
-      "reviewedAt": "2026-10-08T01:10:00.000Z",
+      "reviewedAt": "2026-10-08T01:10:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -60556,7 +60556,7 @@
     {
       "taskId": "human-flow-continuity-block08",
       "reviewedThroughCommit": "98834b8ea03a2335d1a7c35bce7955d6759e0fa4",
-      "reviewedAt": "2026-10-08T04:10:00.000Z",
+      "reviewedAt": "2026-10-08T04:10:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -60627,7 +60627,7 @@
     {
       "taskId": "human-flow-continuity-block09",
       "reviewedThroughCommit": "abb22bdfa9f2c0a9e2f4d2de27604895a255c6de",
-      "reviewedAt": "2026-10-08T04:44:00.000Z",
+      "reviewedAt": "2026-10-08T04:44:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -60768,8 +60768,8 @@
     },
     {
       "taskId": "headquarters-project-lifecycle-block01",
-      "reviewedThroughCommit": "e14711016ce2f625f9d167335e736a65c385802b",
-      "reviewedAt": "2026-10-08T11:10:00.000Z",
+      "reviewedThroughCommit": "b3e888485d6c05929056c43ca19930aa20bfd85b",
+      "reviewedAt": "2026-10-08T13:06:48.9435913Z",
       "status": "candidate",
       "authorities": [
         {
@@ -60828,16 +60828,14 @@
           "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
         }
       ],
-      "reason": "Make project cleanup safe, reversible and understandable while preserving reusable company libraries and retained project evidence.",
+      "reason": "Make project cleanup safe, reversible and understandable while preserving reusable company libraries and retained project evidence; correct the production runtime assembly timeout found by the release gate.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "515d333364e25e9c2ac8c2c9918ec92bac677545fc358228b245412255033145"
+      "reviewedChangeSha256": "79fe8cf35b415aed5c86a9bd141cbc45f0441bb6397be7abbd73c0c5ec82b385"
     }
   ]
 }

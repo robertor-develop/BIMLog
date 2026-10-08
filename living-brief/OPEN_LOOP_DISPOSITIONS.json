@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "0086b271a6490db26db8d16494d76571df3399bdc9d18f1ac80fd9290d127f19",
+  "sourceSha256": "7ef216464b876ae7e1344e6a920bd6af0b4f51ff6729befd00a5207030cf8f88",
   "itemCount": 347,
   "counts": {
     "ACTIVE": 306,
@@ -6310,7 +6310,7 @@
     },
     {
       "id": "21226d152b52e2a1",
-      "sourceLine": 4901,
+      "sourceLine": 4902,
       "heading": "Headquarters project lifecycle Block 1 — 2026-10-08",
       "statement": "Pass the complete release gate, push the block, publish the accumulated ten builds and complete authenticated Chrome production smoke.",
       "classification": "ACTIVE",
@@ -6321,7 +6321,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4901",
+        "OPEN_LOOP.md:4902",
         "Headquarters project lifecycle Block 1 — 2026-10-08"
       ],
       "currentAuthority": false

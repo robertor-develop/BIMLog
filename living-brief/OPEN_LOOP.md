@@ -4898,4 +4898,5 @@ Release closure: exact source `c4152e19a040e77692bbcc10f74ee1588f7c1dd3` passed 
 - [x] Show exact record counts, protected libraries and the required confirmation code in an in-page retirement preview.
 - [x] Restore retired projects through the same tenant and role authority with optimistic concurrency and immutable audit history.
 - [x] Separate Active, Testing, Retired and All Headquarters views while preserving the three named working projects as active.
+- [x] Correct the production runtime assembly timeout found by the full release gate with source-hash reuse and bounded parallel clone-capable copies.
 - [ ] Pass the complete release gate, push the block, publish the accumulated ten builds and complete authenticated Chrome production smoke.
