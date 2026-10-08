@@ -32,7 +32,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { jobIntakeSaveConfidence, type JobIntakeSaveState } from "@/lib/job-intake-save-confidence";
-import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
+import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActivationStructure, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
 import { jobIntakeLifecycle, jobIntakeLifecycleCopy } from "@/lib/job-intake-lifecycle";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
@@ -946,6 +946,7 @@ export function JobIntakeWorkspace() {
         label: item,
       }));
   const activationPreview = jobIntakeActivationPreview(data, completion, canEnrich || (intake.status !== "activated" && capabilities.fullCommercialActivation));
+  const activationStructure = jobIntakeActivationStructure(intake.status, activationPreview, intake.activation);
   const activeChangeDestinations = jobIntakeActiveChangeDestinations(projectId, capabilities.contracts);
   const openBlocker = (code: string) => {
     const destination = jobIntakeBlockerDestination(code);
@@ -2393,16 +2394,16 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
                 <div className="ji-activation" aria-label={tt("Resulting job structure", "Estructura resultante del trabajo")}>
-                  <strong>{tt("What activation will create", "Lo que creará la activación")}</strong>
+                  <strong>{activationStructure.mode === "created" ? tt("What activation created", "Lo que creó la activación") : tt("What activation will create", "Lo que creará la activación")}</strong>
                   <div className="ji-activation-grid">
-                    <div className="ji-stat"><strong>{activationPreview.workItems}</strong><div>{tt("Work items", "Partidas")}</div></div>
-                    <div className="ji-stat"><strong>{activationPreview.tasks}</strong><div>{tt("Delivery tasks", "Tareas de entrega")}</div></div>
-                    <div className="ji-stat"><strong>{activationPreview.genericResourceDemands}</strong><div>{tt("Generic resource demands", "Demandas de recursos genéricos")}</div></div>
-                    <div className="ji-stat"><strong>{activationPreview.namedAssignments}</strong><div>{tt("Named assignments", "Asignaciones nominales")}</div></div>
-                    <div className="ji-stat"><strong>{activationPreview.unassignedHours}</strong><div>{tt("Hours pending future staffing", "Horas pendientes de personal futuro")}</div></div>
-                    {activationPreview.contractDrafts > 0 && <div className="ji-stat"><strong>{activationPreview.contractDrafts}</strong><div>{tt("Controlled contract drafts", "Borradores contractuales controlados")}</div></div>}
+                    <div className="ji-stat"><strong>{activationStructure.workItems}</strong><div>{tt("Work items", "Partidas")}</div></div>
+                    <div className="ji-stat"><strong>{activationStructure.tasks}</strong><div>{tt("Delivery tasks", "Tareas de entrega")}</div></div>
+                    {activationStructure.mode === "preview" && <div className="ji-stat"><strong>{activationStructure.genericResourceDemands}</strong><div>{tt("Generic resource demands", "Demandas de recursos genéricos")}</div></div>}
+                    <div className="ji-stat"><strong>{activationStructure.namedAssignments}</strong><div>{tt("Named assignments", "Asignaciones nominales")}</div></div>
+                    {activationStructure.mode === "preview" && <div className="ji-stat"><strong>{activationStructure.unassignedHours}</strong><div>{tt("Hours pending future staffing", "Horas pendientes de personal futuro")}</div></div>}
+                    {activationStructure.contractDrafts > 0 && <div className="ji-stat"><strong>{activationStructure.contractDrafts}</strong><div>{tt("Controlled contract drafts", "Borradores contractuales controlados")}</div></div>}
                   </div>
-                  <p className="ji-small">{tt("Future staffing remains pending and does not block activation. Named people can be assigned later in Job Operations.", "El personal futuro queda pendiente y no bloquea la activación. Las personas se pueden asignar después en Operaciones del Trabajo.")}</p>
+                  <p className="ji-small">{activationStructure.mode === "created" ? tt("This is the verified structure already created for the active job. Continue changes to delivery and staffing in Job Operations.", "Esta es la estructura verificada ya creada para el trabajo activo. Continúe los cambios de entrega y personal en Operaciones del Trabajo.") : tt("Future staffing remains pending and does not block activation. Named people can be assigned later in Job Operations.", "El personal futuro queda pendiente y no bloquea la activación. Las personas se pueden asignar después en Operaciones del Trabajo.")}</p>
                 </div>
                 <div className="ji-actions">
                   <button

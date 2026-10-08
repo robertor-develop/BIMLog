@@ -46,6 +46,20 @@ export function jobIntakeActivationMatches(expected: ReturnType<typeof jobIntake
     && expected.resourcePlans === (activation?.assignments?.length ?? 0);
 }
 
+export function jobIntakeActivationStructure(status: string, preview: ReturnType<typeof jobIntakeActivationPreview>, activation: any) {
+  if (status !== "activated") return { mode: "preview" as const, ...preview };
+  return {
+    mode: "created" as const,
+    workItems: activation?.workItems?.length ?? 0,
+    tasks: activation?.tasks?.length ?? 0,
+    resourcePlans: activation?.assignments?.length ?? 0,
+    namedAssignments: activation?.assignments?.length ?? 0,
+    genericResourceDemands: 0,
+    unassignedHours: "0",
+    contractDrafts: 0,
+  };
+}
+
 export function jobIntakeActiveChangeDestinations(projectId: number, contractsEnabled: boolean) {
   return {
     operations: `/projects/${projectId}/operations`,

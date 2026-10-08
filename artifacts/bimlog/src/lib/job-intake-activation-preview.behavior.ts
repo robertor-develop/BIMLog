@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "./job-intake-activation-preview";
+import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActivationStructure, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "./job-intake-activation-preview";
 
 assert.deepEqual(jobIntakeBlockerDestination("job_name"), { stage: "identity", item: "ji-job-name" });
 assert.deepEqual(jobIntakeBlockerDestination("budget_mapping"), { stage: "contract", item: "ji-scope" });
@@ -15,6 +15,8 @@ assert.equal(preview.contractDrafts, 2);
 assert.equal(preview.resourcePlans, 1);
 assert.equal(jobIntakeActivationMatches(preview, { workItems: [{}], tasks: [{}], assignments: [{}] }), true);
 assert.equal(jobIntakeActivationMatches(preview, { workItems: [{}, {}], tasks: [{}], assignments: [{}] }), false);
+assert.equal(jobIntakeActivationStructure("draft", preview, null).mode, "preview");
+assert.deepEqual(jobIntakeActivationStructure("activated", preview, { workItems: [{}, {}], tasks: [{}], assignments: [{}, {}, {}] }), { mode: "created", workItems: 2, tasks: 1, resourcePlans: 3, namedAssignments: 3, genericResourceDemands: 0, unassignedHours: "0", contractDrafts: 0 });
 assert.deepEqual(jobIntakeActiveChangeDestinations(41, true), { operations: "/projects/41/operations", contracts: "/projects/41/financial/contracts" });
 assert.equal(jobIntakeActiveChangeDestinations(41, false).contracts, null);
 console.log("job intake activation preview behavior: PASS");
