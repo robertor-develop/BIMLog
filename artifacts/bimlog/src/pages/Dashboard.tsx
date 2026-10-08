@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
-import { useListProjects, useCreateProject, useListMembers } from "@workspace/api-client-react";
+import { useCreateProject, useListMembers } from "@workspace/api-client-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
@@ -15,6 +15,7 @@ import { OnboardingFlow, useOnboarding } from "@/components/OnboardingFlow";
 import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 import { ProjectRetirementDialog } from "@/components/ProjectRetirementDialog";
+import { ProjectRestoreDialog } from "@/components/ProjectRestoreDialog";
 import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWorkspace";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -186,12 +187,13 @@ function AiBriefingCard({ token }: { token?: string }) {
 export function Dashboard() {
   const { t, tt, lang } = useI18n();
   const [, setLocation] = useLocation();
-  const { data: projects, isLoading, isError, error, refetch } = useListProjects();
+  const { data: projects, isLoading, isError, error, refetch } = useQuery<any[]>({ queryKey: ["project-workspace-register"], queryFn: async () => { const response = await fetch(`${API_BASE}/api/v1/projects/workspace-register`, { headers: { Authorization: `Bearer ${useAuthStore.getState().token}` } }); if (!response.ok) throw new Error("Could not load project workspace register."); return response.json(); } });
   const logout = useAuthStore(s => s.logout);
   const token = useAuthStore(s => s.token);
   const user = useAuthStore(s => s.user);
   const [showCreate, setShowCreate] = useState(false);
   const [retirementProjectId, setRetirementProjectId] = useState<number | null>(null);
+  const [restoreProject, setRestoreProject] = useState<any | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportError, setExportError] = useState("");
   function handleProjectCreated(newId: number) {
@@ -237,7 +239,7 @@ export function Dashboard() {
   // ── Cross-project data ─────────────────────────────────────────────────────
   const [agg, setAgg] = useState<AggState>({ rfis: [], submittals: [], activity: [], files: [], loading: false });
   const [projectSearch, setProjectSearch] = useState("");
-  const [projectStatus, setProjectStatus] = useState("all");
+  const [projectStatus, setProjectStatus] = useState("active");
   const [projectSort, setProjectSort] = useState<"name_asc" | "name_desc" | "code_asc" | "status_asc">("name_asc");
   const [showOperationalDetails, setShowOperationalDetails] = useState(false);
 
@@ -278,14 +280,10 @@ export function Dashboard() {
   }
 
   const allProjectRows = (projects ?? []) as Array<any>;
-  const projectStatusOptions = useMemo(
-    () => [...new Set(allProjectRows.map((project: any) => String(project.status || "").trim()).filter(Boolean))].sort(),
-    [allProjectRows],
-  );
   const projectRows = useMemo(() => {
     const query = projectSearch.trim().toLowerCase();
     return allProjectRows
-      .filter((project: any) => projectStatus === "all" || project.status === projectStatus)
+      .filter((project: any) => projectStatus === "all" || project.workspaceGroup === projectStatus)
       .filter((project: any) => !query || [
         project.code,
         project.name,
@@ -456,7 +454,8 @@ export function Dashboard() {
       {onboardingVisible && (
         <OnboardingFlow onDone={() => { setOnboardingVisible(false); doneOnboarding(); }} />
       )}
-      {retirementProjectId !== null && token && <ProjectRetirementDialog projectId={retirementProjectId} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setRetirementProjectId(null)} onRetired={() => { setRetirementProjectId(null); queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] }); toast({ title: tt("Project retired. Every record was preserved.", "Proyecto retirado. Todos los registros fueron preservados.") }); }} />}
+      {retirementProjectId !== null && token && <ProjectRetirementDialog projectId={retirementProjectId} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setRetirementProjectId(null)} onRetired={() => { setRetirementProjectId(null); queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] }); queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project retired. Every record was preserved.", "Proyecto retirado. Todos los registros fueron preservados.") }); }} />}
+      {restoreProject && token && <ProjectRestoreDialog project={restoreProject} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setRestoreProject(null)} onRestored={() => { setRestoreProject(null); queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project restored to the active workspace.", "Proyecto restaurado al espacio de trabajo activo.") }); }} />}
       <MasterSidebar />
 
       {/* Main scrollable area */}
@@ -526,8 +525,10 @@ export function Dashboard() {
               <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
                 {tt("Project status", "Estado del proyecto")}
                 <select className="input" value={projectStatus} onChange={event => setProjectStatus(event.target.value)}>
-                  <option value="all">{tt("All statuses", "Todos los estados")}</option>
-                  {projectStatusOptions.map(status => <option key={status} value={status}>{status.replace(/_/g, " ")}</option>)}
+                  <option value="active">{tt("Active projects", "Proyectos activos")}</option>
+                  <option value="testing">{tt("Testing projects", "Proyectos de prueba")}</option>
+                  <option value="retired">{tt("Retired projects", "Proyectos retirados")}</option>
+                  <option value="all">{tt("All projects", "Todos los proyectos")}</option>
                 </select>
               </label>
               <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
@@ -539,7 +540,7 @@ export function Dashboard() {
                   <option value="status_asc">{tt("Status, then name", "Estado y luego nombre")}</option>
                 </select>
               </label>
-              <Button type="button" variant="outline" onClick={() => { setProjectSearch(""); setProjectStatus("all"); setProjectSort("name_asc"); }}>
+              <Button type="button" variant="outline" onClick={() => { setProjectSearch(""); setProjectStatus("active"); setProjectSort("name_asc"); }}>
                 {tt("Clear filters", "Limpiar filtros")}
               </Button>
             </div>
@@ -868,6 +869,7 @@ export function Dashboard() {
                         key={project.id}
                         project={project}
                         onDelete={handleRetire}
+                        onRestore={() => setRestoreProject(project)}
                       />
                     ))}
                   </div>
@@ -982,12 +984,14 @@ interface ProjectCardProps {
     userRole?: string;
   };
   onDelete: (id: number, name: string) => void;
+  onRestore: () => void;
 }
 
-export function ProjectCard({ project, onDelete }: ProjectCardProps) {
+export function ProjectCard({ project, onDelete, onRestore }: ProjectCardProps) {
   const { t, lang } = useI18n();
   const isActive = project.status === "active";
   const isAdmin = project.userRole === "project_admin";
+  const isRetired = project.status === "archived";
   const { data: members } = useListMembers(project.id);
   const adminMember = (members as any[] | undefined)?.find((m: any) => m.role === "project_admin");
   const adminInitials = adminMember?.userFullName
@@ -996,7 +1000,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
 
   return (
     <div style={{ position: "relative", paddingBottom: isAdmin ? 34 : 0 }}>
-      <Link href={`/projects/${project.id}`} aria-label={`${lang === "es" ? "Abrir proyecto" : "Open project"}: ${project.name} (${project.code})`} className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-lg" style={{ textDecoration: "none", display: "block" }}>
+      <Link href={isRetired ? "/dashboard" : `/projects/${project.id}`} onClick={event => { if (isRetired) event.preventDefault(); }} aria-label={`${lang === "es" ? "Abrir proyecto" : "Open project"}: ${project.name} (${project.code})`} className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary rounded-lg" style={{ textDecoration: "none", display: "block" }}>
         <div
           className="card"
           style={{
@@ -1104,7 +1108,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
               </span>
             </div>
             <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "hsl(var(--primary))", marginLeft: 12 }}>
-              {lang === "es" ? "Abrir proyecto" : "Open project"}
+              {isRetired ? (lang === "es" ? "Proyecto retirado" : "Retired project") : (lang === "es" ? "Abrir proyecto" : "Open project")}
               <ArrowRight aria-hidden="true" style={{ width: 14, height: 14, flexShrink: 0 }} />
             </span>
           </div>
@@ -1112,7 +1116,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
       </Link>
 
       {/* Retirement stays outside the project link and away from its entry action. */}
-      {isAdmin && (
+      {isAdmin && !isRetired && (
         <button
           onClick={e => { e.preventDefault(); e.stopPropagation(); onDelete(project.id, project.name); }}
           title={lang === "es" ? "Retirar proyecto" : "Retire project"}
@@ -1129,6 +1133,7 @@ export function ProjectCard({ project, onDelete }: ProjectCardProps) {
           <Trash2 style={{ width: 12, height: 12 }} />
         </button>
       )}
+      {isAdmin && isRetired && <button onClick={event => { event.preventDefault(); event.stopPropagation(); onRestore(); }} title={lang === "es" ? "Restaurar proyecto" : "Restore project"} style={{ position: "absolute", bottom: 0, right: 0, minHeight: 28, padding: "0 10px", borderRadius: 6, background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1D4ED8", cursor: "pointer", fontSize: 11, fontWeight: 700 }}>{lang === "es" ? "Restaurar" : "Restore"}</button>}
     </div>
   );
 }

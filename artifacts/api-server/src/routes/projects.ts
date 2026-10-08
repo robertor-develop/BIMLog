@@ -259,6 +259,31 @@ router.post("/projects/:projectId/retire", authMiddleware, requireProjectMember(
   }
 });
 
+router.get("/projects/workspace-register", authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user!.userId;
+    const memberRows = await db.select({ projectId: projectMembersTable.projectId, role: projectMembersTable.role })
+      .from(projectMembersTable).where(eq(projectMembersTable.userId, userId));
+    if (memberRows.length === 0) { res.json([]); return; }
+    const roleMap = new Map(memberRows.map(row => [row.projectId, row.role]));
+    const rows = await db.select().from(projectsTable).where(inArray(projectsTable.id, [...roleMap.keys()]));
+    const results = await Promise.all(rows.map(async project => {
+      const [[members], [files]] = await Promise.all([
+        db.select({ value: count() }).from(projectMembersTable).where(eq(projectMembersTable.projectId, project.id)),
+        db.select({ value: count() }).from(filesTable).where(eq(filesTable.projectId, project.id)),
+      ]);
+      const syntheticEvidence = `${project.code} ${project.name} ${project.description || ""}`;
+      const workspaceGroup = project.status === "archived" ? "retired"
+        : /(?:^|\s)QA[-_\s]|controlled (?:live )?(?:qa|test|production sample)|synthetic (?:acceptance|test)/i.test(syntheticEvidence) ? "testing" : "active";
+      return { ...project, createdAt: project.createdAt.toISOString(), updatedAt: project.updatedAt.toISOString(),
+        memberCount: Number(members.value), fileCount: Number(files.value), userRole: roleMap.get(project.id) || "", workspaceGroup };
+    }));
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
 router.post("/projects/:projectId/restore", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = GetProjectParams.parse({ projectId: req.params.projectId });
