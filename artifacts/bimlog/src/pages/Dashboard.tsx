@@ -192,6 +192,7 @@ export function Dashboard() {
   const token = useAuthStore(s => s.token);
   const user = useAuthStore(s => s.user);
   const [showCreate, setShowCreate] = useState(false);
+  const [showCreateDecision, setShowCreateDecision] = useState(false);
   const [retirementProjectId, setRetirementProjectId] = useState<number | null>(null);
   const [restoreProject, setRestoreProject] = useState<any | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -877,11 +878,21 @@ export function Dashboard() {
                   )}
                 </p>
               </div>
-              <Button onClick={() => setShowCreate(true)} style={{ gap: 6, fontSize: 13 }}>
+              <Button onClick={() => preferredTestProject ? setShowCreateDecision(true) : setShowCreate(true)} style={{ gap: 6, fontSize: 13 }}>
                 <Plus style={{ width: 14, height: 14 }} />
                 {t("dashboard.newProject")}
               </Button>
             </div>
+
+            {showCreateDecision && preferredTestProject && !showCreate && <div role="dialog" aria-label={tt("Reuse or create a project", "Reutilizar o crear un proyecto")} style={{ marginBottom: 14, padding: 14, border: "1px solid #BFDBFE", borderRadius: 10, background: "#EFF6FF" }}>
+              <strong style={{ display: "block", marginBottom: 4 }}>{tt("Do you need another project?", "¿Necesitas otro proyecto?")}</strong>
+              <p style={{ margin: "0 0 10px", fontSize: 12, color: "#475569" }}>{tt(`Routine testing already has ${preferredTestProject.name}. Reuse it unless this work needs a separate project record.`, `Las pruebas rutinarias ya tienen ${preferredTestProject.name}. Reutilízalo salvo que este trabajo necesite un registro de proyecto separado.`)}</p>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <Button type="button" onClick={() => setLocation(`/projects/${preferredTestProject.id}`)}>{tt("Open preferred test workspace", "Abrir espacio de pruebas preferido")}</Button>
+                <Button type="button" variant="outline" onClick={() => { setShowCreateDecision(false); setShowCreate(true); }}>{tt("Create a separate project", "Crear un proyecto separado")}</Button>
+                <Button type="button" variant="ghost" onClick={() => setShowCreateDecision(false)}>{tt("Cancel", "Cancelar")}</Button>
+              </div>
+            </div>}
 
             {/* Create project form */}
             {showCreate && (
