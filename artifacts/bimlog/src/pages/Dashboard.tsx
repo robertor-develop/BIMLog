@@ -303,6 +303,12 @@ export function Dashboard() {
       });
   }, [allProjectRows, projectSearch, projectSort, projectStatus]);
   const activeProjects = allProjectRows.filter((p: any) => p.status === "active");
+  const workspaceCounts = allProjectRows.reduce((counts: Record<string, number>, project: any) => {
+    const group = project.workspaceGroup || "active";
+    counts[group] = (counts[group] || 0) + 1;
+    counts.all += 1;
+    return counts;
+  }, { active: 0, testing: 0, retired: 0, all: 0 });
   const totalFiles = allProjectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
   const visibleProjectFiles = projectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
   const visibleProjectMembers = projectRows.reduce((sum: number, p: any) => sum + (p.memberCount || 0), 0);
@@ -589,6 +595,12 @@ export function Dashboard() {
               <span style={{ fontSize: 11, color: "#475569" }}>{preferredTestProject
                 ? tt(`Preferred: ${preferredTestProject.name} (${preferredTestProject.code}). Use it for routine QA before creating another project.`, `Preferido: ${preferredTestProject.name} (${preferredTestProject.code}). Úsalo para pruebas rutinarias antes de crear otro proyecto.`)
                 : tt("Choose a project from Testing. BIMLog will keep it visible as the preferred place for routine QA.", "Elige un proyecto en Pruebas. BIMLog lo mantendrá visible como el lugar preferido para pruebas rutinarias.")}</span>
+            </div>
+            <div aria-label={tt("Project workspace groups", "Grupos del espacio de proyectos")} style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8, marginBottom: 12 }}>
+              {(["active", "testing", "retired", "all"] as const).map(group => <button key={group} type="button" aria-pressed={projectStatus === group} onClick={() => setProjectStatus(group)} style={{ minHeight: 44, padding: "7px 9px", borderRadius: 8, border: projectStatus === group ? "2px solid #2563EB" : "1px solid #CBD5E1", background: projectStatus === group ? "#EFF6FF" : "white", color: "#0F172A", textAlign: "left", cursor: "pointer" }}>
+                <strong style={{ display: "block", fontSize: 15 }}>{workspaceCounts[group]}</strong>
+                <span style={{ fontSize: 10 }}>{group === "active" ? tt("Active", "Activos") : group === "testing" ? tt("Testing", "Pruebas") : group === "retired" ? tt("Retired", "Retirados") : tt("All", "Todos")}</span>
+              </button>)}
             </div>
             {preferredTestProject && <Button type="button" variant="outline" onClick={() => setLocation(`/projects/${preferredTestProject.id}`)}>{tt("Open preferred test workspace", "Abrir espacio de pruebas preferido")}</Button>}
           </section>
