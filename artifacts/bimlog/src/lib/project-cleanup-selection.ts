@@ -19,6 +19,31 @@ export type ProjectCleanupSummary = {
   fileCount: number;
 };
 
+export const PROTECTED_WORKING_PROJECT_CODES = new Set(["PRO-521-TEST", "ELA01", "IBQ-LIT"]);
+
+export type ProjectCleanupClassification = "protected-working" | "preferred-testing" | "testing-review" | "active-review" | "retired";
+
+export function classifyCleanupRow(row: ProjectCleanupRow, preferredTestProjectId: number | null): ProjectCleanupClassification {
+  if (row.workspaceGroup === "retired" || row.status === "archived") return "retired";
+  if (PROTECTED_WORKING_PROJECT_CODES.has(row.code.trim().toUpperCase())) return "protected-working";
+  if (row.workspaceGroup === "testing" || row.status === "testing") {
+    return row.id === preferredTestProjectId ? "preferred-testing" : "testing-review";
+  }
+  return "active-review";
+}
+
+export function testingCleanupCandidateIds(rows: ProjectCleanupRow[], preferredTestProjectId: number | null): number[] {
+  return selectableCleanupRows(rows)
+    .filter(row => classifyCleanupRow(row, preferredTestProjectId) === "testing-review")
+    .map(row => row.id);
+}
+
+export function retirementReviewQueue(rows: ProjectCleanupRow[], selectedIds: ReadonlySet<number>, preferredTestProjectId: number | null): number[] {
+  return rows
+    .filter(row => selectedIds.has(row.id) && classifyCleanupRow(row, preferredTestProjectId) === "testing-review")
+    .map(row => row.id);
+}
+
 export function selectableCleanupRows(rows: ProjectCleanupRow[]): ProjectCleanupRow[] {
   return rows.filter(row => row.canManageLifecycle === true);
 }
