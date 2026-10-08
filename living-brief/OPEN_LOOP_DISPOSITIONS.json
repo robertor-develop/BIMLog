@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "f8abd92e55608768e060a53c771715ec7a10102a51458bc36f7f4a4139a01397",
-  "itemCount": 347,
+  "sourceSha256": "ac5ef491cda96a77b7e7b4f75294d6b291e5f3546b3f1b14a125b8b1ff723c02",
+  "itemCount": 348,
   "counts": {
-    "ACTIVE": 306,
+    "ACTIVE": 307,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6323,6 +6323,24 @@
       "evidence": [
         "OPEN_LOOP.md:4903",
         "Headquarters project lifecycle Block 1 — 2026-10-08"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "bd69fc90bd0afbcc",
+      "sourceLine": 4936,
+      "heading": "Headquarters project lifecycle Block 4 — 2026-10-08",
+      "statement": "Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 5 completes the next ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4936",
+        "Headquarters project lifecycle Block 4 — 2026-10-08"
       ],
       "currentAuthority": false
     }

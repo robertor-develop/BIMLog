@@ -10,6 +10,7 @@ await fixture.query(`SET search_path TO ${schema}`);
 for (const table of ["companies","users","projects","project_members","project_directory","company_profiles","config_options","activity_log","company_master_catalog_administrators","company_master_catalog_policies","company_master_catalog_entries","project_company_binding_versions","files","rfis","submittals","transmittals","change_orders","meeting_minutes","action_items"]) {
   await fixture.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
 }
+await fixture.query("ALTER TABLE companies ADD COLUMN IF NOT EXISTS retired_into_company_id integer, ADD COLUMN IF NOT EXISTS retired_at timestamptz");
 process.env.PROD_DATABASE_URL = `postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test?options=${encodeURIComponent('-csearch_path='+schema)}`;
 delete process.env.SENDGRID_API_KEY;
 const {pool} = await import("@workspace/db");
@@ -34,7 +35,7 @@ try {
   await fixture.query("INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active')",[project,owner]);
   const token=signToken({userId:owner,email:"ux-owner@example.test",fullName:"UX owner",companyId:company,companyName:"TEST UX owner"});
   const outsiderToken=signToken({userId:outsider,email:"ux-outsider@example.test",fullName:"UX outsider",companyId:otherCompany,companyName:"TEST UX unrelated"});
-  const result=await request("/search?q=TEST-UX-P",token); assert.equal(result.status,200); assert.equal(result.body.projects.length,1); assert.equal(result.body.projects[0].id,project);
+  const result=await request("/search?q=TEST-UX-P",token); assert.equal(result.status,200,JSON.stringify(result.body)); assert.equal(result.body.projects.length,1); assert.equal(result.body.projects[0].id,project);
   const unrelated=await request("/search?q=TEST-UX-P",outsiderToken); assert.equal(unrelated.body.projects.length,0);
   assert.equal((await request("/search?q=TEST&projectId=-1",token)).status,400);
   assert.equal((await request("/search?q=TEST&projectId=999999",token)).body.projects.length,0);

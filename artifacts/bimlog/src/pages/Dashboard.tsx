@@ -16,6 +16,7 @@ import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 import { ProjectRetirementDialog } from "@/components/ProjectRetirementDialog";
 import { ProjectRestoreDialog } from "@/components/ProjectRestoreDialog";
+import { ProjectCleanupDialog } from "@/components/ProjectCleanupDialog";
 import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWorkspace";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -193,6 +194,7 @@ export function Dashboard() {
   const user = useAuthStore(s => s.user);
   const [showCreate, setShowCreate] = useState(false);
   const [showCreateDecision, setShowCreateDecision] = useState(false);
+  const [showCleanup, setShowCleanup] = useState(false);
   const [retirementProjectId, setRetirementProjectId] = useState<number | null>(null);
   const [restoreProject, setRestoreProject] = useState<any | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -508,6 +510,7 @@ export function Dashboard() {
       )}
       {retirementProjectId !== null && token && <ProjectRetirementDialog projectId={retirementProjectId} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setRetirementProjectId(null)} onRetired={() => { setRetirementProjectId(null); queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] }); queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project retired. Every record was preserved.", "Proyecto retirado. Todos los registros fueron preservados.") }); }} />}
       {restoreProject && token && <ProjectRestoreDialog project={restoreProject} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setRestoreProject(null)} onRestored={() => { setRestoreProject(null); queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project restored to the active workspace.", "Proyecto restaurado al espacio de trabajo activo.") }); }} />}
+      {showCleanup && token && <ProjectCleanupDialog rows={projectRows} lang={lang} request={(path, init) => fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) } })} onClose={() => setShowCleanup(false)} onChanged={() => { void queryClient.invalidateQueries({ queryKey: ["project-workspace-register"] }); toast({ title: tt("Project workspaces updated. Every project record was preserved.", "Espacios de proyectos actualizados. Se conservaron todos los registros.") }); }} onReviewRetirement={(projectId) => { setShowCleanup(false); setRetirementProjectId(projectId); }} />}
       <MasterSidebar />
 
       {/* Main scrollable area */}
@@ -878,10 +881,13 @@ export function Dashboard() {
                   )}
                 </p>
               </div>
-              <Button onClick={() => preferredTestProject ? setShowCreateDecision(true) : setShowCreate(true)} style={{ gap: 6, fontSize: 13 }}>
-                <Plus style={{ width: 14, height: 14 }} />
-                {t("dashboard.newProject")}
-              </Button>
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 8 }}>
+                <Button type="button" variant="outline" onClick={() => setShowCleanup(true)} disabled={projectRows.every((project: any) => !project.canManageLifecycle)}>{tt("Clean up projects", "Organizar proyectos")}</Button>
+                <Button onClick={() => preferredTestProject ? setShowCreateDecision(true) : setShowCreate(true)} style={{ gap: 6, fontSize: 13 }}>
+                  <Plus style={{ width: 14, height: 14 }} />
+                  {t("dashboard.newProject")}
+                </Button>
+              </div>
             </div>
 
             {showCreateDecision && preferredTestProject && !showCreate && <div role="dialog" aria-label={tt("Reuse or create a project", "Reutilizar o crear un proyecto")} style={{ marginBottom: 14, padding: 14, border: "1px solid #BFDBFE", borderRadius: 10, background: "#EFF6FF" }}>

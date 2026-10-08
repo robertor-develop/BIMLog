@@ -10,6 +10,7 @@ await fixture.query(`SET search_path TO ${schema}`);
 for (const table of ["companies","users","projects","project_members","project_directory","company_profiles","config_options","activity_log","company_master_catalog_administrators","company_master_catalog_policies","company_master_catalog_entries","project_company_binding_versions"]) {
   await fixture.query(`CREATE TABLE ${table} (LIKE public.${table} INCLUDING ALL)`);
 }
+await fixture.query("ALTER TABLE companies ADD COLUMN IF NOT EXISTS retired_into_company_id integer, ADD COLUMN IF NOT EXISTS retired_at timestamptz");
 process.env.PROD_DATABASE_URL = `postgresql://postgres@127.0.0.1:55469/bimlog_rfi_test?options=${encodeURIComponent('-csearch_path='+schema)}`;
 delete process.env.SENDGRID_API_KEY;
 const {pool} = await import("@workspace/db");

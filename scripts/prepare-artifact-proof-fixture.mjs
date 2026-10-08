@@ -82,19 +82,30 @@ try {
     if (!fs.existsSync(cli)) throw new Error("Repository-pinned Drizzle CLI is not installed.");
     run(process.execPath, [cli, "push", "--dialect", "postgresql", "--schema", "./src/schema/index.ts", "--url", rawUrl], dbDirectory);
   }
+  const contract = collectSchemaContract();
   let after = await fixture.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");
   let actual = new Set(after.rows.map((row) => row.tablename));
-  let missing = collectSchemaContract().tables.filter((table) => !actual.has(table));
-  if (missing.length && prepare) {
+  let actualColumns = new Set((await fixture.query("SELECT table_name,column_name FROM information_schema.columns WHERE table_schema='public'")).rows.map((row) => `${row.table_name}.${row.column_name}`));
+  let missing = contract.tables.filter((table) => !actual.has(table));
+  let missingColumns = contract.columns.filter((column) => !actualColumns.has(column));
+  if ((missing.length || missingColumns.length) && prepare) {
     const cli = path.join(dbDirectory, "node_modules", "drizzle-kit", "bin.cjs");
     if (!fs.existsSync(cli)) throw new Error("Repository-pinned Drizzle CLI is not installed.");
     run(process.execPath, [cli, "push", "--dialect", "postgresql", "--schema", "./src/schema/index.ts", "--url", rawUrl], dbDirectory);
+    await fixture.query(fs.readFileSync(path.join(dbDirectory, "scripts", "company-identity-lifecycle.sql"), "utf8"));
+    await fixture.query(`
+      ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_profile_version_id text REFERENCES member_internal_cost_profile_versions(id);
+      ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_policy_version_id text REFERENCES company_internal_cost_policy_versions(id);
+      ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_effective_date date;
+    `);
     after = await fixture.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");
     actual = new Set(after.rows.map((row) => row.tablename));
-    missing = collectSchemaContract().tables.filter((table) => !actual.has(table));
+    actualColumns = new Set((await fixture.query("SELECT table_name,column_name FROM information_schema.columns WHERE table_schema='public'")).rows.map((row) => `${row.table_name}.${row.column_name}`));
+    missing = contract.tables.filter((table) => !actual.has(table));
+    missingColumns = contract.columns.filter((column) => !actualColumns.has(column));
   }
-  if (missing.length)
-    throw new Error("Disposable artifact fixture is incomplete (" + missing.length + " declared tables missing). Preserve it and run the guarded prepare path before release proof.");
+  if (missing.length || missingColumns.length)
+    throw new Error(`Disposable artifact fixture is incomplete (${missing.length} declared tables and ${missingColumns.length} declared columns missing: ${missingColumns.join(", ")}). Preserve it and run the guarded prepare path before release proof.`);
 } finally { await fixture.end(); }
 
 const proofRootCreated = !fs.existsSync(proofRoot);

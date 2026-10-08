@@ -4925,3 +4925,12 @@ Release closure: exact source `13759e262f215eadcd64edc8b86e85f60e5629d7` passed 
 
 Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed the complete release gate, exact branch push, controlled Replit publication and authenticated production Chrome smoke. Headquarters showed Active 17, Testing 0, Retired 0 and All 17; the three protected working projects remained active; All-view persistence survived reload; and the browser produced no warning or error logs.
 
+## Headquarters project lifecycle Block 4 — 2026-10-08
+
+- [x] Add an explicit cleanup review over the currently visible Headquarters register.
+- [x] Limit selection and lifecycle actions to projects the authenticated server authority says the user may manage.
+- [x] Move selected projects atomically between Active and Testing with version checks and immutable per-project audit evidence.
+- [x] Preserve every project record and reusable company library; keep retirement behind individual impact review and exact confirmation.
+- [x] Provide bilingual, keyboard-accessible selection summaries, error states and 44-pixel controls.
+- [x] Bind the complete cleanup workflow to focused API, UI and compiler acceptance.
+- [ ] Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 5 completes the next ten-build interval.

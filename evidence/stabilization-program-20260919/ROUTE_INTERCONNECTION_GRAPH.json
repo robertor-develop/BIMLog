@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 750,
+    "apiRoutes": 751,
     "frontendApiReferences": 298,
     "routeOwnedTables": 68
   },
@@ -6318,6 +6318,20 @@
     {
       "method": "GET",
       "path": "/projects/workspace-register",
+      "owner": "artifacts/api-server/src/routes/projects.ts",
+      "tables": [
+        "projectsTable",
+        "projectMembersTable",
+        "projectCompanyBindingVersionsTable",
+        "lensNextModelBindingsTable",
+        "filesTable",
+        "usersTable",
+        "companiesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/workspace-state/batch",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
         "projectsTable",

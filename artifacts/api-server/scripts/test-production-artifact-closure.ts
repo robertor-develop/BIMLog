@@ -657,8 +657,12 @@ try {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: eligibleUser.email, password: "artifact-proof" }),
   });
-  assert.equal(restoredLogin.status, 200);
-  const restoredLoginBody = await restoredLogin.json() as { token?: unknown; user?: { email?: unknown } };
+  const restoredLoginBody = await restoredLogin.json() as { error?: unknown; token?: unknown; user?: { email?: unknown } };
+  assert.equal(
+    restoredLogin.status,
+    200,
+    `Restored login failed: ${typeof restoredLoginBody.error === "string" ? restoredLoginBody.error : "unknown error"}`,
+  );
   assert.equal(typeof restoredLoginBody.token, "string");
   assert.equal(restoredLoginBody.user?.email, eligibleUser.email);
   assert(storageAuthority.capabilities.includes("bounded-read"));
