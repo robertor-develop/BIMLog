@@ -9,7 +9,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { waitForFeaturePolicyMigration } from "../lib/feature-policy-migration";
 import { normalizeLensNextModelKey, selectSingleAuthorizedLensNextBinding } from "../lib/lens-next-model-binding";
-import { previewProjectRetirement, ProjectRetirementError, restoreProject, retireProject, setProjectWorkspaceState } from "../lib/project-retirement";
+import { previewProjectRetirement, ProjectRetirementError, restoreProject, retireProject, setProjectWorkspaceState, setProjectWorkspaceStateBatch } from "../lib/project-retirement";
 
 const router: IRouter = Router();
 
@@ -164,6 +164,19 @@ router.get("/projects/workspace-register", authMiddleware, async (req, res) => {
     }));
     res.json(results);
   } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+router.post("/projects/workspace-state/batch", authMiddleware, async (req, res) => {
+  try {
+    const adminRoles = await getRolesByPermission("admin");
+    res.json(await setProjectWorkspaceStateBatch(req.user!, adminRoles, req.body || {}));
+  } catch (error) {
+    if (error instanceof ProjectRetirementError) {
+      res.status(error.status).json({ error: error.message, code: error.code });
+      return;
+    }
     res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
 });
