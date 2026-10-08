@@ -15,10 +15,12 @@ export function readAssistantWorkspace(storage: Pick<Storage, "getItem"> | null)
   return {
     width: Number.isFinite(rawWidth) && rawWidth > 0 ? clampAssistantWidth(rawWidth) : ASSISTANT_WIDTH_DEFAULT,
     dock: rawDock === "left" ? "left" as const : "right" as const,
+    collapsed: storage?.getItem("bimlog:assistant-collapsed") === "true",
   };
 }
 
-export function writeAssistantWorkspace(storage: Pick<Storage, "setItem"> | null, width: number, dock: AssistantDockSide) {
+export function writeAssistantWorkspace(storage: Pick<Storage, "setItem"> | null, width: number, dock: AssistantDockSide, collapsed = false) {
   storage?.setItem("bimlog:assistant-width", String(clampAssistantWidth(width)));
   storage?.setItem("bimlog:assistant-dock", dock);
+  storage?.setItem("bimlog:assistant-collapsed", String(collapsed));
 }

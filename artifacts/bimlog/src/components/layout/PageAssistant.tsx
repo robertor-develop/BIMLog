@@ -22,7 +22,7 @@ export function PageAssistant() {
   const [messages,setMessages]=useState<Message[]>([]),[feedbackReceipt,setFeedbackReceipt]=useState<{stableId:string;status:string;notificationState:string}|null>(null);
   const [voiceListening,setVoiceListening]=useState(false),[voiceStatus,setVoiceStatus]=useState("");
   const initialWorkspace=useRef(readAssistantWorkspace(typeof window==="undefined"?null:window.localStorage));
-  const [panelWidth,setPanelWidth]=useState(initialWorkspace.current.width),[dock,setDock]=useState<AssistantDockSide>(initialWorkspace.current.dock),[collapsed,setCollapsed]=useState(false);
+  const [panelWidth,setPanelWidth]=useState(initialWorkspace.current.width),[dock,setDock]=useState<AssistantDockSide>(initialWorkspace.current.dock),[collapsed,setCollapsed]=useState(initialWorkspace.current.collapsed);
   const [repairs,setRepairs]=useState<Repair[]>([]),[canAuthorize,setCanAuthorize]=useState(false),[executionConnected,setExecutionConnected]=useState(false),[pin,setPin]=useState(""),[newPin,setNewPin]=useState(""),[delegateEmail,setDelegateEmail]=useState("");
   const input=useRef<HTMLTextAreaElement|null>(null),opener=useRef<HTMLButtonElement|null>(null),selectedField=useRef<string|null>(null),recognition=useRef<SpeechRecognitionLike|null>(null),voiceBase=useRef(""),voiceError=useRef("");
   const context=collectPageAssistantContext(lang);
@@ -35,7 +35,7 @@ export function PageAssistant() {
   useEffect(()=>{try{sessionStorage.setItem(contextKey,JSON.stringify(messages.slice(-12)));}catch(cause){console.warn("[page-assistant] conversation persistence unavailable",cause);}},[messages,contextKey]);
   useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.altKey&&event.shiftKey&&event.key.toLowerCase()==="a"){event.preventDefault();setOpen(value=>!value);}if(event.key==="Escape"&&open){event.preventDefault();setOpen(false);opener.current?.focus();}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);},[open]);
   useEffect(()=>{if(open)window.setTimeout(()=>input.current?.focus(),0);},[open]);
-  useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open);document.body.dataset.assistantDockSide=dock;document.body.dataset.assistantCollapsed=String(collapsed);document.documentElement.style.setProperty("--bimlog-agent-dock-width",`${panelWidth}px`);writeAssistantWorkspace(window.localStorage,panelWidth,dock);return()=>{document.body.classList.remove("bimlog-assistant-docked");delete document.body.dataset.assistantDockSide;delete document.body.dataset.assistantCollapsed;};},[open,panelWidth,dock,collapsed]);
+  useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open);document.body.dataset.assistantDockSide=dock;document.body.dataset.assistantCollapsed=String(collapsed);document.documentElement.style.setProperty("--bimlog-agent-dock-width",`${panelWidth}px`);writeAssistantWorkspace(window.localStorage,panelWidth,dock,collapsed);return()=>{document.body.classList.remove("bimlog-assistant-docked");delete document.body.dataset.assistantDockSide;delete document.body.dataset.assistantCollapsed;};},[open,panelWidth,dock,collapsed]);
   useEffect(()=>{if(open&&token)void loadRepairs();},[open,token]);
   useEffect(()=>{if(!open||!token)return;const refresh=window.setInterval(()=>void loadRepairs(),15000);return()=>window.clearInterval(refresh);},[open,token]);
   useEffect(()=>{
