@@ -60768,8 +60768,8 @@
     },
     {
       "taskId": "headquarters-project-lifecycle-block01",
-      "reviewedThroughCommit": "b3e888485d6c05929056c43ca19930aa20bfd85b",
-      "reviewedAt": "2026-10-08T13:06:48.9435913Z",
+      "reviewedThroughCommit": "705613a55376b9dbcaec2a04b20a354e6c90b702",
+      "reviewedAt": "2026-10-08T15:36:23.7465202Z",
       "status": "candidate",
       "authorities": [
         {
@@ -60828,14 +60828,14 @@
           "reason": "The block adds governed project retirement, dependency visibility, restoration, and lifecycle views without deleting records or changing company-library, financial, provider, Native, or tenant authority."
         }
       ],
-      "reason": "Make project cleanup safe, reversible and understandable while preserving reusable company libraries and retained project evidence; correct the production runtime assembly timeout found by the release gate.",
+      "reason": "Make project cleanup safe, reversible and understandable while preserving reusable company libraries and retained project evidence; correct runtime assembly and sustained Windows startup-proof failures found by the complete release gate.",
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "79fe8cf35b415aed5c86a9bd141cbc45f0441bb6397be7abbd73c0c5ec82b385"
+      "reviewedChangeSha256": "25ddf9ee1e691801fd9e3eb01a659537f073ac6f0f73a802c1f295e8e4f1d30b"
     }
   ]
 }
