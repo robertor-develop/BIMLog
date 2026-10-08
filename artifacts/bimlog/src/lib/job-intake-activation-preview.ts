@@ -47,7 +47,10 @@ export function jobIntakeActivationMatches(expected: ReturnType<typeof jobIntake
 }
 
 export function jobIntakeActivationStructure(status: string, preview: ReturnType<typeof jobIntakeActivationPreview>, activation: any) {
-  if (status !== "activated") return { mode: "preview" as const, ...preview };
+  // The persisted activation receipt is canonical evidence that the job was
+  // created. Older Intake rows can carry that receipt while their status is
+  // being normalized, so never present a future-tense preview over it.
+  if (status !== "activated" && !activation) return { mode: "preview" as const, ...preview };
   return {
     mode: "created" as const,
     workItems: activation?.workItems?.length ?? 0,
