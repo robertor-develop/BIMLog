@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "9f3863ba661fd4fea65ee14931d14383618730b592b3f5ae51d694a77f498dd3",
-  "itemCount": 349,
+  "sourceSha256": "f8abd92e55608768e060a53c771715ec7a10102a51458bc36f7f4a4139a01397",
+  "itemCount": 347,
   "counts": {
-    "ACTIVE": 308,
+    "ACTIVE": 306,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6323,42 +6323,6 @@
       "evidence": [
         "OPEN_LOOP.md:4903",
         "Headquarters project lifecycle Block 1 — 2026-10-08"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "81481fb0ce943a71",
-      "sourceLine": 4915,
-      "heading": "Headquarters project lifecycle Block 2 — 2026-10-08",
-      "statement": "Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 3 completes the next ten-build interval.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:4915",
-        "Headquarters project lifecycle Block 2 — 2026-10-08"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "00da76a27a999630",
-      "sourceLine": 4924,
-      "heading": "Headquarters project lifecycle Block 3 — 2026-10-08",
-      "statement": "Pass the complete release gate, push Blocks 2 and 3, publish the exact ten-build source and complete authenticated Chrome production smoke.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:4924",
-        "Headquarters project lifecycle Block 3 — 2026-10-08"
       ],
       "currentAuthority": false
     }

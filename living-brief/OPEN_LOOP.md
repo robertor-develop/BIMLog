@@ -4912,7 +4912,7 @@ Release closure: exact source `13759e262f215eadcd64edc8b86e85f60e5629d7` passed 
 - [x] Explain Active, Testing and Retired behavior directly on every project card, including record and shared-library preservation.
 - [x] Align visible lifecycle controls with the server's existing creator, configured administrator and Super Administrator authority.
 - [x] Bind the complete bilingual Headquarters lifecycle workflow to focused API and frontend acceptance.
-- [ ] Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 3 completes the next ten-build interval.
+- [x] Push this five-build block and keep it unpublished until Headquarters project lifecycle Block 3 completes the next ten-build interval.
 
 ## Headquarters project lifecycle Block 3 — 2026-10-08
 
@@ -4921,5 +4921,7 @@ Release closure: exact source `13759e262f215eadcd64edc8b86e85f60e5629d7` passed 
 - [x] Restore the user's project search, lifecycle view and sort choice on return to Headquarters.
 - [x] Offer the preferred QA workspace before creating another project while retaining an explicit separate-project path.
 - [x] Bind lifecycle counts, persistence, QA-first ordering and the bilingual reuse decision to focused acceptance.
-- [ ] Pass the complete release gate, push Blocks 2 and 3, publish the exact ten-build source and complete authenticated Chrome production smoke.
+- [x] Pass the complete release gate, push Blocks 2 and 3, publish the exact ten-build source and complete authenticated Chrome production smoke.
+
+Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed the complete release gate, exact branch push, controlled Replit publication and authenticated production Chrome smoke. Headquarters showed Active 17, Testing 0, Retired 0 and All 17; the three protected working projects remained active; All-view persistence survived reload; and the browser produced no warning or error logs.
 
