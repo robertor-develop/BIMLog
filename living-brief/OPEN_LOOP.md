@@ -4860,7 +4860,7 @@ Reconciliation checkpoint: the completed implementation set is reviewed through 
 
 ## Human flow continuity Block 8 — 2026-10-07
 
-Reconciliation checkpoint: the completed implementation set is reviewed through `694af52ac26b6625fe9165a78d69c1ce5ee79221`; publication remains scheduled after Block 9 reaches the next ten-build boundary.
+Reconciliation checkpoint: the completed implementation set is reviewed through `98834b8e68f1d660d32b1d66a25454a0b621cdf1`; publication remains scheduled after Block 9 reaches the next ten-build boundary.
 
 - [x] Treat a persisted activation receipt as canonical proof that the operational job already exists.
 - [x] Use one derived active state across lifecycle guidance, readonly behavior, stage copy and primary actions.
