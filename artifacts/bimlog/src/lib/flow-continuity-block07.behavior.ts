@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { jobIntakeLifecycle } from "./job-intake-lifecycle";
+import { jobIntakeActivationMatches, jobIntakeActivationStructure } from "./job-intake-activation-preview";
+
+const workspace = readFileSync(new URL("../pages/JobIntakeWorkspace.tsx", import.meta.url), "utf8");
+assert.equal(jobIntakeLifecycle("draft", false, "saved", false), "draft");
+assert.equal(jobIntakeLifecycle("draft", true, "saved", false), "ready");
+assert.equal(jobIntakeLifecycle("draft", true, "saved", true), "activating");
+assert.equal(jobIntakeLifecycle("activated", true, "saved", false), "active");
+assert.equal(jobIntakeLifecycle("activated", true, "unsaved", false), "changes_pending");
+const expected = { workItems: 1, tasks: 2, resourcePlans: 0, namedAssignments: 0, genericResourceDemands: 1, unassignedHours: "8", contractDrafts: 1 };
+assert.equal(jobIntakeActivationMatches(expected, { workItems: [{}], tasks: [{}, {}], assignments: [] }), true);
+assert.equal(jobIntakeActivationStructure("activated", expected, { workItems: [{}], tasks: [{}, {}], assignments: [] }).mode, "created");
+assert.match(workspace, /This activation was already completed\. BIMlog verified and reused the existing job structure/);
+assert.match(workspace, /What activation created/);
+assert.match(workspace, /Open job workspace/);
+assert.match(workspace, /Create Commercial records/);
+assert.doesNotMatch(workspace, /tt\("Job activated", "Trabajo activado"\)/);
+console.log("Flow continuity block 07: activation state, idempotent retry, verified structure, and active-job entry PASS");
