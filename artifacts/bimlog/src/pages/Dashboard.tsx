@@ -634,7 +634,15 @@ export function Dashboard() {
 
           {/* SECTION 2 — Platform stats (5 cards) */}
           {!isLoading && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 20 }}>
+            <section aria-labelledby="headquarters-operational-snapshot" style={{ marginBottom: 20 }}>
+              <div className="dashboard-section-heading">
+                <div>
+                  <h2 id="headquarters-operational-snapshot">{tt("Your operational snapshot", "Tu resumen operativo")}</h2>
+                  <p>{tt("Verified totals from the projects you can access. Choose a card to continue with the matching work.", "Totales verificados de los proyectos a los que tienes acceso. Elige una tarjeta para continuar con el trabajo correspondiente.")}</p>
+                </div>
+                <span className="dashboard-section-eyebrow">{tt("Live workspace data", "Datos actuales del espacio")}</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12 }}>
               {/* FIX 3: each card navigates to the correct section */}
               <StatCard
                 label={tt("Active Projects", "Proyectos activos")}
@@ -671,7 +679,8 @@ export function Dashboard() {
                 actionLabel={tt("Review projects", "Revisar proyectos")}
                 navigate={() => setLocation("/projects")}
               />
-            </div>
+              </div>
+            </section>
           )}
 
           <button

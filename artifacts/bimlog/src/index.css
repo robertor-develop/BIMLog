@@ -866,6 +866,10 @@ textarea.input { height: auto; min-height: 76px; resize: vertical; }
 }
 .card-padded { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 10px; padding: 16px 18px; }
 .kpi-card { background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 10px; padding: 14px 16px; }
+.dashboard-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 10px; }
+.dashboard-section-heading h2 { margin: 0; color: hsl(var(--foreground)); font-family: var(--font-display); font-size: 16px; font-weight: 750; }
+.dashboard-section-heading p { margin: 3px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.45; }
+.dashboard-section-eyebrow { flex-shrink: 0; border-radius: 999px; background: #EFF6FF; color: #1D4ED8; padding: 4px 8px; font-size: 10px; font-weight: 750; letter-spacing: .02em; }
 .kpi-card-action { width: 100%; appearance: none; color: inherit; text-align: left; cursor: pointer; font: inherit; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
 .kpi-card-action:hover { border-color: #93C5FD; box-shadow: 0 8px 18px rgb(15 23 42 / 0.07); transform: translateY(-1px); }
 .kpi-card-action:focus-visible { outline: 3px solid rgb(37 99 235 / 0.25); outline-offset: 2px; border-color: #2563EB; }
