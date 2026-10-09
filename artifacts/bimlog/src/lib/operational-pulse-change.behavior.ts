@@ -9,11 +9,11 @@ assert.deepEqual(
   {
     total: -5, rfis: -2, submittals: 1, files: -4, direction: "decreased",
     queues: [
-      { key: "rfis", delta: -2, direction: "decreased" },
-      { key: "submittals", delta: 1, direction: "increased" },
-      { key: "files", delta: -4, direction: "decreased" },
+      { key: "rfis", previous: 13, current: 11, delta: -2, direction: "decreased" },
+      { key: "submittals", previous: 3, current: 4, delta: 1, direction: "increased" },
+      { key: "files", previous: 14, current: 10, delta: -4, direction: "decreased" },
     ],
-    largestMovement: { key: "files", delta: -4, direction: "decreased" },
+    largestMovement: { key: "files", previous: 14, current: 10, delta: -4, direction: "decreased" },
   },
 );
 assert.equal(operationalPulseChange(
