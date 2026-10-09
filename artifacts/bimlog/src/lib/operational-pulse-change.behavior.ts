@@ -6,12 +6,28 @@ assert.deepEqual(
     { openRfis: 13, pendingSubmittals: 3, filesNeedingAttention: 14 },
     { openRfis: 11, pendingSubmittals: 4, filesNeedingAttention: 10 },
   ),
-  { total: -5, rfis: -2, submittals: 1, files: -4, direction: "decreased" },
+  {
+    total: -5, rfis: -2, submittals: 1, files: -4, direction: "decreased",
+    queues: [
+      { key: "rfis", delta: -2, direction: "decreased" },
+      { key: "submittals", delta: 1, direction: "increased" },
+      { key: "files", delta: -4, direction: "decreased" },
+    ],
+    largestMovement: { key: "files", delta: -4, direction: "decreased" },
+  },
 );
 assert.equal(operationalPulseChange(
   { openRfis: 1, pendingSubmittals: 1, filesNeedingAttention: 1 },
   { openRfis: 1, pendingSubmittals: 1, filesNeedingAttention: 1 },
 ).direction, "unchanged");
+assert.equal(operationalPulseChange(
+  { openRfis: 1, pendingSubmittals: 1, filesNeedingAttention: 1 },
+  { openRfis: 1, pendingSubmittals: 1, filesNeedingAttention: 1 },
+).largestMovement, null);
+assert.equal(operationalPulseChange(
+  { openRfis: 1, pendingSubmittals: 1, filesNeedingAttention: 1 },
+  { openRfis: 2, pendingSubmittals: 2, filesNeedingAttention: 1 },
+).largestMovement?.key, "rfis");
 assert.equal(operationalPulseChange(
   { openRfis: Number.NaN, pendingSubmittals: -2, filesNeedingAttention: 0 },
   { openRfis: 2.9, pendingSubmittals: 0, filesNeedingAttention: 1 },
