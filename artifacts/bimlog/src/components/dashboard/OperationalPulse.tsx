@@ -17,6 +17,17 @@ export function OperationalPulse({ counts, lang, onOpen }: { counts: Operational
         ? (es ? "No hay colas de atención pendientes" : "No attention queues are pending")
         : (es ? `${pulse.total} elementos necesitan revisión` : `${pulse.total} items need review`)}</h2>
       <p>{es ? "Carga actual verificada en los proyectos a los que tiene acceso." : "Current verified workload across the projects you can access."}</p>
+      {pulse.recommended && <div className="operational-pulse__next" aria-labelledby="operational-pulse-next-title">
+        <span>{es ? "Siguiente recomendado" : "Recommended next"}</span>
+        <strong id="operational-pulse-next-title">{labels[pulse.recommended.key]}</strong>
+        <p>{es
+          ? `${pulse.recommended.count} de ${pulse.total} elementos pendientes están en esta cola, la carga verificada más grande en este momento.`
+          : `${pulse.recommended.count} of ${pulse.total} pending items are in this queue, the largest verified workload right now.`}</p>
+        <button type="button" onClick={() => onOpen(pulse.recommended!.href)}>
+          {es ? `Revisar ${labels[pulse.recommended.key].toLowerCase()}` : `Review ${labels[pulse.recommended.key].toLowerCase()}`}
+          <span aria-hidden="true">→</span>
+        </button>
+      </div>}
     </div>
     <div className="operational-pulse__queues" aria-label={es ? "Distribución de la atención" : "Attention distribution"}>
       {pulse.queues.map(queue => <button className="operational-pulse__queue" type="button" key={queue.key} onClick={() => onOpen(queue.href)} aria-label={`${labels[queue.key]}: ${queue.count}. ${es ? "Abrir cola" : "Open queue"}`}>
