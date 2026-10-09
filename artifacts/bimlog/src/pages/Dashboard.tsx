@@ -526,6 +526,14 @@ export function Dashboard() {
         .operational-pulse__movement { display: grid; gap: 2px; margin-top: 8px; padding: 8px 10px; border-left: 3px solid #64748b; border-radius: 0 7px 7px 0; background: color-mix(in srgb, #f1f5f9 70%, hsl(var(--card))); color: #475569; }
         .operational-pulse__movement strong { font-size: 10px; line-height: 1.35; }
         .operational-pulse__movement span { font-size: 9px; line-height: 1.35; color: hsl(var(--muted-foreground)); }
+        .operational-pulse__movement-summary { font-weight: 700; }
+        .operational-pulse__movement-queues { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin: 5px 0 0; padding: 0; list-style: none; }
+        .operational-pulse__movement-queue { display: flex; align-items: center; justify-content: space-between; gap: 5px; min-width: 0; padding: 5px 6px; border: 1px solid color-mix(in srgb, #94a3b8 45%, transparent); border-radius: 6px; background: color-mix(in srgb, white 48%, transparent); }
+        .operational-pulse__movement-queue > span { min-width: 0; overflow: hidden; color: inherit; text-overflow: ellipsis; white-space: nowrap; }
+        .operational-pulse__movement-queue > strong { font-size: 10px; font-variant-numeric: tabular-nums; }
+        .operational-pulse__movement-queue--increased > strong { color: #92400e; }
+        .operational-pulse__movement-queue--decreased > strong { color: #166534; }
+        .operational-pulse__movement-queue--largest { border-color: currentColor; box-shadow: inset 0 0 0 1px currentColor; }
         .operational-pulse__movement--decreased { border-left-color: #16a34a; color: #166534; background: color-mix(in srgb, #dcfce7 55%, hsl(var(--card))); }
         .operational-pulse__movement--increased { border-left-color: #d97706; color: #92400e; background: color-mix(in srgb, #fef3c7 55%, hsl(var(--card))); }
         .operational-pulse__next { display: grid; gap: 4px; margin-top: 12px; padding: 11px 12px; border: 1px solid #93c5fd; border-radius: 10px; background: color-mix(in srgb, #dbeafe 62%, hsl(var(--card))); }
@@ -575,6 +583,8 @@ export function Dashboard() {
           .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }
           .operational-pulse__movement { padding: 9px 10px; }
+          .operational-pulse__movement-queues { grid-template-columns: 1fr; }
+          .operational-pulse__movement-queue > span { white-space: normal; }
         }
         @media (prefers-reduced-motion: reduce) {
           .operational-pulse__queue, .operational-pulse__track > span, .operational-pulse__next > button { transition: none; }
