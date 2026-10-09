@@ -13,7 +13,7 @@ export function OperationalPulse({ counts, lang, onOpen }: { counts: Operational
   return <section className="operational-pulse" aria-labelledby="operational-pulse-title">
     <div className="operational-pulse__intro">
       <p className="operational-pulse__eyebrow">{es ? "Pulso operativo" : "Operational pulse"}</p>
-      <h2 id="operational-pulse-title">{pulse.total === 0
+      <h2 id="operational-pulse-title" aria-live="polite">{pulse.total === 0
         ? (es ? "No hay colas de atención pendientes" : "No attention queues are pending")
         : (es ? `${pulse.total} elementos necesitan revisión` : `${pulse.total} items need review`)}</h2>
       <p>{es ? "Carga actual verificada en los proyectos a los que tiene acceso." : "Current verified workload across the projects you can access."}</p>
@@ -27,6 +27,9 @@ export function OperationalPulse({ counts, lang, onOpen }: { counts: Operational
           {es ? `Revisar ${labels[pulse.recommended.key].toLowerCase()}` : `Review ${labels[pulse.recommended.key].toLowerCase()}`}
           <span aria-hidden="true">→</span>
         </button>
+        <small>{es
+          ? "Recomendación basada solo en los conteos actuales; no implica prioridad contractual ni fecha de vencimiento."
+          : "Recommendation uses current counts only; it does not imply contractual priority or a due date."}</small>
       </div>}
     </div>
     <div className="operational-pulse__queues" aria-label={es ? "Distribución de la atención" : "Attention distribution"}>

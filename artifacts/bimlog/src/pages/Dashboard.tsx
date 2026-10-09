@@ -499,6 +499,7 @@ export function Dashboard() {
         .operational-pulse__next > span:first-child { color: #1d4ed8; font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse__next > strong { color: hsl(var(--foreground)); font-size: 13px; }
         .operational-pulse__next > p { margin: 0; color: hsl(var(--muted-foreground)); font-size: 10px; line-height: 1.45; }
+        .operational-pulse__next > small { color: hsl(var(--muted-foreground)); font-size: 9px; line-height: 1.4; }
         .operational-pulse__next > button { display: inline-flex; align-items: center; justify-content: space-between; gap: 8px; width: fit-content; min-height: 40px; margin-top: 3px; padding: 7px 11px; border: 1px solid #1d4ed8; border-radius: 8px; background: #1d4ed8; color: white; font: inherit; font-size: 11px; font-weight: 750; cursor: pointer; transition: background .16s ease, transform .16s ease, box-shadow .16s ease; }
         .operational-pulse__next > button:hover { background: #1e40af; transform: translateY(-1px); box-shadow: 0 5px 12px rgba(30, 64, 175, .16); }
         .operational-pulse__next > button:focus-visible { outline: 3px solid color-mix(in srgb, #2563eb 35%, transparent); outline-offset: 2px; }
