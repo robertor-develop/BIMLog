@@ -124,6 +124,24 @@ export function PendingItems() {
         <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Dashboard
       </button>
 
+      <nav className="pending-type-tabs" aria-label="Attention queues">
+        {(Object.keys(TYPE_META) as ItemType[]).map(queueType => {
+          const queue = TYPE_META[queueType];
+          const QueueIcon = queue.icon;
+          return (
+            <button
+              key={queueType}
+              type="button"
+              aria-current={type === queueType ? "page" : undefined}
+              onClick={() => setLocation(`/pending?type=${queueType}`)}
+            >
+              <QueueIcon aria-hidden="true" />
+              {queue.label}
+            </button>
+          );
+        })}
+      </nav>
+
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
         <div style={{
           width: 36, height: 36, borderRadius: 8,
