@@ -252,6 +252,8 @@ export function Dashboard() {
     return Number.isInteger(value) && value > 0 ? value : null;
   });
   const [showOperationalDetails, setShowOperationalDetails] = useState(false);
+  const [showProjectControls, setShowProjectControls] = useState(false);
+  const [showTestGuidance, setShowTestGuidance] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("bimlog:headquarters-project-view", JSON.stringify({ search: projectSearch, status: projectStatus, sort: projectSort }));
@@ -564,13 +566,16 @@ export function Dashboard() {
             aria-label={tt("Current view filters", "Filtros de vista actual")}
             style={{ marginBottom: 20, padding: "14px 16px", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))" }}
           >
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: "hsl(var(--foreground))" }}>{tt("Current view filters", "Filtros de vista actual")}</div>
-              <div style={{ marginTop: 2, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>
-                {tt("Filter and sort the visible project register. Print PDF uses these exact controls.", "Filtra y ordena el registro visible de proyectos. Imprimir PDF usa exactamente estos controles.")}
-              </div>
-            </div>
-            <div className="dashboard-current-view-filters" style={{ display: "grid", gridTemplateColumns: "minmax(180px, 2fr) repeat(2, minmax(140px, 1fr)) auto", gap: 10, alignItems: "end" }}>
+            <button type="button" aria-expanded={showProjectControls} aria-controls="headquarters-project-controls" onClick={() => setShowProjectControls(value => !value)} className="dashboard-disclosure-heading">
+              <span>
+                <strong>{tt("Find and organize projects", "Buscar y organizar proyectos")}</strong>
+                <small>{tt(`${projectRows.length} of ${allProjectRows.length} visible`, `${projectRows.length} de ${allProjectRows.length} visibles`)}</small>
+              </span>
+              <span>{showProjectControls ? tt("Hide controls", "Ocultar controles") : tt("Search, filter and sort", "Buscar, filtrar y ordenar")} <ChevronDown aria-hidden className={showProjectControls ? "is-open" : ""} /></span>
+            </button>
+            <div id="headquarters-project-controls" hidden={!showProjectControls}>
+              <p className="dashboard-disclosure-copy">{tt("These controls change the visible project register and the current-view PDF.", "Estos controles cambian el registro visible de proyectos y el PDF de la vista actual.")}</p>
+              <div className="dashboard-current-view-filters" style={{ display: "grid", gridTemplateColumns: "minmax(180px, 2fr) repeat(2, minmax(140px, 1fr)) auto", gap: 10, alignItems: "end" }}>
               <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
                 {tt("Search projects", "Buscar proyectos")}
                 <Input
@@ -600,6 +605,7 @@ export function Dashboard() {
               <Button type="button" variant="outline" onClick={() => { setProjectSearch(""); setProjectStatus("active"); setProjectSort("name_asc"); }}>
                 {tt("Clear filters", "Limpiar filtros")}
               </Button>
+              </div>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10, fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>
               <span>{tt("Visible projects", "Proyectos visibles")}: {projectRows.length}/{allProjectRows.length}</span>
@@ -611,13 +617,18 @@ export function Dashboard() {
             </div>
           </section>
 
-          <section aria-label={tt("Test workspace reuse", "Reutilización del espacio de pruebas")} style={{ marginBottom: 20, padding: "12px 16px", border: "1px solid #BFDBFE", borderRadius: 10, background: "#EFF6FF", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div>
-              <strong style={{ display: "block", fontSize: 13 }}>{tt("Reuse one test workspace", "Reutiliza un solo espacio de pruebas")}</strong>
-              <span style={{ fontSize: 11, color: "#475569" }}>{preferredTestProject
+          <section aria-label={tt("Test workspace reuse", "Reutilización del espacio de pruebas")} style={{ marginBottom: 20, padding: "10px 16px", border: "1px solid #BFDBFE", borderRadius: 10, background: "#EFF6FF" }}>
+            <button type="button" aria-expanded={showTestGuidance} aria-controls="headquarters-test-guidance" onClick={() => setShowTestGuidance(value => !value)} className="dashboard-disclosure-heading dashboard-disclosure-heading-blue">
+              <span>
+                <strong>{tt("Testing workspace", "Espacio de pruebas")}</strong>
+                <small>{preferredTestProject ? preferredTestProject.name : tt("No preferred workspace yet", "Aún no hay un espacio preferido")}</small>
+              </span>
+              <span>{showTestGuidance ? tt("Hide guidance", "Ocultar guía") : tt("Manage routine QA", "Administrar QA rutinaria")} <ChevronDown aria-hidden className={showTestGuidance ? "is-open" : ""} /></span>
+            </button>
+            <div id="headquarters-test-guidance" hidden={!showTestGuidance} style={{ paddingTop: 10 }}>
+              <span style={{ display: "block", marginBottom: 10, fontSize: 11, color: "#475569" }}>{preferredTestProject
                 ? tt(`Preferred: ${preferredTestProject.name} (${preferredTestProject.code}). Use it for routine QA before creating another project.`, `Preferido: ${preferredTestProject.name} (${preferredTestProject.code}). Úsalo para pruebas rutinarias antes de crear otro proyecto.`)
                 : tt("Choose a project from Testing. BIMLog will keep it visible as the preferred place for routine QA.", "Elige un proyecto en Pruebas. BIMLog lo mantendrá visible como el lugar preferido para pruebas rutinarias.")}</span>
-            </div>
             <div aria-label={tt("Project workspace groups", "Grupos del espacio de proyectos")} style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8, marginBottom: 12 }}>
               {(["active", "testing", "retired", "all"] as const).map(group => <button key={group} type="button" aria-pressed={projectStatus === group} onClick={() => setProjectStatus(group)} style={{ minHeight: 44, padding: "7px 9px", borderRadius: 8, border: projectStatus === group ? "2px solid #2563EB" : "1px solid #CBD5E1", background: projectStatus === group ? "#EFF6FF" : "white", color: "#0F172A", textAlign: "left", cursor: "pointer" }}>
                 <strong style={{ display: "block", fontSize: 15 }}>{workspaceCounts[group]}</strong>
@@ -625,6 +636,7 @@ export function Dashboard() {
               </button>)}
             </div>
             {preferredTestProject && <Button type="button" variant="outline" onClick={() => setLocation(`/projects/${preferredTestProject.id}`)}>{tt("Open preferred test workspace", "Abrir espacio de pruebas preferido")}</Button>}
+            </div>
           </section>
 
           {/* AI Briefing banner */}
