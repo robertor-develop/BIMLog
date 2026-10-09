@@ -640,30 +640,35 @@ export function Dashboard() {
                 label={tt("Active Projects", "Proyectos activos")}
                 value={stats?.activeProjects ?? 0}
                 sub={`${projects?.length ?? 0} ${tt("total", "en total")}`}
+                actionLabel={tt("Open projects", "Abrir proyectos")}
                 navigate={() => setLocation("/projects")}
               />
               <StatCard
                 label={tt("Files Processed", "Archivos procesados")}
                 value={stats?.filesProcessed ?? 0}
                 sub={tt("Across all projects", "En todos los proyectos")}
+                actionLabel={tt("Review files", "Revisar archivos")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/files` : "/projects")}
               />
               <StatCard
                 label={tt("Open RFIs", "RFI abiertos")}
                 value={stats?.openRfis ?? 0}
                 sub={tt("Across all projects", "En todos los proyectos")}
+                actionLabel={tt("Review RFIs", "Revisar RFI")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/rfis` : "/projects")}
               />
               <StatCard
                 label={tt("Pending Submittals", "Submittals pendientes")}
                 value={stats?.pendingSubmittals ?? 0}
                 sub={tt("Awaiting review", "En espera de revisión")}
+                actionLabel={tt("Review submittals", "Revisar submittals")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittals` : "/projects")}
               />
               <StatCard
                 label={tt("Compliance Rate", "Tasa de cumplimiento")}
                 value={stats?.complianceRate === null || stats?.complianceRate === undefined ? "—" : `${stats.complianceRate}%`}
                 sub={tt("Completed uploads only", "Solo cargas completadas")}
+                actionLabel={tt("Review projects", "Revisar proyectos")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}` : "/projects")}
               />
             </div>
@@ -691,24 +696,28 @@ export function Dashboard() {
                 label={tt("Total Clashes", "Total de interferencias")}
                 value={stats?.totalClashes ?? 0}
                 sub={`${stats?.p1Clashes ?? 0} ${tt("P1 Critical", "P1 críticas")}`}
+                actionLabel={tt("Review clashes", "Revisar interferencias")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/clash-reports` : "/projects")}
               />
               <StatCard
                 label={tt("Open Clashes", "Interferencias abiertas")}
                 value={stats?.openClashes ?? 0}
                 sub={tt("Unresolved coordination issues", "Problemas de coordinación sin resolver")}
+                actionLabel={tt("Review clashes", "Revisar interferencias")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/clash-reports` : "/projects")}
               />
               <StatCard
                 label={tt("Submittal Tracking", "Seguimiento de submittals")}
                 value={stats?.submittalTrackers ?? 0}
                 sub={tt("Active tracking logs", "Registros activos de seguimiento")}
+                actionLabel={tt("Review tracking", "Revisar seguimiento")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittals` : "/projects")}
               />
               <StatCard
                 label={tt("Open Submittals", "Submittals abiertos")}
                 value={stats?.openSubmittalItems ?? 0}
                 sub={tt("Items needing attention", "Elementos que requieren atención")}
+                actionLabel={tt("Review submittals", "Revisar submittals")}
                 navigate={() => setLocation(projects?.[0]?.id ? `/projects/${projects[0].id}/submittals` : "/projects")}
               />
             </div>
