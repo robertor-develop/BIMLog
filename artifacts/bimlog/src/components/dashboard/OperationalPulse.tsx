@@ -1,10 +1,21 @@
 import { operationalPulse, type OperationalPulseCounts } from "@/lib/operational-pulse";
+import { formatOperationalPulseCheckedAt, operationalPulseRefreshState } from "@/lib/operational-pulse-refresh";
 
 const QUEUE_COLORS = { rfis: "#2563eb", submittals: "#d97706", files: "#7c3aed" } as const;
 
-export function OperationalPulse({ counts, lang, onOpen }: { counts: OperationalPulseCounts; lang: string; onOpen: (href: string) => void }) {
+export function OperationalPulse({ counts, lang, onOpen, onRefresh = () => undefined, isFetching = false, hasError = false, checkedAt = 0 }: {
+  counts: OperationalPulseCounts;
+  lang: string;
+  onOpen: (href: string) => void;
+  onRefresh?: () => void;
+  isFetching?: boolean;
+  hasError?: boolean;
+  checkedAt?: number;
+}) {
   const es = lang === "es";
   const pulse = operationalPulse(counts);
+  const refreshState = operationalPulseRefreshState({ isFetching, hasError, hasVerifiedData: checkedAt > 0 });
+  const checkedTime = formatOperationalPulseCheckedAt(checkedAt, lang);
   const labels = {
     rfis: es ? "RFI abiertos" : "Open RFIs",
     submittals: es ? "Submittals pendientes" : "Pending submittals",
@@ -17,6 +28,16 @@ export function OperationalPulse({ counts, lang, onOpen }: { counts: Operational
         ? (es ? "No hay colas de atención pendientes" : "No attention queues are pending")
         : (es ? `${pulse.total} elementos necesitan revisión` : `${pulse.total} items need review`)}</h2>
       <p>{es ? "Carga actual verificada en los proyectos a los que tiene acceso." : "Current verified workload across the projects you can access."}</p>
+      <div className={`operational-pulse__freshness operational-pulse__freshness--${refreshState}`} role="status" aria-live="polite">
+        <span>{refreshState === "refreshing"
+          ? (es ? "Actualizando conteos verificados…" : "Refreshing verified counts…")
+          : refreshState === "unavailable"
+            ? (es ? "No se pudieron actualizar los conteos. Se conserva la última vista verificada." : "Counts could not refresh. The last verified view remains visible.")
+            : (es ? `Verificado a las ${checkedTime}` : `Checked at ${checkedTime}`)}</span>
+        <button type="button" onClick={onRefresh} disabled={isFetching}>
+          {isFetching ? (es ? "Actualizando…" : "Refreshing…") : (es ? "Actualizar" : "Refresh")}
+        </button>
+      </div>
       {pulse.recommended && <div className="operational-pulse__next" aria-labelledby="operational-pulse-next-title">
         <span>{es ? "Siguiente recomendado" : "Recommended next"}</span>
         <strong id="operational-pulse-next-title">{labels[pulse.recommended.key]}</strong>
