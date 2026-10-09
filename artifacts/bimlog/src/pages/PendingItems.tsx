@@ -186,14 +186,17 @@ export function PendingItems() {
       {!loading && rows.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {rows.map(r => (
-            <div
+            <button
               key={`${r.project_id}-${r.id}`}
+              type="button"
+              className="pending-item-action"
+              aria-label={tt(`Open ${itemTitle(r)} in ${r.project_name}`, `Abrir ${itemTitle(r)} en ${r.project_name}`)}
               onClick={() => setLocation(`/projects/${r.project_id}/${meta.tab}`)}
               style={{
                 display: "flex", alignItems: "center", gap: 12,
                 padding: "12px 14px", background: "white",
                 border: "1px solid hsl(var(--border))", borderRadius: 8,
-                cursor: "pointer",
+                cursor: "pointer", width: "100%", textAlign: "left", font: "inherit",
               }}
             >
               <span style={projectBadgeStyle(r.project_code)} title={r.project_name}>{r.project_code}</span>
@@ -213,7 +216,7 @@ export function PendingItems() {
                 </div>
               </div>
               <ArrowRight style={{ width: 16, height: 16, color: meta.color, flexShrink: 0 }} />
-            </div>
+            </button>
           ))}
         </div>
       )}

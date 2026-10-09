@@ -886,6 +886,13 @@ textarea.input { height: auto; min-height: 76px; resize: vertical; }
 .pending-type-tabs button[aria-current="page"] { border-color: #2563EB; background: #EFF6FF; color: #1D4ED8; box-shadow: inset 0 0 0 1px #2563EB; }
 .pending-type-tabs button:focus-visible { outline: 3px solid rgb(37 99 235 / .25); outline-offset: 2px; }
 .pending-type-tabs svg { width: 15px; height: 15px; flex-shrink: 0; }
+.pending-item-action { color: inherit; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
+.pending-item-action:hover { border-color: #93C5FD !important; box-shadow: 0 8px 18px rgb(15 23 42 / .07); transform: translateY(-1px); }
+.pending-item-action:focus-visible { border-color: #2563EB !important; outline: 3px solid rgb(37 99 235 / .25); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .pending-item-action { transition: none; }
+  .pending-item-action:hover { transform: none; }
+}
 .kpi-card-action { width: 100%; appearance: none; color: inherit; text-align: left; cursor: pointer; font: inherit; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
 .kpi-card-action:hover { border-color: #93C5FD; box-shadow: 0 8px 18px rgb(15 23 42 / 0.07); transform: translateY(-1px); }
 .kpi-card-action:focus-visible { outline: 3px solid rgb(37 99 235 / 0.25); outline-offset: 2px; border-color: #2563EB; }
