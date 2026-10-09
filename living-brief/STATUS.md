@@ -1,8 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
-## Headquarters daily clarity Block 2 publication candidate — 2026-10-08
+## Headquarters daily clarity Block 3 candidate — 2026-10-09
 
-Five builds complete the Headquarters-to-attention journey. Users can switch directly among aggregate RFI, Submittal and file-attention queues; queue labels, counts, empty states, dates, recovery and return actions are bilingual. Each result is a semantic keyboard action with a precise project destination. Invalid queue links fail safely to RFIs, loading is visible, failures retain a retry, and exact-390 layouts stack without horizontal compression. Together with Block 1 this reaches the ten-build publication boundary and requires the complete exact-head gate, one push, controlled publication, exact live-source verification and full authenticated desktop/mobile Chrome smoke.
+Five builds add a compact operational pulse to Headquarters using only the already-verified RFI, Submittal and file-attention totals. The pulse states the combined review workload, shows each queue's current share, and opens the same canonical cross-project queues without creating a score, trend, task or duplicate record. English and Spanish copy, semantic buttons, visible keyboard focus, restrained motion and exact narrow-screen reflow keep the new signal useful without adding another control surface. Focused acceptance, frontend typechecking and the production frontend build pass. This is the first five-build half of the next ten-build interval, so it is pushed once and remains unpublished until Block 4 completes the interval.
+
+## Headquarters daily clarity Blocks 1–2 accepted — 2026-10-09
+
+Five builds complete the Headquarters-to-attention journey. Users can switch directly among aggregate RFI, Submittal and file-attention queues; queue labels, counts, empty states, dates, recovery and return actions are bilingual. Each result is a semantic keyboard action with a precise project destination. Invalid queue links fail safely to RFIs, loading is visible, failures retain a retry, and exact-390 layouts stack without horizontal compression. Blocks 1–2 and the two bounded production repairs passed the complete exact-head gate and were published at exact source `e55c12a5bf1342350f7ed0abb4ed084f40de7941`. Authenticated production Chrome verified Headquarters-to-Submittals navigation, in-place RFI/Submittal/file switching, exact project-register row navigation, 390 CSS-pixel containment (`scrollWidth=390`) and zero browser warnings or errors.
 
 ## Headquarters daily clarity Block 1 candidate — 2026-10-08
 

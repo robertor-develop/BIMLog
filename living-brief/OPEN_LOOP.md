@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Headquarters daily clarity — Block 3 — 2026-10-09
+
+- [x] Derive one deterministic attention total from existing verified RFI, Submittal and file-attention counts.
+- [x] Show the current queue distribution without inventing trends, performance scores or new records.
+- [x] Open each canonical cross-project attention queue directly from the pulse.
+- [x] Keep the pulse bilingual, keyboard accessible, reduced-motion aware and contained on narrow screens.
+- [x] Bind the complete pulse contract to permanent focused acceptance, frontend typechecking and the production frontend build.
+- [ ] Push this five-build block once and keep it unpublished until Headquarters daily clarity Block 4 completes the next ten-build interval.
+
 ## Headquarters daily clarity — Block 2 — 2026-10-08
 
 - [x] Connect the RFI, Submittal and file-attention queues without returning through Headquarters between queue changes.
@@ -7,7 +16,7 @@
 - [x] Make every attention result a semantic keyboard-accessible action with its exact project destination.
 - [x] Add safe invalid-link fallback, visible loading, explicit retry and narrow-screen containment.
 - [x] Bind the ten-build Headquarters clarity interval to a permanent focused acceptance contract.
-- [ ] Pass the complete exact-head gate, push once, publish Blocks 1–2, verify exact live identity and complete authenticated desktop/mobile Chrome smoke before another block.
+- [x] Pass the complete exact-head gate, push once, publish Blocks 1–2, verify exact live identity and complete authenticated desktop/mobile Chrome smoke before another block.
 
 ## Headquarters daily clarity — Block 1 — 2026-10-08
 
@@ -16,7 +25,7 @@
 - [x] Explain the verified operational snapshot and distinguish current workspace data without invented trends.
 - [x] Keep project discovery and routine-QA controls compact until the user requests them.
 - [x] Add visible focus, restrained hover feedback, reduced-motion handling and a permanent source acceptance contract.
-- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 2 reaches the required ten-build publication boundary.
+- [x] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 2 reaches the required ten-build publication boundary.
 
 ## Intake prerequisite continuity — Block 2 — 2026-10-07
 
@@ -4983,6 +4992,10 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [x] Reject that publication after the live agent omitted the visible 13-open-RFI KPI from its grounded answer.
 - [x] Add an explicit bounded KPI evidence opt-in without broad page scraping or a new assistant route.
 - [ ] Pass the corrected complete gate, push the repair, republish the exact source and repeat authenticated desktop/mobile Chrome smoke until the live answer returns both 17 active projects and 13 open RFIs.
-# Headquarters queue publication repair — 2026-10-09
+# Headquarters queue publication repair — closed 2026-10-09
 
-- **Second source repair complete; publication revalidation required:** Live Chrome exposed stale RFI rows after selecting the Submittal tab. The route now reads the reactive Wouter search value instead of its pathname-only location value, and the Block 2 acceptance test binds that exact source. Republish and repeat authenticated desktop/mobile queue smoke before closure.
+- [x] Read the reactive Wouter search value instead of its pathname-only location value.
+- [x] Pass the complete release gate and push the two bounded production repairs.
+- [x] Publish exact source `e55c12a5bf1342350f7ed0abb4ed084f40de7941` with `identityBound=true`.
+- [x] Verify authenticated Headquarters-to-Submittals navigation, in-place RFI/Submittal/file switching and exact project-register row navigation in production Chrome.
+- [x] Verify the 390 CSS-pixel queue has no horizontal overflow and produces zero browser warnings or errors.
