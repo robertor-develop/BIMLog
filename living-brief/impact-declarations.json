@@ -61936,7 +61936,7 @@
     {
       "taskId": "headquarters-daily-clarity-block08",
       "reviewedThroughCommit": "b906669f82c18e6d3638ffc5d70ae3f8aa3a10be",
-      "reviewedAt": "2026-10-09T12:05:00Z",
+      "reviewedAt": "2026-10-09T12:00:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -61997,12 +61997,77 @@
       ],
       "reason": "Expose the exact verified before-and-current queue counts and two-snapshot comparison window without creating historical authority or inferring urgency.",
       "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "51358882fa269fe8fe1cf92d43d303bf60e2a932988081a003eb05a56d8aaa9b"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "headquarters-daily-clarity-block08-gate-repair",
+      "reviewedThroughCommit": "17c1b74d3895996bfff9e9ff41d45b9c056b482d",
+      "reviewedAt": "2026-10-09T12:05:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate-only assertion repair preserves the reviewed Block 8 behavior and updates no product doctrine, status, open loop, schema, customer record, permission, payment, Native scope or MAIN 04 routing."
+        }
+      ],
+      "reason": "Update the prior movement acceptance assertion to require the stronger timestamp-bound snapshot state without changing product behavior.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
