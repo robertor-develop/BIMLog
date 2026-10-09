@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Headquarters daily clarity Block 2 publication candidate — 2026-10-08
+
+Five builds complete the Headquarters-to-attention journey. Users can switch directly among aggregate RFI, Submittal and file-attention queues; queue labels, counts, empty states, dates, recovery and return actions are bilingual. Each result is a semantic keyboard action with a precise project destination. Invalid queue links fail safely to RFIs, loading is visible, failures retain a retry, and exact-390 layouts stack without horizontal compression. Together with Block 1 this reaches the ten-build publication boundary and requires the complete exact-head gate, one push, controlled publication, exact live-source verification and full authenticated desktop/mobile Chrome smoke.
+
 ## Headquarters daily clarity Block 1 candidate — 2026-10-08
 
 Five builds make the Headquarters overview easier to scan and operate without changing any project, commercial or authorization record. KPI cards are real keyboard-accessible actions with visible destinations; aggregate RFI and Submittal totals open their truthful cross-project queues instead of an arbitrary first project. A bilingual operational-snapshot heading explains the data boundary, and project filters plus routine-QA guidance now stay compact until requested. Focus, hover and restrained motion follow the BIMLog palette and reduced-motion preference. The permanent acceptance contract and complete exact-head gate must pass before this block is pushed; it remains unpublished until the next five-build block reaches the ten-build boundary.

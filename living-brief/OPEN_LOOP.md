@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Headquarters daily clarity — Block 2 — 2026-10-08
+
+- [x] Connect the RFI, Submittal and file-attention queues without returning through Headquarters between queue changes.
+- [x] Make the complete attention-queue journey bilingual, including headings, counts, dates, empty states and return actions.
+- [x] Make every attention result a semantic keyboard-accessible action with its exact project destination.
+- [x] Add safe invalid-link fallback, visible loading, explicit retry and narrow-screen containment.
+- [x] Bind the ten-build Headquarters clarity interval to a permanent focused acceptance contract.
+- [ ] Pass the complete exact-head gate, push once, publish Blocks 1–2, verify exact live identity and complete authenticated desktop/mobile Chrome smoke before another block.
+
 ## Headquarters daily clarity — Block 1 — 2026-10-08
 
 - [x] Make every Headquarters KPI a semantic keyboard-accessible action with an explicit bilingual destination cue.
