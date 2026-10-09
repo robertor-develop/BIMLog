@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Headquarters daily clarity Block 5 candidate — 2026-10-09
+
+Five builds add truthful freshness and refresh feedback to the verified Headquarters operational pulse. The pulse distinguishes current, refreshing and unavailable states; shows the browser time of the last successful dashboard-count response; retains the last verified view when a later refresh fails; and lets the user refresh the existing authenticated statistics query directly while preserving its automatic one-minute refresh. English and Spanish status copy, polite announcements, keyboard focus and exact-mobile containment are bound to permanent focused acceptance. This is the first five-build half of the next ten-build interval, so it is pushed once and remains unpublished until Block 6 completes the interval.
+
+## Headquarters daily clarity Block 4 — live — 2026-10-09
+
+Exact source `f741eaac71f46baedb65bab3df565c40403f748f` passed the complete release gate, exact branch push and controlled publication with identity binding. Authenticated production Chrome verified the deterministic 14-of-30 file recommendation, English and Spanish explanation, canonical file and RFI queue navigation, exact 390 CSS-pixel containment and zero browser warnings or errors.
+
 ## Headquarters daily clarity Block 4 publication candidate — 2026-10-09
 
 Five builds turn the verified operational pulse into one clear next action. BIMLog recommends the queue with the largest current verified count, uses a deterministic tie rule, returns no recommendation when every queue is clear, and opens the same canonical aggregate queue. The interface states that this count-based suggestion does not create contractual priority or a due date. English and Spanish copy, polite status updates, visible keyboard focus, reduced motion and narrow-screen containment are bound to permanent focused acceptance. Together with Block 3 this reaches the ten-build publication boundary and requires the complete release gate, exact branch push, controlled publication, exact live-source verification and authenticated desktop/mobile Chrome smoke.

@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Headquarters daily clarity — Block 5 — 2026-10-09
+
+- [x] Define truthful Current, Refreshing and Unavailable states for the existing verified operational-pulse data.
+- [x] Show the last successful dashboard-count check without presenting it as a source-record timestamp.
+- [x] Connect one explicit refresh action to the existing authenticated dashboard statistics query and retain its automatic one-minute refresh.
+- [x] Preserve the last verified view when a refresh fails and explain that state in English and Spanish.
+- [x] Keep the refresh control keyboard accessible, politely announced and contained at exact mobile width.
+- [x] Bind the complete refresh/freshness contract to permanent focused acceptance and the pre-push gate.
+- [ ] Push this five-build block once and keep it unpublished until Headquarters daily clarity Block 6 completes the next ten-build interval.
+
 ## Headquarters daily clarity — Block 4 — 2026-10-09
 
 - [x] Select one recommended next queue from existing verified RFI, Submittal and file-attention counts.
@@ -7,7 +17,7 @@
 - [x] Explain the verified basis for the recommendation without inventing urgency, a due date or contractual priority.
 - [x] Open the recommended canonical queue directly with bilingual, keyboard-accessible and narrow-screen controls.
 - [x] Bind the complete recommended-next contract to permanent focused acceptance and the pre-push gate.
-- [ ] Pass the complete release gate, push Blocks 3–4, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.
+- [x] Pass the complete release gate, push Blocks 3–4, publish exact source `f741eaac71f46baedb65bab3df565c40403f748f` and complete authenticated desktop/mobile Chrome smoke.
 
 ## Headquarters daily clarity — Block 3 — 2026-10-09
 
