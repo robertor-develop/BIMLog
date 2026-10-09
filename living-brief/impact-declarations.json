@@ -61507,8 +61507,8 @@
     },
     {
       "taskId": "headquarters-daily-clarity-block02",
-      "reviewedThroughCommit": "c3c2e98abb18d6b3099b4bd0ecc2ac3ee3598fbb",
-      "reviewedAt": "2026-10-09T04:00:00Z",
+      "reviewedThroughCommit": "0247fd6f3a5e38fea74ee3789c72e96bbaf8dc6d",
+      "reviewedAt": "2026-10-09T05:15:00Z",
       "status": "accepted",
       "authorities": [
         {
@@ -61554,12 +61554,12 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Current status records the second five-build Headquarters clarity candidate and ten-build publication boundary."
+          "reason": "Current status records the published queue defect, the pathname-only diagnosis, and the reactive search-value repair."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "The active register records all five Block 2 builds plus publication and authenticated Chrome acceptance."
+          "reason": "The active register records the exact query-state repair and requires repeated authenticated Chrome acceptance before closure."
         },
         {
           "key": "audit",
@@ -61567,7 +61567,7 @@
           "reason": "The bounded Headquarters attention-path work preserves doctrine, tenant and project authority, canonical records, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
         }
       ],
-      "reason": "Complete the Headquarters-to-attention journey with connected bilingual queues, accessible actions and recoverable responsive states.",
+      "reason": "Repair the published Headquarters queue switch with Wouter's reactive search value while preserving the bounded bilingual attention journey.",
       "reviewedChangedPaths": [
         "artifacts/bimlog/src/pages/PendingItems.tsx",
         "living-brief/OPEN_LOOP.md",
@@ -61576,7 +61576,7 @@
         "living-brief/impact-declarations.json",
         "scripts/test-headquarters-daily-clarity-block02.mjs"
       ],
-      "reviewedChangeSha256": "337a996e3ba4ccfcfd2c39935c1cfbc0a96a656ab83440662eefb9a457f4be96"
+      "reviewedChangeSha256": "c74bb2c65425b814ef8a5a9b11d41a20979d81a25fed068d844f9dfc112562d9"
     }
   ]
 }

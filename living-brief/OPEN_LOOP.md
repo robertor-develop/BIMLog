@@ -4985,4 +4985,4 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [ ] Pass the corrected complete gate, push the repair, republish the exact source and repeat authenticated desktop/mobile Chrome smoke until the live answer returns both 17 active projects and 13 open RFIs.
 # Headquarters queue publication repair — 2026-10-09
 
-- **Closed in source; publication revalidation required:** Live Chrome exposed stale RFI rows after selecting the Submittal tab. The route now reacts to query changes and the Block 2 acceptance test binds this behavior. Republish and repeat authenticated desktop/mobile queue smoke before closure.
+- **Second source repair complete; publication revalidation required:** Live Chrome exposed stale RFI rows after selecting the Submittal tab. The route now reads the reactive Wouter search value instead of its pathname-only location value, and the Block 2 acceptance test binds that exact source. Republish and repeat authenticated desktop/mobile queue smoke before closure.

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { ArrowLeft, ArrowRight, FileText, ClipboardList, FileWarning, CheckCircle2, LoaderCircle, RefreshCw } from "lucide-react";
@@ -58,11 +58,12 @@ function statusBadge(status: string) {
 }
 
 export function PendingItems() {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
+  const search = useSearch();
   const { token } = useAuthStore();
   const { lang } = useI18n();
   const tt = (en: string, es: string) => lang === "es" ? es : en;
-  const sp = new URLSearchParams(location.includes("?") ? location.slice(location.indexOf("?") + 1) : "");
+  const sp = new URLSearchParams(search);
   const requestedType = sp.get("type");
   const type: ItemType = requestedType && requestedType in TYPE_META ? requestedType as ItemType : "rfis";
   const meta = TYPE_META[type];
