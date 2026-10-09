@@ -214,7 +214,13 @@ export function Dashboard() {
   const [onboardingVisible, setOnboardingVisible] = useState(false);
   useEffect(() => { if (showOnboarding) setOnboardingVisible(true); }, [showOnboarding]);
 
-  const { data: stats } = useQuery({
+  const {
+    data: stats,
+    dataUpdatedAt: statsUpdatedAt,
+    isFetching: statsRefreshing,
+    isError: statsRefreshFailed,
+    refetch: refreshStats,
+  } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
       const r = await fetch(`${API_BASE}/api/v1/dashboard/stats`, {
@@ -605,6 +611,10 @@ export function Dashboard() {
               filesNeedingAttention: stats.filesNeedingAttention,
             }}
             onOpen={setLocation}
+            checkedAt={statsUpdatedAt}
+            isFetching={statsRefreshing}
+            hasError={statsRefreshFailed}
+            onRefresh={() => { void refreshStats(); }}
           />}
 
           <section
