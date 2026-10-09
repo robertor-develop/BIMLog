@@ -501,6 +501,12 @@ export function Dashboard() {
         .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
         .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
+        .operational-pulse__freshness { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; color: hsl(var(--muted-foreground)); font-size: 10px; line-height: 1.35; }
+        .operational-pulse__freshness--unavailable { color: #b45309; }
+        .operational-pulse__freshness > button { min-height: 36px; padding: 6px 10px; border: 1px solid #93c5fd; border-radius: 8px; background: color-mix(in srgb, white 75%, hsl(var(--card))); color: #1d4ed8; font: inherit; font-weight: 750; cursor: pointer; }
+        .operational-pulse__freshness > button:hover:not(:disabled) { border-color: #2563eb; background: color-mix(in srgb, #dbeafe 45%, hsl(var(--card))); }
+        .operational-pulse__freshness > button:focus-visible { outline: 3px solid color-mix(in srgb, #2563eb 35%, transparent); outline-offset: 2px; }
+        .operational-pulse__freshness > button:disabled { cursor: wait; opacity: .65; }
         .operational-pulse__next { display: grid; gap: 4px; margin-top: 12px; padding: 11px 12px; border: 1px solid #93c5fd; border-radius: 10px; background: color-mix(in srgb, #dbeafe 62%, hsl(var(--card))); }
         .operational-pulse__next > span:first-child { color: #1d4ed8; font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse__next > strong { color: hsl(var(--foreground)); font-size: 13px; }
@@ -545,6 +551,8 @@ export function Dashboard() {
           }
           .operational-pulse { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
           .operational-pulse__next > button { width: 100%; }
+          .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
+          .operational-pulse__freshness > button { width: 100%; min-height: 44px; }
         }
         @media (prefers-reduced-motion: reduce) {
           .operational-pulse__queue, .operational-pulse__track > span, .operational-pulse__next > button { transition: none; }
