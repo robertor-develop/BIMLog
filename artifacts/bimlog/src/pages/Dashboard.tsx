@@ -523,6 +523,11 @@ export function Dashboard() {
         .operational-pulse__freshness > button:hover:not(:disabled) { border-color: #2563eb; background: color-mix(in srgb, #dbeafe 45%, hsl(var(--card))); }
         .operational-pulse__freshness > button:focus-visible { outline: 3px solid color-mix(in srgb, #2563eb 35%, transparent); outline-offset: 2px; }
         .operational-pulse__freshness > button:disabled { cursor: wait; opacity: .65; }
+        .operational-pulse__movement { display: grid; gap: 2px; margin-top: 8px; padding: 8px 10px; border-left: 3px solid #64748b; border-radius: 0 7px 7px 0; background: color-mix(in srgb, #f1f5f9 70%, hsl(var(--card))); color: #475569; }
+        .operational-pulse__movement strong { font-size: 10px; line-height: 1.35; }
+        .operational-pulse__movement span { font-size: 9px; line-height: 1.35; color: hsl(var(--muted-foreground)); }
+        .operational-pulse__movement--decreased { border-left-color: #16a34a; color: #166534; background: color-mix(in srgb, #dcfce7 55%, hsl(var(--card))); }
+        .operational-pulse__movement--increased { border-left-color: #d97706; color: #92400e; background: color-mix(in srgb, #fef3c7 55%, hsl(var(--card))); }
         .operational-pulse__next { display: grid; gap: 4px; margin-top: 12px; padding: 11px 12px; border: 1px solid #93c5fd; border-radius: 10px; background: color-mix(in srgb, #dbeafe 62%, hsl(var(--card))); }
         .operational-pulse__next > span:first-child { color: #1d4ed8; font-size: 9px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse__next > strong { color: hsl(var(--foreground)); font-size: 13px; }
@@ -569,6 +574,7 @@ export function Dashboard() {
           .operational-pulse__next > button { width: 100%; }
           .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }
+          .operational-pulse__movement { padding: 9px 10px; }
         }
         @media (prefers-reduced-motion: reduce) {
           .operational-pulse__queue, .operational-pulse__track > span, .operational-pulse__next > button { transition: none; }
