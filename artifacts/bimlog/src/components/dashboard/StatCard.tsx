@@ -11,6 +11,7 @@ export function StatCard({ label, value, sub, navigate }: StatCardProps) {
   return (
     <div
       className="kpi-card"
+      data-assistant-context="true"
       style={{ cursor: "pointer" }}
       onClick={() => navigate()}
     >

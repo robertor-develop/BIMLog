@@ -66,7 +66,7 @@ export function collectPageAssistantContext(language: AssistantLanguage): PageAs
     }).filter(Boolean);
   // Selected control values are the most useful page evidence. Do not flood the
   // payload with every unselected option, which can push current values out.
-  const evidenceElements = Array.from(document.querySelectorAll("main [role=status], main [role=alert], main h1, main h2, main h3, main p, main summary"));
+  const evidenceElements = Array.from(document.querySelectorAll("main [role=status], main [role=alert], main [data-assistant-context], main h1, main h2, main h3, main p, main summary"));
   const visibleValues = Array.from(document.querySelectorAll("main input:not([type=password]), main select, main textarea"))
     .filter((element) => element instanceof HTMLElement && element.offsetParent !== null)
     .filter((element) => !element.closest("[data-page-assistant]"))

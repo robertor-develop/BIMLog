@@ -61357,6 +61357,80 @@
         "scripts/test-page-assistant-workspace-block02.mjs"
       ],
       "reviewedChangeSha256": "4048b5421d353a24a6ed007188f86cc527a7d66dd0d7e29f1211d3009eeaa66f"
+    },
+    {
+      "taskId": "page-assistant-dashboard-kpi-hotfix",
+      "reviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
+      "reviewedAt": "2026-10-09T01:20:00Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Current status records the rejected live KPI answer and bounded dashboard evidence correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The active register records the rejected publication and exact corrected acceptance gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dashboard KPI evidence correction preserves doctrine, tenant and project authority, MAIN 04 routing, Feedback/Fix separation, reports, standards and Native scope."
+        }
+      ],
+      "reason": "Correct the production dashboard agent grounding defect by including explicitly opted-in visible KPI cards in the existing bounded page evidence.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/dashboard/StatCard.tsx",
+        "artifacts/bimlog/src/lib/page-assistant-context.behavior.ts",
+        "artifacts/bimlog/src/lib/page-assistant-context.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "fceaf9cb99310842a75443d8c0b0941344f94bbe280883eaedac1391df8701cd"
     }
   ]
 }

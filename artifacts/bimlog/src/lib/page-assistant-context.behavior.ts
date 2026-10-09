@@ -6,6 +6,7 @@ assert.match(source, /input:not\(\[type=password\]\)/);
 assert.match(source, /selectedOptions\[0\]/);
 assert.match(source, /element\.value/);
 assert.match(source, /visibleValues/);
+assert.match(source, /data-assistant-context/);
 assert.match(source, /controlValue/);
 assert.match(source, /\.\.\.visibleValues, \.\.\.pageText/);
 assert.doesNotMatch(source, /main option/);

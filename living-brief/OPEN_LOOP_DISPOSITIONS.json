@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a7545b16ae7c5cb58cfe0908f6d90dbc05986c7564e2c23cd6d80dfde5806581",
+  "sourceSha256": "8b08646f0c1e54dd52c52aa3a12da465d827d932372212af8407990bc43a2bb1",
   "itemCount": 350,
   "counts": {
     "ACTIVE": 309,
@@ -6363,10 +6363,10 @@
       "currentAuthority": false
     },
     {
-      "id": "82f681fb06c30279",
-      "sourceLine": 4964,
+      "id": "f9a2b2fc35b84e81",
+      "sourceLine": 4967,
       "heading": "BIMLog Agent workspace controls Block 2 — 2026-10-08",
-      "statement": "Pass the complete gate, push Blocks 1 and 2, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.",
+      "statement": "Pass the corrected complete gate, push the repair, republish the exact source and repeat authenticated desktop/mobile Chrome smoke until the live answer returns both 17 active projects and 13 open RFIs.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -6375,7 +6375,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:4964",
+        "OPEN_LOOP.md:4967",
         "BIMLog Agent workspace controls Block 2 — 2026-10-08"
       ],
       "currentAuthority": false

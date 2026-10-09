@@ -4961,4 +4961,7 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [x] Fit an oversized desktop dock after viewport changes without destroying the saved desktop width on mobile.
 - [x] Announce dock, minimize, expand and reset changes in English and Spanish.
 - [x] Bind reflow, responsive containment, Feedback receipt/history and restricted Fix behavior to focused acceptance.
-- [ ] Pass the complete gate, push Blocks 1 and 2, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.
+- [x] Publish exact source `bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22` and verify production identity plus authenticated dock controls.
+- [x] Reject that publication after the live agent omitted the visible 13-open-RFI KPI from its grounded answer.
+- [x] Add an explicit bounded KPI evidence opt-in without broad page scraping or a new assistant route.
+- [ ] Pass the corrected complete gate, push the repair, republish the exact source and repeat authenticated desktop/mobile Chrome smoke until the live answer returns both 17 active projects and 13 open RFIs.
