@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
+import { useI18n } from "@/lib/i18n";
 import { ArrowLeft, ArrowRight, FileText, ClipboardList, FileWarning, CheckCircle2 } from "lucide-react";
 
 type ItemType = "rfis" | "submittals" | "files";
@@ -19,10 +20,10 @@ interface FileRow extends BaseRow { file_name: string; compliance_status: boolea
 
 const API = "/api/v1";
 
-const TYPE_META: Record<ItemType, { label: string; tab: string; icon: typeof FileText; color: string; bg: string; border: string }> = {
-  rfis:       { label: "Open RFIs",                tab: "rfis",       icon: FileText,     color: "#D97706", bg: "#FFFBEB", border: "#FDE68A" },
-  submittals: { label: "Pending Submittals",       tab: "submittals", icon: ClipboardList,color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE" },
-  files:      { label: "Files Needing Attention",  tab: "files",      icon: FileWarning,  color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" },
+const TYPE_META: Record<ItemType, { label: { en: string; es: string }; tab: string; icon: typeof FileText; color: string; bg: string; border: string }> = {
+  rfis:       { label: { en: "Open RFIs", es: "RFI abiertos" }, tab: "rfis", icon: FileText, color: "#D97706", bg: "#FFFBEB", border: "#FDE68A" },
+  submittals: { label: { en: "Pending Submittals", es: "Submittals pendientes" }, tab: "submittals", icon: ClipboardList, color: "#2563EB", bg: "#EFF6FF", border: "#BFDBFE" },
+  files:      { label: { en: "Files Needing Attention", es: "Archivos que requieren atención" }, tab: "files", icon: FileWarning, color: "#DC2626", bg: "#FEF2F2", border: "#FECACA" },
 };
 
 // Stable color per project code (matches project card hue style)
@@ -59,6 +60,8 @@ function statusBadge(status: string) {
 export function PendingItems() {
   const [, setLocation] = useLocation();
   const { token } = useAuthStore();
+  const { lang } = useI18n();
+  const tt = (en: string, es: string) => lang === "es" ? es : en;
   const sp = new URLSearchParams(window.location.search);
   const type = (sp.get("type") as ItemType) || "rfis";
   const meta = TYPE_META[type] ?? TYPE_META.rfis;
@@ -84,13 +87,13 @@ export function PendingItems() {
         const data = await r.json();
         if (!cancelled) setRows(data);
       } catch (e) {
-        if (!cancelled) setError(e instanceof Error ? e.message : "Network error");
+        if (!cancelled) setError(e instanceof Error ? e.message : tt("Network error", "Error de red"));
       } finally {
         if (!cancelled) setLoading(false);
       }
     })();
     return () => { cancelled = true; };
-  }, [type, token]);
+  }, [type, token, lang]);
 
   const itemNumber = (r: RfiRow | SubmittalRow | FileRow): string => {
     if (type === "rfis") return (r as RfiRow).rfi_number;
@@ -121,10 +124,10 @@ export function PendingItems() {
           color: "hsl(var(--foreground))", marginBottom: 16,
         }}
       >
-        <ArrowLeft style={{ width: 13, height: 13 }} /> Back to Dashboard
+        <ArrowLeft style={{ width: 13, height: 13 }} /> {tt("Back to Headquarters", "Volver a la Sede")}
       </button>
 
-      <nav className="pending-type-tabs" aria-label="Attention queues">
+      <nav className="pending-type-tabs" aria-label={tt("Attention queues", "Colas de atención")}>
         {(Object.keys(TYPE_META) as ItemType[]).map(queueType => {
           const queue = TYPE_META[queueType];
           const QueueIcon = queue.icon;
@@ -136,7 +139,7 @@ export function PendingItems() {
               onClick={() => setLocation(`/pending?type=${queueType}`)}
             >
               <QueueIcon aria-hidden="true" />
-              {queue.label}
+              {queue.label[lang]}
             </button>
           );
         })}
@@ -152,10 +155,12 @@ export function PendingItems() {
         </div>
         <div>
           <h1 style={{ fontFamily: "var(--font-display)", fontSize: 20, fontWeight: 700, margin: 0 }}>
-            {meta.label}
+            {meta.label[lang]}
           </h1>
           <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>
-            {loading ? "Loading…" : `${rows.length} item${rows.length === 1 ? "" : "s"} across all projects`}
+            {loading
+              ? tt("Loading…", "Cargando…")
+              : tt(`${rows.length} item${rows.length === 1 ? "" : "s"} across all projects`, `${rows.length} elemento${rows.length === 1 ? "" : "s"} en todos los proyectos`)}
           </div>
         </div>
       </div>
@@ -173,8 +178,8 @@ export function PendingItems() {
           borderRadius: 8, color: "#16A34A",
         }}>
           <CheckCircle2 style={{ width: 28, height: 28 }} />
-          <div style={{ fontWeight: 700 }}>No pending items</div>
-          <div style={{ fontSize: 12, color: "#15803D" }}>You're all caught up.</div>
+          <div style={{ fontWeight: 700 }}>{tt("No pending items", "No hay elementos pendientes")}</div>
+          <div style={{ fontSize: 12, color: "#15803D" }}>{tt("You're all caught up.", "Todo está al día.")}</div>
         </div>
       )}
 
@@ -204,7 +209,7 @@ export function PendingItems() {
                 </div>
                 <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>
                   {r.project_name}
-                  {r.due_date && ` · Due ${new Date(r.due_date).toLocaleDateString()}`}
+                  {r.due_date && ` · ${tt("Due", "Vence")} ${new Date(r.due_date).toLocaleDateString(lang === "es" ? "es-BO" : "en-US")}`}
                 </div>
               </div>
               <ArrowRight style={{ width: 16, height: 16, color: meta.color, flexShrink: 0 }} />
