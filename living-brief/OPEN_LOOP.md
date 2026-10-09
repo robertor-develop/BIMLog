@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Headquarters daily clarity — Block 1 — 2026-10-08
+
+- [x] Make every Headquarters KPI a semantic keyboard-accessible action with an explicit bilingual destination cue.
+- [x] Route cross-project RFI and Submittal totals to their aggregate queues and remove arbitrary first-project jumps.
+- [x] Explain the verified operational snapshot and distinguish current workspace data without invented trends.
+- [x] Keep project discovery and routine-QA controls compact until the user requests them.
+- [x] Add visible focus, restrained hover feedback, reduced-motion handling and a permanent source acceptance contract.
+- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 2 reaches the required ten-build publication boundary.
+
 ## Intake prerequisite continuity — Block 2 — 2026-10-07
 
 - [x] Mark an intentional prerequisite return without trusting arbitrary query parameters.

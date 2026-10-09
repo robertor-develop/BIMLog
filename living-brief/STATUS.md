@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Headquarters daily clarity Block 1 candidate — 2026-10-08
+
+Five builds make the Headquarters overview easier to scan and operate without changing any project, commercial or authorization record. KPI cards are real keyboard-accessible actions with visible destinations; aggregate RFI and Submittal totals open their truthful cross-project queues instead of an arbitrary first project. A bilingual operational-snapshot heading explains the data boundary, and project filters plus routine-QA guidance now stay compact until requested. Focus, hover and restrained motion follow the BIMLog palette and reduced-motion preference. The permanent acceptance contract and complete exact-head gate must pass before this block is pushed; it remains unpublished until the next five-build block reaches the ten-build boundary.
+
 ## Intake prerequisite continuity Block 2 candidate — 2026-10-07
 
 Five builds complete the return half of the prerequisite journey. A return action now carries one strict, non-authoritative marker; Intake shows a compact bilingual confirmation, restores the exact saved stage, scrolls to and keyboard-focuses the exact returned field, and removes only the marker when the confirmation is dismissed. The permanent round-trip gate covers every Intake stage plus malformed, cross-purpose and extra-parameter denial. Together with Block 1 this reaches the ten-build publication boundary; the exact candidate requires the complete release gate, one push, controlled publication, exact live-source verification and full authenticated Chrome smoke.

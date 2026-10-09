@@ -1,23 +1,21 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
+  "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "7aaa21c801a5178384a4e9f1e690fb5044f8e85bfa514f58bb297126d6dc535d",
+  "bundleSha256": "161c0490424ab046b1dcb605fa7977701fd2647d86b725fd2df9e3ceef64c71e",
   "impact": {
-    "baselineCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
+    "baselineCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
     "changedPaths": [
-      "artifacts/bimlog/src/components/dashboard/StatCard.tsx",
-      "artifacts/bimlog/src/lib/page-assistant-context.behavior.ts",
-      "artifacts/bimlog/src/lib/page-assistant-context.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "package.json",
+      "scripts/test-headquarters-daily-clarity-block01.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -28,11 +26,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "claude",
@@ -40,11 +38,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "quality",
@@ -52,11 +50,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "vision",
@@ -64,11 +62,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "platform",
@@ -76,11 +74,11 @@
       "sha256": "4d4d691b7f2b6780ac8e1c3837d11e64af840c569285573d222fabb68b23b666",
       "sourceChangedAt": "2026-10-08T17:41:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "plugin",
@@ -88,11 +86,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "report_design_system",
@@ -100,11 +98,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "standards_register",
@@ -112,35 +110,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "3189609e058de95c2aa9d17b9b446846486c7d7d43c3f39b41be50628c69d481",
-      "sourceChangedAt": "2026-10-09T01:20:00.000Z",
+      "sha256": "6c6928dc1a801ecced74120b450a0ba6a488d26251f3e1af0585c5ab929e5afc",
+      "sourceChangedAt": "2026-10-08T22:00:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "8b08646f0c1e54dd52c52aa3a12da465d827d932372212af8407990bc43a2bb1",
-      "sourceChangedAt": "2026-10-09T01:20:00.000Z",
+      "sha256": "95bace88b64a6fe92252a49fb6c512e21fa0ad3dbcb1435242ef4870b1007a69",
+      "sourceChangedAt": "2026-10-08T22:00:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     },
     {
       "key": "audit",
@@ -148,11 +146,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewedThroughCommit": "bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22",
-      "semanticReviewTask": "page-assistant-dashboard-kpi-hotfix",
+      "reconciledThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewedThroughCommit": "d3b467cdb1dbe532cf582988d30edda9c60bc2e6",
+      "semanticReviewTask": "headquarters-daily-clarity-block01",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-09T01:20:00Z"
+      "semanticReviewedAt": "2026-10-08T22:00:00Z"
     }
   ]
 }
