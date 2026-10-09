@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { ArrowLeft, ArrowRight, FileText, ClipboardList, FileWarning, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, ClipboardList, FileWarning, CheckCircle2, LoaderCircle, RefreshCw } from "lucide-react";
 
 type ItemType = "rfis" | "submittals" | "files";
 
@@ -63,17 +63,19 @@ export function PendingItems() {
   const { lang } = useI18n();
   const tt = (en: string, es: string) => lang === "es" ? es : en;
   const sp = new URLSearchParams(window.location.search);
-  const type = (sp.get("type") as ItemType) || "rfis";
-  const meta = TYPE_META[type] ?? TYPE_META.rfis;
+  const requestedType = sp.get("type");
+  const type: ItemType = requestedType && requestedType in TYPE_META ? requestedType as ItemType : "rfis";
+  const meta = TYPE_META[type];
   const Icon = meta.icon;
 
   const [rows, setRows] = useState<(RfiRow | SubmittalRow | FileRow)[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true); setError("");
+    setLoading(true); setError(""); setRows([]);
     (async () => {
       try {
         const r = await fetch(`${API}/dashboard/pending/${type}`, {
@@ -81,7 +83,7 @@ export function PendingItems() {
         });
         if (!r.ok) {
           const d = await r.json().catch(() => ({}));
-          if (!cancelled) setError(d.error || `Request failed (${r.status})`);
+          if (!cancelled) setError(d.error || tt(`Request failed (${r.status})`, `La solicitud falló (${r.status})`));
           return;
         }
         const data = await r.json();
@@ -93,7 +95,7 @@ export function PendingItems() {
       }
     })();
     return () => { cancelled = true; };
-  }, [type, token, lang]);
+  }, [type, token, lang, loadAttempt]);
 
   const itemNumber = (r: RfiRow | SubmittalRow | FileRow): string => {
     if (type === "rfis") return (r as RfiRow).rfi_number;
@@ -166,8 +168,18 @@ export function PendingItems() {
       </div>
 
       {error && (
-        <div style={{ padding: 12, marginBottom: 16, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, color: "#DC2626", fontSize: 13 }}>
-          {error}
+        <div role="alert" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: 12, marginBottom: 16, background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 6, color: "#DC2626", fontSize: 13 }}>
+          <span>{error}</span>
+          <button type="button" className="pending-retry-action" onClick={() => setLoadAttempt(value => value + 1)}>
+            <RefreshCw aria-hidden="true" /> {tt("Try again", "Intentar de nuevo")}
+          </button>
+        </div>
+      )}
+
+      {loading && (
+        <div className="pending-loading-state" role="status" aria-live="polite">
+          <LoaderCircle aria-hidden="true" />
+          <span>{tt("Loading this attention queue…", "Cargando esta cola de atención…")}</span>
         </div>
       )}
 

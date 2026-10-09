@@ -889,9 +889,23 @@ textarea.input { height: auto; min-height: 76px; resize: vertical; }
 .pending-item-action { color: inherit; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
 .pending-item-action:hover { border-color: #93C5FD !important; box-shadow: 0 8px 18px rgb(15 23 42 / .07); transform: translateY(-1px); }
 .pending-item-action:focus-visible { border-color: #2563EB !important; outline: 3px solid rgb(37 99 235 / .25); outline-offset: 2px; }
+.pending-retry-action { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; min-height: 36px; border: 1px solid #FCA5A5; border-radius: 7px; background: white; color: #B91C1C; padding: 6px 10px; font-size: 11px; font-weight: 750; cursor: pointer; }
+.pending-retry-action:focus-visible { outline: 3px solid rgb(220 38 38 / .2); outline-offset: 2px; }
+.pending-retry-action svg { width: 13px; height: 13px; }
+.pending-loading-state { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 160px; border: 1px dashed #CBD5E1; border-radius: 8px; color: hsl(var(--muted-foreground)); font-size: 12px; font-weight: 650; }
+.pending-loading-state svg { width: 17px; height: 17px; animation: pending-spin 900ms linear infinite; }
+@keyframes pending-spin { to { transform: rotate(360deg); } }
+@media (max-width: 640px) {
+  .dashboard-section-heading, .dashboard-disclosure-heading { align-items: flex-start; flex-direction: column; }
+  .dashboard-section-eyebrow, .dashboard-disclosure-heading > span:last-child { align-self: flex-start; }
+  .pending-type-tabs { grid-template-columns: 1fr; }
+  .pending-type-tabs button { justify-content: flex-start; }
+  .pending-item-action { align-items: flex-start !important; padding: 12px !important; }
+}
 @media (prefers-reduced-motion: reduce) {
   .pending-item-action { transition: none; }
   .pending-item-action:hover { transform: none; }
+  .pending-loading-state svg { animation: none; }
 }
 .kpi-card-action { width: 100%; appearance: none; color: inherit; text-align: left; cursor: pointer; font: inherit; transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease; }
 .kpi-card-action:hover { border-color: #93C5FD; box-shadow: 0 8px 18px rgb(15 23 42 / 0.07); transform: translateY(-1px); }
