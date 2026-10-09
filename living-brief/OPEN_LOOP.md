@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Headquarters daily clarity — Block 4 — 2026-10-09
+
+- [x] Select one recommended next queue from existing verified RFI, Submittal and file-attention counts.
+- [x] Use a deterministic largest-count rule, retain stable tie behavior and return no recommendation when all queues are clear.
+- [x] Explain the verified basis for the recommendation without inventing urgency, a due date or contractual priority.
+- [x] Open the recommended canonical queue directly with bilingual, keyboard-accessible and narrow-screen controls.
+- [x] Bind the complete recommended-next contract to permanent focused acceptance and the pre-push gate.
+- [ ] Pass the complete release gate, push Blocks 3–4, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.
+
 ## Headquarters daily clarity — Block 3 — 2026-10-09
 
 - [x] Derive one deterministic attention total from existing verified RFI, Submittal and file-attention counts.
@@ -7,7 +16,7 @@
 - [x] Open each canonical cross-project attention queue directly from the pulse.
 - [x] Keep the pulse bilingual, keyboard accessible, reduced-motion aware and contained on narrow screens.
 - [x] Bind the complete pulse contract to the permanent pre-push gate, frontend typechecking and the production frontend build.
-- [ ] Push this five-build block once and keep it unpublished until Headquarters daily clarity Block 4 completes the next ten-build interval.
+- [x] Push this five-build block once and keep it unpublished until Headquarters daily clarity Block 4 completes the next ten-build interval.
 
 ## Headquarters daily clarity — Block 2 — 2026-10-08
 

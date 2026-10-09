@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Headquarters daily clarity Block 4 publication candidate — 2026-10-09
+
+Five builds turn the verified operational pulse into one clear next action. BIMLog recommends the queue with the largest current verified count, uses a deterministic tie rule, returns no recommendation when every queue is clear, and opens the same canonical aggregate queue. The interface states that this count-based suggestion does not create contractual priority or a due date. English and Spanish copy, polite status updates, visible keyboard focus, reduced motion and narrow-screen containment are bound to permanent focused acceptance. Together with Block 3 this reaches the ten-build publication boundary and requires the complete release gate, exact branch push, controlled publication, exact live-source verification and authenticated desktop/mobile Chrome smoke.
+
 ## Headquarters daily clarity Block 3 candidate — 2026-10-09
 
 Five builds add a compact operational pulse to Headquarters using only the already-verified RFI, Submittal and file-attention totals. The pulse states the combined review workload, shows each queue's current share, and opens the same canonical cross-project queues without creating a score, trend, task or duplicate record. English and Spanish copy, semantic buttons, visible keyboard focus, restrained motion and exact narrow-screen reflow keep the new signal useful without adding another control surface. Focused acceptance is wired into the pre-push gate; frontend typechecking and the production frontend build pass. This is the first five-build half of the next ten-build interval, so it is pushed once and remains unpublished until Block 4 completes the interval.
