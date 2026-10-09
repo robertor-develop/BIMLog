@@ -4953,3 +4953,12 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [x] Keep bilingual controls usable at 390 CSS pixels with mobile safe-area and input safeguards.
 - [x] Verify that every authenticated user can access guidance while project membership and repair authority remain enforced separately.
 - [ ] Push this five-build block and keep it unpublished until BIMLog Agent workspace controls Block 2 completes the next ten-build interval.
+
+## BIMLog Agent workspace controls Block 2 — 2026-10-08
+
+- [x] Use one tested physical-direction contract for pointer and keyboard resizing on either dock side.
+- [x] Provide a discoverable standard-width reset through Home and double-click.
+- [x] Fit an oversized desktop dock after viewport changes without destroying the saved desktop width on mobile.
+- [x] Announce dock, minimize, expand and reset changes in English and Spanish.
+- [x] Bind reflow, responsive containment, Feedback receipt/history and restricted Fix behavior to focused acceptance.
+- [ ] Pass the complete gate, push Blocks 1 and 2, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.

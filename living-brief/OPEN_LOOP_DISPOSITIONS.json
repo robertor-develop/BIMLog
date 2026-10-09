@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "cf46b00de7edccd745db05ebc8a97013aa78e5b2d760f170649f688c14fc89ff",
-  "itemCount": 349,
+  "sourceSha256": "a7545b16ae7c5cb58cfe0908f6d90dbc05986c7564e2c23cd6d80dfde5806581",
+  "itemCount": 350,
   "counts": {
-    "ACTIVE": 308,
+    "ACTIVE": 309,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6359,6 +6359,24 @@
       "evidence": [
         "OPEN_LOOP.md:4955",
         "BIMLog Agent workspace controls Block 1 — 2026-10-08"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "82f681fb06c30279",
+      "sourceLine": 4964,
+      "heading": "BIMLog Agent workspace controls Block 2 — 2026-10-08",
+      "statement": "Pass the complete gate, push Blocks 1 and 2, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:4964",
+        "BIMLog Agent workspace controls Block 2 — 2026-10-08"
       ],
       "currentAuthority": false
     }
