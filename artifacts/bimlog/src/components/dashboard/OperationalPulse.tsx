@@ -48,6 +48,12 @@ export function OperationalPulse({ counts, previousCounts = null, lang, onOpen, 
             ? (es ? `${Math.abs(change.total)} elemento(s) menos desde la última verificación` : `${Math.abs(change.total)} fewer item(s) since the last check`)
             : (es ? `${change.total} elemento(s) más desde la última verificación` : `${change.total} more item(s) since the last check`)}</strong>
         <span>{es ? "Compara únicamente los dos últimos conteos verificados." : "Compares only the two latest verified counts."}</span>
+        <ul className="operational-pulse__movement-queues" aria-label={es ? "Cambios por cola" : "Changes by queue"}>
+          {change.queues.map(queue => <li className={`operational-pulse__movement-queue operational-pulse__movement-queue--${queue.direction}`} key={queue.key}>
+            <span>{labels[queue.key]}</span>
+            <strong>{queue.delta > 0 ? `+${queue.delta}` : queue.delta}</strong>
+          </li>)}
+        </ul>
       </div>}
       {pulse.recommended && <div className="operational-pulse__next" aria-labelledby="operational-pulse-next-title">
         <span>{es ? "Siguiente recomendado" : "Recommended next"}</span>
