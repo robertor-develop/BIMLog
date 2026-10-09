@@ -4983,3 +4983,6 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [x] Reject that publication after the live agent omitted the visible 13-open-RFI KPI from its grounded answer.
 - [x] Add an explicit bounded KPI evidence opt-in without broad page scraping or a new assistant route.
 - [ ] Pass the corrected complete gate, push the repair, republish the exact source and repeat authenticated desktop/mobile Chrome smoke until the live answer returns both 17 active projects and 13 open RFIs.
+# Headquarters queue publication repair — 2026-10-09
+
+- **Closed in source; publication revalidation required:** Live Chrome exposed stale RFI rows after selecting the Submittal tab. The route now reacts to query changes and the Block 2 acceptance test binds this behavior. Republish and repeat authenticated desktop/mobile queue smoke before closure.

@@ -61507,8 +61507,8 @@
     },
     {
       "taskId": "headquarters-daily-clarity-block02",
-      "reviewedThroughCommit": "3718bc43b033915fbb84fc75f700a3e91939465e",
-      "reviewedAt": "2026-10-09T03:00:00Z",
+      "reviewedThroughCommit": "c3c2e98abb18d6b3099b4bd0ecc2ac3ee3598fbb",
+      "reviewedAt": "2026-10-09T04:00:00Z",
       "status": "accepted",
       "authorities": [
         {
@@ -61569,14 +61569,14 @@
       ],
       "reason": "Complete the Headquarters-to-attention journey with connected bilingual queues, accessible actions and recoverable responsive states.",
       "reviewedChangedPaths": [
+        "artifacts/bimlog/src/pages/PendingItems.tsx",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json",
         "scripts/test-headquarters-daily-clarity-block02.mjs"
       ],
-      "reviewedChangeSha256": "a6703779ca732c357fd864a1beb94b4ba231555eebab44cb2778147dcd04fbc8"
+      "reviewedChangeSha256": "337a996e3ba4ccfcfd2c39935c1cfbc0a96a656ab83440662eefb9a457f4be96"
     }
   ]
 }

@@ -6,6 +6,8 @@ const css = readFileSync("artifacts/bimlog/src/index.css", "utf8");
 
 for (const queue of ["rfis", "submittals", "files"]) assert.match(pending, new RegExp(`\\b${queue}:\\s*\\{`));
 assert.match(pending, /setLocation\(`\/pending\?type=\$\{queueType\}`\)/);
+assert.match(pending, /const \[location, setLocation\] = useLocation\(\)/);
+assert.match(pending, /new URLSearchParams\(location\.includes\("\?"\)/);
 for (const spanish of ["RFI abiertos", "Submittals pendientes", "Archivos que requieren atención", "Volver a la Sede", "Intentar de nuevo"]) {
   assert.ok(pending.includes(spanish), `missing Spanish queue text: ${spanish}`);
 }

@@ -58,11 +58,11 @@ function statusBadge(status: string) {
 }
 
 export function PendingItems() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { token } = useAuthStore();
   const { lang } = useI18n();
   const tt = (en: string, es: string) => lang === "es" ? es : en;
-  const sp = new URLSearchParams(window.location.search);
+  const sp = new URLSearchParams(location.includes("?") ? location.slice(location.indexOf("?") + 1) : "");
   const requestedType = sp.get("type");
   const type: ItemType = requestedType && requestedType in TYPE_META ? requestedType as ItemType : "rfis";
   const meta = TYPE_META[type];
