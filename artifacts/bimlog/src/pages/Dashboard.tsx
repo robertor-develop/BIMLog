@@ -526,10 +526,13 @@ export function Dashboard() {
         .operational-pulse__movement { display: grid; gap: 2px; margin-top: 8px; padding: 8px 10px; border-left: 3px solid #64748b; border-radius: 0 7px 7px 0; background: color-mix(in srgb, #f1f5f9 70%, hsl(var(--card))); color: #475569; }
         .operational-pulse__movement strong { font-size: 10px; line-height: 1.35; }
         .operational-pulse__movement span { font-size: 9px; line-height: 1.35; color: hsl(var(--muted-foreground)); }
+        .operational-pulse__movement-window { font-variant-numeric: tabular-nums; }
         .operational-pulse__movement-summary { font-weight: 700; }
         .operational-pulse__movement-queues { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin: 5px 0 0; padding: 0; list-style: none; }
         .operational-pulse__movement-queue { display: flex; align-items: center; justify-content: space-between; gap: 5px; min-width: 0; padding: 5px 6px; border: 1px solid color-mix(in srgb, #94a3b8 45%, transparent); border-radius: 6px; background: color-mix(in srgb, white 48%, transparent); }
-        .operational-pulse__movement-queue > span { min-width: 0; overflow: hidden; color: inherit; text-overflow: ellipsis; white-space: nowrap; }
+        .operational-pulse__movement-queue-copy { display: grid; gap: 1px; min-width: 0; color: inherit; }
+        .operational-pulse__movement-queue-copy > span { overflow: hidden; color: inherit; text-overflow: ellipsis; white-space: nowrap; }
+        .operational-pulse__movement-queue-copy > small { color: hsl(var(--muted-foreground)); font-size: 9px; font-variant-numeric: tabular-nums; line-height: 1.3; }
         .operational-pulse__movement-queue > strong { font-size: 10px; font-variant-numeric: tabular-nums; }
         .operational-pulse__movement-queue--increased > strong { color: #92400e; }
         .operational-pulse__movement-queue--decreased > strong { color: #166534; }
@@ -584,7 +587,7 @@ export function Dashboard() {
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }
           .operational-pulse__movement { padding: 9px 10px; }
           .operational-pulse__movement-queues { grid-template-columns: 1fr; }
-          .operational-pulse__movement-queue > span { white-space: normal; }
+          .operational-pulse__movement-queue-copy > span { overflow: visible; text-overflow: clip; white-space: normal; }
         }
         @media (prefers-reduced-motion: reduce) {
           .operational-pulse__queue, .operational-pulse__track > span, .operational-pulse__next > button { transition: none; }
