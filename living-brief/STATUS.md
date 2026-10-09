@@ -1,8 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Headquarters daily clarity Block 8 publication candidate — 2026-10-09
+
+Five builds make the existing queue-movement signal directly auditable by a human. Each RFI, Submittal and file-attention row retains and displays its exact previous and current verified count alongside the signed delta. The browser preserves the prior successful snapshot time with its counts, and the bilingual interface states the complete date-and-time comparison window so a midnight boundary cannot be mistaken for a same-day comparison. Compact desktop and exact-mobile presentation plus permanent focused acceptance complete the ten-build interval with Block 7. No history database, urgency, causation, contractual priority, due date, schema, customer record, permission, payment or Native behavior was added. The exact candidate requires the complete release gate, push, controlled publication, live identity verification and authenticated desktop/mobile Chrome smoke.
+
 ## Headquarters daily clarity Block 7 candidate — 2026-10-09
 
-Five builds extend the existing verified operational pulse with a truthful per-queue movement breakdown. BIMLog compares only the two latest successful in-browser snapshots, shows the signed RFI, Submittal and file-attention deltas, and deterministically identifies the largest absolute change while preserving stable RFI-first tie behavior. The bilingual compact presentation distinguishes increased, decreased and unchanged queues without creating history, urgency, causation, priority or due-date claims. Exact-mobile styling and permanent behavior/acceptance coverage complete the first five-build half of the next ten-build interval; the block requires the complete exact-head gate and one push, then remains unpublished until Block 8.
+Five builds extend the existing verified operational pulse with a truthful per-queue movement breakdown. BIMLog compares only the two latest successful in-browser snapshots, shows the signed RFI, Submittal and file-attention deltas, and deterministically identifies the largest absolute change while preserving stable RFI-first tie behavior. The bilingual compact presentation distinguishes increased, decreased and unchanged queues without creating history, urgency, causation, priority or due-date claims. Exact-mobile styling and permanent behavior/acceptance coverage passed the complete exact-head gate and were pushed at exact source `826717e02e6ea1e1ea923b7ab4209a78fb8cef0a`; the block remains unpublished until Block 8 completes the interval.
 
 ## Headquarters daily clarity Blocks 5–6 accepted — 2026-10-09
 

@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Headquarters daily clarity — Block 8 — 2026-10-09
+
+- [x] Preserve the exact previous and current verified count for each RFI, Submittal and file-attention queue.
+- [x] Preserve the prior successful snapshot time together with its verified counts.
+- [x] Show the bilingual before-to-current arithmetic and the exact two-snapshot comparison window.
+- [x] Keep comparison timestamps truthful across date boundaries and avoid inventing history, urgency, causes, priorities or due dates.
+- [x] Keep the comparison compact, readable, keyboard-safe and contained at exact mobile width.
+- [x] Bind the complete comparison contract and the prior queue-movement guarantees to permanent focused acceptance and the pre-push gate.
+- [ ] Pass the complete release gate, push Blocks 7–8, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.
+
 ## Headquarters daily clarity — Block 7 — 2026-10-09
 
 - [x] Derive signed movement for each verified RFI, Submittal and file-attention queue.
@@ -8,7 +18,7 @@
 - [x] Explain the queue comparison in English and Spanish without inventing history, urgency, causation, priority or due dates.
 - [x] Keep the breakdown compact, accessible and contained at exact mobile width.
 - [x] Bind the queue-movement model, presentation and responsive contract to permanent focused acceptance and the pre-push gate.
-- [ ] Pass the complete exact-head gate, push this five-build block once and keep it unpublished until Block 8 completes the next ten-build interval.
+- [x] Pass the complete exact-head gate, push exact source `826717e02e6ea1e1ea923b7ab4209a78fb8cef0a` once and keep it unpublished until Block 8 completes the next ten-build interval.
 ## Headquarters daily clarity — Block 6 — 2026-10-09
 
 - [x] Compare only successive successful responses from the existing authenticated operational-pulse query.
