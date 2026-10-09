@@ -19,6 +19,7 @@ import { ProjectRestoreDialog } from "@/components/ProjectRestoreDialog";
 import { ProjectCleanupDialog } from "@/components/ProjectCleanupDialog";
 import { advanceCleanupReviewQueue, beginCleanupReviewQueue, cancelCleanupReviewQueue } from "@/lib/project-cleanup-review-queue";
 import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWorkspace";
+import { OperationalPulse } from "@/components/dashboard/OperationalPulse";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -586,6 +587,16 @@ export function Dashboard() {
               )}
             </div>
           </div>
+
+          {!isLoading && stats && <OperationalPulse
+            lang={lang}
+            counts={{
+              openRfis: stats.openRfis,
+              pendingSubmittals: stats.pendingSubmittals,
+              filesNeedingAttention: stats.filesNeedingAttention,
+            }}
+            onOpen={setLocation}
+          />}
 
           <section
             data-current-view-filter-panel="dashboard"
