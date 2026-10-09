@@ -1,5 +1,5 @@
 import { operationalPulse, type OperationalPulseCounts } from "@/lib/operational-pulse";
-import { formatOperationalPulseCheckedAt, operationalPulseRefreshState } from "@/lib/operational-pulse-refresh";
+import { formatOperationalPulseCheckedAt, formatOperationalPulseComparisonAt, operationalPulseRefreshState } from "@/lib/operational-pulse-refresh";
 import { operationalPulseChange } from "@/lib/operational-pulse-change";
 
 const QUEUE_COLORS = { rfis: "#2563eb", submittals: "#d97706", files: "#7c3aed" } as const;
@@ -19,7 +19,8 @@ export function OperationalPulse({ counts, previousCounts = null, previousChecke
   const pulse = operationalPulse(counts);
   const refreshState = operationalPulseRefreshState({ isFetching, hasError, hasVerifiedData: checkedAt > 0 });
   const checkedTime = formatOperationalPulseCheckedAt(checkedAt, lang);
-  const previousCheckedTime = formatOperationalPulseCheckedAt(previousCheckedAt, lang);
+  const previousCheckedTime = formatOperationalPulseComparisonAt(previousCheckedAt, lang);
+  const currentCheckedTime = formatOperationalPulseComparisonAt(checkedAt, lang);
   const change = previousCounts ? operationalPulseChange(previousCounts, counts) : null;
   const labels = {
     rfis: es ? "RFI abiertos" : "Open RFIs",
@@ -50,6 +51,9 @@ export function OperationalPulse({ counts, previousCounts = null, previousChecke
             ? (es ? `${Math.abs(change.total)} elemento(s) menos desde la última verificación` : `${Math.abs(change.total)} fewer item(s) since the last check`)
             : (es ? `${change.total} elemento(s) más desde la última verificación` : `${change.total} more item(s) since the last check`)}</strong>
         <span>{es ? "Compara únicamente los dos últimos conteos verificados." : "Compares only the two latest verified counts."}</span>
+        {previousCheckedTime && currentCheckedTime && <span className="operational-pulse__movement-window">
+          {es ? `Ventana comparada: ${previousCheckedTime} a ${currentCheckedTime}.` : `Comparison window: ${previousCheckedTime} to ${currentCheckedTime}.`}
+        </span>}
         {change.largestMovement && <span className="operational-pulse__movement-summary">
           {es
             ? `Mayor cambio verificado: ${labels[change.largestMovement.key]}, ${change.largestMovement.delta > 0 ? "+" : ""}${change.largestMovement.delta}.`
@@ -57,7 +61,10 @@ export function OperationalPulse({ counts, previousCounts = null, previousChecke
         </span>}
         <ul className="operational-pulse__movement-queues" aria-label={es ? "Cambios por cola" : "Changes by queue"}>
           {change.queues.map(queue => <li className={`operational-pulse__movement-queue operational-pulse__movement-queue--${queue.direction}${change.largestMovement?.key === queue.key ? " operational-pulse__movement-queue--largest" : ""}`} key={queue.key}>
-            <span>{labels[queue.key]}</span>
+            <span className="operational-pulse__movement-queue-copy">
+              <span>{labels[queue.key]}</span>
+              <small>{queue.previous} <span aria-hidden="true">→</span><span className="sr-only">{es ? "a" : "to"}</span> {queue.current}</small>
+            </span>
             <strong>{queue.delta > 0 ? `+${queue.delta}` : queue.delta}</strong>
           </li>)}
         </ul>
