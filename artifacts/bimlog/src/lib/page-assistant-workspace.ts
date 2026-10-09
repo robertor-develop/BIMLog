@@ -4,6 +4,7 @@ export const ASSISTANT_WIDTH_MIN = 360;
 export const ASSISTANT_WIDTH_DEFAULT = 440;
 export const ASSISTANT_WIDTH_MAX = 680;
 export const ASSISTANT_WIDTH_STEP = 20;
+export const ASSISTANT_MOBILE_BREAKPOINT = 900;
 
 export function clampAssistantWidth(width: number, viewportWidth = Number.POSITIVE_INFINITY) {
   const viewportLimit = Number.isFinite(viewportWidth) ? Math.max(ASSISTANT_WIDTH_MIN, viewportWidth - 320) : ASSISTANT_WIDTH_MAX;
@@ -17,6 +18,10 @@ export function assistantWidthFromPointer(clientX: number, viewportWidth: number
 export function stepAssistantWidth(width: number, key: "ArrowLeft" | "ArrowRight", dock: AssistantDockSide, viewportWidth: number) {
   const physicalDirection = key === "ArrowLeft" ? -1 : 1;
   return clampAssistantWidth(width + (dock === "right" ? -physicalDirection : physicalDirection) * ASSISTANT_WIDTH_STEP, viewportWidth);
+}
+
+export function fitAssistantWidthToViewport(width: number, viewportWidth: number) {
+  return viewportWidth <= ASSISTANT_MOBILE_BREAKPOINT ? width : clampAssistantWidth(width, viewportWidth);
 }
 
 export function readAssistantWorkspace(storage: Pick<Storage, "getItem"> | null) {

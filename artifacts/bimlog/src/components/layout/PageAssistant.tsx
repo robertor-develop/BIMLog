@@ -3,7 +3,7 @@ import { Bot, Mic, Minus, PanelLeft, PanelRight, Plus, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { collectPageAssistantContext, highlightAssistantControls, selectedAssistantControl } from "@/lib/page-assistant-context";
-import { ASSISTANT_WIDTH_DEFAULT, assistantWidthFromPointer, clampAssistantWidth, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
+import { ASSISTANT_WIDTH_DEFAULT, assistantWidthFromPointer, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
 
 type Message = { role: "user" | "assistant"; text: string; projectId: number | null };
 type Repair = { id: string; payload: { issue: string; scope: string }; scope_digest: string; state: string; created_at?: string; execution_receipt?: { message?: string; updatedAt?: string; evidence?: Record<string,unknown> } | null };
@@ -36,6 +36,7 @@ export function PageAssistant() {
   useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.altKey&&event.shiftKey&&event.key.toLowerCase()==="a"){event.preventDefault();setOpen(value=>!value);}if(event.key==="Escape"&&open){event.preventDefault();setOpen(false);opener.current?.focus();}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);},[open]);
   useEffect(()=>{if(open)window.setTimeout(()=>input.current?.focus(),0);},[open]);
   useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open);document.body.dataset.assistantDockSide=dock;document.body.dataset.assistantCollapsed=String(collapsed);document.documentElement.style.setProperty("--bimlog-agent-dock-width",`${panelWidth}px`);writeAssistantWorkspace(window.localStorage,panelWidth,dock,collapsed);return()=>{document.body.classList.remove("bimlog-assistant-docked");delete document.body.dataset.assistantDockSide;delete document.body.dataset.assistantCollapsed;};},[open,panelWidth,dock,collapsed]);
+  useEffect(()=>{const fit=()=>setPanelWidth(current=>fitAssistantWidthToViewport(current,window.innerWidth));window.addEventListener("resize",fit);fit();return()=>window.removeEventListener("resize",fit);},[]);
   useEffect(()=>{if(open&&token)void loadRepairs();},[open,token]);
   useEffect(()=>{if(!open||!token)return;const refresh=window.setInterval(()=>void loadRepairs(),15000);return()=>window.clearInterval(refresh);},[open,token]);
   useEffect(()=>{
