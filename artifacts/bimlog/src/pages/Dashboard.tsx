@@ -480,6 +480,27 @@ export function Dashboard() {
   return (
     <div className="headquarters-dashboard-page" style={{ display: "flex", height: "100vh", overflow: "hidden", minWidth: 0 }}>
       <style>{`
+        .operational-pulse {
+          display: grid;
+          grid-template-columns: minmax(220px, .75fr) minmax(360px, 1.25fr);
+          gap: 20px;
+          margin: 0 0 20px;
+          padding: 18px;
+          border: 1px solid #bfdbfe;
+          border-radius: 14px;
+          background: linear-gradient(135deg, color-mix(in srgb, #eff6ff 88%, hsl(var(--card))), hsl(var(--card)));
+          box-shadow: 0 10px 30px rgba(30, 64, 175, .07);
+        }
+        .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
+        .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
+        .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
+        .operational-pulse__queues { display: grid; gap: 7px; }
+        .operational-pulse__queue { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 12px; width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid color-mix(in srgb, #93c5fd 70%, hsl(var(--border))); border-radius: 9px; background: color-mix(in srgb, white 70%, hsl(var(--card))); color: hsl(var(--foreground)); text-align: left; cursor: pointer; transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease; }
+        .operational-pulse__queue:hover { border-color: #2563eb; transform: translateY(-1px); box-shadow: 0 5px 12px rgba(37, 99, 235, .09); }
+        .operational-pulse__queue:focus-visible { outline: 3px solid color-mix(in srgb, #2563eb 35%, transparent); outline-offset: 2px; border-color: #2563eb; }
+        .operational-pulse__queue > span { font-size: 11px; }
+        .operational-pulse__track { grid-column: 1 / -1; height: 4px; overflow: hidden; border-radius: 999px; background: #dbeafe; }
+        .operational-pulse__track > span { display: block; height: 100%; min-width: 0; border-radius: inherit; transition: width .25s ease; }
         @media (max-width: 720px) {
           .headquarters-dashboard-page {
             display: block !important;
@@ -507,6 +528,11 @@ export function Dashboard() {
           .headquarters-dashboard-page .headquarters-two-column {
             grid-template-columns: 1fr !important;
           }
+          .operational-pulse { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .operational-pulse__queue, .operational-pulse__track > span { transition: none; }
+          .operational-pulse__queue:hover { transform: none; }
         }
       `}</style>
       {onboardingVisible && (
