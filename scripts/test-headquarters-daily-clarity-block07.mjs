@@ -9,7 +9,7 @@ const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
 
 for (const token of ["OperationalPulseQueueChange", "queues:", "largestMovement", "Math.abs(queue.delta)"])
   assert.ok(model.includes(token), `missing queue movement model: ${token}`);
-for (const token of ["largestMovement, null", 'largestMovement?.key, "rfis"', 'key: "files", delta: -4'])
+for (const token of ["largestMovement, null", 'largestMovement?.key, "rfis"', 'key: "files", previous: 14, current: 10, delta: -4'])
   assert.ok(behavior.includes(token), `missing queue movement behavior: ${token}`);
 for (const token of ["Changes by queue", "Cambios por cola", "Largest verified change", "Mayor cambio verificado", "operational-pulse__movement-queue--largest"])
   assert.ok(component.includes(token), `missing queue movement presentation: ${token}`);
