@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Headquarters daily clarity Block 7 candidate — 2026-10-09
+
+Five builds extend the existing verified operational pulse with a truthful per-queue movement breakdown. BIMLog compares only the two latest successful in-browser snapshots, shows the signed RFI, Submittal and file-attention deltas, and deterministically identifies the largest absolute change while preserving stable RFI-first tie behavior. The bilingual compact presentation distinguishes increased, decreased and unchanged queues without creating history, urgency, causation, priority or due-date claims. Exact-mobile styling and permanent behavior/acceptance coverage complete the first five-build half of the next ten-build interval; the block requires the complete exact-head gate and one push, then remains unpublished until Block 8.
+
+## Headquarters daily clarity Blocks 5–6 accepted — 2026-10-09
+
+The freshness, refresh and total-movement interval passed the complete release gate, was pushed and published at exact source `c5323096611fce923b155598c5f1d36003929fa7`, and production health bound that source to release `v1.05.N18-P37`. Authenticated Chrome resolved all 64 registered routes, verified English and Spanish refresh movement, queue navigation, exact-390 containment and a clean final console. No schema, customer record, permission, payment or production business data changed.
 ## Headquarters daily clarity Block 6 publication candidate — 2026-10-09
 
 Five builds add a truthful movement line to the verified Headquarters operational pulse. After the first successful response, BIMLog keeps only the prior verified count snapshot in browser memory and compares it with the next successful refresh. The interface distinguishes increased, decreased and unchanged total attention and explicitly states that it compares only the two latest verified counts; it does not infer urgency, cause, contractual priority or a due date. English and Spanish copy, polite announcements, compact responsive styling and permanent behavior/acceptance coverage complete the second half of the ten-build interval with Block 5. The exact source now requires the complete release gate, push, controlled publication, live identity verification and authenticated desktop/mobile Chrome smoke.

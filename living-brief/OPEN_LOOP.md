@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Headquarters daily clarity — Block 7 — 2026-10-09
+
+- [x] Derive signed movement for each verified RFI, Submittal and file-attention queue.
+- [x] Keep unchanged queues visible and distinguish increased, decreased and unchanged values.
+- [x] Identify the largest absolute queue movement with deterministic stable tie behavior.
+- [x] Explain the queue comparison in English and Spanish without inventing history, urgency, causation, priority or due dates.
+- [x] Keep the breakdown compact, accessible and contained at exact mobile width.
+- [x] Bind the queue-movement model, presentation and responsive contract to permanent focused acceptance and the pre-push gate.
+- [ ] Pass the complete exact-head gate, push this five-build block once and keep it unpublished until Block 8 completes the next ten-build interval.
 ## Headquarters daily clarity — Block 6 — 2026-10-09
 
 - [x] Compare only successive successful responses from the existing authenticated operational-pulse query.
@@ -8,7 +17,7 @@
 - [x] Explain the comparison basis in English and Spanish with polite status announcements.
 - [x] Present compact responsive movement feedback that preserves the existing queue and recommended-next actions.
 - [x] Bind the movement model, snapshot connection and presentation contract to permanent focused acceptance and the pre-push gate.
-- [ ] Pass the complete release gate, push Blocks 5–6, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.
+- [x] Pass the complete release gate, push Blocks 5–6, publish exact source `c5323096611fce923b155598c5f1d36003929fa7` and complete authenticated desktop/mobile Chrome smoke.
 
 ## Headquarters daily clarity — Block 5 — 2026-10-09
 
