@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useCreateProject, useListMembers } from "@workspace/api-client-react";
@@ -20,6 +20,7 @@ import { ProjectCleanupDialog } from "@/components/ProjectCleanupDialog";
 import { advanceCleanupReviewQueue, beginCleanupReviewQueue, cancelCleanupReviewQueue } from "@/lib/project-cleanup-review-queue";
 import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWorkspace";
 import { OperationalPulse } from "@/components/dashboard/OperationalPulse";
+import type { OperationalPulseCounts } from "@/lib/operational-pulse";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -202,6 +203,8 @@ export function Dashboard() {
   const [restoreProject, setRestoreProject] = useState<any | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportError, setExportError] = useState("");
+  const [previousPulseCounts, setPreviousPulseCounts] = useState<OperationalPulseCounts | null>(null);
+  const lastPulseSnapshot = useRef<{ checkedAt: number; counts: OperationalPulseCounts } | null>(null);
   function handleProjectCreated(newId: number) {
     console.log("REDIRECT TARGET", `/projects/${newId}/convention`);
     setShowCreate(false);
@@ -237,6 +240,19 @@ export function Dashboard() {
     enabled: !!token,
     refetchInterval: 60000,
   });
+
+  useEffect(() => {
+    if (!stats || statsUpdatedAt <= 0) return;
+    const counts = {
+      openRfis: stats.openRfis,
+      pendingSubmittals: stats.pendingSubmittals,
+      filesNeedingAttention: stats.filesNeedingAttention,
+    };
+    const prior = lastPulseSnapshot.current;
+    if (prior?.checkedAt === statsUpdatedAt) return;
+    if (prior) setPreviousPulseCounts(prior.counts);
+    lastPulseSnapshot.current = { checkedAt: statsUpdatedAt, counts };
+  }, [stats, statsUpdatedAt]);
 
   // ── CVR Platform Health ────────────────────────────────────────────────────
   const [cvrHealth, setCvrHealth] = useState<{ healthStatus: "green" | "amber" | "red"; totalPendingReview: number; totalFlagged: number } | null>(null);
@@ -613,6 +629,7 @@ export function Dashboard() {
 
           {!isLoading && stats && <OperationalPulse
             lang={lang}
+            previousCounts={previousPulseCounts}
             counts={{
               openRfis: stats.openRfis,
               pendingSubmittals: stats.pendingSubmittals,
