@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Headquarters daily clarity Block 6 publication candidate — 2026-10-09
+
+Five builds add a truthful movement line to the verified Headquarters operational pulse. After the first successful response, BIMLog keeps only the prior verified count snapshot in browser memory and compares it with the next successful refresh. The interface distinguishes increased, decreased and unchanged total attention and explicitly states that it compares only the two latest verified counts; it does not infer urgency, cause, contractual priority or a due date. English and Spanish copy, polite announcements, compact responsive styling and permanent behavior/acceptance coverage complete the second half of the ten-build interval with Block 5. The exact source now requires the complete release gate, push, controlled publication, live identity verification and authenticated desktop/mobile Chrome smoke.
+
 ## Headquarters daily clarity Block 5 candidate — 2026-10-09
 
 Five builds add truthful freshness and refresh feedback to the verified Headquarters operational pulse. The pulse distinguishes current, refreshing and unavailable states; shows the browser time of the last successful dashboard-count response; retains the last verified view when a later refresh fails; and lets the user refresh the existing authenticated statistics query directly while preserving its automatic one-minute refresh. English and Spanish status copy, polite announcements, keyboard focus and exact-mobile containment are bound to permanent focused acceptance. This is the first five-build half of the next ten-build interval, so it is pushed once and remains unpublished until Block 6 completes the interval.

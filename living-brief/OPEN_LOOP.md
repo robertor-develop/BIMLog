@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Headquarters daily clarity — Block 6 — 2026-10-09
+
+- [x] Compare only successive successful responses from the existing authenticated operational-pulse query.
+- [x] Distinguish increased, decreased and unchanged total attention without inventing urgency, causation or due dates.
+- [x] Keep the previous verified snapshot in browser memory only and replace it after each successful refresh.
+- [x] Explain the comparison basis in English and Spanish with polite status announcements.
+- [x] Present compact responsive movement feedback that preserves the existing queue and recommended-next actions.
+- [x] Bind the movement model, snapshot connection and presentation contract to permanent focused acceptance and the pre-push gate.
+- [ ] Pass the complete release gate, push Blocks 5–6, publish the exact ten-build source and complete authenticated desktop/mobile Chrome smoke.
+
 ## Headquarters daily clarity — Block 5 — 2026-10-09
 
 - [x] Define truthful Current, Refreshing and Unavailable states for the existing verified operational-pulse data.
@@ -8,7 +18,7 @@
 - [x] Preserve the last verified view when a refresh fails and explain that state in English and Spanish.
 - [x] Keep the refresh control keyboard accessible, politely announced and contained at exact mobile width.
 - [x] Bind the complete refresh/freshness contract to permanent focused acceptance and the pre-push gate.
-- [ ] Push this five-build block once and keep it unpublished until Headquarters daily clarity Block 6 completes the next ten-build interval.
+- [x] Push this five-build block once and keep it unpublished until Headquarters daily clarity Block 6 completes the next ten-build interval.
 
 ## Headquarters daily clarity — Block 4 — 2026-10-09
 
