@@ -4,9 +4,10 @@ import { operationalPulseChange } from "@/lib/operational-pulse-change";
 
 const QUEUE_COLORS = { rfis: "#2563eb", submittals: "#d97706", files: "#7c3aed" } as const;
 
-export function OperationalPulse({ counts, previousCounts = null, lang, onOpen, onRefresh = () => undefined, isFetching = false, hasError = false, checkedAt = 0 }: {
+export function OperationalPulse({ counts, previousCounts = null, previousCheckedAt = 0, lang, onOpen, onRefresh = () => undefined, isFetching = false, hasError = false, checkedAt = 0 }: {
   counts: OperationalPulseCounts;
   previousCounts?: OperationalPulseCounts | null;
+  previousCheckedAt?: number;
   lang: string;
   onOpen: (href: string) => void;
   onRefresh?: () => void;
@@ -18,6 +19,7 @@ export function OperationalPulse({ counts, previousCounts = null, lang, onOpen, 
   const pulse = operationalPulse(counts);
   const refreshState = operationalPulseRefreshState({ isFetching, hasError, hasVerifiedData: checkedAt > 0 });
   const checkedTime = formatOperationalPulseCheckedAt(checkedAt, lang);
+  const previousCheckedTime = formatOperationalPulseCheckedAt(previousCheckedAt, lang);
   const change = previousCounts ? operationalPulseChange(previousCounts, counts) : null;
   const labels = {
     rfis: es ? "RFI abiertos" : "Open RFIs",

@@ -203,7 +203,7 @@ export function Dashboard() {
   const [restoreProject, setRestoreProject] = useState<any | null>(null);
   const [exportingPdf, setExportingPdf] = useState(false);
   const [exportError, setExportError] = useState("");
-  const [previousPulseCounts, setPreviousPulseCounts] = useState<OperationalPulseCounts | null>(null);
+  const [previousPulseSnapshot, setPreviousPulseSnapshot] = useState<{ checkedAt: number; counts: OperationalPulseCounts } | null>(null);
   const lastPulseSnapshot = useRef<{ checkedAt: number; counts: OperationalPulseCounts } | null>(null);
   function handleProjectCreated(newId: number) {
     console.log("REDIRECT TARGET", `/projects/${newId}/convention`);
@@ -250,7 +250,7 @@ export function Dashboard() {
     };
     const prior = lastPulseSnapshot.current;
     if (prior?.checkedAt === statsUpdatedAt) return;
-    if (prior) setPreviousPulseCounts(prior.counts);
+    if (prior) setPreviousPulseSnapshot(prior);
     lastPulseSnapshot.current = { checkedAt: statsUpdatedAt, counts };
   }, [stats, statsUpdatedAt]);
 
@@ -645,7 +645,8 @@ export function Dashboard() {
 
           {!isLoading && stats && <OperationalPulse
             lang={lang}
-            previousCounts={previousPulseCounts}
+            previousCounts={previousPulseSnapshot?.counts ?? null}
+            previousCheckedAt={previousPulseSnapshot?.checkedAt ?? 0}
             counts={{
               openRfis: stats.openRfis,
               pendingSubmittals: stats.pendingSubmittals,
