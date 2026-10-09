@@ -9,7 +9,7 @@ for (const token of ["increased", "decreased", "unchanged", "safeCount", "curren
   assert.ok(model.includes(token), `missing movement truth contract: ${token}`);
 for (const token of ["No change since the last check", "Sin cambios desde la última verificación", "two latest verified counts", "dos últimos conteos verificados"])
   assert.ok(component.includes(token), `missing bilingual movement presentation: ${token}`);
-for (const token of ["lastPulseSnapshot", "previousPulseCounts", "prior?.checkedAt === statsUpdatedAt", "previousCounts={previousPulseCounts}"])
+for (const token of ["lastPulseSnapshot", "previousPulseSnapshot", "prior?.checkedAt === statsUpdatedAt", "previousCounts={previousPulseSnapshot?.counts ?? null}"])
   assert.ok(dashboard.includes(token), `missing successive snapshot connection: ${token}`);
 for (const token of ["operational-pulse__movement--decreased", "operational-pulse__movement--increased", "role=\"status\"", "aria-live=\"polite\""])
   assert.ok(`${dashboard}\n${component}`.includes(token), `missing movement accessibility or styling: ${token}`);
