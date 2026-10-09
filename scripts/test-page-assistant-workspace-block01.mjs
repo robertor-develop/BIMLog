@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 
 const component=readFileSync("artifacts/bimlog/src/components/layout/PageAssistant.tsx","utf8");
 const css=readFileSync("artifacts/bimlog/src/index.css","utf8");
-for(const marker of ["data-dock={dock}","data-collapsed={collapsed}","page-assistant-resize-handle","aria-valuenow={panelWidth}","aria-valuetext=",'event.key==="Home"',"onDoubleClick", "Dock agent left","Dock agent right"]){
+for(const marker of ["data-dock={dock}","data-collapsed={collapsed}","page-assistant-resize-handle","page-assistant-workspace-status","aria-live=\"polite\"","aria-valuenow={panelWidth}","aria-valuetext=",'event.key==="Home"',"onDoubleClick", "Dock agent left","Dock agent right"]){
   assert.ok(component.includes(marker),`missing workspace control: ${marker}`);
 }
 assert.match(css,/@media\(max-width:480px\)/);
