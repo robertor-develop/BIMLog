@@ -2,7 +2,7 @@
 
 ## Headquarters daily clarity Block 3 candidate — 2026-10-09
 
-Five builds add a compact operational pulse to Headquarters using only the already-verified RFI, Submittal and file-attention totals. The pulse states the combined review workload, shows each queue's current share, and opens the same canonical cross-project queues without creating a score, trend, task or duplicate record. English and Spanish copy, semantic buttons, visible keyboard focus, restrained motion and exact narrow-screen reflow keep the new signal useful without adding another control surface. Focused acceptance, frontend typechecking and the production frontend build pass. This is the first five-build half of the next ten-build interval, so it is pushed once and remains unpublished until Block 4 completes the interval.
+Five builds add a compact operational pulse to Headquarters using only the already-verified RFI, Submittal and file-attention totals. The pulse states the combined review workload, shows each queue's current share, and opens the same canonical cross-project queues without creating a score, trend, task or duplicate record. English and Spanish copy, semantic buttons, visible keyboard focus, restrained motion and exact narrow-screen reflow keep the new signal useful without adding another control surface. Focused acceptance is wired into the pre-push gate; frontend typechecking and the production frontend build pass. This is the first five-build half of the next ten-build interval, so it is pushed once and remains unpublished until Block 4 completes the interval.
 
 ## Headquarters daily clarity Blocks 1–2 accepted — 2026-10-09
 

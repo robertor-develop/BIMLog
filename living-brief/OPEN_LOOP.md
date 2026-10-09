@@ -6,7 +6,7 @@
 - [x] Show the current queue distribution without inventing trends, performance scores or new records.
 - [x] Open each canonical cross-project attention queue directly from the pulse.
 - [x] Keep the pulse bilingual, keyboard accessible, reduced-motion aware and contained on narrow screens.
-- [x] Bind the complete pulse contract to permanent focused acceptance, frontend typechecking and the production frontend build.
+- [x] Bind the complete pulse contract to the permanent pre-push gate, frontend typechecking and the production frontend build.
 - [ ] Push this five-build block once and keep it unpublished until Headquarters daily clarity Block 4 completes the next ten-build interval.
 
 ## Headquarters daily clarity — Block 2 — 2026-10-08
