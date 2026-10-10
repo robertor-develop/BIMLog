@@ -62481,6 +62481,8 @@
       "reviewedChangedPaths": [
         "artifacts/bimlog/src/lib/commercial-availability-journey.behavior.ts",
         "artifacts/bimlog/src/lib/commercial-availability-journey.ts",
+        "artifacts/bimlog/src/lib/commercial-offers.behavior.ts",
+        "artifacts/bimlog/src/lib/commercial-offers.ts",
         "artifacts/bimlog/src/pages/Pricing.tsx",
         "evidence/launch-readiness-20261009/BLOCK_04_LR016_LR020.md",
         "living-brief/OPEN_LOOP.md",
@@ -62490,7 +62492,7 @@
         "package.json",
         "scripts/test-launch-readiness-block04.mjs"
       ],
-      "reviewedChangeSha256": "319de58444f298bf5d7b9dc06338aa4f816cdc18aae09ae483f37b529e6a4d08"
+      "reviewedChangeSha256": "d3aee02c5f91db401b72d169abc6fa935604bbbefe2e97ed76c5bb9e0d9cef37"
     }
   ]
 }

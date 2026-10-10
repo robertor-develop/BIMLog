@@ -1,5 +1,4 @@
 import type { CommercialOffer } from "./commercial-offers";
-import { commercialDestination } from "./commercial-offers";
 import type { PublicCommercialAvailabilityDto } from "./public-commercial-availability-client";
 
 export type CommercialAvailabilityJourney = Readonly<{
@@ -15,56 +14,57 @@ export function commercialAvailabilityJourney(
   useCase: string,
   availability: PublicCommercialAvailabilityDto | null,
 ): CommercialAvailabilityJourney {
+  const query = new URLSearchParams({ plan: offer.id, billing });
+  if (useCase.trim()) query.set("useCase", useCase.trim().slice(0, 120));
+  const destination = (path: "/register" | "/contact") => `${path}?${query}`;
   if (offer.id === "free") {
-    return Object.freeze({
-      destination: commercialDestination(offer, billing, useCase),
+    return {
+      destination: destination("/register"),
       mode: "free_signup",
       label: { en: "Create free account", es: "Crear cuenta gratis" },
       detail: {
-        en: "Create your company account now. No payment method or sales conversation is required.",
-        es: "Cree ahora la cuenta de su empresa. No se requiere método de pago ni conversación comercial.",
+        en: "Create your company account. No card required.",
+        es: "Cree la cuenta de su empresa. No requiere tarjeta.",
       },
-    });
+    };
   }
 
   if (offer.id === "enterprise") {
-    return Object.freeze({
-      destination: commercialDestination(offer, billing, useCase),
+    return {
+      destination: destination("/contact"),
       mode: "custom_consultation",
       label: { en: "Request enterprise consultation", es: "Solicitar consulta Enterprise" },
       detail: {
-        en: "Enterprise scope, service levels and pricing require a confirmed customer agreement.",
-        es: "El alcance, los niveles de servicio y el precio Enterprise requieren un acuerdo confirmado con el cliente.",
+        en: "Enterprise scope and price require an agreement.",
+        es: "El alcance y precio Enterprise requieren un acuerdo.",
       },
-    });
+    };
   }
 
   if (availability?.paidPlans === "available") {
-    const query = new URLSearchParams({ plan: offer.id, billing });
-    if (useCase.trim()) query.set("useCase", useCase.trim().slice(0, 120));
-    return Object.freeze({
-      destination: `/register?${query}`,
+    return {
+      destination: destination("/register"),
       mode: "paid_signup",
       label: { en: "Create account for this plan", es: "Crear cuenta para este plan" },
       detail: {
-        en: "Create the company account first, then confirm the subscription in Billing & Support. This page does not take payment.",
-        es: "Primero cree la cuenta de la empresa y luego confirme la suscripción en Facturación y soporte. Esta página no realiza cobros.",
+        en: "Create the company account, then confirm in Billing & Support. This page does not take payment.",
+        es: "Cree la cuenta y confirme en Facturación y soporte. Aquí no se realiza ningún cobro.",
       },
-    });
+    };
   }
 
-  return Object.freeze({
-    destination: commercialDestination(offer, billing, useCase),
+  return {
+    destination: destination("/contact"),
     mode: "consultation",
     label: { en: "Request plan consultation", es: "Solicitar consulta del plan" },
     detail: availability
       ? {
-          en: "Paid activation currently begins with a consultation. BIMLog will confirm readiness and contracted terms before access changes.",
-          es: "La activación pagada comienza actualmente con una consulta. BIMLog confirmará la disponibilidad y los términos contratados antes de cambiar el acceso.",
+          en: "Paid activation starts with a consultation.",
+          es: "La activación pagada comienza con una consulta.",
         }
       : {
-          en: "Paid-plan availability could not be verified. Send the selected plan for review; no payment is taken here.",
-          es: "No se pudo verificar la disponibilidad del plan pagado. Envíe el plan seleccionado para revisión; aquí no se realiza ningún cobro.",
+          en: "Availability is unverified. Request review; no payment is taken here.",
+          es: "Disponibilidad sin verificar. Solicite revisión; aquí no se cobra.",
         },
-  });
+  };
 }
