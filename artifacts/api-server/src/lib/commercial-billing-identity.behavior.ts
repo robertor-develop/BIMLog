@@ -8,4 +8,7 @@ assert.deepEqual(parseCommercialBillingIdentityUpdate({address:"  100 Main   Str
 assert.equal(deriveCommercialBillingIdentity({companyId:7,legalName:"BIMCorp Inc",address:"100 Main Street",phone:"+1 555 0100"}).status,"complete");
 assert.throws(()=>parseCommercialBillingIdentityUpdate({address:"x",phone:"+1 555 0100"}),/address is invalid/);
 assert.throws(()=>parseCommercialBillingIdentityUpdate({address:"100 Main Street",phone:"123",taxId:"hidden"}),/unsupported fields/);
+assert.throws(()=>parseCommercialBillingIdentityUpdate({address:"100 Test Way\u0000",phone:"+1 555 0100"}),/invalid/);
+assert.throws(()=>parseCommercialBillingIdentityUpdate({address:"100 Test Way",phone:"call-me-now"}),/invalid/);
+assert.deepEqual(deriveCommercialBillingIdentity({companyId:7,legalName:"BIM Tech",address:"bad\u0000",phone:"call-me"}).missingFields,["address","phone"]);
 console.log("LR031 canonical billing identity contract: PASS");
