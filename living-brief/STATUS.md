@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Launch Readiness Block 10 publication candidate — 2026-10-10
+
+LR046–LR050 bind live checkout to the existing durable commercial launch authorization for the exact release source. A configured catalog, provider, webhook, portal and support environment is no longer sufficient by itself: checkout also requires a current successful source-bound verification receipt. Missing, expired, failed and source-mismatched verification states stop before company commercial persistence or Stripe transport, return one bounded failure class, and appear in Billing & Support as a BIMLog-owned action in English and Spanish. The browser rejects contradictory authorization state and keeps checkout unavailable. No payment, subscription, invoice, customer record, provider call, schema or Native behavior is changed by these builds. Together with LR041–LR045, this is the ten-build publication candidate.
+
 ## Launch Readiness Block 9 candidate — 2026-10-10
 
 LR041–LR045 create one fail-closed live-checkout boundary from BIMLog's existing commercial readiness authority. Checkout now stops before any commercial database access or Stripe request unless catalog, live payment provider, signed payment confirmation, billing self-service and customer support are ready. The API returns bounded authority, request, subscription-conflict and platform-readiness codes without provider details or configuration values. The browser accepts only known codes and bounded blocker identifiers, ignores server error prose, keeps the checkout action unavailable while the platform is incomplete, and explains ownership in English and Spanish. Subscription preparation, payment confirmation, entitlement, customer data, schema and Native behavior are unchanged. This is the first five-build half of the next ten-build interval and remains unpublished until Block 10.

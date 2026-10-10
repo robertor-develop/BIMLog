@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
+
+- [x] Require a current commercial launch verification receipt for the exact published source before checkout can begin.
+- [x] Stop before company commercial persistence or Stripe transport when verification is missing, expired, failed or belongs to another source.
+- [x] Expose the bounded current-verification state through the authenticated Billing & Support workspace without exposing evidence or provider secrets.
+- [x] Keep checkout disabled and explain the BIMLog-owned verification action in English and Spanish.
+- [x] Add a cumulative LR046–LR050 acceptance gate and include it in the complete pre-push gate.
+- [ ] Pass the complete exact-head gate, push LR046–LR050 once, publish the LR041–LR050 interval, verify exact live identity and complete the authenticated Chrome smoke.
+
 ## Launch Readiness Block 9 — live-checkout fail-closed boundary — 2026-10-10
 
 - [x] Derive one server-side live-checkout readiness decision from the existing commercial platform authority.
@@ -7,7 +16,7 @@
 - [x] Return bounded customer, authority and platform failure codes without provider detail or configuration values.
 - [x] Reject unknown hosted-destination failures and untrusted server error prose at the browser boundary.
 - [x] Keep secure checkout unavailable until live payments, signed confirmation, billing self-service and customer support are ready, with bilingual ownership guidance.
-- [ ] Pass the complete exact-head gate and push LR041–LR045 once. Keep this five-build block unpublished until Block 10 completes the next ten-build interval.
+- [x] Exact source `9f662d2a` passed the complete gate and was pushed once. It remained unpublished until Block 10 completed the ten-build interval.
 
 Blocks 7–8 release closure: exact source `81483745321837d8bb8ecebd827450ccbcfba1fc` passed the complete release gate, exact branch push and controlled publication as deployment `30559961`. Authenticated Chrome verified the Billing & Support blocker, preserved `?from=billing`, rendered the canonical billing identity controls and returned to Billing & Support without creating a payment, subscription, invoice or provider call.
 
