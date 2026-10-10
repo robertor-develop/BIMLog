@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Launch Readiness Block 3 — public commercial availability — 2026-10-10
+
+- [x] Derive a public-safe distinction between immediate free signup and operational paid-plan availability.
+- [x] Expose only the bounded availability and next-action contract without provider keys, configuration names, credentials, blocker codes or verification evidence.
+- [x] Reject unknown, partial and contradictory browser responses.
+- [x] Explain available, consultation-only and unverifiable states in English and Spanish on Pricing.
+- [x] Preserve free signup while ensuring the public page never implies that it takes payment when paid-plan services are not ready.
+- [ ] Pass the complete exact-head gate and push LR011–LR015 once. Keep this five-build block unpublished until Block 4 completes the next ten-build interval.
+
 ## Headquarters daily clarity — Block 8 — 2026-10-09
 
 - [x] Preserve the exact previous and current verified count for each RFI, Submittal and file-attention queue.

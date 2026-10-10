@@ -125,6 +125,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/project-workspace-batch-route.behavior.ts
 - artifacts/api-server/src/routes/project_directory.ts
 - artifacts/api-server/src/routes/projects.ts
+- artifacts/api-server/src/routes/public-commercial-availability.ts
 - artifacts/api-server/src/routes/public-legal-identity.behavior.ts
 - artifacts/api-server/src/routes/public-legal-identity.ts
 - artifacts/api-server/src/routes/repairs.ts
@@ -165,6 +166,7 @@ It changes only when the code structure or curated architectural facts change.
 
 ## Backend route mount order (routes/index.ts, under /api/v1)
 - publicLegalIdentityRouter
+- publicCommercialAvailabilityRouter
 - downloadsRouter
 - healthRouter
 - authRouter
@@ -1052,6 +1054,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/protected-provider-probe-executor.behavior.ts
 - artifacts/api-server/src/lib/protected-provider-probe-executor.ts
 - artifacts/api-server/src/lib/provider-governance.ts
+- artifacts/api-server/src/lib/public-commercial-availability.behavior.ts
+- artifacts/api-server/src/lib/public-commercial-availability.ts
 - artifacts/api-server/src/lib/public-legal-identity.behavior.ts
 - artifacts/api-server/src/lib/public-legal-identity.ts
 - artifacts/api-server/src/lib/release-metadata.behavior.ts

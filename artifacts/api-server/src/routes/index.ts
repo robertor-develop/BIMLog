@@ -65,10 +65,12 @@ import supportCaseSatisfactionRouter from "./support-case-satisfaction";
 import supportCaseMessagesRouter from "./support-case-messages";
 import repairsRouter from "./repairs";
 import publicLegalIdentityRouter from "./public-legal-identity";
+import publicCommercialAvailabilityRouter from "./public-commercial-availability";
 
 const router: IRouter = Router();
 
 router.use(publicLegalIdentityRouter);
+router.use(publicCommercialAvailabilityRouter);
 router.use(downloadsRouter);
 router.use(healthRouter);
 router.use(authRouter);
