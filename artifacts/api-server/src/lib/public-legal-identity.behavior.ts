@@ -18,8 +18,16 @@ assert.equal(JSON.stringify(complete).includes("REG-TEST-1"), false);
 assert.equal(JSON.stringify(complete).includes("123 Test Avenue"), false);
 assert.equal(JSON.stringify(complete).includes("billing@example.test"), false);
 
-const incomplete = derivePublicLegalIdentity({ BIMLOG_LEGAL_SUPPLIER_NAME: "Partial" });
-assert.equal(incomplete.available, false);
-assert.equal(incomplete.supplierName, null, "partial legal identity must not be published");
-assert.equal(Object.values(incomplete).includes("Partial"), false);
-console.log("LR006 complete-only public legal identity projection: PASS");
+const defaulted = derivePublicLegalIdentity({});
+assert.deepEqual(defaulted, {
+  schemaVersion: "bimlog-public-legal-identity-v1",
+  available: true,
+  supplierName: "BIMCapital Partners INC",
+  supportEmail: "info@ignitesmart.ai",
+  invoiceJurisdiction: "Florida, United States",
+});
+const partial = derivePublicLegalIdentity({ BIMLOG_LEGAL_SUPPLIER_NAME: "Verified Public Supplier" });
+assert.equal(partial.supplierName, "Verified Public Supplier");
+assert.equal(partial.supportEmail, "info@ignitesmart.ai");
+assert.equal(JSON.stringify(partial).includes("registrationNumber"), false);
+console.log("LR006 safe public legal identity projection: PASS");

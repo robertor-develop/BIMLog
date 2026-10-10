@@ -8,22 +8,19 @@ export type PublicLegalIdentity = Readonly<{
   invoiceJurisdiction: string | null;
 }>;
 
+const PUBLIC_LEGAL_IDENTITY_DEFAULTS = Object.freeze({
+  supplierName: "BIMCapital Partners INC",
+  supportEmail: "info@ignitesmart.ai",
+  invoiceJurisdiction: "Florida, United States",
+});
+
 export function derivePublicLegalIdentity(environment: NodeJS.ProcessEnv): PublicLegalIdentity {
   const profile = deriveCommercialLaunchProfile(environment);
-  if (!profile.complete) {
-    return Object.freeze({
-      schemaVersion: "bimlog-public-legal-identity-v1",
-      available: false,
-      supplierName: null,
-      supportEmail: null,
-      invoiceJurisdiction: null,
-    });
-  }
   return Object.freeze({
     schemaVersion: "bimlog-public-legal-identity-v1",
     available: true,
-    supplierName: profile.supplierName,
-    supportEmail: profile.supportEmail,
-    invoiceJurisdiction: profile.invoiceJurisdiction,
+    supplierName: profile.supplierName ?? PUBLIC_LEGAL_IDENTITY_DEFAULTS.supplierName,
+    supportEmail: profile.supportEmail ?? PUBLIC_LEGAL_IDENTITY_DEFAULTS.supportEmail,
+    invoiceJurisdiction: profile.invoiceJurisdiction ?? PUBLIC_LEGAL_IDENTITY_DEFAULTS.invoiceJurisdiction,
   });
 }

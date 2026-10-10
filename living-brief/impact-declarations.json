@@ -62272,6 +62272,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "launch-readiness-block02-public-identity-live-repair",
+      "reviewedThroughCommit": "36ab1dfaa7a0e59d5b3347dd0ab7c2df4d47340e",
+      "reviewedAt": "2026-10-10T05:50:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production-smoke repair keeps the public endpoint limited to the three already published supplier fields while removing its incorrect dependency on protected-profile completion; it changes no doctrine, customer record, permission, payment, Native scope, report, standard, roadmap, or MAIN 04 routing."
+        }
+      ],
+      "reason": "Correct the live legal-card contradiction by using the same safe public supplier identity already published on Terms, Privacy, and Legal Notice without exposing protected launch-profile fields.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/public-legal-identity.behavior.ts",
+        "artifacts/api-server/src/lib/public-legal-identity.ts",
+        "evidence/launch-readiness-20261009/BLOCK_02_LR006_LR010.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "20b6ebce5b8a75d7184f78536ef4f3472a7dead9651d40b3f113170b33ac5ffa"
     }
   ]
 }
