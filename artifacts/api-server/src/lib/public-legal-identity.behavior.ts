@@ -13,6 +13,10 @@ const complete = derivePublicLegalIdentity({
 assert.equal(complete.available, true);
 assert.equal(complete.supplierName, "Synthetic Supplier LLC");
 assert.equal(JSON.stringify(complete).includes("BIMLOG_LEGAL_"), false);
+assert.equal(JSON.stringify(complete).includes("TAX-TEST-1"), false);
+assert.equal(JSON.stringify(complete).includes("REG-TEST-1"), false);
+assert.equal(JSON.stringify(complete).includes("123 Test Avenue"), false);
+assert.equal(JSON.stringify(complete).includes("billing@example.test"), false);
 
 const incomplete = derivePublicLegalIdentity({ BIMLOG_LEGAL_SUPPLIER_NAME: "Partial" });
 assert.equal(incomplete.available, false);
