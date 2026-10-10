@@ -19,6 +19,8 @@ import {resolveReleaseMetadata} from "../lib/release-metadata";
 import {readPersistentCommercialAuthority} from "../lib/commercial-persistence";
 import type {CommercialSubscriptionStatus} from "../lib/commercial-workspace-runtime";
 import {prepareCompanySubscription} from "../lib/commercial-subscription-setup";
+import {deriveCommercialLaunchProfile,commercialLaunchProfileConfigurationKeys} from "../lib/commercial-launch-profile";
+import {deriveCommercialLaunchDossier} from "../lib/commercial-launch-dossier";
 
 const router:IRouter=Router();
 
@@ -41,6 +43,17 @@ router.get("/admin/commercial-launch/verifications",authMiddleware,isSuperAdminM
 router.get("/admin/commercial-launch/authorization",authMiddleware,isSuperAdminMiddleware,async(_req,res)=>{
   res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
   try{const receipt=await readLatestCommercialLaunchVerification(pool);res.json(deriveCommercialLaunchAuthorization({sourceCommit:resolveReleaseMetadata(process.env).sourceCommit,receipt}));}catch{res.status(503).json({code:"COMMERCIAL_LAUNCH_AUTHORIZATION_UNAVAILABLE",error:"Commercial launch authorization is temporarily unavailable."});}
+});
+
+router.get("/admin/commercial-launch/dossier",authMiddleware,isSuperAdminMiddleware,async(_req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
+  try{
+    const sourceCommit=resolveReleaseMetadata(process.env).sourceCommit;
+    const profile=deriveCommercialLaunchProfile(process.env),services=deriveCommercialLaunchActivation(process.env);
+    const receipt=await readLatestCommercialLaunchVerification(pool),authorization=deriveCommercialLaunchAuthorization({sourceCommit,receipt});
+    const dossier=deriveCommercialLaunchDossier({sourceCommit,profile,serviceReady:services.ready,serviceBlockerCount:services.requiredActionCount,verificationReady:authorization.ready});
+    res.json({...dossier,profile,missingConfigurationKeys:commercialLaunchProfileConfigurationKeys(profile.missingFields),services:{status:services.status,providerMode:services.providerMode,requiredActionCount:services.requiredActionCount},authorization:{status:authorization.status,ready:authorization.ready}});
+  }catch{res.status(503).json({code:"COMMERCIAL_LAUNCH_DOSSIER_UNAVAILABLE",error:"Commercial launch dossier is temporarily unavailable."});}
 });
 
 router.get("/commercial/workspace",authMiddleware,async(req,res)=>{
