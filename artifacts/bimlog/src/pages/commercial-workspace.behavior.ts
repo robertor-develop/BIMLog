@@ -11,6 +11,7 @@ for(const token of ["Checkout submitted — verification pending","Pago enviado 
 for(const token of ["deriveCommercialCheckoutEligibility","readCommercialIntent","Prepare subscription","Preparar suscripción","requestCommercialSubscriptionSetup","providerCustomerBound","Before checkout:","checkoutBlockerLabels","checkoutEligibility?.blockers.map"])assert.match(source,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
 for(const token of ["Prepared offer","Oferta preparada","data.preparedSubscription.seatQuantity","Boolean(data.preparedSubscription)"])assert.match(source,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
 assert.match(source,/checkoutEligibility\?\.ready\?<Button/);assert.match(source,/data\.subscriptionStatus!=="active"/);
+for(const token of ["platform_launch","CommercialHostedDestinationError","hostedFailureMessage","CHECKOUT_PLATFORM_NOT_READY","required platform setup"])assert.match(source,new RegExp(token));
 assert.match(source,/data\.actions\.map/);assert.match(source,/action\.status==="blocked"/);assert.match(source,/Button disabled/);
 assert.match(source,/minmax\(min\(240px,100%\),1fr\)/);assert.match(source,/Waiting for:/);assert.match(source,/action\.blockers\.map/);assert.doesNotMatch(source,/Ready \/ Listo|Setup required \/ Requiere configuración/);
 assert.match(source,/AbortController/);assert.match(source,/parseCommercialWorkspace/);assert.doesNotMatch(source,/stripe.*secret/i);
