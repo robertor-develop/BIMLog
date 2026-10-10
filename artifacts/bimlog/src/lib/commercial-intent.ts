@@ -10,3 +10,15 @@ function validIntent(value:unknown):value is CommercialIntent{if(!value||typeof 
 export function rememberCommercialIntent(value:CommercialIntent|null,storage:Pick<Storage,"setItem">=sessionStorage,now=new Date()){if(value)storage.setItem(COMMERCIAL_INTENT_STORAGE_KEY,JSON.stringify({version:1,intent:value,savedAt:now.toISOString()} satisfies CommercialIntentEnvelope));}
 export function readCommercialIntent(storage:Pick<Storage,"getItem"|"removeItem">=sessionStorage,now=new Date()):CommercialIntent|null{const raw=storage.getItem(COMMERCIAL_INTENT_STORAGE_KEY);if(!raw)return null;try{const envelope=JSON.parse(raw) as Record<string,unknown>;const savedAt=typeof envelope.savedAt==="string"?new Date(envelope.savedAt):null;if(envelope.version!==1||!validIntent(envelope.intent)||!savedAt||!Number.isFinite(savedAt.getTime())||savedAt.getTime()>now.getTime()+60_000||now.getTime()-savedAt.getTime()>MAX_INTENT_AGE_MS)throw new Error("invalid");return envelope.intent;}catch{storage.removeItem(COMMERCIAL_INTENT_STORAGE_KEY);return null;}}
 export function clearCommercialIntent(storage:Pick<Storage,"removeItem">=sessionStorage){storage.removeItem(COMMERCIAL_INTENT_STORAGE_KEY);}
+export function postOnboardingCommercialDestination(value:CommercialIntent|null,defaultDestination:string){
+  if(!value||!["professional","team","business"].includes(value.plan))return defaultDestination;
+  const params=new URLSearchParams({plan:value.plan,billing:value.billing,from:"onboarding"});
+  if(value.useCase)params.set("useCase",value.useCase);
+  return `/settings/billing-support?${params.toString()}`;
+}
+export function parsePostOnboardingCommercialIntent(search:string):CommercialIntent|null{
+  const params=new URLSearchParams(search.startsWith("?")?search.slice(1):search),keys=[...params.keys()];
+  if(params.get("from")!=="onboarding"||keys.some(key=>!["plan","billing","from","useCase"].includes(key))||new Set(keys).size!==keys.length)return null;
+  const parsed=parseCommercialIntent(search);
+  return parsed&&["professional","team","business"].includes(parsed.plan)?parsed:null;
+}
