@@ -62414,6 +62414,79 @@
         "scripts/test-launch-readiness-block03.mjs"
       ],
       "reviewedChangeSha256": "df58166b31664852276dbf96be6e554f5a91dd4937e79aeb15e89c5aef9e82e8"
+    },
+    {
+      "taskId": "launch-readiness-block04-availability-aware-conversion",
+      "reviewedThroughCommit": "b6e09e1b62eaa423d97fbeb0b15dbb7aa62513ff",
+      "reviewedAt": "2026-10-10T08:50:44.557Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The availability-aware conversion block reuses the existing Pricing, registration, onboarding, Contact and commercial-intent authorities; it changes no payment execution, entitlement mutation, customer record, permission, provider credential, Native scope, report, standard, roadmap or MAIN 04 routing."
+        }
+      ],
+      "reason": "Make each public Pricing action follow the verified commercial-availability state while preserving the existing bounded intent and downstream commercial journeys.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/pages/Pricing.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "5cfea0847e7b7a1acad72e294005837527b692351975cbb1da68d66108e032dc"
     }
   ]
 }

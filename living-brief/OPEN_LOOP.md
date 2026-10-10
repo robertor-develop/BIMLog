@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Launch Readiness Block 4 — availability-aware conversion handoff — 2026-10-10
+
+- [x] Use one deterministic next-step decision for every public offer.
+- [x] Keep free signup available without a payment method or sales conversation.
+- [x] Route Professional, Team and Business offers to registration only when paid-plan readiness is available.
+- [x] Preserve the exact plan, billing cycle and bounded use case into registration or consultation; keep Enterprise agreement-defined.
+- [x] Fail safely to consultation when paid-plan availability is consultation-only, loading, malformed or unreachable, and never take payment on Pricing.
+- [ ] Pass the complete exact-head gate, push LR016–LR020, publish the accumulated LR011–LR020 ten-build interval, and complete authenticated visible-Chrome production smoke.
+
 ## Launch Readiness Block 3 — public commercial availability — 2026-10-10
 
 - [x] Derive a public-safe distinction between immediate free signup and operational paid-plan availability.
@@ -7,7 +16,7 @@
 - [x] Reject unknown, partial and contradictory browser responses.
 - [x] Explain available, consultation-only and unverifiable states in English and Spanish on Pricing.
 - [x] Preserve free signup while ensuring the public page never implies that it takes payment when paid-plan services are not ready.
-- [ ] Pass the complete exact-head gate and push LR011–LR015 once. Keep this five-build block unpublished until Block 4 completes the next ten-build interval.
+- [x] Pass the complete exact-head gate and push LR011–LR015 once. Keep this five-build block unpublished until Block 4 completes the next ten-build interval.
 
 ## Headquarters daily clarity — Block 8 — 2026-10-09
 
