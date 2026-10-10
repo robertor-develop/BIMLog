@@ -32,6 +32,17 @@ export async function readPersistentCommercialAuthority(client: CommercialQueryC
   return Object.freeze({ subscription: Object.freeze(subscription.rows[0]), terms: Object.freeze(terms.rows.map(Object.freeze)), seats: Object.freeze(seats.rows.map(Object.freeze)), providerBindings: Object.freeze(bindings.rows.map(Object.freeze)) });
 }
 
+export type PersistentSubscriptionLifecycle=Readonly<{status:"pending"|"trialing"|"active"|"past_due"|"suspended"|"canceling"|"canceled";plan:"professional"|"team"|"business";billingCycle:"monthly"|"annual";seatQuantity:number;startedAt:string|null;canceledAt:string|null;updatedAt:string}>;
+export async function readLatestSubscriptionLifecycle(client:CommercialQueryClient,companyId:number):Promise<PersistentSubscriptionLifecycle|null>{
+  positiveInteger(companyId,"Company identity");
+  const result=await client.query(`SELECT status,plan_code,billing_cycle,seat_quantity,started_at,canceled_at,updated_at FROM commercial_subscriptions WHERE company_id=$1 ORDER BY created_at DESC LIMIT 1`,[companyId]);
+  const row=result.rows[0] as Record<string,unknown>|undefined;if(!row)return null;
+  const statuses=["pending","trialing","active","past_due","suspended","canceling","canceled"] as const,plans=["professional","team","business"] as const,cycles=["monthly","annual"] as const;
+  if(!statuses.includes(row.status as typeof statuses[number])||!plans.includes(row.plan_code as typeof plans[number])||!cycles.includes(row.billing_cycle as typeof cycles[number])||!Number.isSafeInteger(row.seat_quantity)||Number(row.seat_quantity)<1)throw new Error("Subscription lifecycle is invalid");
+  const timestamp=(value:unknown,label:string,nullable=false)=>{if(nullable&&value===null)return null;if(typeof value!=="string"||!Number.isFinite(Date.parse(value)))throw new Error(`${label} is invalid`);return value;};
+  return Object.freeze({status:row.status as typeof statuses[number],plan:row.plan_code as typeof plans[number],billingCycle:row.billing_cycle as typeof cycles[number],seatQuantity:Number(row.seat_quantity),startedAt:timestamp(row.started_at,"Subscription start",true),canceledAt:timestamp(row.canceled_at,"Subscription cancellation",true),updatedAt:timestamp(row.updated_at,"Subscription update")!});
+}
+
 export type PersistentSubscriptionSetupInput=Readonly<{companyId:number;userId:number;subscriptionId:string;bindingId:string;planCode:"professional"|"team"|"business";billingCycle:"monthly"|"annual";seatQuantity:number;providerEnvironment:"test"|"live";providerCustomerReference:string}>;
 export async function persistSubscriptionSetup(client:CommercialQueryClient,input:PersistentSubscriptionSetupInput):Promise<Readonly<{subscriptionId:string;providerBindingId:string;replayed:boolean}>>{
   positiveInteger(input.companyId,"Company identity");positiveInteger(input.userId,"User identity");id(input.subscriptionId,"Subscription identity");id(input.bindingId,"Provider binding identity");
