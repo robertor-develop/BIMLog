@@ -62347,7 +62347,7 @@
     },
     {
       "taskId": "launch-readiness-block03-public-commercial-availability",
-      "reviewedThroughCommit": "7b53a809e224489c36253c8659255fbb0e216e53",
+      "reviewedThroughCommit": "2d01d51f20fff6f0a2c2485e23b5e0fbda9ac682",
       "reviewedAt": "2026-10-10T07:15:00Z",
       "status": "candidate",
       "authorities": [
@@ -62409,17 +62409,9 @@
       ],
       "reason": "Connect public Pricing to the existing commercial readiness authority through a minimal fail-closed response without exposing protected provider or launch evidence.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/routes/index.ts",
-        "artifacts/bimlog/src/pages/Pricing.tsx",
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "package.json"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "2c007309d62ad95a78fa8ec90fb4b89e58a62fe0cd9bfa62699aa48bdefb2330"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
