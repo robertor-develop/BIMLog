@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronLeft, Building2, Upload, Globe, Phone, MapPin, Trash2 } from "lucide-react";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
+import { BillingIdentityPanel } from "@/components/commercial/BillingIdentityPanel";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -134,6 +135,7 @@ export function CompanyProfile() {
                 <strong>{t("Account company", "Empresa de la cuenta")}: {data.canonicalCompanyName}</strong>
                 <p>{t("Changing branding below does not rename this company or change project access. Saved document party snapshots remain unchanged; future exports may use the current branding.", "Cambiar la marca abajo no renombra esta empresa ni cambia el acceso a proyectos. Los participantes guardados de documentos permanecen iguales; las exportaciones futuras pueden usar la marca actual.")}</p>
               </section>
+              <BillingIdentityPanel token={token ?? ""} fromBilling={new URLSearchParams(window.location.search).get("from") === "billing"} />
               {/* Logo card */}
               <div style={{ background: "white", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "18px 20px", marginBottom: 18 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
