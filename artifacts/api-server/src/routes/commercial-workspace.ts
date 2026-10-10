@@ -123,7 +123,11 @@ router.post("/commercial/checkout",authMiddleware,async(req,res)=>{
     if(!/^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$/.test(requestKey)){res.status(400).json({code:"CHECKOUT_REQUEST_INVALID",error:"A valid checkout request identity is required."});return;}
     const result=await startCommercialCheckout({client:pool,environment:process.env,companyId:actor.companyId,userId:actor.userId,requestKey,plan:req.body?.plan,cycle:req.body?.cycle});
     res.status(201).json(result);
-  }catch(error){const message=error instanceof Error?error.message:"Checkout unavailable";const denied=/administrator authority/.test(message);res.status(denied?403:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":"CHECKOUT_UNAVAILABLE",error:message});}
+  }catch(error){
+    const failure=error as Error&{code?:string;blockers?:readonly string[]},message=error instanceof Error?error.message:"Checkout unavailable";
+    const denied=/administrator authority/.test(message),invalid=/supported checkout|request identity/.test(message),conflict=/subscription record|does not match/.test(message),platform=failure.code==="CHECKOUT_PLATFORM_NOT_READY";
+    res.status(denied?403:invalid?400:conflict?409:503).json(platform?{code:"CHECKOUT_PLATFORM_NOT_READY",error:"Secure checkout is temporarily unavailable while BIMLog completes payment-service setup.",blockers:failure.blockers??[]}:{code:denied?"BILLING_AUTHORITY_REQUIRED":invalid?"CHECKOUT_REQUEST_INVALID":conflict?"CHECKOUT_AUTHORITY_CONFLICT":"CHECKOUT_UNAVAILABLE",error:denied?"Billing administrator authority is required.":invalid?"The checkout request is invalid.":conflict?"The selected checkout does not match the prepared company subscription.":"Secure checkout is temporarily unavailable."});
+  }
 });
 
 router.post("/commercial/subscription-setup",authMiddleware,async(req,res)=>{
