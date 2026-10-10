@@ -423,6 +423,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-stripe-live-verification.ts
 - artifacts/api-server/src/lib/commercial-stripe-service-verification.behavior.ts
 - artifacts/api-server/src/lib/commercial-stripe-service-verification.ts
+- artifacts/api-server/src/lib/commercial-subscription-lifecycle.behavior.ts
 - artifacts/api-server/src/lib/commercial-subscription-migration.ts
 - artifacts/api-server/src/lib/commercial-subscription-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-subscription-setup-persistence.behavior.ts

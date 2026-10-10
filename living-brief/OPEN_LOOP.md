@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## LR056–LR060 release checkpoint — 2026-10-10
+
+- [x] Preserve and project the latest tenant subscription lifecycle without exposing provider identifiers or credentials.
+- [x] Validate lifecycle status, plan, cycle, seats, and timestamps at the browser boundary.
+- [x] Explain active, past-due, suspended, canceling, and canceled customer next actions in English and Spanish.
+- [ ] Publish the exact ten-build LR051–LR060 source and complete authenticated production Chrome acceptance after the full release gate passes.
+
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
 
 - [x] Require a current commercial launch verification receipt for the exact published source before checkout can begin.
