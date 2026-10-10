@@ -47,12 +47,18 @@ export function parseCommercialWorkspace(value:unknown):CommercialWorkspaceDto{
 }
 
 export type CommercialHostedDestination={url:string};
+export const commercialHostedFailureCodes=["BILLING_AUTHORITY_REQUIRED","CHECKOUT_REQUEST_INVALID","CHECKOUT_AUTHORITY_CONFLICT","CHECKOUT_PLATFORM_NOT_READY","CHECKOUT_UNAVAILABLE","BILLING_PORTAL_UNAVAILABLE"] as const;
+export type CommercialHostedFailureCode=typeof commercialHostedFailureCodes[number];
+export class CommercialHostedDestinationError extends Error{
+  readonly code:CommercialHostedFailureCode;readonly blockers:readonly string[];
+  constructor(code:CommercialHostedFailureCode,blockers:readonly string[]=[]){super(code);this.name="CommercialHostedDestinationError";this.code=code;this.blockers=Object.freeze([...blockers]);}
+}
 export async function requestCommercialHostedDestination(input:{token:string;action:"checkout"|"billing-portal";plan?:"professional"|"team"|"business";cycle?:"monthly"|"annual";requestKey?:string;fetchImpl?:typeof fetch}):Promise<CommercialHostedDestination>{
-  const fetchImpl=input.fetchImpl??fetch,base=import.meta.env.BASE_URL.replace(/\/$/,"");
+  const fetchImpl=input.fetchImpl??fetch,base=(import.meta.env?.BASE_URL??"/").replace(/\/$/,"");
   const body=input.action==="checkout"?{plan:input.plan,cycle:input.cycle,requestKey:input.requestKey}:{};
   const response=await fetchImpl(`${base}/api/v1/commercial/${input.action}`,{method:"POST",headers:{Authorization:`Bearer ${input.token}`,"Content-Type":"application/json"},body:JSON.stringify(body)});
   const payload=await response.json().catch(()=>({})) as Record<string,unknown>;
-  if(!response.ok)throw new Error(typeof payload.error==="string"?payload.error:"Billing service is unavailable.");
+  if(!response.ok){const code=typeof payload.code==="string"&&commercialHostedFailureCodes.includes(payload.code as CommercialHostedFailureCode)?payload.code as CommercialHostedFailureCode:input.action==="checkout"?"CHECKOUT_UNAVAILABLE":"BILLING_PORTAL_UNAVAILABLE";const blockers=Array.isArray(payload.blockers)?payload.blockers.filter((value):value is string=>typeof value==="string"&&/^[a-z_]{3,50}$/.test(value)).slice(0,6):[];throw new CommercialHostedDestinationError(code,blockers);}
   if(typeof payload.url!=="string")throw new Error("Billing service returned an invalid destination.");
   const url=new URL(payload.url);const expected=input.action==="checkout"?"checkout.stripe.com":"billing.stripe.com";
   if(url.protocol!=="https:"||url.hostname!==expected)throw new Error("Billing service returned an untrusted destination.");
