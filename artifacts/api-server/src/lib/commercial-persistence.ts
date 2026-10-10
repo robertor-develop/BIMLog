@@ -86,6 +86,17 @@ export async function bindPersistentCheckoutSession(client:CommercialQueryClient
   return Object.freeze({checkoutId:id(updated.rows[0].id,"Checkout identity"),status:"open" as const});
 }
 
+export type PersistentCheckoutSummary=Readonly<{checkoutId:string;orderId:string;status:"creating"|"open"|"completed"|"expired"|"canceled"|"failed";expiresAt:string;completedAt:string|null;updatedAt:string}>;
+export async function readLatestPersistentCheckout(client:CommercialQueryClient,companyId:number):Promise<PersistentCheckoutSummary|null>{
+  positiveInteger(companyId,"Company identity");
+  const result=await client.query(`SELECT id,order_id,status,expires_at,completed_at,updated_at FROM commercial_checkout_attempts WHERE company_id=$1 ORDER BY created_at DESC,id DESC LIMIT 1`,[companyId]);
+  const row=result.rows[0];if(!row)return null;
+  const status=String(row.status);if(!["creating","open","completed","expired","canceled","failed"].includes(status))throw new Error("Checkout status is invalid");
+  const expiresAt=new Date(String(row.expires_at)),updatedAt=new Date(String(row.updated_at)),completedAt=row.completed_at===null?null:new Date(String(row.completed_at));
+  if(!Number.isFinite(expiresAt.getTime())||!Number.isFinite(updatedAt.getTime())||(completedAt&&!Number.isFinite(completedAt.getTime())))throw new Error("Checkout timeline is invalid");
+  return Object.freeze({checkoutId:id(row.id,"Checkout identity"),orderId:id(row.order_id,"Order identity"),status:status as PersistentCheckoutSummary["status"],expiresAt:expiresAt.toISOString(),completedAt:completedAt?.toISOString()??null,updatedAt:updatedAt.toISOString()});
+}
+
 export type PersistentProviderReceiptInput = Readonly<{ id:string; companyId:number; providerBindingId:string; providerEventReference:string; eventType:string; rawPayload:string; payloadDigest:string; signatureVerifiedAt:string }>;
 export async function persistVerifiedProviderReceipt(client:CommercialQueryClient,input:PersistentProviderReceiptInput):Promise<Readonly<{id:string;replayed:boolean}>>{
   positiveInteger(input.companyId,"Company identity");id(input.id,"Receipt identity");id(input.providerBindingId,"Provider binding identity");id(input.providerEventReference,"Provider event identity");
