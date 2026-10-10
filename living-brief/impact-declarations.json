@@ -63593,6 +63593,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a7ce2c4591be48319be82d28cfe5e5111871f06284de90b5d0c989d5b8731781"
+    },
+    {
+      "taskId": "launch-readiness-block13-browser-budget-repair",
+      "reviewedThroughCommit": "59ef95d10e82f87f79d4aee6e83bb16a9396acaf",
+      "reviewedAt": "2026-10-10T17:30:00.000Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "The exact production build exposed a browser JavaScript budget excess. The repair compacts browser validation messages while preserving strict portal recovery allowlists, contradiction checks, lifecycle actions, server authority, schemas, credentials, Native, reporting, legal identity, and MAIN 04 behavior.",
+      "reviewedChangedPaths": [
+        "evidence/launch-readiness-20261009/BLOCK_13_LR061_LR065.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "341e1da0c820701d835fca086b4f51098a7a25c36729c5bb468b6b75ec70af62"
     }
   ]
 }

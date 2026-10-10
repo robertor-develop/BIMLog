@@ -4195,3 +4195,5 @@ The repeated gate then exposed strict compile-time uncertainty at the persisted 
 The downstream frontend workspace typecheck exposed literal widening in the new portal blocker array. Repair `16bafc6c` retains the exact allowlisted blocker union through strict parsing without changing runtime behavior; the frontend typecheck passes.
 
 The release gate then identified a 2,430-byte browser asset-budget overrun. Commit `8d43cc0c` compacted the customer projection while retaining all lifecycle states and strict status validation; the targeted production build now passes at 4,194,186 of 4,194,304 bytes. The complete exact-source gate must pass again before publication.
+
+The subsequent exact production build remained 749 bytes above the same unchanged limit because the complete recovery parser and bilingual controls were now included. Repair `59ef95d1` compacts validation messages while preserving the strict allowlists, contradiction checks, lifecycle-specific actions and server authority. The targeted rebuilt total is 4,194,301 of 4,194,304 bytes; the complete exact-source gate is repeated before push.

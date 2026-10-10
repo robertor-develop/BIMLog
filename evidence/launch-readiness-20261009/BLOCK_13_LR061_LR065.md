@@ -9,3 +9,5 @@ This block closes the recovery-action gap after subscription lifecycle truth bec
 - LR065: bilingual lifecycle-specific recovery controls and cumulative acceptance.
 
 Focused Block 13 behavior and API/frontend typechecks pass. This is the first five-build half of the next ten-build interval. It is pushed after the complete gate and remains unpublished until LR066–LR070.
+
+The complete production gate found the browser JavaScript total 749 bytes above the 4 MiB release budget. The browser parser was compacted without relaxing portal-state validation; the rebuilt production total is 4,194,301 bytes against the 4,194,304-byte limit. The complete gate is repeated after this repair.

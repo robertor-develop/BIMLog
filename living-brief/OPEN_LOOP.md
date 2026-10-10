@@ -18,6 +18,7 @@
 - [x] Repair the pre-existing active-only portal assertion exposed by the complete gate and retain the stronger server-authoritative recovery contract.
 - [x] Narrow persisted lifecycle and provider configuration values before hosted portal transport after the repeated gate exposed strict TypeScript uncertainty.
 - [x] Preserve the exact allowlisted portal-blocker union through browser parsing after the full frontend workspace typecheck exposed literal widening.
+- [x] Compact browser-side validation messages after the exact production build exceeded the 4 MiB JavaScript budget; preserve strict recovery validation and pass at 4,194,301 of 4,194,304 bytes.
 - [ ] Push LR061–LR065 once and keep this first five-build block unpublished until LR066–LR070 completes the next ten-build interval.
 
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
