@@ -1,0 +1,45 @@
+export type CommercialBillingIdentity = Readonly<{
+  companyId: number;
+  legalName: string;
+  address: string;
+  phone: string;
+  status: "complete" | "incomplete";
+  missingFields: readonly ("address" | "phone")[];
+}>;
+
+const clean = (value: unknown, field: "address" | "phone", min: number, max: number) => {
+  if (typeof value !== "string") throw new Error(`Billing ${field} is required`);
+  const normalized = value.trim().replace(/\s+/g, " ");
+  if (normalized.length < min || normalized.length > max) throw new Error(`Billing ${field} is invalid`);
+  return normalized;
+};
+
+export function deriveCommercialBillingIdentity(input: {
+  companyId: unknown;
+  legalName: unknown;
+  address: unknown;
+  phone: unknown;
+}): CommercialBillingIdentity {
+  if (!Number.isSafeInteger(input.companyId) || Number(input.companyId) < 1) throw new Error("Billing company identity is invalid");
+  if (typeof input.legalName !== "string" || !input.legalName.trim()) throw new Error("Billing legal name is invalid");
+  const address = typeof input.address === "string" ? input.address.trim().replace(/\s+/g, " ") : "";
+  const phone = typeof input.phone === "string" ? input.phone.trim().replace(/\s+/g, " ") : "";
+  const missingFields: ("address" | "phone")[] = [];
+  if (!address) missingFields.push("address");
+  if (!phone) missingFields.push("phone");
+  return Object.freeze({
+    companyId: Number(input.companyId),
+    legalName: input.legalName.trim(),
+    address,
+    phone,
+    status: missingFields.length ? "incomplete" : "complete",
+    missingFields: Object.freeze(missingFields),
+  });
+}
+
+export function parseCommercialBillingIdentityUpdate(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Billing identity update is invalid");
+  const row = value as Record<string, unknown>;
+  if (Object.keys(row).some(key => !["address", "phone"].includes(key))) throw new Error("Billing identity update contains unsupported fields");
+  return Object.freeze({address: clean(row.address, "address", 5, 300), phone: clean(row.phone, "phone", 7, 40)});
+}
