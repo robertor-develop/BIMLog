@@ -22,6 +22,7 @@ import {prepareCompanySubscription} from "../lib/commercial-subscription-setup";
 import {deriveCommercialLaunchProfile,commercialLaunchProfileConfigurationKeys} from "../lib/commercial-launch-profile";
 import {deriveCommercialLaunchDossier} from "../lib/commercial-launch-dossier";
 import {deriveCommercialBillingIdentity,parseCommercialBillingIdentityUpdate} from "../lib/commercial-billing-identity";
+import {deriveCommercialPortalEligibility} from "../lib/commercial-portal-eligibility";
 
 const router:IRouter=Router();
 
@@ -113,7 +114,8 @@ router.get("/commercial/workspace",authMiddleware,async(req,res)=>{
     if(!["not_configured","pending","trialing","active","past_due","suspended","canceling"].includes(subscriptionStatus))throw new Error("Commercial subscription status is invalid");
     const preparedSubscription=commercialAuthority?{subscriptionId:String(commercialAuthority.subscription.id),plan:commercialAuthority.subscription.plan_code,billingCycle:commercialAuthority.subscription.billing_cycle,seatQuantity:commercialAuthority.subscription.seat_quantity}:null;
     const providerCustomerBound=Boolean(commercialAuthority?.providerBindings.some(row=>row.provider==="stripe"&&row.status==="active"&&typeof row.customer_reference==="string"&&row.customer_reference.startsWith("cus_")));
-    res.json({...deriveCommercialRuntimeWorkspace({companyId:company.id,companyName:company.name,memberCount:Number(members?.count??0),commercialAccess:access.any,subscriptionStatus,catalogConfigured:platform.subscriptionConfigured,billingIdentityComplete:Boolean(company.address?.trim()&&company.phone?.trim()),...platform,platformChecks:platform.checks}),preparedSubscription,providerCustomerBound,latestCheckout,subscriptionLifecycle,billingAuthority:{canManageBilling:billingAuthority.canManageBilling,role:billingAuthority.role},launchAuthorizationStatus:launchAuthorization.status,launchAuthorizationReady:launchAuthorization.ready});
+    const portalEligibility=deriveCommercialPortalEligibility({lifecycle:subscriptionLifecycle?.status??null,canManageBilling:billingAuthority.canManageBilling,providerCustomerBound,portalConfigured:platform.billingPortalConfigured});
+    res.json({...deriveCommercialRuntimeWorkspace({companyId:company.id,companyName:company.name,memberCount:Number(members?.count??0),commercialAccess:access.any,subscriptionStatus,catalogConfigured:platform.subscriptionConfigured,billingIdentityComplete:Boolean(company.address?.trim()&&company.phone?.trim()),...platform,platformChecks:platform.checks}),preparedSubscription,providerCustomerBound,latestCheckout,subscriptionLifecycle,portalEligibility,billingAuthority:{canManageBilling:billingAuthority.canManageBilling,role:billingAuthority.role},launchAuthorizationStatus:launchAuthorization.status,launchAuthorizationReady:launchAuthorization.ready});
   }catch{res.status(503).json({code:"COMMERCIAL_WORKSPACE_UNAVAILABLE",error:"Commercial workspace status is temporarily unavailable."});}
 });
 
