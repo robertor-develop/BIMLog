@@ -11,3 +11,5 @@ This block closes the recovery-action gap after subscription lifecycle truth bec
 Focused Block 13 behavior and API/frontend typechecks pass. This is the first five-build half of the next ten-build interval. It is pushed after the complete gate and remains unpublished until LR066–LR070.
 
 The complete production gate found the browser JavaScript total 749 bytes above the 4 MiB release budget. The browser parser was compacted without relaxing portal-state validation; the rebuilt production total is 4,194,301 bytes against the 4,194,304-byte limit. The complete gate is repeated after this repair.
+
+That repeat exposed a permanent LR053 source-contract expectation for the checkout completion-evidence diagnostic. The compatibility repair preserves that diagnostic, compacts unrelated failure copy, passes LR051–LR055 and LR064, and rebuilds at 4,194,297 of 4,194,304 bytes before another complete-gate run.
