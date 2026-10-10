@@ -16,7 +16,7 @@ import {verifyCommercialLaunchLive} from "../lib/commercial-launch-live-verifica
 import {readCommercialLaunchVerificationHistory,readLatestCommercialLaunchVerification,recordCommercialLaunchVerification} from "../lib/commercial-launch-verification-store";
 import {deriveCommercialLaunchAuthorization} from "../lib/commercial-launch-authorization";
 import {resolveReleaseMetadata} from "../lib/release-metadata";
-import {readPersistentCommercialAuthority} from "../lib/commercial-persistence";
+import {readLatestPersistentCheckout,readPersistentCommercialAuthority} from "../lib/commercial-persistence";
 import type {CommercialSubscriptionStatus} from "../lib/commercial-workspace-runtime";
 import {prepareCompanySubscription} from "../lib/commercial-subscription-setup";
 import {deriveCommercialLaunchProfile,commercialLaunchProfileConfigurationKeys} from "../lib/commercial-launch-profile";
@@ -107,13 +107,13 @@ router.get("/commercial/workspace",authMiddleware,async(req,res)=>{
     const launchReceipt=await readLatestCommercialLaunchVerification(pool);
     const launchAuthorization=deriveCommercialLaunchAuthorization({sourceCommit:resolveReleaseMetadata(process.env).sourceCommit,receipt:launchReceipt});
     const billingAuthority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});
-    const commercialAuthority=await readPersistentCommercialAuthority(pool,company.id);
+    const [commercialAuthority,latestCheckout]=await Promise.all([readPersistentCommercialAuthority(pool,company.id),readLatestPersistentCheckout(pool,company.id)]);
     const rawStatus=commercialAuthority?.subscription.status;
     const subscriptionStatus=(rawStatus===undefined?"not_configured":rawStatus) as CommercialSubscriptionStatus;
     if(!["not_configured","pending","trialing","active","past_due","suspended","canceling"].includes(subscriptionStatus))throw new Error("Commercial subscription status is invalid");
     const preparedSubscription=commercialAuthority?{subscriptionId:String(commercialAuthority.subscription.id),plan:commercialAuthority.subscription.plan_code,billingCycle:commercialAuthority.subscription.billing_cycle,seatQuantity:commercialAuthority.subscription.seat_quantity}:null;
     const providerCustomerBound=Boolean(commercialAuthority?.providerBindings.some(row=>row.provider==="stripe"&&row.status==="active"&&typeof row.customer_reference==="string"&&row.customer_reference.startsWith("cus_")));
-    res.json({...deriveCommercialRuntimeWorkspace({companyId:company.id,companyName:company.name,memberCount:Number(members?.count??0),commercialAccess:access.any,subscriptionStatus,catalogConfigured:platform.subscriptionConfigured,billingIdentityComplete:Boolean(company.address?.trim()&&company.phone?.trim()),...platform,platformChecks:platform.checks}),preparedSubscription,providerCustomerBound,billingAuthority:{canManageBilling:billingAuthority.canManageBilling,role:billingAuthority.role},launchAuthorizationStatus:launchAuthorization.status,launchAuthorizationReady:launchAuthorization.ready});
+    res.json({...deriveCommercialRuntimeWorkspace({companyId:company.id,companyName:company.name,memberCount:Number(members?.count??0),commercialAccess:access.any,subscriptionStatus,catalogConfigured:platform.subscriptionConfigured,billingIdentityComplete:Boolean(company.address?.trim()&&company.phone?.trim()),...platform,platformChecks:platform.checks}),preparedSubscription,providerCustomerBound,latestCheckout,billingAuthority:{canManageBilling:billingAuthority.canManageBilling,role:billingAuthority.role},launchAuthorizationStatus:launchAuthorization.status,launchAuthorizationReady:launchAuthorization.ready});
   }catch{res.status(503).json({code:"COMMERCIAL_WORKSPACE_UNAVAILABLE",error:"Commercial workspace status is temporarily unavailable."});}
 });
 
