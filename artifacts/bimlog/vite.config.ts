@@ -48,6 +48,7 @@ if (isBuild && basePath !== PRODUCTION_BASE_PATH) {
 
 export default defineConfig({
   base: basePath,
+  esbuild: isProduction ? { drop: ["console", "debugger"] } : undefined,
   plugins: [
     react(),
     tailwindcss(),
