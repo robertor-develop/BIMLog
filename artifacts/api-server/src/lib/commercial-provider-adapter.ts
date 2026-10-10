@@ -120,14 +120,17 @@ export async function createStripeCustomer(input:{
   companyId:number;
   companyName:string;
   billingEmail:string;
+  billingAddress:string;
+  billingPhone:string;
   idempotencyKey:string;
   transport:StripeTransport;
 }):Promise<Readonly<{providerCustomerReference:string}>>{
-  const companyName=input.companyName.trim(),billingEmail=input.billingEmail.trim().toLowerCase(),idempotencyKey=input.idempotencyKey.trim();
+  const companyName=input.companyName.trim(),billingEmail=input.billingEmail.trim().toLowerCase(),billingAddress=input.billingAddress.trim(),billingPhone=input.billingPhone.trim(),idempotencyKey=input.idempotencyKey.trim();
   if(!Number.isSafeInteger(input.companyId)||input.companyId<1||companyName.length<2||companyName.length>160)throw new Error("Stripe customer company identity is invalid");
   if(!/^\S+@\S+\.\S+$/.test(billingEmail)||billingEmail.length>320)throw new Error("Stripe customer billing email is invalid");
+  if(billingAddress.length<5||billingAddress.length>300||billingPhone.length<7||billingPhone.length>40)throw new Error("Stripe customer billing identity is invalid");
   if(!/^[A-Za-z0-9][A-Za-z0-9._:-]{15,127}$/.test(idempotencyKey))throw new Error("Stripe customer request identity is invalid");
-  const body=new URLSearchParams();body.set("name",companyName);body.set("email",billingEmail);body.set("metadata[company_id]",String(input.companyId));body.set("metadata[source]","bimlog");
+  const body=new URLSearchParams();body.set("name",companyName);body.set("email",billingEmail);body.set("address[line1]",billingAddress);body.set("phone",billingPhone);body.set("metadata[company_id]",String(input.companyId));body.set("metadata[source]","bimlog");
   const response=await input.transport({method:"POST",path:"/v1/customers",body,headers:Object.freeze({Authorization:`Bearer ${input.configuration.secretKey}`,"Stripe-Version":input.configuration.apiVersion,"Idempotency-Key":idempotencyKey})});
   if(response.status<200||response.status>=300||!response.body||typeof response.body!=="object")throw new Error("Stripe customer creation failed");
   const customer=response.body as {id?:unknown;metadata?:Record<string,unknown>};
