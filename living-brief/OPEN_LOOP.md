@@ -20,7 +20,16 @@
 - [x] Preserve the exact allowlisted portal-blocker union through browser parsing after the full frontend workspace typecheck exposed literal widening.
 - [x] Compact browser-side validation messages after the exact production build exceeded the 4 MiB JavaScript budget; preserve strict recovery validation and pass at 4,194,301 of 4,194,304 bytes.
 - [x] Preserve the permanent checkout completion-evidence diagnostic after the repeated gate exposed its compatibility contract; compact unrelated failure copy and pass the production budget at 4,194,297 of 4,194,304 bytes.
-- [ ] Push LR061–LR065 once and keep this first five-build block unpublished until LR066–LR070 completes the next ten-build interval.
+- [x] Push LR061–LR065 together with LR066–LR070 at the ten-build publication boundary.
+
+## Launch Readiness Block 14 — billing portal return continuity — 2026-10-10
+
+- [x] Return from hosted billing through one safe BIMLog-relative marker without provider or tenant identifiers.
+- [x] Accept only the exact bounded return marker in the browser.
+- [x] Derive refreshing, refreshed and unavailable states from BIMLog's authenticated commercial workspace.
+- [x] Explain in English and Spanish that returning from the portal does not confirm a billing change.
+- [x] Add LR066–LR070 to the complete pre-push acceptance gate.
+- [ ] Pass the complete exact-head gate, push LR061–LR070, publish the ten-build interval, verify exact live identity and complete authenticated Chrome smoke.
 
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
 
