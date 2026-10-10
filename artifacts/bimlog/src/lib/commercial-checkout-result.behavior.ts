@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import {deriveCommercialCheckoutReturnState} from "./commercial-checkout-result";
+const latest=(status:"creating"|"open"|"completed"|"expired"|"canceled"|"failed")=>({checkoutId:"checkout-1",orderId:"order-1",status,expiresAt:"2026-10-10T12:00:00.000Z",completedAt:status==="completed"?"2026-10-10T11:31:00.000Z":null,updatedAt:"2026-10-10T11:31:00.000Z"});
+assert.equal(deriveCommercialCheckoutReturnState({checkoutReturn:null,latestCheckout:null,subscriptionStatus:"pending"}),"none");
+assert.equal(deriveCommercialCheckoutReturnState({checkoutReturn:"cancelled",latestCheckout:latest("open"),subscriptionStatus:"pending"}),"cancelled");
+assert.equal(deriveCommercialCheckoutReturnState({checkoutReturn:"success",latestCheckout:null,subscriptionStatus:"pending"}),"verifying");
+assert.equal(deriveCommercialCheckoutReturnState({checkoutReturn:"success",latestCheckout:latest("open"),subscriptionStatus:"pending"}),"verifying");
+assert.equal(deriveCommercialCheckoutReturnState({checkoutReturn:"success",latestCheckout:latest("completed"),subscriptionStatus:"pending"}),"verifying");
+assert.equal(deriveCommercialCheckoutReturnState({checkoutReturn:"success",latestCheckout:latest("completed"),subscriptionStatus:"active"}),"verified");
+for(const status of ["expired","canceled","failed"] as const)assert.equal(deriveCommercialCheckoutReturnState({checkoutReturn:"success",latestCheckout:latest(status),subscriptionStatus:"pending"}),"failed");
+console.log("LR054 checkout-return truth acceptance: PASS");
