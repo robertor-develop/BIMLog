@@ -5125,3 +5125,14 @@ Release closure: exact source `0bcb3c741cccd64cf4254f5dbedb28602cea15ea` passed 
 - [ ] Pass the complete gate, push LR036–LR040, publish accumulated LR031–LR040 and complete authenticated Chrome production smoke.
 
 Production-smoke repair closed: the first LR031–LR040 publication exposed a dropped `from=billing` query on the Billing & Support Continue action. The bounded same-origin anchor repair, permanent acceptance assertion, complete gate, repair push, republication and repeated authenticated Chrome smoke passed at exact source `81483745321837d8bb8ecebd827450ccbcfba1fc` and deployment `30559961`.
+
+## Launch Readiness Block 11 — verified checkout return — 2026-10-10
+
+- [x] Read only the latest checkout attempt owned by the authenticated company.
+- [x] Keep provider session references and credentials outside the browser response.
+- [x] Validate checkout identity, timeline, state and completion consistency in the browser.
+- [x] Treat a redirect as pending until signed provider evidence activates the subscription.
+- [x] Show bilingual verified, pending, cancelled and failed outcomes with bounded automatic refresh.
+- [ ] Push LR051–LR055 and keep the block unpublished until LR056–LR060 completes the ten-build interval.
+
+Reconciliation checkpoint: LR051–LR055 reconciliation baseline is LR054 `09a6f47f`; LR055 remains an unpublished reviewed candidate and publication is due only after LR056–LR060.

@@ -73,6 +73,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/clash_reports.ts
 - artifacts/api-server/src/routes/commercial-billing-history-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-billing-identity-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-checkout-summary-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-activation-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-authorization-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-dossier-route.behavior.ts
@@ -365,6 +366,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-checkout-readiness.behavior.ts
 - artifacts/api-server/src/lib/commercial-checkout-readiness.ts
 - artifacts/api-server/src/lib/commercial-checkout-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-checkout-summary.behavior.ts
 - artifacts/api-server/src/lib/commercial-credit-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-setup.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.behavior.ts

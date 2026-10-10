@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "dd5aedd5212f9043284c1bd04354b96109bb751c34efd5561d740f12e22e8a72",
-  "itemCount": 355,
+  "sourceSha256": "ceafd7fc79e0672155bcae92a63985666a011573a81d1ae1fadf917e62503a0a",
+  "itemCount": 356,
   "counts": {
-    "ACTIVE": 314,
+    "ACTIVE": 315,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6467,6 +6467,24 @@
       "evidence": [
         "OPEN_LOOP.md:5125",
         "Launch Readiness Block 8 — billing identity to subscription setup — 2026-10-10"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "9670e71cf856d85d",
+      "sourceLine": 5136,
+      "heading": "Launch Readiness Block 11 — verified checkout return — 2026-10-10",
+      "statement": "Push LR051–LR055 and keep the block unpublished until LR056–LR060 completes the ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5136",
+        "Launch Readiness Block 11 — verified checkout return — 2026-10-10"
       ],
       "currentAuthority": false
     }
