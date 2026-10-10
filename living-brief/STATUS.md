@@ -4158,3 +4158,5 @@ LR021–LR025 connect the preserved paid-plan selection to the existing protecte
 # Launch Readiness Blocks 7–8 — billing identity production handoff repair — 2026-10-10
 
 LR031–LR040 establish the canonical tenant-scoped billing identity, restrict writes to billing authority, validate the browser contract, require complete identity before subscription preparation, bind verified billing fields to provider-customer setup, reject malformed fields before provider calls, and preserve atomic audit evidence. The first authenticated production smoke found that the Billing & Support Continue action dropped its `from=billing` query during client navigation, hiding the otherwise deployed identity form. The repair uses a normal same-origin anchor for that explicit handoff and adds a permanent source assertion. No payment, subscription, provider call, entitlement, customer data, or unrelated workflow is changed by the repair.
+
+The repair implementation commit is `d2dd9eb095a6166754c06ace95b1a0927b6402ca`; this candidate state is reconciled against that exact implementation before its release-gate and production acceptance commits.

@@ -5105,3 +5105,5 @@ Release closure: exact source `0bcb3c741cccd64cf4254f5dbedb28602cea15ea` passed 
 - [ ] Pass the complete gate, push LR036–LR040, publish accumulated LR031–LR040 and complete authenticated Chrome production smoke.
 
 Production-smoke repair in progress: the first LR031–LR040 publication exposed a dropped `from=billing` query on the Billing & Support Continue action. The billing identity route and form are live and work when addressed directly. The bounded same-origin anchor repair and its acceptance assertion are implemented; closure still requires a complete passing gate, repair commit/push, republish, and repeated authenticated Chrome smoke before either Block 7 or Block 8 is marked released.
+
+Reconciliation baseline: repair implementation commit `d2dd9eb095a6166754c06ace95b1a0927b6402ca`; the release remains open until the candidate metadata, complete gate, push, republish, and repeated smoke all pass.
