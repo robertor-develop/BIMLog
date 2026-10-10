@@ -4121,3 +4121,6 @@ The first exact publication at `bc84c5143ef05f0e3d2b5afdaf4beae20f9cdf22` passed
 # Headquarters queue publication repair — 2026-10-09
 
 - Live authenticated Chrome exposed stale queue content after switching the `type` query in place. The first repair proved that Wouter's location omits the search string in this runtime; `PendingItems` now derives its queue from Wouter's reactive `useSearch()` value, so direct links and in-page RFI, Submittal, and file switches reload the correct data without leaving the page.
+# Launch Readiness Block 1 — commercial launch dossier — 2026-10-09
+
+LR001–LR005 add one protected, source-bound commercial launch dossier for the Global Super Administrator. The dossier keeps verified supplier identity, registration/tax identity, billing and support contacts, invoice jurisdiction, configured commercial services and the current provider-verification authorization in one fail-closed decision. Values come only from protected runtime configuration and existing durable verification evidence; the browser receives no provider credentials. Total Control presents the exact missing BIMLog-owned configuration keys in English and Spanish. This is the first five-build block in the launch-readiness program and remains unpublished until Block 2 completes the ten-build publication interval.

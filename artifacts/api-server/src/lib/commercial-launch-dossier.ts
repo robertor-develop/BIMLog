@@ -34,5 +34,5 @@ export function deriveCommercialLaunchDossier(input:{
     {id:"current_verification",status:input.verificationReady?"ready":"action_required",owner:"bimlog_platform",blockerCount:input.verificationReady?0:1},
   ];
   const blockerCount=sections.reduce((total,section)=>total+section.blockerCount,0),ready=blockerCount===0;
-  return Object.freeze({schemaVersion:"bimlog-commercial-launch-dossier-v1",status:ready?"ready":"blocked",ready,sourceCommit:input.sourceCommit,sections:Object.freeze(sections.map(Object.freeze)),blockerCount,evaluatedAt:(input.now??new Date()).toISOString()});
+  return Object.freeze({schemaVersion:"bimlog-commercial-launch-dossier-v1",status:ready?"ready":"blocked",ready,sourceCommit:input.sourceCommit,sections:Object.freeze(sections.map(section=>Object.freeze(section))),blockerCount,evaluatedAt:(input.now??new Date()).toISOString()});
 }

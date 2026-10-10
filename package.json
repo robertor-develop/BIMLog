@@ -247,6 +247,7 @@
     "test:saas-block60": "node scripts/test-saas-completion-block60.mjs",
     "test:saas-block61": "node scripts/test-saas-completion-block61.mjs",
     "test:saas-block62": "node scripts/test-saas-completion-block62.mjs",
+    "test:launch-readiness-block01": "node scripts/test-launch-readiness-block01.mjs",
     "test:ux-human-orientation-block01": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/next-action.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/human-orientation-block01.behavior.ts && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/pages/responsibility-workspace-ui.behavior.ts",
     "test:headquarters-daily-clarity-block01": "node scripts/test-headquarters-daily-clarity-block01.mjs",
     "test:headquarters-daily-clarity-block02": "node scripts/test-headquarters-daily-clarity-block02.mjs",

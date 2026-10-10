@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 751,
-    "frontendApiReferences": 298,
+    "apiRoutes": 752,
+    "frontendApiReferences": 300,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -2225,6 +2225,15 @@
     {
       "method": "GET",
       "path": "/admin/commercial-launch/authorization",
+      "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "tables": [
+        "companiesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/commercial-launch/dossier",
       "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
       "tables": [
         "companiesTable",
@@ -9623,6 +9632,10 @@
       "apiPath": "/api/v1/company/master-catalogs/"
     },
     {
+      "screen": "artifacts/bimlog/src/components/admin/commercial-launch-dossier-panel.behavior.ts",
+      "apiPath": "/api/v1/admin/commercial-launch/dossier"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/commercial-launch"
     },
@@ -9633,6 +9646,10 @@
     {
       "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/admin/commercial-launch/authorization"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/commercial-launch/dossier"
     },
     {
       "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
