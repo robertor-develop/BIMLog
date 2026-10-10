@@ -1,0 +1,6 @@
+import assert from"node:assert/strict";import{deriveCommercialInvoiceGuidance}from"./commercial-invoice-guidance";import type{BillingInvoiceDto}from"./commercial-billing-history-client";
+const invoice:BillingInvoiceDto={id:"i",invoiceNumber:"INV-1",currency:"USD",subtotalCents:10000,taxCents:0,totalCents:10000,status:"open",issuedAt:"2026-10-10T12:00:00Z",dueAt:"2026-10-20T12:00:00Z",paidAt:null,credits:[{id:"c",creditNumber:"CN-1",amountCents:1500,reason:"Adjustment",status:"issued",issuedAt:"2026-10-11T12:00:00Z"}],disputes:[]};
+assert.deepEqual(deriveCommercialInvoiceGuidance(invoice),{creditedCents:1500,openDisputeCents:0,balanceCents:8500,action:"pay_or_update"});
+assert.equal(deriveCommercialInvoiceGuidance({...invoice,status:"paid",paidAt:"2026-10-12T12:00:00Z"}).action,"paid");assert.equal(deriveCommercialInvoiceGuidance({...invoice,status:"void"}).action,"closed");assert.equal(deriveCommercialInvoiceGuidance({...invoice,status:"draft"}).action,"await_invoice");
+const disputed={...invoice,disputes:[{id:"d",amountCents:2000,reasonCode:"duplicate",status:"needs_response" as const,evidenceDueAt:"2026-10-15T12:00:00Z",closedAt:null}]};assert.deepEqual(deriveCommercialInvoiceGuidance(disputed),{creditedCents:1500,openDisputeCents:2000,balanceCents:8500,action:"dispute_response"});
+console.log("LR073 deterministic customer invoice guidance: PASS");
