@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 752,
-    "frontendApiReferences": 300,
+    "apiRoutes": 753,
+    "frontendApiReferences": 301,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -6591,6 +6591,12 @@
       ]
     },
     {
+      "method": "GET",
+      "path": "/public/legal-identity",
+      "owner": "artifacts/api-server/src/routes/public-legal-identity.ts",
+      "tables": []
+    },
+    {
       "method": "POST",
       "path": "/repair-execution/claim",
       "owner": "artifacts/api-server/src/routes/repairs.ts",
@@ -9982,6 +9988,10 @@
     {
       "screen": "artifacts/bimlog/src/lib/commercial-workspace-client.ts",
       "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/subscription-setup"
+    },
+    {
+      "screen": "artifacts/bimlog/src/lib/public-legal-identity-client.ts",
+      "apiPath": "/api/v1/public/legal-identity"
     },
     {
       "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",
