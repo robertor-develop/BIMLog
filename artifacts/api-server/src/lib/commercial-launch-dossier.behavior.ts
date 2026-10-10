@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import {deriveCommercialLaunchDossier} from "./commercial-launch-dossier";
+import {deriveCommercialLaunchProfile} from "./commercial-launch-profile";
+const source="a".repeat(40),now=new Date("2026-10-09T15:00:00.000Z");
+const blocked=deriveCommercialLaunchDossier({sourceCommit:source,profile:deriveCommercialLaunchProfile({},now),serviceReady:false,serviceBlockerCount:6,verificationReady:false,now});
+assert.equal(blocked.ready,false);assert.equal(blocked.blockerCount,14);assert.deepEqual(blocked.sections.map(item=>item.id),["supplier_identity","commercial_services","current_verification"]);
+const profile=deriveCommercialLaunchProfile({BIMLOG_LEGAL_SUPPLIER_NAME:"Supplier",BIMLOG_LEGAL_SUPPLIER_REGISTRATION:"Registration",BIMLOG_LEGAL_TAX_ID:"Tax",BIMLOG_LEGAL_BILLING_EMAIL:"billing@example.com",BIMLOG_LEGAL_SUPPORT_EMAIL:"support@example.com",BIMLOG_LEGAL_ADDRESS:"Address",BIMLOG_INVOICE_JURISDICTION:"Jurisdiction"},now);
+const ready=deriveCommercialLaunchDossier({sourceCommit:source,profile,serviceReady:true,serviceBlockerCount:0,verificationReady:true,now});
+assert.equal(ready.ready,true);assert.equal(ready.status,"ready");assert.equal(ready.blockerCount,0);
+assert.throws(()=>deriveCommercialLaunchDossier({sourceCommit:source,profile,serviceReady:true,serviceBlockerCount:1,verificationReady:true}));
+console.log("Launch Block 1 Build 2 source-bound launch dossier: PASS");
