@@ -63879,6 +63879,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "99bfaeb772783d06affe712ea102e6ec7b88b9b3075391b679fea006d7fee0ca"
+    },
+    {
+      "taskId": "launch-readiness-block14-provider-guidance-repair",
+      "reviewedThroughCommit": "f634846c489a267208e1223b806c5bb8731f3bd3",
+      "reviewedAt": "2026-10-10T20:30:00.000Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "The repeated gate exposed the permanent customer guidance that provider settings remain BIMLog-owned. The repair restores that exact compatibility sentence without changing portal behavior, provider authority, schemas, credentials, Native, reporting, legal identity, or MAIN 04 behavior.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e35aa77300c46f734c1d1099583e1004e3281fd2050bc6309d36cb2a38f42ee9"
     }
   ]
 }

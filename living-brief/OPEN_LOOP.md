@@ -30,6 +30,7 @@
 - [x] Explain in English and Spanish that returning from the portal does not confirm a billing change.
 - [x] Add LR066–LR070 to the complete pre-push acceptance gate.
 - [x] Repair the browser JavaScript budget failure without raising the 4 MiB limit; preserve the bounded bilingual return truth and pass at 4,194,254 of 4,194,304 bytes.
+- [x] Preserve the permanent customer guidance that provider settings remain BIMLog-owned after copy compaction.
 - [ ] Pass the complete exact-head gate, push LR061–LR070, publish the ten-build interval, verify exact live identity and complete authenticated Chrome smoke.
 
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
