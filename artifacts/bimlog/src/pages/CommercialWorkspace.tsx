@@ -7,7 +7,7 @@ import {useAuthStore} from "@/store/auth";
 import {useI18n} from "@/lib/i18n";
 import {parseCommercialWorkspace,requestCommercialHostedDestination,requestCommercialSubscriptionSetup,type CommercialWorkspaceDto} from "@/lib/commercial-workspace-client";
 import {deriveCommercialCheckoutEligibility} from "@/lib/commercial-checkout-eligibility";
-import {readCommercialIntent} from "@/lib/commercial-intent";
+import {parsePostOnboardingCommercialIntent,readCommercialIntent} from "@/lib/commercial-intent";
 import {parseCommercialCheckoutReturn} from "@/lib/commercial-checkout-return";
 import {SupportCasesPanel} from "@/components/commercial/SupportCasesPanel";
 import {BillingHistoryPanel} from "@/components/commercial/BillingHistoryPanel";
@@ -15,7 +15,7 @@ const API_BASE=import.meta.env.BASE_URL.replace(/\/$/,"");
 
 export function CommercialWorkspace(){
   const token=useAuthStore(state=>state.token),{tt}=useI18n();
-  const [intent]=useState(()=>readCommercialIntent()),initialPlan=intent&&["professional","team","business"].includes(intent.plan)?intent.plan as "professional"|"team"|"business":"professional";
+  const [intent]=useState(()=>parsePostOnboardingCommercialIntent(window.location.search)??readCommercialIntent()),initialPlan=intent&&["professional","team","business"].includes(intent.plan)?intent.plan as "professional"|"team"|"business":"professional";
   const [data,setData]=useState<CommercialWorkspaceDto|null>(null),[error,setError]=useState(""),[loading,setLoading]=useState(true),[nonce,setNonce]=useState(0),[plan,setPlan]=useState<"professional"|"team"|"business">(initialPlan),[cycle,setCycle]=useState<"monthly"|"annual">(intent?.billing??"monthly"),[billingBusy,setBillingBusy]=useState(false),[billingError,setBillingError]=useState("");
   const checkoutReturn=parseCommercialCheckoutReturn(window.location.search);
   const checkoutEligibility=data?deriveCommercialCheckoutEligibility(data,{plan,cycle}):null;
