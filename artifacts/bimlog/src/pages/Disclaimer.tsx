@@ -3,6 +3,7 @@ import { useI18n } from "@/lib/i18n";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft } from "lucide-react";
 import { LegalDocumentNav } from "@/components/legal/LegalDocumentNav";
+import { LegalSupplierIdentity } from "@/components/legal/LegalSupplierIdentity";
 import { LEGAL_EFFECTIVE_DATE, legalDocument } from "@/lib/legal-information";
 
 const CONTENT = {
@@ -99,6 +100,8 @@ export function Disclaimer() {
         <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 32 }}>
           {t("legal.effectiveDate")}: {content.effectiveDate} · BIMCapital Partners INC · info@ignitesmart.ai
         </div>
+
+        <LegalSupplierIdentity />
 
         <div style={{ background: "hsl(var(--muted)/0.4)", border: "1px solid hsl(var(--border))", borderRadius: 8, padding: "16px 20px", marginBottom: 32 }}>
           {content.intro.split("\n\n").map((para, i) => (

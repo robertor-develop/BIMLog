@@ -3,6 +3,7 @@ import { useI18n } from "@/lib/i18n";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronLeft } from "lucide-react";
 import { LegalDocumentNav } from "@/components/legal/LegalDocumentNav";
+import { LegalSupplierIdentity } from "@/components/legal/LegalSupplierIdentity";
 import { LEGAL_EFFECTIVE_DATE, legalDocument } from "@/lib/legal-information";
 
 const CONTENT = {
@@ -131,6 +132,8 @@ export function Privacy() {
         <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{t("legal.effectiveDate")}: {content.effectiveDate}</div>
         <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 4 }}>{t("legal.lastUpdated")}: {content.lastUpdated}</div>
         <div style={{ fontSize: 13, color: "hsl(var(--muted-foreground))", marginBottom: 32 }}>BIMCapital Partners INC · 7901 4th Street North, STE 300 · St. Petersburg, FL 33702 · info@ignitesmart.ai</div>
+
+        <LegalSupplierIdentity />
 
         <article aria-labelledby="privacy-title" style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 32 }}>
           {content.sections.map((sec, i) => (
