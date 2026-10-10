@@ -62479,14 +62479,18 @@
       ],
       "reason": "Make each public Pricing action follow the verified commercial-availability state while preserving the existing bounded intent and downstream commercial journeys.",
       "reviewedChangedPaths": [
+        "artifacts/bimlog/src/lib/commercial-availability-journey.behavior.ts",
+        "artifacts/bimlog/src/lib/commercial-availability-journey.ts",
         "artifacts/bimlog/src/pages/Pricing.tsx",
+        "evidence/launch-readiness-20261009/BLOCK_04_LR016_LR020.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-launch-readiness-block04.mjs"
       ],
-      "reviewedChangeSha256": "5cfea0847e7b7a1acad72e294005837527b692351975cbb1da68d66108e032dc"
+      "reviewedChangeSha256": "319de58444f298bf5d7b9dc06338aa4f816cdc18aae09ae483f37b529e6a4d08"
     }
   ]
 }

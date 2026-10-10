@@ -6,12 +6,16 @@
   "impact": {
     "baselineCommit": "b6e09e1b62eaa423d97fbeb0b15dbb7aa62513ff",
     "changedPaths": [
+      "artifacts/bimlog/src/lib/commercial-availability-journey.behavior.ts",
+      "artifacts/bimlog/src/lib/commercial-availability-journey.ts",
       "artifacts/bimlog/src/pages/Pricing.tsx",
+      "evidence/launch-readiness-20261009/BLOCK_04_LR016_LR020.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
-      "package.json"
+      "package.json",
+      "scripts/test-launch-readiness-block04.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
