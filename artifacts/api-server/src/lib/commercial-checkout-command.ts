@@ -2,6 +2,8 @@ import crypto from "node:crypto";
 import {bindPersistentCheckoutSession,createPersistentOrderCheckout,readPersistentCommercialAuthority,type CommercialQueryClient} from "./commercial-persistence";
 import {createStripeCheckoutSession,createStripeTransport,inspectStripeCommercialConfiguration,type StripeTransport} from "./commercial-provider-adapter";
 import {requireCommercialCheckoutReadiness} from "./commercial-checkout-readiness";
+import {requireCommercialCheckoutAuthorization} from "./commercial-checkout-authorization";
+import type {CommercialLaunchAuthorization} from "./commercial-launch-authorization";
 import type {CheckoutAttempt,CommercialOrder,ProviderCustomerBinding} from "./subscription-authority";
 
 export const checkoutPlans=["professional","team","business"] as const;
@@ -18,8 +20,9 @@ export function resolveCheckoutOffer(environment:NodeJS.ProcessEnv,plan:unknown,
   return Object.freeze({plan:plan as CheckoutPlan,cycle:cycle as CheckoutCycle,priceReference,subtotalCents:amounts[slot],currency:"USD" as const});
 }
 
-export async function startCommercialCheckout(input:{client:CommercialQueryClient;environment:NodeJS.ProcessEnv;companyId:number;userId:number;requestKey:string;plan:unknown;cycle:unknown;transport?:StripeTransport;now?:Date}){
+export async function startCommercialCheckout(input:{client:CommercialQueryClient;environment:NodeJS.ProcessEnv;launchAuthorization:CommercialLaunchAuthorization;companyId:number;userId:number;requestKey:string;plan:unknown;cycle:unknown;transport?:StripeTransport;now?:Date}){
   requireCommercialCheckoutReadiness(input.environment);
+  requireCommercialCheckoutAuthorization(input.launchAuthorization);
   const offer=resolveCheckoutOffer(input.environment,input.plan,input.cycle),authority=await readPersistentCommercialAuthority(input.client,input.companyId);
   if(!authority)throw new Error("Create the company subscription record before checkout");
   const subscription=authority.subscription,binding=authority.providerBindings.find(row=>row.provider==="stripe");

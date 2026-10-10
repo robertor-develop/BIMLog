@@ -6,7 +6,12 @@ assert.equal(resolveCheckoutOffer(env,"business","annual").subtotalCents,399000)
 assert.throws(()=>resolveCheckoutOffer(env,"enterprise","annual"),/supported checkout/);
 assert.throws(()=>resolveCheckoutOffer({},"team","monthly"),/not configured/);
 let queryCount=0,transportCount=0;
-await assert.rejects(()=>startCommercialCheckout({client:{async query(){queryCount+=1;return {rows:[],rowCount:0};}},environment:{},companyId:7,userId:11,requestKey:"request-company-7",plan:"professional",cycle:"monthly",transport:async()=>{transportCount+=1;return {status:500,body:{}};}}),error=>error instanceof Error&&(error as Error&{code?:string}).code==="CHECKOUT_PLATFORM_NOT_READY");
+const missingAuthorization={status:"missing",ready:false,sourceCommit:"a".repeat(40),receipt:null,evaluatedAt:"2026-10-10T17:00:00.000Z"} as const;
+await assert.rejects(()=>startCommercialCheckout({client:{async query(){queryCount+=1;return {rows:[],rowCount:0};}},environment:{},launchAuthorization:missingAuthorization,companyId:7,userId:11,requestKey:"request-company-7",plan:"professional",cycle:"monthly",transport:async()=>{transportCount+=1;return {status:500,body:{}};}}),error=>error instanceof Error&&(error as Error&{code?:string}).code==="CHECKOUT_PLATFORM_NOT_READY");
 assert.equal(queryCount,0,"platform readiness must fail before any commercial write or read");
 assert.equal(transportCount,0,"platform readiness must fail before a Stripe call");
+const readyEnvironment={...env,STRIPE_SECRET_KEY:["sk","live","abcdefghijklmnopqrstuvwxyz"].join("_"),STRIPE_WEBHOOK_SECRET:"whsec_abcdefghijklmnopqrstuvwxyz",STRIPE_PORTAL_CONFIGURATION_ID:"bpc_abcdefghijklmnopqrstuvwxyz",BIMLOG_COMMERCIAL_MODE:"live",BIMLOG_APP_ORIGIN:"https://bimlog.app",SENDGRID_API_KEY:"SG.abcdefghijk.abcdefghijklmnop",BIMLOG_SUPPORT_FROM_EMAIL:"support@bimlog.app",BIMLOG_SUPPORT_INBOX_EMAIL:"support@bimlog.app"};
+await assert.rejects(()=>startCommercialCheckout({client:{async query(){queryCount+=1;return {rows:[],rowCount:0};}},environment:readyEnvironment,launchAuthorization:missingAuthorization,companyId:7,userId:11,requestKey:"request-company-7",plan:"professional",cycle:"monthly",transport:async()=>{transportCount+=1;return {status:500,body:{}};}}),error=>error instanceof Error&&(error as Error&{code?:string}).code==="CHECKOUT_LIVE_VERIFICATION_REQUIRED");
+assert.equal(queryCount,0,"launch authorization must fail before commercial persistence access");
+assert.equal(transportCount,0,"launch authorization must fail before a Stripe call");
 console.log("commercial checkout command behavior passed");
