@@ -6,6 +6,7 @@
 - [x] Validate lifecycle status, plan, cycle, seats, and timestamps at the browser boundary.
 - [x] Explain active, past-due, suspended, canceling, and canceled customer next actions in English and Spanish.
 - [ ] Publish the exact ten-build LR051–LR060 source and complete authenticated production Chrome acceptance after the full release gate passes.
+- [x] Repair the production browser asset-budget failure without raising or weakening the 4 MiB limit.
 
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
 

@@ -4181,3 +4181,5 @@ Reconciliation checkpoint: LR051–LR055 reconciliation baseline is LR054 `09a6f
 # Launch readiness LR056–LR060 — subscription lifecycle projection — 2026-10-10
 
 The second five-build interval now preserves the latest tenant subscription lifecycle after checkout, including canceled history, validates the credential-free browser contract, and explains active, past-due, suspended, canceling, and canceled next actions in Billing & Support. Signed provider webhook evidence remains the only authority that changes paid access. The implementation is committed through `eb0b8d63`; publication and production Chrome acceptance remain pending the exact-source release gate.
+
+The release gate then identified a 2,430-byte browser asset-budget overrun. Commit `8d43cc0c` compacted the customer projection while retaining all lifecycle states and strict status validation; the targeted production build now passes at 4,194,186 of 4,194,304 bytes. The complete exact-source gate must pass again before publication.
