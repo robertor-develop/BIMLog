@@ -18,6 +18,9 @@ const publicRules = [
   /^health\.ts\|GET\|\/healthz$/,
   /^auth\.ts\|(POST|GET)\|\/(auth\/login|auth\/register|auth\/forgot-password|auth\/reset-password|auth\/verify-reset-token)$/,
   /^contact\.ts\|POST\|\/contact$/,
+  // Legal disclosure pages load this deliberately minimal projection before
+  // sign-in. The route excludes registration, tax, billing and address data.
+  /^public-legal-identity\.ts\|GET\|\/public\/legal-identity$/,
   /^downloads\.ts\|GET\|\/downloads\//,
   /^autodesk\.ts\|GET\|\/autodesk\/(token|login|callback)$/,
   /^connections\.ts\|GET\|\/connections\/:provider\/callback$/,
