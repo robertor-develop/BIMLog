@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
-import {resolveCheckoutOffer} from "./commercial-checkout-command";
+import {resolveCheckoutOffer,startCommercialCheckout} from "./commercial-checkout-command";
 const env={BIMLOG_STRIPE_PRICE_IDS:"professional.monthly=price_prof_monthly,professional.annual=price_prof_annual,team.monthly=price_team_monthly,team.annual=price_team_annual,business.monthly=price_business_monthly,business.annual=price_business_annual"};
 assert.deepEqual(resolveCheckoutOffer(env,"professional","monthly"),{plan:"professional",cycle:"monthly",priceReference:"price_prof_monthly",subtotalCents:14900,currency:"USD"});
 assert.equal(resolveCheckoutOffer(env,"business","annual").subtotalCents,399000);
 assert.throws(()=>resolveCheckoutOffer(env,"enterprise","annual"),/supported checkout/);
 assert.throws(()=>resolveCheckoutOffer({},"team","monthly"),/not configured/);
+let queryCount=0,transportCount=0;
+await assert.rejects(()=>startCommercialCheckout({client:{async query(){queryCount+=1;return {rows:[],rowCount:0};}},environment:{},companyId:7,userId:11,requestKey:"request-company-7",plan:"professional",cycle:"monthly",transport:async()=>{transportCount+=1;return {status:500,body:{}};}}),error=>error instanceof Error&&(error as Error&{code?:string}).code==="CHECKOUT_PLATFORM_NOT_READY");
+assert.equal(queryCount,0,"platform readiness must fail before any commercial write or read");
+assert.equal(transportCount,0,"platform readiness must fail before a Stripe call");
 console.log("commercial checkout command behavior passed");

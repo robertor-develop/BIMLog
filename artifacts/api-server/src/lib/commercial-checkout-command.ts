@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import {bindPersistentCheckoutSession,createPersistentOrderCheckout,readPersistentCommercialAuthority,type CommercialQueryClient} from "./commercial-persistence";
 import {createStripeCheckoutSession,createStripeTransport,inspectStripeCommercialConfiguration,type StripeTransport} from "./commercial-provider-adapter";
+import {requireCommercialCheckoutReadiness} from "./commercial-checkout-readiness";
 import type {CheckoutAttempt,CommercialOrder,ProviderCustomerBinding} from "./subscription-authority";
 
 export const checkoutPlans=["professional","team","business"] as const;
@@ -18,6 +19,7 @@ export function resolveCheckoutOffer(environment:NodeJS.ProcessEnv,plan:unknown,
 }
 
 export async function startCommercialCheckout(input:{client:CommercialQueryClient;environment:NodeJS.ProcessEnv;companyId:number;userId:number;requestKey:string;plan:unknown;cycle:unknown;transport?:StripeTransport;now?:Date}){
+  requireCommercialCheckoutReadiness(input.environment);
   const offer=resolveCheckoutOffer(input.environment,input.plan,input.cycle),authority=await readPersistentCommercialAuthority(input.client,input.companyId);
   if(!authority)throw new Error("Create the company subscription record before checkout");
   const subscription=authority.subscription,binding=authority.providerBindings.find(row=>row.provider==="stripe");
