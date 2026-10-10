@@ -5,4 +5,8 @@ const environment={STRIPE_SECRET_KEY:"sk_test_abcdefghijkl",STRIPE_WEBHOOK_SECRE
 const result=await startCommercialBillingPortal({client,environment,companyId:7,userId:4,now:new Date("2026-10-04T12:00:00Z"),transport:async request=>{assert.equal(request.path,"/v1/billing_portal/sessions");assert.equal(request.body.get("customer"),"cus_company_7");return {status:200,body:{id:"bps_company_7",url:"https://billing.stripe.com/p/session_7",customer:"cus_company_7"}};}});
 assert.equal(result.url,"https://billing.stripe.com/p/session_7");
 assert.equal(result.expiresAt,"2026-10-04T12:10:00.000Z");
-console.log("commercial portal command behavior passed");
+assert.equal(result.purpose,"manage");
+const recoveryClient={query:async(text:string)=>text.includes("FROM commercial_subscriptions")?{rows:[{id:"sub-7",company_id:7,status:"past_due"}],rowCount:1}:text.includes("commercial_provider_bindings")?{rows:[{id:"binding-7",provider:"stripe",customer_reference:"cus_company_7"}],rowCount:1}:{rows:[],rowCount:0}};
+const recovery=await startCommercialBillingPortal({client:recoveryClient,environment,companyId:7,userId:4,transport:async()=>({status:200,body:{id:"bps_recovery",url:"https://billing.stripe.com/p/recovery",customer:"cus_company_7"}})});
+assert.equal(recovery.purpose,"recover_payment");
+console.log("LR062 server-enforced billing portal recovery: PASS");
