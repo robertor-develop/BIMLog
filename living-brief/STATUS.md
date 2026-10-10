@@ -4192,4 +4192,6 @@ The first complete-gate run found a stale Billing & Support assertion that still
 
 The repeated gate then exposed strict compile-time uncertainty at the persisted lifecycle and nullable provider-configuration boundaries. Repair `89d8feea` validates the lifecycle allowlist and narrows complete provider configuration before transport; the API typecheck and focused recovery behavior pass.
 
+The downstream frontend workspace typecheck exposed literal widening in the new portal blocker array. Repair `16bafc6c` retains the exact allowlisted blocker union through strict parsing without changing runtime behavior; the frontend typecheck passes.
+
 The release gate then identified a 2,430-byte browser asset-budget overrun. Commit `8d43cc0c` compacted the customer projection while retaining all lifecycle states and strict status validation; the targeted production build now passes at 4,194,186 of 4,194,304 bytes. The complete exact-source gate must pass again before publication.

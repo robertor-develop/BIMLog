@@ -17,6 +17,7 @@
 - [x] Show bilingual Manage billing, Update payment method and Review cancellation actions from server-authoritative recovery truth.
 - [x] Repair the pre-existing active-only portal assertion exposed by the complete gate and retain the stronger server-authoritative recovery contract.
 - [x] Narrow persisted lifecycle and provider configuration values before hosted portal transport after the repeated gate exposed strict TypeScript uncertainty.
+- [x] Preserve the exact allowlisted portal-blocker union through browser parsing after the full frontend workspace typecheck exposed literal widening.
 - [ ] Push LR061–LR065 once and keep this first five-build block unpublished until LR066–LR070 completes the next ten-build interval.
 
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
