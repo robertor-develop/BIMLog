@@ -5074,3 +5074,12 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [x] Publish exact source `e55c12a5bf1342350f7ed0abb4ed084f40de7941` with `identityBound=true`.
 - [x] Verify authenticated Headquarters-to-Submittals navigation, in-place RFI/Submittal/file switching and exact project-register row navigation in production Chrome.
 - [x] Verify the 390 CSS-pixel queue has no horizontal overflow and produces zero browser warnings or errors.
+
+## Launch Readiness Block 6 — billing offer handoff — 2026-10-10
+
+- [x] Derive one deterministic review, preparation, checkout, or management next action.
+- [x] Show the exact paid plan and billing cycle carried from Pricing and onboarding.
+- [x] Clear only a matching commercial intent after the prepared subscription is verified.
+- [x] Explain every checkout blocker with clear customer or BIMLog ownership.
+- [x] Bind the explicit preparation, checkout and entitlement boundaries to focused acceptance.
+- [ ] Pass the complete gate, push LR026–LR030, publish LR021–LR030 and complete authenticated Chrome production smoke.

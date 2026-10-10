@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "cefcd5544ef3d78b1682c632bc57fb6dac07057b964dfecb2be476488d6ffc05",
-  "itemCount": 352,
+  "sourceSha256": "c824d08411e7134bb1ff214e4b7308f9163d9fbbcc9b2697a767542c20c21604",
+  "itemCount": 353,
   "counts": {
-    "ACTIVE": 311,
+    "ACTIVE": 312,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6413,6 +6413,24 @@
       "evidence": [
         "OPEN_LOOP.md:5069",
         "BIMLog Agent workspace controls Block 2 — 2026-10-08"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d20ed012052c5302",
+      "sourceLine": 5085,
+      "heading": "Launch Readiness Block 6 — billing offer handoff — 2026-10-10",
+      "statement": "Pass the complete gate, push LR026–LR030, publish LR021–LR030 and complete authenticated Chrome production smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5085",
+        "Launch Readiness Block 6 — billing offer handoff — 2026-10-10"
       ],
       "currentAuthority": false
     }

@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Launch Readiness Block 6 publication candidate — 2026-10-10
+
+Five builds complete the verified paid-offer handoff in the protected Billing & Support workspace. BIMLog shows the exact plan and cycle selected through Pricing and onboarding, derives one truthful next action, clears only a matching session intent after server-confirmed preparation, and identifies each customer-owned or BIMLog-owned checkout blocker. Subscription preparation, hosted checkout, signed payment confirmation and entitlement remain separate explicit authorities. This completes the LR021–LR030 ten-build interval and requires the complete release gate, exact push, controlled publication, live identity verification and authenticated Chrome smoke.
+
 ## Headquarters daily clarity Block 8 publication candidate — 2026-10-09
 
 Five builds make the existing queue-movement signal directly auditable by a human. Each RFI, Submittal and file-attention row retains and displays its exact previous and current verified count alongside the signed delta. The browser preserves the prior successful snapshot time with its counts, and the bilingual interface states the complete date-and-time comparison window so a midnight boundary cannot be mistaken for a same-day comparison. Compact desktop and exact-mobile presentation plus permanent focused acceptance complete the ten-build interval with Block 7. No history database, urgency, causation, contractual priority, due date, schema, customer record, permission, payment or Native behavior was added. The exact candidate requires the complete release gate, push, controlled publication, live identity verification and authenticated desktop/mobile Chrome smoke.
