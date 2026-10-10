@@ -38,7 +38,7 @@ export function parseCommercialWorkspace(value:unknown):CommercialWorkspaceDto{
   if(!row.portalEligibility||typeof row.portalEligibility!=="object"||Array.isArray(row.portalEligibility))throw new Error("Invalid billing portal eligibility");
   const portalSource=row.portalEligibility as Record<string,unknown>,portalPurpose=portalSource.purpose===null?null:oneOf(portalSource.purpose,["manage","recover_payment","review_cancellation"],"portal purpose");
   if(typeof portalSource.ready!=="boolean"||!Array.isArray(portalSource.blockers))throw new Error("Invalid billing portal eligibility");
-  const portalBlockers=portalSource.blockers.map(value=>oneOf(value,["billing_authority","subscription_state","provider_customer","portal_service"],"portal blocker"));
+  const portalBlockers:CommercialPortalEligibilityDto["blockers"]=portalSource.blockers.map(value=>oneOf(value,["billing_authority","subscription_state","provider_customer","portal_service"] as const,"portal blocker"));
   const portalEligibility={ready:portalSource.ready,purpose:portalPurpose,blockers:portalBlockers};
   if(new Set(portalBlockers).size!==portalBlockers.length||portalEligibility.ready!==(portalBlockers.length===0&&portalPurpose!==null))throw new Error("Invalid billing portal eligibility consistency");
   let latestCheckout:CommercialCheckoutSummaryDto|null=null;
