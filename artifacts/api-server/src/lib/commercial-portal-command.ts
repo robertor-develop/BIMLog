@@ -14,7 +14,7 @@ export async function startCommercialBillingPortal(input:{client:CommercialQuery
   if(!eligibility.ready||!binding||!configured.configuration||!configured.configuration.portalConfigurationId)throw new Error(`Billing self-service is unavailable: ${eligibility.blockers.join(",")}`);
   const now=input.now??new Date();
   const customer:ProviderCustomerBinding={id:String(binding.id),companyId:input.companyId,billingProfileRevision:1,provider:"stripe",providerCustomerReference:String(binding.customer_reference),status:"active",createdAt:now.toISOString()};
-  const session=createBillingPortalSession({id:`portal-${crypto.randomUUID()}`,customer,requestedBy:String(input.userId),returnPath:"/settings/billing-support",now:now.toISOString()});
+  const session=createBillingPortalSession({id:`portal-${crypto.randomUUID()}`,customer,requestedBy:String(input.userId),returnPath:"/settings/billing-support?billing=returned",now:now.toISOString()});
   const launch=await createStripeBillingPortalLaunch({configuration:configured.configuration,session,customer,transport:input.transport??createStripeTransport()});
   return Object.freeze({url:launch.portalUrl,expiresAt:session.expiresAt,purpose:eligibility.purpose});
 }
