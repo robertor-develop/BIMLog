@@ -12,13 +12,5 @@ export function readCommercialIntent(storage:Pick<Storage,"getItem"|"removeItem"
 export function clearCommercialIntent(storage:Pick<Storage,"removeItem">=sessionStorage){storage.removeItem(COMMERCIAL_INTENT_STORAGE_KEY);}
 export function postOnboardingCommercialDestination(value:CommercialIntent|null,defaultDestination:string){
   if(!value||!["professional","team","business"].includes(value.plan))return defaultDestination;
-  const params=new URLSearchParams({plan:value.plan,billing:value.billing,from:"onboarding"});
-  if(value.useCase)params.set("useCase",value.useCase);
-  return `/settings/billing-support?${params.toString()}`;
-}
-export function parsePostOnboardingCommercialIntent(search:string):CommercialIntent|null{
-  const params=new URLSearchParams(search.startsWith("?")?search.slice(1):search),keys=[...params.keys()];
-  if(params.get("from")!=="onboarding"||keys.some(key=>!["plan","billing","from","useCase"].includes(key))||new Set(keys).size!==keys.length)return null;
-  const parsed=parseCommercialIntent(search);
-  return parsed&&["professional","team","business"].includes(parsed.plan)?parsed:null;
+  return "/settings/billing-support";
 }

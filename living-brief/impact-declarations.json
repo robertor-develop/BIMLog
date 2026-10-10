@@ -62493,6 +62493,84 @@
         "scripts/test-launch-readiness-block04.mjs"
       ],
       "reviewedChangeSha256": "d3aee02c5f91db401b72d169abc6fa935604bbbefe2e97ed76c5bb9e0d9cef37"
+    },
+    {
+      "taskId": "launch-readiness-block05-onboarding-to-billing",
+      "reviewedThroughCommit": "3c538151f78e0abf502deefcc0b2b93cc5629921",
+      "reviewedAt": "2026-10-10T10:15:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The onboarding-to-billing continuity block reuses the existing commercial intent, onboarding and Billing & Support authorities; it creates no automatic subscription, checkout, charge, entitlement, credential, database/schema, Native, report, standard or MAIN 04 change."
+        }
+      ],
+      "reason": "Carry a verified paid-plan selection from completed onboarding into the existing protected Billing & Support workspace while preserving explicit human authority over subscription preparation and checkout.",
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/OnboardingFlow.tsx",
+        "artifacts/bimlog/src/lib/commercial-intent.ts",
+        "artifacts/bimlog/src/lib/commercial-post-onboarding.behavior.ts",
+        "artifacts/bimlog/src/pages/CommercialWorkspace.tsx",
+        "evidence/launch-readiness-20261009/BLOCK_05_LR021_LR025.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-launch-readiness-block05.mjs"
+      ],
+      "reviewedChangeSha256": "492a5caed069cc60f0d2fa6869a583e2125ec133767b9547fecb4a04b740053c"
     }
   ]
 }

@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Launch Readiness Block 5 — onboarding-to-billing continuity — 2026-10-10
+
+- [x] Preserve a verified paid-plan selection through successful onboarding.
+- [x] Route only Professional, Team and Business selections to the existing protected Billing & Support workspace.
+- [x] Restore the exact plan, billing cycle and bounded use case without creating another checkout or subscription authority.
+- [x] Keep subscription preparation and secure checkout behind separate explicit actions for an authorized billing administrator.
+- [x] Keep free users on the existing project journey and Enterprise sales-assisted.
+- [ ] Pass the complete exact-head gate and push LR021–LR025 once. Keep this five-build block unpublished until Block 6 completes the next ten-build interval.
+
 ## Launch Readiness Block 4 — availability-aware conversion handoff — 2026-10-10
 
 - [x] Use one deterministic next-step decision for every public offer.
@@ -7,7 +16,7 @@
 - [x] Route Professional, Team and Business offers to registration only when paid-plan readiness is available.
 - [x] Preserve the exact plan, billing cycle and bounded use case into registration or consultation; keep Enterprise agreement-defined.
 - [x] Fail safely to consultation when paid-plan availability is consultation-only, loading, malformed or unreachable, and never take payment on Pricing.
-- [ ] Pass the complete exact-head gate, push LR016–LR020, publish the accumulated LR011–LR020 ten-build interval, and complete authenticated visible-Chrome production smoke.
+- [x] Exact source `37f79a422853758e0c1efb97f5392ecb77bb80e4` passed the complete gate, was pushed and published as receipt `6ee6e527`, and passed authenticated visible-Chrome production smoke with exact release identity, database receipt and live BIMLog Agent response.
 
 ## Launch Readiness Block 3 — public commercial availability — 2026-10-10
 
