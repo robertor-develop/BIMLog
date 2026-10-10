@@ -62409,9 +62409,11 @@
       ],
       "reason": "Connect public Pricing to the existing commercial readiness authority through a minimal fail-closed response without exposing protected provider or launch evidence.",
       "reviewedChangedPaths": [
-        "living-brief/impact-declarations.json"
+        "living-brief/impact-declarations.json",
+        "scripts/endpoint-authority-matrix.mjs",
+        "scripts/test-launch-readiness-block03.mjs"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "df58166b31664852276dbf96be6e554f5a91dd4937e79aeb15e89c5aef9e82e8"
     }
   ]
 }

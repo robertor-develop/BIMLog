@@ -21,6 +21,10 @@ const publicRules = [
   // Legal disclosure pages load this deliberately minimal projection before
   // sign-in. The route excludes registration, tax, billing and address data.
   /^public-legal-identity\.ts\|GET\|\/public\/legal-identity$/,
+  // Pricing loads this deliberately minimal launch-readiness projection before
+  // sign-in. It exposes only availability and a safe next action, never
+  // provider credentials or protected verification evidence.
+  /^public-commercial-availability\.ts\|GET\|\/public\/commercial-availability$/,
   /^downloads\.ts\|GET\|\/downloads\//,
   /^autodesk\.ts\|GET\|\/autodesk\/(token|login|callback)$/,
   /^connections\.ts\|GET\|\/connections\/:provider\/callback$/,

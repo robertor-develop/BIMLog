@@ -6,7 +6,9 @@
   "impact": {
     "baselineCommit": "2d01d51f20fff6f0a2c2485e23b5e0fbda9ac682",
     "changedPaths": [
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "scripts/endpoint-authority-matrix.mjs",
+      "scripts/test-launch-readiness-block03.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
