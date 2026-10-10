@@ -134,7 +134,7 @@ router.post("/commercial/subscription-setup",authMiddleware,async(req,res)=>{
     if(!identity)throw new Error("Company billing identity is unavailable");
     const result=await prepareCompanySubscription({client:pool,environment:process.env,companyId:actor.companyId,userId:actor.userId,companyName:identity.companyName,billingEmail:identity.billingEmail,billingAddress:identity.billingAddress,billingPhone:identity.billingPhone,requestKey:String(req.body?.requestKey??"").trim(),plan:req.body?.plan,cycle:req.body?.cycle});
     res.status(result.replayed?200:201).json(result);
-  }catch(error){const message=error instanceof Error?error.message:"Subscription setup unavailable",denied=/administrator authority/.test(message),invalid=/request identity|offer is invalid|supported checkout/.test(message);res.status(denied?403:invalid?400:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":invalid?"SUBSCRIPTION_SETUP_INVALID":"SUBSCRIPTION_SETUP_UNAVAILABLE",error:message});}
+  }catch(error){const message=error instanceof Error?error.message:"Subscription setup unavailable",denied=/administrator authority/.test(message),identity=/Complete company billing identity/.test(message),invalid=/request identity|offer is invalid|supported checkout/.test(message);res.status(denied?403:identity?409:invalid?400:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":identity?"BILLING_IDENTITY_INCOMPLETE":invalid?"SUBSCRIPTION_SETUP_INVALID":"SUBSCRIPTION_SETUP_UNAVAILABLE",error:message});}
 });
 
 router.post("/commercial/billing-portal",authMiddleware,async(req,res)=>{
