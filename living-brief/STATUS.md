@@ -4182,4 +4182,10 @@ Reconciliation checkpoint: LR051–LR055 reconciliation baseline is LR054 `09a6f
 
 The second five-build interval now preserves the latest tenant subscription lifecycle after checkout, including canceled history, validates the credential-free browser contract, and explains active, past-due, suspended, canceling, and canceled next actions in Billing & Support. Signed provider webhook evidence remains the only authority that changes paid access. The implementation is committed through `eb0b8d63`; publication and production Chrome acceptance remain pending the exact-source release gate.
 
+Release closure: exact source `7ff76efc683f0ee6ec4f9148d9194f519808dece` passed the complete gate, reached the authorized branch, published as deployment `6b38b943`, reported an identity-bound production health receipt, and passed authenticated Chrome acceptance across Headquarters, Billing & Support, Profile, Job Intake, Help and Company Profile without browser warnings or errors.
+
+# Launch readiness LR061–LR065 — subscription recovery — 2026-10-10
+
+Billing & Support now derives billing-portal access from the exact tenant subscription lifecycle and existing billing authority. Authorized customers can enter Stripe-hosted billing self-service while trialing or active, recover payment while past due or suspended, and review a scheduled cancellation while canceling. Pending, canceled, unbound and unconfigured states fail closed. The authenticated workspace projects only a bounded purpose and blocker set, the browser validates it strictly, and the visible action is bilingual. No payment, cancellation or provider state is changed until the customer explicitly continues into the existing hosted provider portal.
+
 The release gate then identified a 2,430-byte browser asset-budget overrun. Commit `8d43cc0c` compacted the customer projection while retaining all lifecycle states and strict status validation; the targeted production build now passes at 4,194,186 of 4,194,304 bytes. The complete exact-source gate must pass again before publication.

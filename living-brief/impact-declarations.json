@@ -63308,6 +63308,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d40e1042be71afb3e48e6d92dc2e2b0d24ee71b866c408382bc7a9731f84934c"
+    },
+    {
+      "taskId": "launch-readiness-lr061-lr065-subscription-recovery",
+      "reviewedThroughCommit": "7d19932aec087840386c8ba45d49f7e0d1e3f628",
+      "reviewedAt": "2026-10-10T21:20:00Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "ecosystem_doctrine"
+        },
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "claude"
+        },
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "quality"
+        },
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "vision"
+        },
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "platform"
+        },
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "plugin"
+        },
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "report_design_system"
+        },
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "standards_register"
+        },
+        {
+          "result": "updated",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "status"
+        },
+        {
+          "result": "updated",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "open_loop"
+        },
+        {
+          "result": "reviewed_no_semantic_change",
+          "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "key": "audit"
+        }
+      ],
+      "reason": "LR061-LR065 reuse the existing authenticated provider portal to give tenant billing administrators lifecycle-specific recovery actions. The change adds strict bounded eligibility and browser validation without altering provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a5029200f9680912349dc22faf91e9c7dc70afb9c957c052bb582fd483718b3f"
     }
   ]
 }

@@ -79,6 +79,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/commercial-launch-dossier-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-live-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-verification-history-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-portal-recovery-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-provider-webhook.ts
 - artifacts/api-server/src/routes/commercial-workspace-subscription-truth.behavior.ts
 - artifacts/api-server/src/routes/commercial-workspace.behavior.ts
@@ -403,6 +404,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-platform-readiness.ts
 - artifacts/api-server/src/lib/commercial-portal-command.behavior.ts
 - artifacts/api-server/src/lib/commercial-portal-command.ts
+- artifacts/api-server/src/lib/commercial-portal-eligibility.behavior.ts
+- artifacts/api-server/src/lib/commercial-portal-eligibility.ts
 - artifacts/api-server/src/lib/commercial-potential-impact.behavior.ts
 - artifacts/api-server/src/lib/commercial-potential-impact.ts
 - artifacts/api-server/src/lib/commercial-project-scope.ts

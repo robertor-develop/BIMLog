@@ -5,8 +5,17 @@
 - [x] Preserve and project the latest tenant subscription lifecycle without exposing provider identifiers or credentials.
 - [x] Validate lifecycle status, plan, cycle, seats, and timestamps at the browser boundary.
 - [x] Explain active, past-due, suspended, canceling, and canceled customer next actions in English and Spanish.
-- [ ] Publish the exact ten-build LR051–LR060 source and complete authenticated production Chrome acceptance after the full release gate passes.
+- [x] Publish the exact ten-build LR051–LR060 source and complete authenticated production Chrome acceptance after the full release gate passes. Accepted at exact source `7ff76efc683f0ee6ec4f9148d9194f519808dece`, deployment `6b38b943`, with identity-bound health and authenticated Chrome acceptance.
 - [x] Repair the production browser asset-budget failure without raising or weakening the 4 MiB limit.
+
+## Launch Readiness Block 13 — subscription recovery — 2026-10-10
+
+- [x] Derive one deterministic billing-portal eligibility decision from subscription lifecycle, billing authority, provider-customer binding and portal readiness.
+- [x] Permit provider billing self-service for active, trialing, past-due, suspended and canceling subscriptions while refusing unsupported lifecycle states.
+- [x] Project the tenant-safe recovery purpose and blockers through the authenticated commercial workspace.
+- [x] Reject unknown, duplicate or contradictory recovery contracts at the browser boundary.
+- [x] Show bilingual Manage billing, Update payment method and Review cancellation actions from server-authoritative recovery truth.
+- [ ] Push LR061–LR065 once and keep this first five-build block unpublished until LR066–LR070 completes the next ten-build interval.
 
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
 
