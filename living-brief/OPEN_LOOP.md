@@ -15,6 +15,7 @@
 - [x] Project the tenant-safe recovery purpose and blockers through the authenticated commercial workspace.
 - [x] Reject unknown, duplicate or contradictory recovery contracts at the browser boundary.
 - [x] Show bilingual Manage billing, Update payment method and Review cancellation actions from server-authoritative recovery truth.
+- [x] Repair the pre-existing active-only portal assertion exposed by the complete gate and retain the stronger server-authoritative recovery contract.
 - [ ] Push LR061–LR065 once and keep this first five-build block unpublished until LR066–LR070 completes the next ten-build interval.
 
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10

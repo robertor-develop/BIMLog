@@ -63380,6 +63380,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a5029200f9680912349dc22faf91e9c7dc70afb9c957c052bb582fd483718b3f"
+    },
+    {
+      "taskId": "launch-readiness-lr061-lr065-gate-repair",
+      "reviewedThroughCommit": "dce690c3b1952d81e61a332a7a2d900d84de69c7",
+      "reviewedAt": "2026-10-10T21:30:00Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "The complete gate found an obsolete active-only Billing and Support assertion. The repair updates permanent acceptance to require the new server-authoritative portal eligibility contract without changing runtime behavior, provider authority, schema, Native, reporting, credentials, legal identity, or MAIN 04 behavior.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1f07ee49de2a968704c24a87ad8c3fa28b7592d55b5550e7c4615a705d60f94a"
     }
   ]
 }
