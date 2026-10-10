@@ -360,6 +360,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-change-order-draft.ts
 - artifacts/api-server/src/lib/commercial-checkout-command.behavior.ts
 - artifacts/api-server/src/lib/commercial-checkout-command.ts
+- artifacts/api-server/src/lib/commercial-checkout-readiness.behavior.ts
+- artifacts/api-server/src/lib/commercial-checkout-readiness.ts
 - artifacts/api-server/src/lib/commercial-checkout-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-credit-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-setup.behavior.ts

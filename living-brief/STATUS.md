@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Launch Readiness Block 9 candidate — 2026-10-10
+
+LR041–LR045 create one fail-closed live-checkout boundary from BIMLog's existing commercial readiness authority. Checkout now stops before any commercial database access or Stripe request unless catalog, live payment provider, signed payment confirmation, billing self-service and customer support are ready. The API returns bounded authority, request, subscription-conflict and platform-readiness codes without provider details or configuration values. The browser accepts only known codes and bounded blocker identifiers, ignores server error prose, keeps the checkout action unavailable while the platform is incomplete, and explains ownership in English and Spanish. Subscription preparation, payment confirmation, entitlement, customer data, schema and Native behavior are unchanged. This is the first five-build half of the next ten-build interval and remains unpublished until Block 10.
+
+## Launch Readiness Blocks 7–8 accepted — 2026-10-10
+
+Exact source `81483745321837d8bb8ecebd827450ccbcfba1fc` passed the complete release gate, exact branch push and controlled Replit publication as deployment `30559961`. Authenticated production Chrome verified the Billing & Support readiness view, the corrected `?from=billing` handoff, visible canonical billing identity controls and the explicit return path. No payment, subscription, invoice, provider call or customer-data mutation was performed during acceptance.
+
 ## Launch Readiness Block 8 publication candidate — 2026-10-10
 
 Five builds connect the canonical authenticated-company billing identity to subscription preparation. The server now rejects direct setup attempts when the legal company address or phone is incomplete, validates those fields before any provider call, and binds the verified legal name, address, phone and billing-administrator email to the Stripe customer request. An incomplete identity returns a precise customer-actionable conflict. Preparation, checkout, signed payment confirmation and entitlement remain separate explicit authorities. This completes the LR031–LR040 interval and requires the complete release gate, exact push, controlled publication, live identity verification and authenticated Chrome smoke.

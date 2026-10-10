@@ -1,5 +1,16 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Launch Readiness Block 9 — live-checkout fail-closed boundary — 2026-10-10
+
+- [x] Derive one server-side live-checkout readiness decision from the existing commercial platform authority.
+- [x] Stop before commercial persistence or Stripe transport when the complete sale-supporting service set is not ready.
+- [x] Return bounded customer, authority and platform failure codes without provider detail or configuration values.
+- [x] Reject unknown hosted-destination failures and untrusted server error prose at the browser boundary.
+- [x] Keep secure checkout unavailable until live payments, signed confirmation, billing self-service and customer support are ready, with bilingual ownership guidance.
+- [ ] Pass the complete exact-head gate and push LR041–LR045 once. Keep this five-build block unpublished until Block 10 completes the next ten-build interval.
+
+Blocks 7–8 release closure: exact source `81483745321837d8bb8ecebd827450ccbcfba1fc` passed the complete release gate, exact branch push and controlled publication as deployment `30559961`. Authenticated Chrome verified the Billing & Support blocker, preserved `?from=billing`, rendered the canonical billing identity controls and returned to Billing & Support without creating a payment, subscription, invoice or provider call.
+
 ## Launch Readiness Block 5 — onboarding-to-billing continuity — 2026-10-10
 
 - [x] Preserve a verified paid-plan selection through successful onboarding.
@@ -5104,6 +5115,4 @@ Release closure: exact source `0bcb3c741cccd64cf4254f5dbedb28602cea15ea` passed 
 - [x] Bind the complete identity-to-setup path to permanent focused acceptance.
 - [ ] Pass the complete gate, push LR036–LR040, publish accumulated LR031–LR040 and complete authenticated Chrome production smoke.
 
-Production-smoke repair in progress: the first LR031–LR040 publication exposed a dropped `from=billing` query on the Billing & Support Continue action. The billing identity route and form are live and work when addressed directly. The bounded same-origin anchor repair and its acceptance assertion are implemented; closure still requires a complete passing gate, repair commit/push, republish, and repeated authenticated Chrome smoke before either Block 7 or Block 8 is marked released.
-
-Reconciliation baseline: repair implementation commit `d2dd9eb095a6166754c06ace95b1a0927b6402ca`; the release remains open until the candidate metadata, complete gate, push, republish, and repeated smoke all pass.
+Production-smoke repair closed: the first LR031–LR040 publication exposed a dropped `from=billing` query on the Billing & Support Continue action. The bounded same-origin anchor repair, permanent acceptance assertion, complete gate, repair push, republication and repeated authenticated Chrome smoke passed at exact source `81483745321837d8bb8ecebd827450ccbcfba1fc` and deployment `30559961`.
