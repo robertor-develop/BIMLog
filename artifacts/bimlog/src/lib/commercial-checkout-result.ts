@@ -10,10 +10,3 @@ export function deriveCommercialCheckoutReturnState(input:{checkoutReturn:"succe
   if(checkout.status==="completed")return "verifying";
   return "failed";
 }
-
-export type CommercialPortalReturnState="none"|"refreshing"|"refreshed"|"unavailable";
-export function deriveCommercialPortalReturnState(input:{portalReturn:boolean;loading:boolean;hasData:boolean;hasError:boolean}):CommercialPortalReturnState{
-  if(!input.portalReturn)return "none";
-  if(input.hasError)return "unavailable";
-  return input.loading||!input.hasData?"refreshing":"refreshed";
-}
