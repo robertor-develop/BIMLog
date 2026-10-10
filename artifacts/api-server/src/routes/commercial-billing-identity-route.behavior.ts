@@ -7,4 +7,9 @@ assert.equal((source.match(/requireCommercialBillingManager\(authority\)/g)??[])
 assert.match(source,/parseCommercialBillingIdentityUpdate\(req\.body\)/);
 assert.match(source,/where\(eq\(companiesTable\.id,actor\.companyId\)\)/);
 assert.match(source,/BILLING_IDENTITY_INVALID/);
+assert.match(source,/await client\.query\("BEGIN"\)/);
+assert.match(source,/billing_identity_updated/);
+assert.match(source,/JSON\.stringify\(\{fields:\["address","phone"\],status:identity\.status\}\)/);
+assert.match(source,/await client\.query\("COMMIT"\)/);
+assert.match(source,/await client\.query\("ROLLBACK"\)/);
 console.log("LR032 billing-admin canonical identity route: PASS");

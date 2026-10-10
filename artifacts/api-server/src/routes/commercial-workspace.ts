@@ -40,9 +40,25 @@ router.patch("/commercial/billing-identity",authMiddleware,async(req,res)=>{
   try{
     const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);
     const values=parseCommercialBillingIdentityUpdate(req.body);
-    const [company]=await db.update(companiesTable).set(values).where(eq(companiesTable.id,actor.companyId)).returning({id:companiesTable.id,name:companiesTable.name,address:companiesTable.address,phone:companiesTable.phone});
-    if(!company)throw new Error("Authenticated billing identity is unavailable");
-    res.json(deriveCommercialBillingIdentity({companyId:company.id,legalName:company.name,address:company.address,phone:company.phone}));
+    const client=await pool.connect();
+    try{
+      await client.query("BEGIN");
+      const result=await client.query<{id:string;name:string;address:string|null;phone:string|null}>(
+        `UPDATE companies SET address = $1, phone = $2 WHERE id = $3 RETURNING id, name, address, phone`,
+        [values.address,values.phone,actor.companyId],
+      );
+      const company=result.rows[0];
+      if(!company)throw new Error("Authenticated billing identity is unavailable");
+      const identity=deriveCommercialBillingIdentity({companyId:company.id,legalName:company.name,address:company.address,phone:company.phone});
+      await client.query(
+        `INSERT INTO admin_actions_log (admin_user_id, admin_email, action, target_type, target_id, details)
+         SELECT id, email, 'billing_identity_updated', 'company', $2, $3::jsonb
+         FROM users WHERE id = $1 AND company_id = $2`,
+        [actor.userId,actor.companyId,JSON.stringify({fields:["address","phone"],status:identity.status})],
+      );
+      await client.query("COMMIT");
+      res.json(identity);
+    }catch(error){await client.query("ROLLBACK");throw error;}finally{client.release();}
   }catch(error){const message=error instanceof Error?error.message:"",denied=/administrator authority/.test(message),invalid=/Billing (address|phone|identity update)/.test(message);res.status(denied?403:invalid?400:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":invalid?"BILLING_IDENTITY_INVALID":"BILLING_IDENTITY_UNAVAILABLE",error:denied?"Billing administrator authority is required.":invalid?message:"Billing identity is temporarily unavailable."});}
 });
 

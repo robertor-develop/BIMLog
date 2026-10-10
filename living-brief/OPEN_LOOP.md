@@ -5082,4 +5082,15 @@ Release closure: exact source `ed2e3d68113170001b67585ffc57c81894eea00a` passed 
 - [x] Clear only a matching commercial intent after the prepared subscription is verified.
 - [x] Explain every checkout blocker with clear customer or BIMLog ownership.
 - [x] Bind the explicit preparation, checkout and entitlement boundaries to focused acceptance.
-- [ ] Pass the complete gate, push LR026–LR030, publish LR021–LR030 and complete authenticated Chrome production smoke.
+- [x] Pass the complete gate, push LR026–LR030, publish LR021–LR030 and complete authenticated Chrome production smoke.
+
+Release closure: exact source `0bcb3c741cccd64cf4254f5dbedb28602cea15ea` passed the complete release gate, exact branch push, controlled publication as Replit deployment `5a7b356f`, live identity verification and authenticated Chrome smoke across all 61 registered routes.
+
+## Launch Readiness Block 7 — canonical billing identity — 2026-10-10
+
+- [x] Define one canonical billing identity from the authenticated legal company record.
+- [x] Restrict tenant-scoped identity reads and updates to the existing billing-manager authority.
+- [x] Validate the exact company identity response in the browser before rendering or saving it.
+- [x] Connect the Billing & Support blocker to bilingual completion guidance and an explicit return path.
+- [x] Commit the company update and privacy-safe audit evidence atomically and bind the journey to permanent acceptance.
+- [ ] Pass the complete gate and push LR031–LR035; keep the block unpublished until LR036–LR040 completes the ten-build interval.

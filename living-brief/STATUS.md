@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Launch Readiness Block 7 candidate — 2026-10-10
+
+Five builds close the customer-visible billing-identity gap. The existing Billing & Support blocker now opens the canonical authenticated-company identity editor instead of a user-specific branding profile. Only the existing billing-manager authority may read or update the legal company's billing address and phone; the legal company name remains read-only. The update and privacy-safe audit evidence commit atomically, while strict browser validation, bilingual completion guidance and an explicit return to Billing & Support preserve the customer journey. This is the first half of the LR031–LR040 interval and remains unpublished until Block 8 completes the ten-build boundary.
+
 ## Launch Readiness Block 6 publication candidate — 2026-10-10
 
 Five builds complete the verified paid-offer handoff in the protected Billing & Support workspace. BIMLog shows the exact plan and cycle selected through Pricing and onboarding, derives one truthful next action, clears only a matching session intent after server-confirmed preparation, and identifies each customer-owned or BIMLog-owned checkout blocker. Subscription preparation, hosted checkout, signed payment confirmation and entitlement remain separate explicit authorities. This completes the LR021–LR030 ten-build interval and requires the complete release gate, exact push, controlled publication, live identity verification and authenticated Chrome smoke.

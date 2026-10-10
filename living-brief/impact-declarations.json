@@ -62647,6 +62647,88 @@
         "scripts/test-launch-readiness-block06.mjs"
       ],
       "reviewedChangeSha256": "e76d058b311676d2b3cc811d3bc7902355f1db0c7477423bd98d26644530b8e1"
+    },
+    {
+      "taskId": "launch-readiness-block07-canonical-billing-identity",
+      "reviewedThroughCommit": "acbffcfb70967590a74e41a695cdbda92465b39d",
+      "reviewedAt": "2026-10-10T13:37:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The canonical billing-identity block binds the existing company address and phone to the existing billing-manager authority and adds privacy-safe audit evidence; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        }
+      ],
+      "reason": "Connect the Billing & Support identity blocker to the canonical authenticated-company record with tenant authority, strict validation, bilingual continuity and atomic privacy-safe audit evidence.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/routes/commercial-billing-identity-route.behavior.ts",
+        "artifacts/api-server/src/routes/commercial-workspace.ts",
+        "artifacts/bimlog/src/components/commercial/BillingIdentityPanel.tsx",
+        "artifacts/bimlog/src/components/commercial/billing-identity-panel.behavior.ts",
+        "artifacts/bimlog/src/lib/commercial-billing-identity-client.ts",
+        "artifacts/bimlog/src/pages/CompanyProfile.tsx",
+        "evidence/launch-readiness-20261009/BLOCK_07_LR031_LR035.md",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-launch-readiness-block07.mjs"
+      ],
+      "reviewedChangeSha256": "82e6bf7dc5971c34e5b842af82a3f836a9ef3f023355640a9796c35ca4d4188b"
     }
   ]
 }

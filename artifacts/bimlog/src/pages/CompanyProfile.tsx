@@ -6,9 +6,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, Building2, Upload, Globe, Phone, MapPin, Trash2 } from "lucide-react";
+import { ChevronLeft, Building2, Upload, Trash2 } from "lucide-react";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
-import { BillingIdentityPanel } from "@/components/commercial/BillingIdentityPanel";
+import { readCommercialBillingIdentity, saveCommercialBillingIdentity, type CommercialBillingIdentityDto } from "@/lib/commercial-billing-identity-client";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -37,7 +37,10 @@ export function CompanyProfile() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [billing, setBilling] = useState<CommercialBillingIdentityDto | null>(null);
+  const [billingError, setBillingError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const fromBilling = new URLSearchParams(window.location.search).get("from") === "billing";
 
   useEffect(() => {
     if (!token) { setLocation("/login"); return; }
@@ -52,6 +55,18 @@ export function CompanyProfile() {
       .finally(() => { if (current) setLoading(false); });
     return () => { current = false; };
   }, [token, setLocation, retry]);
+
+  useEffect(() => {
+    if (!token || !fromBilling) return;
+    readCommercialBillingIdentity(token).then(setBilling).catch(e => setBillingError(e instanceof Error ? e.message : String(e)));
+  }, [token, fromBilling]);
+
+  const saveBilling = async () => {
+    if (!token || !billing) return;
+    setBillingError("");
+    try { setBilling(await saveCommercialBillingIdentity(token, billing)); }
+    catch (e) { setBillingError(e instanceof Error ? e.message : String(e)); }
+  };
 
   const handleSave = async () => {
     if (!data) return;
@@ -122,20 +137,23 @@ export function CompanyProfile() {
             <Building2 style={{ width: 20, height: 20, color: "#1D4ED8" }} />
             <h1 style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: 0 }}>{t("Company Profile", "Perfil de Empresa")}</h1>
           </div>
-          <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 20 }}>
-            {t("Your account company is read from your current membership. Document branding is separate and does not change membership or stored document parties.", "La empresa de su cuenta corresponde a su membresía actual. La marca documental es independiente y no cambia la membresía ni los participantes guardados.")}
-          </div>
-
           {loadError && <div role="alert">{t("Company profile could not be loaded.", "No se pudo cargar el perfil de empresa.")} <Button variant="outline" onClick={() => setRetry(n => n + 1)}>{t("Retry", "Reintentar")}</Button></div>}
           {loading ? (
             <div className="skeleton" style={{ height: 200, borderRadius: 10 }} />
           ) : data && (
             <>
-              <section aria-label={t("Account company", "Empresa de la cuenta")} style={{ padding: 16, marginBottom: 18, border: "1px solid hsl(var(--border))", borderRadius: 10 }}>
+              <section aria-label={t("Account company", "Empresa de la cuenta")}>
                 <strong>{t("Account company", "Empresa de la cuenta")}: {data.canonicalCompanyName}</strong>
-                <p>{t("Changing branding below does not rename this company or change project access. Saved document party snapshots remain unchanged; future exports may use the current branding.", "Cambiar la marca abajo no renombra esta empresa ni cambia el acceso a proyectos. Los participantes guardados de documentos permanecen iguales; las exportaciones futuras pueden usar la marca actual.")}</p>
               </section>
-              <BillingIdentityPanel token={token ?? ""} fromBilling={new URLSearchParams(window.location.search).get("from") === "billing"} />
+              {fromBilling && <section>
+                <h2>{t("Billing identity","Identidad de facturación")}</h2>
+                {billingError && <p role="alert">{billingError}</p>}
+                {billing && <><Label>{t("Legal company name","Nombre legal de la empresa")}</Label><Input value={billing.legalName} disabled />
+                  <Label htmlFor="billing-phone">{t("Billing phone","Teléfono de facturación")}</Label><Input id="billing-phone" value={billing.phone} onChange={e=>setBilling({...billing,phone:e.target.value})}/>
+                  <Label htmlFor="billing-address">{t("Billing address","Dirección de facturación")}</Label><Input id="billing-address" value={billing.address} onChange={e=>setBilling({...billing,address:e.target.value})}/>
+                  <p role="status">{billing.status==="complete"?t("Complete","Completa"):t("Missing","Falta")}</p>
+                  <Button onClick={()=>void saveBilling()}>{t("Save billing identity","Guardar identidad de facturación")}</Button> <Button variant="outline" asChild><Link href="/settings/billing-support">{t("Return to Billing & Support","Volver a Facturación y Soporte")}</Link></Button></>}
+              </section>}
               {/* Logo card */}
               <div style={{ background: "white", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "18px 20px", marginBottom: 18 }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
@@ -178,9 +196,6 @@ export function CompanyProfile() {
                         {t("Remove", "Quitar")}
                       </Button>
                     )}
-                    <div style={{ fontSize: 11, color: "#6B7280", marginTop: 6 }}>
-                      {t("PNG, JPG, or SVG · up to 2 MB · square or wide format works best.", "PNG, JPG o SVG · hasta 2 MB · se recomienda formato cuadrado o ancho.")}
-                    </div>
                   </div>
                 </div>
               </div>
@@ -201,21 +216,15 @@ export function CompanyProfile() {
                     <Input id="companyRole" placeholder="e.g. General Contractor, Architect" value={data.companyRole ?? ""} onChange={e => setData(d => d ? { ...d, companyRole: e.target.value } : d)} />
                   </div>
                   <div>
-                    <Label htmlFor="website" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
-                      <Globe style={{ width: 11, height: 11 }} /> {t("Website", "Sitio web")}
-                    </Label>
+                    <Label htmlFor="website">{t("Website", "Sitio web")}</Label>
                     <Input id="website" placeholder="https://" value={data.website ?? ""} onChange={e => setData(d => d ? { ...d, website: e.target.value } : d)} />
                   </div>
                   <div>
-                    <Label htmlFor="phone" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
-                      <Phone style={{ width: 11, height: 11 }} /> {t("Phone", "Teléfono")}
-                    </Label>
+                    <Label htmlFor="phone">{t("Phone", "Teléfono")}</Label>
                     <Input id="phone" value={data.phone ?? ""} onChange={e => setData(d => d ? { ...d, phone: e.target.value } : d)} />
                   </div>
                   <div>
-                    <Label htmlFor="city" style={{ fontSize: 11, display: "flex", alignItems: "center", gap: 4 }}>
-                      <MapPin style={{ width: 11, height: 11 }} /> {t("City", "Ciudad")}
-                    </Label>
+                    <Label htmlFor="city">{t("City", "Ciudad")}</Label>
                     <Input id="city" value={data.city ?? ""} onChange={e => setData(d => d ? { ...d, city: e.target.value } : d)} />
                   </div>
                   <div>

@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 754,
-    "frontendApiReferences": 302,
+    "apiRoutes": 756,
+    "frontendApiReferences": 303,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -2194,6 +2194,24 @@
       "path": "/commercial/providers/stripe/webhook",
       "owner": "artifacts/api-server/src/routes/commercial-provider-webhook.ts",
       "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/commercial/billing-identity",
+      "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "tables": [
+        "companiesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/commercial/billing-identity",
+      "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "tables": [
+        "companiesTable",
+        "usersTable"
+      ]
     },
     {
       "method": "GET",
@@ -9978,6 +9996,10 @@
     {
       "screen": "artifacts/bimlog/src/lib/commercial-billing-history-client.ts",
       "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/billing-history"
+    },
+    {
+      "screen": "artifacts/bimlog/src/lib/commercial-billing-identity-client.ts",
+      "apiPath": "${base}/api/v1/commercial/billing-identity"
     },
     {
       "screen": "artifacts/bimlog/src/lib/commercial-launch-verification-workflow.ts",
