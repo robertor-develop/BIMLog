@@ -4190,4 +4190,6 @@ Billing & Support now derives billing-portal access from the exact tenant subscr
 
 The first complete-gate run found a stale Billing & Support assertion that still required the former active-only portal condition. Repair `dce690c3` replaces that obsolete expectation with the server-authoritative portal eligibility contract; focused Block 5 and Block 13 acceptance pass again.
 
+The repeated gate then exposed strict compile-time uncertainty at the persisted lifecycle and nullable provider-configuration boundaries. Repair `89d8feea` validates the lifecycle allowlist and narrows complete provider configuration before transport; the API typecheck and focused recovery behavior pass.
+
 The release gate then identified a 2,430-byte browser asset-budget overrun. Commit `8d43cc0c` compacted the customer projection while retaining all lifecycle states and strict status validation; the targeted production build now passes at 4,194,186 of 4,194,304 bytes. The complete exact-source gate must pass again before publication.
