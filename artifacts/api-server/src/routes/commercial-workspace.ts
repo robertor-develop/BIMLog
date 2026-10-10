@@ -21,8 +21,30 @@ import type {CommercialSubscriptionStatus} from "../lib/commercial-workspace-run
 import {prepareCompanySubscription} from "../lib/commercial-subscription-setup";
 import {deriveCommercialLaunchProfile,commercialLaunchProfileConfigurationKeys} from "../lib/commercial-launch-profile";
 import {deriveCommercialLaunchDossier} from "../lib/commercial-launch-dossier";
+import {deriveCommercialBillingIdentity,parseCommercialBillingIdentityUpdate} from "../lib/commercial-billing-identity";
 
 const router:IRouter=Router();
+
+router.get("/commercial/billing-identity",authMiddleware,async(req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
+  try{
+    const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);
+    const [company]=await db.select({id:companiesTable.id,name:companiesTable.name,address:companiesTable.address,phone:companiesTable.phone}).from(companiesTable).where(eq(companiesTable.id,actor.companyId)).limit(1);
+    if(!company)throw new Error("Authenticated billing identity is unavailable");
+    res.json(deriveCommercialBillingIdentity({companyId:company.id,legalName:company.name,address:company.address,phone:company.phone}));
+  }catch(error){const denied=/administrator authority/.test(error instanceof Error?error.message:"");res.status(denied?403:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":"BILLING_IDENTITY_UNAVAILABLE",error:denied?"Billing administrator authority is required.":"Billing identity is temporarily unavailable."});}
+});
+
+router.patch("/commercial/billing-identity",authMiddleware,async(req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
+  try{
+    const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);
+    const values=parseCommercialBillingIdentityUpdate(req.body);
+    const [company]=await db.update(companiesTable).set(values).where(eq(companiesTable.id,actor.companyId)).returning({id:companiesTable.id,name:companiesTable.name,address:companiesTable.address,phone:companiesTable.phone});
+    if(!company)throw new Error("Authenticated billing identity is unavailable");
+    res.json(deriveCommercialBillingIdentity({companyId:company.id,legalName:company.name,address:company.address,phone:company.phone}));
+  }catch(error){const message=error instanceof Error?error.message:"",denied=/administrator authority/.test(message),invalid=/Billing (address|phone|identity update)/.test(message);res.status(denied?403:invalid?400:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":invalid?"BILLING_IDENTITY_INVALID":"BILLING_IDENTITY_UNAVAILABLE",error:denied?"Billing administrator authority is required.":invalid?message:"Billing identity is temporarily unavailable."});}
+});
 
 router.get("/admin/commercial-launch",authMiddleware,isSuperAdminMiddleware,(_req,res)=>{
   res.set("Cache-Control","private, no-store, max-age=0");

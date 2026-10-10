@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const source=readFileSync(new URL("./commercial-workspace.ts",import.meta.url),"utf8");
+assert.match(source,/router\.get\("\/commercial\/billing-identity",authMiddleware/);
+assert.match(source,/router\.patch\("\/commercial\/billing-identity",authMiddleware/);
+assert.equal((source.match(/requireCommercialBillingManager\(authority\)/g)??[]).length>=5,true);
+assert.match(source,/parseCommercialBillingIdentityUpdate\(req\.body\)/);
+assert.match(source,/where\(eq\(companiesTable\.id,actor\.companyId\)\)/);
+assert.match(source,/BILLING_IDENTITY_INVALID/);
+console.log("LR032 billing-admin canonical identity route: PASS");
