@@ -14,6 +14,7 @@ assert.match(source,/checkoutEligibility\?\.ready\?<Button/);assert.match(source
 assert.match(source,/data\.actions\.map/);assert.match(source,/action\.status==="blocked"/);assert.match(source,/Button disabled/);
 assert.match(source,/minmax\(min\(240px,100%\),1fr\)/);assert.match(source,/Waiting for:/);assert.match(source,/action\.blockers\.map/);assert.doesNotMatch(source,/Ready \/ Listo|Setup required \/ Requiere configuración/);
 assert.match(source,/AbortController/);assert.match(source,/parseCommercialWorkspace/);assert.doesNotMatch(source,/stripe.*secret/i);
+assert.match(source,/complete_billing_identity.*from=billing/s);assert.match(source,/<a href=\{href\}>/);
 console.log("B069 bilingual Billing & Support workspace: PASS");
 const app=fs.readFileSync(new URL("../App.tsx",import.meta.url),"utf8"),sidebar=fs.readFileSync(new URL("../components/layout/MasterSidebar.tsx",import.meta.url),"utf8");
 assert.match(app,/settings\/billing-support/);assert.match(app,/ProtectedRoute component=\{CommercialWorkspace\}/);assert.match(sidebar,/Billing & Support/);assert.match(sidebar,/Facturación y Soporte/);

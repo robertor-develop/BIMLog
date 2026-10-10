@@ -5103,3 +5103,5 @@ Release closure: exact source `0bcb3c741cccd64cf4254f5dbedb28602cea15ea` passed 
 - [x] Reject malformed billing fields before any provider call.
 - [x] Bind the complete identity-to-setup path to permanent focused acceptance.
 - [ ] Pass the complete gate, push LR036–LR040, publish accumulated LR031–LR040 and complete authenticated Chrome production smoke.
+
+Production-smoke repair in progress: the first LR031–LR040 publication exposed a dropped `from=billing` query on the Billing & Support Continue action. The billing identity route and form are live and work when addressed directly. The bounded same-origin anchor repair and its acceptance assertion are implemented; closure still requires a complete passing gate, repair commit/push, republish, and repeated authenticated Chrome smoke before either Block 7 or Block 8 is marked released.
