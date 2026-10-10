@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import assert from "node:assert/strict";
 const panel=fs.readFileSync(new URL("./BillingHistoryPanel.tsx",import.meta.url),"utf8"),page=fs.readFileSync(new URL("../../pages/CommercialWorkspace.tsx",import.meta.url),"utf8");
-for(const token of ["Billing history","Historial de facturación","Loading billing history","Billing history unavailable","No invoices have been recorded","No invoices match this status","Invoice status","All statuses","Billing history pages","Previous","Next","Payment disputes","Provider credentials and payment methods are never shown","requestCommercialBillingHistory"])assert.match(panel,new RegExp(token));
+for(const token of ["Billing history","Historial de facturación","Loading billing history","Billing history unavailable","No invoices have been recorded","No invoices match this status","Invoice status","All statuses","Billing history pages","Previous","Next","Payment disputes","Provider credentials and payment methods are never shown","requestCommercialBillingHistory","deriveCommercialInvoiceGuidance","Await final invoice","Pay or update payment method","Payment recorded","Review payment dispute","No payment action","Credited","Balance","Due"])assert.match(panel,new RegExp(token));
 assert.match(panel,/setStatus\(event\.target\.value as BillingHistoryStatus\);setPage\(1\)/);
 assert.match(panel,/status,page,pageSize:10/);
 assert.match(panel,/role="status"/);assert.match(panel,/role="alert"/);assert.match(panel,/repeat\(auto-fit,minmax\(min\(150px,100%\),1fr\)\)/);
