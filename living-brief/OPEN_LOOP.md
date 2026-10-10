@@ -5094,3 +5094,12 @@ Release closure: exact source `0bcb3c741cccd64cf4254f5dbedb28602cea15ea` passed 
 - [x] Connect the Billing & Support blocker to bilingual completion guidance and an explicit return path.
 - [x] Commit the company update and privacy-safe audit evidence atomically and bind the journey to permanent acceptance.
 - [ ] Pass the complete gate and push LR031–LR035; keep the block unpublished until LR036–LR040 completes the ten-build interval.
+
+## Launch Readiness Block 8 — billing identity to subscription setup — 2026-10-10
+
+- [x] Require complete canonical company billing identity before subscription preparation.
+- [x] Bind the verified legal name, address, phone and billing-administrator email to the provider customer request.
+- [x] Return a precise customer-actionable conflict for incomplete billing identity.
+- [x] Reject malformed billing fields before any provider call.
+- [x] Bind the complete identity-to-setup path to permanent focused acceptance.
+- [ ] Pass the complete gate, push LR036–LR040, publish accumulated LR031–LR040 and complete authenticated Chrome production smoke.

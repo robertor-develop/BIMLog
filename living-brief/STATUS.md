@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Launch Readiness Block 8 publication candidate — 2026-10-10
+
+Five builds connect the canonical authenticated-company billing identity to subscription preparation. The server now rejects direct setup attempts when the legal company address or phone is incomplete, validates those fields before any provider call, and binds the verified legal name, address, phone and billing-administrator email to the Stripe customer request. An incomplete identity returns a precise customer-actionable conflict. Preparation, checkout, signed payment confirmation and entitlement remain separate explicit authorities. This completes the LR031–LR040 interval and requires the complete release gate, exact push, controlled publication, live identity verification and authenticated Chrome smoke.
+
 ## Launch Readiness Block 7 candidate — 2026-10-10
 
 Five builds close the customer-visible billing-identity gap. The existing Billing & Support blocker now opens the canonical authenticated-company identity editor instead of a user-specific branding profile. Only the existing billing-manager authority may read or update the legal company's billing address and phone; the legal company name remains read-only. The update and privacy-safe audit evidence commit atomically, while strict browser validation, bilingual completion guidance and an explicit return to Billing & Support preserve the customer journey. This is the first half of the LR031–LR040 interval and remains unpublished until Block 8 completes the ten-build boundary.

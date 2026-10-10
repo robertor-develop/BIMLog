@@ -62729,6 +62729,81 @@
         "scripts/test-launch-readiness-block07.mjs"
       ],
       "reviewedChangeSha256": "82e6bf7dc5971c34e5b842af82a3f836a9ef3f023355640a9796c35ca4d4188b"
+    },
+    {
+      "taskId": "launch-readiness-block08-billing-identity-subscription-setup",
+      "reviewedThroughCommit": "60eaa7ca074cf223f8e343cf809d4ab7e6a59023",
+      "reviewedAt": "2026-10-10T14:45:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The billing-identity-to-subscription block enforces and forwards the existing canonical company identity through the existing billing-manager and provider authorities; it creates no automatic checkout, charge, entitlement, credential, schema, Native, report, standard or MAIN 04 change."
+        }
+      ],
+      "reason": "Close the direct subscription-setup bypass by requiring canonical company billing identity and binding it to the provider customer request under existing tenant and billing authority.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/commercial-customer-setup.behavior.ts",
+        "evidence/launch-readiness-20261009/BLOCK_08_LR036_LR040.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-launch-readiness-block08.mjs"
+      ],
+      "reviewedChangeSha256": "0ff8b09936b8ac23d2f986fdc126516d82a7329207d675dd6dcbee09077b94c8"
     }
   ]
 }

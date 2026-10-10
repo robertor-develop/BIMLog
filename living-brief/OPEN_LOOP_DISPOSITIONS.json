@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "32c18187be8119eff6e985bb7c4526401c1cc375f539c8664dcffd8cafbad534",
-  "itemCount": 353,
+  "sourceSha256": "16b5dc19359f06ef060c56a8809bfc83261f18adeb7386e33acd85fb249c2a08",
+  "itemCount": 354,
   "counts": {
-    "ACTIVE": 312,
+    "ACTIVE": 313,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6431,6 +6431,24 @@
       "evidence": [
         "OPEN_LOOP.md:5096",
         "Launch Readiness Block 7 — canonical billing identity — 2026-10-10"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ef1b95c54755ad9d",
+      "sourceLine": 5105,
+      "heading": "Launch Readiness Block 8 — billing identity to subscription setup — 2026-10-10",
+      "statement": "Pass the complete gate, push LR036–LR040, publish accumulated LR031–LR040 and complete authenticated Chrome production smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5105",
+        "Launch Readiness Block 8 — billing identity to subscription setup — 2026-10-10"
       ],
       "currentAuthority": false
     }
