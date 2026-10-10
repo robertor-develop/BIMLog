@@ -49,7 +49,7 @@ export function parseCommercialWorkspace(value:unknown):CommercialWorkspaceDto{
 }
 
 export type CommercialHostedDestination={url:string};
-export const commercialHostedFailureCodes=["BILLING_AUTHORITY_REQUIRED","CHECKOUT_REQUEST_INVALID","CHECKOUT_AUTHORITY_CONFLICT","CHECKOUT_PLATFORM_NOT_READY","CHECKOUT_UNAVAILABLE","BILLING_PORTAL_UNAVAILABLE"] as const;
+export const commercialHostedFailureCodes=["BILLING_AUTHORITY_REQUIRED","CHECKOUT_REQUEST_INVALID","CHECKOUT_AUTHORITY_CONFLICT","CHECKOUT_PLATFORM_NOT_READY","CHECKOUT_LIVE_VERIFICATION_REQUIRED","CHECKOUT_UNAVAILABLE","BILLING_PORTAL_UNAVAILABLE"] as const;
 export type CommercialHostedFailureCode=typeof commercialHostedFailureCodes[number];
 export class CommercialHostedDestinationError extends Error{
   readonly code:CommercialHostedFailureCode;readonly blockers:readonly string[];

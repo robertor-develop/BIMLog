@@ -1,5 +1,5 @@
 import type {CommercialWorkspaceDto} from "./commercial-workspace-client";
-export type CommercialCheckoutBlocker="billing_authority"|"billing_identity"|"subscription"|"offer_mismatch"|"provider_customer"|"payment_service"|"platform_launch";
+export type CommercialCheckoutBlocker="billing_authority"|"billing_identity"|"subscription"|"offer_mismatch"|"provider_customer"|"payment_service"|"platform_launch"|"live_verification";
 export function deriveCommercialCheckoutEligibility(value:CommercialWorkspaceDto,selected?:{plan:"professional"|"team"|"business";cycle:"monthly"|"annual"}){
   const blockers:CommercialCheckoutBlocker[]=[];
   if(!value.billingAuthority.canManageBilling)blockers.push("billing_authority");
@@ -9,5 +9,6 @@ export function deriveCommercialCheckoutEligibility(value:CommercialWorkspaceDto
   if(!value.providerCustomerBound)blockers.push("provider_customer");
   if(value.paymentProviderStatus!=="ready")blockers.push("payment_service");
   if(value.salesLaunchStatus!=="ready")blockers.push("platform_launch");
+  if(!value.launchAuthorizationReady)blockers.push("live_verification");
   return Object.freeze({ready:blockers.length===0,blockers:Object.freeze(blockers)});
 }
