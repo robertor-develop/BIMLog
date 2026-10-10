@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import {parseCommercialBillingIdentity,readCommercialBillingIdentity,saveCommercialBillingIdentity} from "./commercial-billing-identity-client";
+const complete={companyId:7,legalName:"BIMCorp Inc",address:"100 Main Street",phone:"+1 555 0100",status:"complete",missingFields:[]};
+assert.deepEqual(parseCommercialBillingIdentity(complete),complete);
+assert.throws(()=>parseCommercialBillingIdentity({...complete,status:"incomplete"}),/status/);
+assert.throws(()=>parseCommercialBillingIdentity({...complete,address:"",missingFields:[]}),/status/);
+const calls:{url:string;init?:RequestInit}[]=[];
+const fetchImpl=async(url:string|URL|Request,init?:RequestInit)=>{calls.push({url:String(url),init});return new Response(JSON.stringify(complete),{status:200,headers:{"Content-Type":"application/json"}});};
+await readCommercialBillingIdentity("token",fetchImpl as typeof fetch);
+await saveCommercialBillingIdentity("token",{address:"100 Main Street",phone:"+1 555 0100"},fetchImpl as typeof fetch);
+assert.equal(calls[0]?.init?.method,"GET");assert.equal(calls[1]?.init?.method,"PATCH");
+assert.equal(calls[0]?.init?.headers&&Object.fromEntries(new Headers(calls[0].init.headers).entries()).authorization,"Bearer token");
+assert.deepEqual(JSON.parse(String(calls[1]?.init?.body)),{address:"100 Main Street",phone:"+1 555 0100"});
+console.log("LR033 strict billing identity browser client: PASS");
