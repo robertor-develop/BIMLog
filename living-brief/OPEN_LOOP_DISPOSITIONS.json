@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a9da35183faa2e289067d43d23bfa4bdca830da1e0c619409a68ec9dcc0f9550",
-  "itemCount": 365,
+  "sourceSha256": "fe31e551d5f9a5aaffa738d5b37de12c0ac8752bd8d2a362247eaff5fa56d610",
+  "itemCount": 366,
   "counts": {
-    "ACTIVE": 324,
+    "ACTIVE": 325,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6647,6 +6647,24 @@
       "evidence": [
         "OPEN_LOOP.md:5288",
         "Launch Readiness Block 23 — governed customer profile correction — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c71c54fe3dcf54ca",
+      "sourceLine": 5300,
+      "heading": "Launch Readiness Block 24 — governed customer processing restriction — 2026-10-11",
+      "statement": "Pass the complete exact-head gate, push LR111–LR120, publish the ten-build interval, verify exact live identity and complete authenticated desktop/mobile Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5300",
+        "Launch Readiness Block 24 — governed customer processing restriction — 2026-10-11"
       ],
       "currentAuthority": false
     }

@@ -5288,3 +5288,15 @@ Production-smoke repair checkpoint: `8122ad76` retains the support form element 
 - [ ] Pass the complete exact-head gate and push LR111–LR115 once. Keep this block unpublished until LR116–LR120 completes the next ten-build interval.
 
 Deletion and processing restriction remain human-governed operational actions. This block does not expose old or replacement personal values to the customer result projection.
+
+## Launch Readiness Block 24 — governed customer processing restriction — 2026-10-11
+
+- [x] Limit restriction execution to nonessential profile processing, product analytics and AI assistance context.
+- [x] Require the assigned Super Administrator, restriction request kind, approved or partially approved state and exact optimistic revision.
+- [x] Commit immutable restriction evidence, fulfillment evidence, lifecycle evidence and customer notification atomically.
+- [x] Project only the restricted scopes, completion time and receipt reference to the owning customer.
+- [x] Show the bilingual restriction-completed state and bind LR116–LR120 to permanent focused acceptance.
+- [x] Reconcile the deterministic route graph and isolated loopback artifact-proof fixture with the additive restriction-evidence schema.
+- [ ] Pass the complete exact-head gate, push LR111–LR120, publish the ten-build interval, verify exact live identity and complete authenticated desktop/mobile Chrome smoke.
+
+This block records the authoritative restriction decision. Optional processors still must consult that state before processing; mandatory contractual, security, financial, legal and audit processing remains governed by its existing authority. Customer deletion remains a separate human-governed workflow.
