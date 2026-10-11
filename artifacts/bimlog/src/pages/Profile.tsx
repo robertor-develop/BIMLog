@@ -885,6 +885,7 @@ export function Profile() {
           </nav>
         </section>
 
+        {profileArea === "personal" && <>
         <FeaturePolicySettingsPanel />
 
         {/* 2. Personal Info */}
@@ -1138,6 +1139,8 @@ export function Profile() {
             </div>
           )}
         </SectionCard>
+
+        </>}
 
         {/* A. My Projects */}
         <SectionCard title="My Projects" icon={FolderOpen}>
