@@ -4222,3 +4222,6 @@ LR076–LR080 complete the customer invoice-record journey. A billing manager ca
 
 The unchanged 4 MiB browser budget caught an 835-byte regression in the first statement-download implementation. Repair `72e51f75` reuses the existing authenticated PDF downloader and removes duplicate subscription/count presentation already shown by Billing & Support. The statement action, bilingual labels, tenant authority and server-side fingerprint remain intact; the rebuilt browser total passes at 4,194,303 of 4,194,304 bytes.
 
+
+Route-inventory reconciliation: `c58ea632` records the statement URL at its final Billing History owner after the browser-budget repair; the protected endpoint and runtime behavior are unchanged.
+

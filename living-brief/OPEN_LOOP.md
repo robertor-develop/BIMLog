@@ -5192,3 +5192,6 @@ Performance repair checkpoint: `dce92b03` preserves LR071–LR075 invoice-histor
 
 Performance repair checkpoint: `72e51f75` preserves LR076-LR080 statement download while reusing the existing authenticated PDF path and restoring the fixed browser budget at 4,194,303 of 4,194,304 bytes. The complete exact-source gate must pass before push and publication.
 
+
+Route-inventory reconciliation checkpoint: `c58ea632` records the final statement-link source owner. No runtime route or product behavior changed.
+
