@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 756,
-    "frontendApiReferences": 303,
+    "apiRoutes": 758,
+    "frontendApiReferences": 304,
     "routeOwnedTables": 68
   },
   "compatibilityRedirects": [
@@ -2297,6 +2297,24 @@
     {
       "method": "GET",
       "path": "/commercial/billing-history",
+      "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "tables": [
+        "companiesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/commercial/invoices/:invoiceId",
+      "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "tables": [
+        "companiesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/commercial/invoices/:invoiceId/statement.pdf",
       "owner": "artifacts/api-server/src/routes/commercial-workspace.ts",
       "tables": [
         "companiesTable",
@@ -9996,6 +10014,10 @@
     {
       "screen": "artifacts/bimlog/src/lib/commercial-billing-history-client.ts",
       "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/billing-history"
+    },
+    {
+      "screen": "artifacts/bimlog/src/lib/commercial-billing-history-client.ts",
+      "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/invoices/${encodeURIComponent(invoice.id)}/statement.pdf"
     },
     {
       "screen": "artifacts/bimlog/src/lib/commercial-billing-identity-client.ts",

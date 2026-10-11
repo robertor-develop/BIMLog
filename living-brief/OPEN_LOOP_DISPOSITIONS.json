@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4db63715f966b655997cde87f1855407b8c70986ef439f0c73daf2a1abfd38dc",
-  "itemCount": 357,
+  "sourceSha256": "6e2a467a5b02a0e269c8e4b0a03a9793cdaaf19950ab8149d526f4b2563b461d",
+  "itemCount": 358,
   "counts": {
-    "ACTIVE": 316,
+    "ACTIVE": 317,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6503,6 +6503,24 @@
       "evidence": [
         "OPEN_LOOP.md:5178",
         "Launch Readiness Block 11 — verified checkout return — 2026-10-10"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "69247a6f9e035476",
+      "sourceLine": 5191,
+      "heading": "Launch Readiness Block 16 — customer invoice statements — 2026-10-10",
+      "statement": "Pass the complete release gate, push LR076–LR080, publish accumulated LR071–LR080 and complete authenticated Chrome production smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5191",
+        "Launch Readiness Block 16 — customer invoice statements — 2026-10-10"
       ],
       "currentAuthority": false
     }

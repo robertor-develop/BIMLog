@@ -63597,7 +63597,7 @@
     {
       "taskId": "launch-readiness-block13-browser-budget-repair",
       "reviewedThroughCommit": "59ef95d10e82f87f79d4aee6e83bb16a9396acaf",
-      "reviewedAt": "2026-10-10T17:30:00.000Z",
+      "reviewedAt": "2026-10-10T17:30:00Z",
       "status": "accepted",
       "authorities": [
         {
@@ -63669,7 +63669,7 @@
     {
       "taskId": "launch-readiness-block13-checkout-contract-repair",
       "reviewedThroughCommit": "7f46e1cf59436b816d6156aca10af911b73d7f4c",
-      "reviewedAt": "2026-10-10T18:00:00.000Z",
+      "reviewedAt": "2026-10-10T18:00:00Z",
       "status": "accepted",
       "authorities": [
         {
@@ -63741,7 +63741,7 @@
     {
       "taskId": "launch-readiness-block14",
       "reviewedThroughCommit": "c69d76a3e011a5522ffea91d21a389eed57c6a7f",
-      "reviewedAt": "2026-10-10T19:00:00.000Z",
+      "reviewedAt": "2026-10-10T19:00:00Z",
       "status": "accepted",
       "authorities": [
         {
@@ -63812,7 +63812,7 @@
     {
       "taskId": "launch-readiness-block14-browser-budget-repair",
       "reviewedThroughCommit": "509b666f45e2e7b947918f9faac5ea5fb06ca262",
-      "reviewedAt": "2026-10-10T20:00:00.000Z",
+      "reviewedAt": "2026-10-10T20:00:00Z",
       "status": "accepted",
       "authorities": [
         {
@@ -63883,7 +63883,7 @@
     {
       "taskId": "launch-readiness-block14-provider-guidance-repair",
       "reviewedThroughCommit": "f634846c489a267208e1223b806c5bb8731f3bd3",
-      "reviewedAt": "2026-10-10T20:30:00.000Z",
+      "reviewedAt": "2026-10-10T20:30:00Z",
       "status": "accepted",
       "authorities": [
         {
@@ -63954,7 +63954,7 @@
     {
       "taskId": "launch-readiness-block15-invoice-history",
       "reviewedThroughCommit": "dce92b0304124d21c859a91a5c63f7ef46732ed9",
-      "reviewedAt": "2026-10-10T23:00:00.000Z",
+      "reviewedAt": "2026-10-10T23:00:00Z",
       "status": "accepted",
       "authorities": [
         {
@@ -64021,6 +64021,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f6739b48b15af77ba4fe54b92e3c267f9ab8649ab889d23765d88bf9dd65ccc9"
+    },
+    {
+      "taskId": "launch-readiness-block16-invoice-statements",
+      "reviewedThroughCommit": "298e70253841f38fb3f88f0227672b934e6064f2",
+      "reviewedAt": "2026-10-11T01:20:00.000Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "updated"
+        },
+        {
+          "key": "plugin",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "LR076-LR080 add tenant-scoped customer invoice detail and shared-system PDF statements with private authenticated delivery and bilingual browser download. They do not change payment, refund, dispute, subscription, provider, database, Native, legal identity, credentials, or MAIN 04 authority.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7444899e32caf0c067ae3ec3f0ea2c1794e83d6ca5d6952b58ee249675c69094"
     }
   ]
 }

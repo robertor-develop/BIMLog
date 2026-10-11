@@ -5180,3 +5180,12 @@ Production-smoke repair closed: the first LR031–LR040 publication exposed a dr
 Reconciliation checkpoint: LR051–LR055 reconciliation baseline is LR054 `09a6f47f`; LR055 remains an unpublished reviewed candidate and publication is due only after LR056–LR060.
 
 Performance repair checkpoint: `dce92b03` preserves LR071–LR075 invoice-history behavior while extracting presentation CSS and restoring the unchanged 4 MiB browser budget. The full exact-source gate and branch push remain required; publication stays deferred until LR076–LR080 completes the ten-build interval.
+
+## Launch Readiness Block 16 — customer invoice statements — 2026-10-10
+
+- [x] Project one exact invoice through existing tenant and billing-manager authority.
+- [x] Validate totals, lifecycle, credits, disputes, customer identity and remaining balance.
+- [x] Render a professional statement through the shared BIMLog PDF system with a deterministic fingerprint.
+- [x] Deliver the PDF through authenticated private no-store response headers without provider secrets.
+- [x] Add a bilingual Billing & Support download and reject malformed statement responses.
+- [ ] Pass the complete release gate, push LR076–LR080, publish accumulated LR071–LR080 and complete authenticated Chrome production smoke.

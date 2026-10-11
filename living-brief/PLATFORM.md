@@ -74,6 +74,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/commercial-billing-history-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-billing-identity-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-checkout-summary-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-invoice-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-invoice-statement-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-activation-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-authorization-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-launch-dossier-route.behavior.ts
@@ -380,6 +382,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.ts
 - artifacts/api-server/src/lib/commercial-invoice-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-invoice-statement-pdf.behavior.ts
+- artifacts/api-server/src/lib/commercial-invoice-statement-pdf.ts
+- artifacts/api-server/src/lib/commercial-invoice-statement.behavior.ts
+- artifacts/api-server/src/lib/commercial-invoice-statement.ts
 - artifacts/api-server/src/lib/commercial-launch-activation.behavior.ts
 - artifacts/api-server/src/lib/commercial-launch-activation.ts
 - artifacts/api-server/src/lib/commercial-launch-authorization.behavior.ts
