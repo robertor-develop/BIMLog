@@ -88,6 +88,7 @@ const css = `
 .ji-mapper{margin:14px 0;padding:16px;border:1px solid #93c5fd;border-radius:12px;background:#f8fbff}.ji-mapper-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.ji-mapper-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.ji-preview{overflow:auto;margin-top:12px}.ji-preview table{width:100%;border-collapse:collapse;font-size:12px}.ji-preview th,.ji-preview td{padding:7px;border:1px solid #dbe4f0;text-align:left}.ji-preview th{background:#eaf1ff}.ji-issues{color:#9f1239;font-weight:700}@media(max-width:900px){.ji-mapper-grid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.ji-mapper-grid{grid-template-columns:1fr}.ji-mapper-head{display:block}}
 .ji-quick{background:#fff;border:1px solid #d9e1ec;border-radius:16px;padding:22px}.ji-quick-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.ji-quick-head h2{margin:5px 0}.ji-quick-head button,.ji-quick-question button,.ji-quick-nav button{display:inline-flex;gap:7px;align-items:center}.ji-quick-kicker{color:#1d4ed8;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.ji-quick-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}.ji-quick-steps button{display:flex;align-items:center;gap:8px;text-align:left}.ji-quick-steps button span{display:grid;place-items:center;width:23px;height:23px;border-radius:99px;background:#e2e8f0}.ji-quick-steps button.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}.ji-quick-steps button.done span{background:#dcfce7;color:#166534}.ji-quick-question{min-height:260px;border:1px solid #e2e8f0;border-radius:12px;padding:20px}.ji-quick-question h3{margin-top:0}.ji-quick-summary{display:grid;gap:9px;margin:14px 0}.ji-quick-summary div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px}.ji-quick-summary span{color:#64748b}.ji-quick-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.ji-advanced-return{margin-bottom:12px}.ji-advanced-return button{display:inline-flex;gap:7px;align-items:center}@media(max-width:700px){.ji-quick-head{display:block}.ji-quick-head>button{margin-top:10px}.ji-quick-steps{grid-template-columns:1fr}.ji-quick-question{min-height:0}.ji-quick-summary div{grid-template-columns:1fr}.ji-quick-nav span{display:none}}
 .ji-field-legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #d9e1ec;border-radius:10px;background:#f8fafc;font-size:12px}.ji-field-legend strong{color:#9f1239}.ji-nav-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}.ji-nav-status.complete{color:#15803d}.ji-nav-status.required{color:#b45309}.ji-nav-status.optional{color:#64748b}
+.ji-stage-movement{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:12px 14px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff}.ji-stage-movement>div:first-child{display:grid;gap:2px}.ji-stage-movement span{font-size:12px;color:#536174}.ji-stage-movement .ji-actions{margin:0}@media(max-width:600px){.ji-stage-movement{align-items:stretch;flex-direction:column}.ji-stage-movement .ji-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ji-stage-movement .ji-actions>:only-child{grid-column:1/-1}}
 .ji-company-map{margin-top:16px;padding:16px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff}.ji-company-map h3{display:flex;gap:7px;align-items:center}.ji-company-row{display:grid;grid-template-columns:1fr 220px auto;gap:8px;align-items:center;margin:8px 0;padding:8px;background:white;border-radius:8px}@media(max-width:700px){.ji-company-row{grid-template-columns:1fr}}
 .ji-company-create-button{display:inline-flex;align-items:center;gap:7px;margin-top:10px}.ji-company-create{grid-column:1/-1;margin-top:10px;padding:14px;border:1px solid #93c5fd;border-radius:10px;background:#f8fbff}.ji-company-create-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.ji-company-create-head button{display:grid;place-items:center;padding:6px}.ji-company-create p{margin:6px 0 12px;font-size:12px}
 .ji-readiness{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}.ji-readiness-card{background:#fff;border:1px solid #d9e1ec;border-radius:12px;padding:14px;min-width:0}.ji-readiness-card h2{font-size:12px;margin:0 0 7px;color:#475569}.ji-readiness-card strong{font-size:20px;color:#0f172a}.ji-readiness-card p{font-size:11px;margin:6px 0 0}.ji-readiness-help{grid-column:1/-1;background:#eff6ff;border-left:4px solid #2563eb;padding:10px 12px;color:#334155;font-size:12px}.ji button:focus-visible,.ji a:focus-visible,.ji input:focus-visible,.ji select:focus-visible,.ji textarea:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}@media(max-width:900px){.ji-readiness{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.ji{padding-top:12px}.ji-readiness{grid-template-columns:1fr}.ji-footer{position:static;align-items:flex-start;flex-direction:column}.ji-footer button{width:100%}}
@@ -989,6 +990,14 @@ export function JobIntakeWorkspace() {
     preserveJobIntakeActiveStage(projectId, "review");
     window.requestAnimationFrame(() => document.getElementById("ji-review")?.scrollIntoView({ block: "start" }));
   };
+  const activeStageIndex = stages.indexOf(active as (typeof stages)[number]);
+  const moveToStage = (stage: IntakeStage) => {
+    setActive(stage);
+    preserveJobIntakeActiveStage(projectId, stage);
+    window.requestAnimationFrame(() =>
+      document.getElementById(`ji-${stage}`)?.scrollIntoView({ block: "start", behavior: "smooth" }),
+    );
+  };
   const reviewItems = [
     [
       "sourceConfirmed",
@@ -1281,6 +1290,15 @@ export function JobIntakeWorkspace() {
                   </button>
                 );
               })}
+              <button
+                type="button"
+                className={active === "documents" ? "on" : ""}
+                aria-current={active === "documents" ? "step" : undefined}
+                onClick={() => moveToStage("documents")}
+              >
+                {tt("Source documents", "Documentos fuente")}
+                <span className="ji-nav-status optional">{tt("Optional", "Opcional")}</span>
+              </button>
             </aside>
             <div className="ji-stages">
               {activeStageMissing.length > 0 && (
@@ -1295,6 +1313,22 @@ export function JobIntakeWorkspace() {
                 </section>
               )}
               <div className="ji-field-legend" role="note"><span><strong>{tt("Required", "Obligatorio")}</strong> — {tt("must be complete before activation", "debe completarse antes de activar")}</span><span>{tt("Optional", "Opcional")} — {tt("add only when it applies", "agregue solo cuando corresponda")}</span></div>
+              <nav className="ji-stage-movement" aria-label={tt("Setup step controls", "Controles de pasos de configuración")}>
+                <div>
+                  <strong>{active === "documents" ? tt("Optional supporting material", "Material de apoyo opcional") : tt(`Step ${activeStageIndex + 1} of ${stages.length}`, `Paso ${activeStageIndex + 1} de ${stages.length}`)}</strong>
+                  <span>{active === "documents" ? tt("Return to the setup whenever you are ready.", "Vuelva a la configuración cuando esté listo.") : stageLabel(active)}</span>
+                </div>
+                <div className="ji-actions">
+                  {active === "documents" ? (
+                    <button type="button" onClick={() => moveToStage("identity")}>{tt("Return to setup", "Volver a la configuración")}</button>
+                  ) : (
+                    <>
+                      {activeStageIndex > 0 && <button type="button" onClick={() => moveToStage(stages[activeStageIndex - 1])}>{tt("Previous step", "Paso anterior")}</button>}
+                      {activeStageIndex < stages.length - 1 && <button className="primary" type="button" onClick={() => moveToStage(stages[activeStageIndex + 1])}>{tt("Continue", "Continuar")}</button>}
+                    </>
+                  )}
+                </div>
+              </nav>
               <div
                 className="ji-actions"
                 style={{
