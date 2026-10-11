@@ -5405,7 +5405,7 @@ The summary remains read-only and tenant-bounded. Existing RFI and Submittal reg
 - [x] Defer loading the complete responsibility queue until the user opens it.
 - [x] Group project organization, testing, briefing, responsibilities, totals and operational detail into one secondary workspace.
 - [x] Bind hierarchy, bilingual disclosure labels and responsive containment to the permanent production build.
-- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Progressive disclosure Block 2 completes the ten-build interval.
+- [x] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Progressive disclosure Block 2 completes the ten-build interval. It published with Block 2 as deployment `7e2a94ba` from exact source `7b257977906c52e605dcdc281c4f14fb3d85f5f1`.
 
 This block changes presentation hierarchy only. It creates no project record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.
 
@@ -5418,6 +5418,6 @@ This block changes presentation hierarchy only. It creates no project record and
 - [x] Route team blockers to the actual Resource budget step.
 - [x] Defer PDF, capability badges and expanded step explanations behind clearly labeled controls.
 - [x] Bind staged rendering, contextual guidance, bilingual labels and narrow-width containment to the permanent production build.
-- [ ] Pass the complete exact-head gate, push Blocks 1–2, publish the ten-build interval and complete authenticated Chrome production acceptance.
+- [x] Pass the complete exact-head gate, push Blocks 1–2, publish the ten-build interval and complete authenticated Chrome production acceptance. Exact source `7b257977906c52e605dcdc281c4f14fb3d85f5f1` published as deployment `7e2a94ba`; production health returned package `bimlog-7b257977906c52e6-d5599947f6e73229` with `identityBound=true`. Authenticated Chrome passed Headquarters, Job Intake, Profile, Company Profile, Billing & Support and Help, including staged step movement, collapsed secondary controls, hard authenticated navigation, exact 390×844 containment and zero console warnings or errors.
 
 This block changes presentation and navigation hierarchy only. It creates no project record and changes no canonical draft, autosave, activation, membership, permission, payment, email, provider, Native, installer or external-send behavior.
