@@ -5381,6 +5381,18 @@ The summary is read-only and bounded. It creates no project record, expands no m
 - [x] Keep status announcements, keyboard focus and narrow-screen retry controls accessible.
 - [x] Bind the complete state and responsive behavior to the permanent production build.
 - [x] Move the cumulative Block 6 failure-surface assertion to the actual `TodayWorkspace` owner after the complete gate exposed the stale file-level expectation.
-- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 8 completes the next ten-build interval.
+- [x] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 8 completes the next ten-build interval.
 
 This block changes presentation truth only. It creates no project record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.
+
+## Simplification and guided adoption Block 8 — 2026-10-11
+
+- [x] Add exact authorized record identity to assigned-work summary items.
+- [x] Project the RFI or Submittal identity from the existing tenant-scoped query.
+- [x] Build URL-safe destinations through the canonical register deep-link contract.
+- [x] Open the exact assigned record from Today while preserving role-aware priority.
+- [x] Omit invalid record identities instead of showing a misleading action.
+- [x] Bind the API contract, route projection, destinations and Today integration to the permanent production build.
+- [ ] Pass the complete exact-head gate, push Blocks 7–8, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
+
+The summary remains read-only and tenant-bounded. Existing RFI and Submittal registers remain authoritative; this block creates no record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.
