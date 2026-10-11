@@ -4219,3 +4219,6 @@ The complete gate identified a 1,731-byte browser JavaScript budget overrun. Rep
 # Launch readiness LR076–LR080 — customer invoice statements — 2026-10-10
 
 LR076–LR080 complete the customer invoice-record journey. A billing manager can retrieve one exact tenant-owned invoice and download a professional BIMLog billing statement containing validated totals, dates, credits, disputes, customer identity, remaining balance and a deterministic content fingerprint. Both routes preserve existing billing authority and private no-store delivery; the browser rejects non-PDF or unsigned statement responses. The output explicitly does not authorize payment, refund, tax filing or accounting entries, and no financial or provider state is mutated. This second five-build block reaches the LR071–LR080 publication boundary after the complete exact-source gate.
+
+The unchanged 4 MiB browser budget caught an 835-byte regression in the first statement-download implementation. Repair `72e51f75` reuses the existing authenticated PDF downloader and removes duplicate subscription/count presentation already shown by Billing & Support. The statement action, bilingual labels, tenant authority and server-side fingerprint remain intact; the rebuilt browser total passes at 4,194,303 of 4,194,304 bytes.
+
