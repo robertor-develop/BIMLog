@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 5,
     "apiRoutes": 763,
-    "frontendApiReferences": 304,
+    "frontendApiReferences": 306,
     "routeOwnedTables": 70
   },
   "compatibilityRedirects": [
@@ -9805,6 +9805,10 @@
       "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/projects/${projectId}/financial/contracts/${encodeURIComponent(contract.id)}/payments"
     },
     {
+      "screen": "artifacts/bimlog/src/components/commercial/support-data-request-receipt.behavior.ts",
+      "apiPath": "/api/v1/support/cases/${caseId}/data-request/fulfillment"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases"
     },
@@ -9819,6 +9823,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportConversation.tsx",
       "apiPath": "/api/v1/admin"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+      "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/fulfillment"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportSatisfaction.tsx",

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "32086a943d56a4190d0988189a0944d1b5df5582a6feb7e24f41aebedf3d01d3",
-  "itemCount": 361,
+  "sourceSha256": "47899013df3a6a8ea5ab4094da1635e3b82c1ad6817021c5c2a8ce76df850824",
+  "itemCount": 362,
   "counts": {
-    "ACTIVE": 320,
+    "ACTIVE": 321,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6575,6 +6575,24 @@
       "evidence": [
         "OPEN_LOOP.md:5238",
         "Launch Readiness Block 19 — governed data-request fulfillment receipts — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "89e92675d56ab206",
+      "sourceLine": 5252,
+      "heading": "Launch Readiness Block 20 — customer data-request completion — 2026-10-11",
+      "statement": "Pass the complete exact-head release gate, push LR096–LR100, publish the LR091–LR100 interval, verify exact live identity and complete authenticated desktop/mobile Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5252",
+        "Launch Readiness Block 20 — customer data-request completion — 2026-10-11"
       ],
       "currentAuthority": false
     }
