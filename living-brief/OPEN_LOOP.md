@@ -5211,6 +5211,8 @@ Legacy projection repair `24a825d2` preserves pre-LR081 support records with no 
 
 Accessibility compatibility repair `09a24d82` restores the exact bilingual unread-message ARIA label and keeps the visible badge compact. SaaS Block 35, LR081–LR085, the production build and fixed browser budget pass at 4,194,244 of 4,194,304 bytes; the complete exact-head gate and branch push remain.
 
+Customer-service compatibility repair `f3c0ac5f` restores the established bilingual customer-service labels and credential warning while keeping only the new data-request copy concise. SaaS Block 29, LR081–LR085, frontend typecheck, production build and the browser budget pass at 4,194,275 of 4,194,304 bytes; the complete exact-head gate and branch push remain.
+
 
 Route-inventory reconciliation checkpoint: `c58ea632` records the final statement-link source owner. No runtime route or product behavior changed.
 
