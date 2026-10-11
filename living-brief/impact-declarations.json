@@ -64311,75 +64311,75 @@
       "reviewedChangeSha256": "52165c6358893618334555ddfa1136f9e3da0812faca45a05ccbbc4e11e35d74"
     },
     {
-      "taskId": "launch-readiness-block17-legacy-projection",
-      "reviewedThroughCommit": "24a825d26c415bca7981854e8c336adb7dffab76",
-      "reviewedAt": "2026-10-10T22:47:00-04:00",
+      "taskId": "launch-readiness-block17-unread-accessibility",
+      "reviewedThroughCommit": "09a24d824ad853440f8b2638190494aca833a753",
+      "reviewedAt": "2026-10-10T22:54:00-04:00",
       "status": "accepted",
       "authorities": [
         {
           "key": "ecosystem_doctrine",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         },
         {
           "key": "claude",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         },
         {
           "key": "quality",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         },
         {
           "key": "vision",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         },
         {
           "key": "platform",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         },
         {
           "key": "plugin",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         },
         {
           "key": "report_design_system",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         },
         {
           "key": "standards_register",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         },
         {
           "key": "status",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "updated"
         },
         {
           "key": "open_loop",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "updated"
         },
         {
           "key": "audit",
-          "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+          "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
           "result": "reviewed_no_semantic_change"
         }
       ],
-      "reason": "The LR085 legacy projection repair accepts preexisting untyped support records, preserves strict typed data-request validation, and follows extracted CSS ownership while leaving tenant authority, financial and provider state, Native and MAIN 04 authority unchanged.",
+      "reason": "The LR085 accessibility compatibility repair restores the established bilingual unread-message ARIA label while preserving typed data-request validation, tenant authority, financial and provider state, Native and MAIN 04 authority.",
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "cbeaeba8e975d10b86a2af27e27fa4209c376c4d454646399fb506729ad7e599"
+      "reviewedChangeSha256": "6d4390b74af952f4fd2215482861f2618c08ae0ff53009df78576ac04ba3f4bb"
     }
   ]
 }

@@ -5209,6 +5209,8 @@ Release-gate compatibility repair `c3f696da` preserves the exact established clo
 
 Legacy projection repair `24a825d2` preserves pre-LR081 support records with no request type while continuing to reject invalid typed records. The extracted resolution-style assertion follows its CSS owner. SaaS Block 38, LR081–LR085, frontend typecheck, production build and browser budget pass at 4,194,226 of 4,194,304 bytes; the complete exact-head gate and branch push remain.
 
+Accessibility compatibility repair `09a24d82` restores the exact bilingual unread-message ARIA label and keeps the visible badge compact. SaaS Block 35, LR081–LR085, the production build and fixed browser budget pass at 4,194,244 of 4,194,304 bytes; the complete exact-head gate and branch push remain.
+
 
 Route-inventory reconciliation checkpoint: `c58ea632` records the final statement-link source owner. No runtime route or product behavior changed.
 
