@@ -41,7 +41,7 @@ interface XSubmittal {
 }
 interface XActivity {
   id: number; projectId: number;
-  userFullName: string; userCompanyName: string;
+  userFullName: string; userCompanyName: string; userEmail?: string | null;
   actionType: string; entityType: string;
   details?: string | null;
   fileNameBefore?: string | null; fileNameAfter?: string | null;
@@ -485,6 +485,14 @@ export function Dashboard() {
     ...allProjectRows.slice(0, 1).map(item => ({ kind: "project" as const, title: tt("Continue project work", "Continuar trabajo del proyecto"), detail: `${item.code} · ${item.name}`, href: `/projects/${item.id}` })),
   ];
   const todayAction = chooseRoleAwareTodayAction((user as any)?.workProfile || (user as any)?.role, todayCandidates);
+  const myLatestActivity = recentActivity.find(entry => !userEmail || String(entry.userEmail || "").toLowerCase() === userEmail.toLowerCase()) || recentActivity[0];
+  const resumeProject = myLatestActivity ? projectMap.get(myLatestActivity.projectId) : null;
+  const resumeAction = resumeProject ? {
+    title: resumeProject.name,
+    detail: tt(`Recent project activity · ${timeAgo(myLatestActivity.createdAt)}`, `Actividad reciente del proyecto · ${timeAgo(myLatestActivity.createdAt)}`),
+    href: `/projects/${resumeProject.id}`,
+    label: tt("Resume", "Reanudar"),
+  } : null;
 
   // ── Top Naming Violators ───────────────────────────────────────────────────
   // FIX 2: only count confirmed violations (user clicked Continue Anyway on naming warning)
@@ -532,6 +540,11 @@ export function Dashboard() {
         .today-workspace__action p,.today-workspace__clear p { margin:4px 0 0; color:hsl(var(--muted-foreground)); font-size:11px; }
         .today-workspace__action button { display:inline-flex; align-items:center; gap:7px; min-height:40px; padding:8px 12px; border:0; border-radius:8px; background:#1d4ed8; color:white; font-weight:750; cursor:pointer; }
         .today-workspace__clear { display:flex; gap:10px; align-items:flex-start; color:#15803d; }
+        .today-workspace__resume { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; margin-top:10px; padding:10px 12px; border:1px solid hsl(var(--border)); border-radius:9px; background:hsl(var(--card)); color:hsl(var(--foreground)); text-align:left; cursor:pointer; }
+        .today-workspace__resume > span { display:grid; gap:2px; min-width:0; }
+        .today-workspace__resume small { color:#1d4ed8; font-size:9px; font-weight:850; letter-spacing:.06em; }
+        .today-workspace__resume strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+        .today-workspace__resume em { color:hsl(var(--muted-foreground)); font-size:10px; font-style:normal; }
         .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
         .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
@@ -682,7 +695,7 @@ export function Dashboard() {
             onRefresh={() => { void refreshStats(); }}
           />}
 
-          {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} />}
+          {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
 
           <section
             data-current-view-filter-panel="dashboard"
