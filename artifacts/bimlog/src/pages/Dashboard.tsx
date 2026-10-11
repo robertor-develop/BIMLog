@@ -22,6 +22,7 @@ import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWo
 import { OperationalPulse } from "@/components/dashboard/OperationalPulse";
 import type { OperationalPulseCounts } from "@/lib/operational-pulse";
 import { TodayWorkspace } from "@/components/dashboard/TodayWorkspace";
+import { SetupProgressCard } from "@/components/dashboard/SetupProgressCard";
 import { chooseRoleAwareTodayAction, type TodayCandidate } from "@/lib/today-action";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -215,7 +216,7 @@ export function Dashboard() {
   }
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { shouldShow: showOnboarding, markDone: doneOnboarding } = useOnboarding();
+  const { state: onboardingState, shouldShow: showOnboarding, resumeGuide, markDone: doneOnboarding } = useOnboarding();
   const [onboardingVisible, setOnboardingVisible] = useState(false);
   useEffect(() => { if (showOnboarding) setOnboardingVisible(true); }, [showOnboarding]);
 
@@ -696,6 +697,8 @@ export function Dashboard() {
           />}
 
           {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
+
+          {onboardingState && !onboardingState.completedAt && onboardingState.projectCount === 0 && onboardingState.completedSteps.includes("guide_paused") && <SetupProgressCard lang={lang} state={onboardingState} onResume={() => { void resumeGuide().then(resumed => { if (resumed) setOnboardingVisible(true); }); }} />}
 
           <section
             data-current-view-filter-panel="dashboard"

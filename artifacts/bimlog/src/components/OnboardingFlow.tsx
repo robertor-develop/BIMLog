@@ -12,18 +12,18 @@ const API=(import.meta.env.BASE_URL||"").replace(/\/$/,"")+"/api/v1";
 const roles=[["bim_coordinator","BIM coordinator","Coordinador BIM"],["project_admin","Project administrator","Administrador de proyecto"],["document_controller","Document controller","Controlador documental"],["designer","Designer / detailer","Diseñador / dibujante"],["field_team","Field team","Equipo de campo"],["executive","Executive / owner","Ejecutivo / propietario"]] as const;
 const allDisciplines=["Architecture","Structural","Mechanical","Electrical","Plumbing","Fire Protection","Civil"];
 const allDocuments=["Shop Drawings","Coordination Drawings","Clash Reports","RFIs","Submittals"];
-type State={email:string;companyName:string;emailVerifiedAt:string|null;workProfile:string|null;preferredDisciplines:string[];preferredDocumentTypes:string[];completedSteps:string[];completedAt:string|null;projectCount:number};
+export type OnboardingState={email:string;companyName:string;emailVerifiedAt:string|null;workProfile:string|null;preferredDisciplines:string[];preferredDocumentTypes:string[];completedSteps:string[];completedAt:string|null;projectCount:number};
 
 export function OnboardingFlow({onDone}:{onDone:()=>void}){
   const {lang}=useI18n(),token=useAuthStore(s=>s.token),tl=(en:string,es:string)=>lang==="es"?es:en;
   const [,navigate]=useLocation();
-  const [state,setState]=useState<State|null>(null),[step,setStep]=useState(0),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
+  const [state,setState]=useState<OnboardingState|null>(null),[step,setStep]=useState(0),[error,setError]=useState(""),[notice,setNotice]=useState(""),[busy,setBusy]=useState(false);
   const [commercialIntent]=useState(()=>readCommercialIntent());
   const [role,setRole]=useState(""),[disciplines,setDisciplines]=useState<string[]>(["Architecture"]),[documents,setDocuments]=useState<string[]>(["Shop Drawings"]);
   const [project,setProject]=useState({name:"",code:"",description:""});
   const [createdProjectId,setCreatedProjectId]=useState<number|null>(null);
   const headers=useMemo(()=>({Authorization:`Bearer ${token}`,"Content-Type":"application/json"}),[token]);
-  const load=async()=>{setError("");const response=await fetch(`${API}/onboarding`,{headers});if(!response.ok)throw new Error(tl("Setup could not be loaded.","No se pudo cargar la configuración."));const data=await response.json() as State;setState(data);setRole(data.workProfile||"");setDisciplines(data.preferredDisciplines.length?data.preferredDisciplines:["Architecture"]);setDocuments(data.preferredDocumentTypes.length?data.preferredDocumentTypes:["Shop Drawings"]);if(data.completedAt||data.projectCount>0)onDone();};
+  const load=async()=>{setError("");const response=await fetch(`${API}/onboarding`,{headers});if(!response.ok)throw new Error(tl("Setup could not be loaded.","No se pudo cargar la configuración."));const data=await response.json() as OnboardingState;setState(data);setRole(data.workProfile||"");setDisciplines(data.preferredDisciplines.length?data.preferredDisciplines:["Architecture"]);setDocuments(data.preferredDocumentTypes.length?data.preferredDocumentTypes:["Shop Drawings"]);if(data.completedAt||data.projectCount>0)onDone();};
   useEffect(()=>{void load().catch(e=>setError(e.message));},[token]);
   const request=async(path:string,init:RequestInit={})=>{setBusy(true);setError("");setNotice("");try{const response=await fetch(`${API}${path}`,{...init,headers:{...headers,...init.headers}});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||tl("The step could not be saved.","No se pudo guardar el paso."));return body;}finally{setBusy(false);}};
   const toggle=(value:string,current:string[],set:(v:string[])=>void)=>set(current.includes(value)?current.filter(item=>item!==value):[...current,value]);
@@ -52,7 +52,8 @@ function Done({text}:{text:string}){return <div className="flex items-center gap
 function Choice({active,onClick,children}:{active:boolean;onClick:()=>void;children:React.ReactNode}){return <button type="button" aria-pressed={active} onClick={onClick} className={`rounded-lg border px-3 py-2 text-left text-sm ${active?"border-blue-600 bg-blue-50 font-semibold text-blue-800":"border-slate-200 hover:border-slate-400"}`}>{children}</button>}
 function Label({text,children}:{text:string;children:React.ReactNode}){return <div><p className="mb-2 mt-4 text-sm font-semibold">{text}</p><div className="flex flex-wrap gap-2">{children}</div></div>}
 export function useOnboarding(){
-  const token=useAuthStore(s=>s.token),[state,setState]=useState<State|null>(null);
+  const token=useAuthStore(s=>s.token),[state,setState]=useState<OnboardingState|null>(null);
   useEffect(()=>{if(!token){setState(null);return;}const controller=new AbortController();fetch(`${API}/onboarding`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal}).then(r=>r.ok?r.json():null).then(data=>{if(data)setState(data);}).catch(()=>{});return()=>controller.abort();},[token]);
-  return {state,shouldShow:!!token&&!!state&&!state.completedAt&&state.projectCount===0&&!state.completedSteps.includes("guide_paused"),markDone:()=>setState(current=>current?{...current,completedSteps:[...new Set([...current.completedSteps,"guide_paused"])]}:current)};
+  const resumeGuide=async()=>{if(!token)return false;const response=await fetch(`${API}/onboarding`,{method:"PATCH",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({guidePaused:false})});if(!response.ok)return false;setState(current=>current?{...current,completedSteps:current.completedSteps.filter(step=>step!=="guide_paused")}:current);return true;};
+  return {state,shouldShow:!!token&&!!state&&!state.completedAt&&state.projectCount===0&&!state.completedSteps.includes("guide_paused"),resumeGuide,markDone:()=>setState(current=>current?{...current,completedSteps:[...new Set([...current.completedSteps,"guide_paused"])]}:current)};
 }
