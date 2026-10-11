@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "154e31b2b8638b071886d08502a3caa98320190e8aff3f6e0da57504991e516f",
-  "itemCount": 360,
+  "sourceSha256": "2894f758a91ff6cba98b42f79314b8bf5550546abb531023c5501695200ab0bf",
+  "itemCount": 361,
   "counts": {
-    "ACTIVE": 319,
+    "ACTIVE": 320,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6557,6 +6557,24 @@
       "evidence": [
         "OPEN_LOOP.md:5227",
         "Launch Readiness Block 18 — governed data-request review — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ce2ea9da5a0a234a",
+      "sourceLine": 5238,
+      "heading": "Launch Readiness Block 19 — governed data-request fulfillment receipts — 2026-10-11",
+      "statement": "Pass the complete exact-head release gate and push LR091–LR095 once. Keep this block unpublished until LR096–LR100 completes the next ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5238",
+        "Launch Readiness Block 19 — governed data-request fulfillment receipts — 2026-10-11"
       ],
       "currentAuthority": false
     }

@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 759,
+    "apiRoutes": 765,
     "frontendApiReferences": 304,
-    "routeOwnedTables": 69
+    "routeOwnedTables": 70
   },
   "compatibilityRedirects": [
     {
@@ -2187,6 +2187,57 @@
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
         "filesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/support/cases/:id/data-request/fulfillment",
+      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/admin/support/cases/:id/data-request/fulfillment",
+      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/support/cases/",
+      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/support/cases/:id/data-request/fulfillment",
+      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseDataRequestFulfillmentsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/support/cases/:id/data-request/fulfillment",
+      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseDataRequestFulfillmentsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/admin/support/cases/:id/data-request/fulfillment",
+      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseDataRequestFulfillmentsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCasesTable"
       ]
     },
     {
@@ -10867,7 +10918,22 @@
     }
   ],
   "findings": {
-    "duplicateApiRoutes": [],
+    "duplicateApiRoutes": [
+      {
+        "key": "GET /support/cases/:id/data-request/fulfillment",
+        "owners": [
+          "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
+          "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts"
+        ]
+      },
+      {
+        "key": "GET /admin/support/cases/:id/data-request/fulfillment",
+        "owners": [
+          "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
+          "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts"
+        ]
+      }
+    ],
     "sidebarTabsWithoutScreen": [],
     "screensWithoutSidebar": []
   }

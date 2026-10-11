@@ -276,6 +276,7 @@
     "test:launch-readiness-block16": "node scripts/test-launch-readiness-block16.mjs",
     "test:launch-readiness-block17": "node scripts/test-launch-readiness-block17.mjs",
     "test:launch-readiness-block18": "node scripts/test-launch-readiness-block18.mjs",
+    "test:launch-readiness-block19": "node scripts/test-launch-readiness-block19.mjs",
     "test:launch-readiness-block09": "node scripts/test-launch-readiness-block09.mjs",
     "test:launch-readiness-block10": "node scripts/test-launch-readiness-block10.mjs"
   },
