@@ -64812,17 +64812,20 @@
         "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
         "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
         "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+        "artifacts/bimlog/src/components/commercial/support-data-request-export-ui.behavior.ts",
         "artifacts/bimlog/src/lib/support-data-request-export-client.behavior.ts",
         "artifacts/bimlog/src/lib/support-data-request-export-client.ts",
+        "evidence/launch-readiness-20261011/BLOCK_21_LR101_LR105.md",
         "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-launch-readiness-block21.mjs"
       ],
-      "reviewedChangeSha256": "e74ea69cbc78023f0c2f85ce95ae50e816a2c6c957e4c7db13ec366e24dc627a"
+      "reviewedChangeSha256": "dd79c85b13e3b3ede478c9cd53a57ae1a0988aff5b432c8224cd6e523002c8aa"
     }
   ]
 }
