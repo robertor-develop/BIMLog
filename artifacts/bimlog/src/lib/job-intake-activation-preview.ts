@@ -7,7 +7,7 @@ const blockerStages: Record<string, JobIntakeStage> = {
   scope: "scope", edt_source: "scope", pricing: "scope",
   contract_title: "contract", contract_number: "contract", counterparty: "contract",
   contract_assignment: "contract", budget_mapping: "contract", budget_snapshot: "contract",
-  delivery: "delivery", team: "team", internal_rates: "team", confirmations: "review",
+  delivery: "delivery", leader: "team", team: "team", internal_rates: "team", hours: "team", confirmations: "review",
 };
 
 const blockerAnchors: Record<string, string> = {
@@ -16,7 +16,7 @@ const blockerAnchors: Record<string, string> = {
   contract_title: "ji-contract-title", contract_number: "ji-contract-contractNumber",
   counterparty: "ji-contract-counterpartyName", contract_assignment: "ji-contract-item-assignment",
   budget_mapping: "ji-scope", budget_snapshot: "ji-contract",
-  delivery: "ji-submittal-strategy", team: "ji-team", internal_rates: "ji-team",
+  delivery: "ji-submittal-strategy", leader: "ji-team", team: "ji-team", internal_rates: "ji-team", hours: "ji-team",
   confirmations: "ji-review",
 };
 

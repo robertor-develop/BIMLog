@@ -89,6 +89,7 @@ const css = `
 .ji-quick{background:#fff;border:1px solid #d9e1ec;border-radius:16px;padding:22px}.ji-quick-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.ji-quick-head h2{margin:5px 0}.ji-quick-head button,.ji-quick-question button,.ji-quick-nav button{display:inline-flex;gap:7px;align-items:center}.ji-quick-kicker{color:#1d4ed8;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.ji-quick-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}.ji-quick-steps button{display:flex;align-items:center;gap:8px;text-align:left}.ji-quick-steps button span{display:grid;place-items:center;width:23px;height:23px;border-radius:99px;background:#e2e8f0}.ji-quick-steps button.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}.ji-quick-steps button.done span{background:#dcfce7;color:#166534}.ji-quick-question{min-height:260px;border:1px solid #e2e8f0;border-radius:12px;padding:20px}.ji-quick-question h3{margin-top:0}.ji-quick-summary{display:grid;gap:9px;margin:14px 0}.ji-quick-summary div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px}.ji-quick-summary span{color:#64748b}.ji-quick-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.ji-advanced-return{margin-bottom:12px}.ji-advanced-return button{display:inline-flex;gap:7px;align-items:center}@media(max-width:700px){.ji-quick-head{display:block}.ji-quick-head>button{margin-top:10px}.ji-quick-steps{grid-template-columns:1fr}.ji-quick-question{min-height:0}.ji-quick-summary div{grid-template-columns:1fr}.ji-quick-nav span{display:none}}
 .ji-field-legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #d9e1ec;border-radius:10px;background:#f8fafc;font-size:12px}.ji-field-legend strong{color:#9f1239}.ji-nav-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}.ji-nav-status.complete{color:#15803d}.ji-nav-status.required{color:#b45309}.ji-nav-status.optional{color:#64748b}
 .ji-stage-movement{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:12px 14px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff}.ji-stage-movement>div:first-child{display:grid;gap:2px}.ji-stage-movement span{font-size:12px;color:#536174}.ji-stage-movement .ji-actions{margin:0}@media(max-width:600px){.ji-stage-movement{align-items:stretch;flex-direction:column}.ji-stage-movement .ji-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.ji-stage-movement .ji-actions>:only-child{grid-column:1/-1}}
+.ji-next-required{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin:0 0 12px;padding:12px 14px;border:1px solid #fed7aa;border-left:4px solid #f59e0b;border-radius:10px;background:#fffaf0}.ji-next-required p{margin:3px 0 0;color:#7c2d12}.ji-next-required>details{grid-column:1/-1}.ji-next-required summary{cursor:pointer;font-size:12px;font-weight:700;color:#475569}@media(max-width:600px){.ji-next-required{grid-template-columns:1fr}.ji-next-required>button{width:100%}}
 .ji-company-map{margin-top:16px;padding:16px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff}.ji-company-map h3{display:flex;gap:7px;align-items:center}.ji-company-row{display:grid;grid-template-columns:1fr 220px auto;gap:8px;align-items:center;margin:8px 0;padding:8px;background:white;border-radius:8px}@media(max-width:700px){.ji-company-row{grid-template-columns:1fr}}
 .ji-company-create-button{display:inline-flex;align-items:center;gap:7px;margin-top:10px}.ji-company-create{grid-column:1/-1;margin-top:10px;padding:14px;border:1px solid #93c5fd;border-radius:10px;background:#f8fbff}.ji-company-create-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.ji-company-create-head button{display:grid;place-items:center;padding:6px}.ji-company-create p{margin:6px 0 12px;font-size:12px}
 .ji-readiness{display:grid;grid-template-columns:minmax(220px,340px) minmax(0,1fr);gap:10px;margin:0 0 18px}.ji-readiness-card{background:#fff;border:1px solid #d9e1ec;border-radius:12px;padding:14px;min-width:0}.ji-readiness-primary{border-color:#93c5fd;background:#f8fbff}.ji-readiness-card h2{font-size:12px;margin:0 0 7px;color:#475569}.ji-readiness-card strong{font-size:20px;color:#0f172a}.ji-readiness-card p{font-size:11px;margin:6px 0 0}.ji-readiness-details{min-width:0;border:1px solid #d9e1ec;border-radius:12px;background:#fff}.ji-readiness-details>summary{cursor:pointer;padding:14px;font-size:12px;font-weight:800;color:#334155}.ji-readiness-secondary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 10px 10px}.ji-readiness-help{margin:0 10px 10px;background:#eff6ff;border-left:4px solid #2563eb;padding:10px 12px;color:#334155;font-size:12px}.ji button:focus-visible,.ji a:focus-visible,.ji input:focus-visible,.ji select:focus-visible,.ji textarea:focus-visible,.ji summary:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}@media(max-width:900px){.ji-readiness{grid-template-columns:1fr}.ji-readiness-secondary{grid-template-columns:1fr}}@media(max-width:560px){.ji{padding-top:12px}.ji-footer{position:static;align-items:flex-start;flex-direction:column}.ji-footer button{width:100%}}
@@ -970,19 +971,18 @@ export function JobIntakeWorkspace() {
     });
   };
   const stageMissingCodes: Record<string, string[]> = {
+    identity: ["job_name", "job_code", "client"],
     contract: ["contract_title", "contract_number", "counterparty", "contract_assignment", "budget_mapping", "budget_snapshot"],
+    scope: ["scope", "edt_source", "pricing"],
     delivery: ["delivery"],
     team: ["leader", "team", "internal_rates", "hours"],
+    review: ["confirmations"],
   };
-  const missingForStage = (stage: "contract" | "delivery" | "team") =>
+  const missingForStage = (stage: IntakeStage) =>
     missingItems.filter((item: { key: string; label: string }) =>
-      stageMissingCodes[stage].includes(item.key),
+      (stageMissingCodes[stage] ?? []).includes(item.key),
     );
-  const activeStageMissing = active === "contract" || active === "delivery" || active === "team"
-    ? missingForStage(active)
-    : active === "review"
-      ? missingItems.filter((item: { key: string }) => item.key === "confirmations")
-      : [];
+  const activeStageMissing = missingForStage(active);
   const stageConfirmationPending = (field: "contractConfirmed" | "deliveryConfirmed" | "teamConfirmed") =>
     !data.review[field];
   const openFinalReview = () => {
@@ -1305,14 +1305,22 @@ export function JobIntakeWorkspace() {
             </aside>
             <div className="ji-stages">
               {activeStageMissing.length > 0 && (
-                <section className="ji-row" aria-label={tt("Required items in this section", "Elementos obligatorios de esta sección")}>
-                  <strong>{tt("Complete these required items", "Complete estos elementos obligatorios")}</strong>
-                  <p>{tt("Each item opens and highlights its exact field.", "Cada elemento abre y resalta su campo exacto.")}</p>
-                  <div className="ji-actions">
-                    {activeStageMissing.map((item: { key: string; label: string }) => (
-                      <button type="button" key={item.key} onClick={() => openBlocker(item.key)}>{item.label}</button>
-                    ))}
+                <section className="ji-next-required" aria-label={tt("Next required action in this step", "Siguiente acción obligatoria en este paso")}>
+                  <div>
+                    <strong>{tt("Next required action", "Siguiente acción obligatoria")}</strong>
+                    <p>{activeStageMissing[0].label}</p>
                   </div>
+                  <button className="primary" type="button" onClick={() => openBlocker(activeStageMissing[0].key)}>{tt("Go to this field", "Ir a este campo")}</button>
+                  {activeStageMissing.length > 1 && (
+                    <details>
+                      <summary>{tt(`${activeStageMissing.length - 1} more required in this step`, `${activeStageMissing.length - 1} más obligatorios en este paso`)}</summary>
+                      <div className="ji-actions">
+                        {activeStageMissing.slice(1).map((item: { key: string; label: string }) => (
+                          <button type="button" key={item.key} onClick={() => openBlocker(item.key)}>{item.label}</button>
+                        ))}
+                      </div>
+                    </details>
+                  )}
                 </section>
               )}
               <div className="ji-field-legend" role="note"><span><strong>{tt("Required", "Obligatorio")}</strong> — {tt("must be complete before activation", "debe completarse antes de activar")}</span><span>{tt("Optional", "Opcional")} — {tt("add only when it applies", "agregue solo cuando corresponda")}</span></div>
