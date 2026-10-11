@@ -471,9 +471,6 @@ export function Dashboard() {
         .first-value-success span { display:block; overflow:hidden; color:hsl(var(--muted-foreground)); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
         .first-value-success > button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:8px 12px; border:1px solid #15803d; border-radius:8px; background:#15803d; color:white; font-size:11px; font-weight:750; cursor:pointer; }
         .first-value-success > button:focus-visible { outline:3px solid #86efac; outline-offset:2px; }
-        .adoption-summary-status { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 20px; padding:11px 13px; border:1px solid #f59e0b; border-radius:10px; background:#fffbeb; color:#92400e; font-size:11px; }
-        .adoption-summary-status > button { min-height:38px; padding:7px 11px; border:1px solid #b45309; border-radius:8px; background:white; color:#92400e; font-weight:750; cursor:pointer; }
-        .adoption-summary-status > button:focus-visible { outline:3px solid #fcd34d; outline-offset:2px; }
         .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
         .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
@@ -550,8 +547,8 @@ export function Dashboard() {
           .first-value-card > button { grid-column:1 / -1; width:100%; }
           .first-value-success { grid-template-columns:auto minmax(0,1fr); }
           .first-value-success > button { grid-column:1 / -1; width:100%; }
-          .adoption-summary-status { align-items:stretch; flex-direction:column; }
-          .adoption-summary-status > button { width:100%; }
+          .today-workspace__status--error { align-items:stretch; flex-direction:column; }
+          .today-workspace__status--error button { width:100%; }
           .operational-pulse__next > button { width: 100%; }
           .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }

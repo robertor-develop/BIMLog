@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const read = path => fs.readFileSync(path, "utf8");
+const state = read("artifacts/bimlog/src/lib/dashboard-guidance-state.ts");
+const today = read("artifacts/bimlog/src/components/dashboard/TodayWorkspace.tsx");
+const dashboard = read("artifacts/bimlog/src/pages/Dashboard.tsx");
+for (const token of ['"loading" | "ready" | "empty" | "unavailable"', 'if (input.failed) return "unavailable"']) assert.ok(state.includes(token), token);
+for (const token of ['role="status"', 'role="alert"', 'state === "ready" && action', 'state === "empty"']) assert.ok(today.includes(token), token);
+for (const token of ["isPending: adoptionSummaryLoading", "isFetching: adoptionSummaryRefreshing", "today-workspace__status--error", "@media (max-width: 720px)"]) assert.ok(dashboard.includes(token), token);
+assert.ok(!dashboard.includes(".adoption-summary-status"), "obsolete duplicate failure surface must be removed");
+console.log("Simplification and guided adoption Block 7 acceptance: PASS");
