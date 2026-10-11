@@ -64237,6 +64237,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e9f6abfeb4a2b5d04bc0b9e0004bcc4e716933b69c5343ff742989a4f94a77bd"
+    },
+    {
+      "taskId": "launch-readiness-block17",
+      "reviewedThroughCommit": "09867ff0c9c75725c7c3a010eb5a28085fb44b6f",
+      "reviewedAt": "2026-10-10T22:05:00-04:00",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "LR081-LR085 add a structured, tenant-scoped customer data-right request type to the existing support authority, with additive schema parity, strict browser validation and bilingual deletion-review guidance. No data is exported, corrected, deleted or restricted automatically; financial, provider, Native and MAIN 04 authority are unchanged.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "52165c6358893618334555ddfa1136f9e3da0812faca45a05ccbbc4e11e35d74"
     }
   ]
 }

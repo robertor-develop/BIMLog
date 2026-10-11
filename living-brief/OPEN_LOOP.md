@@ -5192,6 +5192,15 @@ Performance repair checkpoint: `dce92b03` preserves LR071–LR075 invoice-histor
 
 Performance repair checkpoint: `72e51f75` preserves LR076-LR080 statement download while reusing the existing authenticated PDF path and restoring the fixed browser budget at 4,194,303 of 4,194,304 bytes. The complete exact-source gate must pass before push and publication.
 
+## Launch Readiness Block 17 — customer data-right requests — 2026-10-10
+
+- [x] Define one bounded export, correction, deletion-review or processing-restriction request type.
+- [x] Persist that type through additive schema and startup-migration parity without deleting customer or project records.
+- [x] Project it only through the existing authenticated requester and administrator support authority.
+- [x] Reject unknown and category-conflicting request types at the browser boundary.
+- [x] Add a bilingual Billing & Support flow that explains deletion review and record-preservation boundaries.
+- [ ] Pass the complete exact-head gate and push LR081–LR085 once. Keep this block unpublished until LR086–LR090 completes the next ten-build interval.
+
 
 Route-inventory reconciliation checkpoint: `c58ea632` records the final statement-link source owner. No runtime route or product behavior changed.
 
