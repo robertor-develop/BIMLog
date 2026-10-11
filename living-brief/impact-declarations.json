@@ -65334,7 +65334,7 @@
     },
     {
       "taskId": "simplification-guided-adoption-block05",
-      "reviewedThroughCommit": "f9d2f7fc6e7c1207a8986a371852109388a45973",
+      "reviewedThroughCommit": "97813351506695c3feff9e2c4535e0ce7f533dad",
       "reviewedAt": "2026-10-11T19:16:00Z",
       "status": "accepted",
       "authorities": [
@@ -65398,11 +65398,10 @@
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "41e7dcedd0e3c861cbd3caff9a9a2a4d608e9d8d01bfd79b2ab0ceb291c9f542"
+      "reviewedChangeSha256": "d8c21a3dacae140b52ae5675520988c109d91d59efb070dd2fdd4f8d9065c835"
     }
   ]
 }

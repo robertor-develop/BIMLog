@@ -5355,6 +5355,7 @@ No controlled record is created by the guidance card. Existing project authoriza
 - [x] Show one compact bilingual success card until the result is acknowledged.
 - [x] Keep the reinforcement keyboard accessible and contained at narrow width.
 - [x] Bind evidence, acknowledgement, exact routing, presentation and responsive behavior to the permanent gate.
+- [x] Update the cumulative Block 4 assertions to enforce the evidence-backed first-value contract.
 - [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 6 completes the next ten-build interval.
 
 No project record, permission, payment, email, provider, Native, installer or external-send behavior changes in this block.
