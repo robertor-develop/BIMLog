@@ -5205,6 +5205,8 @@ Performance repair checkpoint: `50a6b8b6` preserves LR081–LR085 behavior while
 
 Final budget repair `4e3553de` keeps the same request types, tenant authority, record-preservation guidance and responsive flow with concise bilingual copy. The focused block suite, frontend typecheck, production build and fixed browser budget pass at 4,194,289 of 4,194,304 bytes; the complete exact-head gate and branch push remain.
 
+Release-gate compatibility repair `c3f696da` preserves the exact established close/reopen labels while removing redundant introductory copy. The lifecycle suite, LR081–LR085 suite, frontend typecheck, production build and fixed browser budget pass at 4,194,227 of 4,194,304 bytes; the complete exact-head gate and branch push remain.
+
 
 Route-inventory reconciliation checkpoint: `c58ea632` records the final statement-link source owner. No runtime route or product behavior changed.
 

@@ -4228,6 +4228,8 @@ Performance repair checkpoint: `50a6b8b6` extracts the existing support-panel pr
 
 Final budget repair `4e3553de` condenses equivalent bilingual support labels and failures after the rebuilt bundle remained 872 bytes over the unchanged ceiling. The focused LR081–LR085 suite, frontend typecheck, production build and performance gate now pass at 4,194,289 of 4,194,304 bytes.
 
+Release-gate compatibility repair `c3f696da` restores the established customer close/reopen wording and removes redundant introductory copy. The prior lifecycle suite, LR081–LR085 suite, frontend typecheck, production build and fixed browser budget pass at 4,194,227 of 4,194,304 bytes.
+
 The unchanged 4 MiB browser budget caught an 835-byte regression in the first statement-download implementation. Repair `72e51f75` reuses the existing authenticated PDF downloader and removes duplicate subscription/count presentation already shown by Billing & Support. The statement action, bilingual labels, tenant authority and server-side fingerprint remain intact; the rebuilt browser total passes at 4,194,303 of 4,194,304 bytes.
 
 
