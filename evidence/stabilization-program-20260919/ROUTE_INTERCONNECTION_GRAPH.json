@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 768,
+    "apiRoutes": 769,
     "frontendApiReferences": 308,
     "routeOwnedTables": 72
   },
@@ -6433,6 +6433,12 @@
     {
       "method": "POST",
       "path": "/onboarding/complete",
+      "owner": "artifacts/api-server/src/routes/onboarding.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/onboarding/milestones",
       "owner": "artifacts/api-server/src/routes/onboarding.ts",
       "tables": []
     },
