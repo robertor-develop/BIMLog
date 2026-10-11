@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3022825004b721d6030f7b365fe9377150d67b2e6dc31422a9b9e4e3436ce2a0",
-  "itemCount": 368,
+  "sourceSha256": "11affb1b3b7f4ef0d3ae81580405b195d1d35b78c725157559238b2defae22ae",
+  "itemCount": 369,
   "counts": {
-    "ACTIVE": 327,
+    "ACTIVE": 328,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6701,6 +6701,24 @@
       "evidence": [
         "OPEN_LOOP.md:5322",
         "Simplification and guided adoption Block 2 — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "14633e5d1f36cb64",
+      "sourceLine": 5334,
+      "heading": "Simplification and guided adoption Block 3 — 2026-10-11",
+      "statement": "Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 4 completes the next ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5334",
+        "Simplification and guided adoption Block 3 — 2026-10-11"
       ],
       "currentAuthority": false
     }

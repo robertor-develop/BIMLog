@@ -1019,6 +1019,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/meeting-schedule-placement.behavior.ts
 - artifacts/api-server/src/lib/meeting-schedule-placement.ts
 - artifacts/api-server/src/lib/oauth.ts
+- artifacts/api-server/src/lib/onboarding-guide-state.behavior.ts
 - artifacts/api-server/src/lib/onboarding-migration.ts
 - artifacts/api-server/src/lib/operational-failure.behavior.ts
 - artifacts/api-server/src/lib/operational-failure.ts
