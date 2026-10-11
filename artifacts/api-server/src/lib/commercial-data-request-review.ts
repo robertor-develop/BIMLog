@@ -3,7 +3,7 @@ import {DATA_REQUEST_KINDS,type DataRequestKind} from "./commercial-support-case
 
 export const DATA_REQUEST_REVIEW_STATES=["requested","under_review","approved","partially_approved","denied","fulfilled"] as const;
 export type DataRequestReviewState=typeof DATA_REQUEST_REVIEW_STATES[number];
-const transitions:Record<DataRequestReviewState,readonly DataRequestReviewState[]>={requested:["under_review"],under_review:["approved","partially_approved","denied"],approved:["fulfilled"],partially_approved:["fulfilled"],denied:[],fulfilled:[]};
+const transitions:Record<DataRequestReviewState,readonly DataRequestReviewState[]>={requested:["under_review"],under_review:["approved","partially_approved","denied"],approved:[],partially_approved:[],denied:[],fulfilled:[]};
 const forbidden=/(?:password|passwd|api[_ -]?key|secret|token)\s*[:=]/i;
 
 export type DataRequestReviewInput=Readonly<{kind:DataRequestKind;expectedState:DataRequestReviewState;state:DataRequestReviewState;expectedUpdatedAt:Date;reason:string}>;
