@@ -21,6 +21,7 @@ import { advanceCleanupReviewQueue, beginCleanupReviewQueue, cancelCleanupReview
 import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWorkspace";
 import { OperationalPulse } from "@/components/dashboard/OperationalPulse";
 import type { OperationalPulseCounts } from "@/lib/operational-pulse";
+import { TodayWorkspace } from "@/components/dashboard/TodayWorkspace";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -514,6 +515,15 @@ export function Dashboard() {
           background: linear-gradient(135deg, color-mix(in srgb, #eff6ff 88%, hsl(var(--card))), hsl(var(--card)));
           box-shadow: 0 10px 30px rgba(30, 64, 175, .07);
         }
+        .today-workspace { margin: 0 0 20px; padding: 16px 18px; border: 1px solid #bfdbfe; border-radius: 14px; background: hsl(var(--card)); box-shadow: 0 8px 24px rgba(30,64,175,.06); }
+        .today-workspace__heading { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+        .today-workspace__heading > span { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dbeafe; color:#1d4ed8; }
+        .today-workspace__heading p { margin:0; color:#1d4ed8; font-size:10px; font-weight:850; letter-spacing:.08em; }
+        .today-workspace__heading h2 { margin:2px 0 0; font-size:17px; }
+        .today-workspace__action { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px; border-radius:10px; background:#eff6ff; }
+        .today-workspace__action p,.today-workspace__clear p { margin:4px 0 0; color:hsl(var(--muted-foreground)); font-size:11px; }
+        .today-workspace__action button { display:inline-flex; align-items:center; gap:7px; min-height:40px; padding:8px 12px; border:0; border-radius:8px; background:#1d4ed8; color:white; font-weight:750; cursor:pointer; }
+        .today-workspace__clear { display:flex; gap:10px; align-items:flex-start; color:#15803d; }
         .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
         .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
@@ -582,6 +592,8 @@ export function Dashboard() {
             grid-template-columns: 1fr !important;
           }
           .operational-pulse { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+          .today-workspace__action { align-items:stretch; flex-direction:column; }
+          .today-workspace__action button { justify-content:center; width:100%; }
           .operational-pulse__next > button { width: 100%; }
           .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }
@@ -661,6 +673,18 @@ export function Dashboard() {
             hasError={statsRefreshFailed}
             onRefresh={() => { void refreshStats(); }}
           />}
+
+          {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={attentionRows[0] ? {
+            title: attentionRows[0].issue,
+            detail: `${projectMap.get(attentionRows[0].pid)?.code || tt("Project", "Proyecto")} · ${projectMap.get(attentionRows[0].pid)?.name || ""}`,
+            href: attentionRows[0].href,
+            label: tt("Open source work", "Abrir trabajo fuente"),
+          } : allProjectRows[0] ? {
+            title: tt("Continue project work", "Continuar trabajo del proyecto"),
+            detail: `${allProjectRows[0].code} · ${allProjectRows[0].name}`,
+            href: `/projects/${allProjectRows[0].id}`,
+            label: tt("Open project", "Abrir proyecto"),
+          } : null} />}
 
           <section
             data-current-view-filter-panel="dashboard"
