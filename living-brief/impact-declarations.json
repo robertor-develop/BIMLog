@@ -64826,6 +64826,82 @@
         "scripts/test-launch-readiness-block21.mjs"
       ],
       "reviewedChangeSha256": "dd79c85b13e3b3ede478c9cd53a57ae1a0988aff5b432c8224cd6e523002c8aa"
+    },
+    {
+      "taskId": "launch-readiness-block22-verified-export",
+      "reviewedThroughCommit": "889c9833f9c12b46cee873b56ada5bae7a3b6716",
+      "reviewedAt": "2026-10-11T11:31:17.9055094Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "LR106-LR110 close the customer export integrity gap through browser-computed SHA-256, exact bounded length, verified canonical JSON identity and bilingual verified-download status. STATUS and OPEN_LOOP record the ten-build publication candidate; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+        "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+        "artifacts/bimlog/src/lib/support-data-request-export-client.behavior.ts",
+        "artifacts/bimlog/src/lib/support-data-request-export-client.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "27f6624c33db3ad6438beafa12ed378a258ba55049e7760b46fad61b4dddad5c"
     }
   ]
 }

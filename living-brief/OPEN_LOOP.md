@@ -5241,6 +5241,15 @@ This block records governed fulfillment evidence only. It does not automatically
 
 Release-gate repair checkpoint: `b9984bcf` removes duplicate-route audit identities caused only by literal route examples in the LR094 behavior test. Production routes and fulfillment behavior are unchanged; the focused block suite and blocking platform audit pass with zero unexpected P1 identities.
 
+## Launch Readiness Block 22 — verified customer data export — 2026-10-11
+
+- [x] Independently compute and compare SHA-256 over the received export bytes.
+- [x] Require an exact bounded content length and reject oversized or truncated responses.
+- [x] Parse only verified JSON and require the canonical schema, request identity, export kind and fulfilled state.
+- [x] Show a bilingual verified-download status with a short customer-safe digest reference.
+- [x] Add LR106–LR110 to permanent focused acceptance.
+- [ ] Pass the complete exact-head gate, push LR106–LR110, publish LR101–LR110, verify exact live identity and complete authenticated desktop/mobile Chrome smoke.
+
 ## Launch Readiness Block 21 — customer data export delivery — 2026-10-11
 
 - [x] Generate a deterministic export package from an explicit allowlist of requester and company profile fields.

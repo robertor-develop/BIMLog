@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Launch Readiness Block 22 publication candidate — 2026-10-11
+
+LR106–LR110 close the customer export integrity gap. The browser now computes SHA-256 over the received bytes, compares it with the authenticated server receipt, enforces an exact bounded content length, and parses the document only after integrity verification. The canonical schema, request identity, export kind and fulfilled state must match before download succeeds. English and Spanish status confirms the verified download with a short digest reference. Together with LR101–LR105, this is the ten-build publication candidate pending the complete exact-head gate, push, controlled publication, exact live-source verification and authenticated desktop/mobile Chrome smoke.
+
 ## Launch Readiness Block 21 candidate — 2026-10-11
 
 LR101–LR105 turn the already governed, fulfilled export request into a real customer-controlled download without introducing another support workflow. The generated JSON package contains only allowlisted requester and company profile fields plus the request lifecycle; passwords, API tokens, AI keys, preferences, support descriptions, provider details and internal fingerprints are excluded. The route requires the exact authenticated requester, company and fulfilled export state, returns a private no-store attachment with deterministic SHA-256 evidence, and the browser rejects malformed response headers. The bilingual customer action appears only for fulfilled export requests. Correction, deletion and processing restriction remain human-governed operational actions. This first five-build block remains unpublished until LR106–LR110 completes the next ten-build interval.
