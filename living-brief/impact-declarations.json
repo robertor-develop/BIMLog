@@ -65122,8 +65122,8 @@
     },
     {
       "taskId": "simplification-guided-adoption-block02",
-      "reviewedThroughCommit": "4e82fde2a579ad2679c43181c145d6a93b508eb0",
-      "reviewedAt": "2026-10-11T19:15:00Z",
+      "reviewedThroughCommit": "1128b8dcbcf9ad4a6638701e0cf92cb457625b33",
+      "reviewedAt": "2026-10-11T18:09:55Z",
       "status": "accepted",
       "authorities": [
         {
@@ -65184,11 +65184,9 @@
       ],
       "reason": "Guided adoption Block 2 adds one focused Today surface, role-aware prioritization, authenticated recent-work continuity, server-backed guide state and privacy-safe allowlisted milestones. PLATFORM, STATUS and OPEN_LOOP record the ten-build publication boundary; doctrine, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
-        "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e8ef18454b665b83eb2950b1b07b2226ff531255ffc2c91e7790145a09810e71"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
