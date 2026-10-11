@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { chooseFirstValueAction, firstValueDestination } from "./first-value-action";
+assert.equal(chooseFirstValueAction({workProfile:"document_controller",preferredDocumentTypes:["RFIs"]}),"file");
+assert.equal(chooseFirstValueAction({workProfile:"bim_coordinator",preferredDocumentTypes:["Submittals"]}),"submittal");
+assert.equal(chooseFirstValueAction({workProfile:"field_team",preferredDocumentTypes:[]}),"rfi");
+assert.equal(chooseFirstValueAction({workProfile:null,preferredDocumentTypes:[]}),"submittal");
+assert.equal(firstValueDestination(63,"rfi"),"/projects/63/rfis");
+assert.equal(firstValueDestination(63,"submittal"),"/projects/63/submittals");
+assert.equal(firstValueDestination(63,"file"),"/projects/63/files");
+console.log("Simplification and guided adoption build 017 first-value action: PASS");
