@@ -1,6 +1,6 @@
 export type DashboardAdoptionSummary = {
   attention: Array<{ kind: "rfi" | "submittal" | "file"; projectId: number; projectCode: string; projectName: string; count: number }>;
-  assigned: Array<{ kind: "rfi" | "submittal"; projectId: number; number: string; title: string }>;
+  assigned: Array<{ kind: "rfi" | "submittal"; id: number; projectId: number; number: string; title: string }>;
   recentActivity: Array<{ id: number; projectId: number; projectName: string; userEmail: string | null; userFullName: string; userCompanyName: string | null; actionType: string; entityType: string | null; details: unknown; createdAt: string }>;
   namingCompanies: Array<{ company: string; count: number; projectIds: number[] }>;
 };
