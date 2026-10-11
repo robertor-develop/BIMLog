@@ -152,6 +152,8 @@ interface GovernedProvider {
   oauthParam: string | null;
 }
 
+type ProfileArea = "personal" | "work" | "security" | "connections";
+
 const DEFAULT_PREFS = {
   emailRfiAssigned: true,
   emailSubmittalAssigned: true,
@@ -269,6 +271,9 @@ export function Profile() {
 
   const [, navigate] = useLocation();
   const [emailReturnTarget] = useState(() => safeEmailReturnTarget(new URLSearchParams(window.location.search).get("returnTo")));
+  const [profileArea, setProfileArea] = useState<ProfileArea>(() =>
+    new URLSearchParams(window.location.search).get("section") === "email-sending" ? "connections" : "personal",
+  );
 
   const authHeaders = {
     "Content-Type": "application/json",
@@ -858,6 +863,27 @@ export function Profile() {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+
+        <section aria-labelledby="profile-workspace-heading" style={{ border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 16, background: "hsl(var(--card))" }}>
+          <div style={{ marginBottom: 12 }}>
+            <h1 id="profile-workspace-heading" style={{ margin: 0, fontSize: 20 }}>{tt("Profile workspace", "Espacio de perfil")}</h1>
+            <p style={{ margin: "5px 0 0", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
+              {tt("Choose the area you want to manage. Your personal details are the starting point.", "Elige el área que deseas administrar. Tus datos personales son el punto de partida.")}
+            </p>
+          </div>
+          <nav aria-label={tt("Profile areas", "Áreas del perfil")} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(140px,100%),1fr))", gap: 8 }}>
+            {([
+              ["personal", tt("Personal", "Personal")],
+              ["work", tt("Work", "Trabajo")],
+              ["security", tt("Security", "Seguridad")],
+              ["connections", tt("Connections", "Conexiones")],
+            ] as Array<[ProfileArea, string]>).map(([area, label]) => (
+              <Button key={area} type="button" variant={profileArea === area ? "default" : "outline"} aria-pressed={profileArea === area} onClick={() => setProfileArea(area)}>
+                {label}
+              </Button>
+            ))}
+          </nav>
+        </section>
 
         <FeaturePolicySettingsPanel />
 
