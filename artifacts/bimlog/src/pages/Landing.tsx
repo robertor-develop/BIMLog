@@ -5,6 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { FileCheck2, ShieldCheck, FileSpreadsheet, Users, ArrowRight, CheckCircle2, UserPlus, FolderPlus, Settings2, Upload, MessageSquare, BarChart2, Camera, Link2, FileOutput } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { BIMLOG_BRAND } from "@/lib/brand-positioning";
+import { EMAIL_VERIFICATION_POLICY } from "@/lib/adoption-journey";
 
 export function Landing() {
   const { t, tt, lang } = useI18n();
@@ -203,12 +204,12 @@ export function Landing() {
               color: "bg-blue-50 border-blue-100",
               title: tt("Create your account", "Crea tu cuenta"),
               desc: tt(
-                "Register with your name, email, and company. No email confirmation. No waiting. You are in immediately and assigned as Project Admin.",
-                "Regístrate con tu nombre, correo y empresa. Sin confirmación de correo. Sin esperas. Entras de inmediato y se te asigna como Administrador del Proyecto.",
+                "Register with your name, email, and company. After sign-in, verify your email before project setup so invitations and account recovery are protected.",
+                "Regístrate con tu nombre, correo y empresa. Después de iniciar sesión, verifica tu correo antes de configurar proyectos para proteger las invitaciones y la recuperación de la cuenta.",
               ),
               tips: [
-                tt("No email confirmation required", "No requiere confirmación de correo"),
-                tt("Immediately assigned as Project Admin", "Asignado de inmediato como Administrador del Proyecto"),
+                EMAIL_VERIFICATION_POLICY.reason[lang === "es" ? "es" : "en"],
+                tt("Your permissions come from your verified company and project role", "Tus permisos provienen de tu empresa verificada y tu función en el proyecto"),
               ],
             },
             {

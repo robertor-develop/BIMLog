@@ -10,9 +10,10 @@ import { AuthLayout } from "@/components/AuthLayout";
 import { readInvitationToken, invitationError } from "@/lib/invitation-ui";
 import { intentLabel, parseCommercialIntent, readCommercialIntent, rememberCommercialIntent } from "@/lib/commercial-intent";
 import { recordConversionEvent } from "@/lib/conversion-funnel";
+import { EMAIL_VERIFICATION_POLICY } from "@/lib/adoption-journey";
 
 export function Register() {
-  const { t, tt } = useI18n();
+  const { t, tt, lang } = useI18n();
   const [, setLocation] = useLocation();
   const { login, token:sessionToken, user, logout } = useAuthStore();
   const [inviteToken,setInviteToken] = useState(readInvitationToken);
@@ -103,6 +104,9 @@ export function Register() {
       }
     >
       {commercialIntent && <div role="status" className="mb-4 rounded-lg border p-3 text-sm"><strong>{tt("Selected offer","Oferta seleccionada")}:</strong> {intentLabel(commercialIntent)}{commercialIntent.useCase?` · ${commercialIntent.useCase}`:""}. {tt("Your selection will remain available during onboarding.","Su selección permanecerá disponible durante la incorporación.")}</div>}
+      <div role="note" className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+        {EMAIL_VERIFICATION_POLICY.reason[lang === "es" ? "es" : "en"]}
+      </div>
       {error && (
         <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive text-sm mb-4">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
