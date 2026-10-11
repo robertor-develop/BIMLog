@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "c75c48a178b750c4c0dff00682dbf677c5d8313cd3b11fbf8a56bdb3e0e728e7",
-  "itemCount": 371,
+  "sourceSha256": "73bf8cc25899981fdf12e786b6abfb47d79137ee358925ff45d4e3280b3653b7",
+  "itemCount": 372,
   "counts": {
-    "ACTIVE": 330,
+    "ACTIVE": 331,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6755,6 +6755,24 @@
       "evidence": [
         "OPEN_LOOP.md:5359",
         "Simplification and guided adoption Block 5 — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "97b5de473a7c8dfb",
+      "sourceLine": 5433,
+      "heading": "Progressive disclosure Block 3 — 2026-10-11",
+      "statement": "Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Progressive disclosure Block 4 completes the next ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5433",
+        "Progressive disclosure Block 3 — 2026-10-11"
       ],
       "currentAuthority": false
     }

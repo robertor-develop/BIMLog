@@ -5421,3 +5421,15 @@ This block changes presentation hierarchy only. It creates no project record and
 - [x] Pass the complete exact-head gate, push Blocks 1–2, publish the ten-build interval and complete authenticated Chrome production acceptance. Exact source `7b257977906c52e605dcdc281c4f14fb3d85f5f1` published as deployment `7e2a94ba`; production health returned package `bimlog-7b257977906c52e6-d5599947f6e73229` with `identityBound=true`. Authenticated Chrome passed Headquarters, Job Intake, Profile, Company Profile, Billing & Support and Help, including staged step movement, collapsed secondary controls, hard authenticated navigation, exact 390×844 containment and zero console warnings or errors.
 
 This block changes presentation and navigation hierarchy only. It creates no project record and changes no canonical draft, autosave, activation, membership, permission, payment, email, provider, Native, installer or external-send behavior.
+
+## Progressive disclosure Block 3 — 2026-10-11
+
+- [x] Put one available or blocked customer account action first in Billing & Support.
+- [x] Defer account and BIMLog-owned platform readiness detail behind one explicit disclosure.
+- [x] Load billing history and statements only when the billing administrator requests them.
+- [x] Keep customer support and data-right requests in their canonical workspace and load it only when opened.
+- [x] Keep the remaining account actions visible without repeating the primary action.
+- [x] Bind bilingual hierarchy, disclosure behavior and narrow-width containment to the permanent production build.
+- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Progressive disclosure Block 4 completes the next ten-build interval.
+
+This block changes presentation and loading hierarchy only. Existing commercial, invoice, support, data-right, permission and provider records remain authoritative. It creates no payment, subscription, invoice, support request or external send and changes no database, schema, provider, Native, installer or MAIN 04 behavior.
