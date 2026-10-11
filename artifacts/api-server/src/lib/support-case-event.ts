@@ -1,4 +1,4 @@
-export const SUPPORT_CASE_EVENT_TYPES=["opened","assigned","released","status_changed"] as const;
+export const SUPPORT_CASE_EVENT_TYPES=["opened","assigned","released","status_changed","data_request_reviewed"] as const;
 export type SupportCaseEventType=typeof SUPPORT_CASE_EVENT_TYPES[number];
 
 export function supportCaseEvent(input:{type:SupportCaseEventType;actorUserId:number;fromValue?:string|null;toValue?:string|null;reason?:string|null}){
@@ -9,6 +9,7 @@ export function supportCaseEvent(input:{type:SupportCaseEventType;actorUserId:nu
   if(input.type==="assigned"&&(fromValue!==null||toValue===null))throw new Error("SUPPORT_EVENT_ASSIGN_INVALID");
   if(input.type==="released"&&(fromValue===null||toValue!==null))throw new Error("SUPPORT_EVENT_RELEASE_INVALID");
   if(input.type==="status_changed"&&(fromValue===null||toValue===null||fromValue===toValue))throw new Error("SUPPORT_EVENT_STATUS_INVALID");
-  const reason=clean(input.reason);if(reason!==null&&(input.type!=="status_changed"||reason.length<10||reason.length>1000))throw new Error("SUPPORT_EVENT_REASON_INVALID");
+  if(input.type==="data_request_reviewed"&&(fromValue===null||toValue===null||fromValue===toValue))throw new Error("SUPPORT_EVENT_DATA_REQUEST_INVALID");
+  const reason=clean(input.reason);if(reason!==null&&((input.type!=="status_changed"&&input.type!=="data_request_reviewed")||reason.length<10||reason.length>2000))throw new Error("SUPPORT_EVENT_REASON_INVALID");
   return reason===null?{eventType:input.type,actorUserId:input.actorUserId,fromValue,toValue}:{eventType:input.type,actorUserId:input.actorUserId,fromValue,toValue,reason};
 }
