@@ -5359,3 +5359,15 @@ No controlled record is created by the guidance card. Existing project authoriza
 - [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 6 completes the next ten-build interval.
 
 No project record, permission, payment, email, provider, Native, installer or external-send behavior changes in this block.
+
+## Simplification and guided adoption Block 6 — 2026-10-11
+
+- [x] Define one bounded Headquarters adoption-summary contract.
+- [x] Serve the summary from tenant-authorized project membership with fixed result limits.
+- [x] Add one typed, cancellable authenticated summary client.
+- [x] Remove the four-requests-per-project browser fan-out while preserving canonical actions.
+- [x] Distinguish loading, unavailable and empty states without presenting failed data as all clear.
+- [x] Bind Blocks 5–6 to the permanent production build and responsive accessibility gate.
+- [ ] Pass the complete exact-head gate, push Blocks 5–6, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
+
+The summary is read-only and bounded. It creates no project record, expands no membership, and changes no customer permission, payment, email, provider, Native, installer or external-send behavior.

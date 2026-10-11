@@ -623,6 +623,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/daily-site-observation.ts
 - artifacts/api-server/src/lib/daily-workforce-observation.behavior.ts
 - artifacts/api-server/src/lib/daily-workforce-observation.ts
+- artifacts/api-server/src/lib/dashboard-adoption-route.behavior.ts
+- artifacts/api-server/src/lib/dashboard-adoption-summary.behavior.ts
+- artifacts/api-server/src/lib/dashboard-adoption-summary.ts
 - artifacts/api-server/src/lib/database-startup-serialization.behavior.ts
 - artifacts/api-server/src/lib/delivery-workflow-allocation-source-contract.ts
 - artifacts/api-server/src/lib/delivery-workflow-allocation-source.behavior.ts

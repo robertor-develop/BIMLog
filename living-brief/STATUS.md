@@ -4294,3 +4294,7 @@ Five builds connect onboarding to the first controlled result without inventing 
 # Simplification and guided adoption Block 5 — 2026-10-11
 
 Five builds reinforce verified first value without inventing a parallel completion authority. The authenticated onboarding projection returns the earliest tenant-authorized RFI, Submittal or governed file as exact evidence, and acknowledgement is accepted only while such evidence exists. Headquarters shows one compact bilingual success card until the user acknowledges it, then returns to the exact canonical record through the existing register deep link. Narrow-screen containment, keyboard focus and permanent cumulative acceptance pass; the earlier Block 4 regression assertions now enforce this evidence-backed expression. This first five-build half remains unpublished until Block 6 completes the next ten-build interval.
+
+# Simplification and guided adoption Block 6 — 2026-10-11
+
+Five builds replace Headquarters' four-requests-per-project adoption fan-out with one tenant-authorized, bounded server summary. The server caps attention, assigned-work, recent-activity and naming-governance results; the typed client uses one cancellable request; Headquarters preserves the same canonical actions while distinguishing loading, unavailable and empty states in English and Spanish. The permanent production build now enforces Blocks 5–6. Together they complete the next ten-build publication interval pending the complete exact-head gate, push, controlled publication and authenticated desktop/mobile Chrome acceptance.

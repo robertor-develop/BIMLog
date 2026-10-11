@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 769,
+    "apiRoutes": 770,
     "frontendApiReferences": 308,
     "routeOwnedTables": 72
   },
@@ -3402,6 +3402,25 @@
     {
       "method": "GET",
       "path": "/dashboard/stats",
+      "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
+      "tables": [
+        "rfisTable",
+        "submittalsTable",
+        "filesTable",
+        "projectMembersTable",
+        "projectsTable",
+        "activityLogTable",
+        "usersTable",
+        "companiesTable",
+        "clashReportsTable",
+        "clashesTable",
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/dashboard/adoption-summary",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
         "rfisTable",
@@ -10180,6 +10199,10 @@
       "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/subscription-setup"
     },
     {
+      "screen": "artifacts/bimlog/src/lib/dashboard-adoption-summary.ts",
+      "apiPath": "${apiBase}/api/v1/dashboard/adoption-summary"
+    },
+    {
       "screen": "artifacts/bimlog/src/lib/public-commercial-availability-client.ts",
       "apiPath": "/api/v1/public/commercial-availability"
     },
@@ -10294,10 +10317,6 @@
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
       "apiPath": "${API_BASE}/api/v1/cvr-health"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
-      "apiPath": "${API_BASE}/api/v1/projects/${p.id}"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
