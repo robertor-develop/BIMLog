@@ -233,7 +233,7 @@ export function Dashboard() {
       .catch((error) => logClientError("dashboard CVR health load", error));
   }, [token]);
 
-  const { data: adoptionSummary = EMPTY_DASHBOARD_ADOPTION_SUMMARY, isFetching: adoptionSummaryLoading } = useQuery({
+  const { data: adoptionSummary = EMPTY_DASHBOARD_ADOPTION_SUMMARY, isFetching: adoptionSummaryLoading, isError: adoptionSummaryFailed, refetch: retryAdoptionSummary } = useQuery({
     queryKey: ["dashboard-adoption-summary"],
     queryFn: ({ signal }) => loadDashboardAdoptionSummary(API_BASE, token!, signal),
     enabled: !!token,
@@ -459,6 +459,9 @@ export function Dashboard() {
         .first-value-success span { display:block; overflow:hidden; color:hsl(var(--muted-foreground)); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
         .first-value-success > button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:8px 12px; border:1px solid #15803d; border-radius:8px; background:#15803d; color:white; font-size:11px; font-weight:750; cursor:pointer; }
         .first-value-success > button:focus-visible { outline:3px solid #86efac; outline-offset:2px; }
+        .adoption-summary-status { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 20px; padding:11px 13px; border:1px solid #f59e0b; border-radius:10px; background:#fffbeb; color:#92400e; font-size:11px; }
+        .adoption-summary-status > button { min-height:38px; padding:7px 11px; border:1px solid #b45309; border-radius:8px; background:white; color:#92400e; font-weight:750; cursor:pointer; }
+        .adoption-summary-status > button:focus-visible { outline:3px solid #fcd34d; outline-offset:2px; }
         .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
         .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
@@ -535,6 +538,8 @@ export function Dashboard() {
           .first-value-card > button { grid-column:1 / -1; width:100%; }
           .first-value-success { grid-template-columns:auto minmax(0,1fr); }
           .first-value-success > button { grid-column:1 / -1; width:100%; }
+          .adoption-summary-status { align-items:stretch; flex-direction:column; }
+          .adoption-summary-status > button { width:100%; }
           .operational-pulse__next > button { width: 100%; }
           .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }
@@ -617,6 +622,8 @@ export function Dashboard() {
           />}
 
           {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
+
+          {adoptionSummaryFailed && <div className="adoption-summary-status" role="alert"><span>{tt("Some Headquarters guidance could not be loaded. Project records remain available.", "No se pudo cargar parte de la guía de Sede. Los registros del proyecto siguen disponibles.")}</span><button type="button" onClick={() => void retryAdoptionSummary()}>{tt("Try again", "Intentar de nuevo")}</button></div>}
 
           {onboardingState && !onboardingState.completedAt && onboardingState.projectCount === 0 && onboardingState.completedSteps.includes("guide_paused") && <SetupProgressCard lang={lang} state={onboardingState} onResume={() => { void resumeGuide().then(resumed => { if (resumed) setOnboardingVisible(true); }); }} />}
 
@@ -885,7 +892,7 @@ export function Dashboard() {
               {/* Needs Attention */}
               <div style={panel}>
                 <div style={panelTitle}>{tt("Needs Attention", "Requiere atención")}</div>
-                {adoptionSummaryLoading ? loadingText : attentionRows.length === 0 ? (
+                {adoptionSummaryFailed ? <div style={{ fontSize: 12, color: "#92400e" }}>{tt("Summary unavailable.", "Resumen no disponible.")}</div> : adoptionSummaryLoading ? loadingText : attentionRows.length === 0 ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
                     <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
                     <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>{tt("All clear — no issues detected", "Todo claro; no se detectaron problemas")}</span>
@@ -1078,7 +1085,7 @@ export function Dashboard() {
                   Recent Activity
                   <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", fontWeight: 400 }}>across all projects</span>
                 </div>
-                {adoptionSummaryLoading ? loadingText : recentActivity.length === 0 ? (
+                {adoptionSummaryFailed ? <div style={{ fontSize: 12, color: "#92400e" }}>{tt("Recent activity unavailable.", "Actividad reciente no disponible.")}</div> : adoptionSummaryLoading ? loadingText : recentActivity.length === 0 ? (
                   <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>No activity yet.</div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
@@ -1113,7 +1120,7 @@ export function Dashboard() {
               {/* Top Naming Violators */}
               <div style={panel}>
                 <div style={panelTitle}>Top Naming Violators</div>
-                {adoptionSummaryLoading ? loadingText : topViolators.length === 0 ? (
+                {adoptionSummaryFailed ? <div style={{ fontSize: 12, color: "#92400e" }}>{tt("Naming summary unavailable.", "Resumen de nomenclatura no disponible.")}</div> : adoptionSummaryLoading ? loadingText : topViolators.length === 0 ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
                     <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
                     <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>All companies compliant</span>
