@@ -401,9 +401,6 @@ export function Profile() {
 
   useEffect(() => {
     loadProfile().then(() => {});
-    loadPerformance();
-    loadMyProjects();
-    loadRecentActivity();
     loadConnections();
     loadTelegramStatus();
     loadTelegramPanel();
@@ -422,10 +419,15 @@ export function Profile() {
   }, []);
 
   useEffect(() => {
-    if (profile?.email) {
+    if (profileArea === "work") {
+      loadPerformance();
+      loadMyProjects();
+      loadRecentActivity();
+    }
+    if (profileArea === "work" && profile?.email) {
       loadPendingItems(profile.email);
     }
-  }, [profile?.email]);
+  }, [profileArea, profile?.email]);
 
   async function savePersonal() {
     setSavingPersonal(true);
@@ -1142,6 +1144,7 @@ export function Profile() {
 
         </>}
 
+        {profileArea === "work" && <>
         {/* A. My Projects */}
         <SectionCard title="My Projects" icon={FolderOpen}>
           {loadingProjects ? (
@@ -1328,6 +1331,8 @@ export function Profile() {
             </div>
           )}
         </SectionCard>
+
+        </>}
 
         <nav aria-label="Settings scope" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 10 }}>
           {settingsDestinations.map(item => <Link key={item.scope} href={item.href} style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 12, color: "inherit", textDecoration: "none" }}>
