@@ -23,6 +23,8 @@ import { OperationalPulse } from "@/components/dashboard/OperationalPulse";
 import type { OperationalPulseCounts } from "@/lib/operational-pulse";
 import { TodayWorkspace } from "@/components/dashboard/TodayWorkspace";
 import { SetupProgressCard } from "@/components/dashboard/SetupProgressCard";
+import { FirstValueCard } from "@/components/dashboard/FirstValueCard";
+import { chooseFirstValueAction, firstValueDestination } from "@/lib/first-value-action";
 import { chooseRoleAwareTodayAction, type TodayCandidate } from "@/lib/today-action";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -494,6 +496,8 @@ export function Dashboard() {
     href: `/projects/${resumeProject.id}`,
     label: tt("Resume", "Reanudar"),
   } : null;
+  const firstValueProject = allProjectRows[0] ?? null;
+  const firstValueKind = onboardingState ? chooseFirstValueAction({workProfile:onboardingState.workProfile,preferredDocumentTypes:onboardingState.preferredDocumentTypes}) : "submittal";
 
   // ── Top Naming Violators ───────────────────────────────────────────────────
   // FIX 2: only count confirmed violations (user clicked Continue Anyway on naming warning)
@@ -712,6 +716,8 @@ export function Dashboard() {
           {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
 
           {onboardingState && !onboardingState.completedAt && onboardingState.projectCount === 0 && onboardingState.completedSteps.includes("guide_paused") && <SetupProgressCard lang={lang} state={onboardingState} onResume={() => { void resumeGuide().then(resumed => { if (resumed) setOnboardingVisible(true); }); }} />}
+
+          {onboardingState && onboardingState.projectCount > 0 && !onboardingState.firstValueReached && firstValueProject && <FirstValueCard lang={lang} kind={firstValueKind} projectName={`${firstValueProject.code} · ${firstValueProject.name}`} onOpen={() => setLocation(firstValueDestination(Number(firstValueProject.id),firstValueKind))} />}
 
           <section
             data-current-view-filter-panel="dashboard"
