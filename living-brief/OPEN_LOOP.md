@@ -5201,6 +5201,8 @@ Performance repair checkpoint: `72e51f75` preserves LR076-LR080 statement downlo
 - [x] Add a bilingual Billing & Support flow that explains deletion review and record-preservation boundaries.
 - [ ] Pass the complete exact-head gate and push LR081–LR085 once. Keep this block unpublished until LR086–LR090 completes the next ten-build interval.
 
+Performance repair checkpoint: `50a6b8b6` preserves LR081–LR085 behavior while extracting support-panel presentation CSS. The focused block gate passes; the production build and unchanged 4 MiB browser budget must pass before push.
+
 
 Route-inventory reconciliation checkpoint: `c58ea632` records the final statement-link source owner. No runtime route or product behavior changed.
 

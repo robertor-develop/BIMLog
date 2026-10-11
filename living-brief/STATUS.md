@@ -4224,6 +4224,8 @@ LR076–LR080 complete the customer invoice-record journey. A billing manager ca
 
 LR081–LR085 connect the existing authenticated customer-service record to a structured data-right request for export, correction, deletion review or processing restriction. The request type is fingerprinted, stored through additive schema parity, projected only to the owning requester and authorized support administrators, and rejected when malformed or attached to another support category. Billing & Support exposes the bilingual request type and preserves existing support conversations, lifecycle, notifications and secret rejection. A deletion request starts human review and does not erase contractual, legal, security, audit or project-integrity records. This first five-build block remains unpublished until LR086–LR090 completes the next ten-build interval.
 
+Performance repair checkpoint: `50a6b8b6` extracts the existing support-panel presentation rules into CSS after the production build measured a 1,220-byte JavaScript budget overrun. The customer data-right contract, bilingual guidance, responsive layout and fixed 4 MiB ceiling remain unchanged.
+
 The unchanged 4 MiB browser budget caught an 835-byte regression in the first statement-download implementation. Repair `72e51f75` reuses the existing authenticated PDF downloader and removes duplicate subscription/count presentation already shown by Billing & Support. The statement action, bilingual labels, tenant authority and server-side fingerprint remain intact; the rebuilt browser total passes at 4,194,303 of 4,194,304 bytes.
 
 
