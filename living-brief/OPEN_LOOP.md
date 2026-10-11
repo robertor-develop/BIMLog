@@ -5346,3 +5346,15 @@ No customer project, payment, provider, email, permission, Native, installer or 
 - [ ] Pass the complete exact-head gate, push Blocks 3–4, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
 
 No controlled record is created by the guidance card. Existing project authorization and each destination register remain authoritative.
+
+## Simplification and guided adoption Block 5 — 2026-10-11
+
+- [x] Project the earliest actual authorized RFI, Submittal or governed file as exact first-value evidence.
+- [x] Reject first-value acknowledgement when no authorized evidence exists.
+- [x] Return to the exact canonical source record through existing register deep links.
+- [x] Show one compact bilingual success card until the result is acknowledged.
+- [x] Keep the reinforcement keyboard accessible and contained at narrow width.
+- [x] Bind evidence, acknowledgement, exact routing, presentation and responsive behavior to the permanent gate.
+- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 6 completes the next ten-build interval.
+
+No project record, permission, payment, email, provider, Native, installer or external-send behavior changes in this block.
