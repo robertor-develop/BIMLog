@@ -74,6 +74,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/commercial-billing-history-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-billing-identity-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-checkout-summary-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-data-request-projection.behavior.ts
+- artifacts/api-server/src/routes/commercial-data-request-review-notification.behavior.ts
+- artifacts/api-server/src/routes/commercial-data-request-review-route.behavior.ts
+- artifacts/api-server/src/routes/commercial-data-request-review.ts
 - artifacts/api-server/src/routes/commercial-data-request-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-invoice-route.behavior.ts
 - artifacts/api-server/src/routes/commercial-invoice-statement-route.behavior.ts
@@ -180,6 +184,7 @@ It changes only when the code structure or curated architectural facts change.
 - commercialWorkspaceRouter
 - commercialProviderWebhookRouter
 - supportCasesRouter
+- commercialDataRequestReviewRouter
 - supportCaseSatisfactionRouter
 - supportCaseMessagesRouter
 - repairsRouter
@@ -375,6 +380,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-customer-setup.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.behavior.ts
 - artifacts/api-server/src/lib/commercial-customer-support.ts
+- artifacts/api-server/src/lib/commercial-data-request-review-schema.behavior.ts
+- artifacts/api-server/src/lib/commercial-data-request-review.behavior.ts
+- artifacts/api-server/src/lib/commercial-data-request-review.ts
 - artifacts/api-server/src/lib/commercial-data-request-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-data-request.behavior.ts
 - artifacts/api-server/src/lib/commercial-dispute-schema.behavior.ts

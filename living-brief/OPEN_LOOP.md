@@ -5216,3 +5216,14 @@ Customer-service compatibility repair `f3c0ac5f` restores the established biling
 
 Route-inventory reconciliation checkpoint: `c58ea632` records the final statement-link source owner. No runtime route or product behavior changed.
 
+
+## Launch Readiness Block 18 — governed data-request review — 2026-10-11
+
+- [x] Define explicit, forward-only review transitions with a required bounded reason and secret rejection.
+- [x] Persist review state, reviewer, decision reason, review time and fulfillment time through additive startup parity.
+- [x] Require Super Administrator authority, current assignment, exact request kind and optimistic revision identity for every decision.
+- [x] Project the same durable decision to the owning requester and authorized administrator without exposing another tenant.
+- [x] Record the decision and customer notification atomically in the existing support transaction.
+- [ ] Pass the complete exact-head release gate, push LR086–LR090, publish accumulated LR081–LR090, verify exact live identity and complete authenticated Chrome production smoke.
+
+No request automatically exports, corrects, deletes or restricts data. Deletion and restriction remain human-reviewed decisions; contractual, legal, security, audit and project-integrity preservation remains governed outside this state machine.

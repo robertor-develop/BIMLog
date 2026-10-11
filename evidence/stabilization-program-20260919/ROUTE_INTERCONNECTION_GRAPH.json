@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 758,
+    "apiRoutes": 759,
     "frontendApiReferences": 304,
-    "routeOwnedTables": 68
+    "routeOwnedTables": 69
   },
   "compatibilityRedirects": [
     {
@@ -2187,6 +2187,16 @@
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
         "filesTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/support/cases/:id/data-request",
+      "owner": "artifacts/api-server/src/routes/commercial-data-request-review.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCasesTable"
       ]
     },
     {

@@ -4241,3 +4241,7 @@ The unchanged 4 MiB browser budget caught an 835-byte regression in the first st
 
 Route-inventory reconciliation: `c58ea632` records the statement URL at its final Billing History owner after the browser-budget repair; the protected endpoint and runtime behavior are unchanged.
 
+
+# Launch readiness LR086–LR090 — governed customer data-request review — 2026-10-11
+
+LR086–LR090 complete the operational review half of the customer data-right request path. Review transitions are explicit and forward-only; every change requires an assigned Super Administrator, the exact request kind, the prior review state, the prior record revision and a bounded reason that rejects credential-like content. Additive schema parity preserves the state, reason, reviewer, review time and fulfillment time. Each accepted decision writes one append-only support event and one requester notification inside the same transaction, while requester and administrator reads expose the same durable outcome under their existing authority. No transition automatically exports, corrects, deletes or restricts customer data, and no financial, provider, Native or MAIN 04 authority changes. LR081–LR090 now reach the ten-build publication boundary pending the complete exact-head gate, push, exact-source publication and authenticated Chrome production smoke.

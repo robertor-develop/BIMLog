@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "44db15be2d3995295ad3d293b7b6f899351881f70a692cb65bb8e7488b7fcbf9",
-  "itemCount": 359,
+  "sourceSha256": "154e31b2b8638b071886d08502a3caa98320190e8aff3f6e0da57504991e516f",
+  "itemCount": 360,
   "counts": {
-    "ACTIVE": 318,
+    "ACTIVE": 319,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6539,6 +6539,24 @@
       "evidence": [
         "OPEN_LOOP.md:5202",
         "Launch Readiness Block 17 — customer data-right requests — 2026-10-10"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f50f6e138a9cd33f",
+      "sourceLine": 5227,
+      "heading": "Launch Readiness Block 18 — governed data-request review — 2026-10-11",
+      "statement": "Pass the complete exact-head release gate, push LR086–LR090, publish accumulated LR081–LR090, verify exact live identity and complete authenticated Chrome production smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5227",
+        "Launch Readiness Block 18 — governed data-request review — 2026-10-11"
       ],
       "currentAuthority": false
     }
