@@ -18,4 +18,6 @@ assert.doesNotMatch(landing, /No email confirmation|Sin confirmación de correo/
 assert.match(landing, /EMAIL_VERIFICATION_POLICY\.reason/);
 assert.match(register, /EMAIL_VERIFICATION_POLICY\.reason/);
 assert.match(onboarding, /EMAIL_VERIFICATION_POLICY\.reason/);
+assert.doesNotMatch(landing, /3 months|3 meses|full access, no limits|acceso total, sin límites/);
+assert.match(landing, /fetchPublicCommercialAvailability/);
 console.log("Simplification and guided adoption build 001 canonical journey: PASS");

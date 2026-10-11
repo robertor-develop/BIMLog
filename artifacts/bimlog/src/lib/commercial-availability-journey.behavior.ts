@@ -3,8 +3,9 @@ import { COMMERCIAL_OFFERS } from "./commercial-offers";
 import { commercialAvailabilityJourney } from "./commercial-availability-journey";
 
 const offer = (id: string) => COMMERCIAL_OFFERS.find((entry) => entry.id === id)!;
-const ready = { schemaVersion: "bimlog-public-commercial-availability-v1", freeSignupAvailable: true, paidPlans: "available", nextAction: "create_free_account" } as const;
-const consultation = { schemaVersion: "bimlog-public-commercial-availability-v1", freeSignupAvailable: true, paidPlans: "consultation_only", nextAction: "request_plan_consultation" } as const;
+const base = { schemaVersion: "bimlog-public-commercial-availability-v2", freeSignupAvailable: true, emailVerification: "required_before_project_setup", freeOffer: { projectLimit: 1, memberLimit: 5, evaluationPeriodDays: null } } as const;
+const ready = { ...base, paidPlans: "available", nextAction: "create_free_account" } as const;
+const consultation = { ...base, paidPlans: "consultation_only", nextAction: "request_plan_consultation" } as const;
 
 assert.deepEqual(commercialAvailabilityJourney(offer("free"), "monthly", "shop drawings", ready).mode, "free_signup");
 const paid = commercialAvailabilityJourney(offer("professional"), "annual", "shop drawings", ready);

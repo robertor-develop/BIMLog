@@ -6,10 +6,15 @@ import { FileCheck2, ShieldCheck, FileSpreadsheet, Users, ArrowRight, CheckCircl
 import { useAuthStore } from "@/store/auth";
 import { BIMLOG_BRAND } from "@/lib/brand-positioning";
 import { EMAIL_VERIFICATION_POLICY } from "@/lib/adoption-journey";
+import { useEffect, useState } from "react";
+import { fetchPublicCommercialAvailability, type PublicCommercialAvailabilityDto } from "@/lib/public-commercial-availability-client";
 
 export function Landing() {
   const { t, tt, lang } = useI18n();
   const { user } = useAuthStore();
+  const [availability,setAvailability]=useState<PublicCommercialAvailabilityDto|null>(null);
+  const [availabilityFailed,setAvailabilityFailed]=useState(false);
+  useEffect(()=>{const controller=new AbortController();fetchPublicCommercialAvailability(controller.signal).then(value=>{setAvailability(value);setAvailabilityFailed(false);}).catch(()=>{if(!controller.signal.aborted)setAvailabilityFailed(true);});return()=>controller.abort();},[]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -385,14 +390,13 @@ export function Landing() {
       {/* CTA */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 py-24 text-center">
         <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
-          {tt("One project. Free. No credit card.", "Un proyecto. Gratis. Sin tarjeta de crédito.")}
+          {tt("Start with one governed project", "Comience con un proyecto controlado")}
         </h2>
-        <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-          {tt(
-            "Start with one project for 3 months — full access, no limits. See exactly what BIMLog finds in your current workflow. Upgrade when you are ready.",
-            "Empieza con un proyecto durante 3 meses — acceso total, sin límites. Mira exactamente qué encuentra BIMLog en tu flujo de trabajo actual. Actualiza cuando estés listo.",
-          )}
-        </p>
+        <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto" role="status">{availabilityFailed
+          ? tt("Free signup availability could not be verified. Review the current offer before creating an account.", "No se pudo verificar la disponibilidad del registro gratuito. Revise la oferta actual antes de crear una cuenta.")
+          : availability
+            ? tt(`The current free offer supports ${availability.freeOffer.projectLimit} active project and up to ${availability.freeOffer.memberLimit} members. Email verification is required before project setup. No evaluation duration is promised unless your entitlement or agreement states one.`, `La oferta gratuita actual admite ${availability.freeOffer.projectLimit} proyecto activo y hasta ${availability.freeOffer.memberLimit} miembros. Se requiere verificar el correo antes de configurar proyectos. No se promete una duración de evaluación salvo que su habilitación o acuerdo la establezca.`)
+            : tt("Checking the current free offer…", "Verificando la oferta gratuita actual…")}</p>
         <Link href="/register">
           <Button size="lg" className="gap-2 text-base px-8">
             {tt("Start for free", "Empieza gratis")}
