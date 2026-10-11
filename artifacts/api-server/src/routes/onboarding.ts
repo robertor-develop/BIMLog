@@ -20,9 +20,9 @@ async function ensureProfile(userId: number, companyId: number) {
 router.get("/onboarding", authMiddleware, async (req,res) => {
   await waitForOnboardingMigration();
   await ensureProfile(req.user!.userId,req.user!.companyId);
-  const result=await pool.query(`SELECT p.*,u.email,c.name company_name,(SELECT count(*)::int FROM project_members WHERE user_id=p.user_id) project_count FROM user_onboarding_profiles p JOIN users u ON u.id=p.user_id JOIN companies c ON c.id=p.company_id WHERE p.user_id=$1`,[req.user!.userId]);
+  const result=await pool.query(`SELECT p.*,u.email,c.name company_name,(SELECT count(*)::int FROM project_members WHERE user_id=p.user_id) project_count,EXISTS(SELECT 1 FROM project_members m WHERE m.user_id=p.user_id AND (EXISTS(SELECT 1 FROM rfis r WHERE r.project_id=m.project_id) OR EXISTS(SELECT 1 FROM submittals s WHERE s.project_id=m.project_id) OR EXISTS(SELECT 1 FROM files f WHERE f.project_id=m.project_id))) first_value_reached FROM user_onboarding_profiles p JOIN users u ON u.id=p.user_id JOIN companies c ON c.id=p.company_id WHERE p.user_id=$1`,[req.user!.userId]);
   const row=result.rows[0];
-  res.json({email:row.email,companyName:row.company_name,emailVerifiedAt:row.email_verified_at,workProfile:row.work_profile,preferredDisciplines:row.preferred_disciplines,preferredDocumentTypes:row.preferred_document_types,completedSteps:row.completed_steps,completedAt:row.completed_at,projectCount:row.project_count});
+  res.json({email:row.email,companyName:row.company_name,emailVerifiedAt:row.email_verified_at,workProfile:row.work_profile,preferredDisciplines:row.preferred_disciplines,preferredDocumentTypes:row.preferred_document_types,completedSteps:row.completed_steps,completedAt:row.completed_at,projectCount:row.project_count,firstValueReached:row.first_value_reached});
 });
 
 router.post("/onboarding/email-verification", authMiddleware, async (req,res) => {

@@ -12,7 +12,7 @@ const API=(import.meta.env.BASE_URL||"").replace(/\/$/,"")+"/api/v1";
 const roles=[["bim_coordinator","BIM coordinator","Coordinador BIM"],["project_admin","Project administrator","Administrador de proyecto"],["document_controller","Document controller","Controlador documental"],["designer","Designer / detailer","Diseñador / dibujante"],["field_team","Field team","Equipo de campo"],["executive","Executive / owner","Ejecutivo / propietario"]] as const;
 const allDisciplines=["Architecture","Structural","Mechanical","Electrical","Plumbing","Fire Protection","Civil"];
 const allDocuments=["Shop Drawings","Coordination Drawings","Clash Reports","RFIs","Submittals"];
-export type OnboardingState={email:string;companyName:string;emailVerifiedAt:string|null;workProfile:string|null;preferredDisciplines:string[];preferredDocumentTypes:string[];completedSteps:string[];completedAt:string|null;projectCount:number};
+export type OnboardingState={email:string;companyName:string;emailVerifiedAt:string|null;workProfile:string|null;preferredDisciplines:string[];preferredDocumentTypes:string[];completedSteps:string[];completedAt:string|null;projectCount:number;firstValueReached:boolean};
 
 export function OnboardingFlow({onDone}:{onDone:()=>void}){
   const {lang}=useI18n(),token=useAuthStore(s=>s.token),tl=(en:string,es:string)=>lang==="es"?es:en;

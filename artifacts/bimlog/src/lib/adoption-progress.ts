@@ -8,6 +8,7 @@ export type AdoptionProgressInput = {
   completedSteps: string[];
   completedAt: string | null;
   projectCount: number;
+  firstValueReached?: boolean;
 };
 
 export type AdoptionProgress = {
@@ -23,7 +24,7 @@ const stages: Array<{ id: AdoptionStageId; done: (state: AdoptionProgressInput) 
   { id: "company", done: state => state.completedSteps.includes("company") },
   { id: "project", done: state => state.projectCount > 0 },
   { id: "control", done: state => Boolean(state.workProfile) && state.preferredDisciplines.length > 0 && state.preferredDocumentTypes.length > 0 },
-  { id: "first_value", done: state => state.completedSteps.includes("first_value") },
+  { id: "first_value", done: state => state.firstValueReached === true || state.completedSteps.includes("first_value") },
 ];
 
 export function deriveAdoptionProgress(state: AdoptionProgressInput): AdoptionProgress {
