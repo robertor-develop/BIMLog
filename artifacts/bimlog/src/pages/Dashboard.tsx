@@ -253,6 +253,7 @@ export function Dashboard() {
   const [showProjectControls, setShowProjectControls] = useState(false);
   const [showTestGuidance, setShowTestGuidance] = useState(false);
   const [showResponsibilities, setShowResponsibilities] = useState(false);
+  const [showSecondaryWorkspace, setShowSecondaryWorkspace] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("bimlog:headquarters-project-view", JSON.stringify({ search: projectSearch, status: projectStatus, sort: projectSort }));
@@ -469,6 +470,16 @@ export function Dashboard() {
         .headquarters-responsibility-disclosure > button:focus-visible { outline:3px solid color-mix(in srgb,#2563eb 35%,transparent); outline-offset:4px; }
         .headquarters-responsibility-disclosure__body { padding-top:12px; }
         .headquarters-responsibility-disclosure__body > section { margin-bottom:0 !important; }
+        .headquarters-secondary-workspace { margin:0 0 20px; border:1px solid hsl(var(--border)); border-radius:12px; background:color-mix(in srgb,hsl(var(--card)) 94%,#eff6ff); }
+        .headquarters-secondary-workspace__toggle { display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%; min-height:52px; padding:11px 16px; border:0; border-radius:inherit; background:transparent; color:hsl(var(--foreground)); text-align:left; cursor:pointer; }
+        .headquarters-secondary-workspace__toggle strong { display:block; font-size:13px; }
+        .headquarters-secondary-workspace__toggle small { display:block; margin-top:3px; color:hsl(var(--muted-foreground)); font-size:10px; font-weight:500; }
+        .headquarters-secondary-workspace__toggle > span:last-child { display:inline-flex; align-items:center; gap:7px; color:#1d4ed8; font-size:11px; font-weight:750; white-space:nowrap; }
+        .headquarters-secondary-workspace__toggle svg { width:16px; height:16px; transition:transform .16s ease; }
+        .headquarters-secondary-workspace__toggle svg.is-open { transform:rotate(180deg); }
+        .headquarters-secondary-workspace__toggle:focus-visible { outline:3px solid color-mix(in srgb,#2563eb 35%,transparent); outline-offset:3px; }
+        .headquarters-secondary-workspace__body { padding:4px 14px 14px; }
+        .headquarters-secondary-workspace__body > :last-child { margin-bottom:0 !important; }
         .setup-progress-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; margin:0 0 20px; padding:14px 16px; border:1px solid #bfdbfe; border-radius:12px; background:#f8fbff; }
         .setup-progress-card__icon { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dbeafe; color:#1d4ed8; }
         .setup-progress-card__body { min-width:0; }
@@ -662,6 +673,13 @@ export function Dashboard() {
           {onboardingState && onboardingState.projectCount > 0 && !onboardingState.firstValueReached && firstValueProject && <FirstValueCard lang={lang} kind={firstValueKind} projectName={`${firstValueProject.code} · ${firstValueProject.name}`} onOpen={() => setLocation(firstValueDestination(Number(firstValueProject.id),firstValueKind))} />}
 
           {onboardingState?.firstValueEvidence && !onboardingState.completedSteps.includes("first_value_seen") && <FirstValueSuccessCard lang={lang} evidence={onboardingState.firstValueEvidence} onOpen={() => { const destination=firstValueEvidenceDestination(onboardingState.firstValueEvidence!); void acknowledgeFirstValue().then(saved => { if(saved)setLocation(destination); }); }} />}
+
+          <section className="headquarters-secondary-workspace" aria-label={tt("More Headquarters tools", "Más herramientas de Sede")}>
+            <button className="headquarters-secondary-workspace__toggle" type="button" aria-expanded={showSecondaryWorkspace} aria-controls="headquarters-secondary-workspace" onClick={() => setShowSecondaryWorkspace(value => !value)}>
+              <span><strong>{tt("More Headquarters tools", "Más herramientas de Sede")}</strong><small>{tt("Project organization, testing, briefing, responsibilities and verified totals.", "Organización de proyectos, pruebas, briefing, responsabilidades y totales verificados.")}</small></span>
+              <span>{showSecondaryWorkspace ? tt("Hide tools", "Ocultar herramientas") : tt("Show tools", "Mostrar herramientas")}<ChevronDown aria-hidden className={showSecondaryWorkspace ? "is-open" : ""}/></span>
+            </button>
+            <div id="headquarters-secondary-workspace" className="headquarters-secondary-workspace__body" hidden={!showSecondaryWorkspace}>
 
           <section
             data-current-view-filter-panel="dashboard"
@@ -1007,6 +1025,8 @@ export function Dashboard() {
             </div>
           )}
           </div>
+            </div>
+          </section>
 
           {/* SECTION 4 — Your Projects */}
           <div style={{ marginBottom: 28 }}>
