@@ -1334,6 +1334,7 @@ export function Profile() {
 
         </>}
 
+        {profileArea === "security" && <>
         <nav aria-label="Settings scope" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 10 }}>
           {settingsDestinations.map(item => <Link key={item.scope} href={item.href} style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 12, color: "inherit", textDecoration: "none" }}>
             <strong>{item.label}</strong><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Responsible: {item.owner}</div><p style={{ fontSize: 12, margin: "6px 0 0" }}>{item.description}</p>
@@ -1470,6 +1471,8 @@ export function Profile() {
         <SectionCard title="AI Credits & Cost Controls" icon={Zap}>
           <AiControlPlanePanel token={token} />
         </SectionCard>
+
+        </>}
 
         <SectionCard title={tt("Telegram Channel", "Canal de Telegram")} icon={MessageCircle}>
           {loadingTelegram ? (
