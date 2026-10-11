@@ -5396,3 +5396,15 @@ This block changes presentation truth only. It creates no project record and cha
 - [x] Pass the complete exact-head gate, push Blocks 7–8, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance at exact source `9f869e14cba0c29e062c6263f9cc365ea2423842` and deployment `6dda3bf6`.
 
 The summary remains read-only and tenant-bounded. Existing RFI and Submittal registers remain authoritative; this block creates no record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.
+
+## Progressive disclosure Block 1 — 2026-10-11
+
+- [x] Make Today the first and strongest Headquarters task surface.
+- [x] Defer Operational Pulse distribution, movement and recommendation detail behind one explicit control.
+- [x] Keep recent-work continuation inside Today and reveal it only when requested beside a stronger primary action.
+- [x] Defer loading the complete responsibility queue until the user opens it.
+- [x] Group project organization, testing, briefing, responsibilities, totals and operational detail into one secondary workspace.
+- [x] Bind hierarchy, bilingual disclosure labels and responsive containment to the permanent production build.
+- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Progressive disclosure Block 2 completes the ten-build interval.
+
+This block changes presentation hierarchy only. It creates no project record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.
