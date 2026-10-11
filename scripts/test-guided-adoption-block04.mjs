@@ -5,7 +5,7 @@ const route=read("artifacts/api-server/src/routes/onboarding.ts");
 const dashboard=read("artifacts/bimlog/src/pages/Dashboard.tsx");
 const action=read("artifacts/bimlog/src/lib/first-value-action.ts");
 const card=read("artifacts/bimlog/src/components/dashboard/FirstValueCard.tsx");
-assert.match(route,/firstValueReached:row\.first_value_reached/);
+assert.match(route,/firstValueReached:Boolean\(firstValueEvidence\)/);
 assert.match(route,/FROM rfis r/);assert.match(route,/FROM submittals s/);assert.match(route,/FROM files f/);
 assert.match(action,/document_controller/);assert.match(action,/preferredDocumentTypes\.includes\("Submittals"\)/);
 assert.match(card,/FIRST CONTROLLED RESULT/);assert.match(card,/PRIMER RESULTADO CONTROLADO/);
