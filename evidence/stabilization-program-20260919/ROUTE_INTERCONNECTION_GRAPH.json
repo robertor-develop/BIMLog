@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 766,
-    "frontendApiReferences": 307,
-    "routeOwnedTables": 71
+    "apiRoutes": 768,
+    "frontendApiReferences": 308,
+    "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
     {
@@ -2280,6 +2280,30 @@
       "tables": [
         "notificationsTable",
         "supportCaseDataRequestReviewsTable",
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/support/cases/:id/data-request/restriction",
+      "owner": "artifacts/api-server/src/routes/commercial-data-restriction.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseDataRequestFulfillmentsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCaseDataRestrictionsTable",
+        "supportCasesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/support/cases/:id/data-request/restriction",
+      "owner": "artifacts/api-server/src/routes/commercial-data-restriction.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseDataRequestFulfillmentsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCaseDataRestrictionsTable",
         "supportCasesTable"
       ]
     },
@@ -9872,6 +9896,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/correction"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+      "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/restriction"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
