@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "d5aed45dd83d3c85d0c1ab1edd26a7b1a0a74035ffcdc386009216dc7fc3334c",
-  "itemCount": 364,
+  "sourceSha256": "bf03a9640226da0149661634c6c057ea590949d765fca1ecd3c3f7bea5acfd21",
+  "itemCount": 365,
   "counts": {
-    "ACTIVE": 323,
+    "ACTIVE": 324,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6629,6 +6629,24 @@
       "evidence": [
         "OPEN_LOOP.md:5272",
         "Launch Readiness Block 20 — customer data-request completion — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1f1cdc388f2503cf",
+      "sourceLine": 5287,
+      "heading": "Launch Readiness Block 23 — governed customer profile correction — 2026-10-11",
+      "statement": "Pass the complete exact-head gate and push LR111–LR115 once. Keep this block unpublished until LR116–LR120 completes the next ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5287",
+        "Launch Readiness Block 23 — governed customer profile correction — 2026-10-11"
       ],
       "currentAuthority": false
     }

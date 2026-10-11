@@ -6,9 +6,9 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 764,
-    "frontendApiReferences": 306,
-    "routeOwnedTables": 70
+    "apiRoutes": 766,
+    "frontendApiReferences": 307,
+    "routeOwnedTables": 71
   },
   "compatibilityRedirects": [
     {
@@ -2187,6 +2187,32 @@
         "lensViewpointEventsTable",
         "lensViewpointSequenceCountersTable",
         "filesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/admin/support/cases/:id/data-request/correction",
+      "owner": "artifacts/api-server/src/routes/commercial-data-correction.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseDataCorrectionsTable",
+        "supportCaseDataRequestFulfillmentsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/support/cases/:id/data-request/correction",
+      "owner": "artifacts/api-server/src/routes/commercial-data-correction.ts",
+      "tables": [
+        "notificationsTable",
+        "supportCaseDataCorrectionsTable",
+        "supportCaseDataRequestFulfillmentsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCasesTable",
+        "usersTable"
       ]
     },
     {
@@ -9842,6 +9868,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/fulfillment"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+      "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/correction"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
