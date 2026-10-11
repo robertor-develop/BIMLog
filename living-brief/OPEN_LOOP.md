@@ -5203,6 +5203,8 @@ Performance repair checkpoint: `72e51f75` preserves LR076-LR080 statement downlo
 
 Performance repair checkpoint: `50a6b8b6` preserves LR081–LR085 behavior while extracting support-panel presentation CSS. The focused block gate passes; the production build and unchanged 4 MiB browser budget must pass before push.
 
+Final budget repair `4e3553de` keeps the same request types, tenant authority, record-preservation guidance and responsive flow with concise bilingual copy. The focused block suite, frontend typecheck, production build and fixed browser budget pass at 4,194,289 of 4,194,304 bytes; the complete exact-head gate and branch push remain.
+
 
 Route-inventory reconciliation checkpoint: `c58ea632` records the final statement-link source owner. No runtime route or product behavior changed.
 

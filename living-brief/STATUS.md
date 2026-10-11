@@ -4226,6 +4226,8 @@ LR081–LR085 connect the existing authenticated customer-service record to a st
 
 Performance repair checkpoint: `50a6b8b6` extracts the existing support-panel presentation rules into CSS after the production build measured a 1,220-byte JavaScript budget overrun. The customer data-right contract, bilingual guidance, responsive layout and fixed 4 MiB ceiling remain unchanged.
 
+Final budget repair `4e3553de` condenses equivalent bilingual support labels and failures after the rebuilt bundle remained 872 bytes over the unchanged ceiling. The focused LR081–LR085 suite, frontend typecheck, production build and performance gate now pass at 4,194,289 of 4,194,304 bytes.
+
 The unchanged 4 MiB browser budget caught an 835-byte regression in the first statement-download implementation. Repair `72e51f75` reuses the existing authenticated PDF downloader and removes duplicate subscription/count presentation already shown by Billing & Support. The statement action, bilingual labels, tenant authority and server-side fingerprint remain intact; the rebuilt browser total passes at 4,194,303 of 4,194,304 bytes.
 
 
