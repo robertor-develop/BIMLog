@@ -4,7 +4,7 @@ import {
   rfisTable, submittalsTable, filesTable, projectMembersTable, projectsTable, activityLogTable, usersTable, companiesTable,
   clashReportsTable, clashesTable, submittalReportsTable, submittalItemsTable,
 } from "@workspace/db/schema";
-import { eq, and, inArray, ne, or, count, desc } from "drizzle-orm";
+import { eq, and, inArray, ne, or, count, desc, lt } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { deterministicBriefing, type BriefingDraft } from "../lib/ai-assistance-governance";
 import { ScopedBriefingCache } from "../lib/scoped-briefing-cache";
@@ -14,6 +14,7 @@ import { parseResponsibilityScope, scopeResponsibilityItems } from "../lib/respo
 import { classifyResponsibility } from "../lib/responsibility-classification";
 import { responsibilityActionRoute } from "../lib/responsibility-action-routing";
 import { responsibilityPerformanceSummary } from "../lib/responsibility-performance-summary";
+import { boundedDashboardAdoptionSummary, type DashboardAttentionRow, type DashboardNamingCompany } from "../lib/dashboard-adoption-summary";
 import {
   addPageNumbers,
   computeContentHash,
@@ -721,6 +722,64 @@ router.get("/dashboard/stats", authMiddleware, async (req, res) => {
     submittalTrackers: submittalTrackersRes.length,
     openSubmittalItems: openSubmittalItemsRes.length,
   });
+});
+
+router.get("/dashboard/adoption-summary", authMiddleware, async (req, res) => {
+  const memberships = await getScopedProjectIds(req.user!.userId);
+  const projectIds = memberships.map(item => item.projectId);
+  if (!projectIds.length) {
+    res.json(boundedDashboardAdoptionSummary({ attention: [], assigned: [], recentActivity: [], namingCompanies: [] }));
+    return;
+  }
+
+  const projectColumns = { projectId: projectsTable.id, projectCode: projectsTable.code, projectName: projectsTable.name };
+  const [overdueRfis, pendingSubmittals, rejectedFiles, assignedRfis, assignedSubmittals, recentActivity, namingRows] = await Promise.all([
+    db.select({ ...projectColumns, count: count() }).from(rfisTable).innerJoin(projectsTable, eq(rfisTable.projectId, projectsTable.id))
+      .where(and(inArray(rfisTable.projectId, projectIds), ne(rfisTable.status, "closed"), lt(rfisTable.dueDate, new Date())))
+      .groupBy(projectsTable.id, projectsTable.code, projectsTable.name).orderBy(desc(count())).limit(20),
+    db.select({ ...projectColumns, count: count() }).from(submittalsTable).innerJoin(projectsTable, eq(submittalsTable.projectId, projectsTable.id))
+      .where(and(inArray(submittalsTable.projectId, projectIds), eq(submittalsTable.status, "pending")))
+      .groupBy(projectsTable.id, projectsTable.code, projectsTable.name).orderBy(desc(count())).limit(20),
+    db.select({ ...projectColumns, count: count() }).from(filesTable).innerJoin(projectsTable, eq(filesTable.projectId, projectsTable.id))
+      .where(and(inArray(filesTable.projectId, projectIds), eq(filesTable.status, "rejected")))
+      .groupBy(projectsTable.id, projectsTable.code, projectsTable.name).orderBy(desc(count())).limit(20),
+    db.select({ kind: rfisTable.id, projectId: rfisTable.projectId, number: rfisTable.number, title: rfisTable.subject }).from(rfisTable)
+      .where(and(inArray(rfisTable.projectId, projectIds), inArray(rfisTable.status, ["open", "in_review"]), eq(rfisTable.submittedToEmail, req.user!.email)))
+      .orderBy(rfisTable.dueDate, rfisTable.createdAt).limit(1),
+    db.select({ kind: submittalsTable.id, projectId: submittalsTable.projectId, number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable)
+      .where(and(inArray(submittalsTable.projectId, projectIds), eq(submittalsTable.status, "pending"), eq(submittalsTable.submittedToEmail, req.user!.email)))
+      .orderBy(submittalsTable.dueDate, submittalsTable.createdAt).limit(1),
+    db.select({ id: activityLogTable.id, projectId: activityLogTable.projectId, projectName: projectsTable.name, userEmail: usersTable.email, userFullName: activityLogTable.userFullName, userCompanyName: activityLogTable.userCompanyName, actionType: activityLogTable.actionType, entityType: activityLogTable.entityType, details: activityLogTable.details, createdAt: activityLogTable.createdAt })
+      .from(activityLogTable).innerJoin(projectsTable, eq(activityLogTable.projectId, projectsTable.id)).leftJoin(usersTable, eq(activityLogTable.userId, usersTable.id))
+      .where(inArray(activityLogTable.projectId, projectIds)).orderBy(desc(activityLogTable.createdAt)).limit(15),
+    db.select({ company: companiesTable.name, projectId: filesTable.projectId, count: count() }).from(filesTable)
+      .innerJoin(usersTable, eq(filesTable.uploadedById, usersTable.id)).innerJoin(companiesTable, eq(usersTable.companyId, companiesTable.id))
+      .where(and(inArray(filesTable.projectId, projectIds), eq(filesTable.userConfirmedNonCompliant, true)))
+      .groupBy(companiesTable.name, filesTable.projectId).orderBy(desc(count())).limit(200),
+  ]);
+
+  const attention: DashboardAttentionRow[] = [
+    ...overdueRfis.map(row => ({ ...row, count: Number(row.count), kind: "rfi" as const })),
+    ...rejectedFiles.map(row => ({ ...row, count: Number(row.count), kind: "file" as const })),
+    ...pendingSubmittals.map(row => ({ ...row, count: Number(row.count), kind: "submittal" as const })),
+  ];
+  const namingMap = new Map<string, DashboardNamingCompany>();
+  for (const row of namingRows) {
+    const current = namingMap.get(row.company) ?? { company: row.company, count: 0, projectIds: [] };
+    current.count += Number(row.count);
+    current.projectIds.push(row.projectId);
+    namingMap.set(row.company, current);
+  }
+
+  res.json(boundedDashboardAdoptionSummary({
+    attention,
+    assigned: [
+      ...assignedRfis.map(row => ({ kind: "rfi" as const, projectId: row.projectId, number: row.number, title: row.title })),
+      ...assignedSubmittals.map(row => ({ kind: "submittal" as const, projectId: row.projectId, number: row.number, title: row.title })),
+    ],
+    recentActivity,
+    namingCompanies: [...namingMap.values()].sort((left, right) => right.count - left.count),
+  }));
 });
 
 // ── GET /dashboard/briefing ───────────────────────────────────────────────────
