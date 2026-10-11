@@ -488,6 +488,8 @@ queueDatabaseStartup(async () => {
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS resolution_summary text`);
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS resolved_by_user_id integer REFERENCES users(id)`);
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS resolved_at timestamp`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_kind text`);
+    await pool.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'support_cases_data_request_kind_chk') THEN ALTER TABLE support_cases ADD CONSTRAINT support_cases_data_request_kind_chk CHECK (data_request_kind IS NULL OR (category = 'data' AND data_request_kind IN ('export','correction','deletion','restriction'))); END IF; END $$`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS support_cases_requester_request_key_uidx ON support_cases(requester_user_id,request_key)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS support_cases_company_created_idx ON support_cases(company_id,created_at DESC)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS support_cases_response_due_idx ON support_cases(status,response_due_at)`);
