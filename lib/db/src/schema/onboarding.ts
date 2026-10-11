@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, index, integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigserial, check, index, integer, jsonb, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { companiesTable, usersTable } from "./users";
 
 export const userOnboardingProfilesTable = pgTable("user_onboarding_profiles", {
@@ -27,4 +27,17 @@ export const emailVerificationTokensTable = pgTable("email_verification_tokens",
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [
   index("email_verification_tokens_user_idx").on(table.userId, table.createdAt.desc().nullsFirst()),
+]);
+
+export const adoptionMilestoneEventsTable = pgTable("adoption_milestone_events", {
+  id: bigserial("id", { mode: "number" }).primaryKey(),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  userId: integer("user_id").notNull().references(() => usersTable.id),
+  milestone: text("milestone").notNull(),
+  surface: text("surface").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("adoption_milestone_events_company_idx").on(table.companyId, table.createdAt.desc().nullsFirst()),
+  check("adoption_milestone_key_chk", sql`${table.milestone} IN ('today_viewed','primary_action_opened','onboarding_completed','first_project_opened')`),
+  check("adoption_milestone_surface_chk", sql`${table.surface} IN ('headquarters','onboarding','project')`),
 ]);

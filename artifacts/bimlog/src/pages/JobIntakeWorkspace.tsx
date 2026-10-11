@@ -1876,7 +1876,7 @@ export function JobIntakeWorkspace() {
                             "Número de contrato / orden de compra",
                           ),
                         ],
-                        ["counterpartyName", PRODUCT_TERMS.counterparty[lang === "es" ? "es" : "en"]],
+                        ["counterpartyName", PRODUCT_TERMS.counterparty[language === "es" ? "es" : "en"]],
                         [
                           "paymentTerms",
                           tt("Payment terms", "Términos de pago"),
@@ -1894,7 +1894,7 @@ export function JobIntakeWorkspace() {
                                 <option value={data.commercial[field]}>{data.commercial[field]}</option>
                               )}
                               {clientCompanyOptions.map((company) => <option key={company} value={company}>{company}</option>)}
-                            </select><small className="ji-small">{PRODUCT_TERM_HELP.counterparty[lang === "es" ? "es" : "en"]}</small></>
+                            </select><small className="ji-small">{PRODUCT_TERM_HELP.counterparty[language === "es" ? "es" : "en"]}</small></>
                           ) : (
                             <input
                               value={data.commercial[field]}
@@ -2025,7 +2025,7 @@ export function JobIntakeWorkspace() {
                                 ],
                                 [
                                   "counterpartyName",
-                                  PRODUCT_TERMS.counterparty[lang === "es" ? "es" : "en"],
+                                  PRODUCT_TERMS.counterparty[language === "es" ? "es" : "en"],
                                 ],
                                 [
                                   "paymentTerms",
@@ -2044,7 +2044,7 @@ export function JobIntakeWorkspace() {
                                         <option value={contract[field]}>{contract[field]}</option>
                                       )}
                                       {clientCompanyOptions.map((company) => <option key={company} value={company}>{company}</option>)}
-                                    </select><small className="ji-small">{PRODUCT_TERM_HELP.counterparty[lang === "es" ? "es" : "en"]}</small></>
+                                    </select><small className="ji-small">{PRODUCT_TERM_HELP.counterparty[language === "es" ? "es" : "en"]}</small></>
                                   ) : (
                                     <input
                                       value={contract[field] || ""}
