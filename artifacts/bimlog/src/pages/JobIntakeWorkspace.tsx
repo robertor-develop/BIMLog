@@ -1312,7 +1312,7 @@ export function JobIntakeWorkspace() {
               </div>
               {canonicalReadOnly && <p role="status" className="ji-lock">{tt("Activated setup — read-only. Use Job Operations and the linked commercial records to continue work.", "Configuración activada — solo lectura. Continúe en Operaciones del Trabajo y en los registros comerciales vinculados.")}</p>}
               <fieldset className="ji-fields" disabled={canonicalReadOnly} style={{ display: "contents" }}>
-              <details className="ji-card" id="ji-documents">
+              <details className="ji-card" id="ji-documents" hidden={active !== "documents"} open={active === "documents"}>
                 <summary>{tt("Source documents (optional)", "Documentos fuente (opcional)")}</summary>
                 {guide && (
                   <div className="ji-guide">
@@ -1683,7 +1683,7 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
               </details>
-              <section className="ji-card" id="ji-identity">
+              <section className="ji-card" id="ji-identity" hidden={active !== "identity"}>
                 <h2>1. {stageLabel("identity")}</h2>
                 <p className="ji-guide">{tt("Existing project details are reused below. Change them only when this job needs a deliberate override; saving never creates a second project. Client selection reuses the project directory and clears a contact that belongs to another company.", "Los datos existentes del proyecto se reutilizan abajo. Cámbielos solo cuando este trabajo requiera una excepción deliberada; guardar nunca crea otro proyecto. La selección de cliente reutiliza el directorio y borra un contacto de otra empresa.")}</p>
                 <p className="ji-small">{tt("Current project", "Proyecto actual")}: {intake.project?.name} · {intake.project?.code}</p>
@@ -1805,7 +1805,7 @@ export function JobIntakeWorkspace() {
                 </div>
                 <details id="ji-company-agreements"><summary>{tt("Companies and agreements (optional advanced setup)", "Empresas y acuerdos (configuración avanzada opcional)")}</summary><CompanyJobMap data={data} companies={authoritativeCompanies} contacts={directoryEntries} setData={setData} tt={tt}/></details>
               </section>
-              <section className="ji-card" id="ji-contract">
+              <section className="ji-card" id="ji-contract" hidden={active !== "contract"}>
                 <h2>
                   2. {stageLabel("contract")}
                   {!capabilities.contracts && (
@@ -2172,7 +2172,7 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
               </section>
-              <section className="ji-card" id="ji-scope">
+              <section className="ji-card" id="ji-scope" hidden={active !== "scope"}>
                 <h2>
                   3. {stageLabel("scope")} + {stageLabel("pricing")}
                 </h2>
@@ -2261,7 +2261,7 @@ export function JobIntakeWorkspace() {
                 <LegacyProjectClassificationNotice data={data} setData={setData} tt={tt} />
 
               </section>
-              <section className="ji-card" id="ji-delivery">
+              <section className="ji-card" id="ji-delivery" hidden={active !== "delivery"}>
                 {canonicalReadOnly ? <Link className="ji-navigation-link" href={withIntakeReturn(`/projects/${projectId}/convention`, projectId, "delivery", "ji-delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</Link> : <button type="button" onClick={() => openCommercialPrerequisite(`/projects/${projectId}/convention`, "delivery", "ji-delivery")}>{tt("Open Convention Builder and return here", "Abrir Constructor de Convenciones y volver aquí")}</button>}
                 <h2>4. {stageLabel("delivery")}</h2>
                 <p className="ji-small">{tt("Only eligible published workflows appear below. If none match, an authorized company administrator must publish one; your draft is saved before leaving and you can return to this step.", "Solo aparecen flujos publicados elegibles. Si ninguno corresponde, un administrador autorizado debe publicar uno; el borrador se guarda antes de salir y puede volver a este paso.")}</p>
@@ -2354,15 +2354,15 @@ export function JobIntakeWorkspace() {
                   </label>
                 </div>
               </section>
-              <section className="ji-card" id="ji-team">
+              <section className="ji-card" id="ji-team" hidden={active !== "team"}>
                 <h2>5. {tt("Resource budget", "Presupuesto de recursos")}</h2>
                 {data.team.projectLeaderUserId != null && <div className="ji-row"><p>{tt("The project leader from the saved setup is preserved. If that person is no longer available, leave the leader pending and choose one later in project administration.", "Se conserva el líder de la configuración guardada. Si ya no está disponible, déjelo pendiente y elíjalo después en la administración del proyecto.")}</p>{!isActivated && <button type="button" onClick={() => change("team", "projectLeaderUserId", null)}>{tt("Leave project leader pending", "Dejar líder del proyecto pendiente")}</button>}</div>}
                 <GenericResourcePlan assignments={data.team.assignments} scopeItems={data.scopeItems} currency={data.identity.currency} budgetEnabled={capabilities.budget} canReleaseLegacyAssignment={!isActivated} tt={tt}
                   onChange={assignments => setData((old: any) => ({ ...old, team: { ...old.team, assignments }, review: { ...old.review, teamConfirmed: false } }))}/>
                 <p className="ji-small">{tt("Unassigned scope hours remain pending for later staffing. They do not prevent activation.", "Las horas sin personal quedan pendientes para asignarlas después. No impiden la activación.")}</p>
               </section>
-              <EmailReadinessSection projectId={projectId} tt={tt} />
-              <section className="ji-card" id="ji-review">
+              <div hidden={active !== "team"}><EmailReadinessSection projectId={projectId} tt={tt} /></div>
+              <section className="ji-card" id="ji-review" hidden={active !== "review"}>
                 <h2>6. {stageLabel("review")}</h2>
                 {isActivated && <p className="ji-small" role="note">{activeIntakeEditGuidance(canonicalReadOnly, language)}</p>}
                 {guide && (
