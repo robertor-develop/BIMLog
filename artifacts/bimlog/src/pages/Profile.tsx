@@ -401,14 +401,8 @@ export function Profile() {
 
   useEffect(() => {
     loadProfile().then(() => {});
-    loadConnections();
-    loadTelegramStatus();
-    loadTelegramPanel();
     // Handle the OAuth return from a provider connect.
     const params = new URLSearchParams(window.location.search);
-    if (params.get("section") === "email-sending") {
-      window.requestAnimationFrame(() => document.getElementById("profile-email-sending")?.scrollIntoView({ block: "start" }));
-    }
     if (params.get("connected")) {
       toast({ title: `${params.get("connected")} connected` });
       window.history.replaceState({}, "", window.location.pathname);
@@ -428,6 +422,16 @@ export function Profile() {
       loadPendingItems(profile.email);
     }
   }, [profileArea, profile?.email]);
+
+  useEffect(() => {
+    if (profileArea !== "connections") return;
+    loadConnections();
+    loadTelegramStatus();
+    loadTelegramPanel();
+    if (new URLSearchParams(window.location.search).get("section") === "email-sending") {
+      window.requestAnimationFrame(() => document.getElementById("profile-email-sending")?.scrollIntoView({ block: "start" }));
+    }
+  }, [profileArea]);
 
   async function savePersonal() {
     setSavingPersonal(true);
@@ -1474,6 +1478,7 @@ export function Profile() {
 
         </>}
 
+        {profileArea === "connections" && <>
         <SectionCard title={tt("Telegram Channel", "Canal de Telegram")} icon={MessageCircle}>
           {loadingTelegram ? (
             <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>{tt("Loading Telegram status...", "Cargando estado de Telegram...")}</div>
@@ -1738,6 +1743,7 @@ export function Profile() {
             })}
           </div>
         </SectionCard>
+        </>}
 
             </div>
     </div>
