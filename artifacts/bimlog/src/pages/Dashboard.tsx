@@ -252,6 +252,7 @@ export function Dashboard() {
   const [showOperationalDetails, setShowOperationalDetails] = useState(false);
   const [showProjectControls, setShowProjectControls] = useState(false);
   const [showTestGuidance, setShowTestGuidance] = useState(false);
+  const [showResponsibilities, setShowResponsibilities] = useState(false);
 
   useEffect(() => {
     localStorage.setItem("bimlog:headquarters-project-view", JSON.stringify({ search: projectSearch, status: projectStatus, sort: projectSort }));
@@ -459,6 +460,15 @@ export function Dashboard() {
         .today-workspace__recent-disclosure:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
         .today-workspace__recent-disclosure svg { width:15px; height:15px; transition:transform .16s ease; }
         .today-workspace__recent-disclosure svg.is-open { transform:rotate(180deg); }
+        .headquarters-responsibility-disclosure { width:100%; margin:0 0 20px; padding:11px 14px; border:1px solid hsl(var(--border)); border-radius:9px; background:hsl(var(--card)); color:hsl(var(--foreground)); }
+        .headquarters-responsibility-disclosure > button { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; min-height:40px; padding:0; border:0; background:transparent; color:inherit; text-align:left; cursor:pointer; }
+        .headquarters-responsibility-disclosure > button strong { display:block; font-size:12px; }
+        .headquarters-responsibility-disclosure > button small { display:block; margin-top:2px; color:hsl(var(--muted-foreground)); font-size:10px; font-weight:500; }
+        .headquarters-responsibility-disclosure > button svg { width:15px; height:15px; transition:transform .16s ease; }
+        .headquarters-responsibility-disclosure > button svg.is-open { transform:rotate(180deg); }
+        .headquarters-responsibility-disclosure > button:focus-visible { outline:3px solid color-mix(in srgb,#2563eb 35%,transparent); outline-offset:4px; }
+        .headquarters-responsibility-disclosure__body { padding-top:12px; }
+        .headquarters-responsibility-disclosure__body > section { margin-bottom:0 !important; }
         .setup-progress-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; margin:0 0 20px; padding:14px 16px; border:1px solid #bfdbfe; border-radius:12px; background:#f8fbff; }
         .setup-progress-card__icon { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dbeafe; color:#1d4ed8; }
         .setup-progress-card__body { min-width:0; }
@@ -734,7 +744,15 @@ export function Dashboard() {
           {/* AI Briefing banner */}
           <AiBriefingCard token={token ?? undefined} />
 
-          <ResponsibilityWorkspace token={token ?? undefined} lang={lang} />
+          <section className="headquarters-responsibility-disclosure" aria-label={tt("Responsibility workspace", "Espacio de responsabilidades")}>
+            <button type="button" aria-expanded={showResponsibilities} aria-controls="headquarters-responsibility-workspace" onClick={() => setShowResponsibilities(value => !value)}>
+              <span><strong>{tt("Responsibility workspace", "Espacio de responsabilidades")}</strong><small>{tt("Open only when you need the complete cross-project queue.", "Ábralo solo cuando necesite la cola completa entre proyectos.")}</small></span>
+              <ChevronDown aria-hidden className={showResponsibilities ? "is-open" : ""}/>
+            </button>
+            <div id="headquarters-responsibility-workspace" className="headquarters-responsibility-disclosure__body" hidden={!showResponsibilities}>
+              {showResponsibilities && <ResponsibilityWorkspace token={token ?? undefined} lang={lang} />}
+            </div>
+          </section>
 
           {/* SECTION 2 — Platform stats (5 cards) */}
           {!isLoading && (
