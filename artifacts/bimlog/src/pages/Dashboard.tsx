@@ -234,7 +234,7 @@ export function Dashboard() {
       .catch((error) => logClientError("dashboard CVR health load", error));
   }, [token]);
 
-  const { data: adoptionSummary = EMPTY_DASHBOARD_ADOPTION_SUMMARY, isFetching: adoptionSummaryLoading, isError: adoptionSummaryFailed, refetch: retryAdoptionSummary } = useQuery({
+  const { data: adoptionSummary = EMPTY_DASHBOARD_ADOPTION_SUMMARY, isPending: adoptionSummaryLoading, isFetching: adoptionSummaryRefreshing, isError: adoptionSummaryFailed, refetch: retryAdoptionSummary } = useQuery({
     queryKey: ["dashboard-adoption-summary"],
     queryFn: ({ signal }) => loadDashboardAdoptionSummary(API_BASE, token!, signal),
     enabled: !!token,
@@ -634,6 +634,7 @@ export function Dashboard() {
           />}
 
           {!isLoading && <TodayWorkspace lang={lang} state={todayGuidanceState} onOpen={setLocation} onRetry={() => void retryAdoptionSummary()} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
+          {adoptionSummaryRefreshing && !adoptionSummaryLoading && !adoptionSummaryFailed && <span className="sr-only" role="status">{tt("Refreshing Headquarters guidance.", "Actualizando la guía de Sede.")}</span>}
 
           {onboardingState && !onboardingState.completedAt && onboardingState.projectCount === 0 && onboardingState.completedSteps.includes("guide_paused") && <SetupProgressCard lang={lang} state={onboardingState} onResume={() => { void resumeGuide().then(resumed => { if (resumed) setOnboardingVisible(true); }); }} />}
 
