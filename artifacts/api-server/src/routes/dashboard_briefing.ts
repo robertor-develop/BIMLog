@@ -743,10 +743,10 @@ router.get("/dashboard/adoption-summary", authMiddleware, async (req, res) => {
     db.select({ ...projectColumns, count: count() }).from(filesTable).innerJoin(projectsTable, eq(filesTable.projectId, projectsTable.id))
       .where(and(inArray(filesTable.projectId, projectIds), eq(filesTable.status, "rejected")))
       .groupBy(projectsTable.id, projectsTable.code, projectsTable.name).orderBy(desc(count())).limit(20),
-    db.select({ kind: rfisTable.id, projectId: rfisTable.projectId, number: rfisTable.number, title: rfisTable.subject }).from(rfisTable)
+    db.select({ id: rfisTable.id, projectId: rfisTable.projectId, number: rfisTable.number, title: rfisTable.subject }).from(rfisTable)
       .where(and(inArray(rfisTable.projectId, projectIds), inArray(rfisTable.status, ["open", "in_review"]), eq(rfisTable.submittedToEmail, req.user!.email)))
       .orderBy(rfisTable.dueDate, rfisTable.createdAt).limit(1),
-    db.select({ kind: submittalsTable.id, projectId: submittalsTable.projectId, number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable)
+    db.select({ id: submittalsTable.id, projectId: submittalsTable.projectId, number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable)
       .where(and(inArray(submittalsTable.projectId, projectIds), eq(submittalsTable.status, "pending"), eq(submittalsTable.submittedToEmail, req.user!.email)))
       .orderBy(submittalsTable.dueDate, submittalsTable.createdAt).limit(1),
     db.select({ id: activityLogTable.id, projectId: activityLogTable.projectId, projectName: projectsTable.name, userEmail: usersTable.email, userFullName: activityLogTable.userFullName, userCompanyName: activityLogTable.userCompanyName, actionType: activityLogTable.actionType, entityType: activityLogTable.entityType, details: activityLogTable.details, createdAt: activityLogTable.createdAt })
@@ -774,8 +774,8 @@ router.get("/dashboard/adoption-summary", authMiddleware, async (req, res) => {
   res.json(boundedDashboardAdoptionSummary({
     attention,
     assigned: [
-      ...assignedRfis.map(row => ({ kind: "rfi" as const, projectId: row.projectId, number: row.number, title: row.title })),
-      ...assignedSubmittals.map(row => ({ kind: "submittal" as const, projectId: row.projectId, number: row.number, title: row.title })),
+      ...assignedRfis.map(row => ({ kind: "rfi" as const, id: row.id, projectId: row.projectId, number: row.number, title: row.title })),
+      ...assignedSubmittals.map(row => ({ kind: "submittal" as const, id: row.id, projectId: row.projectId, number: row.number, title: row.title })),
     ],
     recentActivity,
     namingCompanies: [...namingMap.values()].sort((left, right) => right.count - left.count),
