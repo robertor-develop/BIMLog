@@ -5178,3 +5178,5 @@ Production-smoke repair closed: the first LR031–LR040 publication exposed a dr
 - [ ] Push LR051–LR055 and keep the block unpublished until LR056–LR060 completes the ten-build interval.
 
 Reconciliation checkpoint: LR051–LR055 reconciliation baseline is LR054 `09a6f47f`; LR055 remains an unpublished reviewed candidate and publication is due only after LR056–LR060.
+
+Performance repair checkpoint: `dce92b03` preserves LR071–LR075 invoice-history behavior while extracting presentation CSS and restoring the unchanged 4 MiB browser budget. The full exact-source gate and branch push remain required; publication stays deferred until LR076–LR080 completes the ten-build interval.

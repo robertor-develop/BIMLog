@@ -63953,7 +63953,7 @@
     },
     {
       "taskId": "launch-readiness-block15-invoice-history",
-      "reviewedThroughCommit": "35b85f64b64bc6df300f9068fe3d98f41da1962c",
+      "reviewedThroughCommit": "dce92b0304124d21c859a91a5c63f7ef46732ed9",
       "reviewedAt": "2026-10-10T23:00:00.000Z",
       "status": "accepted",
       "authorities": [
@@ -64020,7 +64020,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a120ce4f5206ed11c02cd0fc941f0a8d34867f7e2e66bd019be9d31dedb11920"
+      "reviewedChangeSha256": "f6739b48b15af77ba4fe54b92e3c267f9ab8649ab889d23765d88bf9dd65ccc9"
     }
   ]
 }
