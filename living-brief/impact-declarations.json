@@ -64895,13 +64895,15 @@
         "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
         "artifacts/bimlog/src/lib/support-data-request-export-client.behavior.ts",
         "artifacts/bimlog/src/lib/support-data-request-export-client.ts",
+        "evidence/launch-readiness-20261011/BLOCK_22_LR106_LR110.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-launch-readiness-block22.mjs"
       ],
-      "reviewedChangeSha256": "27f6624c33db3ad6438beafa12ed378a258ba55049e7760b46fad61b4dddad5c"
+      "reviewedChangeSha256": "e90795e619bfc7dd9cca16510210e32c772ec7066735d4e166b6d156fae1433f"
     }
   ]
 }
