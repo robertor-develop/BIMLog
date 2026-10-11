@@ -12,6 +12,8 @@ import {startCommercialBillingPortal} from "../lib/commercial-portal-command";
 import {readCustomerBillingHistory} from "../lib/commercial-billing-history";
 import {parseBillingHistoryQuery} from "../lib/commercial-billing-history-query";
 import {parseCommercialInvoiceId,readCustomerInvoiceStatement} from "../lib/commercial-invoice-statement";
+import {buildCustomerInvoiceStatementPdf} from "../lib/commercial-invoice-statement-pdf";
+import {applyPdfDownloadHeaders} from "../lib/pdf-kit";
 import {deriveCommercialLaunchActivation} from "../lib/commercial-launch-activation";
 import {verifyCommercialLaunchLive} from "../lib/commercial-launch-live-verification";
 import {readCommercialLaunchVerificationHistory,readLatestCommercialLaunchVerification,recordCommercialLaunchVerification} from "../lib/commercial-launch-verification-store";
@@ -172,6 +174,12 @@ router.get("/commercial/invoices/:invoiceId",authMiddleware,async(req,res)=>{
   res.set("Cache-Control","private, no-store, max-age=0");res.set("Vary","Authorization");
   try{const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);res.json(await readCustomerInvoiceStatement(pool,actor.companyId,parseCommercialInvoiceId(req.params.invoiceId)));}
   catch(error){const message=error instanceof Error?error.message:"Invoice unavailable",denied=/administrator authority/.test(message),invalid=/identity is invalid/.test(message),missing=/was not found/.test(message);res.status(denied?403:invalid?400:missing?404:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":invalid?"INVOICE_ID_INVALID":missing?"INVOICE_NOT_FOUND":"INVOICE_UNAVAILABLE",error:denied?"Billing administrator authority is required.":invalid?message:missing?"Invoice was not found.":"Invoice is temporarily unavailable."});}
+});
+
+router.get("/commercial/invoices/:invoiceId/statement.pdf",authMiddleware,async(req,res)=>{
+  res.set("Vary","Authorization");
+  try{const actor=req.user!,authority=await resolveCommercialBillingAuthority(pool,{userId:actor.userId,companyId:actor.companyId});requireCommercialBillingManager(authority);const statement=await readCustomerInvoiceStatement(pool,actor.companyId,parseCommercialInvoiceId(req.params.invoiceId)),pdf=await buildCustomerInvoiceStatementPdf(statement);applyPdfDownloadHeaders(res,{fileName:`BIMLog-${statement.invoice.invoiceNumber}-Billing-Statement.pdf`});res.setHeader("X-BIMLog-Content-SHA256",pdf.contentHash);res.send(pdf.buffer);}
+  catch(error){const message=error instanceof Error?error.message:"Statement unavailable",denied=/administrator authority/.test(message),invalid=/identity is invalid/.test(message),missing=/was not found/.test(message);res.status(denied?403:invalid?400:missing?404:503).json({code:denied?"BILLING_AUTHORITY_REQUIRED":invalid?"INVOICE_ID_INVALID":missing?"INVOICE_NOT_FOUND":"INVOICE_STATEMENT_UNAVAILABLE",error:denied?"Billing administrator authority is required.":invalid?message:missing?"Invoice was not found.":"Invoice statement is temporarily unavailable."});}
 });
 
 export default router;
