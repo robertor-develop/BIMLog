@@ -28,6 +28,7 @@ import { FirstValueSuccessCard } from "@/components/dashboard/FirstValueSuccessC
 import { chooseFirstValueAction, firstValueDestination } from "@/lib/first-value-action";
 import { firstValueEvidenceDestination } from "@/lib/first-value-evidence";
 import { chooseRoleAwareTodayAction, type TodayCandidate } from "@/lib/today-action";
+import { assignedItemDestination } from "@/lib/assigned-item-destination";
 import { EMPTY_DASHBOARD_ADOPTION_SUMMARY, loadDashboardAdoptionSummary } from "@/lib/dashboard-adoption-summary";
 import { dashboardGuidanceState } from "@/lib/dashboard-guidance-state";
 
@@ -375,7 +376,10 @@ export function Dashboard() {
   }));
   const recentActivity = adoptionSummary.recentActivity;
   const todayCandidates: TodayCandidate[] = [
-    ...adoptionSummary.assigned.map(item => ({ kind: item.kind, title: item.kind === "rfi" ? tt(`RFI ${item.number} needs your response`, `RFI ${item.number} necesita su respuesta`) : tt(`Submittal ${item.number} needs your review`, `Submittal ${item.number} necesita su revisión`), detail: item.title, href: `/projects/${item.projectId}/${item.kind === "rfi" ? "rfis" : "submittals"}` })),
+    ...adoptionSummary.assigned.flatMap(item => {
+      const href = assignedItemDestination(item);
+      return href ? [{ kind: item.kind, title: item.kind === "rfi" ? tt(`RFI ${item.number} needs your response`, `RFI ${item.number} necesita su respuesta`) : tt(`Submittal ${item.number} needs your review`, `Submittal ${item.number} necesita su revisión`), detail: item.title, href }] : [];
+    }),
     ...attentionRows.slice(0, 1).map(item => ({ kind: "attention" as const, title: item.issue, detail: `${projectMap.get(item.pid)?.code || tt("Project", "Proyecto")} · ${projectMap.get(item.pid)?.name || ""}`, href: item.href })),
     ...allProjectRows.slice(0, 1).map(item => ({ kind: "project" as const, title: tt("Continue project work", "Continuar trabajo del proyecto"), detail: `${item.code} · ${item.name}`, href: `/projects/${item.id}` })),
   ];
