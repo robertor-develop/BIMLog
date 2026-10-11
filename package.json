@@ -282,6 +282,7 @@
     "test:launch-readiness-block22": "node scripts/test-launch-readiness-block22.mjs",
     "test:launch-readiness-block23": "node scripts/test-launch-readiness-block23.mjs",
     "test:launch-readiness-block24": "node scripts/test-launch-readiness-block24.mjs",
+    "test:guided-adoption-block01": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/adoption-journey.behavior.ts",
     "test:launch-readiness-block09": "node scripts/test-launch-readiness-block09.mjs",
     "test:launch-readiness-block10": "node scripts/test-launch-readiness-block10.mjs"
   },
