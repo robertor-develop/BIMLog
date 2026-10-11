@@ -5311,3 +5311,14 @@ This block records the authoritative restriction decision. Optional processors s
 - [ ] Complete guided adoption Block 2, then publish the ten-build interval and run full authenticated desktop/mobile Chrome acceptance.
 
 No database, customer data, permission, Native, installer, provider-secret or external-send change is included in this block.
+
+## Simplification and guided adoption Block 2 — 2026-10-11
+
+- [x] Put one focused Today action ahead of secondary Headquarters controls.
+- [x] Prefer assigned RFI or Submittal work according to the authenticated work profile or role.
+- [x] Offer a server-derived recent-project continuation without treating browser storage as workflow authority.
+- [x] Persist guide pause and completion state in the authenticated onboarding profile.
+- [x] Record deduplicated, allowlisted adoption milestones without question text, record content, email or project details.
+- [ ] Pass the complete exact-head gate, push, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
+
+The milestone path adds one tenant- and user-attributed operational event table. It accepts only fixed milestone and surface enums and stores no customer content.

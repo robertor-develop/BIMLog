@@ -4278,3 +4278,7 @@ LR116–LR120 add a governed, tenant-safe customer processing-restriction path f
 # Simplification and guided adoption Block 1 — 2026-10-11
 
 Five builds establish the canonical account-to-first-value journey, reconcile email-verification truth, expose a strict capability-backed free-offer contract, standardize bilingual adoption vocabulary and add a fail-closed adoption-truth release check. Focused behavior tests plus API and frontend typechecks pass through implementation commit `d410c6835f3d112642e4c7da5e81595c9dfb807d`. This is the first five-build half of the next ten-build interval; it is pushed after the complete gate and remains unpublished until Block 2 completes.
+
+# Simplification and guided adoption Block 2 — 2026-10-11
+
+Five builds add a focused Today entry point, role-aware primary action, server-derived recent-work continuation, server-backed onboarding guide state and allowlisted privacy-safe adoption milestones. Release-gate repairs align the earlier Counterparty vocabulary change with the active locale variable and declare the additive milestone table in Drizzle schema parity. The ten-build interval is ready for its complete gate, push, exact-source publication and authenticated desktop/mobile Chrome acceptance.

@@ -1970,3 +1970,11 @@ Activated Intake with a canonical contract displays authoritative saved setup in
 - Reviewer decisions are optimistic-concurrency protected, attributable, rationale-bearing, and audited. Duplicate proposals may merge only into a same-company canonical proposal and retain their redirect history.
 - An approved proposal may create or revise draft Conflict Types, Coordination Rules, or Resolution Methods through a separate controlled action. No proposal, review transition, or merge automatically approves or publishes organizational knowledge.
 - Block 8 adds no schema and changes no Native, bridge, camera, installer, package, Autodesk load path, or Navisworks-facing source. Build 265 is the scheduled Replit publication and authenticated Chrome acceptance boundary.
+
+## Guided adoption Today surface — 2026-10-11
+
+- Headquarters derives one primary Today action from authenticated RFI, Submittal, attention and project records. The user's work profile or role changes ordering only; source permissions and records remain authoritative.
+- Recent-work continuation derives from the existing authenticated activity projection and opens the project source. It does not create a task, copy a record or store customer work in browser storage.
+- Onboarding pause/completion state lives in `user_onboarding_profiles.completed_steps` and `completed_at`; local storage is no longer the dismissal authority.
+- `adoption_milestone_events` stores only tenant ID, user ID, an allowlisted milestone, an allowlisted surface and time. The endpoint rejects arbitrary names and accepts no content payload.
+- No provider, payment, email-send, Native, installer, Lens, Feedback, Fix or MAIN authority changes.
