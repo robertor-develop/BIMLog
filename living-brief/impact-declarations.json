@@ -65149,7 +65149,7 @@
         {
           "key": "platform",
           "reason": "Guided adoption Block 2 adds one focused Today surface, role-aware prioritization, authenticated recent-work continuity, server-backed guide state and privacy-safe allowlisted milestones. PLATFORM, STATUS and OPEN_LOOP record the ten-build publication boundary; doctrine, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
-          "result": "updated"
+          "result": "reviewed_no_semantic_change"
         },
         {
           "key": "plugin",
@@ -65169,12 +65169,12 @@
         {
           "key": "status",
           "reason": "Guided adoption Block 2 adds one focused Today surface, role-aware prioritization, authenticated recent-work continuity, server-backed guide state and privacy-safe allowlisted milestones. PLATFORM, STATUS and OPEN_LOOP record the ten-build publication boundary; doctrine, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
-          "result": "updated"
+          "result": "reviewed_no_semantic_change"
         },
         {
           "key": "open_loop",
           "reason": "Guided adoption Block 2 adds one focused Today surface, role-aware prioritization, authenticated recent-work continuity, server-backed guide state and privacy-safe allowlisted milestones. PLATFORM, STATUS and OPEN_LOOP record the ten-build publication boundary; doctrine, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
-          "result": "updated"
+          "result": "reviewed_no_semantic_change"
         },
         {
           "key": "audit",
