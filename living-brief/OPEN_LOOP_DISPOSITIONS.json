@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "11affb1b3b7f4ef0d3ae81580405b195d1d35b78c725157559238b2defae22ae",
-  "itemCount": 369,
+  "sourceSha256": "50c3372f3d661d17cd1535054c33be53f34515665a265c9f8daf21970362ce22",
+  "itemCount": 370,
   "counts": {
-    "ACTIVE": 328,
+    "ACTIVE": 329,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6719,6 +6719,24 @@
       "evidence": [
         "OPEN_LOOP.md:5334",
         "Simplification and guided adoption Block 3 — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "4107891b4bf42160",
+      "sourceLine": 5346,
+      "heading": "Simplification and guided adoption Block 4 — 2026-10-11",
+      "statement": "Pass the complete exact-head gate, push Blocks 3–4, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5346",
+        "Simplification and guided adoption Block 4 — 2026-10-11"
       ],
       "currentAuthority": false
     }

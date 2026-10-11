@@ -5334,3 +5334,15 @@ The milestone path adds one tenant- and user-attributed operational event table.
 - [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 4 completes the next ten-build interval.
 
 No customer project, payment, provider, email, permission, Native, installer or external-send behavior changes in this block.
+
+## Simplification and guided adoption Block 4 — 2026-10-11
+
+- [x] Derive first value from an actual RFI, Submittal or governed file in an authorized project.
+- [x] Choose one deterministic first-record action from the saved work profile and document preferences.
+- [x] Open the canonical project RFI, Submittal or file register without creating a parallel task.
+- [x] Explain the first controlled result in English and Spanish without claiming completion before evidence exists.
+- [x] Keep the guidance keyboard accessible and contained at narrow width.
+- [x] Bind the authoritative evidence, action selection, presentation and responsive contracts to the permanent gate.
+- [ ] Pass the complete exact-head gate, push Blocks 3–4, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
+
+No controlled record is created by the guidance card. Existing project authorization and each destination register remain authoritative.
