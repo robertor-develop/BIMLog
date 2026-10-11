@@ -5252,3 +5252,5 @@ Release-gate repair checkpoint: `b9984bcf` removes duplicate-route audit identit
 - [ ] Pass the complete exact-head release gate, push LR096–LR100, publish the LR091–LR100 interval, verify exact live identity and complete authenticated desktop/mobile Chrome smoke.
 
 This customer surface displays governed review and fulfillment evidence. The actual export, correction, deletion or restriction remains an authorized operational action outside the browser and must respect legal retention, immutable audit evidence and project-integrity obligations.
+
+Browser-budget repair checkpoint: `a77820f3` preserves the LR096–LR100 lifecycle, bilingual guidance, tenant-scoped receipt and responsive behavior while consolidating duplicate UI code and using deterministic content-hashed asset names without redundant timestamp suffixes. Focused behavior, typecheck, production build and the unchanged 4 MiB browser budget pass at 4,175,939 bytes; the complete exact-head gate, push, publication and authenticated Chrome smoke remain required.
