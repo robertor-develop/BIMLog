@@ -5433,3 +5433,16 @@ This block changes presentation and navigation hierarchy only. It creates no pro
 - [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Progressive disclosure Block 4 completes the next ten-build interval.
 
 This block changes presentation and loading hierarchy only. Existing commercial, invoice, support, data-right, permission and provider records remain authoritative. It creates no payment, subscription, invoice, support request or external send and changes no database, schema, provider, Native, installer or MAIN 04 behavior.
+
+## Progressive disclosure Block 4 — 2026-10-11
+
+- [x] Add one compact bilingual Profile workspace switcher with Personal as the default task.
+- [x] Show personal identity, company and signature controls only in the Personal area.
+- [x] Load project, pending-item, activity and performance data only when Work is selected.
+- [x] Isolate preferences, password, API token and AI cost controls in Security.
+- [x] Load Telegram, SendGrid and governed file-source connections only when Connections is selected.
+- [x] Preserve the email-sending return path and open its exact Connections destination.
+- [x] Bind grouping, lazy loading, bilingual labels and narrow-width containment to the permanent production build.
+- [ ] Pass the complete exact-head gate, push Blocks 3–4, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
+
+This block changes Profile presentation and loading hierarchy only. Existing identity, company, signature, project, preference, security, AI-cost, Telegram, email and provider records remain authoritative. It creates no external send and changes no database, schema, provider, Native, installer or MAIN 04 behavior.

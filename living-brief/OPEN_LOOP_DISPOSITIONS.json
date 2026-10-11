@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "73bf8cc25899981fdf12e786b6abfb47d79137ee358925ff45d4e3280b3653b7",
-  "itemCount": 372,
+  "sourceSha256": "1b017da68317d95bfbd8e07cfc724c0e75d15413cf38b3676f384aa3a28f7fb9",
+  "itemCount": 373,
   "counts": {
     "ACTIVE": 331,
-    "SUPERSEDED": 29,
+    "SUPERSEDED": 30,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -68,6 +68,10 @@
     {
       "canonicalId": "e1b80d75396de1b7",
       "duplicateId": "ee06604f748f05d4"
+    },
+    {
+      "canonicalId": "4107891b4bf42160",
+      "duplicateId": "93d4450874e30898"
     }
   ],
   "items": [
@@ -6773,6 +6777,24 @@
       "evidence": [
         "OPEN_LOOP.md:5433",
         "Progressive disclosure Block 3 — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "93d4450874e30898",
+      "sourceLine": 5446,
+      "heading": "Progressive disclosure Block 4 — 2026-10-11",
+      "statement": "Pass the complete exact-head gate, push Blocks 3–4, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "canonical-open-loop:4107891b4bf42160",
+        "duplicate-source:93d4450874e30898"
       ],
       "currentAuthority": false
     }
