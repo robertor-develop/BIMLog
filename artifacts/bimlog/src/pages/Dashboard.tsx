@@ -454,6 +454,11 @@ export function Dashboard() {
         .today-workspace__resume small { color:#1d4ed8; font-size:9px; font-weight:850; letter-spacing:.06em; }
         .today-workspace__resume strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
         .today-workspace__resume em { color:hsl(var(--muted-foreground)); font-size:10px; font-style:normal; }
+        .today-workspace__recent-disclosure { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; min-height:38px; margin-top:8px; padding:7px 10px; border:0; border-radius:8px; background:transparent; color:#1d4ed8; font-size:11px; font-weight:750; cursor:pointer; }
+        .today-workspace__recent-disclosure:hover { background:color-mix(in srgb,#dbeafe 45%,transparent); }
+        .today-workspace__recent-disclosure:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
+        .today-workspace__recent-disclosure svg { width:15px; height:15px; transition:transform .16s ease; }
+        .today-workspace__recent-disclosure svg.is-open { transform:rotate(180deg); }
         .setup-progress-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; margin:0 0 20px; padding:14px 16px; border:1px solid #bfdbfe; border-radius:12px; background:#f8fbff; }
         .setup-progress-card__icon { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dbeafe; color:#1d4ed8; }
         .setup-progress-card__body { min-width:0; }
