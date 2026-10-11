@@ -489,7 +489,16 @@ queueDatabaseStartup(async () => {
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS resolved_by_user_id integer REFERENCES users(id)`);
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS resolved_at timestamp`);
     await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_kind text`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_state text`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_reason text`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_reviewed_by_user_id integer REFERENCES users(id)`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_reviewed_at timestamp`);
+    await pool.query(`ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_fulfilled_at timestamp`);
+    await pool.query(`UPDATE support_cases SET data_request_state='requested' WHERE data_request_kind IS NOT NULL AND data_request_state IS NULL`);
     await pool.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'support_cases_data_request_kind_chk') THEN ALTER TABLE support_cases ADD CONSTRAINT support_cases_data_request_kind_chk CHECK (data_request_kind IS NULL OR (category = 'data' AND data_request_kind IN ('export','correction','deletion','restriction'))); END IF; END $$`);
+    await pool.query(`DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'support_cases_data_request_state_chk') THEN ALTER TABLE support_cases ADD CONSTRAINT support_cases_data_request_state_chk CHECK ((data_request_kind IS NULL AND data_request_state IS NULL) OR (data_request_kind IS NOT NULL AND data_request_state IN ('requested','under_review','approved','partially_approved','denied','fulfilled'))); END IF; END $$`);
+    await pool.query(`ALTER TABLE support_case_events DROP CONSTRAINT IF EXISTS support_case_events_type_chk`);
+    await pool.query(`ALTER TABLE support_case_events ADD CONSTRAINT support_case_events_type_chk CHECK (event_type IN ('opened','assigned','released','status_changed','data_request_reviewed'))`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS support_cases_requester_request_key_uidx ON support_cases(requester_user_id,request_key)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS support_cases_company_created_idx ON support_cases(company_id,created_at DESC)`);
     await pool.query(`CREATE INDEX IF NOT EXISTS support_cases_response_due_idx ON support_cases(status,response_due_at)`);
