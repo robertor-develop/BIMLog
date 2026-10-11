@@ -5408,3 +5408,16 @@ The summary remains read-only and tenant-bounded. Existing RFI and Submittal reg
 - [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Progressive disclosure Block 2 completes the ten-build interval.
 
 This block changes presentation hierarchy only. It creates no project record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.
+
+## Progressive disclosure Block 2 — 2026-10-11
+
+- [x] Render only the selected Advanced Job Intake stage while preserving the canonical draft and autosave path.
+- [x] Add explicit previous, continue and optional-document navigation with project-scoped return continuity.
+- [x] Keep setup readiness primary and defer optional, staffing and commercial readiness detail.
+- [x] Show one exact required action beside the active step and disclose the remaining blockers on demand.
+- [x] Route team blockers to the actual Resource budget step.
+- [x] Defer PDF, capability badges and expanded step explanations behind clearly labeled controls.
+- [x] Bind staged rendering, contextual guidance, bilingual labels and narrow-width containment to the permanent production build.
+- [ ] Pass the complete exact-head gate, push Blocks 1–2, publish the ten-build interval and complete authenticated Chrome production acceptance.
+
+This block changes presentation and navigation hierarchy only. It creates no project record and changes no canonical draft, autosave, activation, membership, permission, payment, email, provider, Native, installer or external-send behavior.

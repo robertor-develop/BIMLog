@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "411db35a51d69627fc3e6ba164ceb6d2fb4b574cbffca209dffbee4b87fce9d8",
-  "itemCount": 372,
+  "sourceSha256": "0eb687ef277358c9245390f0503780b0e8468f4c9f75f5c8cff651be46428f1f",
+  "itemCount": 373,
   "counts": {
-    "ACTIVE": 331,
+    "ACTIVE": 332,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6773,6 +6773,24 @@
       "evidence": [
         "OPEN_LOOP.md:5408",
         "Progressive disclosure Block 1 — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c7964c8616df5c1a",
+      "sourceLine": 5421,
+      "heading": "Progressive disclosure Block 2 — 2026-10-11",
+      "statement": "Pass the complete exact-head gate, push Blocks 1–2, publish the ten-build interval and complete authenticated Chrome production acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5421",
+        "Progressive disclosure Block 2 — 2026-10-11"
       ],
       "currentAuthority": false
     }
