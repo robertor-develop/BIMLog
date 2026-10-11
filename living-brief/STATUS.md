@@ -4274,3 +4274,7 @@ Exact-gate reconciliation: the complete release gate detected and corrected the 
 # Launch Readiness Block 24 candidate — 2026-10-11
 
 LR116–LR120 add a governed, tenant-safe customer processing-restriction path for nonessential profile processing, product analytics and AI assistance context. Only the assigned Super Administrator may execute an approved or partially approved restriction at the exact revision; immutable restriction evidence, fulfillment evidence and the customer notification commit atomically. The customer sees the restricted scopes, completion time and receipt reference. This records the authoritative restriction decision without deleting data or claiming that mandatory contractual, security, financial or legal processing has stopped. LR111–LR120 now reach the ten-build publication boundary pending the complete exact-head gate, push, exact-source publication and authenticated Chrome production acceptance.
+
+# Simplification and guided adoption Block 1 — 2026-10-11
+
+Five builds establish the canonical account-to-first-value journey, reconcile email-verification truth, expose a strict capability-backed free-offer contract, standardize bilingual adoption vocabulary and add a fail-closed adoption-truth release check. Focused behavior tests plus API and frontend typechecks pass through implementation commit `d410c6835f3d112642e4c7da5e81595c9dfb807d`. This is the first five-build half of the next ten-build interval; it is pushed after the complete gate and remains unpublished until Block 2 completes.

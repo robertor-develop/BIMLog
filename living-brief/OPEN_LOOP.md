@@ -5300,3 +5300,14 @@ Deletion and processing restriction remain human-governed operational actions. T
 - [ ] Pass the complete exact-head gate, push LR111–LR120, publish the ten-build interval, verify exact live identity and complete authenticated desktop/mobile Chrome smoke.
 
 This block records the authoritative restriction decision. Optional processors still must consult that state before processing; mandatory contractual, security, financial, legal and audit processing remains governed by its existing authority. Customer deletion remains a separate human-governed workflow.
+
+## Simplification and guided adoption Block 1 — 2026-10-11
+
+- [x] Define one canonical journey from account creation to the first controlled project record.
+- [x] Reconcile public, registration and onboarding email-verification truth.
+- [x] Replace the unsupported fixed-duration/unlimited free claim with the no-store capability contract.
+- [x] Establish shared bilingual adoption terminology and visible Counterparty guidance.
+- [x] Add the adoption-truth check to the normal production build.
+- [ ] Complete guided adoption Block 2, then publish the ten-build interval and run full authenticated desktop/mobile Chrome acceptance.
+
+No database, customer data, permission, Native, installer, provider-secret or external-send change is included in this block.
