@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { ACTIVATION_MILESTONE, ADOPTION_JOURNEY, EMAIL_VERIFICATION_POLICY, PRODUCT_TERMS, adoptionStageLabel } from "./adoption-journey";
+import { ACTIVATION_MILESTONE, ADOPTION_JOURNEY, EMAIL_VERIFICATION_POLICY, PRODUCT_TERM_HELP, PRODUCT_TERMS, adoptionStageLabel } from "./adoption-journey";
 import { readFileSync } from "node:fs";
 
 assert.deepEqual(ADOPTION_JOURNEY.map(stage => stage.id), ["account", "verify", "company", "project", "control", "first_value"]);
@@ -11,6 +11,10 @@ for (const term of Object.values(PRODUCT_TERMS)) {
   assert.ok(term.en.trim());
   assert.ok(term.es.trim());
 }
+for (const help of Object.values(PRODUCT_TERM_HELP)) {
+  assert.ok(help.en.length > 40);
+  assert.ok(help.es.length > 40);
+}
 const landing = readFileSync(new URL("../pages/Landing.tsx", import.meta.url), "utf8");
 const register = readFileSync(new URL("../pages/Register.tsx", import.meta.url), "utf8");
 const onboarding = readFileSync(new URL("../components/OnboardingFlow.tsx", import.meta.url), "utf8");
@@ -18,6 +22,9 @@ assert.doesNotMatch(landing, /No email confirmation|Sin confirmación de correo/
 assert.match(landing, /EMAIL_VERIFICATION_POLICY\.reason/);
 assert.match(register, /EMAIL_VERIFICATION_POLICY\.reason/);
 assert.match(onboarding, /EMAIL_VERIFICATION_POLICY\.reason/);
+const intake = readFileSync(new URL("../pages/JobIntakeWorkspace.tsx", import.meta.url), "utf8");
+assert.match(intake, /PRODUCT_TERM_HELP\.counterparty/);
+assert.match(intake, /PRODUCT_TERMS\.counterparty/);
 assert.doesNotMatch(landing, /3 months|3 meses|full access, no limits|acceso total, sin límites/);
 assert.match(landing, /fetchPublicCommercialAvailability/);
 console.log("Simplification and guided adoption build 001 canonical journey: PASS");

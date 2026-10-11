@@ -31,6 +31,7 @@ import { ProjectContactCreator, type CreatedProjectContact } from "@/components/
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
+import { PRODUCT_TERM_HELP, PRODUCT_TERMS } from "@/lib/adoption-journey";
 import { jobIntakeSaveConfidence, type JobIntakeSaveState } from "@/lib/job-intake-save-confidence";
 import { jobIntakeActivationMatches, jobIntakeActivationPreview, jobIntakeActivationStructure, jobIntakeActiveChangeDestinations, jobIntakeBlockerDestination } from "@/lib/job-intake-activation-preview";
 import { jobIntakeLifecycle, jobIntakeLifecycleCopy } from "@/lib/job-intake-lifecycle";
@@ -1875,7 +1876,7 @@ export function JobIntakeWorkspace() {
                             "Número de contrato / orden de compra",
                           ),
                         ],
-                        ["counterpartyName", tt("Counterparty", "Contraparte")],
+                        ["counterpartyName", PRODUCT_TERMS.counterparty[lang === "es" ? "es" : "en"]],
                         [
                           "paymentTerms",
                           tt("Payment terms", "Términos de pago"),
@@ -1884,7 +1885,7 @@ export function JobIntakeWorkspace() {
                         <label key={field} id={`ji-contract-${field}`} data-assistant-label={label}>
                           {label}
                           {field === "counterpartyName" ? (
-                            <select
+                            <><select
                               value={data.commercial[field]}
                               onChange={(e) => changeContract(0, field, e.target.value)}
                             >
@@ -1893,7 +1894,7 @@ export function JobIntakeWorkspace() {
                                 <option value={data.commercial[field]}>{data.commercial[field]}</option>
                               )}
                               {clientCompanyOptions.map((company) => <option key={company} value={company}>{company}</option>)}
-                            </select>
+                            </select><small className="ji-small">{PRODUCT_TERM_HELP.counterparty[lang === "es" ? "es" : "en"]}</small></>
                           ) : (
                             <input
                               value={data.commercial[field]}
@@ -2024,7 +2025,7 @@ export function JobIntakeWorkspace() {
                                 ],
                                 [
                                   "counterpartyName",
-                                  tt("Counterparty", "Contraparte"),
+                                  PRODUCT_TERMS.counterparty[lang === "es" ? "es" : "en"],
                                 ],
                                 [
                                   "paymentTerms",
@@ -2034,7 +2035,7 @@ export function JobIntakeWorkspace() {
                                 <label key={field}>
                                   {label}
                                   {field === "counterpartyName" ? (
-                                    <select
+                                    <><select
                                       value={contract[field] || ""}
                                       onChange={(event) => changeContract(index, field, event.target.value)}
                                     >
@@ -2043,7 +2044,7 @@ export function JobIntakeWorkspace() {
                                         <option value={contract[field]}>{contract[field]}</option>
                                       )}
                                       {clientCompanyOptions.map((company) => <option key={company} value={company}>{company}</option>)}
-                                    </select>
+                                    </select><small className="ji-small">{PRODUCT_TERM_HELP.counterparty[lang === "es" ? "es" : "en"]}</small></>
                                   ) : (
                                     <input
                                       value={contract[field] || ""}

@@ -29,6 +29,17 @@ export const PRODUCT_TERMS = Object.freeze({
   workPackage: { en: "Work Package", es: "Paquete de trabajo" },
 });
 
+export const PRODUCT_TERM_HELP = Object.freeze({
+  counterparty: {
+    en: "The other company named on this contract. Choose the client or organization receiving the work described by this contract profile.",
+    es: "La otra empresa nombrada en este contrato. Elija el cliente u organización que recibe el trabajo descrito por este perfil contractual.",
+  },
+  contractItem: {
+    en: "A priced unit of promised work. Its quantity and unit rate calculate contract value; planned labor hours remain a separate delivery estimate.",
+    es: "Una unidad valorizada del trabajo comprometido. Su cantidad y tarifa unitaria calculan el valor contractual; las horas previstas siguen siendo una estimación separada de entrega.",
+  },
+});
+
 export const EMAIL_VERIFICATION_POLICY = Object.freeze({
   requiredBeforeProjectSetup: true,
   reason: {
