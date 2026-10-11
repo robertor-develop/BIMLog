@@ -431,7 +431,7 @@ export function Dashboard() {
           background: linear-gradient(135deg, color-mix(in srgb, #eff6ff 88%, hsl(var(--card))), hsl(var(--card)));
           box-shadow: 0 10px 30px rgba(30, 64, 175, .07);
         }
-        .today-workspace { margin: 0 0 20px; padding: 16px 18px; border: 1px solid #bfdbfe; border-radius: 14px; background: hsl(var(--card)); box-shadow: 0 8px 24px rgba(30,64,175,.06); }
+        .today-workspace { margin: 0 0 16px; padding: 18px 20px; border: 2px solid #2563eb; border-radius: 14px; background: linear-gradient(135deg, color-mix(in srgb, #eff6ff 72%, hsl(var(--card))), hsl(var(--card))); box-shadow: 0 12px 30px rgba(30,64,175,.10); }
         .today-workspace__heading { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
         .today-workspace__heading > span { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dbeafe; color:#1d4ed8; }
         .today-workspace__heading p { margin:0; color:#1d4ed8; font-size:10px; font-weight:850; letter-spacing:.08em; }
@@ -618,6 +618,9 @@ export function Dashboard() {
             </div>
           </div>
 
+          {!isLoading && <TodayWorkspace lang={lang} state={todayGuidanceState} onOpen={setLocation} onRetry={() => void retryAdoptionSummary()} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
+          {adoptionSummaryRefreshing && !adoptionSummaryLoading && !adoptionSummaryFailed && <span className="sr-only" role="status">{tt("Refreshing Headquarters guidance.", "Actualizando la guía de Sede.")}</span>}
+
           {!isLoading && stats && <OperationalPulse
             lang={lang}
             previousCounts={previousPulseSnapshot?.counts ?? null}
@@ -633,9 +636,6 @@ export function Dashboard() {
             hasError={statsRefreshFailed}
             onRefresh={() => { void refreshStats(); }}
           />}
-
-          {!isLoading && <TodayWorkspace lang={lang} state={todayGuidanceState} onOpen={setLocation} onRetry={() => void retryAdoptionSummary()} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
-          {adoptionSummaryRefreshing && !adoptionSummaryLoading && !adoptionSummaryFailed && <span className="sr-only" role="status">{tt("Refreshing Headquarters guidance.", "Actualizando la guía de Sede.")}</span>}
 
           {onboardingState && !onboardingState.completedAt && onboardingState.projectCount === 0 && onboardingState.completedSteps.includes("guide_paused") && <SetupProgressCard lang={lang} state={onboardingState} onResume={() => { void resumeGuide().then(resumed => { if (resumed) setOnboardingVisible(true); }); }} />}
 
