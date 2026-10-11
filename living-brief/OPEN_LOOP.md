@@ -31,7 +31,16 @@
 - [x] Add LR066–LR070 to the complete pre-push acceptance gate.
 - [x] Repair the browser JavaScript budget failure without raising the 4 MiB limit; preserve the bounded bilingual return truth and pass at 4,194,254 of 4,194,304 bytes.
 - [x] Preserve the permanent customer guidance that provider settings remain BIMLog-owned after copy compaction.
-- [ ] Pass the complete exact-head gate, push LR061–LR070, publish the ten-build interval, verify exact live identity and complete authenticated Chrome smoke.
+- [x] Pass the complete exact-head gate, push LR061–LR070, publish the ten-build interval, verify exact live identity and complete authenticated Chrome smoke. Accepted at exact source `bd0a9fe45e76418424623ebbdb412a89bc945a9d`, deployment `e850a88e`, with identity-bound health and authenticated Chrome acceptance.
+
+## Launch Readiness Block 15 — customer invoice history truth — 2026-10-10
+
+- [x] Validate invoice, credit and dispute lifecycle values at the tenant-scoped server projection.
+- [x] Reject contradictory totals, payment timestamps, adjustment lineage and duplicate identities at the browser boundary.
+- [x] Derive one deterministic customer next action from the verified invoice state.
+- [x] Show due date, credited total, remaining balance and next action in English and Spanish.
+- [x] Add LR071–LR075 to the complete pre-push acceptance gate.
+- [ ] Push LR071–LR075 and keep the block unpublished until LR076–LR080 completes the next ten-build interval.
 
 ## Launch Readiness Block 10 — source-bound checkout authorization — 2026-10-10
 

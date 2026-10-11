@@ -63950,6 +63950,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e35aa77300c46f734c1d1099583e1004e3281fd2050bc6309d36cb2a38f42ee9"
+    },
+    {
+      "taskId": "launch-readiness-block15-invoice-history",
+      "reviewedThroughCommit": "35b85f64b64bc6df300f9068fe3d98f41da1962c",
+      "reviewedAt": "2026-10-10T23:00:00.000Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "updated"
+        },
+        {
+          "key": "plugin",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "LR071-LR075 harden the existing tenant-scoped customer billing-history projection and browser boundary, derive deterministic invoice guidance, and add bilingual due, credit, balance and next-action context without changing payment, refund, dispute, subscription, provider, database, Native, reporting, legal identity, credentials, or MAIN 04 authority.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a120ce4f5206ed11c02cd0fc941f0a8d34867f7e2e66bd019be9d31dedb11920"
     }
   ]
 }
