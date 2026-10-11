@@ -421,8 +421,7 @@ export function Dashboard() {
     <div className="headquarters-dashboard-page" style={{ display: "flex", height: "100vh", overflow: "hidden", minWidth: 0 }}>
       <style>{`
         .operational-pulse {
-          display: grid;
-          grid-template-columns: minmax(220px, .75fr) minmax(360px, 1.25fr);
+          display: block;
           gap: 20px;
           margin: 0 0 20px;
           padding: 18px;
@@ -431,6 +430,11 @@ export function Dashboard() {
           background: linear-gradient(135deg, color-mix(in srgb, #eff6ff 88%, hsl(var(--card))), hsl(var(--card)));
           box-shadow: 0 10px 30px rgba(30, 64, 175, .07);
         }
+        .operational-pulse--expanded { display:grid; grid-template-columns:minmax(220px,.75fr) minmax(360px,1.25fr); }
+        .operational-pulse__disclosure { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; min-height:40px; margin-top:10px; padding:8px 10px; border:1px solid #93c5fd; border-radius:8px; background:color-mix(in srgb, white 70%, hsl(var(--card))); color:#1d4ed8; font-size:11px; font-weight:750; cursor:pointer; }
+        .operational-pulse__disclosure svg { width:15px; height:15px; transition:transform .16s ease; }
+        .operational-pulse__disclosure svg.is-open { transform:rotate(180deg); }
+        .operational-pulse__disclosure:focus-visible { outline:3px solid color-mix(in srgb,#2563eb 35%,transparent); outline-offset:2px; }
         .today-workspace { margin: 0 0 16px; padding: 18px 20px; border: 2px solid #2563eb; border-radius: 14px; background: linear-gradient(135deg, color-mix(in srgb, #eff6ff 72%, hsl(var(--card))), hsl(var(--card))); box-shadow: 0 12px 30px rgba(30,64,175,.10); }
         .today-workspace__heading { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
         .today-workspace__heading > span { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dbeafe; color:#1d4ed8; }
@@ -542,7 +546,8 @@ export function Dashboard() {
           .headquarters-dashboard-page .headquarters-two-column {
             grid-template-columns: 1fr !important;
           }
-          .operational-pulse { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
+          .operational-pulse, .operational-pulse--expanded { display:block; padding:14px; }
+          .operational-pulse__queues { margin-top:12px; }
           .today-workspace__action { align-items:stretch; flex-direction:column; }
           .today-workspace__action button { justify-content:center; width:100%; }
           .setup-progress-card { grid-template-columns:auto minmax(0,1fr); }

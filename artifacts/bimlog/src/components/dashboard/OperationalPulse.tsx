@@ -15,6 +15,7 @@ export function OperationalPulse({ counts, previousCounts = null, previousChecke
   hasError?: boolean;
   checkedAt?: number;
 }) {
+  const [expanded, setExpanded] = useState(false);
   const es = lang === "es";
   const pulse = operationalPulse(counts);
   const refreshState = operationalPulseRefreshState({ isFetching, hasError, hasVerifiedData: checkedAt > 0 });
@@ -27,7 +28,7 @@ export function OperationalPulse({ counts, previousCounts = null, previousChecke
     submittals: es ? "Submittals pendientes" : "Pending submittals",
     files: es ? "Archivos por revisar" : "Files to review",
   };
-  return <section className="operational-pulse" aria-labelledby="operational-pulse-title">
+  return <section className={`operational-pulse${expanded ? " operational-pulse--expanded" : ""}`} aria-labelledby="operational-pulse-title">
     <div className="operational-pulse__intro">
       <p className="operational-pulse__eyebrow">{es ? "Pulso operativo" : "Operational pulse"}</p>
       <h2 id="operational-pulse-title" aria-live="polite">{pulse.total === 0
@@ -44,6 +45,11 @@ export function OperationalPulse({ counts, previousCounts = null, previousChecke
           {isFetching ? (es ? "Actualizando…" : "Refreshing…") : (es ? "Actualizar" : "Refresh")}
         </button>
       </div>
+      <button className="operational-pulse__disclosure" type="button" aria-expanded={expanded} aria-controls="operational-pulse-details" onClick={() => setExpanded(value => !value)}>
+        <span>{expanded ? (es ? "Ocultar detalle de carga" : "Hide workload detail") : (es ? "Ver detalle de carga" : "View workload detail")}</span>
+        <ChevronDown aria-hidden className={expanded ? "is-open" : ""}/>
+      </button>
+      <div id="operational-pulse-details" hidden={!expanded}>
       {change && <div className={`operational-pulse__movement operational-pulse__movement--${change.direction}`} role="status" aria-live="polite">
         <strong>{change.direction === "unchanged"
           ? (es ? "Sin cambios desde la última verificación" : "No change since the last check")
@@ -83,8 +89,9 @@ export function OperationalPulse({ counts, previousCounts = null, previousChecke
           ? "Recomendación basada solo en los conteos actuales; no implica prioridad contractual ni fecha de vencimiento."
           : "Recommendation uses current counts only; it does not imply contractual priority or a due date."}</small>
       </div>}
+      </div>
     </div>
-    <div className="operational-pulse__queues" aria-label={es ? "Distribución de la atención" : "Attention distribution"}>
+    <div className="operational-pulse__queues" id="operational-pulse-queues" hidden={!expanded} aria-label={es ? "Distribución de la atención" : "Attention distribution"}>
       {pulse.queues.map(queue => <button className="operational-pulse__queue" type="button" key={queue.key} onClick={() => onOpen(queue.href)} aria-label={`${labels[queue.key]}: ${queue.count}. ${es ? "Abrir cola" : "Open queue"}`}>
         <span><strong>{queue.count}</strong> {labels[queue.key]}</span>
         <span>{queue.share}% <span aria-hidden="true">→</span></span>
@@ -93,3 +100,5 @@ export function OperationalPulse({ counts, previousCounts = null, previousChecke
     </div>
   </section>;
 }
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
