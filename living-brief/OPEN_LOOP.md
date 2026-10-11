@@ -5393,6 +5393,6 @@ This block changes presentation truth only. It creates no project record and cha
 - [x] Open the exact assigned record from Today while preserving role-aware priority.
 - [x] Omit invalid record identities instead of showing a misleading action.
 - [x] Bind the API contract, route projection, destinations and Today integration to the permanent production build.
-- [ ] Pass the complete exact-head gate, push Blocks 7–8, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
+- [x] Pass the complete exact-head gate, push Blocks 7–8, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance at exact source `9f869e14cba0c29e062c6263f9cc365ea2423842` and deployment `6dda3bf6`.
 
 The summary remains read-only and tenant-bounded. Existing RFI and Submittal registers remain authoritative; this block creates no record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.

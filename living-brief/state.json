@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
+  "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "eefa9e9158c179790c020513deeb9055a3253c917da74e90a04eb77a08524c84",
+  "bundleSha256": "2b320b5de3455a8ee949d51e7fa719c694f08bb235fb83cc5221228cc15b424a",
   "impact": {
-    "baselineCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
+    "baselineCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -24,11 +24,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "claude",
@@ -36,11 +36,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "quality",
@@ -48,11 +48,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "vision",
@@ -60,11 +60,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "platform",
@@ -72,11 +72,11 @@
       "sha256": "aa909444010c1e3db85110e3aa67a8593fe3b19fef22f3ead604d2643de68b8b",
       "sourceChangedAt": "2026-10-11T15:57:39-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "plugin",
@@ -84,11 +84,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "report_design_system",
@@ -96,11 +96,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "standards_register",
@@ -108,35 +108,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "5d3c529f86142058e134987d3262c75a5fe1804e7c8c54f6d4ae8963bf9fdb39",
-      "sourceChangedAt": "2026-10-11T20:32:00.000Z",
+      "sha256": "b5557a39939e57c6a9443d441ae9434af4c3e278a7163b247c808beedb0a0b74",
+      "sourceChangedAt": "2026-10-11T20:50:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "b2c80805164626b5ea43476de08a2e396d527eaefe0970c365287204af8fe168",
-      "sourceChangedAt": "2026-10-11T20:32:00.000Z",
+      "sha256": "5d28435b82d2f1dea7a62824184774e7f0e371e4dd6cb47bc8eb6faf35bf6cc0",
+      "sourceChangedAt": "2026-10-11T20:50:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     },
     {
       "key": "audit",
@@ -144,11 +144,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewedThroughCommit": "8208c955140d272ee1238ccaa43af11ceb8dd534",
-      "semanticReviewTask": "simplification-guided-adoption-block08",
+      "reconciledThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewedThroughCommit": "9f869e14cba0c29e062c6263f9cc365ea2423842",
+      "semanticReviewTask": "simplification-guided-adoption-block08-release-closure",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-11T20:32:00Z"
+      "semanticReviewedAt": "2026-10-11T20:50:00Z"
     }
   ]
 }
