@@ -560,6 +560,13 @@ export function Dashboard() {
         .setup-progress-card__next { display:flex; align-items:center; gap:5px; margin-top:6px; color:hsl(var(--muted-foreground)); font-size:10px; }
         .setup-progress-card > button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:8px 12px; border:1px solid #2563eb; border-radius:8px; background:#2563eb; color:white; font-size:11px; font-weight:750; cursor:pointer; }
         .setup-progress-card > button:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
+        .first-value-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; margin:0 0 20px; padding:14px 16px; border:1px solid #bbf7d0; border-radius:12px; background:#f0fdf4; }
+        .first-value-card__icon { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dcfce7; color:#15803d; }
+        .first-value-card p { margin:0; color:#15803d; font-size:9px; font-weight:850; letter-spacing:.08em; }
+        .first-value-card h2 { margin:2px 0 4px; font-size:14px; }
+        .first-value-card span { color:hsl(var(--muted-foreground)); font-size:10px; }
+        .first-value-card > button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:8px 12px; border:1px solid #15803d; border-radius:8px; background:#15803d; color:white; font-size:11px; font-weight:750; cursor:pointer; }
+        .first-value-card > button:focus-visible { outline:3px solid #86efac; outline-offset:2px; }
         .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
         .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
@@ -632,6 +639,8 @@ export function Dashboard() {
           .today-workspace__action button { justify-content:center; width:100%; }
           .setup-progress-card { grid-template-columns:auto minmax(0,1fr); }
           .setup-progress-card > button { grid-column:1 / -1; width:100%; }
+          .first-value-card { grid-template-columns:auto minmax(0,1fr); }
+          .first-value-card > button { grid-column:1 / -1; width:100%; }
           .operational-pulse__next > button { width: 100%; }
           .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }

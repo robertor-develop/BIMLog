@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const read=path=>fs.readFileSync(path,"utf8");
+const route=read("artifacts/api-server/src/routes/onboarding.ts");
+const dashboard=read("artifacts/bimlog/src/pages/Dashboard.tsx");
+const action=read("artifacts/bimlog/src/lib/first-value-action.ts");
+const card=read("artifacts/bimlog/src/components/dashboard/FirstValueCard.tsx");
+assert.match(route,/firstValueReached:row\.first_value_reached/);
+assert.match(route,/FROM rfis r/);assert.match(route,/FROM submittals s/);assert.match(route,/FROM files f/);
+assert.match(action,/document_controller/);assert.match(action,/preferredDocumentTypes\.includes\("Submittals"\)/);
+assert.match(card,/FIRST CONTROLLED RESULT/);assert.match(card,/PRIMER RESULTADO CONTROLADO/);
+assert.match(dashboard,/!onboardingState\.firstValueReached/);
+assert.match(dashboard,/firstValueDestination\(Number\(firstValueProject\.id\),firstValueKind\)/);
+assert.match(dashboard,/\.first-value-card \{ grid-template-columns:auto minmax\(0,1fr\); \}/);
+console.log("Simplification and guided adoption Block 4: PASS");
