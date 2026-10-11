@@ -5368,6 +5368,18 @@ No project record, permission, payment, email, provider, Native, installer or ex
 - [x] Remove the four-requests-per-project browser fan-out while preserving canonical actions.
 - [x] Distinguish loading, unavailable and empty states without presenting failed data as all clear.
 - [x] Bind Blocks 5–6 to the permanent production build and responsive accessibility gate.
-- [ ] Pass the complete exact-head gate, push Blocks 5–6, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
+- [x] Pass the complete exact-head gate, push Blocks 5–6, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance at exact source `e4f8f631d2dd55c2fa5386babc7c9395956cf8dc` and deployment `7e2a94ba`.
 
 The summary is read-only and bounded. It creates no project record, expands no membership, and changes no customer permission, payment, email, provider, Native, installer or external-send behavior.
+
+## Simplification and guided adoption Block 7 — 2026-10-11
+
+- [x] Define explicit loading, ready, empty and unavailable guidance states.
+- [x] Keep unresolved or failed guidance from appearing as an authoritative fallback or all-clear state.
+- [x] Put bilingual retry inside the existing Today surface without creating another workflow.
+- [x] Preserve the last verified guidance while a background refresh is running.
+- [x] Keep status announcements, keyboard focus and narrow-screen retry controls accessible.
+- [x] Bind the complete state and responsive behavior to the permanent production build.
+- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 8 completes the next ten-build interval.
+
+This block changes presentation truth only. It creates no project record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.
