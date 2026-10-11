@@ -546,6 +546,16 @@ export function Dashboard() {
         .today-workspace__resume small { color:#1d4ed8; font-size:9px; font-weight:850; letter-spacing:.06em; }
         .today-workspace__resume strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
         .today-workspace__resume em { color:hsl(var(--muted-foreground)); font-size:10px; font-style:normal; }
+        .setup-progress-card { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; margin:0 0 20px; padding:14px 16px; border:1px solid #bfdbfe; border-radius:12px; background:#f8fbff; }
+        .setup-progress-card__icon { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dbeafe; color:#1d4ed8; }
+        .setup-progress-card__body { min-width:0; }
+        .setup-progress-card__body > p { margin:0; color:#1d4ed8; font-size:9px; font-weight:850; letter-spacing:.08em; }
+        .setup-progress-card__body h2 { margin:2px 0 7px; font-size:14px; }
+        .setup-progress-card__meter { height:5px; overflow:hidden; border-radius:999px; background:#dbeafe; }
+        .setup-progress-card__meter span { display:block; height:100%; border-radius:inherit; background:#2563eb; transition:width .2s ease; }
+        .setup-progress-card__next { display:flex; align-items:center; gap:5px; margin-top:6px; color:hsl(var(--muted-foreground)); font-size:10px; }
+        .setup-progress-card > button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:8px 12px; border:1px solid #2563eb; border-radius:8px; background:#2563eb; color:white; font-size:11px; font-weight:750; cursor:pointer; }
+        .setup-progress-card > button:focus-visible { outline:3px solid #93c5fd; outline-offset:2px; }
         .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
         .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
@@ -616,6 +626,8 @@ export function Dashboard() {
           .operational-pulse { grid-template-columns: 1fr; gap: 12px; padding: 14px; }
           .today-workspace__action { align-items:stretch; flex-direction:column; }
           .today-workspace__action button { justify-content:center; width:100%; }
+          .setup-progress-card { grid-template-columns:auto minmax(0,1fr); }
+          .setup-progress-card > button { grid-column:1 / -1; width:100%; }
           .operational-pulse__next > button { width: 100%; }
           .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }
@@ -623,6 +635,7 @@ export function Dashboard() {
           .operational-pulse__movement-queues { grid-template-columns: 1fr; }
           .operational-pulse__movement-queue-copy > span { overflow: visible; text-overflow: clip; white-space: normal; }
         }
+        @media (prefers-reduced-motion: reduce) { .setup-progress-card__meter span { transition:none; } }
         @media (prefers-reduced-motion: reduce) {
           .operational-pulse__queue, .operational-pulse__track > span, .operational-pulse__next > button { transition: none; }
           .operational-pulse__queue:hover, .operational-pulse__next > button:hover { transform: none; }
