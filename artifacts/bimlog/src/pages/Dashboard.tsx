@@ -28,47 +28,9 @@ import { FirstValueSuccessCard } from "@/components/dashboard/FirstValueSuccessC
 import { chooseFirstValueAction, firstValueDestination } from "@/lib/first-value-action";
 import { firstValueEvidenceDestination } from "@/lib/first-value-evidence";
 import { chooseRoleAwareTodayAction, type TodayCandidate } from "@/lib/today-action";
+import { EMPTY_DASHBOARD_ADOPTION_SUMMARY, loadDashboardAdoptionSummary } from "@/lib/dashboard-adoption-summary";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-// ── Cross-project aggregate types ─────────────────────────────────────────────
-interface XRfi {
-  id: number; projectId: number; subject: string; number: string;
-  status: string; dueDate?: string | null;
-  submittedToEmail?: string | null; assignedToId?: number | null;
-  createdAt: string;
-}
-interface XSubmittal {
-  id: number; projectId: number; title: string; number: string;
-  status: string; dueDate?: string | null;
-  submittedToEmail?: string | null; assignedToId?: number | null;
-  createdAt: string;
-}
-interface XActivity {
-  id: number; projectId: number;
-  userFullName: string; userCompanyName: string; userEmail?: string | null;
-  actionType: string; entityType: string;
-  details?: string | null;
-  fileNameBefore?: string | null; fileNameAfter?: string | null;
-  createdAt: string;
-}
-interface XFile {
-  id: number; projectId: number; fileName: string;
-  status: string; uploadedByCompany?: string;
-}
-
-interface AggState {
-  rfis: XRfi[]; submittals: XSubmittal[];
-  activity: XActivity[]; files: XFile[];
-  loading: boolean;
-}
-
-async function fetchJson(url: string, token: string) {
-  try {
-    const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    return r.ok ? r.json() : [];
-  } catch { return []; }
-}
 
 function filenameFromDisposition(disposition: string | null, fallback: string): string {
   if (!disposition) return fallback;
@@ -271,8 +233,12 @@ export function Dashboard() {
       .catch((error) => logClientError("dashboard CVR health load", error));
   }, [token]);
 
-  // ── Cross-project data ─────────────────────────────────────────────────────
-  const [agg, setAgg] = useState<AggState>({ rfis: [], submittals: [], activity: [], files: [], loading: false });
+  const { data: adoptionSummary = EMPTY_DASHBOARD_ADOPTION_SUMMARY, isFetching: adoptionSummaryLoading } = useQuery({
+    queryKey: ["dashboard-adoption-summary"],
+    queryFn: ({ signal }) => loadDashboardAdoptionSummary(API_BASE, token!, signal),
+    enabled: !!token,
+    staleTime: 30000,
+  });
   const savedProjectView = (() => { try { return JSON.parse(localStorage.getItem("bimlog:headquarters-project-view") || "{}"); } catch { return {}; } })();
   const [projectSearch, setProjectSearch] = useState(typeof savedProjectView.search === "string" ? savedProjectView.search : "");
   const [projectStatus, setProjectStatus] = useState(["active", "testing", "retired", "all"].includes(savedProjectView.status) ? savedProjectView.status : "active");
@@ -288,35 +254,6 @@ export function Dashboard() {
   useEffect(() => {
     localStorage.setItem("bimlog:headquarters-project-view", JSON.stringify({ search: projectSearch, status: projectStatus, sort: projectSort }));
   }, [projectSearch, projectSort, projectStatus]);
-
-  useEffect(() => {
-    if (!projects || !token) return;
-    if (projects.length === 0) {
-      setAgg({ rfis: [], submittals: [], activity: [], files: [], loading: false });
-      return;
-    }
-    setAgg(prev => ({ ...prev, loading: true }));
-    Promise.all(
-      (projects as any[]).map(async (p: any) => {
-        const base = `${API_BASE}/api/v1/projects/${p.id}`;
-        const [rfis, submittals, activity, files] = await Promise.all([
-          fetchJson(`${base}/rfis`, token),
-          fetchJson(`${base}/submittals`, token),
-          fetchJson(`${base}/activity`, token),
-          fetchJson(`${base}/files`, token),
-        ]);
-        return { rfis, submittals, activity, files };
-      })
-    ).then((results: Array<{ rfis: any[]; submittals: any[]; activity: any[]; files: any[] }>) => {
-      setAgg({
-        rfis:       results.flatMap((r: { rfis: any[] }) => r.rfis),
-        submittals: results.flatMap((r: { submittals: any[] }) => r.submittals),
-        activity:   results.flatMap((r: { activity: any[] }) => r.activity),
-        files:      results.flatMap((r: { files: any[] }) => r.files),
-        loading:    false,
-      });
-    }).catch(() => setAgg(prev => ({ ...prev, loading: false })));
-  }, [projects, token]);
 
   // ── Existing helpers ───────────────────────────────────────────────────────
   function clearSessionAndRetry() {
@@ -396,7 +333,7 @@ export function Dashboard() {
   }
 
   async function exportCurrentViewPdf() {
-    if (!token || isLoading || agg.loading) return;
+    if (!token || isLoading || adoptionSummaryLoading) return;
     setExportingPdf(true);
     setExportError("");
     try {
@@ -429,67 +366,20 @@ export function Dashboard() {
   // ── Derived aggregate stats ────────────────────────────────────────────────
   const projectMap = new Map<number, any>(allProjectRows.map((p: any) => [Number(p.id), p]));
 
-  const openRfis        = agg.rfis.filter(r => r.status !== "closed");
-  const pendingSubmittals = agg.submittals.filter(s => ["pending", "under_review"].includes(s.status));
-  const pendingSubmits  = pendingSubmittals;
-  // FIX 4: compliance rate only counts completed uploads (valid + rejected), not in-progress
-  const completedFiles  = agg.files.filter(f => f.status === "valid" || f.status === "rejected");
-  const compliantFiles  = completedFiles.filter(f => f.status === "valid");
-  const totalFilesReal  = agg.files.length;
-  const complianceRate  = completedFiles.length > 0
-    ? Math.round((compliantFiles.length / completedFiles.length) * 100)
-    : null;
-  // FIX 1: count confirmed violations only (user clicked Continue Anyway past naming warning)
-  const confirmedViolations = agg.files.filter(f => (f as any).userConfirmedNonCompliant === true);
-  // FIX 6: files needing attention = non-compliant or CVR-flagged completed files
-  const filesNeedingAttention = agg.files.filter(f =>
-    (f.status === "rejected" || (f as any).contentVerificationResult === "possible_mismatch" || (f as any).contentVerificationResult === "clear_mismatch") && f.status !== "in_progress"
-  );
-
-  // ── Needs Attention ────────────────────────────────────────────────────────
-  const now = Date.now();
-  const overdueRfiPids = new Set(
-    agg.rfis
-      .filter(r => r.status !== "closed" && r.dueDate && new Date(r.dueDate).getTime() < now)
-      .map(r => r.projectId)
-  );
-  const rejectedFilePids = new Set(
-    agg.files.filter(f => f.status === "rejected").map(f => f.projectId)
-  );
-  const pendingSubPids = new Set(
-    agg.submittals.filter(s => s.status === "pending").map(s => s.projectId)
-  );
-  // Collect unique attention items
-  const attentionRows: { pid: number; issue: string; color: string; href: string }[] = [];
-  overdueRfiPids.forEach(pid => attentionRows.push({ pid, issue: tt("Has overdue RFIs", "Tiene RFI vencidos"), color: "#D97706", href: `/projects/${pid}/rfis` }));
-  rejectedFilePids.forEach(pid => attentionRows.push({ pid, issue: tt("Naming violations detected", "Se detectaron incumplimientos de nomenclatura"), color: "#D97706", href: `/projects/${pid}/files` }));
-  pendingSubPids.forEach(pid => {
-    if (!overdueRfiPids.has(pid) && !rejectedFilePids.has(pid))
-      attentionRows.push({ pid, issue: tt("Pending submittals", "Submittals pendientes"), color: "#2563EB", href: `/projects/${pid}/submittals` });
-  });
-
-  // ── Your Pending Items ─────────────────────────────────────────────────────
-  const userEmail = (user as any)?.email ?? "";
-  const myRfis = agg.rfis.filter(r =>
-    ["open", "in_review"].includes(r.status) &&
-    r.submittedToEmail && userEmail && r.submittedToEmail === userEmail
-  );
-  const mySubmittals = agg.submittals.filter(s =>
-    s.status === "pending" &&
-    s.submittedToEmail && userEmail && s.submittedToEmail === userEmail
-  );
-
-  // ── Recent Activity ────────────────────────────────────────────────────────
-  const recentActivity = [...agg.activity]
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 15);
+  const attentionRows = adoptionSummary.attention.map(item => ({
+    pid: item.projectId,
+    issue: item.kind === "rfi" ? tt("Has overdue RFIs", "Tiene RFI vencidos") : item.kind === "file" ? tt("Naming violations detected", "Se detectaron incumplimientos de nomenclatura") : tt("Pending submittals", "Submittals pendientes"),
+    color: item.kind === "submittal" ? "#2563EB" : "#D97706",
+    href: `/projects/${item.projectId}/${item.kind === "rfi" ? "rfis" : item.kind === "file" ? "files" : "submittals"}`,
+  }));
+  const recentActivity = adoptionSummary.recentActivity;
   const todayCandidates: TodayCandidate[] = [
-    ...myRfis.slice(0, 1).map(item => ({ kind: "rfi" as const, title: tt(`RFI ${item.number} needs your response`, `RFI ${item.number} necesita su respuesta`), detail: item.subject, href: `/projects/${item.projectId}/rfis` })),
-    ...mySubmittals.slice(0, 1).map(item => ({ kind: "submittal" as const, title: tt(`Submittal ${item.number} needs your review`, `Submittal ${item.number} necesita su revisión`), detail: item.title, href: `/projects/${item.projectId}/submittals` })),
+    ...adoptionSummary.assigned.map(item => ({ kind: item.kind, title: item.kind === "rfi" ? tt(`RFI ${item.number} needs your response`, `RFI ${item.number} necesita su respuesta`) : tt(`Submittal ${item.number} needs your review`, `Submittal ${item.number} necesita su revisión`), detail: item.title, href: `/projects/${item.projectId}/${item.kind === "rfi" ? "rfis" : "submittals"}` })),
     ...attentionRows.slice(0, 1).map(item => ({ kind: "attention" as const, title: item.issue, detail: `${projectMap.get(item.pid)?.code || tt("Project", "Proyecto")} · ${projectMap.get(item.pid)?.name || ""}`, href: item.href })),
     ...allProjectRows.slice(0, 1).map(item => ({ kind: "project" as const, title: tt("Continue project work", "Continuar trabajo del proyecto"), detail: `${item.code} · ${item.name}`, href: `/projects/${item.id}` })),
   ];
   const todayAction = chooseRoleAwareTodayAction((user as any)?.workProfile || (user as any)?.role, todayCandidates);
+  const userEmail = (user as any)?.email ?? "";
   const myLatestActivity = recentActivity.find(entry => !userEmail || String(entry.userEmail || "").toLowerCase() === userEmail.toLowerCase()) || recentActivity[0];
   const resumeProject = myLatestActivity ? projectMap.get(myLatestActivity.projectId) : null;
   const resumeAction = resumeProject ? {
@@ -503,15 +393,7 @@ export function Dashboard() {
 
   // ── Top Naming Violators ───────────────────────────────────────────────────
   // FIX 2: only count confirmed violations (user clicked Continue Anyway on naming warning)
-  const violatorMap = new Map<string, { count: number; pids: Set<number> }>();
-  confirmedViolations.forEach(f => {
-    const co = (f as any).uploadedByCompany || "Unknown";
-    if (!violatorMap.has(co)) violatorMap.set(co, { count: 0, pids: new Set() });
-    const v = violatorMap.get(co)!;
-    v.count++;
-    v.pids.add(f.projectId);
-  });
-  const topViolators = [...violatorMap.entries()].sort((a, b) => b[1].count - a[1].count).slice(0, 5);
+  const topViolators = adoptionSummary.namingCompanies.map(item => [item.company, { count: item.count, pids: new Set(item.projectIds) }] as const);
 
   // ── Shared card style ──────────────────────────────────────────────────────
   const panel: React.CSSProperties = {
@@ -698,7 +580,7 @@ export function Dashboard() {
               <PrintPdfButton
                 lang={lang}
                 loading={exportingPdf}
-                disabled={!token || isLoading || agg.loading}
+                disabled={!token || isLoading || adoptionSummaryLoading}
                 disabledReason={!token
                   ? tt("Sign in to print this dashboard.", "Inicie sesion para imprimir este tablero.")
                   : tt("Wait until the current dashboard view finishes loading.", "Espere a que termine de cargar la vista actual del tablero.")}
@@ -710,7 +592,7 @@ export function Dashboard() {
                 ]}
                 onClick={() => void exportCurrentViewPdf()}
               />
-              {(!token || isLoading || agg.loading) && (
+              {(!token || isLoading || adoptionSummaryLoading) && (
                 <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", maxWidth: 260, textAlign: "right" }}>
                   {!token ? tt("Sign in is required.", "Se requiere iniciar sesion.") : tt("Available after the current dashboard data loads.", "Disponible despues de cargar los datos actuales del tablero.")}
                 </div>
@@ -1003,7 +885,7 @@ export function Dashboard() {
               {/* Needs Attention */}
               <div style={panel}>
                 <div style={panelTitle}>{tt("Needs Attention", "Requiere atención")}</div>
-                {agg.loading ? loadingText : attentionRows.length === 0 ? (
+                {adoptionSummaryLoading ? loadingText : attentionRows.length === 0 ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
                     <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
                     <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>{tt("All clear — no issues detected", "Todo claro; no se detectaron problemas")}</span>
@@ -1032,7 +914,7 @@ export function Dashboard() {
                 {(() => {
                   const openRfisCount      = stats?.openRfis ?? 0;
                   const pendingSubsCount   = stats?.pendingSubmittals ?? 0;
-                  const filesAttnCount     = agg.loading ? (stats?.filesNeedingAttention ?? 0) : filesNeedingAttention.length;
+                  const filesAttnCount     = stats?.filesNeedingAttention ?? 0;
                   const allClear = stats !== undefined && openRfisCount === 0 && pendingSubsCount === 0 && filesAttnCount === 0;
                   if (allClear) {
                     return (
@@ -1196,14 +1078,14 @@ export function Dashboard() {
                   Recent Activity
                   <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", fontWeight: 400 }}>across all projects</span>
                 </div>
-                {agg.loading ? loadingText : recentActivity.length === 0 ? (
+                {adoptionSummaryLoading ? loadingText : recentActivity.length === 0 ? (
                   <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>No activity yet.</div>
                 ) : (
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     {recentActivity.map(entry => {
                       const proj = projectMap.get(entry.projectId);
                       const s = actionStyle(entry.actionType);
-                      const detail = presentActivityDetails(entry.details, { actionType: entry.actionType, entityType: entry.entityType });
+                      const detail = presentActivityDetails(entry.details, { actionType: entry.actionType, entityType: entry.entityType ?? undefined });
                       return (
                         <div key={entry.id} style={{ display: "flex", alignItems: "flex-start", gap: 8, padding: "6px 8px", borderRadius: 6, background: "hsl(var(--secondary)/0.5)" }}>
                           <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 5px", borderRadius: 3, background: s.bg, color: s.color, flexShrink: 0, textTransform: "uppercase", marginTop: 1 }}>
@@ -1231,7 +1113,7 @@ export function Dashboard() {
               {/* Top Naming Violators */}
               <div style={panel}>
                 <div style={panelTitle}>Top Naming Violators</div>
-                {agg.loading ? loadingText : topViolators.length === 0 ? (
+                {adoptionSummaryLoading ? loadingText : topViolators.length === 0 ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 6, background: "#F0FDF4", border: "1px solid #BBF7D0" }}>
                     <CheckCircle2 style={{ width: 13, height: 13, color: "#16A34A" }} />
                     <span style={{ fontSize: 12, color: "#16A34A", fontWeight: 600 }}>All companies compliant</span>
