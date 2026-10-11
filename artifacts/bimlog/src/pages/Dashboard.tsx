@@ -22,6 +22,7 @@ import { ResponsibilityWorkspace } from "@/components/dashboard/ResponsibilityWo
 import { OperationalPulse } from "@/components/dashboard/OperationalPulse";
 import type { OperationalPulseCounts } from "@/lib/operational-pulse";
 import { TodayWorkspace } from "@/components/dashboard/TodayWorkspace";
+import { chooseRoleAwareTodayAction, type TodayCandidate } from "@/lib/today-action";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -477,6 +478,13 @@ export function Dashboard() {
   const recentActivity = [...agg.activity]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 15);
+  const todayCandidates: TodayCandidate[] = [
+    ...myRfis.slice(0, 1).map(item => ({ kind: "rfi" as const, title: tt(`RFI ${item.number} needs your response`, `RFI ${item.number} necesita su respuesta`), detail: item.subject, href: `/projects/${item.projectId}/rfis` })),
+    ...mySubmittals.slice(0, 1).map(item => ({ kind: "submittal" as const, title: tt(`Submittal ${item.number} needs your review`, `Submittal ${item.number} necesita su revisión`), detail: item.title, href: `/projects/${item.projectId}/submittals` })),
+    ...attentionRows.slice(0, 1).map(item => ({ kind: "attention" as const, title: item.issue, detail: `${projectMap.get(item.pid)?.code || tt("Project", "Proyecto")} · ${projectMap.get(item.pid)?.name || ""}`, href: item.href })),
+    ...allProjectRows.slice(0, 1).map(item => ({ kind: "project" as const, title: tt("Continue project work", "Continuar trabajo del proyecto"), detail: `${item.code} · ${item.name}`, href: `/projects/${item.id}` })),
+  ];
+  const todayAction = chooseRoleAwareTodayAction((user as any)?.workProfile || (user as any)?.role, todayCandidates);
 
   // ── Top Naming Violators ───────────────────────────────────────────────────
   // FIX 2: only count confirmed violations (user clicked Continue Anyway on naming warning)
@@ -674,17 +682,7 @@ export function Dashboard() {
             onRefresh={() => { void refreshStats(); }}
           />}
 
-          {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={attentionRows[0] ? {
-            title: attentionRows[0].issue,
-            detail: `${projectMap.get(attentionRows[0].pid)?.code || tt("Project", "Proyecto")} · ${projectMap.get(attentionRows[0].pid)?.name || ""}`,
-            href: attentionRows[0].href,
-            label: tt("Open source work", "Abrir trabajo fuente"),
-          } : allProjectRows[0] ? {
-            title: tt("Continue project work", "Continuar trabajo del proyecto"),
-            detail: `${allProjectRows[0].code} · ${allProjectRows[0].name}`,
-            href: `/projects/${allProjectRows[0].id}`,
-            label: tt("Open project", "Abrir proyecto"),
-          } : null} />}
+          {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} />}
 
           <section
             data-current-view-filter-panel="dashboard"
