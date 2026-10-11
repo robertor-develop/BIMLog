@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "d705205c3f2295d1a432336bf121014a50c285d4b21235b794fabd0264e615a3",
-  "itemCount": 362,
+  "sourceSha256": "63f87a895389becc6910c26808e07fb6de4da119a4c4532aedfedb429c0766ee",
+  "itemCount": 363,
   "counts": {
-    "ACTIVE": 321,
+    "ACTIVE": 322,
     "SUPERSEDED": 29,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6579,8 +6579,26 @@
       "currentAuthority": false
     },
     {
+      "id": "97d9f674bae41868",
+      "sourceLine": 5251,
+      "heading": "Launch Readiness Block 21 — customer data export delivery — 2026-10-11",
+      "statement": "Push LR101–LR105 once and keep it unpublished until LR106–LR110 completes the ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5251",
+        "Launch Readiness Block 21 — customer data export delivery — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "89e92675d56ab206",
-      "sourceLine": 5252,
+      "sourceLine": 5263,
       "heading": "Launch Readiness Block 20 — customer data-request completion — 2026-10-11",
       "statement": "Pass the complete exact-head release gate, push LR096–LR100, publish the LR091–LR100 interval, verify exact live identity and complete authenticated desktop/mobile Chrome smoke.",
       "classification": "ACTIVE",
@@ -6591,7 +6609,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5252",
+        "OPEN_LOOP.md:5263",
         "Launch Readiness Block 20 — customer data-request completion — 2026-10-11"
       ],
       "currentAuthority": false

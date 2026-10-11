@@ -5241,6 +5241,17 @@ This block records governed fulfillment evidence only. It does not automatically
 
 Release-gate repair checkpoint: `b9984bcf` removes duplicate-route audit identities caused only by literal route examples in the LR094 behavior test. Production routes and fulfillment behavior are unchanged; the focused block suite and blocking platform audit pass with zero unexpected P1 identities.
 
+## Launch Readiness Block 21 — customer data export delivery — 2026-10-11
+
+- [x] Generate a deterministic export package from an explicit allowlist of requester and company profile fields.
+- [x] Require the owning authenticated requester, tenant, fulfilled lifecycle and export request kind.
+- [x] Return the package as a private no-store JSON attachment with deterministic filename, nosniff policy and SHA-256 evidence.
+- [x] Reject malformed download responses at the browser boundary.
+- [x] Add a bilingual download action only for fulfilled export requests, with visible retryable failure.
+- [ ] Push LR101–LR105 once and keep it unpublished until LR106–LR110 completes the ten-build interval.
+
+Correction, deletion and processing restriction remain human-governed operational actions. No credential, provider secret, support narrative, internal fingerprint or customer-specific exception is included in the package.
+
 ## Launch Readiness Block 20 — customer data-request completion — 2026-10-11
 
 - [x] Preserve the server-authoritative request kind, review state, decision explanation, review time and fulfillment time at the strict customer browser boundary.

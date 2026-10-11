@@ -64740,6 +64740,89 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c2fa2d6a14e61dbe377a2559054d03efaac43885ccb993be40df206ba861d2ed"
+    },
+    {
+      "taskId": "launch-readiness-block21-customer-data-export",
+      "reviewedThroughCommit": "302833bec9707ca5b9dc2e6c42eb1588d2d1a739",
+      "reviewedAt": "2026-10-11T10:14:54.9367722Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "LR101-LR105 add a tenant-owned fulfilled-export download using an explicit allowlist, private no-store response, deterministic SHA-256 evidence and strict bilingual browser handling. STATUS and OPEN_LOOP record the new customer lifecycle behavior; product doctrine, quality rules, Native, reports, standards and MAIN 04 authority remain unchanged.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/commercial-data-export.behavior.ts",
+        "artifacts/api-server/src/lib/commercial-data-export.ts",
+        "artifacts/api-server/src/routes/commercial-data-export-response.behavior.ts",
+        "artifacts/api-server/src/routes/commercial-data-export-route.behavior.ts",
+        "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+        "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
+        "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+        "artifacts/bimlog/src/lib/support-data-request-export-client.behavior.ts",
+        "artifacts/bimlog/src/lib/support-data-request-export-client.ts",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "e74ea69cbc78023f0c2f85ce95ae50e816a2c6c957e4c7db13ec366e24dc627a"
     }
   ]
 }

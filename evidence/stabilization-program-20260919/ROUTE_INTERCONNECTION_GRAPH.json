@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 763,
-    "frontendApiReferences": 305,
+    "apiRoutes": 764,
+    "frontendApiReferences": 306,
     "routeOwnedTables": 70
   },
   "compatibilityRedirects": [
@@ -2200,10 +2200,12 @@
       "path": "/admin/support/cases/:id/data-request/fulfillment",
       "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
       "tables": [
+        "companiesTable",
         "notificationsTable",
         "supportCaseDataRequestFulfillmentsTable",
         "supportCaseDataRequestReviewsTable",
-        "supportCasesTable"
+        "supportCasesTable",
+        "usersTable"
       ]
     },
     {
@@ -2211,10 +2213,25 @@
       "path": "/support/cases/:id/data-request/fulfillment",
       "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
       "tables": [
+        "companiesTable",
         "notificationsTable",
         "supportCaseDataRequestFulfillmentsTable",
         "supportCaseDataRequestReviewsTable",
-        "supportCasesTable"
+        "supportCasesTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/support/cases/:id/data-request/export",
+      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+      "tables": [
+        "companiesTable",
+        "notificationsTable",
+        "supportCaseDataRequestFulfillmentsTable",
+        "supportCaseDataRequestReviewsTable",
+        "supportCasesTable",
+        "usersTable"
       ]
     },
     {
@@ -2222,10 +2239,12 @@
       "path": "/admin/support/cases/:id/data-request/fulfillment",
       "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
       "tables": [
+        "companiesTable",
         "notificationsTable",
         "supportCaseDataRequestFulfillmentsTable",
         "supportCaseDataRequestReviewsTable",
-        "supportCasesTable"
+        "supportCasesTable",
+        "usersTable"
       ]
     },
     {
@@ -9823,6 +9842,10 @@
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/fulfillment"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+      "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/export"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportSatisfaction.tsx",
