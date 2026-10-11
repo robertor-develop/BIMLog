@@ -4302,3 +4302,5 @@ Five builds replace Headquarters' four-requests-per-project adoption fan-out wit
 # Simplification and guided adoption Block 7 — 2026-10-11
 
 Five builds make the Today surface truthful throughout the bounded summary lifecycle. Headquarters now distinguishes initial loading, verified guidance, verified empty work and unavailable guidance; failure cannot fall through to an all-clear message or a project-list fallback. Retry stays inside Today, the last verified guidance remains visible during background refresh, assistive status announcements remain explicit, and narrow-screen retry controls stack without overflow. Focused behavior gates and frontend typecheck pass through implementation commit `e0d7cf24`; this first five-build half remains unpublished until Block 8 completes the next ten-build interval.
+
+The complete gate found that Block 6's cumulative assertion still looked for the failure alert in `Dashboard.tsx`. Repair `72f00d82` verifies the unchanged alert and retry behavior at its new `TodayWorkspace` owner; production behavior is unchanged and the full gate is repeated before push.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "83542cddc563d2d319e0006a0bf19bb55a9f8226250cfd101c1ce017c89b2078",
+  "sourceSha256": "9e9d514e24b6f60bfeb5212892d4c6126c8b44d13b6e222494ea05296250a817",
   "itemCount": 372,
   "counts": {
     "ACTIVE": 331,
@@ -6760,7 +6760,7 @@
     },
     {
       "id": "1c721c84d5d12ced",
-      "sourceLine": 5383,
+      "sourceLine": 5384,
       "heading": "Simplification and guided adoption Block 7 — 2026-10-11",
       "statement": "Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 8 completes the next ten-build interval.",
       "classification": "ACTIVE",
@@ -6771,7 +6771,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5383",
+        "OPEN_LOOP.md:5384",
         "Simplification and guided adoption Block 7 — 2026-10-11"
       ],
       "currentAuthority": false

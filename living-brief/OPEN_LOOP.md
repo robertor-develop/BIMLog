@@ -5380,6 +5380,7 @@ The summary is read-only and bounded. It creates no project record, expands no m
 - [x] Preserve the last verified guidance while a background refresh is running.
 - [x] Keep status announcements, keyboard focus and narrow-screen retry controls accessible.
 - [x] Bind the complete state and responsive behavior to the permanent production build.
+- [x] Move the cumulative Block 6 failure-surface assertion to the actual `TodayWorkspace` owner after the complete gate exposed the stale file-level expectation.
 - [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 8 completes the next ten-build interval.
 
 This block changes presentation truth only. It creates no project record and changes no membership, permission, payment, email, provider, Native, installer or external-send behavior.
