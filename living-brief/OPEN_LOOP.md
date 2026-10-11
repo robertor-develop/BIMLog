@@ -5238,3 +5238,5 @@ No request automatically exports, corrects, deletes or restricts data. Deletion 
 - [ ] Pass the complete exact-head release gate and push LR091–LR095 once. Keep this block unpublished until LR096–LR100 completes the next ten-build interval.
 
 This block records governed fulfillment evidence only. It does not automatically export, correct, delete or restrict customer data and it does not place customer data or a delivery URL in the receipt.
+
+Release-gate repair checkpoint: `b9984bcf` removes duplicate-route audit identities caused only by literal route examples in the LR094 behavior test. Production routes and fulfillment behavior are unchanged; the focused block suite and blocking platform audit pass with zero unexpected P1 identities.

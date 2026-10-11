@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 765,
+    "apiRoutes": 763,
     "frontendApiReferences": 304,
     "routeOwnedTables": 70
   },
@@ -2188,18 +2188,6 @@
         "lensViewpointSequenceCountersTable",
         "filesTable"
       ]
-    },
-    {
-      "method": "GET",
-      "path": "/support/cases/:id/data-request/fulfillment",
-      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
-      "tables": []
-    },
-    {
-      "method": "GET",
-      "path": "/admin/support/cases/:id/data-request/fulfillment",
-      "owner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
-      "tables": []
     },
     {
       "method": "GET",
@@ -10918,22 +10906,7 @@
     }
   ],
   "findings": {
-    "duplicateApiRoutes": [
-      {
-        "key": "GET /support/cases/:id/data-request/fulfillment",
-        "owners": [
-          "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
-          "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts"
-        ]
-      },
-      {
-        "key": "GET /admin/support/cases/:id/data-request/fulfillment",
-        "owners": [
-          "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
-          "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts"
-        ]
-      }
-    ],
+    "duplicateApiRoutes": [],
     "sidebarTabsWithoutScreen": [],
     "screensWithoutSidebar": []
   }
