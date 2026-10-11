@@ -37,6 +37,17 @@ CREATE TABLE IF NOT EXISTS email_verification_tokens (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS email_verification_tokens_user_idx ON email_verification_tokens(user_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS adoption_milestone_events (
+  id bigserial PRIMARY KEY,
+  company_id integer NOT NULL REFERENCES companies(id),
+  user_id integer NOT NULL REFERENCES users(id),
+  milestone text NOT NULL,
+  surface text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT adoption_milestone_key_chk CHECK (milestone IN ('today_viewed','primary_action_opened','onboarding_completed','first_project_opened')),
+  CONSTRAINT adoption_milestone_surface_chk CHECK (surface IN ('headquarters','onboarding','project'))
+);
+CREATE INDEX IF NOT EXISTS adoption_milestone_events_company_idx ON adoption_milestone_events(company_id,created_at DESC);
 `);
     await client.query("COMMIT");
   } catch (error) {

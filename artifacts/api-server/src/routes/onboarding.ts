@@ -9,6 +9,8 @@ const router: IRouter = Router();
 const profiles = new Set(["bim_coordinator","project_admin","document_controller","designer","field_team","executive"]);
 const disciplines = new Set(["Architecture","Structural","Mechanical","Electrical","Plumbing","Fire Protection","Civil"]);
 const documents = new Set(["Shop Drawings","Coordination Drawings","Clash Reports","RFIs","Submittals"]);
+const milestones = new Set(["today_viewed","primary_action_opened","onboarding_completed","first_project_opened"]);
+const milestoneSurfaces = new Set(["headquarters","onboarding","project"]);
 const hash = (token: string) => createHash("sha256").update(token).digest("hex");
 
 async function ensureProfile(userId: number, companyId: number) {
@@ -73,6 +75,15 @@ router.post("/onboarding/complete", authMiddleware, async (req,res) => {
   const result=await pool.query(`UPDATE user_onboarding_profiles p SET completed_steps='["email","company","profile","project","defaults"]'::jsonb,completed_at=now(),updated_at=now() WHERE user_id=$1 AND email_verified_at IS NOT NULL AND work_profile IS NOT NULL AND EXISTS(SELECT 1 FROM project_members m WHERE m.user_id=p.user_id) RETURNING completed_at`,[req.user!.userId]);
   if(!result.rows[0]){res.status(409).json({error:"ONBOARDING_PREREQUISITES_INCOMPLETE"});return;}
   res.json({completedAt:result.rows[0].completed_at});
+});
+
+router.post("/onboarding/milestones", authMiddleware, async (req,res) => {
+  await waitForOnboardingMigration();
+  const milestone=typeof req.body?.milestone==="string"?req.body.milestone:"";
+  const surface=typeof req.body?.surface==="string"?req.body.surface:"";
+  if(!milestones.has(milestone)||!milestoneSurfaces.has(surface)){res.status(400).json({error:"ADOPTION_MILESTONE_INVALID"});return;}
+  await pool.query(`INSERT INTO adoption_milestone_events(company_id,user_id,milestone,surface) SELECT $1,$2,$3,$4 WHERE NOT EXISTS (SELECT 1 FROM adoption_milestone_events WHERE user_id=$2 AND milestone=$3 AND surface=$4)`,[req.user!.companyId,req.user!.userId,milestone,surface]);
+  res.status(202).json({recorded:true});
 });
 
 export default router;
