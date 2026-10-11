@@ -64,10 +64,10 @@ router.patch("/onboarding", authMiddleware, async (req,res) => {
   const role=typeof req.body?.workProfile==="string"?req.body.workProfile:null;
   const preferredDisciplines=Array.isArray(req.body?.preferredDisciplines)?req.body.preferredDisciplines.filter((v:unknown)=>typeof v==="string"&&disciplines.has(v)).slice(0,7):null;
   const preferredDocumentTypes=Array.isArray(req.body?.preferredDocumentTypes)?req.body.preferredDocumentTypes.filter((v:unknown)=>typeof v==="string"&&documents.has(v)).slice(0,5):null;
-  const guidePaused=req.body?.guidePaused===true;
+  const guidePaused=typeof req.body?.guidePaused==="boolean"?req.body.guidePaused:null;
   if(role!==null&&!profiles.has(role)){res.status(400).json({error:"WORK_PROFILE_INVALID"});return;}
-  await pool.query(`UPDATE user_onboarding_profiles SET work_profile=COALESCE($2,work_profile),preferred_disciplines=COALESCE($3::jsonb,preferred_disciplines),preferred_document_types=COALESCE($4::jsonb,preferred_document_types),completed_steps=(SELECT jsonb_agg(DISTINCT value) FROM jsonb_array_elements_text(completed_steps || CASE WHEN $2::text IS NULL THEN '[]'::jsonb ELSE '["profile"]'::jsonb END || CASE WHEN $5::boolean THEN '["guide_paused"]'::jsonb ELSE '[]'::jsonb END)),updated_at=now() WHERE user_id=$1`,[req.user!.userId,role,preferredDisciplines?JSON.stringify(preferredDisciplines):null,preferredDocumentTypes?JSON.stringify(preferredDocumentTypes):null,guidePaused]);
-  res.json({saved:true});
+  await pool.query(`UPDATE user_onboarding_profiles SET work_profile=COALESCE($2,work_profile),preferred_disciplines=COALESCE($3::jsonb,preferred_disciplines),preferred_document_types=COALESCE($4::jsonb,preferred_document_types),completed_steps=(SELECT COALESCE(jsonb_agg(DISTINCT value),'[]'::jsonb) FROM jsonb_array_elements_text((completed_steps - CASE WHEN $5::boolean IS FALSE THEN 'guide_paused' ELSE '' END) || CASE WHEN $2::text IS NULL THEN '[]'::jsonb ELSE '["profile"]'::jsonb END || CASE WHEN $5::boolean IS TRUE THEN '["guide_paused"]'::jsonb ELSE '[]'::jsonb END)),updated_at=now() WHERE user_id=$1`,[req.user!.userId,role,preferredDisciplines?JSON.stringify(preferredDisciplines):null,preferredDocumentTypes?JSON.stringify(preferredDocumentTypes):null,guidePaused]);
+  res.json({saved:true,guidePaused});
 });
 
 router.post("/onboarding/complete", authMiddleware, async (req,res) => {
