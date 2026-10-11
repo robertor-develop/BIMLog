@@ -12,7 +12,7 @@ for(const token of ["deriveCommercialCheckoutEligibility","readCommercialIntent"
 for(const token of ["Prepared offer","Oferta preparada","data.preparedSubscription.seatQuantity","Boolean(data.preparedSubscription)"])assert.match(source,new RegExp(token.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
 assert.match(source,/checkoutEligibility\?\.ready\?<Button/);assert.match(source,/disabled=\{billingBusy\|\|!data\.portalEligibility\.ready\}/);
 for(const token of ["platform_launch","CommercialHostedDestinationError","hostedFailureMessage","CHECKOUT_PLATFORM_NOT_READY","required platform setup"])assert.match(source,new RegExp(token));
-assert.match(source,/data\.actions\.map/);assert.match(source,/action\.status==="blocked"/);assert.match(source,/Button disabled/);
+assert.match(source,/data\?\.actions\.find\(action=>action\.status==="available"\)/);assert.match(source,/data\.actions\.filter\(action=>action!==primaryAction\)\.map/);assert.match(source,/action\.status==="blocked"/);assert.match(source,/Button disabled/);
 assert.match(source,/minmax\(min\(240px,100%\),1fr\)/);assert.match(source,/Waiting for:/);assert.match(source,/action\.blockers\.map/);assert.doesNotMatch(source,/Ready \/ Listo|Setup required \/ Requiere configuración/);
 assert.match(source,/AbortController/);assert.match(source,/parseCommercialWorkspace/);assert.doesNotMatch(source,/stripe.*secret/i);
 assert.match(source,/complete_billing_identity.*from=billing/s);assert.match(source,/<a href=\{href\}>/);
