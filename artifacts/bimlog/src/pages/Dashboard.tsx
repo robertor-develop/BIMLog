@@ -29,6 +29,7 @@ import { chooseFirstValueAction, firstValueDestination } from "@/lib/first-value
 import { firstValueEvidenceDestination } from "@/lib/first-value-evidence";
 import { chooseRoleAwareTodayAction, type TodayCandidate } from "@/lib/today-action";
 import { EMPTY_DASHBOARD_ADOPTION_SUMMARY, loadDashboardAdoptionSummary } from "@/lib/dashboard-adoption-summary";
+import { dashboardGuidanceState } from "@/lib/dashboard-guidance-state";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -379,6 +380,12 @@ export function Dashboard() {
     ...allProjectRows.slice(0, 1).map(item => ({ kind: "project" as const, title: tt("Continue project work", "Continuar trabajo del proyecto"), detail: `${item.code} · ${item.name}`, href: `/projects/${item.id}` })),
   ];
   const todayAction = chooseRoleAwareTodayAction((user as any)?.workProfile || (user as any)?.role, todayCandidates);
+  const todayGuidanceState = dashboardGuidanceState({
+    enabled: !!token && !isLoading,
+    loading: adoptionSummaryLoading,
+    failed: adoptionSummaryFailed,
+    candidateCount: todayCandidates.length,
+  });
   const userEmail = (user as any)?.email ?? "";
   const myLatestActivity = recentActivity.find(entry => !userEmail || String(entry.userEmail || "").toLowerCase() === userEmail.toLowerCase()) || recentActivity[0];
   const resumeProject = myLatestActivity ? projectMap.get(myLatestActivity.projectId) : null;
@@ -429,6 +436,11 @@ export function Dashboard() {
         .today-workspace__action p,.today-workspace__clear p { margin:4px 0 0; color:hsl(var(--muted-foreground)); font-size:11px; }
         .today-workspace__action button { display:inline-flex; align-items:center; gap:7px; min-height:40px; padding:8px 12px; border:0; border-radius:8px; background:#1d4ed8; color:white; font-weight:750; cursor:pointer; }
         .today-workspace__clear { display:flex; gap:10px; align-items:flex-start; color:#15803d; }
+        .today-workspace__status { padding:12px; border-radius:10px; background:#eff6ff; color:#1e3a5f; }
+        .today-workspace__status p { margin:4px 0 0; color:hsl(var(--muted-foreground)); font-size:11px; }
+        .today-workspace__status--error { display:flex; align-items:center; justify-content:space-between; gap:12px; background:#fff7ed; color:#9a3412; }
+        .today-workspace__status--error button { min-height:40px; padding:8px 12px; border:1px solid #c2410c; border-radius:8px; background:white; color:#9a3412; font-weight:750; cursor:pointer; }
+        .today-workspace__status--error button:focus-visible { outline:3px solid #fdba74; outline-offset:2px; }
         .today-workspace__resume { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; margin-top:10px; padding:10px 12px; border:1px solid hsl(var(--border)); border-radius:9px; background:hsl(var(--card)); color:hsl(var(--foreground)); text-align:left; cursor:pointer; }
         .today-workspace__resume > span { display:grid; gap:2px; min-width:0; }
         .today-workspace__resume small { color:#1d4ed8; font-size:9px; font-weight:850; letter-spacing:.06em; }
@@ -621,9 +633,7 @@ export function Dashboard() {
             onRefresh={() => { void refreshStats(); }}
           />}
 
-          {!isLoading && <TodayWorkspace lang={lang} onOpen={setLocation} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
-
-          {adoptionSummaryFailed && <div className="adoption-summary-status" role="alert"><span>{tt("Some Headquarters guidance could not be loaded. Project records remain available.", "No se pudo cargar parte de la guía de Sede. Los registros del proyecto siguen disponibles.")}</span><button type="button" onClick={() => void retryAdoptionSummary()}>{tt("Try again", "Intentar de nuevo")}</button></div>}
+          {!isLoading && <TodayWorkspace lang={lang} state={todayGuidanceState} onOpen={setLocation} onRetry={() => void retryAdoptionSummary()} action={todayAction ? { ...todayAction, label: tt("Continue", "Continuar") } : null} resume={resumeAction} />}
 
           {onboardingState && !onboardingState.completedAt && onboardingState.projectCount === 0 && onboardingState.completedSteps.includes("guide_paused") && <SetupProgressCard lang={lang} state={onboardingState} onResume={() => { void resumeGuide().then(resumed => { if (resumed) setOnboardingVisible(true); }); }} />}
 
