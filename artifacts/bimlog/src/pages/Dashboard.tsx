@@ -24,7 +24,9 @@ import type { OperationalPulseCounts } from "@/lib/operational-pulse";
 import { TodayWorkspace } from "@/components/dashboard/TodayWorkspace";
 import { SetupProgressCard } from "@/components/dashboard/SetupProgressCard";
 import { FirstValueCard } from "@/components/dashboard/FirstValueCard";
+import { FirstValueSuccessCard } from "@/components/dashboard/FirstValueSuccessCard";
 import { chooseFirstValueAction, firstValueDestination } from "@/lib/first-value-action";
+import { firstValueEvidenceDestination } from "@/lib/first-value-evidence";
 import { chooseRoleAwareTodayAction, type TodayCandidate } from "@/lib/today-action";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -218,7 +220,7 @@ export function Dashboard() {
   }
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const { state: onboardingState, shouldShow: showOnboarding, resumeGuide, markDone: doneOnboarding } = useOnboarding();
+  const { state: onboardingState, shouldShow: showOnboarding, resumeGuide, acknowledgeFirstValue, markDone: doneOnboarding } = useOnboarding();
   const [onboardingVisible, setOnboardingVisible] = useState(false);
   useEffect(() => { if (showOnboarding) setOnboardingVisible(true); }, [showOnboarding]);
 
@@ -567,6 +569,14 @@ export function Dashboard() {
         .first-value-card span { color:hsl(var(--muted-foreground)); font-size:10px; }
         .first-value-card > button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:8px 12px; border:1px solid #15803d; border-radius:8px; background:#15803d; color:white; font-size:11px; font-weight:750; cursor:pointer; }
         .first-value-card > button:focus-visible { outline:3px solid #86efac; outline-offset:2px; }
+        .first-value-success { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:12px; margin:0 0 20px; padding:14px 16px; border:1px solid #bbf7d0; border-radius:12px; background:#f0fdf4; }
+        .first-value-success__icon { display:grid; place-items:center; width:34px; height:34px; border-radius:9px; background:#dcfce7; color:#15803d; }
+        .first-value-success__body { min-width:0; }
+        .first-value-success p { margin:0; color:#15803d; font-size:9px; font-weight:850; letter-spacing:.08em; }
+        .first-value-success h2 { margin:2px 0 4px; font-size:14px; }
+        .first-value-success span { display:block; overflow:hidden; color:hsl(var(--muted-foreground)); font-size:10px; text-overflow:ellipsis; white-space:nowrap; }
+        .first-value-success > button { display:inline-flex; align-items:center; justify-content:center; gap:7px; min-height:40px; padding:8px 12px; border:1px solid #15803d; border-radius:8px; background:#15803d; color:white; font-size:11px; font-weight:750; cursor:pointer; }
+        .first-value-success > button:focus-visible { outline:3px solid #86efac; outline-offset:2px; }
         .operational-pulse__eyebrow { margin: 0 0 4px; color: #1d4ed8; font-size: 10px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
         .operational-pulse h2 { margin: 0; font-size: 18px; line-height: 1.25; color: hsl(var(--foreground)); }
         .operational-pulse__intro > p:last-child { margin: 7px 0 0; color: hsl(var(--muted-foreground)); font-size: 11px; line-height: 1.5; }
@@ -641,6 +651,8 @@ export function Dashboard() {
           .setup-progress-card > button { grid-column:1 / -1; width:100%; }
           .first-value-card { grid-template-columns:auto minmax(0,1fr); }
           .first-value-card > button { grid-column:1 / -1; width:100%; }
+          .first-value-success { grid-template-columns:auto minmax(0,1fr); }
+          .first-value-success > button { grid-column:1 / -1; width:100%; }
           .operational-pulse__next > button { width: 100%; }
           .operational-pulse__freshness { align-items: stretch; flex-direction: column; }
           .operational-pulse__freshness > button { width: 100%; min-height: 44px; }
@@ -727,6 +739,8 @@ export function Dashboard() {
           {onboardingState && !onboardingState.completedAt && onboardingState.projectCount === 0 && onboardingState.completedSteps.includes("guide_paused") && <SetupProgressCard lang={lang} state={onboardingState} onResume={() => { void resumeGuide().then(resumed => { if (resumed) setOnboardingVisible(true); }); }} />}
 
           {onboardingState && onboardingState.projectCount > 0 && !onboardingState.firstValueReached && firstValueProject && <FirstValueCard lang={lang} kind={firstValueKind} projectName={`${firstValueProject.code} · ${firstValueProject.name}`} onOpen={() => setLocation(firstValueDestination(Number(firstValueProject.id),firstValueKind))} />}
+
+          {onboardingState?.firstValueEvidence && !onboardingState.completedSteps.includes("first_value_seen") && <FirstValueSuccessCard lang={lang} evidence={onboardingState.firstValueEvidence} onOpen={() => { const destination=firstValueEvidenceDestination(onboardingState.firstValueEvidence!); void acknowledgeFirstValue().then(saved => { if(saved)setLocation(destination); }); }} />}
 
           <section
             data-current-view-filter-panel="dashboard"

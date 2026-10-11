@@ -7,12 +7,13 @@ import { Input } from "@/components/ui/input";
 import { AlertCircle, Building2, Check, ChevronLeft, Mail, Settings2, UserRound, X } from "lucide-react";
 import { clearCommercialIntent, intentLabel, postOnboardingCommercialDestination, readCommercialIntent } from "@/lib/commercial-intent";
 import { EMAIL_VERIFICATION_POLICY, PRODUCT_TERMS } from "@/lib/adoption-journey";
+import type { FirstValueEvidence } from "@/lib/first-value-evidence";
 
 const API=(import.meta.env.BASE_URL||"").replace(/\/$/,"")+"/api/v1";
 const roles=[["bim_coordinator","BIM coordinator","Coordinador BIM"],["project_admin","Project administrator","Administrador de proyecto"],["document_controller","Document controller","Controlador documental"],["designer","Designer / detailer","Diseñador / dibujante"],["field_team","Field team","Equipo de campo"],["executive","Executive / owner","Ejecutivo / propietario"]] as const;
 const allDisciplines=["Architecture","Structural","Mechanical","Electrical","Plumbing","Fire Protection","Civil"];
 const allDocuments=["Shop Drawings","Coordination Drawings","Clash Reports","RFIs","Submittals"];
-export type OnboardingState={email:string;companyName:string;emailVerifiedAt:string|null;workProfile:string|null;preferredDisciplines:string[];preferredDocumentTypes:string[];completedSteps:string[];completedAt:string|null;projectCount:number;firstValueReached:boolean};
+export type OnboardingState={email:string;companyName:string;emailVerifiedAt:string|null;workProfile:string|null;preferredDisciplines:string[];preferredDocumentTypes:string[];completedSteps:string[];completedAt:string|null;projectCount:number;firstValueReached:boolean;firstValueEvidence:FirstValueEvidence|null};
 
 export function OnboardingFlow({onDone}:{onDone:()=>void}){
   const {lang}=useI18n(),token=useAuthStore(s=>s.token),tl=(en:string,es:string)=>lang==="es"?es:en;
@@ -55,5 +56,6 @@ export function useOnboarding(){
   const token=useAuthStore(s=>s.token),[state,setState]=useState<OnboardingState|null>(null);
   useEffect(()=>{if(!token){setState(null);return;}const controller=new AbortController();fetch(`${API}/onboarding`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal}).then(r=>r.ok?r.json():null).then(data=>{if(data)setState(data);}).catch(()=>{});return()=>controller.abort();},[token]);
   const resumeGuide=async()=>{if(!token)return false;const response=await fetch(`${API}/onboarding`,{method:"PATCH",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({guidePaused:false})});if(!response.ok)return false;setState(current=>current?{...current,completedSteps:current.completedSteps.filter(step=>step!=="guide_paused")}:current);return true;};
-  return {state,shouldShow:!!token&&!!state&&!state.completedAt&&state.projectCount===0&&!state.completedSteps.includes("guide_paused"),resumeGuide,markDone:()=>setState(current=>current?{...current,completedSteps:[...new Set([...current.completedSteps,"guide_paused"])]}:current)};
+  const acknowledgeFirstValue=async()=>{if(!token)return false;const response=await fetch(`${API}/onboarding`,{method:"PATCH",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({acknowledgeFirstValue:true})});if(!response.ok)return false;setState(current=>current?{...current,completedSteps:[...new Set([...current.completedSteps,"first_value_seen"])]}:current);return true;};
+  return {state,shouldShow:!!token&&!!state&&!state.completedAt&&state.projectCount===0&&!state.completedSteps.includes("guide_paused"),resumeGuide,acknowledgeFirstValue,markDone:()=>setState(current=>current?{...current,completedSteps:[...new Set([...current.completedSteps,"guide_paused"])]}:current)};
 }
