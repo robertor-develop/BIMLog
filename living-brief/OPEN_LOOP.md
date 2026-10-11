@@ -5322,3 +5322,15 @@ No database, customer data, permission, Native, installer, provider-secret or ex
 - [ ] Pass the complete exact-head gate, push, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
 
 The milestone path adds one tenant- and user-attributed operational event table. It accepts only fixed milestone and surface enums and stores no customer content.
+
+## Simplification and guided adoption Block 3 — 2026-10-11
+
+- [x] Derive one canonical six-stage progress state from authenticated onboarding facts.
+- [x] Make an intentional guide pause reversible through the existing authenticated onboarding profile.
+- [x] Show one compact bilingual setup-continuation card only for incomplete, project-less paused setup.
+- [x] Name the exact next canonical stage and resume the same guided flow without another workflow authority.
+- [x] Keep the card keyboard accessible, reduced-motion aware and contained at narrow width.
+- [x] Bind the progress, resume, presentation and responsive contracts to a permanent focused release gate.
+- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until Block 4 completes the next ten-build interval.
+
+No customer project, payment, provider, email, permission, Native, installer or external-send behavior changes in this block.

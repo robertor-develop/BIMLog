@@ -4282,3 +4282,7 @@ Five builds establish the canonical account-to-first-value journey, reconcile em
 # Simplification and guided adoption Block 2 — 2026-10-11
 
 Five builds add a focused Today entry point, role-aware primary action, server-derived recent-work continuation, server-backed onboarding guide state and allowlisted privacy-safe adoption milestones. Release-gate repairs align the earlier Counterparty vocabulary change with the active locale variable and declare the additive milestone table in Drizzle schema parity. The ten-build interval is ready for its complete gate, push, exact-source publication and authenticated desktop/mobile Chrome acceptance.
+
+# Simplification and guided adoption Block 3 — 2026-10-11
+
+Five builds close the paused-setup continuation gap without creating another onboarding authority. BIMLog derives one canonical six-stage progress state from authenticated onboarding facts, permits the existing guide pause marker to be cleared server-side, and shows a compact bilingual Headquarters card only when a project-less user intentionally paused incomplete setup. The card names the exact next canonical stage, exposes accessible progress, resumes the same guided flow, contains at narrow width and respects reduced motion. Focused behavior gates plus API and frontend typechecks pass. This first five-build half remains unpublished until Block 4 completes the next ten-build interval.
