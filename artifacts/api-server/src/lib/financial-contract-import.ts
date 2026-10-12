@@ -8,6 +8,7 @@ import { boundedText, positiveId } from "./financial-budget-contract";
 import { contractCurrency, contractFingerprint, contractLineTotal, exactPositiveAmount, normalizeContractLines } from "./financial-contract-contract";
 import { createContractDraftWithClient, type CreateContractDraftInput } from "./financial-contract-service";
 import { waitForFinancialContractMigration } from "./financial-contract-migration";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_ROWS = 10000;
@@ -82,6 +83,9 @@ export async function confirmContractImport(input: Omit<CreateContractDraftInput
     await client.query(`UPDATE financial_contract_import_sessions SET confirmed_contract_version_id=$2,confirmed_at=now() WHERE id=$1 AND confirmed_contract_version_id IS NULL`, [sessionId, draft.versionId]);
     await client.query("COMMIT");
     return { contractId: draft.id, contractVersionId: draft.versionId, idempotent: false };
-  } catch (error) { try { await client.query("ROLLBACK"); } catch {} throw error; }
+  } catch (error) {
+    await rollbackWithOperationalEvidence(client, "FINANCIAL_CONTRACT_IMPORT_ROLLBACK_FAILED");
+    throw error;
+  }
   finally { if (locked) await client.query(`SELECT pg_advisory_unlock(hashtextextended($1,0))`, [`contract-import:${sessionId}`]); client.release(); }
 }
