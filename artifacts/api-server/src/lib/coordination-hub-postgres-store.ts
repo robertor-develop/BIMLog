@@ -9,6 +9,7 @@ import {
   type CoordinationRevisionRecord,
   type CoordinationScope,
 } from "./coordination-hub-service";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 type PoolClient = {
   query(sql: string, values?: unknown[]): Promise<{ rows: Array<Record<string, unknown>>; rowCount: number | null }>;
@@ -183,7 +184,7 @@ export const postgresCoordinationHubStore: CoordinationHubStore = {
       await client.query("COMMIT");
       return result;
     } catch (error) {
-      await client.query("ROLLBACK").catch(() => undefined);
+      await rollbackWithOperationalEvidence(client, "COORDINATION_HUB_ROLLBACK_FAILED");
       throw error;
     } finally {
       client.release();
@@ -197,7 +198,7 @@ export const postgresCoordinationHubStore: CoordinationHubStore = {
       await client.query("COMMIT");
       return result;
     } catch (error) {
-      await client.query("ROLLBACK").catch(() => undefined);
+      await rollbackWithOperationalEvidence(client, "COORDINATION_HUB_ROLLBACK_FAILED");
       throw error;
     } finally {
       client.release();
