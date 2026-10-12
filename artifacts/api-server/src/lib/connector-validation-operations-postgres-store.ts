@@ -1,5 +1,6 @@
 import { ConnectorValidationOperationsService, connectorValidationOperationSchema, type ConnectorValidationOperationsQuery, type ConnectorValidationOperationsStore } from "./connector-validation-operations";
 import { CoordinationConflictError } from "./coordination-hub-service";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 type QueryResult = { rows: Array<Record<string, unknown>>; rowCount: number | null };
 type Client = { query(sql: string, values?: unknown[]): Promise<QueryResult>; release(): void };
@@ -45,7 +46,7 @@ export class PostgresConnectorValidationOperationsStore implements ConnectorVali
       await client.query("COMMIT");
       return operations;
     } catch (error) {
-      await client.query("ROLLBACK").catch(() => undefined);
+      await rollbackWithOperationalEvidence(client, "CONNECTOR_VALIDATION_OPERATIONS_ROLLBACK_FAILED");
       throw error;
     } finally { client.release(); }
   }
