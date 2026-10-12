@@ -84,6 +84,10 @@ router.post("/admin/launch-configuration/:environment/:action", authMiddleware, 
   if (!target || !["activate", "deactivate"].includes(action) || !changeReason || !Number.isSafeInteger(expectedRevision)) { res.status(400).json({ code: "LAUNCH_CONFIGURATION_ACTION_INVALID" }); return; }
   const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
   if (action === "activate" && !(current.readiness as any)?.launchConfigurationEntered) { res.status(409).json({ code: "LAUNCH_CONFIGURATION_NOT_READY" }); return; }
+  if (action === "activate" && target === "production") {
+    const evidence = await readLatestLaunchEmailVerification(pool, target), provider = (current.configuration as StoredLaunchConfiguration).emailDelivery?.provider;
+    if (!evidence || evidence.provider !== provider || !["verified", "sent"].includes(evidence.status)) { res.status(409).json({ code: "LAUNCH_EMAIL_NOT_VERIFIED" }); return; }
+  }
   try {
     const state = action === "activate" ? "active" : "inactive", item = await writeLaunchConfiguration(pool, { environment: target, expectedRevision, state, configuration: current.configuration, readiness: current.readiness, actorUserId: req.user!.userId, reason: changeReason, action: action === "activate" ? "activated" : "deactivated" });
     res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(item) });
