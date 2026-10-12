@@ -7,7 +7,8 @@ import { useLaunchSecret } from "../lib/launch-configuration-secret";
 import { sendLaunchTestEmail, verifyLaunchEmailProvider, type LaunchEmailAdapters } from "../lib/launch-email-provider";
 import { createLiveLaunchEmailAdapters } from "../lib/launch-email-provider-live";
 import { liveSmtpLaunchProbe } from "../lib/launch-smtp-probe";
-import { LaunchConfigurationConflict, listLaunchConfigurationHistory, readLaunchConfiguration, readLatestLaunchEmailVerification, recordLaunchEmailVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
+import { verifyLaunchPaymentMethod } from "../lib/launch-payment-verification";
+import { LaunchConfigurationConflict, listLaunchConfigurationHistory, listLatestLaunchPaymentVerifications, readLaunchConfiguration, readLatestLaunchEmailVerification, recordLaunchEmailVerification, recordLaunchPaymentVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
 
 const router: IRouter = Router();
 const environments = new Set<LaunchEnvironment>(["development", "staging", "production"]);
@@ -39,7 +40,7 @@ export async function executeLaunchEmailCheck(input: { record: { configuration: 
 
 router.get("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
-  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(await readLaunchConfiguration(pool, target)), emailVerification: await readLatestLaunchEmailVerification(pool, target) });
+  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(await readLaunchConfiguration(pool, target)), emailVerification: await readLatestLaunchEmailVerification(pool, target), paymentVerifications: await listLatestLaunchPaymentVerifications(pool, target) });
 });
 
 router.get("/admin/launch-configuration/:environment/history", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
@@ -82,6 +83,23 @@ router.post("/admin/launch-configuration/:environment/email/send-test", authMidd
   const result = await executeLaunchEmailCheck({ record: current, environment: target, action: "send-test", recipient: to });
   await recordLaunchEmailVerification(pool, { configurationId: current.id, environment: target, revision: current.revision, provider: result.provider, action: "send_test", status: result.status, resultCode: result.code, actorUserId: req.user!.userId });
   res.set("Cache-Control", "private, no-store, max-age=0"); res.status(result.status === "sent" ? 200 : 409).json({ result });
+});
+
+router.post("/admin/launch-configuration/:environment/payment/verify", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+  const target = environment(String(req.params.environment)), method = String(req.body?.method);
+  if (!target || !["bank_transfer", "qr_payment", "stripe"].includes(method)) { res.status(400).json({ code: "LAUNCH_PAYMENT_TEST_INVALID" }); return; }
+  const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
+  const stored = current.configuration as StoredLaunchConfiguration, readiness = current.readiness as any;
+  if (!(stored.enabledPaymentMethods ?? []).includes(method)) { res.status(409).json({ code: "LAUNCH_PAYMENT_METHOD_DISABLED" }); return; }
+  const payment = readiness.paymentMethods?.capabilities?.find((item: any) => item.method === method);
+  let result;
+  if (method === "stripe") {
+    const mode = stored.paymentProvider?.mode === "production" ? "production" : "sandbox";
+    result = useLaunchSecret({ environment: target, field: "stripeSecretKey", envelope: stored.secretEnvelopes?.stripeSecretKey }, secretKey => useLaunchSecret({ environment: target, field: "stripeWebhookSecret", envelope: stored.secretEnvelopes?.stripeWebhookSecret }, webhookSecret => verifyLaunchPaymentMethod({ method: "stripe", mode, configurationReady: payment?.issues?.length === 0, accountReference: stored.paymentProvider?.accountReference, secretKey, webhookSecret })));
+  } else result = verifyLaunchPaymentMethod({ method: method as "bank_transfer" | "qr_payment", configurationReady: payment?.issues?.length === 0 });
+  const resolved = await result;
+  await recordLaunchPaymentVerification(pool, { configurationId: current.id, environment: target, revision: current.revision, method: resolved.method, mode: resolved.mode, status: resolved.status, resultCode: resolved.code, actorUserId: req.user!.userId });
+  res.set("Cache-Control", "private, no-store, max-age=0"); res.status(["configured", "verified"].includes(resolved.status) ? 200 : 409).json({ result: resolved });
 });
 
 router.post("/admin/launch-configuration/:environment/:action", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
