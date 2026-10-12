@@ -45,7 +45,7 @@ async function reserve(candidate: Candidate, artifactKind: ArtifactKind, attempt
     if(decision.action!=="send") { await client.query("ROLLBACK"); return null; }
     await client.query(`INSERT INTO feedback_audit_events(feedback_id,actor_user_id,event_type,after_state,reason) VALUES($1,$2,$3,$4::jsonb,$5)`, [candidate.feedback_id, candidate.recipient_user_id, EVENT, JSON.stringify({ snapshotEventId: candidate.snapshot_event_id, recipientUserId: candidate.recipient_user_id, artifactKind, attemptId, attemptNumber:decision.attemptNumber, state: "sending", release: FEEDBACK_RELEASE }), "Automatic explicitly opted-in super-admin feedback package delivery"]);
     await client.query("COMMIT"); return decision.attemptNumber;
-  } catch (error) { try { await client.query("ROLLBACK"); } catch {} throw error; } finally { client.release(); }
+  } catch (error) { await rollbackWithOperationalEvidence(client, "FEEDBACK_TELEGRAM_SETTLEMENT_ROLLBACK_FAILED"); throw error; } finally { client.release(); }
 }
 async function settle(candidate: Candidate, artifactKind: ArtifactKind, attemptId: string, attemptNumber: number, state: "sent" | "failed", providerAcknowledgementId?: string, reasonCode?: string, now=new Date()) {
   const nextAttemptAt=state==="failed"?feedbackTelegramNextAttemptAt(attemptNumber,now):null;
