@@ -135,6 +135,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/intelligence.ts
 - artifacts/api-server/src/routes/job-intake.ts
 - artifacts/api-server/src/routes/job-operations.ts
+- artifacts/api-server/src/routes/launch-configuration.behavior.ts
+- artifacts/api-server/src/routes/launch-configuration.ts
 - artifacts/api-server/src/routes/linked_items.ts
 - artifacts/api-server/src/routes/living_brief.ts
 - artifacts/api-server/src/routes/master-catalogs.ts
@@ -190,6 +192,7 @@ It changes only when the code structure or curated architectural facts change.
 - downloadsRouter
 - healthRouter
 - authRouter
+- launchConfigurationRouter
 - onboardingRouter
 - commercialWorkspaceRouter
 - commercialProviderWebhookRouter
@@ -978,6 +981,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/knowledge-context-lookup.ts
 - artifacts/api-server/src/lib/knowledge-lesson-proposal-link.behavior.ts
 - artifacts/api-server/src/lib/knowledge-lesson-proposal-link.ts
+- artifacts/api-server/src/lib/launch-configuration-migration.behavior.ts
+- artifacts/api-server/src/lib/launch-configuration-migration.ts
+- artifacts/api-server/src/lib/launch-configuration-secret.behavior.ts
+- artifacts/api-server/src/lib/launch-configuration-secret.ts
+- artifacts/api-server/src/lib/launch-configuration-store.behavior.ts
+- artifacts/api-server/src/lib/launch-configuration-store.ts
 - artifacts/api-server/src/lib/launch-configuration.behavior.ts
 - artifacts/api-server/src/lib/launch-configuration.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
@@ -1383,6 +1392,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/internal-cost-governance.ts
 - lib/db/src/schema/invitations.ts
 - lib/db/src/schema/job-intakes.ts
+- lib/db/src/schema/launch-configuration.ts
 - lib/db/src/schema/lens-imports.ts
 - lib/db/src/schema/lens-next-model-bindings.ts
 - lib/db/src/schema/lens-next-publishing.ts
