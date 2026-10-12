@@ -5468,3 +5468,16 @@ This repair changes only failure observability. It creates no customer record, s
 - [ ] Pass the complete gate, push the five-build block, publish the accumulated ten builds and complete authenticated desktop/mobile Chrome smoke.
 
 This block changes transaction-failure observability only. Rollback remains best-effort and the original operation error remains authoritative. It changes no financial value, connector credential, coordination record, customer permission, payment, email, provider, Native, installer or MAIN 04 behavior.
+
+## Commercial billing-history release-gate repair — 2026-10-12
+
+- [x] Replace the superseded always-mounted Billing History assertion with its accepted disclosure owner.
+- [x] Protect billing-administrator authority before the disclosure renders.
+- [x] Protect the English and Spanish disclosure label.
+- [x] Protect exact open-state tracking from the native details control.
+- [x] Protect lazy Billing History mounting until the customer opens the disclosure.
+- [x] Pass Launch Readiness Blocks 15–24, SaaS Completion Blocks 50–62 and the blocking platform audit.
+- [ ] Pass the complete exact-head build, push the five-build block and publish it.
+- [ ] Complete authenticated desktop/mobile Chrome production acceptance.
+
+This repair changes test coverage only. Existing commercial UI, billing authority, provider configuration, customer records, database, schema, Native, installer and MAIN 04 behavior are unchanged.

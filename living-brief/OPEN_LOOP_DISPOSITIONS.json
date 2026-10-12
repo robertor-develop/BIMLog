@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "651bed2eb1ee0e8e5a1f5407caaf72ac0d4f522e044f1d2628caed4a7124530d",
-  "itemCount": 374,
+  "sourceSha256": "e514f94fb4925d25688005e7bfd29c992f761f5696f332ae3a5e8c44ab700950",
+  "itemCount": 376,
   "counts": {
-    "ACTIVE": 332,
+    "ACTIVE": 334,
     "SUPERSEDED": 30,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6813,6 +6813,42 @@
       "evidence": [
         "OPEN_LOOP.md:5468",
         "Pre-release transaction rollback observability — 2026-10-11"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d0f9e4f966ca8bf9",
+      "sourceLine": 5480,
+      "heading": "Commercial billing-history release-gate repair — 2026-10-12",
+      "statement": "Pass the complete exact-head build, push the five-build block and publish it.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5480",
+        "Commercial billing-history release-gate repair — 2026-10-12"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "dddcb728297a79b0",
+      "sourceLine": 5481,
+      "heading": "Commercial billing-history release-gate repair — 2026-10-12",
+      "statement": "Complete authenticated desktop/mobile Chrome production acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5481",
+        "Commercial billing-history release-gate repair — 2026-10-12"
       ],
       "currentAuthority": false
     }
