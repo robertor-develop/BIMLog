@@ -44,3 +44,23 @@ export function decryptLaunchSecret(input: { environment: string; field: string;
 export function maskLaunchSecret(envelope: LaunchSecretEnvelope | null | undefined) {
   return envelope ? `configured (${envelope.keyVersion})` : "not configured";
 }
+
+export function useLaunchSecret<T>(input: {
+  environment: string;
+  field: string;
+  envelope: LaunchSecretEnvelope | null | undefined;
+  encodedKey?: string;
+}, operation: (value: string) => T): T {
+  if (!input.envelope) throw new LaunchSecretError("LAUNCH_SECRET_NOT_CONFIGURED", "Launch secret is not configured.");
+  const plaintext = decryptLaunchSecret({
+    environment: input.environment,
+    field: input.field,
+    envelope: input.envelope,
+    encodedKey: input.encodedKey,
+  });
+  try {
+    return operation(plaintext.toString("utf8"));
+  } finally {
+    plaintext.fill(0);
+  }
+}
