@@ -978,6 +978,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/knowledge-context-lookup.ts
 - artifacts/api-server/src/lib/knowledge-lesson-proposal-link.behavior.ts
 - artifacts/api-server/src/lib/knowledge-lesson-proposal-link.ts
+- artifacts/api-server/src/lib/launch-configuration.behavior.ts
+- artifacts/api-server/src/lib/launch-configuration.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.behavior.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.ts
