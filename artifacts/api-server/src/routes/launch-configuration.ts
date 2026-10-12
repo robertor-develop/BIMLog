@@ -3,6 +3,9 @@ import { pool } from "@workspace/db";
 import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
 import { inspectLaunchConfiguration, type LaunchConfigurationInput } from "../lib/launch-configuration";
 import { encryptLaunchSecret, maskLaunchSecret, type LaunchSecretEnvelope } from "../lib/launch-configuration-secret";
+import { useLaunchSecret } from "../lib/launch-configuration-secret";
+import { sendLaunchTestEmail, verifyLaunchEmailProvider, type LaunchEmailAdapters } from "../lib/launch-email-provider";
+import { createLiveLaunchEmailAdapters } from "../lib/launch-email-provider-live";
 import { LaunchConfigurationConflict, listLaunchConfigurationHistory, readLaunchConfiguration, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
 
 const router: IRouter = Router();
@@ -19,6 +22,19 @@ function publicConfiguration(value: unknown) {
   return { ...configuration, secrets: { smtpPassword: maskLaunchSecret(envelopes?.smtpPassword), sendgridApiKey: maskLaunchSecret(envelopes?.sendgridApiKey) } };
 }
 const response = (record: any) => record ? { ...record, configuration: publicConfiguration(record.configuration) } : null;
+const unavailableSmtp = { async verify() { return "unavailable" as const; }, async send() { return { status: "unavailable" as const }; } };
+const emailAdapters: LaunchEmailAdapters = createLiveLaunchEmailAdapters({ smtp: unavailableSmtp });
+const recipient = (value: unknown) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) && value.trim().length <= 254 ? value.trim().toLowerCase() : null;
+
+export async function executeLaunchEmailCheck(input: { record: { configuration: unknown }; environment: LaunchEnvironment; action: "verify" | "send-test"; recipient?: string; adapters?: LaunchEmailAdapters }) {
+  const stored = input.record.configuration as StoredLaunchConfiguration;
+  const provider = stored.emailDelivery?.provider;
+  const field = provider === "sendgrid" ? "sendgridApiKey" : "smtpPassword";
+  const envelope = stored.secretEnvelopes?.[field];
+  return useLaunchSecret({ environment: input.environment, field, envelope }, secret => input.action === "verify"
+    ? verifyLaunchEmailProvider({ configuration: stored.emailDelivery, secret, adapters: input.adapters ?? emailAdapters })
+    : sendLaunchTestEmail({ configuration: stored.emailDelivery, secret, recipient: input.recipient ?? "", adapters: input.adapters ?? emailAdapters }));
+}
 
 router.get("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
@@ -44,6 +60,21 @@ router.put("/admin/launch-configuration/:environment", authMiddleware, isSuperAd
     const item = await writeLaunchConfiguration(pool, { environment: target, expectedRevision, state, configuration: supplied, readiness, actorUserId: req.user!.userId, reason: changeReason });
     res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(item) });
   } catch (error) { if (error instanceof LaunchConfigurationConflict) { res.status(409).json({ code: "LAUNCH_CONFIGURATION_STALE" }); return; } throw error; }
+});
+
+router.post("/admin/launch-configuration/:environment/email/verify", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+  const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
+  const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
+  const result = await executeLaunchEmailCheck({ record: current, environment: target, action: "verify" });
+  res.set("Cache-Control", "private, no-store, max-age=0"); res.status(result.status === "verified" ? 200 : 409).json({ result });
+});
+
+router.post("/admin/launch-configuration/:environment/email/send-test", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+  const target = environment(String(req.params.environment)), to = recipient(req.body?.recipient);
+  if (!target || !to) { res.status(400).json({ code: "LAUNCH_EMAIL_TEST_INVALID" }); return; }
+  const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
+  const result = await executeLaunchEmailCheck({ record: current, environment: target, action: "send-test", recipient: to });
+  res.set("Cache-Control", "private, no-store, max-age=0"); res.status(result.status === "sent" ? 200 : 409).json({ result });
 });
 
 router.post("/admin/launch-configuration/:environment/:action", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
