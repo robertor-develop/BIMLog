@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 770,
+    "apiRoutes": 774,
     "frontendApiReferences": 308,
     "routeOwnedTables": 72
   },
@@ -5140,6 +5140,30 @@
       "method": "PATCH",
       "path": "/projects/:projectId/operations/budget/variance-reviews/:reviewId",
       "owner": "artifacts/api-server/src/routes/job-operations.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/admin/launch-configuration/:environment",
+      "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/admin/launch-configuration/:environment/history",
+      "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
+      "tables": []
+    },
+    {
+      "method": "PUT",
+      "path": "/admin/launch-configuration/:environment",
+      "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/launch-configuration/:environment/:action",
+      "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
       "tables": []
     },
     {
