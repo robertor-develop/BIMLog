@@ -1,7 +1,9 @@
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { createHash, timingSafeEqual } from "node:crypto";
-import { readFileSync, statSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 export const THREAD_ID = "01a10a95-a2e5-73d3-a471-6738addc7e42";
 const PORT = Number(process.env.BIMLOG_MAIN04_LOCAL_PORT || 8791);
@@ -9,6 +11,7 @@ const TOKEN = process.env.BIMLOG_MAIN04_BRIDGE_TOKEN || "";
 const CODEX = process.env.BIMLOG_CODEX_EXECUTABLE || "C:\\Users\\soporte\\AppData\\Local\\OpenAI\\Codex\\bin\\f544b3844e0f14e9\\codex.exe";
 const ROLLOUT = process.env.BIMLOG_MAIN04_ROLLOUT_PATH || "C:\\Users\\soporte\\.codex\\sessions\\2026\\10\\05\\rollout-2026-10-05T01-42-21-01a10a95-a2e5-73d3-a471-6738addc7e42.jsonl";
 let queue = Promise.resolve();
+const jobs = new Map();
 
 function authorized(value) {
   if (!TOKEN || !value?.startsWith("Bearer ")) return false;
@@ -32,54 +35,38 @@ function readBody(request) {
   });
 }
 
-function queueQuestion(message) {
+function resumeQuestion(message) {
+  const folder = mkdtempSync(join(tmpdir(), "bimlog-main04-"));
+  const output = join(folder, "answer.txt");
   return new Promise((resolve, reject) => {
-    const child = spawn(CODEX, ["queue", "--thread", THREAD_ID, "--message", message], {
+    const child = spawn(CODEX, ["exec", "--skip-git-repo-check", "resume", "-c", 'sandbox_mode="read-only"', "--output-last-message", output, THREAD_ID, "-"], {
       cwd: "F:\\BIMLog",
       windowsHide: true,
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ["pipe", "ignore", "pipe"],
       env: { ...process.env, USERPROFILE: "C:\\Users\\soporte", HOME: "C:\\Users\\soporte", CODEX_HOME: "C:\\Users\\soporte\\.codex" },
     });
     let error = "";
     child.stderr.on("data", chunk => { if (error.length < 8192) error += String(chunk); });
-    child.on("error", () => reject(new Error("CODEX_QUEUE_FAILED")));
-    child.on("exit", code => code === 0 ? resolve() : reject(new Error(/active writer|already has an active/i.test(error) ? "CODEX_DESTINATION_BUSY" : "CODEX_QUEUE_FAILED")));
-  });
-}
-
-function appendedEvents(offset) {
-  const bytes = readFileSync(ROLLOUT);
-  return bytes.subarray(offset).toString("utf8").split(/\r?\n/).filter(Boolean).flatMap(line => {
-    try { return [JSON.parse(line)]; } catch { return []; }
-  });
-}
-
-async function waitForAnswer(offset, marker, timeoutMs = 190_000) {
-  const deadline = Date.now() + timeoutMs;
-  let turnId = null;
-  while (Date.now() < deadline) {
-    const events = appendedEvents(offset);
-    if (!turnId) {
-      const user = events.find(event => event.type === "response_item" && event.payload?.role === "user" && event.payload?.content?.some?.(item => item?.type === "input_text" && item.text.includes(marker)));
-      turnId = user?.payload?.internal_chat_message_metadata_passthrough?.turn_id || null;
-    }
-    if (turnId) {
-      const completed = events.find(event => event.type === "event_msg" && event.payload?.type === "task_complete" && event.payload?.turn_id === turnId);
-      if (completed) {
-        const answer = String(completed.payload.last_agent_message || "").trim();
-        if (!answer) throw new Error("MAIN04_ANSWER_MISSING");
-        return answer;
+    child.on("error", () => reject(new Error("CODEX_RESUME_FAILED")));
+    child.on("exit", code => {
+      try {
+        if (code !== 0) return reject(new Error(/active writer|already has an active/i.test(error) ? "CODEX_DESTINATION_BUSY" : "CODEX_RESUME_FAILED"));
+        const answer = readFileSync(output, "utf8").trim();
+        if (!answer) return reject(new Error("MAIN04_ANSWER_MISSING"));
+        resolve(answer);
+      } catch {
+        reject(new Error("MAIN04_ANSWER_MISSING"));
+      } finally {
+        rmSync(folder, { recursive: true, force: true });
       }
-    }
-    await new Promise(resolve => setTimeout(resolve, 250));
-  }
-  throw new Error("MAIN04_TIMEOUT");
+    });
+    child.stdin.end(message);
+  });
 }
 
 export function invokeMain04(payload) {
   const work = async () => {
     if (payload?.schemaVersion !== "bimlog-main04-question.v1" || payload?.destinationThreadId !== THREAD_ID || typeof payload?.requestId !== "string" || typeof payload?.question !== "string" || !payload.question.trim()) throw new Error("REQUEST_REFUSED");
-    const offset = statSync(ROLLOUT).size;
     const marker = `BIMLOG_REQUEST_ID=${payload.requestId}`;
     const message = [
       marker,
@@ -87,13 +74,30 @@ export function invokeMain04(payload) {
       `EXACT_QUESTION=${JSON.stringify(payload.question)}`,
       `TRUSTED_PAGE_CONTEXT=${JSON.stringify(payload.context || {})}`,
     ].join("\n");
-    await queueQuestion(message);
-    const answer = await waitForAnswer(offset, marker);
+    const answer = await resumeQuestion(message);
     return { threadId: THREAD_ID, requestId: payload.requestId, answer, answerDigest: createHash("sha256").update(answer).digest("hex") };
   };
   const result = queue.then(work, work);
   queue = result.then(() => undefined, () => undefined);
   return result;
+}
+
+function submitMain04(payload) {
+  if (payload?.schemaVersion !== "bimlog-main04-question.v1" || payload?.destinationThreadId !== THREAD_ID || typeof payload?.requestId !== "string" || typeof payload?.question !== "string" || !payload.question.trim()) throw new Error("REQUEST_REFUSED");
+  if (jobs.has(payload.requestId)) return jobs.get(payload.requestId);
+  const job = { threadId: THREAD_ID, requestId: payload.requestId, state: "QUEUED", createdAt: Date.now() };
+  jobs.set(payload.requestId, job);
+  void invokeMain04(payload).then(
+    result => Object.assign(job, result, { state: "SUCCEEDED", completedAt: Date.now() }),
+    error => Object.assign(job, { state: "FAILED", error: error instanceof Error ? error.message : "MAIN04_FAILED", completedAt: Date.now() }),
+  );
+  return job;
+}
+
+function publicJob(job) {
+  if (job.state === "SUCCEEDED") return { threadId: job.threadId, requestId: job.requestId, state: job.state, answer: job.answer, answerDigest: job.answerDigest };
+  if (job.state === "FAILED") return { threadId: job.threadId, requestId: job.requestId, state: job.state, error: job.error };
+  return { threadId: job.threadId, requestId: job.requestId, state: job.state };
 }
 
 if (process.argv[1] && import.meta.url === new URL(`file:///${process.argv[1].replace(/\\/g, "/")}`).href) {
@@ -102,13 +106,24 @@ if (process.argv[1] && import.meta.url === new URL(`file:///${process.argv[1].re
     response.setHeader("content-type", "application/json; charset=utf-8");
     response.setHeader("cache-control", "no-store");
     if (request.method === "GET" && request.url === "/healthz") return response.end(JSON.stringify({ ok: true, threadId: THREAD_ID }));
-    if (request.method !== "POST" || request.url !== "/bimlog/main04" || !authorized(request.headers.authorization)) {
+    if (!authorized(request.headers.authorization)) {
       response.statusCode = 404;
       return response.end(JSON.stringify({ error: "NOT_FOUND" }));
     }
     try {
-      const result = await invokeMain04(await readBody(request));
-      response.end(JSON.stringify(result));
+      if (request.method === "POST" && request.url === "/bimlog/main04") {
+        const job = submitMain04(await readBody(request));
+        response.statusCode = job.state === "SUCCEEDED" ? 200 : 202;
+        return response.end(JSON.stringify(publicJob(job)));
+      }
+      const match = request.method === "GET" && request.url?.match(/^\/bimlog\/main04\/([A-Za-z0-9-]{8,128})$/);
+      const job = match ? jobs.get(match[1]) : null;
+      if (!job) {
+        response.statusCode = 404;
+        return response.end(JSON.stringify({ error: "NOT_FOUND" }));
+      }
+      response.statusCode = job.state === "FAILED" ? 503 : job.state === "SUCCEEDED" ? 200 : 202;
+      response.end(JSON.stringify(publicJob(job)));
     } catch (error) {
       response.statusCode = 503;
       response.end(JSON.stringify({ error: error instanceof Error ? error.message : "MAIN04_FAILED" }));

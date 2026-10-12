@@ -14,6 +14,23 @@ assert.equal(captured.destinationThreadId, BIMLOG_MAIN04_THREAD_ID);
 assert.equal(result.answer, answer, "the panel answer must be the task's returned answer");
 assert.equal(result.answerDigest.length, 64);
 
+let asyncRequestId = "";
+let asyncPollUrl = "";
+let asyncCalls = 0;
+const asyncFetch: typeof fetch = async (url, init) => {
+  asyncCalls += 1;
+  if (init?.method === "POST") {
+    asyncRequestId = JSON.parse(String(init.body)).requestId;
+    return new Response(JSON.stringify({ threadId: BIMLOG_MAIN04_THREAD_ID, requestId: asyncRequestId, state: "QUEUED" }), { status: 202, headers: { "content-type": "application/json" } });
+  }
+  asyncPollUrl = String(url);
+  return new Response(JSON.stringify({ threadId: BIMLOG_MAIN04_THREAD_ID, requestId: asyncRequestId, state: "SUCCEEDED", answer: "Correlated async answer" }), { status: 200, headers: { "content-type": "application/json" } });
+};
+const asyncResult = await askBimlogMain04({ question: "Return the correlated answer.", context, userId: 7, projectId: 63 }, { fetch: asyncFetch, environment: { BIMLOG_MAIN04_BRIDGE_URL: "https://connector.example.test/bimlog", BIMLOG_MAIN04_BRIDGE_TOKEN: "secret" } });
+assert.equal(asyncCalls, 2, "a queued request must be polled until its answer is ready");
+assert.equal(asyncPollUrl, `https://connector.example.test/bimlog/${asyncRequestId}`);
+assert.equal(asyncResult.answer, "Correlated async answer");
+
 let protectedHeaders: Record<string, string> | undefined;
 const protectedFetch: typeof fetch = async (_url, init) => {
   protectedHeaders = init?.headers as Record<string, string>;

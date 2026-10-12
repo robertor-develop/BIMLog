@@ -4,7 +4,12 @@ const source = readFileSync(new URL("./bimlog-main04-local-bridge.mjs", import.m
 assert.match(source, /queue\.then\(work, work\)/);
 assert.match(source, /destinationThreadId !== THREAD_ID/);
 assert.match(source, /EXACT_QUESTION=/);
-assert.match(source, /payload\?\.turn_id === turnId/);
+assert.match(source, /"exec", "--skip-git-repo-check", "resume"/);
+assert.match(source, /--skip-git-repo-check/);
+assert.match(source, /--output-last-message/);
+assert.match(source, /child\.stdin\.end\(message\)/);
+assert.match(source, /state: "QUEUED"/);
+assert.match(source, /\/bimlog\\\/main04\\\/\(\[A-Za-z0-9-\]/);
 assert.match(source, /timingSafeEqual/);
 assert.doesNotMatch(source, /MAIN-00|Feedback Agent|operations-dashboard/i);
 console.log("BIMLog MAIN 04 local bridge contract: PASS");

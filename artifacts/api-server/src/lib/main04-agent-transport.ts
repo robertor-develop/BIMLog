@@ -4,7 +4,7 @@ import { BIMLOG_ASSISTANT_ROUTES } from "./assistant-route-registry";
 export const BIMLOG_MAIN04_THREAD_ID = BIMLOG_ASSISTANT_ROUTES.conversation.threadId;
 
 export type Main04QuestionContext = { route: string; page: string; section: string; language: "en" | "es"; focusedControl: string; controls: string[]; pageText: string[]; history: Array<{ role: "user" | "assistant"; content: string }> };
-type Main04BridgeResponse = { threadId?: unknown; answer?: unknown; requestId?: unknown };
+type Main04BridgeResponse = { threadId?: unknown; answer?: unknown; requestId?: unknown; state?: unknown };
 let main04QueueTail: Promise<void> = Promise.resolve();
 
 function enqueueMain04<T>(work: () => Promise<T>): Promise<T> {
@@ -35,9 +35,18 @@ export async function askBimlogMain04(input: { question: string; context: Main04
       headers["cf-access-client-id"] = accessClientId;
       headers["cf-access-client-secret"] = accessClientSecret;
     }
-    const response = await (dependencies.fetch ?? fetch)(url, { method: "POST", headers, body: JSON.stringify(body), signal: AbortSignal.timeout(190_000) });
+    const fetcher = dependencies.fetch ?? fetch;
+    let response = await fetcher(url, { method: "POST", headers, body: JSON.stringify(body), signal: AbortSignal.timeout(30_000) });
     if (!response.ok) throw new Error(`MAIN04_TRANSPORT_FAILED_${response.status}`);
-    const result = await response.json() as Main04BridgeResponse;
+    let result = await response.json() as Main04BridgeResponse;
+    const deadline = Date.now() + 190_000;
+    while (response.status === 202 || result.state === "QUEUED") {
+      if (Date.now() >= deadline) throw new Error("MAIN04_TRANSPORT_TIMEOUT");
+      await new Promise(resolve => setTimeout(resolve, 1_000));
+      response = await fetcher(new URL(encodeURIComponent(requestId), url.endsWith("/") ? url : `${url}/`).toString(), { method: "GET", headers, signal: AbortSignal.timeout(30_000) });
+      if (!response.ok && response.status !== 202) throw new Error(`MAIN04_TRANSPORT_FAILED_${response.status}`);
+      result = await response.json() as Main04BridgeResponse;
+    }
     if (result.threadId !== BIMLOG_MAIN04_THREAD_ID) throw new Error("MAIN04_DESTINATION_MISMATCH");
     if (result.requestId !== requestId) throw new Error("MAIN04_REQUEST_MISMATCH");
     const answer = typeof result.answer === "string" ? result.answer.trim() : "";
