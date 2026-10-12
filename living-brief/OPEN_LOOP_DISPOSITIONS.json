@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a309454b7a3c3eeb25c62aac8e3d6e6d101b0577ea28cb9f4ad3c285ab0a32e6",
-  "itemCount": 382,
+  "sourceSha256": "82404575f53322d1ea30526e2dd74b90ab710eed112ff0d6213ad6d995dab668",
+  "itemCount": 383,
   "counts": {
     "ACTIVE": 340,
-    "SUPERSEDED": 30,
+    "SUPERSEDED": 31,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -72,6 +72,10 @@
     {
       "canonicalId": "4107891b4bf42160",
       "duplicateId": "93d4450874e30898"
+    },
+    {
+      "canonicalId": "5b374606f8726bca",
+      "duplicateId": "c8f39eca660f5589"
     }
   ],
   "items": [
@@ -6957,6 +6961,24 @@
       "evidence": [
         "OPEN_LOOP.md:5526",
         "Financial import and feedback receiver observability — 2026-10-12"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c8f39eca660f5589",
+      "sourceLine": 5537,
+      "heading": "Enterprise launch configuration Blocks 3–4 release — 2026-10-12",
+      "statement": "Pass the complete exact-head gate, push the accumulated ten builds, publish and complete authenticated desktop/mobile Chrome acceptance.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "canonical-open-loop:5b374606f8726bca",
+        "duplicate-source:c8f39eca660f5589"
       ],
       "currentAuthority": false
     }

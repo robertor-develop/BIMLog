@@ -5526,3 +5526,14 @@ This block changes rollback-failure observability only. Rollback remains best-ef
 - [ ] Pass the complete exact-head gate, push the accumulated ten builds, publish and complete authenticated desktop/mobile Chrome acceptance.
 
 This block changes failure observability only. Existing feedback custody, fencing, retries, financial values, permissions, payments, email, providers, Native, installer and MAIN 04 behavior remain authoritative and unchanged.
+
+## Enterprise launch configuration Blocks 3–4 release — 2026-10-12
+
+- [x] Verify SendGrid credentials and synthetic delivery through the protected Super Admin authority.
+- [x] Verify SMTP credentials over certificate-validated TLS and send a non-customer synthetic message.
+- [x] Persist sanitized provider evidence without credentials or recipient addresses.
+- [x] Require current-provider verification evidence before production activation.
+- [x] Show the latest verification result in the bilingual Total Control workspace.
+- [ ] Pass the complete exact-head gate, push the accumulated ten builds, publish and complete authenticated desktop/mobile Chrome acceptance.
+
+This release creates no customer transaction and sends no message until a Super Admin explicitly invokes the synthetic test with owner-supplied credentials and recipient. Provider credentials remain encrypted and never return to the browser.
