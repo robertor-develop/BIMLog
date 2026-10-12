@@ -70,6 +70,7 @@ import supportCaseMessagesRouter from "./support-case-messages";
 import repairsRouter from "./repairs";
 import publicLegalIdentityRouter from "./public-legal-identity";
 import publicCommercialAvailabilityRouter from "./public-commercial-availability";
+import launchConfigurationRouter from "./launch-configuration";
 
 const router: IRouter = Router();
 
@@ -78,6 +79,7 @@ router.use(publicCommercialAvailabilityRouter);
 router.use(downloadsRouter);
 router.use(healthRouter);
 router.use(authRouter);
+router.use(launchConfigurationRouter);
 router.use(onboardingRouter);
 router.use(commercialWorkspaceRouter);
 router.use(commercialProviderWebhookRouter);
