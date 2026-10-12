@@ -159,7 +159,7 @@ async function settleFailure(claimed: BackupClaim, actorUserId: number, error: u
     if (!updated.rowCount) { await client.query("ROLLBACK"); return false; }
     await client.query(`INSERT INTO feedback_audit_events(feedback_id,actor_user_id,event_type,after_state) VALUES($1,$2,'evidence_backup_failed',$3::jsonb)`, [claimed.feedbackId, actorUserId, JSON.stringify({ assetId: claimed.assetId, state, attempt: claimed.attempt, nextAttemptAt: updated.rows[0].next_attempt_at?.toISOString?.() ?? null, errorCode: code, fencingToken: claimed.fencingToken, actorType: "worker" })]);
     await client.query("COMMIT"); return true;
-  } catch (failure) { await client.query("ROLLBACK").catch(() => undefined); throw failure; } finally { client.release(); }
+  } catch (failure) { await rollbackWithOperationalEvidence(client, "FEEDBACK_BACKUP_SETTLEMENT_ROLLBACK_FAILED"); throw failure; } finally { client.release(); }
 }
 
 export async function processFeedbackBackupBatch(limit = DEFAULT_BATCH_SIZE) {
