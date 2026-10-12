@@ -86,6 +86,10 @@ export default defineConfig({
     emptyOutDir: true,
     manifest: "vite-manifest.json",
     rollupOptions: {
+      treeshake: {
+        preset: "smallest",
+        moduleSideEffects: (id) => id.endsWith(".css"),
+      },
       output: {
         entryFileNames: "assets/[name]-[hash].js",
         chunkFileNames: "assets/[name]-[hash].js",
