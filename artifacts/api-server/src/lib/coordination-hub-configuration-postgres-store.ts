@@ -1,6 +1,7 @@
 import { pool } from "@workspace/db";
 import { CoordinationConflictError, type CoordinationScope } from "./coordination-hub-service";
 import type { ConnectorCredentialRecord, CoordinationHubConfigurationStore, CoordinationHubConfigurationTransaction, RotateConnectorCredential, SharePointFolderMappingRecord, SharePointProjectMappingRecord } from "./coordination-hub-configuration-service";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 type PoolClient = { query(sql: string, values?: unknown[]): Promise<{ rows: Array<Record<string, unknown>>; rowCount: number | null }>; release(): void };
 
@@ -147,7 +148,7 @@ export const postgresCoordinationHubConfigurationStore: CoordinationHubConfigura
       await client.query("COMMIT");
       return result;
     } catch (error) {
-      await client.query("ROLLBACK").catch(() => undefined);
+      await rollbackWithOperationalEvidence(client, "COORDINATION_HUB_CONFIGURATION_ROLLBACK_FAILED");
       throw error;
     } finally { client.release(); }
   },
