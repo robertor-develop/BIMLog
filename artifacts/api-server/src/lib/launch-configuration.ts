@@ -1,3 +1,5 @@
+import { inspectLaunchPaymentSelection, type LaunchPaymentMethod } from "./launch-payment-provider";
+
 export const launchReadinessStates = [
   "DEVELOPMENT_INCOMPLETE",
   "INTERNAL_TEST_READY",
@@ -166,6 +168,16 @@ export type LaunchConfigurationInput = Readonly<{
   emailDelivery: EmailDeliveryInput;
   qrPayment: QrPaymentInput;
   bankTransfer: BankTransferInput;
+  enabledPaymentMethods?: readonly LaunchPaymentMethod[];
+  paymentProvider?: Readonly<{
+    provider?: "stripe";
+    mode?: "sandbox" | "production";
+    accountReference?: string;
+    secretKeyReference?: string;
+    webhookSecretReference?: string;
+    portalConfigurationReference?: string;
+    active?: boolean;
+  }>;
   stripeEnabled?: boolean;
 }>;
 
@@ -177,6 +189,7 @@ export type LaunchConfigurationReadiness = Readonly<{
   emailDelivery: LaunchConfigurationSection<EmailDeliveryInput>;
   qrPayment: LaunchConfigurationSection<QrPaymentInput>;
   bankTransfer: LaunchConfigurationSection<BankTransferInput>;
+  paymentMethods: ReturnType<typeof inspectLaunchPaymentSelection>;
   stripe: Readonly<{ enabled: boolean; status: "disabled" | "configuration_required" }>;
   blockers: readonly string[];
 }>;
@@ -186,12 +199,14 @@ export function inspectLaunchConfiguration(input: LaunchConfigurationInput): Lau
   const emailDelivery = inspectEmailDelivery(input.emailDelivery);
   const qrPayment = inspectQrPayment(input.qrPayment);
   const bankTransfer = inspectBankTransfer(input.bankTransfer);
+  const enabledPaymentMethods = input.enabledPaymentMethods ?? (input.stripeEnabled ? ["stripe"] : ["bank_transfer", "qr_payment"]);
+  const paymentProvider = input.paymentProvider ?? {};
+  const stripeConfigured = paymentProvider.provider === "stripe" && !!clean(paymentProvider.accountReference, 200) && !!clean(paymentProvider.secretKeyReference, 500) && !!clean(paymentProvider.webhookSecretReference, 500);
+  const paymentMethods = inspectLaunchPaymentSelection({ enabledMethods: enabledPaymentMethods, stripeMode: paymentProvider.mode, bankReady: bankTransfer.status !== "invalid", qrReady: qrPayment.status !== "invalid", stripeConfigured });
   const blockers = [
     ...(businessIdentity.status === "invalid" ? ["business_identity"] : []),
     ...(emailDelivery.status === "invalid" ? ["email_delivery"] : []),
-    ...(qrPayment.status === "invalid" ? ["qr_payment"] : []),
-    ...(bankTransfer.status === "invalid" ? ["bank_transfer"] : []),
-    ...(input.stripeEnabled ? ["stripe_configuration"] : []),
+    ...paymentMethods.issues,
   ];
   const launchConfigurationEntered = blockers.length === 0;
   return Object.freeze({
@@ -202,7 +217,8 @@ export function inspectLaunchConfiguration(input: LaunchConfigurationInput): Lau
     emailDelivery: Object.freeze({ ...emailDelivery, value: emailDelivery.value ? Object.freeze({ ...emailDelivery.value, smtpPasswordSecretReference: undefined, sendgridApiKeySecretReference: undefined }) : null }),
     qrPayment,
     bankTransfer,
-    stripe: Object.freeze({ enabled: input.stripeEnabled === true, status: input.stripeEnabled ? "configuration_required" : "disabled" }),
+    paymentMethods,
+    stripe: Object.freeze({ enabled: paymentMethods.enabledMethods.includes("stripe"), status: stripeConfigured ? "configuration_required" : "disabled" }),
     blockers: Object.freeze(blockers),
   });
 }

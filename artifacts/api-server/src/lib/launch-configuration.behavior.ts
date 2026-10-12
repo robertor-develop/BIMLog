@@ -63,7 +63,10 @@ assert.equal(readiness.emailDelivery.value?.smtpPasswordSecretReference, undefin
 const ownerPending = inspectLaunchConfiguration({ businessIdentity: {}, emailDelivery: {}, qrPayment: {}, bankTransfer: {}, stripeEnabled: false });
 assert.equal(ownerPending.readinessState, "GA_CANDIDATE_CONFIGURATION_READY");
 assert.equal(ownerPending.gaCandidateConfigurationReady, true);
-assert.deepEqual(ownerPending.blockers, ["business_identity", "email_delivery", "qr_payment", "bank_transfer"]);
+assert.deepEqual(ownerPending.blockers, ["business_identity", "email_delivery", "bank_transfer_configuration_required", "qr_payment_configuration_required"]);
+const bankOnly = inspectLaunchConfiguration({ businessIdentity: readyIdentity.value ?? {}, emailDelivery: smtp.value ?? {}, enabledPaymentMethods: ["bank_transfer"], qrPayment: {}, bankTransfer: bank.value ?? {} });
+assert.equal(bankOnly.launchConfigurationEntered, true);
+assert.deepEqual(bankOnly.paymentMethods.enabledMethods, ["bank_transfer"]);
 
 console.log("LAUNCH_CONFIGURATION_BUILD_01=PASS states=6 ownerReserved=true");
 console.log("LAUNCH_CONFIGURATION_BUILD_02=PASS syntheticBusinessIdentity=true");
