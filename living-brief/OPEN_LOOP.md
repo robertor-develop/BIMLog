@@ -5502,3 +5502,15 @@ This repair changes build orchestration only. It changes no runtime product beha
 - [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until the following five builds complete the ten-build interval.
 
 This block changes rollback-failure observability only. Rollback remains best-effort and the original operation error remains authoritative. It changes no feedback content, financial value, customer permission, payment, email, provider, Native, installer or MAIN 04 behavior.
+
+## Financial import and feedback receiver observability — 2026-10-12
+
+- [x] Report contract-import transaction rollback failure through the shared privacy-safe operational-failure contract.
+- [x] Report receiver staging-handle close failure without replacing the original write error.
+- [x] Report receiver staging-file unlink failure without exposing file or customer details.
+- [x] Report received-object rollback failure while preserving exact retry behavior.
+- [x] Report stale-lock quarantine cleanup failure while preserving bounded contention retry.
+- [x] Pass the focused observability regression and all 13 receiver process/fencing cases.
+- [ ] Pass the complete exact-head gate, push the accumulated ten builds, publish and complete authenticated desktop/mobile Chrome acceptance.
+
+This block changes failure observability only. Existing feedback custody, fencing, retries, financial values, permissions, payments, email, providers, Native, installer and MAIN 04 behavior remain authoritative and unchanged.

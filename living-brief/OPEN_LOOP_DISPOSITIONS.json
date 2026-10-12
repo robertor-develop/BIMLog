@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "5e41eda012ae71912d58285de50f8e3bd85e8c18f4f4c241b239fcada6b60748",
-  "itemCount": 379,
+  "sourceSha256": "aa6c59d6b97b1b8d0d294faa86b2e9b1f6661ff2238f94a84717cf5abef16860",
+  "itemCount": 380,
   "counts": {
-    "ACTIVE": 337,
+    "ACTIVE": 338,
     "SUPERSEDED": 30,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6903,6 +6903,24 @@
       "evidence": [
         "OPEN_LOOP.md:5502",
         "Feedback and budget rollback observability hardening — 2026-10-12"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5b374606f8726bca",
+      "sourceLine": 5514,
+      "heading": "Financial import and feedback receiver observability — 2026-10-12",
+      "statement": "Pass the complete exact-head gate, push the accumulated ten builds, publish and complete authenticated desktop/mobile Chrome acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5514",
+        "Financial import and feedback receiver observability — 2026-10-12"
       ],
       "currentAuthority": false
     }

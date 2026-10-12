@@ -4344,3 +4344,7 @@ The controlled publication exposed a Replit-only race between independent worksp
 # Feedback and budget rollback observability hardening — 2026-10-12
 
 Five builds remove five remaining silent rollback failures from feedback delivery and financial budget import. Both backup-delivery settlement paths, both Telegram-delivery settlement paths and the budget-import transaction now use BIMLog's shared privacy-safe operational-failure contract when rollback itself fails, while preserving the original operation error as authoritative. The focused regression protects every repaired path and its stable code. This is the first five-build half of the next ten-build publication interval and remains unpublished until the following five builds complete.
+
+# Financial import and feedback receiver observability — 2026-10-12
+
+Five builds complete the ten-build interval by removing five additional silent failure paths. Contract import rollback, feedback receiver staging-handle close, staging-file unlink, received-object rollback and stale-lock quarantine cleanup now emit stable privacy-safe operational-failure codes while preserving the original operation or retry behavior. The focused observability regression passes, and the receiver's full process/fencing suite passes all 13 cases. Together with the preceding five builds, this reaches the controlled publication boundary pending the complete exact-head gate, push, publication and authenticated desktop/mobile Chrome acceptance.
