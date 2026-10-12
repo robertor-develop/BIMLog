@@ -4,6 +4,7 @@ import { storage } from "./storage-adapter";
 import { FEEDBACK_RELEASE } from "./feedback-evidence-contract";
 import { feedbackTelegramAttemptDecision, feedbackTelegramConfigurationDecision, feedbackTelegramNextAttemptAt } from "./feedback-telegram-policy";
 import { getTelegramProductConfig, sendVerifiedTelegramDocument } from "./telegram-product";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 const EVENT = "feedback_telegram_delivery";
 const DEFAULT_INTERVAL_MS = 60_000;
@@ -28,7 +29,7 @@ async function recordSkipped(snapshot: Snapshot, artifactKind: ArtifactKind, rea
     const prior = await client.query(`SELECT 1 FROM feedback_audit_events WHERE feedback_id=$1 AND event_type=$2 AND (after_state->>'snapshotEventId')::integer=$3 AND after_state->>'artifactKind'=$4 AND after_state->>'recipientUserId' IS NULL LIMIT 1`, [snapshot.feedback_id, EVENT, snapshot.snapshot_event_id, artifactKind]);
     if (!prior.rowCount) await client.query(`INSERT INTO feedback_audit_events(feedback_id,actor_user_id,event_type,after_state,reason) VALUES($1,$2,$3,$4::jsonb,$5)`, [snapshot.feedback_id, snapshot.submitter_user_id, EVENT, JSON.stringify({ snapshotEventId: snapshot.snapshot_event_id, recipientUserId: null, artifactKind, state: "skipped", reasonCode, release: FEEDBACK_RELEASE }), "Telegram document delivery skipped by governed configuration"]);
     await client.query("COMMIT"); return !prior.rowCount;
-  } catch (error) { try { await client.query("ROLLBACK"); } catch {} throw error; } finally { client.release(); }
+  } catch (error) { await rollbackWithOperationalEvidence(client, "FEEDBACK_TELEGRAM_SETTLEMENT_ROLLBACK_FAILED"); throw error; } finally { client.release(); }
 }
 async function reserve(candidate: Candidate, artifactKind: ArtifactKind, attemptId: string, now = new Date()) {
   const client = await pool.connect();
