@@ -4348,3 +4348,5 @@ Five builds remove five remaining silent rollback failures from feedback deliver
 # Financial import and feedback receiver observability — 2026-10-12
 
 Five builds complete the ten-build interval by removing five additional silent failure paths. Contract import rollback, feedback receiver staging-handle close, staging-file unlink, received-object rollback and stale-lock quarantine cleanup now emit stable privacy-safe operational-failure codes while preserving the original operation or retry behavior. The focused observability regression passes, and the receiver's full process/fencing suite passes all 13 cases. Together with the preceding five builds, this reaches the controlled publication boundary pending the complete exact-head gate, push, publication and authenticated desktop/mobile Chrome acceptance.
+
+The complete gate identified a TypeScript closure-narrowing defect in staging-handle cleanup. Repair `f16c38a6` captures the verified descriptor before entering the callback; API typecheck and the focused regression pass, and the full exact-head gate is repeated before release.
