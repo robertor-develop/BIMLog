@@ -72,3 +72,8 @@ export async function readLatestLaunchPaymentVerification(pool: Queryable, envir
   const result = await pool.query(`SELECT method,mode,status,result_code AS "resultCode",revision,created_at AS "createdAt" FROM launch_payment_verification_audit WHERE environment=$1 ORDER BY created_at DESC LIMIT 1`, [environment]);
   return result.rows[0] ? { ...result.rows[0], revision: Number(result.rows[0].revision), createdAt: new Date(result.rows[0].createdAt).toISOString() } : null;
 }
+
+export async function listLatestLaunchPaymentVerifications(pool: Queryable, environment: LaunchEnvironment) {
+  const result = await pool.query(`SELECT DISTINCT ON (method) method,mode,status,result_code AS "resultCode",revision,created_at AS "createdAt" FROM launch_payment_verification_audit WHERE environment=$1 ORDER BY method,created_at DESC`, [environment]);
+  return result.rows.map((row) => ({ ...row, revision: Number(row.revision), createdAt: new Date(row.createdAt).toISOString() }));
+}
