@@ -294,7 +294,8 @@
     "test:progressive-disclosure-block03": "node scripts/test-progressive-disclosure-block03.mjs && pnpm --filter @workspace/bimlog run typecheck",
     "test:progressive-disclosure-block04": "node scripts/test-progressive-disclosure-block04.mjs && pnpm --filter @workspace/bimlog run typecheck",
     "test:launch-readiness-block09": "node scripts/test-launch-readiness-block09.mjs",
-    "test:launch-readiness-block10": "node scripts/test-launch-readiness-block10.mjs"
+    "test:launch-readiness-block10": "node scripts/test-launch-readiness-block10.mjs",
+    "test:pre-release-adoption-observability": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/adoption-observability.behavior.ts && pnpm run audit:platform:blocking && pnpm --filter @workspace/bimlog run typecheck"
   },
   "private": true,
   "devDependencies": {
