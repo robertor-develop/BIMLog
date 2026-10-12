@@ -776,11 +776,11 @@ export class FeedbackReceiverCustodyService {
         if (!committed&&!indexed) await this.nonces.rollback(acceptedReservation.token);
         if (wroteObject && !fs.existsSync(index)) {
           const object = this.objectPath(request);
-          try {
+          cleanupWithOperationalEvidenceSync(() => {
             lease.assertCurrent();
             assertNoLinks(this.root, object);
             fs.unlinkSync(object);
-          } catch {}
+          }, "FEEDBACK_RECEIVER_OBJECT_ROLLBACK_FAILED");
         }
         throw error;
       }
