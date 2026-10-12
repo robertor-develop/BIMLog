@@ -63,3 +63,12 @@ export async function readLatestLaunchEmailVerification(pool: Queryable, environ
   const result = await pool.query(`SELECT provider,action,status,result_code AS "resultCode",created_at AS "createdAt" FROM launch_email_verification_audit WHERE environment=$1 ORDER BY created_at DESC LIMIT 1`, [environment]);
   return result.rows[0] ? { ...result.rows[0], createdAt: new Date(result.rows[0].createdAt).toISOString() } : null;
 }
+
+export async function recordLaunchPaymentVerification(pool: Queryable, input: { configurationId: string; environment: LaunchEnvironment; revision: number; method: "bank_transfer" | "qr_payment" | "stripe"; mode: "manual" | "sandbox" | "production"; status: "configured" | "verified" | "failed" | "unavailable"; resultCode: string; actorUserId: number }) {
+  await pool.query(`INSERT INTO launch_payment_verification_audit(id,configuration_id,environment,revision,method,mode,status,result_code,actor_user_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [randomUUID(), input.configurationId, input.environment, input.revision, input.method, input.mode, input.status, input.resultCode, input.actorUserId]);
+}
+
+export async function readLatestLaunchPaymentVerification(pool: Queryable, environment: LaunchEnvironment) {
+  const result = await pool.query(`SELECT method,mode,status,result_code AS "resultCode",revision,created_at AS "createdAt" FROM launch_payment_verification_audit WHERE environment=$1 ORDER BY created_at DESC LIMIT 1`, [environment]);
+  return result.rows[0] ? { ...result.rows[0], revision: Number(result.rows[0].revision), createdAt: new Date(result.rows[0].createdAt).toISOString() } : null;
+}
