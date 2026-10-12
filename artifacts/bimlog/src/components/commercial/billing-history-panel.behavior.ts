@@ -8,5 +8,6 @@ assert.match(panel,/role="status"/);assert.match(panel,/role="alert"/);assert.ma
 assert.match(page,/data\.billingAuthority\.canManageBilling&&<details/);
 assert.doesNotMatch(page,/<BillingHistoryPanel token=\{token\?\?""\}\/>.*data\.billingAuthority\.canManageBilling/s);
 assert.match(page,/Billing history and statements","Historial y estados de facturación/);
+assert.match(page,/onToggle=\{event=>setBillingHistoryOpen\(event\.currentTarget\.open\)\}/);
 assert.doesNotMatch(panel,/providerInvoiceReference|providerDisputeReference|payloadDigest|rawPayload|customerReference/);
 console.log("B244 bilingual responsive billing history UI: PASS");
