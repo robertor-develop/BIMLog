@@ -5481,3 +5481,14 @@ This block changes transaction-failure observability only. Rollback remains best
 - [ ] Complete authenticated desktop/mobile Chrome production acceptance.
 
 This repair changes test coverage only. Existing commercial UI, billing authority, provider configuration, customer records, database, schema, Native, installer and MAIN 04 behavior are unchanged.
+
+## Deterministic Replit publication repair — 2026-10-12
+
+- [x] Reproduce the paid publication failure in the existing Replit Shell.
+- [x] Verify the exact accepted source commit and a clean source tree.
+- [x] Identify concurrent workspace package builds as the clean-source verification race.
+- [x] Serialize the final recursive workspace build phase.
+- [ ] Pass the complete exact-head gate and push the correction.
+- [ ] Publish the exact corrected source and complete authenticated desktop/mobile Chrome acceptance.
+
+This repair changes build orchestration only. It changes no runtime product behavior, customer record, provider, permission, database, schema, Native, installer or MAIN 04 behavior.

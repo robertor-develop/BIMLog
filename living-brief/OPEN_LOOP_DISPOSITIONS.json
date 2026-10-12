@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "e514f94fb4925d25688005e7bfd29c992f761f5696f332ae3a5e8c44ab700950",
-  "itemCount": 376,
+  "sourceSha256": "681f81bd5fbfd36512ef51a56a1b767004f44d01897ad5f334f4bb13b26eea78",
+  "itemCount": 378,
   "counts": {
-    "ACTIVE": 334,
+    "ACTIVE": 336,
     "SUPERSEDED": 30,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6849,6 +6849,42 @@
       "evidence": [
         "OPEN_LOOP.md:5481",
         "Commercial billing-history release-gate repair — 2026-10-12"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "bb90c7627bc64784",
+      "sourceLine": 5491,
+      "heading": "Deterministic Replit publication repair — 2026-10-12",
+      "statement": "Pass the complete exact-head gate and push the correction.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5491",
+        "Deterministic Replit publication repair — 2026-10-12"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ad7f3b193328d001",
+      "sourceLine": 5492,
+      "heading": "Deterministic Replit publication repair — 2026-10-12",
+      "statement": "Publish the exact corrected source and complete authenticated desktop/mobile Chrome acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5492",
+        "Deterministic Replit publication repair — 2026-10-12"
       ],
       "currentAuthority": false
     }

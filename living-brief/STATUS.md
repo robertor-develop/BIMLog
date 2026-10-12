@@ -4336,3 +4336,7 @@ Five builds replace seven accepted silent-rollback findings across Connector Val
 # Commercial billing-history release-gate repair — 2026-10-12
 
 Five test-hardening builds reconcile the billing-history behavior contract with the already accepted progressive-disclosure implementation. The permanent release assertion now protects billing authority, English and Spanish disclosure labeling, exact open-state tracking and lazy panel mounting instead of requiring the superseded always-mounted layout. Production commercial behavior, permissions, provider configuration and customer records are unchanged. Launch Readiness Blocks 15–24, SaaS Completion Blocks 50–62 and the blocking platform audit pass through implementation commit `93d1c4e659f0195841c9b8d4bd8c9bb6e27d2e15`; the complete exact-head build, push, controlled publication and authenticated desktop/mobile Chrome acceptance remain the release gates.
+
+# Deterministic Replit publication repair — 2026-10-12
+
+The controlled publication exposed a Replit-only race between independent workspace package builds and the API production assembler's clean-source verification. The final recursive build phase now executes workspace package builds one at a time, preserving the same package outputs while ensuring the API assembler never observes another package's transient source-tree activity. No product behavior, customer data, provider configuration, permission, database, Native, installer or MAIN 04 behavior changes.
