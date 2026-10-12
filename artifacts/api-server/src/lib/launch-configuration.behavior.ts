@@ -4,6 +4,8 @@ import {
   launchReadinessStates,
   ownerReservedLaunchFields,
   inspectBusinessIdentity,
+  inspectEmailDelivery,
+  maskSecretReference,
 } from "./launch-configuration";
 
 assert.equal(launchReadinessStates.length, 6);
@@ -30,5 +32,14 @@ const readyIdentity = inspectBusinessIdentity({
 assert.equal(readyIdentity.status, "ready");
 assert.deepEqual(readyIdentity.issues, []);
 
+const smtp = inspectEmailDelivery({ provider: "smtp", senderAddress: "mail@example.test", senderDomain: "example.test", smtpHost: "smtp.example.test", smtpPort: 587, smtpUsername: "synthetic-user", smtpPasswordSecretReference: "secret://test/smtp", active: true });
+assert.equal(smtp.status, "active");
+const sendgrid = inspectEmailDelivery({ provider: "sendgrid", senderAddress: "mail@example.test", senderDomain: "example.test", sendgridApiKeySecretReference: "secret://test/sendgrid" });
+assert.equal(sendgrid.status, "ready");
+assert.equal(inspectEmailDelivery({ provider: "smtp", senderAddress: "invalid", senderDomain: "invalid" }).status, "invalid");
+assert.equal(maskSecretReference("secret://test/sendgrid"), "secr••••grid");
+assert.equal(maskSecretReference(undefined), null);
+
 console.log("LAUNCH_CONFIGURATION_BUILD_01=PASS states=6 ownerReserved=true");
 console.log("LAUNCH_CONFIGURATION_BUILD_02=PASS syntheticBusinessIdentity=true");
+console.log("LAUNCH_CONFIGURATION_BUILD_03=PASS emailProviders=smtp,sendgrid secrets=masked-reference-only");
