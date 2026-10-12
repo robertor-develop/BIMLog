@@ -14,13 +14,14 @@ const environments = new Set<LaunchEnvironment>(["development", "staging", "prod
 const environment = (value: string) => environments.has(value as LaunchEnvironment) ? value as LaunchEnvironment : null;
 const reason = (value: unknown) => typeof value === "string" && value.trim().length >= 8 && value.trim().length <= 500 ? value.trim() : null;
 
-type StoredLaunchConfiguration = Omit<LaunchConfigurationInput, "emailDelivery"> & { emailDelivery: Record<string, any>; secretEnvelopes?: { smtpPassword?: LaunchSecretEnvelope; sendgridApiKey?: LaunchSecretEnvelope } };
+type StoredLaunchConfiguration = Omit<LaunchConfigurationInput, "emailDelivery"> & { emailDelivery: Record<string, any>; paymentProvider?: Record<string, any>; secretEnvelopes?: { smtpPassword?: LaunchSecretEnvelope; sendgridApiKey?: LaunchSecretEnvelope; stripeSecretKey?: LaunchSecretEnvelope; stripeWebhookSecret?: LaunchSecretEnvelope } };
 function publicConfiguration(value: unknown) {
   const configuration = structuredClone((value ?? {}) as StoredLaunchConfiguration) as any;
   const envelopes = configuration.secretEnvelopes;
   delete configuration.secretEnvelopes;
   if (configuration.emailDelivery) configuration.emailDelivery = { ...configuration.emailDelivery, smtpPasswordSecretReference: undefined, sendgridApiKeySecretReference: undefined };
-  return { ...configuration, secrets: { smtpPassword: maskLaunchSecret(envelopes?.smtpPassword), sendgridApiKey: maskLaunchSecret(envelopes?.sendgridApiKey) } };
+  if (configuration.paymentProvider) configuration.paymentProvider = { ...configuration.paymentProvider, secretKeyReference: undefined, webhookSecretReference: undefined };
+  return { ...configuration, secrets: { smtpPassword: maskLaunchSecret(envelopes?.smtpPassword), sendgridApiKey: maskLaunchSecret(envelopes?.sendgridApiKey), stripeSecretKey: maskLaunchSecret(envelopes?.stripeSecretKey), stripeWebhookSecret: maskLaunchSecret(envelopes?.stripeWebhookSecret) } };
 }
 const response = (record: any) => record ? { ...record, configuration: publicConfiguration(record.configuration) } : null;
 const emailAdapters: LaunchEmailAdapters = createLiveLaunchEmailAdapters({ smtp: liveSmtpLaunchProbe });
@@ -52,9 +53,13 @@ router.put("/admin/launch-configuration/:environment", authMiddleware, isSuperAd
   const supplied = structuredClone(req.body.configuration) as any as StoredLaunchConfiguration & { emailDelivery: Record<string, unknown> }, previous = await readLaunchConfiguration(pool, target), prior = previous?.configuration as StoredLaunchConfiguration | undefined;
   supplied.secretEnvelopes = { ...prior?.secretEnvelopes };
   const smtpPassword = req.body?.secrets?.smtpPassword, sendgridApiKey = req.body?.secrets?.sendgridApiKey;
+  const stripeSecretKey = req.body?.secrets?.stripeSecretKey, stripeWebhookSecret = req.body?.secrets?.stripeWebhookSecret;
   if (typeof smtpPassword === "string" && smtpPassword.trim()) supplied.secretEnvelopes.smtpPassword = encryptLaunchSecret({ environment: target, field: "smtpPassword", value: smtpPassword });
   if (typeof sendgridApiKey === "string" && sendgridApiKey.trim()) supplied.secretEnvelopes.sendgridApiKey = encryptLaunchSecret({ environment: target, field: "sendgridApiKey", value: sendgridApiKey });
+  if (typeof stripeSecretKey === "string" && stripeSecretKey.trim()) supplied.secretEnvelopes.stripeSecretKey = encryptLaunchSecret({ environment: target, field: "stripeSecretKey", value: stripeSecretKey });
+  if (typeof stripeWebhookSecret === "string" && stripeWebhookSecret.trim()) supplied.secretEnvelopes.stripeWebhookSecret = encryptLaunchSecret({ environment: target, field: "stripeWebhookSecret", value: stripeWebhookSecret });
   supplied.emailDelivery = { ...supplied.emailDelivery, smtpPasswordSecretReference: supplied.secretEnvelopes.smtpPassword ? "encrypted:v1" : undefined, sendgridApiKeySecretReference: supplied.secretEnvelopes.sendgridApiKey ? "encrypted:v1" : undefined };
+  supplied.paymentProvider = { ...supplied.paymentProvider, secretKeyReference: supplied.secretEnvelopes.stripeSecretKey ? "encrypted:v1" : undefined, webhookSecretReference: supplied.secretEnvelopes.stripeWebhookSecret ? "encrypted:v1" : undefined };
   const readiness = inspectLaunchConfiguration(supplied), state: LaunchStoredState = readiness.launchConfigurationEntered ? "validated" : "draft";
   try {
     const item = await writeLaunchConfiguration(pool, { environment: target, expectedRevision, state, configuration: supplied, readiness, actorUserId: req.user!.userId, reason: changeReason });
