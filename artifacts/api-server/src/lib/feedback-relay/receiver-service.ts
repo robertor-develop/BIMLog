@@ -340,8 +340,9 @@ function atomicWrite(root: string, target: string, bytes: Buffer) {
     return syncDirectory(path.dirname(target));
   } catch (error) {
     if (fd !== undefined) {
+      const descriptor = fd;
       cleanupWithOperationalEvidenceSync(
-        () => fs.closeSync(fd),
+        () => fs.closeSync(descriptor),
         "FEEDBACK_RECEIVER_STAGING_CLOSE_FAILED",
       );
     }
