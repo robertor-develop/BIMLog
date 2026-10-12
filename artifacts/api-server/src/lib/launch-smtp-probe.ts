@@ -1,6 +1,7 @@
 import type { EmailDeliveryInput } from "./launch-configuration";
 import net from "node:net";
 import tls from "node:tls";
+import { randomUUID } from "node:crypto";
 
 export type SmtpEndpoint = Readonly<{ host: string; port: number; username: string; sender: string; implicitTls: boolean }>;
 
@@ -92,7 +93,29 @@ export const liveSmtpLaunchProbe = Object.freeze({
     catch (error) { return error instanceof Error && error.message === "smtp_credentials_rejected" ? "rejected" : "unavailable"; }
     finally { socket?.destroy(); }
   },
-  async send(_configuration: EmailDeliveryInput, _password: string, _recipient: string): Promise<{ status: "sent" | "rejected" | "unavailable"; messageId?: string }> {
-    return { status: "unavailable" };
+  async send(configuration: EmailDeliveryInput, password: string, recipient: string): Promise<{ status: "sent" | "rejected" | "unavailable"; messageId?: string }> {
+    let socket: MailSocket | undefined;
+    try {
+      const authenticated = await authenticate(configuration, password); socket = authenticated.socket;
+      if (!/^[^\s@\r\n]+@[^\s@\r\n]+\.[^\s@\r\n]+$/.test(recipient)) return { status: "rejected" };
+      const messageId = `<${randomUUID()}@${configuration.senderDomain?.trim().toLowerCase() || "bimlog.app"}>`;
+      await command(socket, `MAIL FROM:<${authenticated.endpoint.sender}>`, [250]);
+      await command(socket, `RCPT TO:<${recipient}>`, [250, 251]);
+      await command(socket, "DATA", [354]);
+      const body = [
+        `From: BIMLog <${authenticated.endpoint.sender}>`,
+        `To: <${recipient}>`,
+        "Subject: BIMLog synthetic launch configuration test",
+        `Message-ID: ${messageId}`,
+        "MIME-Version: 1.0",
+        "Content-Type: text/plain; charset=UTF-8",
+        "",
+        "Synthetic BIMLog configuration test. No customer transaction was created.",
+      ].join("\r\n");
+      await command(socket, `${smtpDotStuff(body)}\r\n.`, [250]);
+      await command(socket, "QUIT", [221]);
+      return { status: "sent", messageId };
+    } catch (error) { return { status: error instanceof Error && error.message === "smtp_credentials_rejected" ? "rejected" : "unavailable" }; }
+    finally { socket?.destroy(); }
   },
 });

@@ -6,6 +6,7 @@ assert.deepEqual(endpoint, { host: "smtp.example.test", port: 587, username: "sy
 assert.equal(inspectSmtpEndpoint({ provider: "smtp", senderAddress: "x@example.test", smtpHost: "bad host", smtpPort: 25, smtpUsername: "x" }), null);
 assert.equal(smtpAuthPlain("u", "p"), Buffer.from("\0u\0p").toString("base64"));
 assert.equal(smtpDotStuff("one\n.two"), "one\r\n..two");
+assert.equal(smtpDotStuff(".first\r\n..second"), "..first\r\n...second");
 assert.equal(smtpReplyComplete("250-first\r\n250 ok\r\n"), true);
 assert.equal(smtpReplyComplete("250-first\r\n"), false);
 assert.equal(smtpReplyCode("535 rejected\r\n"), 535);
