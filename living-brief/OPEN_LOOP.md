@@ -7,6 +7,7 @@
 - [x] Add the live SendGrid verification and synthetic-delivery adapter with timeout and credential rejection handling.
 - [x] Protect connection and synthetic test-email actions with Super Admin authorization and private no-store responses.
 - [x] Add bilingual accessible controls and explicit synthetic-test guidance to the centralized launch workspace.
+- [x] Preserve the fixed 4 MiB browser budget through safe production tree-shaking; exact rebuilt total 4,162,675 bytes.
 - [ ] Connect and prove a governed live SMTP transport; the current SMTP adapter fails safely as unavailable.
 - [ ] Push Builds 11–15 once after the complete gate; keep them unpublished until Builds 16–20 complete the ten-build interval.
 
