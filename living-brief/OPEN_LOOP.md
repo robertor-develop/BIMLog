@@ -5537,3 +5537,5 @@ This block changes failure observability only. Existing feedback custody, fencin
 - [ ] Pass the complete exact-head gate, push the accumulated ten builds, publish and complete authenticated desktop/mobile Chrome acceptance.
 
 This release creates no customer transaction and sends no message until a Super Admin explicitly invokes the synthetic test with owner-supplied credentials and recipient. Provider credentials remain encrypted and never return to the browser.
+
+Release-gate repair `9b2cd552` reconciles the generated eleventh historical duplicate group and changes no product behavior.
