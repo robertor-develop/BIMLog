@@ -7,7 +7,7 @@ import { useLaunchSecret } from "../lib/launch-configuration-secret";
 import { sendLaunchTestEmail, verifyLaunchEmailProvider, type LaunchEmailAdapters } from "../lib/launch-email-provider";
 import { createLiveLaunchEmailAdapters } from "../lib/launch-email-provider-live";
 import { liveSmtpLaunchProbe } from "../lib/launch-smtp-probe";
-import { LaunchConfigurationConflict, listLaunchConfigurationHistory, readLaunchConfiguration, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
+import { LaunchConfigurationConflict, listLaunchConfigurationHistory, readLaunchConfiguration, readLatestLaunchEmailVerification, recordLaunchEmailVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
 
 const router: IRouter = Router();
 const environments = new Set<LaunchEnvironment>(["development", "staging", "production"]);
@@ -38,7 +38,7 @@ export async function executeLaunchEmailCheck(input: { record: { configuration: 
 
 router.get("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
-  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(await readLaunchConfiguration(pool, target)) });
+  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(await readLaunchConfiguration(pool, target)), emailVerification: await readLatestLaunchEmailVerification(pool, target) });
 });
 
 router.get("/admin/launch-configuration/:environment/history", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
@@ -66,6 +66,7 @@ router.post("/admin/launch-configuration/:environment/email/verify", authMiddlew
   const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
   const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
   const result = await executeLaunchEmailCheck({ record: current, environment: target, action: "verify" });
+  await recordLaunchEmailVerification(pool, { configurationId: current.id, environment: target, revision: current.revision, provider: result.provider, action: "verify", status: result.status, resultCode: result.code, actorUserId: req.user!.userId });
   res.set("Cache-Control", "private, no-store, max-age=0"); res.status(result.status === "verified" ? 200 : 409).json({ result });
 });
 
@@ -74,6 +75,7 @@ router.post("/admin/launch-configuration/:environment/email/send-test", authMidd
   if (!target || !to) { res.status(400).json({ code: "LAUNCH_EMAIL_TEST_INVALID" }); return; }
   const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
   const result = await executeLaunchEmailCheck({ record: current, environment: target, action: "send-test", recipient: to });
+  await recordLaunchEmailVerification(pool, { configurationId: current.id, environment: target, revision: current.revision, provider: result.provider, action: "send_test", status: result.status, resultCode: result.code, actorUserId: req.user!.userId });
   res.set("Cache-Control", "private, no-store, max-age=0"); res.status(result.status === "sent" ? 200 : 409).json({ result });
 });
 

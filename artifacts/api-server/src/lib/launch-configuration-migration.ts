@@ -19,6 +19,13 @@ CREATE TABLE IF NOT EXISTS launch_configuration_audit (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS launch_configuration_audit_time_idx ON launch_configuration_audit(environment, created_at DESC);
+CREATE TABLE IF NOT EXISTS launch_email_verification_audit (
+  id text PRIMARY KEY, configuration_id text NOT NULL REFERENCES launch_configurations(id), environment text NOT NULL,
+  revision integer NOT NULL CHECK (revision > 0), provider text NOT NULL CHECK (provider IN ('smtp','sendgrid')),
+  action text NOT NULL CHECK (action IN ('verify','send_test')), status text NOT NULL CHECK (status IN ('verified','sent','rejected','unavailable')),
+  result_code text NOT NULL, actor_user_id integer NOT NULL REFERENCES users(id), created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS launch_email_verification_audit_time_idx ON launch_email_verification_audit(environment, created_at DESC);
 `;
 
 type MigrationPool = { query(sql: string): Promise<unknown> };

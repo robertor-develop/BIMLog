@@ -54,3 +54,10 @@ export const launchConfigurationAuditTable = pgTable("launch_configuration_audit
 export type LaunchConfigurationRecord = typeof launchConfigurationsTable.$inferSelect;
 export type LaunchConfigurationVersion = typeof launchConfigurationVersionsTable.$inferSelect;
 export type LaunchConfigurationAuditEntry = typeof launchConfigurationAuditTable.$inferSelect;
+
+export const launchEmailVerificationAuditTable = pgTable("launch_email_verification_audit", {
+  id: text("id").primaryKey(), configurationId: text("configuration_id").notNull().references(() => launchConfigurationsTable.id),
+  environment: text("environment").notNull(), revision: integer("revision").notNull(), provider: text("provider").notNull(),
+  action: text("action").notNull(), status: text("status").notNull(), resultCode: text("result_code").notNull(),
+  actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id), createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [check("launch_email_verification_audit_revision_chk", sql`${table.revision} > 0`)]);
