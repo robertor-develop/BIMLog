@@ -15,6 +15,7 @@ import {
 } from "./financial-budget-contract";
 import { createBudgetDraftWithClient } from "./financial-budget-service";
 import { waitForFinancialBudgetMigration } from "./financial-budget-migration";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 const MAX_BYTES = 10 * 1024 * 1024,
   MAX_ROWS = 10000;
@@ -388,9 +389,7 @@ export async function confirmBudgetImport(input: {
       idempotent: false,
     };
   } catch (error) {
-    try {
-      await client.query("ROLLBACK");
-    } catch {}
+    await rollbackWithOperationalEvidence(client, "FINANCIAL_BUDGET_IMPORT_ROLLBACK_FAILED");
     throw error;
   } finally {
     if (locked)
