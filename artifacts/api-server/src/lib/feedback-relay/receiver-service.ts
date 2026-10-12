@@ -23,6 +23,7 @@ import {
   type Signed,
 } from "./protocol.js";
 import { assertFeedbackPurgeCommandSignature, type FeedbackPurgeCommand, type FeedbackPurgeSignatureVerifier } from "./state-machine.js";
+import { cleanupWithOperationalEvidenceSync } from "../operational-failure.js";
 
 export type ReceiverRootAuthority = {
   canonicalRoot: string;
@@ -339,9 +340,10 @@ function atomicWrite(root: string, target: string, bytes: Buffer) {
     return syncDirectory(path.dirname(target));
   } catch (error) {
     if (fd !== undefined) {
-      try {
-        fs.closeSync(fd);
-      } catch {}
+      cleanupWithOperationalEvidenceSync(
+        () => fs.closeSync(fd),
+        "FEEDBACK_RECEIVER_STAGING_CLOSE_FAILED",
+      );
     }
     try {
       fs.unlinkSync(temporary);

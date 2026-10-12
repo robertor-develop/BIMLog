@@ -14,6 +14,7 @@ export type OperationalFailureCode =
   | "FEEDBACK_PACKAGE_WORKBOOK_CLEANUP_FAILED"
   | "FEEDBACK_BACKUP_SETTLEMENT_ROLLBACK_FAILED"
   | "FEEDBACK_TELEGRAM_SETTLEMENT_ROLLBACK_FAILED"
+  | "FEEDBACK_RECEIVER_STAGING_CLOSE_FAILED"
   | "FINANCIAL_BUDGET_IMPORT_ROLLBACK_FAILED"
   | "FINANCIAL_CONTRACT_IMPORT_ROLLBACK_FAILED"
   | "JOB_INTAKE_ACTIVATION_ROLLBACK_FAILED"
@@ -62,6 +63,20 @@ export async function cleanupWithOperationalEvidence(
 ): Promise<boolean> {
   try {
     await cleanup();
+    return true;
+  } catch {
+    reportOperationalFailure(code, reporter);
+    return false;
+  }
+}
+
+export function cleanupWithOperationalEvidenceSync(
+  cleanup: () => unknown,
+  code: OperationalFailureCode,
+  reporter: OperationalFailureReporter = defaultOperationalFailureReporter,
+): boolean {
+  try {
+    cleanup();
     return true;
   } catch {
     reportOperationalFailure(code, reporter);
