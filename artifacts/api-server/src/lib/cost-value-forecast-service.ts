@@ -5,6 +5,7 @@ import { waitForGenericApuPersistenceMigration } from "./generic-apu-persistence
 import { CostValuePlanError } from "./cost-value-plan-service";
 import { financialCsvCell } from "./financial-export-contract";
 import { performanceProvenance } from "./cost-value-performance-provenance";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 const amountPattern = /^(?:0|[1-9]\d{0,15})(?:\.\d{1,2})?$/;
 const cents = (value: unknown, field: string) => {
@@ -103,7 +104,7 @@ export async function saveCostValueForecast(actorUserId: number, projectId: numb
     await client.query(`INSERT INTO generic_cost_value_forecast_versions(id,project_id,plan_version_id,performance_version_id,version,content,evaluation,content_fingerprint,supersedes_id,created_by_id) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,$9,$10)`, [crypto.randomUUID(), projectId, plan.id, performance.id, Number(prior?.version ?? 0) + 1, JSON.stringify(content), JSON.stringify(evaluation), fingerprint, prior?.id ?? null, actorUserId]);
     await client.query("COMMIT");
     return getCostValueForecast(actorUserId, projectId);
-  } catch (error) { await client.query("ROLLBACK").catch(() => undefined); throw error; }
+  } catch (error) { await rollbackWithOperationalEvidence(client, "COST_VALUE_FORECAST_ROLLBACK_FAILED"); throw error; }
   finally { client.release(); }
 }
 
