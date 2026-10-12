@@ -5454,6 +5454,17 @@ This block changes Profile presentation and loading hierarchy only. Existing ide
 - [x] Treat non-success milestone HTTP responses as failed delivery.
 - [x] Add a focused regression that prohibits silent failure handling in both paths.
 - [x] Add the regression, blocking audit and frontend typecheck to one repeatable release command.
-- [ ] Pass the complete exact-head build and push the repaired five-build block.
+- [x] Pass the complete exact-head build and push the repaired five-build block at exact source `6d21937ab258ef95b48419e4218534eba16c9264`.
 
 This repair changes only failure observability. It creates no customer record, sends no email, changes no payment, permission, tenant boundary, provider, Native, installer or MAIN 04 behavior.
+
+## Pre-release transaction rollback observability — 2026-10-11
+
+- [x] Report Connector Validation Operations rollback failures through the shared privacy-safe operational-failure contract.
+- [x] Report Coordination Hub configuration rollback failures without replacing the original transaction error.
+- [x] Report both Coordination Hub workspace rollback paths through one stable code.
+- [x] Report Cost Value Forecast rollback failures without logging database details.
+- [x] Report Cost Value Performance and Plan rollback failures and bind all repaired paths to a permanent regression.
+- [ ] Pass the complete gate, push the five-build block, publish the accumulated ten builds and complete authenticated desktop/mobile Chrome smoke.
+
+This block changes transaction-failure observability only. Rollback remains best-effort and the original operation error remains authoritative. It changes no financial value, connector credential, coordination record, customer permission, payment, email, provider, Native, installer or MAIN 04 behavior.

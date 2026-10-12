@@ -66114,6 +66114,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b14cb9ffa5e1cfb18a555c8a9fbc4e462b38e96c6f15bdefd91e0d597d8bf06d"
+    },
+    {
+      "taskId": "pre-release-transaction-rollback-observability",
+      "reviewedThroughCommit": "c491502b300810d8496211a01ef63dd8f71280f8",
+      "reviewedAt": "2026-10-12T02:03:42Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "Pre-release transaction rollback observability routes seven previously silent rollback failures through the established code-only operational-failure contract while preserving the original transaction error. STATUS and OPEN_LOOP record the ten-build publication candidate; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "acac83275ed993fce4b8e1c4dab282591391631535e03de2750a504a7050c0e4"
     }
   ]
 }

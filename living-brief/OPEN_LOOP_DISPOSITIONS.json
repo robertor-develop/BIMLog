@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a1a7a8538432cc03179e618d7d36e4076ab7efa8cf8cda49fe3e32791098ddf0",
+  "sourceSha256": "651bed2eb1ee0e8e5a1f5407caaf72ac0d4f522e044f1d2628caed4a7124530d",
   "itemCount": 374,
   "counts": {
     "ACTIVE": 332,
@@ -6799,20 +6799,20 @@
       "currentAuthority": false
     },
     {
-      "id": "92e1e911b2b93c4a",
-      "sourceLine": 5457,
-      "heading": "Pre-release adoption observability repair — 2026-10-11",
-      "statement": "Pass the complete exact-head build and push the repaired five-build block.",
+      "id": "a3727063669060e2",
+      "sourceLine": 5468,
+      "heading": "Pre-release transaction rollback observability — 2026-10-11",
+      "statement": "Pass the complete gate, push the five-build block, publish the accumulated ten builds and complete authenticated desktop/mobile Chrome smoke.",
       "classification": "ACTIVE",
-      "workClass": "PRODUCT_WORK",
+      "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
-        "owner": "Platform",
-        "route": "/dashboard",
-        "module": "artifacts/bimlog/src/App.tsx"
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5457",
-        "Pre-release adoption observability repair — 2026-10-11"
+        "OPEN_LOOP.md:5468",
+        "Pre-release transaction rollback observability — 2026-10-11"
       ],
       "currentAuthority": false
     }
