@@ -160,3 +160,49 @@ export function inspectBankTransfer(input: BankTransferInput): LaunchConfigurati
   const value = Object.freeze({ ...input, currency: input.currency?.trim().toUpperCase() });
   return Object.freeze({ status: issues.length ? "invalid" : input.active ? "active" : "ready", value, issues: Object.freeze(issues) });
 }
+
+export type LaunchConfigurationInput = Readonly<{
+  businessIdentity: BusinessIdentityInput;
+  emailDelivery: EmailDeliveryInput;
+  qrPayment: QrPaymentInput;
+  bankTransfer: BankTransferInput;
+  stripeEnabled?: boolean;
+}>;
+
+export type LaunchConfigurationReadiness = Readonly<{
+  readinessState: LaunchReadinessState;
+  gaCandidateConfigurationReady: boolean;
+  launchConfigurationEntered: boolean;
+  businessIdentity: LaunchConfigurationSection<BusinessIdentityInput>;
+  emailDelivery: LaunchConfigurationSection<EmailDeliveryInput>;
+  qrPayment: LaunchConfigurationSection<QrPaymentInput>;
+  bankTransfer: LaunchConfigurationSection<BankTransferInput>;
+  stripe: Readonly<{ enabled: boolean; status: "disabled" | "configuration_required" }>;
+  blockers: readonly string[];
+}>;
+
+export function inspectLaunchConfiguration(input: LaunchConfigurationInput): LaunchConfigurationReadiness {
+  const businessIdentity = inspectBusinessIdentity(input.businessIdentity);
+  const emailDelivery = inspectEmailDelivery(input.emailDelivery);
+  const qrPayment = inspectQrPayment(input.qrPayment);
+  const bankTransfer = inspectBankTransfer(input.bankTransfer);
+  const blockers = [
+    ...(businessIdentity.status === "invalid" ? ["business_identity"] : []),
+    ...(emailDelivery.status === "invalid" ? ["email_delivery"] : []),
+    ...(qrPayment.status === "invalid" ? ["qr_payment"] : []),
+    ...(bankTransfer.status === "invalid" ? ["bank_transfer"] : []),
+    ...(input.stripeEnabled ? ["stripe_configuration"] : []),
+  ];
+  const launchConfigurationEntered = blockers.length === 0;
+  return Object.freeze({
+    readinessState: launchConfigurationEntered ? "LAUNCH_CONFIGURATION_ENTERED" : "GA_CANDIDATE_CONFIGURATION_READY",
+    gaCandidateConfigurationReady: true,
+    launchConfigurationEntered,
+    businessIdentity,
+    emailDelivery: Object.freeze({ ...emailDelivery, value: emailDelivery.value ? Object.freeze({ ...emailDelivery.value, smtpPasswordSecretReference: undefined, sendgridApiKeySecretReference: undefined }) : null }),
+    qrPayment,
+    bankTransfer,
+    stripe: Object.freeze({ enabled: input.stripeEnabled === true, status: input.stripeEnabled ? "configuration_required" : "disabled" }),
+    blockers: Object.freeze(blockers),
+  });
+}
