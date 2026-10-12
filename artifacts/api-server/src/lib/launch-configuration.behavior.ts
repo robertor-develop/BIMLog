@@ -6,6 +6,8 @@ import {
   inspectBusinessIdentity,
   inspectEmailDelivery,
   maskSecretReference,
+  inspectBankTransfer,
+  inspectQrPayment,
 } from "./launch-configuration";
 
 assert.equal(launchReadinessStates.length, 6);
@@ -40,6 +42,14 @@ assert.equal(inspectEmailDelivery({ provider: "smtp", senderAddress: "invalid", 
 assert.equal(maskSecretReference("secret://test/sendgrid"), "secr••••grid");
 assert.equal(maskSecretReference(undefined), null);
 
+const qr = inspectQrPayment({ qrAssetReference: "asset://synthetic/qr", beneficiaryName: "Synthetic Test Company", currency: "tst", country: "Test Country", instructions: "Synthetic payment only", active: true });
+assert.equal(qr.status, "active");
+assert.equal(qr.value?.currency, "TST");
+const bank = inspectBankTransfer({ bankName: "Synthetic Bank", accountHolder: "Synthetic Test Company", accountIdentifier: "TEST-0001", routingInformation: "TEST-ROUTE", currency: "TST", country: "Test Country", instructions: "Synthetic transfer only", referenceInstructions: "Use synthetic invoice reference" });
+assert.equal(bank.status, "ready");
+assert.ok(inspectBankTransfer({}).issues.includes("routingInformation_required"));
+
 console.log("LAUNCH_CONFIGURATION_BUILD_01=PASS states=6 ownerReserved=true");
 console.log("LAUNCH_CONFIGURATION_BUILD_02=PASS syntheticBusinessIdentity=true");
 console.log("LAUNCH_CONFIGURATION_BUILD_03=PASS emailProviders=smtp,sendgrid secrets=masked-reference-only");
+console.log("LAUNCH_CONFIGURATION_BUILD_04=PASS manualPayments=qr,bank-transfer jurisdictionNeutral=true");

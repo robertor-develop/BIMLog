@@ -112,3 +112,51 @@ export function maskSecretReference(reference: string | undefined) {
   const normalized = reference.trim();
   return normalized.length <= 8 ? "••••••••" : `${normalized.slice(0, 4)}••••${normalized.slice(-4)}`;
 }
+
+export type QrPaymentInput = Readonly<{
+  qrAssetReference?: string;
+  beneficiaryName?: string;
+  financialInstitution?: string;
+  currency?: string;
+  country?: string;
+  instructions?: string;
+  replacementDueAt?: string;
+  active?: boolean;
+}>;
+
+export type BankTransferInput = Readonly<{
+  bankName?: string;
+  accountHolder?: string;
+  accountType?: string;
+  accountIdentifier?: string;
+  routingInformation?: string;
+  currency?: string;
+  country?: string;
+  instructions?: string;
+  referenceInstructions?: string;
+  active?: boolean;
+}>;
+
+const currencyPattern = /^[A-Z]{3}$/;
+
+export function inspectQrPayment(input: QrPaymentInput): LaunchConfigurationSection<QrPaymentInput> {
+  const issues: string[] = [];
+  if (!clean(input.qrAssetReference, 500)) issues.push("qrAssetReference_required");
+  if (!clean(input.beneficiaryName, 160)) issues.push("beneficiaryName_required");
+  if (!currencyPattern.test(input.currency?.trim().toUpperCase() ?? "")) issues.push("currency_invalid");
+  if (!clean(input.country, 120)) issues.push("country_required");
+  if (!clean(input.instructions, 2_000)) issues.push("instructions_required");
+  if (input.replacementDueAt && Number.isNaN(Date.parse(input.replacementDueAt))) issues.push("replacementDueAt_invalid");
+  const value = Object.freeze({ ...input, currency: input.currency?.trim().toUpperCase() });
+  return Object.freeze({ status: issues.length ? "invalid" : input.active ? "active" : "ready", value, issues: Object.freeze(issues) });
+}
+
+export function inspectBankTransfer(input: BankTransferInput): LaunchConfigurationSection<BankTransferInput> {
+  const issues: string[] = [];
+  for (const field of ["bankName", "accountHolder", "accountIdentifier", "routingInformation", "country", "instructions", "referenceInstructions"] as const) {
+    if (!clean(input[field], field === "instructions" || field === "referenceInstructions" ? 2_000 : 320)) issues.push(`${field}_required`);
+  }
+  if (!currencyPattern.test(input.currency?.trim().toUpperCase() ?? "")) issues.push("currency_invalid");
+  const value = Object.freeze({ ...input, currency: input.currency?.trim().toUpperCase() });
+  return Object.freeze({ status: issues.length ? "invalid" : input.active ? "active" : "ready", value, issues: Object.freeze(issues) });
+}
