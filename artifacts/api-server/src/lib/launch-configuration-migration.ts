@@ -1,5 +1,3 @@
-import type { Pool } from "pg";
-
 export const LAUNCH_CONFIGURATION_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS launch_configurations (
   id text PRIMARY KEY, environment text NOT NULL UNIQUE CHECK (environment IN ('development','staging','production')),
@@ -23,7 +21,8 @@ CREATE TABLE IF NOT EXISTS launch_configuration_audit (
 CREATE INDEX IF NOT EXISTS launch_configuration_audit_time_idx ON launch_configuration_audit(environment, created_at DESC);
 `;
 
+type MigrationPool = { query(sql: string): Promise<unknown> };
 let startup: Promise<void> | undefined;
-export function ensureLaunchConfigurationSchema(pool: Pick<Pool, "query">): Promise<void> {
+export function ensureLaunchConfigurationSchema(pool: MigrationPool): Promise<void> {
   return startup ??= pool.query(LAUNCH_CONFIGURATION_SCHEMA_SQL).then(() => undefined);
 }

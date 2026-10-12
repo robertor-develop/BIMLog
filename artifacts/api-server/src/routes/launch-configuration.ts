@@ -10,9 +10,9 @@ const environments = new Set<LaunchEnvironment>(["development", "staging", "prod
 const environment = (value: string) => environments.has(value as LaunchEnvironment) ? value as LaunchEnvironment : null;
 const reason = (value: unknown) => typeof value === "string" && value.trim().length >= 8 && value.trim().length <= 500 ? value.trim() : null;
 
-type StoredLaunchConfiguration = LaunchConfigurationInput & { secretEnvelopes?: { smtpPassword?: LaunchSecretEnvelope; sendgridApiKey?: LaunchSecretEnvelope } };
+type StoredLaunchConfiguration = Omit<LaunchConfigurationInput, "emailDelivery"> & { emailDelivery: Record<string, any>; secretEnvelopes?: { smtpPassword?: LaunchSecretEnvelope; sendgridApiKey?: LaunchSecretEnvelope } };
 function publicConfiguration(value: unknown) {
-  const configuration = structuredClone((value ?? {}) as StoredLaunchConfiguration);
+  const configuration = structuredClone((value ?? {}) as StoredLaunchConfiguration) as any;
   const envelopes = configuration.secretEnvelopes;
   delete configuration.secretEnvelopes;
   if (configuration.emailDelivery) configuration.emailDelivery = { ...configuration.emailDelivery, smtpPasswordSecretReference: undefined, sendgridApiKeySecretReference: undefined };

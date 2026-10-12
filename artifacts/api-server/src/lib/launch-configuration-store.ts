@@ -1,5 +1,8 @@
 import { createHash, randomUUID } from "node:crypto";
-import type { Pool, PoolClient } from "pg";
+type QueryResult = { rows: any[]; rowCount?: number | null };
+type Queryable = { query(sql: string, values?: unknown[]): Promise<QueryResult> };
+type TransactionClient = Queryable & { release(): void };
+type TransactionPool = { connect(): Promise<TransactionClient> };
 
 export type LaunchEnvironment = "development" | "staging" | "production";
 export type LaunchStoredState = "draft" | "validated" | "active" | "inactive";
@@ -14,12 +17,12 @@ export function launchConfigurationFingerprint(input: { environment: string; rev
 const projection = `id,environment,revision,state,configuration,readiness,updated_at AS "updatedAt"`;
 const map = (row: any): LaunchConfigurationSnapshot => Object.freeze({ ...row, revision: Number(row.revision), updatedAt: new Date(row.updatedAt).toISOString() });
 
-export async function readLaunchConfiguration(pool: Pick<Pool, "query">, environment: LaunchEnvironment) {
+export async function readLaunchConfiguration(pool: Queryable, environment: LaunchEnvironment) {
   const result = await pool.query(`SELECT ${projection} FROM launch_configurations WHERE environment=$1`, [environment]);
   return result.rows[0] ? map(result.rows[0]) : null;
 }
 
-export async function writeLaunchConfiguration(pool: Pick<Pool, "connect">, input: {
+export async function writeLaunchConfiguration(pool: TransactionPool, input: {
   environment: LaunchEnvironment; expectedRevision: number; state: LaunchStoredState; configuration: unknown; readiness: unknown;
   actorUserId: number; reason: string; action?: "updated" | "activated" | "deactivated" | "restored";
 }) {
@@ -42,12 +45,12 @@ export async function writeLaunchConfiguration(pool: Pick<Pool, "connect">, inpu
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 
-async function appendHistory(client: Pick<PoolClient, "query">, input: { id: string; environment: string; revision: number; state: string; configuration: unknown; readiness: unknown; actorUserId: number; reason: string; action: string; fingerprint: string }) {
+async function appendHistory(client: Queryable, input: { id: string; environment: string; revision: number; state: string; configuration: unknown; readiness: unknown; actorUserId: number; reason: string; action: string; fingerprint: string }) {
   await client.query(`INSERT INTO launch_configuration_versions(id,configuration_id,environment,revision,state,configuration,readiness,reason,actor_user_id) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7::jsonb,$8,$9)`, [randomUUID(), input.id, input.environment, input.revision, input.state, JSON.stringify(input.configuration), JSON.stringify(input.readiness), input.reason, input.actorUserId]);
   await client.query(`INSERT INTO launch_configuration_audit(id,configuration_id,environment,revision,action,actor_user_id,reason,fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [randomUUID(), input.id, input.environment, input.revision, input.action, input.actorUserId, input.reason, input.fingerprint]);
 }
 
-export async function listLaunchConfigurationHistory(pool: Pick<Pool, "query">, environment: LaunchEnvironment) {
+export async function listLaunchConfigurationHistory(pool: Queryable, environment: LaunchEnvironment) {
   const result = await pool.query(`SELECT id,revision,state,reason,actor_user_id AS "actorUserId",created_at AS "createdAt" FROM launch_configuration_versions WHERE environment=$1 ORDER BY revision DESC`, [environment]);
   return result.rows;
 }
