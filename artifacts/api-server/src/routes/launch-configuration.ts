@@ -6,6 +6,7 @@ import { encryptLaunchSecret, maskLaunchSecret, type LaunchSecretEnvelope } from
 import { useLaunchSecret } from "../lib/launch-configuration-secret";
 import { sendLaunchTestEmail, verifyLaunchEmailProvider, type LaunchEmailAdapters } from "../lib/launch-email-provider";
 import { createLiveLaunchEmailAdapters } from "../lib/launch-email-provider-live";
+import { liveSmtpLaunchProbe } from "../lib/launch-smtp-probe";
 import { LaunchConfigurationConflict, listLaunchConfigurationHistory, readLaunchConfiguration, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
 
 const router: IRouter = Router();
@@ -22,8 +23,7 @@ function publicConfiguration(value: unknown) {
   return { ...configuration, secrets: { smtpPassword: maskLaunchSecret(envelopes?.smtpPassword), sendgridApiKey: maskLaunchSecret(envelopes?.sendgridApiKey) } };
 }
 const response = (record: any) => record ? { ...record, configuration: publicConfiguration(record.configuration) } : null;
-const unavailableSmtp = { async verify() { return "unavailable" as const; }, async send() { return { status: "unavailable" as const }; } };
-const emailAdapters: LaunchEmailAdapters = createLiveLaunchEmailAdapters({ smtp: unavailableSmtp });
+const emailAdapters: LaunchEmailAdapters = createLiveLaunchEmailAdapters({ smtp: liveSmtpLaunchProbe });
 const recipient = (value: unknown) => typeof value === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) && value.trim().length <= 254 ? value.trim().toLowerCase() : null;
 
 export async function executeLaunchEmailCheck(input: { record: { configuration: unknown }; environment: LaunchEnvironment; action: "verify" | "send-test"; recipient?: string; adapters?: LaunchEmailAdapters }) {
