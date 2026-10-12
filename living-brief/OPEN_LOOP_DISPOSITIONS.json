@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "681f81bd5fbfd36512ef51a56a1b767004f44d01897ad5f334f4bb13b26eea78",
-  "itemCount": 378,
+  "sourceSha256": "5e41eda012ae71912d58285de50f8e3bd85e8c18f4f4c241b239fcada6b60748",
+  "itemCount": 379,
   "counts": {
-    "ACTIVE": 336,
+    "ACTIVE": 337,
     "SUPERSEDED": 30,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6885,6 +6885,24 @@
       "evidence": [
         "OPEN_LOOP.md:5492",
         "Deterministic Replit publication repair — 2026-10-12"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2010c8455d374b09",
+      "sourceLine": 5502,
+      "heading": "Feedback and budget rollback observability hardening — 2026-10-12",
+      "statement": "Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until the following five builds complete the ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5502",
+        "Feedback and budget rollback observability hardening — 2026-10-12"
       ],
       "currentAuthority": false
     }

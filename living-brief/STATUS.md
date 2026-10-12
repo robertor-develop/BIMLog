@@ -4340,3 +4340,7 @@ Five test-hardening builds reconcile the billing-history behavior contract with 
 # Deterministic Replit publication repair — 2026-10-12
 
 The controlled publication exposed a Replit-only race between independent workspace package builds and the API production assembler's clean-source verification. The final recursive build phase now executes workspace package builds one at a time, preserving the same package outputs while ensuring the API assembler never observes another package's transient source-tree activity. No product behavior, customer data, provider configuration, permission, database, Native, installer or MAIN 04 behavior changes.
+
+# Feedback and budget rollback observability hardening — 2026-10-12
+
+Five builds remove five remaining silent rollback failures from feedback delivery and financial budget import. Both backup-delivery settlement paths, both Telegram-delivery settlement paths and the budget-import transaction now use BIMLog's shared privacy-safe operational-failure contract when rollback itself fails, while preserving the original operation error as authoritative. The focused regression protects every repaired path and its stable code. This is the first five-build half of the next ten-build publication interval and remains unpublished until the following five builds complete.

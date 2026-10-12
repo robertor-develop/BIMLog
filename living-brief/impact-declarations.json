@@ -66328,6 +66328,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3accf8595aaa9c664d89bfbdbd01c2dc831cf67187d7411aea803ece9b9de247"
+    },
+    {
+      "taskId": "feedback-budget-rollback-observability-hardening",
+      "reviewedThroughCommit": "8dde56ba200cda5f2c6606febe858355926cf10c",
+      "reviewedAt": "2026-10-12T13:29:28Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "vision",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "open_loop",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "updated"
+        },
+        {
+          "key": "audit",
+          "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "Feedback and budget rollback observability hardening routes five previously silent rollback failures through the established code-only operational-failure contract while preserving the original operation error. STATUS and OPEN_LOOP record the first five-build half of the next publication interval; doctrine, platform authority, quality, Native, reports, standards and MAIN 04 authority remain unchanged.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7533392bac93d115f5f895bdf9acc97aec190b06af57bc867fa43f0708cc8fba"
     }
   ]
 }

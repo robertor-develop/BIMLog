@@ -776,6 +776,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feedback-http-db.behavior.ts
 - artifacts/api-server/src/lib/feedback-notification-worker.behavior.ts
 - artifacts/api-server/src/lib/feedback-notification-worker.ts
+- artifacts/api-server/src/lib/feedback-operational-failure-observability.behavior.ts
 - artifacts/api-server/src/lib/feedback-package-source.ts
 - artifacts/api-server/src/lib/feedback-package-worker.ts
 - artifacts/api-server/src/lib/feedback-package.behavior.ts

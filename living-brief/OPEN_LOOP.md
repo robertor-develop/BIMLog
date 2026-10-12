@@ -5492,3 +5492,13 @@ This repair changes test coverage only. Existing commercial UI, billing authorit
 - [ ] Publish the exact corrected source and complete authenticated desktop/mobile Chrome acceptance.
 
 This repair changes build orchestration only. It changes no runtime product behavior, customer record, provider, permission, database, schema, Native, installer or MAIN 04 behavior.
+
+## Feedback and budget rollback observability hardening — 2026-10-12
+
+- [x] Report both feedback backup-delivery settlement rollback failures through the shared privacy-safe operational-failure contract.
+- [x] Report both Telegram-delivery settlement rollback failures without replacing the original delivery error.
+- [x] Report financial budget-import rollback failure without logging database or customer details.
+- [x] Bind all five repaired paths and their stable codes to a focused regression.
+- [ ] Pass the complete exact-head gate and push this five-build block once. Keep it unpublished until the following five builds complete the ten-build interval.
+
+This block changes rollback-failure observability only. Rollback remains best-effort and the original operation error remains authoritative. It changes no feedback content, financial value, customer permission, payment, email, provider, Native, installer or MAIN 04 behavior.
