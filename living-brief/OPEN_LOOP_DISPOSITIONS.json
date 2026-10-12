@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "1b017da68317d95bfbd8e07cfc724c0e75d15413cf38b3676f384aa3a28f7fb9",
-  "itemCount": 373,
+  "sourceSha256": "a1a7a8538432cc03179e618d7d36e4076ab7efa8cf8cda49fe3e32791098ddf0",
+  "itemCount": 374,
   "counts": {
-    "ACTIVE": 331,
+    "ACTIVE": 332,
     "SUPERSEDED": 30,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -6795,6 +6795,24 @@
       "evidence": [
         "canonical-open-loop:4107891b4bf42160",
         "duplicate-source:93d4450874e30898"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "92e1e911b2b93c4a",
+      "sourceLine": 5457,
+      "heading": "Pre-release adoption observability repair — 2026-10-11",
+      "statement": "Pass the complete exact-head build and push the repaired five-build block.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5457",
+        "Pre-release adoption observability repair — 2026-10-11"
       ],
       "currentAuthority": false
     }
