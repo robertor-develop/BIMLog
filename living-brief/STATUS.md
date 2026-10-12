@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Enterprise launch configuration Block 3 candidate — 2026-10-12
+
+Builds 11–15 add the first provider-neutral transactional-email verification path to the centralized Super Admin launch workspace. Encrypted SMTP or SendGrid credentials are recovered only inside a bounded operation, provider adapters return allowlisted outcomes, protected no-store actions test the saved connection and send an explicitly synthetic test email, and bilingual accessible controls keep credentials masked. The block contains no owner credentials, customer transaction, production provider activation, or publication. SendGrid has a live adapter; the SMTP adapter boundary is present and fails safely until a governed SMTP transport is connected. The complete pre-push gate found and repaired one strict-TypeScript defect; this five-build block remains unpublished until Builds 16–20 complete the next ten-build interval.
+
 ## Launch Readiness Block 22 publication candidate — 2026-10-11
 
 LR106–LR110 close the customer export integrity gap. The browser now computes SHA-256 over the received bytes, compares it with the authenticated server receipt, enforces an exact bounded content length, and parses the document only after integrity verification. The canonical schema, request identity, export kind and fulfilled state must match before download succeeds. English and Spanish status confirms the verified download with a short digest reference. Together with LR101–LR105, this is the ten-build publication candidate pending the complete exact-head gate, push, controlled publication, exact live-source verification and authenticated desktop/mobile Chrome smoke.

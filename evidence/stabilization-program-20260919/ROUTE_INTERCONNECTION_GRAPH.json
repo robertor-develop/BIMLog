@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 774,
+    "apiRoutes": 776,
     "frontendApiReferences": 308,
     "routeOwnedTables": 72
   },
@@ -5157,6 +5157,18 @@
     {
       "method": "PUT",
       "path": "/admin/launch-configuration/:environment",
+      "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/launch-configuration/:environment/email/verify",
+      "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/launch-configuration/:environment/email/send-test",
       "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
       "tables": []
     },

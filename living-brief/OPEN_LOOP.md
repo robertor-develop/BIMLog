@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Enterprise launch configuration Block 3 — transactional email verification — 2026-10-12
+
+- [x] Recover the selected provider secret only within a bounded operation and fail closed when it is absent or unreadable.
+- [x] Define provider-neutral verification and synthetic-delivery contracts with bounded outcomes.
+- [x] Add the live SendGrid verification and synthetic-delivery adapter with timeout and credential rejection handling.
+- [x] Protect connection and synthetic test-email actions with Super Admin authorization and private no-store responses.
+- [x] Add bilingual accessible controls and explicit synthetic-test guidance to the centralized launch workspace.
+- [ ] Connect and prove a governed live SMTP transport; the current SMTP adapter fails safely as unavailable.
+- [ ] Push Builds 11–15 once after the complete gate; keep them unpublished until Builds 16–20 complete the ten-build interval.
+
 ## LR056–LR060 release checkpoint — 2026-10-10
 
 - [x] Preserve and project the latest tenant subscription lifecycle without exposing provider identifiers or credentials.

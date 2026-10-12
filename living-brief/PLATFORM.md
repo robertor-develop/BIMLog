@@ -989,6 +989,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/launch-configuration-store.ts
 - artifacts/api-server/src/lib/launch-configuration.behavior.ts
 - artifacts/api-server/src/lib/launch-configuration.ts
+- artifacts/api-server/src/lib/launch-email-provider-live.behavior.ts
+- artifacts/api-server/src/lib/launch-email-provider-live.ts
+- artifacts/api-server/src/lib/launch-email-provider.behavior.ts
+- artifacts/api-server/src/lib/launch-email-provider.ts
+- artifacts/api-server/src/lib/launch-email-routes.behavior.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.behavior.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.ts
