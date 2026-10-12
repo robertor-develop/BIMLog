@@ -4324,3 +4324,7 @@ Five builds make Billing & Support begin with one deterministic customer account
 # Progressive disclosure Block 4 — candidate — 2026-10-11
 
 Five builds turn Profile into four focused work areas without changing any canonical identity, company, security or provider authority. Personal is the default; work metrics and pending records load only when Work is selected; security controls remain together; and Telegram, SendGrid and governed file-source connections load only when Connections is selected. The existing email-sending deep link opens the correct area and preserves its return destination. The permanent Block 4 gate protects bilingual grouping, on-demand loading and narrow-width containment. Blocks 3–4 now reach the ten-build publication boundary and require the complete exact-head gate, push, controlled publication and authenticated desktop/mobile Chrome acceptance.
+
+# Pre-release adoption observability repair — 2026-10-11
+
+Five builds close the two unexpected P1 findings exposed by the fresh pre-release platform audit. Authenticated onboarding-state loading now reports non-abort failures through BIMLog's existing privacy-safe client logger. Adoption milestone delivery reports transport failures and rejects non-success HTTP responses instead of silently presenting them as delivered. A permanent focused regression and package-level release gate protect both paths. The blocking audit now reports zero unexpected P1 identities; the complete exact-head build remains the final gate before the block push.

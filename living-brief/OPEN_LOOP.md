@@ -5446,3 +5446,14 @@ This block changes presentation and loading hierarchy only. Existing commercial,
 - [ ] Pass the complete exact-head gate, push Blocks 3–4, publish the ten-build interval and complete authenticated desktop/mobile Chrome acceptance.
 
 This block changes Profile presentation and loading hierarchy only. Existing identity, company, signature, project, preference, security, AI-cost, Telegram, email and provider records remain authoritative. It creates no external send and changes no database, schema, provider, Native, installer or MAIN 04 behavior.
+
+## Pre-release adoption observability repair — 2026-10-11
+
+- [x] Report onboarding-state load failures without logging expected request-abort cleanup.
+- [x] Report adoption milestone transport failures through the established client logger.
+- [x] Treat non-success milestone HTTP responses as failed delivery.
+- [x] Add a focused regression that prohibits silent failure handling in both paths.
+- [x] Add the regression, blocking audit and frontend typecheck to one repeatable release command.
+- [ ] Pass the complete exact-head build and push the repaired five-build block.
+
+This repair changes only failure observability. It creates no customer record, sends no email, changes no payment, permission, tenant boundary, provider, Native, installer or MAIN 04 behavior.
