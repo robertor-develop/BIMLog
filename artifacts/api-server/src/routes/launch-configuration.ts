@@ -9,6 +9,7 @@ import { createLiveLaunchEmailAdapters } from "../lib/launch-email-provider-live
 import { liveSmtpLaunchProbe } from "../lib/launch-smtp-probe";
 import { verifyLaunchPaymentMethod } from "../lib/launch-payment-verification";
 import { paymentActivationBlockers } from "../lib/launch-payment-activation";
+import { launchPaymentMethods, type LaunchPaymentMethod } from "../lib/launch-payment-provider";
 import { LaunchConfigurationConflict, listLaunchConfigurationHistory, listLatestLaunchPaymentVerifications, readLaunchConfiguration, readLatestLaunchEmailVerification, recordLaunchEmailVerification, recordLaunchPaymentVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
 
 const router: IRouter = Router();
@@ -87,8 +88,9 @@ router.post("/admin/launch-configuration/:environment/email/send-test", authMidd
 });
 
 router.post("/admin/launch-configuration/:environment/payment/verify", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
-  const target = environment(String(req.params.environment)), method = String(req.body?.method);
-  if (!target || !["bank_transfer", "qr_payment", "stripe"].includes(method)) { res.status(400).json({ code: "LAUNCH_PAYMENT_TEST_INVALID" }); return; }
+  const target = environment(String(req.params.environment)), requestedMethod = String(req.body?.method);
+  if (!target || !(launchPaymentMethods as readonly string[]).includes(requestedMethod)) { res.status(400).json({ code: "LAUNCH_PAYMENT_TEST_INVALID" }); return; }
+  const method = requestedMethod as LaunchPaymentMethod;
   const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
   const stored = current.configuration as StoredLaunchConfiguration, readiness = current.readiness as any;
   if (!(stored.enabledPaymentMethods ?? []).includes(method)) { res.status(409).json({ code: "LAUNCH_PAYMENT_METHOD_DISABLED" }); return; }
