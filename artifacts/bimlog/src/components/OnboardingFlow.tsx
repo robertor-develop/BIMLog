@@ -8,6 +8,7 @@ import { AlertCircle, Building2, Check, ChevronLeft, Mail, Settings2, UserRound,
 import { clearCommercialIntent, intentLabel, postOnboardingCommercialDestination, readCommercialIntent } from "@/lib/commercial-intent";
 import { EMAIL_VERIFICATION_POLICY, PRODUCT_TERMS } from "@/lib/adoption-journey";
 import type { FirstValueEvidence } from "@/lib/first-value-evidence";
+import { logClientError } from "@/lib/client-log";
 
 const API=(import.meta.env.BASE_URL||"").replace(/\/$/,"")+"/api/v1";
 const roles=[["bim_coordinator","BIM coordinator","Coordinador BIM"],["project_admin","Project administrator","Administrador de proyecto"],["document_controller","Document controller","Controlador documental"],["designer","Designer / detailer","Diseñador / dibujante"],["field_team","Field team","Equipo de campo"],["executive","Executive / owner","Ejecutivo / propietario"]] as const;
@@ -54,7 +55,7 @@ function Choice({active,onClick,children}:{active:boolean;onClick:()=>void;child
 function Label({text,children}:{text:string;children:React.ReactNode}){return <div><p className="mb-2 mt-4 text-sm font-semibold">{text}</p><div className="flex flex-wrap gap-2">{children}</div></div>}
 export function useOnboarding(){
   const token=useAuthStore(s=>s.token),[state,setState]=useState<OnboardingState|null>(null);
-  useEffect(()=>{if(!token){setState(null);return;}const controller=new AbortController();fetch(`${API}/onboarding`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal}).then(r=>r.ok?r.json():null).then(data=>{if(data)setState(data);}).catch(()=>{});return()=>controller.abort();},[token]);
+  useEffect(()=>{if(!token){setState(null);return;}const controller=new AbortController();fetch(`${API}/onboarding`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal}).then(r=>r.ok?r.json():null).then(data=>{if(data)setState(data);}).catch((error)=>{if(!controller.signal.aborted)logClientError("onboarding state load",error);});return()=>controller.abort();},[token]);
   const resumeGuide=async()=>{if(!token)return false;const response=await fetch(`${API}/onboarding`,{method:"PATCH",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({guidePaused:false})});if(!response.ok)return false;setState(current=>current?{...current,completedSteps:current.completedSteps.filter(step=>step!=="guide_paused")}:current);return true;};
   const acknowledgeFirstValue=async()=>{if(!token)return false;const response=await fetch(`${API}/onboarding`,{method:"PATCH",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({acknowledgeFirstValue:true})});if(!response.ok)return false;setState(current=>current?{...current,completedSteps:[...new Set([...current.completedSteps,"first_value_seen"])]}:current);return true;};
   return {state,shouldShow:!!token&&!!state&&!state.completedAt&&state.projectCount===0&&!state.completedSteps.includes("guide_paused"),resumeGuide,acknowledgeFirstValue,markDone:()=>setState(current=>current?{...current,completedSteps:[...new Set([...current.completedSteps,"guide_paused"])]}:current)};
