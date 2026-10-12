@@ -8,6 +8,7 @@ import { sendLaunchTestEmail, verifyLaunchEmailProvider, type LaunchEmailAdapter
 import { createLiveLaunchEmailAdapters } from "../lib/launch-email-provider-live";
 import { liveSmtpLaunchProbe } from "../lib/launch-smtp-probe";
 import { verifyLaunchPaymentMethod } from "../lib/launch-payment-verification";
+import { paymentActivationBlockers } from "../lib/launch-payment-activation";
 import { LaunchConfigurationConflict, listLaunchConfigurationHistory, listLatestLaunchPaymentVerifications, readLaunchConfiguration, readLatestLaunchEmailVerification, recordLaunchEmailVerification, recordLaunchPaymentVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
 
 const router: IRouter = Router();
@@ -110,6 +111,11 @@ router.post("/admin/launch-configuration/:environment/:action", authMiddleware, 
   if (action === "activate" && target === "production") {
     const evidence = await readLatestLaunchEmailVerification(pool, target), provider = (current.configuration as StoredLaunchConfiguration).emailDelivery?.provider;
     if (!evidence || evidence.provider !== provider || !["verified", "sent"].includes(evidence.status)) { res.status(409).json({ code: "LAUNCH_EMAIL_NOT_VERIFIED" }); return; }
+  }
+  if (action === "activate") {
+    const stored = current.configuration as StoredLaunchConfiguration;
+    const blockers = paymentActivationBlockers({ selectedMethods: stored.enabledPaymentMethods ?? [], configurationRevision: current.revision, evidence: await listLatestLaunchPaymentVerifications(pool, target), production: target === "production" });
+    if (blockers.length) { res.status(409).json({ code: "LAUNCH_PAYMENT_NOT_VERIFIED", blockers }); return; }
   }
   try {
     const state = action === "activate" ? "active" : "inactive", item = await writeLaunchConfiguration(pool, { environment: target, expectedRevision, state, configuration: current.configuration, readiness: current.readiness, actorUserId: req.user!.userId, reason: changeReason, action: action === "activate" ? "activated" : "deactivated" });
