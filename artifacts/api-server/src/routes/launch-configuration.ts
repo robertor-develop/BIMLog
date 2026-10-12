@@ -21,19 +21,19 @@ function publicConfiguration(value: unknown) {
 const response = (record: any) => record ? { ...record, configuration: publicConfiguration(record.configuration) } : null;
 
 router.get("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
-  const target = environment(req.params.environment); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
+  const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
   res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(await readLaunchConfiguration(pool, target)) });
 });
 
 router.get("/admin/launch-configuration/:environment/history", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
-  const target = environment(req.params.environment); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
+  const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
   res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ items: await listLaunchConfigurationHistory(pool, target) });
 });
 
 router.put("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
-  const target = environment(req.params.environment), changeReason = reason(req.body?.reason), expectedRevision = Number(req.body?.expectedRevision);
+  const target = environment(String(req.params.environment)), changeReason = reason(req.body?.reason), expectedRevision = Number(req.body?.expectedRevision);
   if (!target || !changeReason || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0 || !req.body?.configuration) { res.status(400).json({ code: "LAUNCH_CONFIGURATION_INVALID" }); return; }
-  const supplied = structuredClone(req.body.configuration) as StoredLaunchConfiguration, previous = await readLaunchConfiguration(pool, target), prior = previous?.configuration as StoredLaunchConfiguration | undefined;
+  const supplied = structuredClone(req.body.configuration) as any as StoredLaunchConfiguration & { emailDelivery: Record<string, unknown> }, previous = await readLaunchConfiguration(pool, target), prior = previous?.configuration as StoredLaunchConfiguration | undefined;
   supplied.secretEnvelopes = { ...prior?.secretEnvelopes };
   const smtpPassword = req.body?.secrets?.smtpPassword, sendgridApiKey = req.body?.secrets?.sendgridApiKey;
   if (typeof smtpPassword === "string" && smtpPassword.trim()) supplied.secretEnvelopes.smtpPassword = encryptLaunchSecret({ environment: target, field: "smtpPassword", value: smtpPassword });
@@ -47,7 +47,7 @@ router.put("/admin/launch-configuration/:environment", authMiddleware, isSuperAd
 });
 
 router.post("/admin/launch-configuration/:environment/:action", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
-  const target = environment(req.params.environment), action = req.params.action, changeReason = reason(req.body?.reason), expectedRevision = Number(req.body?.expectedRevision);
+  const target = environment(String(req.params.environment)), action = String(req.params.action), changeReason = reason(req.body?.reason), expectedRevision = Number(req.body?.expectedRevision);
   if (!target || !["activate", "deactivate"].includes(action) || !changeReason || !Number.isSafeInteger(expectedRevision)) { res.status(400).json({ code: "LAUNCH_CONFIGURATION_ACTION_INVALID" }); return; }
   const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
   if (action === "activate" && !(current.readiness as any)?.launchConfigurationEntered) { res.status(409).json({ code: "LAUNCH_CONFIGURATION_NOT_READY" }); return; }
