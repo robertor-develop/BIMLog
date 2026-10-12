@@ -6,6 +6,7 @@ import { CostValuePlanError } from "./cost-value-plan-service";
 import { performanceProvenance } from "./cost-value-performance-provenance";
 import { financialCsvCell, isFinancialCalendarDate } from "./financial-export-contract";
 import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 export type CostValuePerformanceInput = {
   snapshotDate: string;
@@ -153,7 +154,7 @@ export async function saveCostValuePerformance(actorUserId: number, projectId: n
     await client.query("COMMIT");
     return getCostValuePerformance(actorUserId, projectId);
   } catch (error) {
-    await client.query("ROLLBACK").catch(() => undefined);
+    await rollbackWithOperationalEvidence(client, "COST_VALUE_PERFORMANCE_ROLLBACK_FAILED");
     throw error;
   } finally { client.release(); }
 }

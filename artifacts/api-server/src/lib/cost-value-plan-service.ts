@@ -4,6 +4,7 @@ import { pool } from "@workspace/db";
 import { authorizeFinancialOperation } from "./financial-control-service";
 import { evaluateGenericApu } from "./generic-apu-engine";
 import { waitForGenericApuPersistenceMigration } from "./generic-apu-persistence-migration";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 type Line = { id: string; name: string; amount: string; percentage: string };
 export type CostValuePlanInput = {
@@ -226,7 +227,7 @@ export async function saveCostValuePlan(actorUserId: number, projectId: number, 
     await client.query("COMMIT");
     return getCostValuePlan(actorUserId, projectId);
   } catch (error) {
-    await client.query("ROLLBACK").catch(() => undefined);
+    await rollbackWithOperationalEvidence(client, "COST_VALUE_PLAN_ROLLBACK_FAILED");
     throw error;
   } finally { client.release(); }
 }
