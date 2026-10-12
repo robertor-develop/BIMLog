@@ -16,5 +16,7 @@ assert.match(contractImport, /FINANCIAL_CONTRACT_IMPORT_ROLLBACK_FAILED/);
 assert.doesNotMatch(contractImport, /try\s*\{\s*await client\.query\("ROLLBACK"\);\s*\}\s*catch\s*\{\}/);
 assert.match(receiverService, /FEEDBACK_RECEIVER_STAGING_CLOSE_FAILED/);
 assert.doesNotMatch(receiverService, /try\s*\{\s*fs\.closeSync\(fd\);\s*\}\s*catch\s*\{\}/);
+assert.match(receiverService, /FEEDBACK_RECEIVER_STAGING_UNLINK_FAILED/);
+assert.doesNotMatch(receiverService, /try\s*\{\s*fs\.unlinkSync\(temporary\);\s*\}\s*catch\s*\{\}/);
 
 console.log("Feedback operational-failure observability Build 1: PASS");

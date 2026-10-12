@@ -345,9 +345,10 @@ function atomicWrite(root: string, target: string, bytes: Buffer) {
         "FEEDBACK_RECEIVER_STAGING_CLOSE_FAILED",
       );
     }
-    try {
-      fs.unlinkSync(temporary);
-    } catch {}
+    cleanupWithOperationalEvidenceSync(
+      () => fs.unlinkSync(temporary),
+      "FEEDBACK_RECEIVER_STAGING_UNLINK_FAILED",
+    );
     throw error;
   }
 }
