@@ -20,5 +20,7 @@ assert.match(receiverService, /FEEDBACK_RECEIVER_STAGING_UNLINK_FAILED/);
 assert.doesNotMatch(receiverService, /try\s*\{\s*fs\.unlinkSync\(temporary\);\s*\}\s*catch\s*\{\}/);
 assert.match(receiverService, /FEEDBACK_RECEIVER_OBJECT_ROLLBACK_FAILED/);
 assert.doesNotMatch(receiverService, /fs\.unlinkSync\(object\);\s*\}\s*catch\s*\{\}/);
+assert.match(receiverService, /FEEDBACK_RECEIVER_STALE_LOCK_CLEANUP_FAILED/);
+assert.doesNotMatch(receiverService, /fs\.rmSync\(quarantine,[\s\S]{0,100}continue;\s*\}\s*catch\s*\{\}/);
 
 console.log("Feedback operational-failure observability Build 1: PASS");

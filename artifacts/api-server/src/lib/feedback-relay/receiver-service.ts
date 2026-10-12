@@ -875,7 +875,15 @@ export class FeedbackReceiverCustodyService {
           if(!current||current.fence!==fence||new Date(current.leaseUntil).getTime()<Date.now())fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");};
         try{assertCurrent();return work({assertCurrent,fence});}finally{let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
       }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
-        if((!owner&&ownerlessLockExpired(lock))||(owner&&ownerIsProvablyDead(owner))){const quarantine=`${lock}.stale-${randomUUID()}`;try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch{}}
+        if((!owner&&ownerlessLockExpired(lock))||(owner&&ownerIsProvablyDead(owner))){
+          const quarantine=`${lock}.stale-${randomUUID()}`;
+          const recovered=cleanupWithOperationalEvidenceSync(() => {
+            fs.renameSync(lock,quarantine);
+            syncDirectory(path.dirname(lock));
+            fs.rmSync(quarantine,{recursive:true,force:false});
+          }, "FEEDBACK_RECEIVER_STALE_LOCK_CLEANUP_FAILED");
+          if(recovered)continue;
+        }
         Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,2);
       }
     }
