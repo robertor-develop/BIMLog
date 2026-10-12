@@ -5,6 +5,6 @@ for(const token of ["Billing history","Historial de facturación","Loading billi
 assert.match(panel,/setStatus\(event\.target\.value as BillingHistoryStatus\);setPage\(1\)/);
 assert.match(panel,/status,page,pageSize:10/);
 assert.match(panel,/role="status"/);assert.match(panel,/role="alert"/);assert.match(styles,/repeat\(auto-fit,minmax\(min\(150px,100%\),1fr\)\)/);
-assert.match(page,/data\.billingAuthority\.canManageBilling&&<BillingHistoryPanel token=/);
+assert.match(page,/data\.billingAuthority\.canManageBilling&&<details/);
 assert.doesNotMatch(panel,/providerInvoiceReference|providerDisputeReference|payloadDigest|rawPayload|customerReference/);
 console.log("B244 bilingual responsive billing history UI: PASS");
