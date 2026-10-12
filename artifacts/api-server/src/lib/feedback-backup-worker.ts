@@ -3,6 +3,7 @@ import { Client as ReplitObjectStorageClient } from "@replit/object-storage";
 import { pool } from "@workspace/db";
 import { FEEDBACK_MAX_FILE_BYTES } from "./feedback-evidence-contract";
 import { storage } from "./storage-adapter";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 const INTERVAL_MS = 60_000, DEFAULT_BATCH_SIZE = 5, MAX_BATCH_SIZE = 25;
 export const FEEDBACK_BACKUP_LEASE_MS = 5 * 60_000;
@@ -148,7 +149,7 @@ async function settleSuccess(claimed: BackupClaim, actorUserId: number, receipt:
     if (!updated.rowCount) { await client.query("ROLLBACK"); return false; }
     await client.query(`INSERT INTO feedback_audit_events(feedback_id,actor_user_id,event_type,after_state) VALUES($1,$2,'evidence_backup_verified',$3::jsonb)`, [claimed.feedbackId, actorUserId, JSON.stringify({ assetId: claimed.assetId, state: "verified", backendId: receipt.backendId, objectId: receipt.objectId, encryptionKeyId: receipt.encryptionKeyId, sourceByteCount: receipt.sourceByteCount, sourceSha256: receipt.sourceSha256, ciphertextByteCount: receipt.ciphertextByteCount, ciphertextSha256: receipt.ciphertextSha256, verifiedAt: receipt.verifiedAt, attempt: claimed.attempt, fencingToken: claimed.fencingToken, restoreVerification: "exact-bytes-and-sha256", actorType: "worker" })]);
     await client.query("COMMIT"); return true;
-  } catch (error) { await client.query("ROLLBACK").catch(() => undefined); throw error; } finally { client.release(); }
+  } catch (error) { await rollbackWithOperationalEvidence(client, "FEEDBACK_BACKUP_SETTLEMENT_ROLLBACK_FAILED"); throw error; } finally { client.release(); }
 }
 
 async function settleFailure(claimed: BackupClaim, actorUserId: number, error: unknown) {
