@@ -97,6 +97,12 @@ try {
       ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_profile_version_id text REFERENCES member_internal_cost_profile_versions(id);
       ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_policy_version_id text REFERENCES company_internal_cost_policy_versions(id);
       ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_effective_date date;
+      ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_kind text;
+      ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_state text;
+      ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_reason text;
+      ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_reviewed_by_user_id integer REFERENCES users(id);
+      ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_reviewed_at timestamp;
+      ALTER TABLE support_cases ADD COLUMN IF NOT EXISTS data_request_fulfilled_at timestamp;
     `);
     after = await fixture.query("SELECT tablename FROM pg_tables WHERE schemaname='public'");
     actual = new Set(after.rows.map((row) => row.tablename));
