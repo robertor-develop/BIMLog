@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { check, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { check, index, integer, jsonb, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 
 export const launchConfigurationsTable = pgTable("launch_configurations", {
@@ -14,10 +14,10 @@ export const launchConfigurationsTable = pgTable("launch_configurations", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [
-  check("launch_configurations_environment_chk", sql`${table.environment} in ('development','staging','production')`),
-  check("launch_configurations_state_chk", sql`${table.state} in ('draft','validated','active','inactive')`),
-  check("launch_configurations_revision_chk", sql`${table.revision} > 0`),
-  uniqueIndex("launch_configurations_environment_uidx").on(table.environment),
+  check("launch_configurations_environment_check", sql`${table.environment} in ('development','staging','production')`),
+  check("launch_configurations_state_check", sql`${table.state} in ('draft','validated','active','inactive')`),
+  check("launch_configurations_revision_check", sql`${table.revision} > 0`),
+  unique("launch_configurations_environment_key").on(table.environment),
 ]);
 
 export const launchConfigurationVersionsTable = pgTable("launch_configuration_versions", {
@@ -32,8 +32,8 @@ export const launchConfigurationVersionsTable = pgTable("launch_configuration_ve
   actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [
-  check("launch_configuration_versions_revision_chk", sql`${table.revision} > 0`),
-  uniqueIndex("launch_configuration_versions_revision_uidx").on(table.configurationId, table.revision),
+  check("launch_configuration_versions_revision_check", sql`${table.revision} > 0`),
+  unique("launch_configuration_versions_configuration_id_revision_key").on(table.configurationId, table.revision),
 ]);
 
 export const launchConfigurationAuditTable = pgTable("launch_configuration_audit", {
@@ -47,8 +47,9 @@ export const launchConfigurationAuditTable = pgTable("launch_configuration_audit
   fingerprint: text("fingerprint").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [
-  check("launch_configuration_audit_action_chk", sql`${table.action} in ('created','updated','activated','deactivated','restored')`),
-  check("launch_configuration_audit_revision_chk", sql`${table.revision} > 0`),
+  check("launch_configuration_audit_action_check", sql`${table.action} in ('created','updated','activated','deactivated','restored')`),
+  check("launch_configuration_audit_revision_check", sql`${table.revision} > 0`),
+  index("launch_configuration_audit_time_idx").on(table.environment, table.createdAt),
 ]);
 
 export type LaunchConfigurationRecord = typeof launchConfigurationsTable.$inferSelect;
@@ -60,7 +61,13 @@ export const launchEmailVerificationAuditTable = pgTable("launch_email_verificat
   environment: text("environment").notNull(), revision: integer("revision").notNull(), provider: text("provider").notNull(),
   action: text("action").notNull(), status: text("status").notNull(), resultCode: text("result_code").notNull(),
   actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id), createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, table => [check("launch_email_verification_audit_revision_chk", sql`${table.revision} > 0`)]);
+}, table => [
+  check("launch_email_verification_audit_revision_check", sql`${table.revision} > 0`),
+  check("launch_email_verification_audit_provider_check", sql`${table.provider} in ('smtp','sendgrid')`),
+  check("launch_email_verification_audit_action_check", sql`${table.action} in ('verify','send_test')`),
+  check("launch_email_verification_audit_status_check", sql`${table.status} in ('verified','sent','rejected','unavailable')`),
+  index("launch_email_verification_audit_time_idx").on(table.environment, table.createdAt),
+]);
 
 export const launchPaymentVerificationAuditTable = pgTable("launch_payment_verification_audit", {
   id: text("id").primaryKey(),
@@ -74,10 +81,11 @@ export const launchPaymentVerificationAuditTable = pgTable("launch_payment_verif
   actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [
-  check("launch_payment_verification_audit_revision_chk", sql`${table.revision} > 0`),
-  check("launch_payment_verification_audit_method_chk", sql`${table.method} in ('bank_transfer','qr_payment','stripe')`),
-  check("launch_payment_verification_audit_mode_chk", sql`${table.mode} in ('manual','sandbox','production')`),
-  check("launch_payment_verification_audit_status_chk", sql`${table.status} in ('configured','verified','failed','unavailable')`),
+  check("launch_payment_verification_audit_revision_check", sql`${table.revision} > 0`),
+  check("launch_payment_verification_audit_method_check", sql`${table.method} in ('bank_transfer','qr_payment','stripe')`),
+  check("launch_payment_verification_audit_mode_check", sql`${table.mode} in ('manual','sandbox','production')`),
+  check("launch_payment_verification_audit_status_check", sql`${table.status} in ('configured','verified','failed','unavailable')`),
+  index("launch_payment_verification_audit_time_idx").on(table.environment, table.createdAt),
 ]);
 
 export type LaunchPaymentVerificationAuditEntry = typeof launchPaymentVerificationAuditTable.$inferSelect;
