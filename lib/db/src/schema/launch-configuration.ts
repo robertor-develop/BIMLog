@@ -61,3 +61,23 @@ export const launchEmailVerificationAuditTable = pgTable("launch_email_verificat
   action: text("action").notNull(), status: text("status").notNull(), resultCode: text("result_code").notNull(),
   actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id), createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [check("launch_email_verification_audit_revision_chk", sql`${table.revision} > 0`)]);
+
+export const launchPaymentVerificationAuditTable = pgTable("launch_payment_verification_audit", {
+  id: text("id").primaryKey(),
+  configurationId: text("configuration_id").notNull().references(() => launchConfigurationsTable.id),
+  environment: text("environment").notNull(),
+  revision: integer("revision").notNull(),
+  method: text("method").notNull(),
+  mode: text("mode").notNull(),
+  status: text("status").notNull(),
+  resultCode: text("result_code").notNull(),
+  actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, table => [
+  check("launch_payment_verification_audit_revision_chk", sql`${table.revision} > 0`),
+  check("launch_payment_verification_audit_method_chk", sql`${table.method} in ('bank_transfer','qr_payment','stripe')`),
+  check("launch_payment_verification_audit_mode_chk", sql`${table.mode} in ('manual','sandbox','production')`),
+  check("launch_payment_verification_audit_status_chk", sql`${table.status} in ('configured','verified','failed','unavailable')`),
+]);
+
+export type LaunchPaymentVerificationAuditEntry = typeof launchPaymentVerificationAuditTable.$inferSelect;
