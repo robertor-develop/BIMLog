@@ -21,6 +21,7 @@
     "test:edt-engine-block13": "node ./scripts/test-edt-engine-block13.mjs",
     "test:edt-engine-block14": "node ./scripts/test-edt-engine-block14.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
+    "test:launch-payment-audit-migration": "node scripts/test-launch-payment-audit-migration.mjs",
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "audit:platform": "node scripts/platform-audit.mjs",
     "audit:platform:blocking": "node scripts/platform-audit.mjs --enforce",
