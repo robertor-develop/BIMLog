@@ -17,16 +17,40 @@ CREATE TABLE IF NOT EXISTS launch_payment_verification_audit (
   id text PRIMARY KEY,
   configuration_id text NOT NULL REFERENCES launch_configurations(id),
   environment text NOT NULL,
-  revision integer NOT NULL CHECK (revision > 0),
-  method text NOT NULL CHECK (method IN ('bank_transfer','qr_payment','stripe')),
-  mode text NOT NULL CHECK (mode IN ('manual','sandbox','production')),
-  status text NOT NULL CHECK (status IN ('configured','verified','failed','unavailable')),
+  revision integer NOT NULL CONSTRAINT launch_payment_verification_audit_revision_check CHECK (revision > 0),
+  method text NOT NULL CONSTRAINT launch_payment_verification_audit_method_check CHECK (method IN ('bank_transfer','qr_payment','stripe')),
+  mode text NOT NULL CONSTRAINT launch_payment_verification_audit_mode_check CHECK (mode IN ('manual','sandbox','production')),
+  status text NOT NULL CONSTRAINT launch_payment_verification_audit_status_check CHECK (status IN ('configured','verified','failed','unavailable')),
   result_code text NOT NULL,
   actor_user_id integer NOT NULL REFERENCES users(id),
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS launch_payment_verification_audit_time_idx
   ON launch_payment_verification_audit(environment, created_at DESC);
+`;
+
+const constraintReconciliationSql = `
+DO $$ BEGIN
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_revision_chk')
+     AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_revision_check')
+  THEN ALTER TABLE launch_payment_verification_audit RENAME CONSTRAINT launch_payment_verification_audit_revision_chk TO launch_payment_verification_audit_revision_check; END IF;
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_method_chk')
+     AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_method_check')
+  THEN ALTER TABLE launch_payment_verification_audit RENAME CONSTRAINT launch_payment_verification_audit_method_chk TO launch_payment_verification_audit_method_check; END IF;
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_mode_chk')
+     AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_mode_check')
+  THEN ALTER TABLE launch_payment_verification_audit RENAME CONSTRAINT launch_payment_verification_audit_mode_chk TO launch_payment_verification_audit_mode_check; END IF;
+  IF EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_status_chk')
+     AND NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_status_check')
+  THEN ALTER TABLE launch_payment_verification_audit RENAME CONSTRAINT launch_payment_verification_audit_status_chk TO launch_payment_verification_audit_status_check; END IF;
+END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_revision_check') THEN ALTER TABLE launch_payment_verification_audit ADD CONSTRAINT launch_payment_verification_audit_revision_check CHECK (revision > 0); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_method_check') THEN ALTER TABLE launch_payment_verification_audit ADD CONSTRAINT launch_payment_verification_audit_method_check CHECK (method IN ('bank_transfer','qr_payment','stripe')); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_mode_check') THEN ALTER TABLE launch_payment_verification_audit ADD CONSTRAINT launch_payment_verification_audit_mode_check CHECK (mode IN ('manual','sandbox','production')); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_payment_verification_audit'::regclass AND conname='launch_payment_verification_audit_status_check') THEN ALTER TABLE launch_payment_verification_audit ADD CONSTRAINT launch_payment_verification_audit_status_check CHECK (status IN ('configured','verified','failed','unavailable')); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_email_verification_audit'::regclass AND conname='launch_email_verification_audit_provider_check') THEN ALTER TABLE launch_email_verification_audit ADD CONSTRAINT launch_email_verification_audit_provider_check CHECK (provider IN ('smtp','sendgrid')); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_email_verification_audit'::regclass AND conname='launch_email_verification_audit_action_check') THEN ALTER TABLE launch_email_verification_audit ADD CONSTRAINT launch_email_verification_audit_action_check CHECK (action IN ('verify','send_test')); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid='public.launch_email_verification_audit'::regclass AND conname='launch_email_verification_audit_status_check') THEN ALTER TABLE launch_email_verification_audit ADD CONSTRAINT launch_email_verification_audit_status_check CHECK (status IN ('verified','sent','rejected','unavailable')); END IF; END $$;
 `;
 
 function git(args) {
@@ -70,6 +94,23 @@ async function main() {
   const directory = path.resolve(process.env.BIMLOG_MIGRATION_RECEIPT_DIRECTORY);
   fs.mkdirSync(directory, { recursive: true });
   const source = { commit: head, tree: git(["rev-parse", "HEAD^{tree}"]) };
+  const developmentClient = new Client({ connectionString: process.env.DATABASE_URL, connectionTimeoutMillis: 5_000, statement_timeout: 30_000 });
+  await developmentClient.connect();
+  try {
+    await developmentClient.query("BEGIN");
+    try {
+      await developmentClient.query("SELECT pg_advisory_xact_lock(hashtext('bimlog-launch-payment-verification-audit-v1'))");
+      await developmentClient.query(migrationSql);
+      await developmentClient.query(constraintReconciliationSql);
+      await developmentClient.query("COMMIT");
+    } catch (error) {
+      await developmentClient.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    }
+  } finally {
+    await developmentClient.end();
+  }
+
   const client = new Client({ connectionString: process.env.PROD_DATABASE_URL, connectionTimeoutMillis: 5_000, statement_timeout: 30_000 });
   await client.connect();
   try {
@@ -79,6 +120,7 @@ async function main() {
     try {
       await client.query("SELECT pg_advisory_xact_lock(hashtext('bimlog-launch-payment-verification-audit-v1'))");
       await client.query(migrationSql);
+      await client.query(constraintReconciliationSql);
       await client.query("COMMIT");
     } catch (error) {
       await client.query("ROLLBACK").catch(() => undefined);

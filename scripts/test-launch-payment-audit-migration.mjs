@@ -16,6 +16,17 @@ assert.match(source, /await client\.query\("COMMIT"\)/);
 assert.match(source, /await client\.query\("ROLLBACK"\)/);
 assert.match(source, /before\.json/);
 assert.match(source, /after\.json/);
+for (const constraint of [
+  "launch_email_verification_audit_provider_check",
+  "launch_email_verification_audit_action_check",
+  "launch_email_verification_audit_status_check",
+  "launch_payment_verification_audit_revision_check",
+  "launch_payment_verification_audit_method_check",
+  "launch_payment_verification_audit_mode_check",
+  "launch_payment_verification_audit_status_check",
+]) assert.match(source, new RegExp(constraint));
+assert.match(source, /developmentClient/);
+assert.match(source, /RENAME CONSTRAINT launch_payment_verification_audit_method_chk TO launch_payment_verification_audit_method_check/);
 assert.doesNotMatch(source, /(?:^|\n)\s*(?:DROP|DELETE|TRUNCATE|UPDATE)\b/m);
 
 const refusal = spawnSync(process.execPath, [fileURLToPath(scriptUrl)], {
@@ -26,4 +37,4 @@ const refusal = spawnSync(process.execPath, [fileURLToPath(scriptUrl)], {
 assert.notEqual(refusal.status, 0);
 assert.match(`${refusal.stdout}\n${refusal.stderr}`, /Set BIMLOG_PRODUCTION_ADDITIVE_MIGRATION=launch-payment-verification-audit-v1/);
 
-console.log("LAUNCH_PAYMENT_AUDIT_MIGRATION=PASS additive_only=1 transaction=1 evidence=before_after authorization=fail_closed");
+console.log("LAUNCH_PAYMENT_AUDIT_MIGRATION=PASS additive_only=1 transaction=1 development_production=1 canonical_constraints=1 evidence=before_after authorization=fail_closed");
