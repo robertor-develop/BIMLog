@@ -1,5 +1,19 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Enterprise launch configuration Blocks 5–6 — payment verification — 2026-10-13
+
+- [x] Select provider-neutral payment methods per launch environment: bank transfer, QR payment, or Stripe.
+- [x] Store Stripe credentials as encrypted write-only configuration and never return secret values to the browser.
+- [x] Persist immutable verification evidence for the exact environment, payment method, and configuration revision.
+- [x] Protect payment verification routes and bilingual Super Admin controls with private no-store responses.
+- [x] Require current successful evidence for every selected payment method before production activation.
+- [x] Keep bank-transfer and QR verification configuration-only and create no payment, invoice, subscription, email, or financial transaction.
+- [x] Fail Stripe verification safely until its governed live provider account, credentials, and adapter are owner-supplied.
+- [ ] Owner must supply and verify the final legal identity, NIT/tax details, customer contact, transactional-email sender, banking/QR instructions, invoicing method, and live payment-provider account before commercial launch.
+- [ ] Pass the complete exact-head gate, push Builds 21–30, publish the ten-build interval, verify exact live source, and complete authenticated desktop/mobile Chrome acceptance.
+
+External owner-controlled values are launch inputs rather than missing application implementation. They must remain visibly blocked until verified and must never be invented, copied from synthetic fixtures, or inferred from test data.
+
 ## Enterprise launch configuration Block 3 — transactional email verification — 2026-10-12
 
 - [x] Recover the selected provider secret only within a bounded operation and fail closed when it is absent or unreadable.

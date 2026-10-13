@@ -21,6 +21,8 @@ It changes only when the code structure or curated architectural facts change.
 - Document and catalog SHA-256 values use canonical UTF-8 text with LF line endings so Windows and Linux checkouts verify identically.
 
 ## Current release and provider contract
+- Enterprise launch configuration Builds 21–30 add provider-neutral payment-method selection for bank transfer, QR payment, and Stripe; encrypted write-only Stripe secrets; immutable verification evidence scoped to environment and configuration revision; protected Super Admin verification actions; and production-activation blockers that require current successful evidence for every selected method. The implementation creates no customer payment, invoice, subscription, email, or financial transaction.
+- Bank-transfer and QR verification validate BIMLog-owned configuration only. Stripe live verification remains unavailable until the owner selects and supplies the governed production account, credentials, and provider adapter. Missing owner-controlled legal identity, contact, sender, banking, invoicing, or payment-provider values remain explicit launch blockers and are never synthesized by the application.
 - Current accepted Platform release: `v1.05.N18-P34` / `1.5.18.34`; Build 040 corrective source `4472d982c2fc7ab5fde552048f024cd7e90fab96`; Replit publication receipt `b8718795`. Exact live source/package/database identity and authenticated two-tab restoration passed.
 - Builds 041–050 are the due ten-build publication batch. Builds 041–045 harden the global shell; Builds 046–050 add governed catalog aliases, canonical Intake classification selection, permanent pricing/workflow/Intake lifecycle regressions, and controlled role acceptance. The only schema delta is the additive, default-empty company-catalog `aliases` column. No Lens Next Native source or installer changed. Publication and authenticated live acceptance are required before Build 051.
 - GitHub `master` is the product source authority. Replit is the established BIMLog publication provider; synchronize exact reviewed source through the signed-in Replit Shell, never Replit Agents.
@@ -995,6 +997,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/launch-email-provider.behavior.ts
 - artifacts/api-server/src/lib/launch-email-provider.ts
 - artifacts/api-server/src/lib/launch-email-routes.behavior.ts
+- artifacts/api-server/src/lib/launch-payment-activation.behavior.ts
+- artifacts/api-server/src/lib/launch-payment-activation.ts
+- artifacts/api-server/src/lib/launch-payment-provider.behavior.ts
+- artifacts/api-server/src/lib/launch-payment-provider.ts
+- artifacts/api-server/src/lib/launch-payment-verification.behavior.ts
+- artifacts/api-server/src/lib/launch-payment-verification.ts
 - artifacts/api-server/src/lib/launch-smtp-probe.behavior.ts
 - artifacts/api-server/src/lib/launch-smtp-probe.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
