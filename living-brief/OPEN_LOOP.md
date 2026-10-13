@@ -5553,3 +5553,10 @@ This block changes failure observability only. Existing feedback custody, fencin
 This release creates no customer transaction and sends no message until a Super Admin explicitly invokes the synthetic test with owner-supplied credentials and recipient. Provider credentials remain encrypted and never return to the browser.
 
 Release-gate repair `9b2cd552` reconciles the generated eleventh historical duplicate group and changes no product behavior.
+## Launch payment release repair — Block 1 — 2026-10-13
+
+- [x] Canonicalize the launch configuration, email verification and payment verification check/index names between the Drizzle schema and the idempotent runtime migration.
+- [x] Add a regression contract that rejects legacy `_chk`/`_uidx` aliases and requires the runtime indexes and unique-constraint identities already present in production.
+- [x] Add a production-only, fail-closed, additive migration operator for `launch_payment_verification_audit`; it requires authoritative clean `master`, distinct development/production identities, an exact authorization token, an advisory transaction lock and immutable before/after receipts.
+- [x] Prove the operator contains one idempotent table creation, one idempotent index creation, no destructive SQL and refuses execution without its exact authorization token.
+- [ ] Push this five-build block, promote the exact candidate to `master`, synchronize development, capture the production before/after receipts, obtain `schemaAction: NONE`, and carry publication plus authenticated Chrome smoke into the second and final ten-build interval block.

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "c8be17345f8e928a9bd4dea10f41dce550fe77cdfbdb217c65fd8a3e11e3ebcf",
-  "itemCount": 385,
+  "sourceSha256": "3b80e99a62ddaa8cd98d5e717d2dc1206d1c56557cc103ae68786b813801883b",
+  "itemCount": 386,
   "counts": {
-    "ACTIVE": 342,
+    "ACTIVE": 343,
     "SUPERSEDED": 31,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7015,6 +7015,24 @@
       "evidence": [
         "canonical-open-loop:5b374606f8726bca",
         "duplicate-source:c8f39eca660f5589"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "73b55ca013663179",
+      "sourceLine": 5562,
+      "heading": "Launch payment release repair — Block 1 — 2026-10-13",
+      "statement": "Push this five-build block, promote the exact candidate to `master`, synchronize development, capture the production before/after receipts, obtain `schemaAction: NONE`, and carry publication plus authenticated Chrome smoke into the second and final ten-build interval block.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5562",
+        "Launch payment release repair — Block 1 — 2026-10-13"
       ],
       "currentAuthority": false
     }

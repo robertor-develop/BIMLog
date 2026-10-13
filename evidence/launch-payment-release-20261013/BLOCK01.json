@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "bimlog-launch-payment-release-block-v1",
+  "date": "2026-10-13",
+  "block": 1,
+  "builds": [
+    { "build": 1, "commit": "4922c8ec", "result": "PASS", "scope": "canonical launch schema identities" },
+    { "build": 2, "commit": "1c40a98d", "result": "PASS", "scope": "schema contract regression" },
+    { "build": 3, "commit": "6970335a", "result": "PASS", "scope": "guarded additive production migration" },
+    { "build": 4, "commit": "041df6b2", "result": "PASS", "scope": "fail-closed migration proof" },
+    { "build": 5, "commit": "THIS_COMMIT", "result": "PASS", "scope": "living brief and evidence reconciliation" }
+  ],
+  "tests": [
+    "LAUNCH_CONFIGURATION_BUILD_06=PASS",
+    "LAUNCH_SCHEMA_CONTRACT=PASS",
+    "LAUNCH_PAYMENT_AUDIT_MIGRATION=PASS",
+    "Database safety fixtures: passed"
+  ],
+  "publication": "DEFERRED_TO_BLOCK_2_AT_TEN_BUILD_INTERVAL",
+  "productionMutation": "NONE_IN_BLOCK_1"
+}
