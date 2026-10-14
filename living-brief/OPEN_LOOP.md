@@ -5662,3 +5662,13 @@ No automatic activation, credential, provider call, payment, invoice, email, cus
 - [x] Run the duplicate-checked additive production uniqueness migration and preserve its PASS receipt.
 - [ ] Reconcile the three retained Helium launch-audit indexes to the production-verified descending definitions, rerun exact bidirectional parity, and publish only when the provider proposes no drop.
 
+## Gauntlet navigation Block 17 — Builds 81–85 — 2026-10-14
+
+- [x] Replace the flat Administration list with one explicit disclosure.
+- [x] Separate project oversight from company configuration destinations without duplicating routes.
+- [x] Reopen every owning group when its current child route becomes active.
+- [x] Preserve user disclosure choices while preventing the active route from becoming hidden.
+- [x] Bind bilingual desktop/mobile hierarchy, semantics, focus and strict frontend typechecking to one permanent gate.
+
+This block changes navigation hierarchy and discoverability only. Existing route, role, tenant, catalog, workflow, APU, Total Control, customer, payment, email, Native, installer, Feedback and MAIN 04 authorities remain unchanged. It is pushed after its complete gate and stays unpublished until Builds 86–90 complete the next ten-build interval.
+
