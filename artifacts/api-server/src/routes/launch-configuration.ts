@@ -11,6 +11,7 @@ import { verifyLaunchPaymentMethod } from "../lib/launch-payment-verification";
 import { paymentActivationBlockers } from "../lib/launch-payment-activation";
 import { inspectLaunchActivationPreflight } from "../lib/launch-activation-preflight";
 import { inspectLaunchHistoricalIntegrity } from "../lib/launch-historical-integrity";
+import { inspectLaunchOwnerInputChecklist } from "../lib/launch-owner-input-checklist";
 import { prepareLaunchConfigurationRestore } from "../lib/launch-configuration-restore";
 import { launchPaymentMethods, type LaunchPaymentMethod } from "../lib/launch-payment-provider";
 import { LaunchConfigurationConflict, listLaunchConfigurationHistory, listLatestLaunchPaymentVerifications, readLaunchConfiguration, readLaunchConfigurationVersion, readLatestLaunchEmailVerification, recordLaunchEmailVerification, recordLaunchPaymentVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
@@ -60,7 +61,8 @@ router.get("/admin/launch-configuration/:environment", authMiddleware, isSuperAd
     paymentEvidence: paymentVerifications,
   }) : null;
   const historicalIntegrity = inspectLaunchHistoricalIntegrity();
-  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(current), emailVerification, paymentVerifications, preflight, historicalIntegrity });
+  const ownerInputChecklist = inspectLaunchOwnerInputChecklist({ configured: !!(current?.readiness as any)?.launchConfigurationEntered, active: current?.state === "active", preflight });
+  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(current), emailVerification, paymentVerifications, preflight, historicalIntegrity, ownerInputChecklist });
 });
 
 router.get("/admin/launch-configuration/:environment/history", authMiddleware, isSuperAdminMiddleware, async (req, res) => {

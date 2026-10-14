@@ -8,6 +8,7 @@ assert.equal(pending.pendingCount, 6);
 assert.equal(new Set(pending.items.map(item => item.id)).size, 6);
 
 const verified = inspectLaunchOwnerInputChecklist({ configured: true, active: true, preflight: {
+  environment: "production", configurationRevision: 7,
   classification: "FINAL_ACTIVATION_VERIFIED", configurationReady: true, emailReady: true,
   paymentsReady: true, activationReady: true, blockers: [],
 } });
