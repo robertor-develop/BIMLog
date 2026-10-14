@@ -17,7 +17,9 @@ import { initializeContractItemWorkflowsWithClient } from "./contract-item-workf
 import { waitForContractItemWorkflowMigration } from "./contract-item-workflow-migration";
 import { waitForFinancialContractMigration } from "./financial-contract-migration";
 import {
+  assertJobIntakeActivationConfirmation,
   assertAuthoritativeBudgetAssociations,
+  assertIntakeProductionAllocation,
   jobIntakeBudgetLinkRequested,
   jobIntakeCompletion,
   jobIntakeCoreFingerprint,
@@ -35,7 +37,6 @@ import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
-import { assertIntakeProductionAllocation } from "./job-intake-contract";
 import { rollbackWithOperationalEvidence } from "./operational-failure";
 import { activatedLineageReceipt, canonicalIntakeContractItemSource } from "./job-intake-contract-lineage";
 
@@ -1301,15 +1302,7 @@ export async function activateJobIntake(input: {
     const docs = await documents(intake.id, client),
       data = normalizeJobIntakeData(intake.data),
       completion = jobIntakeCompletion(data, docs, capabilities);
-    if (
-      !completion.ready ||
-      completion.fingerprint !== String(input.confirmationFingerprint)
-    )
-      throw new FinancialControlError(
-        409,
-        "JOB_INTAKE_NOT_READY",
-        `Complete the intake before activation: ${completion.missing.join(" ")}`,
-      );
+    assertJobIntakeActivationConfirmation(completion, input.confirmationFingerprint);
     const budgetLinkRequested =
       capabilities.budget && jobIntakeBudgetLinkRequested(data);
     if (input.requireCommercial === true && !budgetLinkRequested)

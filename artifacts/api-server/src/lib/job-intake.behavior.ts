@@ -4,10 +4,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  assertJobIntakeActivationConfirmation,
   assertAuthoritativeBudgetAssociations,
   jobIntakeCompletion,
   normalizeJobIntakeData,
 } from "./job-intake-contract";
+import { FinancialControlError } from "./financial-control-contract";
 import { buildActivatedCommercialBaseline } from "./job-activation-commercial-baseline";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -131,6 +133,12 @@ assert.equal(completion.totals.unassignedHours, "0");
 assert.equal(completion.percent, 100);
 assert.equal(completion.ready, true);
 assert.match(completion.fingerprint, /^[a-f0-9]{64}$/);
+assert.doesNotThrow(() => assertJobIntakeActivationConfirmation(completion, completion.fingerprint));
+assert.throws(
+  () => assertJobIntakeActivationConfirmation(completion, "0".repeat(64)),
+  (error: unknown) => error instanceof FinancialControlError && error.code === "JOB_INTAKE_CONFIRMATION_STALE",
+  "a changed confirmation must never be reported as an undisclosed missing requirement",
+);
 const missingEdtTrade = normalizeJobIntakeData({
   ...data,
   scopeItems: [{
@@ -140,6 +148,10 @@ const missingEdtTrade = normalizeJobIntakeData({
 });
 const missingEdtTradeCompletion = jobIntakeCompletion(missingEdtTrade, []);
 assert.equal(missingEdtTradeCompletion.ready, false, "activation must not offer an EDT that cannot be generated");
+assert.throws(
+  () => assertJobIntakeActivationConfirmation(missingEdtTradeCompletion, missingEdtTradeCompletion.fingerprint),
+  (error: unknown) => error instanceof FinancialControlError && error.code === "JOB_INTAKE_NOT_READY",
+);
 assert.equal(missingEdtTradeCompletion.missingItems.some((item) => item.code === "edt_source"), true);
 assert.equal(jobIntakeCompletion(missingEdtTrade, [], coreCapabilities).missingItems.some((item) => item.code === "edt_source"), false);
 const multiContractData = normalizeJobIntakeData({

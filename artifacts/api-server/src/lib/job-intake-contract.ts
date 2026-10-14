@@ -1331,3 +1331,21 @@ export function jobIntakeCompletion(
       .digest("hex"),
   };
 }
+
+export function assertJobIntakeActivationConfirmation(
+  completion: ReturnType<typeof jobIntakeCompletion>,
+  confirmationFingerprint: unknown,
+) {
+  if (!completion.ready)
+    throw new FinancialControlError(
+      409,
+      "JOB_INTAKE_NOT_READY",
+      `Complete the intake before activation: ${completion.missing.join(" ")}`,
+    );
+  if (completion.fingerprint !== String(confirmationFingerprint ?? ""))
+    throw new FinancialControlError(
+      409,
+      "JOB_INTAKE_CONFIRMATION_STALE",
+      "The saved Intake changed after confirmation. Reload the current readiness result before activation.",
+    );
+}
