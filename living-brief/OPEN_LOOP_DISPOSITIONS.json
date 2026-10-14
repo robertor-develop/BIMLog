@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "8c22932f039e9c170ae7bb7c00925de35a450458587af5ab9e0b2c002c4ef7af",
-  "itemCount": 386,
+  "sourceSha256": "4991a31f0b15e4aa27a578c231b390105fee0ed4b7f9b09cea342887c52bad9b",
+  "itemCount": 388,
   "counts": {
-    "ACTIVE": 343,
+    "ACTIVE": 345,
     "SUPERSEDED": 31,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7033,6 +7033,42 @@
       "evidence": [
         "OPEN_LOOP.md:5562",
         "Launch payment release repair — Block 1 — 2026-10-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "89b1a97e8b08d98e",
+      "sourceLine": 5574,
+      "heading": "Enterprise launch configuration Block 7 — Builds 31–35 — 2026-10-13",
+      "statement": "Pass the complete exact-head gate and push this five-build block once.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5574",
+        "Enterprise launch configuration Block 7 — Builds 31–35 — 2026-10-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "918ab068ea69a424",
+      "sourceLine": 5575,
+      "heading": "Enterprise launch configuration Block 7 — Builds 31–35 — 2026-10-13",
+      "statement": "Keep Builds 31–35 unpublished until Builds 36–40 complete the ten-build publication interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5575",
+        "Enterprise launch configuration Block 7 — Builds 31–35 — 2026-10-13"
       ],
       "currentAuthority": false
     }

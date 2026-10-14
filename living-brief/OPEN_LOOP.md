@@ -5564,3 +5564,15 @@ Release-gate repair `9b2cd552` reconciles the generated eleventh historical dupl
 Candidate `9d2d9cece8354220c3fd766c867b448d68f12223` is pushed on the authorized release branch. The corrected F-rooted launch fixture passes the payment schema, migration, coordination-knowledge and artifact-proof checks. The complete gate reached final Living Brief integrity after all application, security, dependency, Native and release checks passed; this reconciliation closes that exact documentation failure before the complete gate is repeated.
 
 The first live publication receipt correctly stopped with `schemaAction=STOP_COMPLETE_PREVIEW_AND_RESTORE_PROOF_REQUIRED`. Development had four legacy payment `_chk` aliases and lacked three canonical email checks; production lacked four canonical payment checks. Repair `2c81b5a7` reconciles only those exact constraint identities inside the existing authorized advisory-locked transactions. Repeat the full gate, promote the repaired exact head, rerun the operator, require `schemaAction=NONE`, then publish and complete authenticated desktop/mobile Chrome acceptance.
+## Enterprise launch configuration Block 7 — Builds 31–35 — 2026-10-13
+
+- [x] Extend the governed business profile with business/support phones, legal contact, website, invoice identity, customer footer and public legal links.
+- [x] Normalize bounded values and reject invalid contact data or non-HTTPS public URLs.
+- [x] Expose every field through the existing Super Admin launch configuration authority.
+- [x] Replace internal blocker codes with bilingual human next actions.
+- [x] Bind server/browser field parity and negative validation to one permanent aggregate regression.
+- [ ] Pass the complete exact-head gate and push this five-build block once.
+- [ ] Keep Builds 31–35 unpublished until Builds 36–40 complete the ten-build publication interval.
+
+Owner-supplied real identity values remain intentionally pending. This block creates no production identity, credential, payment, invoice, email or customer record and changes no schema, Native, installer or MAIN 04 behavior.
+
