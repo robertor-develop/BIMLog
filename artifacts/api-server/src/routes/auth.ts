@@ -16,6 +16,7 @@ import { eq, and, sql, isNull } from "drizzle-orm";
 import { RegisterBody, LoginBody } from "@workspace/api-zod";
 import {
   signToken,
+  signLaunchStepUpToken,
   authMiddleware,
   type AuthPayload,
 } from "../middlewares/auth";
@@ -31,6 +32,14 @@ import {
 } from "../lib/project-invitation-contract";
 
 const router: IRouter = Router();
+
+router.post("/auth/launch-step-up", authMiddleware, async (req, res) => {
+  res.setHeader("Cache-Control", "private, no-store, max-age=0");
+  const password = typeof req.body?.password === "string" ? req.body.password : "";
+  const [user] = await db.select({ passwordHash: usersTable.passwordHash, isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+  if (!user?.isSuperAdmin || !password || !(await bcrypt.compare(password, user.passwordHash))) { res.status(401).json({ code: "LAUNCH_STEP_UP_DENIED" }); return; }
+  res.json({ stepUpToken: signLaunchStepUpToken(req.user!.userId), expiresInSeconds: 600 });
+});
 
 class RegistrationConflictError extends Error {}
 
