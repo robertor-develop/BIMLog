@@ -66,17 +66,21 @@ export function MasterSidebar() {
   };
 
   const [showSearch, setShowSearch] = useState(false);
-  const [showSettingsNavigation, setShowSettingsNavigation] = useState(() => location === "/profile" || location.startsWith("/settings/"));
+  const storedDisclosure = (key: string, active: boolean) => {
+    if (active || typeof window === "undefined") return active;
+    return window.localStorage.getItem(key) === "true";
+  };
+  const [showSettingsNavigation, setShowSettingsNavigation] = useState(() => storedDisclosure("bimlog-nav-settings-open", location === "/profile" || location.startsWith("/settings/")));
   const [showAdministrationNavigation, setShowAdministrationNavigation] = useState(() =>
-    ["/admin", "/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates", "/total-control"]
-      .some(route => location === route || location.startsWith(`${route}/`)),
+    storedDisclosure("bimlog-nav-administration-open", ["/admin", "/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates", "/total-control"]
+      .some(route => location === route || location.startsWith(`${route}/`))),
   );
   const [showProjectManagementNavigation, setShowProjectManagementNavigation] = useState(() =>
-    location === "/admin" || location.startsWith("/admin/") || location === "/total-control" || location.startsWith("/total-control/"),
+    storedDisclosure("bimlog-nav-project-management-open", location === "/admin" || location.startsWith("/admin/") || location === "/total-control" || location.startsWith("/total-control/")),
   );
   const [showCompanySetupNavigation, setShowCompanySetupNavigation] = useState(() =>
-    ["/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates"]
-      .some(route => location === route || location.startsWith(`${route}/`)),
+    storedDisclosure("bimlog-nav-company-setup-open", ["/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates"]
+      .some(route => location === route || location.startsWith(`${route}/`))),
   );
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
@@ -218,6 +222,14 @@ export function MasterSidebar() {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("bimlog-master-sidebar-collapsed", String(sidebarCollapsed));
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bimlog-nav-administration-open", String(showAdministrationNavigation));
+    window.localStorage.setItem("bimlog-nav-project-management-open", String(showProjectManagementNavigation));
+    window.localStorage.setItem("bimlog-nav-company-setup-open", String(showCompanySetupNavigation));
+    window.localStorage.setItem("bimlog-nav-settings-open", String(showSettingsNavigation));
+  }, [showAdministrationNavigation, showProjectManagementNavigation, showCompanySetupNavigation, showSettingsNavigation]);
 
   const loadNotifications = async () => {
     if (!token) return;
