@@ -5609,3 +5609,12 @@ Final production activation remains an explicit Super Admin action after owner-s
 - [x] Add bilingual identity-confirmation guidance and disabled mutation states.
 - [x] Add and pass the permanent Block 10 aggregate acceptance gate.
 - [ ] Push and publish the complete Builds 41–50 interval, then verify exact live identity and authenticated Chrome production behavior.
+
+## Enterprise launch configuration Block 11 — Builds 51–55 — 2026-10-14
+
+- [x] Define and validate an immutable invoice-party snapshot.
+- [x] Add backward-compatible JSON snapshot storage to commercial invoices.
+- [x] Capture the customer and active production supplier revision at issuance.
+- [x] Render new statements from issued snapshots and classify legacy fallback.
+- [x] Bind migration, issuance, rendering and negative cases to an aggregate gate.
+- [ ] Push Builds 51–55 and keep them unpublished until Builds 56–60 complete the interval.

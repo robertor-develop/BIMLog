@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "56cbfc216fa0e450453c5c6c2e66666a7ddd4af5cfcbb7bb098b6b1fb99f662d",
-  "itemCount": 392,
+  "sourceSha256": "8c5048f570c667bb53ac006f4495b69136f6c6088de1322621ab5c163d7d974a",
+  "itemCount": 393,
   "counts": {
-    "ACTIVE": 348,
+    "ACTIVE": 349,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7141,6 +7141,24 @@
       "evidence": [
         "living-brief/STATUS.md current authority",
         "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "8505274c377a7789",
+      "sourceLine": 5620,
+      "heading": "Enterprise launch configuration Block 11 — Builds 51–55 — 2026-10-14",
+      "statement": "Push Builds 51–55 and keep them unpublished until Builds 56–60 complete the interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5620",
+        "Enterprise launch configuration Block 11 — Builds 51–55 — 2026-10-14"
       ],
       "currentAuthority": false
     }

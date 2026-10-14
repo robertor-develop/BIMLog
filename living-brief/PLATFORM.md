@@ -421,6 +421,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-evidence-package.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.behavior.ts
 - artifacts/api-server/src/lib/commercial-forecast-reconciliation.ts
+- artifacts/api-server/src/lib/commercial-invoice-parties.behavior.ts
+- artifacts/api-server/src/lib/commercial-invoice-parties.ts
 - artifacts/api-server/src/lib/commercial-invoice-schema.behavior.ts
 - artifacts/api-server/src/lib/commercial-invoice-statement-pdf.behavior.ts
 - artifacts/api-server/src/lib/commercial-invoice-statement-pdf.ts

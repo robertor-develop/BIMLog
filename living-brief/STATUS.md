@@ -4395,3 +4395,7 @@ Builds 41–45 close the evidence-based reversibility gap in the existing Super 
 ## Enterprise launch configuration Block 10 — Builds 46–50 — 2026-10-14
 
 Builds 46–50 require a fresh, account-bound password confirmation before a Super Admin can save, restore, activate, or deactivate launch configuration. The proof is scoped only to launch configuration, expires after ten minutes, is bound to the current authenticated user, and is never accepted as a normal session token. English and Spanish guidance explains the step before mutation controls become available. API and frontend TypeScript plus the permanent Block 10 acceptance gate pass. This closes the ten-build 41–50 publication interval.
+
+## Enterprise launch configuration Block 11 — Builds 51–55 — 2026-10-14
+
+Builds 51–55 preserve the exact customer and supplier identity used when a commercial invoice is issued. New invoices store a bounded party snapshot and active production launch-configuration revision; statements render that snapshot rather than silently joining mutable company or launch settings. Legacy invoices remain readable and explicitly classified as legacy instead of receiving fabricated historical supplier identity. The schema change is additive and publication waits for Builds 56–60.
