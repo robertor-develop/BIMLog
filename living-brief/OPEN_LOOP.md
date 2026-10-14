@@ -5654,5 +5654,6 @@ No automatic activation, credential, provider call, payment, invoice, email, cus
 - [x] Reload canonical readiness after a stale-confirmation response and prevent mismatched activation.
 - [x] Reopen completed conventions at their saved checkpoint instead of the first-run front door.
 - [x] Share one ordered convention consumer across Name Generator, Files and Coordination Hub.
+- [x] Repair the Coordination Hub field-key mismatch exposed by the Replit exact-source typecheck.
 - [ ] Pass the complete exact-head gate, push Builds 76–80, publish the complete Builds 71–80 interval, and complete authenticated desktop/mobile Chrome acceptance.
 
