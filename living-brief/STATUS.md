@@ -4399,3 +4399,7 @@ Builds 46–50 require a fresh, account-bound password confirmation before a Sup
 ## Enterprise launch configuration Block 11 — Builds 51–55 — 2026-10-14
 
 Builds 51–55 preserve the exact customer and supplier identity used when a commercial invoice is issued. New invoices store a bounded party snapshot and active production launch-configuration revision; statements render that snapshot rather than silently joining mutable company or launch settings. Legacy invoices remain readable and explicitly classified as legacy instead of receiving fabricated historical supplier identity. The schema change is additive and publication waits for Builds 56–60.
+
+## Enterprise launch configuration Block 12 — Builds 56–60 — 2026-10-14
+
+Builds 56–60 make the issued identity reviewable by an authorized billing administrator before statement download. The browser strictly validates the tenant-scoped statement response, loads it only after the user requests review, shows the preserved supplier and billed customer identity, identifies the exact launch-configuration revision, and warns when a legacy invoice lacks historical supplier identity instead of inventing it. English and Spanish copy, retry handling, compact responsive presentation and a permanent aggregate gate complete the ten-build 51–60 publication interval. No payment, refund, provider call, email, customer record, Native, installer, or MAIN 04 behavior is changed.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "8c5048f570c667bb53ac006f4495b69136f6c6088de1322621ab5c163d7d974a",
+  "sourceSha256": "fcc448169df0d418ede5526b03eee9814fe06737afeb641d7d37329e38dee6c4",
   "itemCount": 393,
   "counts": {
     "ACTIVE": 349,
@@ -7145,10 +7145,10 @@
       "currentAuthority": false
     },
     {
-      "id": "8505274c377a7789",
-      "sourceLine": 5620,
-      "heading": "Enterprise launch configuration Block 11 — Builds 51–55 — 2026-10-14",
-      "statement": "Push Builds 51–55 and keep them unpublished until Builds 56–60 complete the interval.",
+      "id": "347933e8e41b9796",
+      "sourceLine": 5630,
+      "heading": "Enterprise launch configuration Block 12 — Builds 56–60 — 2026-10-14",
+      "statement": "Pass the complete exact-head gate, push Builds 56–60, publish the complete Builds 51–60 interval, verify exact live identity and complete authenticated desktop/mobile Chrome acceptance.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -7157,8 +7157,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5620",
-        "Enterprise launch configuration Block 11 — Builds 51–55 — 2026-10-14"
+        "OPEN_LOOP.md:5630",
+        "Enterprise launch configuration Block 12 — Builds 56–60 — 2026-10-14"
       ],
       "currentAuthority": false
     }

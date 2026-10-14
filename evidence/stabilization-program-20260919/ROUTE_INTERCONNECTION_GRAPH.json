@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 5,
     "apiRoutes": 779,
-    "frontendApiReferences": 308,
+    "frontendApiReferences": 309,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -10242,6 +10242,10 @@
     {
       "screen": "artifacts/bimlog/src/lib/commercial-billing-identity-client.ts",
       "apiPath": "${base}/api/v1/commercial/billing-identity"
+    },
+    {
+      "screen": "artifacts/bimlog/src/lib/commercial-invoice-statement-client.ts",
+      "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/invoices/${encodeURIComponent(input.invoiceId)}"
     },
     {
       "screen": "artifacts/bimlog/src/lib/commercial-launch-verification-workflow.ts",

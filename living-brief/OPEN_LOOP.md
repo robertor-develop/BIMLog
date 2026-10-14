@@ -5617,4 +5617,14 @@ Final production activation remains an explicit Super Admin action after owner-s
 - [x] Capture the customer and active production supplier revision at issuance.
 - [x] Render new statements from issued snapshots and classify legacy fallback.
 - [x] Bind migration, issuance, rendering and negative cases to an aggregate gate.
-- [ ] Push Builds 51–55 and keep them unpublished until Builds 56–60 complete the interval.
+- [x] Pass the complete exact-head gate and push Builds 51–55 at source `e650ae72a82a377d7f55e7a88ffc2d9088f0dd41`.
+- [x] Keep Builds 51–55 unpublished until Builds 56–60 complete the interval.
+
+## Enterprise launch configuration Block 12 — Builds 56–60 — 2026-10-14
+
+- [x] Strictly validate issued and legacy invoice identity responses in the browser.
+- [x] Load the exact tenant-scoped statement only after an authorized billing administrator requests review.
+- [x] Show preserved supplier and billed-customer identity before statement download.
+- [x] Explain issued configuration lineage and legacy identity limits without fabricating history.
+- [x] Add compact bilingual responsive styling and permanent Block 12 aggregate acceptance.
+- [ ] Pass the complete exact-head gate, push Builds 56–60, publish the complete Builds 51–60 interval, verify exact live identity and complete authenticated desktop/mobile Chrome acceptance.
