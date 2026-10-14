@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { pool } from "@workspace/db";
-import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
+import { authMiddleware, isSuperAdminMiddleware, requireLaunchStepUp } from "../middlewares/auth";
 import { inspectLaunchConfiguration, type LaunchConfigurationInput } from "../lib/launch-configuration";
 import { encryptLaunchSecret, maskLaunchSecret, type LaunchSecretEnvelope } from "../lib/launch-configuration-secret";
 import { useLaunchSecret } from "../lib/launch-configuration-secret";
@@ -66,7 +66,7 @@ router.get("/admin/launch-configuration/:environment/history", authMiddleware, i
   res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ items: await listLaunchConfigurationHistory(pool, target) });
 });
 
-router.post("/admin/launch-configuration/:environment/restore", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+router.post("/admin/launch-configuration/:environment/restore", authMiddleware, isSuperAdminMiddleware, requireLaunchStepUp, async (req, res) => {
   const target = environment(String(req.params.environment)), changeReason = reason(req.body?.reason), expectedRevision = Number(req.body?.expectedRevision), sourceRevision = Number(req.body?.sourceRevision);
   if (!target || !changeReason || !Number.isSafeInteger(expectedRevision) || expectedRevision < 1 || !Number.isSafeInteger(sourceRevision) || sourceRevision < 1 || sourceRevision >= expectedRevision) { res.status(400).json({ code: "LAUNCH_CONFIGURATION_RESTORE_INVALID" }); return; }
   const [current, historical] = await Promise.all([readLaunchConfiguration(pool, target), readLaunchConfigurationVersion(pool, target, sourceRevision)]);
@@ -79,7 +79,7 @@ router.post("/admin/launch-configuration/:environment/restore", authMiddleware, 
   } catch (error) { if (error instanceof LaunchConfigurationConflict) { res.status(409).json({ code: "LAUNCH_CONFIGURATION_STALE" }); return; } throw error; }
 });
 
-router.put("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+router.put("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, requireLaunchStepUp, async (req, res) => {
   const target = environment(String(req.params.environment)), changeReason = reason(req.body?.reason), expectedRevision = Number(req.body?.expectedRevision);
   if (!target || !changeReason || !Number.isSafeInteger(expectedRevision) || expectedRevision < 0 || !req.body?.configuration) { res.status(400).json({ code: "LAUNCH_CONFIGURATION_INVALID" }); return; }
   const supplied = structuredClone(req.body.configuration) as any as StoredLaunchConfiguration & { emailDelivery: Record<string, unknown> }, previous = await readLaunchConfiguration(pool, target), prior = previous?.configuration as StoredLaunchConfiguration | undefined;
@@ -134,7 +134,7 @@ router.post("/admin/launch-configuration/:environment/payment/verify", authMiddl
   res.set("Cache-Control", "private, no-store, max-age=0"); res.status(["configured", "verified"].includes(resolved.status) ? 200 : 409).json({ result: resolved });
 });
 
-router.post("/admin/launch-configuration/:environment/:action", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+router.post("/admin/launch-configuration/:environment/:action", authMiddleware, isSuperAdminMiddleware, requireLaunchStepUp, async (req, res) => {
   const target = environment(String(req.params.environment)), action = String(req.params.action), changeReason = reason(req.body?.reason), expectedRevision = Number(req.body?.expectedRevision);
   if (!target || !["activate", "deactivate"].includes(action) || !changeReason || !Number.isSafeInteger(expectedRevision)) { res.status(400).json({ code: "LAUNCH_CONFIGURATION_ACTION_INVALID" }); return; }
   const current = await readLaunchConfiguration(pool, target); if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
