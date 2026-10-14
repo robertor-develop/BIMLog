@@ -94,6 +94,7 @@ try {
     run(process.execPath, [cli, "push", "--dialect", "postgresql", "--schema", "./src/schema/index.ts", "--url", rawUrl], dbDirectory);
     await fixture.query(fs.readFileSync(path.join(dbDirectory, "scripts", "company-identity-lifecycle.sql"), "utf8"));
     await fixture.query(`
+      ALTER TABLE commercial_invoices ADD COLUMN IF NOT EXISTS party_snapshot jsonb;
       ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_profile_version_id text REFERENCES member_internal_cost_profile_versions(id);
       ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_policy_version_id text REFERENCES company_internal_cost_policy_versions(id);
       ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS internal_cost_effective_date date;
