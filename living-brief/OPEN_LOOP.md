@@ -5588,3 +5588,4 @@ Owner-supplied real identity values remain intentionally pending. This block cre
 
 Final production activation remains an explicit Super Admin action after owner-supplied configuration and current verification evidence. No automatic activation or external transaction is authorized by this preflight.
 
+- [x] Repair the strict TypeScript narrowing exposed by the complete gate without changing preflight behavior.
