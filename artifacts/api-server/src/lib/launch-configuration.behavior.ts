@@ -31,9 +31,20 @@ const readyIdentity = inspectBusinessIdentity({
   billingAddress: "100 Test Avenue",
   supportEmail: "support@example.test",
   billingEmail: "billing@example.test",
+  businessPhone: "+1 555 010 2000",
+  supportPhone: "+1 555 010 2001",
+  legalContactName: "Synthetic Legal Contact",
+  legalContactEmail: "legal@example.test",
+  websiteUrl: "https://example.test",
+  invoiceIdentity: "Synthetic Test Company · TEST-0001",
+  customerFacingFooter: "Synthetic test identity. No real transaction.",
+  termsUrl: "https://example.test/terms",
+  privacyUrl: "https://example.test/privacy",
 });
 assert.equal(readyIdentity.status, "ready");
 assert.deepEqual(readyIdentity.issues, []);
+assert.ok(inspectBusinessIdentity({ ...readyIdentity.value, termsUrl: "http://example.test/terms" }).issues.includes("termsUrl_invalid"));
+assert.ok(inspectBusinessIdentity({ ...readyIdentity.value, supportPhone: "call us" }).issues.includes("supportPhone_invalid"));
 
 const smtp = inspectEmailDelivery({ provider: "smtp", senderAddress: "mail@example.test", senderDomain: "example.test", smtpHost: "smtp.example.test", smtpPort: 587, smtpUsername: "synthetic-user", smtpPasswordSecretReference: "secret://test/smtp", active: true });
 assert.equal(smtp.status, "active");

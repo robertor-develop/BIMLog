@@ -67,10 +67,21 @@ export type BusinessIdentityInput = Readonly<{
 }>;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phonePattern = /^\+?[0-9][0-9 ().-]{6,38}$/;
 const clean = (value: string | undefined, max: number) => {
   const normalized = value?.trim() ?? "";
   return normalized && normalized.length <= max ? normalized : null;
 };
+
+function isHttpsUrl(value: string | undefined) {
+  if (!value) return false;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !!url.hostname;
+  } catch {
+    return false;
+  }
+}
 
 export function inspectBusinessIdentity(input: BusinessIdentityInput): LaunchConfigurationSection<BusinessIdentityInput> {
   const value = Object.freeze({
@@ -95,11 +106,17 @@ export function inspectBusinessIdentity(input: BusinessIdentityInput): LaunchCon
     privacyUrl: clean(input.privacyUrl, 500) ?? undefined,
   });
   const issues: string[] = [];
-  for (const field of ["legalBusinessName", "businessIdentificationNumber", "country", "jurisdiction", "businessAddress", "billingAddress"] as const) {
+  for (const field of ["legalBusinessName", "businessIdentificationNumber", "country", "jurisdiction", "businessAddress", "billingAddress", "legalContactName", "invoiceIdentity", "customerFacingFooter"] as const) {
     if (!value[field]) issues.push(`${field}_required`);
   }
   if (!value.supportEmail || !emailPattern.test(value.supportEmail)) issues.push("supportEmail_invalid");
   if (!value.billingEmail || !emailPattern.test(value.billingEmail)) issues.push("billingEmail_invalid");
+  if (!value.legalContactEmail || !emailPattern.test(value.legalContactEmail)) issues.push("legalContactEmail_invalid");
+  if (!value.businessPhone || !phonePattern.test(value.businessPhone)) issues.push("businessPhone_invalid");
+  if (!value.supportPhone || !phonePattern.test(value.supportPhone)) issues.push("supportPhone_invalid");
+  for (const field of ["websiteUrl", "termsUrl", "privacyUrl"] as const) {
+    if (!isHttpsUrl(value[field])) issues.push(`${field}_invalid`);
+  }
   return Object.freeze({
     status: issues.length ? "invalid" : "ready",
     value,
