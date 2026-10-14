@@ -15,6 +15,23 @@ iframe[aria-label*="Replit" i],
   pointer-events: none !important;
 }
 
+.company-catalog-authority-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.company-catalog-authority-grid article { min-width: 0; padding: 12px; border: 1px solid hsl(var(--border)); border-radius: 10px; background: hsl(var(--card)); }
+.company-catalog-authority-grid article p { margin: 6px 0; }
+.company-catalog-authority-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.company-catalog-authority-actions a { display: inline-flex; min-height: 44px; align-items: center; padding: 8px 10px; border: 1px solid hsl(var(--border)); border-radius: 8px; font-weight: 650; }
+.company-catalog-workspace button,
+.company-catalog-workspace input,
+.company-catalog-workspace select { min-height: 44px; }
+.company-catalog-workspace :focus-visible { outline: 3px solid hsl(var(--ring)); outline-offset: 2px; }
+
+@media (max-width: 720px) {
+  .company-catalog-authority-grid,
+  .company-catalog-kind-nav,
+  .company-catalog-filter { grid-template-columns: minmax(0, 1fr) !important; }
+  .company-catalog-kind-nav { position: static !important; }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

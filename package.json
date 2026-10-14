@@ -309,6 +309,7 @@
     "test:enterprise-launch-configuration-block15": "node scripts/test-enterprise-launch-configuration-block15.mjs"
     ,"test:gauntlet-navigation-block17": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/components/layout/MasterSidebar.behavior.tsx && pnpm --filter @workspace/bimlog run typecheck"
     ,"test:gauntlet-responsive-navigation-block18": "node scripts/test-gauntlet-responsive-navigation-block18.mjs && pnpm --filter @workspace/bimlog run typecheck"
+    ,"test:gauntlet-company-catalogs-block19": "node scripts/test-gauntlet-company-catalogs-block19.mjs && pnpm --filter @workspace/bimlog run typecheck"
   },
   "private": true,
   "devDependencies": {

@@ -5682,3 +5682,14 @@ This block changes navigation hierarchy and discoverability only. Existing route
 
 This block changes responsive navigation behavior only. Existing route, role, tenant, record, customer, payment, email, Native, installer, Feedback and MAIN 04 authorities remain unchanged. Builds 81–90 now require the complete exact-head gate, one push, controlled publication and authenticated desktop/mobile Chrome acceptance.
 
+## Gauntlet company catalogs Block 19 — Builds 91–95 — 2026-10-14
+
+- [x] Explain the authority and downstream use of clients, disciplines, services and phases.
+- [x] Show active/total catalog counts and searchable, lifecycle-filtered values.
+- [x] Validate bounded codes, names and aliases before submission with bilingual guidance.
+- [x] Route related delivery status, governance and pricing setup to their existing authorities and explain project-bound Convention Builder ownership.
+- [x] Preserve keyboard focus, 44-pixel controls and mobile containment with a permanent aggregate gate.
+- [ ] Pass the complete exact-head gate and push Builds 91–95 once. Keep this block unpublished until Builds 96–100 complete the next ten-build interval.
+
+This block changes the existing company-catalog presentation and validation only. Existing server authority, tenant isolation, catalog persistence, workflow lifecycle, project history, customer records, payment, email, Native, installer, Feedback and MAIN 04 behavior remain unchanged.
+
