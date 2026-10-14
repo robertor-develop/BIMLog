@@ -21,6 +21,12 @@ const checks: Array<[string, RegExp]> = [
   ["notification list uses full available panel height", /height: "calc\(100% - 44px\)".*overflowY: "auto"/s],
   ["notification rows are native keyboard buttons", /<button type="button" aria-label=\{`\$\{n\.title\}\. \$\{n\.message\}`\}.*void markRead\(n\.id\)/s],
   ["notification deletion has a localized accessible label", /aria-label=\{t\(`Delete notification \$\{n\.title\}`.*Eliminar notificación/s],
+  ["administration is an explicit disclosure", /aria-expanded=\{showAdministrationNavigation\}.*aria-controls="headquarters-administration-navigation".*Administration.*Administración/s],
+  ["project and company destinations have separate subgroups", /Projects & oversight.*Proyectos y supervisión.*Company setup.*Configuración de empresa/s],
+  ["active project and company paths remain identified", /data-active=\{location === "\/admin".*data-active=\{\["\/company-catalogs"/s],
+  ["active route changes reopen every owning disclosure", /projectManagementActive.*companySetupActive.*settingsActive.*setShowAdministrationNavigation\(true\).*setShowProjectManagementNavigation\(true\).*setShowCompanySetupNavigation\(true\).*setShowSettingsNavigation\(true\)/s],
+  ["disclosure choices persist without hiding the active route", /bimlog-nav-administration-open.*bimlog-nav-project-management-open.*bimlog-nav-company-setup-open.*bimlog-nav-settings-open/s],
+  ["mobile and desktop share the same role-filtered hierarchy", /\(!sidebarCollapsed \|\| isMobile\).*headquarters-project-management-navigation.*\(!sidebarCollapsed \|\| isMobile\).*headquarters-company-setup-navigation/s],
 ];
 for (const [name, pattern] of checks) assert.match(source, pattern, name);
-console.log(`Master sidebar notification panel assertions: ${checks.length}/${checks.length} passed`);
+console.log(`Master sidebar hierarchy and panel assertions: ${checks.length}/${checks.length} passed`);

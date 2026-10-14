@@ -66,7 +66,22 @@ export function MasterSidebar() {
   };
 
   const [showSearch, setShowSearch] = useState(false);
-  const [showSettingsNavigation, setShowSettingsNavigation] = useState(() => location === "/profile" || location.startsWith("/settings/"));
+  const storedDisclosure = (key: string, active: boolean) => {
+    if (active || typeof window === "undefined") return active;
+    return window.localStorage.getItem(key) === "true";
+  };
+  const [showSettingsNavigation, setShowSettingsNavigation] = useState(() => storedDisclosure("bimlog-nav-settings-open", location === "/profile" || location.startsWith("/settings/")));
+  const [showAdministrationNavigation, setShowAdministrationNavigation] = useState(() =>
+    storedDisclosure("bimlog-nav-administration-open", ["/admin", "/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates", "/total-control"]
+      .some(route => location === route || location.startsWith(`${route}/`))),
+  );
+  const [showProjectManagementNavigation, setShowProjectManagementNavigation] = useState(() =>
+    storedDisclosure("bimlog-nav-project-management-open", location === "/admin" || location.startsWith("/admin/") || location === "/total-control" || location.startsWith("/total-control/")),
+  );
+  const [showCompanySetupNavigation, setShowCompanySetupNavigation] = useState(() =>
+    storedDisclosure("bimlog-nav-company-setup-open", ["/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates"]
+      .some(route => location === route || location.startsWith(`${route}/`))),
+  );
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -78,6 +93,12 @@ export function MasterSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const mobileCloseRef = useRef<HTMLButtonElement>(null);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
+
+  const closeMobileNavigation = () => {
+    setMobileOpen(false);
+    requestAnimationFrame(() => mobileTriggerRef.current?.focus());
+  };
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -124,12 +145,24 @@ export function MasterSidebar() {
   useEffect(() => {
     if (!isMobile || !mobileOpen) return;
     const previousOverflow = document.body.style.overflow;
-    const close = () => {
-      setMobileOpen(false);
-      requestAnimationFrame(() => mobileTriggerRef.current?.focus());
-    };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
+      if (event.key === "Escape") {
+        closeMobileNavigation();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(mobilePanelRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [])
+        .filter(element => !element.hidden && element.getAttribute("aria-hidden") !== "true");
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKeyDown);
@@ -141,6 +174,17 @@ export function MasterSidebar() {
   }, [isMobile, mobileOpen]);
 
   useEffect(() => setMobileOpen(false), [location]);
+
+  useEffect(() => {
+    const projectManagementActive = location === "/admin" || location.startsWith("/admin/") || location === "/total-control" || location.startsWith("/total-control/");
+    const companySetupActive = ["/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates"]
+      .some(route => location === route || location.startsWith(`${route}/`));
+    const settingsActive = location === "/profile" || location.startsWith("/settings/");
+    if (projectManagementActive || companySetupActive) setShowAdministrationNavigation(true);
+    if (projectManagementActive) setShowProjectManagementNavigation(true);
+    if (companySetupActive) setShowCompanySetupNavigation(true);
+    if (settingsActive) setShowSettingsNavigation(true);
+  }, [location]);
 
   useEffect(() => {
     if (!notificationPanelResizing) return;
@@ -196,6 +240,14 @@ export function MasterSidebar() {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("bimlog-master-sidebar-collapsed", String(sidebarCollapsed));
   }, [sidebarCollapsed]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bimlog-nav-administration-open", String(showAdministrationNavigation));
+    window.localStorage.setItem("bimlog-nav-project-management-open", String(showProjectManagementNavigation));
+    window.localStorage.setItem("bimlog-nav-company-setup-open", String(showCompanySetupNavigation));
+    window.localStorage.setItem("bimlog-nav-settings-open", String(showSettingsNavigation));
+  }, [showAdministrationNavigation, showProjectManagementNavigation, showCompanySetupNavigation, showSettingsNavigation]);
 
   const loadNotifications = async () => {
     if (!token) return;
@@ -353,11 +405,12 @@ export function MasterSidebar() {
     {isMobile && mobileOpen && (
       <div
         role="presentation"
-        onClick={() => setMobileOpen(false)}
+        onClick={closeMobileNavigation}
         style={{ position: "fixed", top: 52, right: 0, bottom: 0, left: 0, zIndex: 1290, background: "rgba(15,23,42,0.48)" }}
       />
     )}
     <div
+      ref={mobilePanelRef}
       id="headquarters-global-sidebar"
       role={isMobile ? "dialog" : undefined}
       aria-modal={isMobile ? true : undefined}
@@ -373,7 +426,7 @@ export function MasterSidebar() {
           ref={mobileCloseRef}
           type="button"
           className="master-mobile-nav-close"
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobileNavigation}
           style={{ display: "inline-flex", alignItems: "center", gap: 6, margin: "12px 10px 0", padding: "7px 10px", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 8, background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
         >
           <X style={{ width: 14, height: 14 }} />
@@ -439,13 +492,43 @@ export function MasterSidebar() {
 
         {(showAdminPanel || showCompanyCatalogs || showTotalControl) && (
           <>
-            {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Administration", "Administración")}</span>}
-            {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
-            {showCompanyCatalogs && navButton(t("Company Catalogs", "Catálogos de Empresa"), "/company-catalogs", Building2)}
-            {showCompanyCatalogs && navButton(t("Delivery Workflows", "Flujos de Entrega"), "/company-workflows", Building2)}
-            {showCompanyCatalogs && navButton(t("Workflow Governance", "Gobernanza de Flujos"), "/company-workflow-governance", ShieldCheck)}
-            {showCompanyCatalogs && navButton(t("APU Library", "Biblioteca APU"), "/company-pricing-templates", Building2)}
-            {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
+            {(!sidebarCollapsed || isMobile) && (
+              <button
+                type="button"
+                aria-expanded={showAdministrationNavigation}
+                aria-controls="headquarters-administration-navigation"
+                className="sidebar-section-label"
+                onClick={() => setShowAdministrationNavigation(value => !value)}
+                style={{ width: "calc(100% - 20px)", margin: "8px 10px 3px", padding: "5px 4px", border: 0, background: "transparent", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}
+              >
+                <span>{t("Administration", "Administración")}</span>
+                <ChevronRight aria-hidden style={{ width: 12, height: 12, transform: showAdministrationNavigation ? "rotate(90deg)" : undefined, transition: "transform .16s ease" }} />
+              </button>
+            )}
+            <div id="headquarters-administration-navigation" hidden={(!sidebarCollapsed || isMobile) && !showAdministrationNavigation}>
+              {(showAdminPanel || showTotalControl) && (!sidebarCollapsed || isMobile) && (
+                <button type="button" aria-expanded={showProjectManagementNavigation} aria-controls="headquarters-project-management-navigation" data-active={location === "/admin" || location.startsWith("/admin/") || location === "/total-control" || location.startsWith("/total-control/") || undefined} className="sidebar-nav-subgroup" onClick={() => setShowProjectManagementNavigation(value => !value)}>
+                  <span>{t("Projects & oversight", "Proyectos y supervisión")}</span>
+                  <ChevronRight aria-hidden />
+                </button>
+              )}
+              <div id="headquarters-project-management-navigation" hidden={(!sidebarCollapsed || isMobile) && !showProjectManagementNavigation}>
+                {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
+                {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
+              </div>
+              {showCompanyCatalogs && (!sidebarCollapsed || isMobile) && (
+                <button type="button" aria-expanded={showCompanySetupNavigation} aria-controls="headquarters-company-setup-navigation" data-active={["/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates"].some(route => location === route || location.startsWith(`${route}/`)) || undefined} className="sidebar-nav-subgroup" onClick={() => setShowCompanySetupNavigation(value => !value)}>
+                  <span>{t("Company setup", "Configuración de empresa")}</span>
+                  <ChevronRight aria-hidden />
+                </button>
+              )}
+              <div id="headquarters-company-setup-navigation" hidden={(!sidebarCollapsed || isMobile) && !showCompanySetupNavigation}>
+                {showCompanyCatalogs && navButton(t("Company Catalogs", "Catálogos de Empresa"), "/company-catalogs", Building2)}
+                {showCompanyCatalogs && navButton(t("Delivery Workflows", "Flujos de Entrega"), "/company-workflows", Building2)}
+                {showCompanyCatalogs && navButton(t("Workflow Governance", "Gobernanza de Flujos"), "/company-workflow-governance", ShieldCheck)}
+                {showCompanyCatalogs && navButton(t("APU Library", "Biblioteca APU"), "/company-pricing-templates", Building2)}
+              </div>
+            </div>
           </>
         )}
 
