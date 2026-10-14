@@ -807,7 +807,12 @@ export function JobIntakeWorkspace() {
           "Seleccione un presupuesto aprobado y vincule cada Partida de Contrato y su APU guardado antes de crear registros comerciales. Use Abrir presupuesto del proyecto más abajo. El trabajo operativo existente no cambió.",
         ));
       const saved = await persist(dataRef.current);
-      if (!saved?.completion?.ready)
+      const activationConfirmation = saved?.activationConfirmation;
+      if (
+        !activationConfirmation?.ready ||
+        activationConfirmation.revision !== saved.revision ||
+        activationConfirmation.fingerprint !== saved.completion?.fingerprint
+      )
         throw new Error(
           tt(
             "Save and complete every required Intake item before activation.",
@@ -818,8 +823,8 @@ export function JobIntakeWorkspace() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          expectedRevision: saved.revision,
-          confirmationFingerprint: saved.completion.fingerprint,
+          expectedRevision: activationConfirmation.revision,
+          confirmationFingerprint: activationConfirmation.fingerprint,
           requireCommercial: canEnrich,
         }),
       });

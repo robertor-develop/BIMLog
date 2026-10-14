@@ -292,6 +292,11 @@ async function hydrate(
     revision: Number(row.revision),
     data,
     completion,
+    activationConfirmation: {
+      revision: Number(row.revision),
+      fingerprint: completion.fingerprint,
+      ready: completion.ready,
+    },
     capabilities,
     configurationPolicy,
     documents: docs,
