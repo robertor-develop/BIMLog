@@ -93,6 +93,12 @@ export function MasterSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const mobileCloseRef = useRef<HTMLButtonElement>(null);
+  const mobilePanelRef = useRef<HTMLDivElement>(null);
+
+  const closeMobileNavigation = () => {
+    setMobileOpen(false);
+    requestAnimationFrame(() => mobileTriggerRef.current?.focus());
+  };
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -139,12 +145,24 @@ export function MasterSidebar() {
   useEffect(() => {
     if (!isMobile || !mobileOpen) return;
     const previousOverflow = document.body.style.overflow;
-    const close = () => {
-      setMobileOpen(false);
-      requestAnimationFrame(() => mobileTriggerRef.current?.focus());
-    };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
+      if (event.key === "Escape") {
+        closeMobileNavigation();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(mobilePanelRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], input:not([disabled]), [tabindex]:not([tabindex="-1"])') ?? [])
+        .filter(element => !element.hidden && element.getAttribute("aria-hidden") !== "true");
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKeyDown);
@@ -387,11 +405,12 @@ export function MasterSidebar() {
     {isMobile && mobileOpen && (
       <div
         role="presentation"
-        onClick={() => setMobileOpen(false)}
+        onClick={closeMobileNavigation}
         style={{ position: "fixed", top: 52, right: 0, bottom: 0, left: 0, zIndex: 1290, background: "rgba(15,23,42,0.48)" }}
       />
     )}
     <div
+      ref={mobilePanelRef}
       id="headquarters-global-sidebar"
       role={isMobile ? "dialog" : undefined}
       aria-modal={isMobile ? true : undefined}
@@ -407,7 +426,7 @@ export function MasterSidebar() {
           ref={mobileCloseRef}
           type="button"
           className="master-mobile-nav-close"
-          onClick={() => setMobileOpen(false)}
+          onClick={closeMobileNavigation}
           style={{ display: "inline-flex", alignItems: "center", gap: 6, margin: "12px 10px 0", padding: "7px 10px", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 8, background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
         >
           <X style={{ width: 14, height: 14 }} />
