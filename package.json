@@ -23,6 +23,7 @@
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
     "test:launch-payment-audit-migration": "node scripts/test-launch-payment-audit-migration.mjs",
     "test:enterprise-launch-configuration-block07": "node scripts/test-enterprise-launch-configuration-block07.mjs",
+    "test:enterprise-launch-configuration-block08": "node scripts/test-enterprise-launch-configuration-block08.mjs",
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "audit:platform": "node scripts/platform-audit.mjs",
     "audit:platform:blocking": "node scripts/platform-audit.mjs --enforce",
