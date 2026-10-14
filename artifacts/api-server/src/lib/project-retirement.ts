@@ -51,7 +51,7 @@ export async function previewProjectRetirement(actor: Actor, projectId: number, 
 
 export async function retireProject(actor: Actor, projectId: number, adminRoles: string[], input: { confirmation?: unknown; expectedUpdatedAt?: unknown }) {
   return db.transaction(async (tx) => {
-    const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1).for("update");
     if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
     const email = await requireAuthority(tx, actor, project, adminRoles);
     if (input.confirmation !== project.code)
@@ -62,7 +62,7 @@ export async function retireProject(actor: Actor, projectId: number, adminRoles:
     const impact = await counts(tx, projectId);
     const retiredAt = new Date();
     const [updated] = await tx.update(projectsTable).set({ status: "archived", updatedAt: retiredAt })
-      .where(and(eq(projectsTable.id, projectId), eq(projectsTable.updatedAt, project.updatedAt))).returning();
+      .where(eq(projectsTable.id, projectId)).returning();
     if (!updated) throw new ProjectRetirementError("PROJECT_RETIREMENT_CONCURRENT_CHANGE", 409, "The project changed during retirement. No retirement was committed.");
     await tx.insert(adminActionsLogTable).values({ adminUserId: actor.userId, adminEmail: email, action: "retire_project",
       targetType: "project", targetId: String(projectId), details: { projectName: project.name, projectCode: project.code,
@@ -75,7 +75,7 @@ export async function retireProject(actor: Actor, projectId: number, adminRoles:
 
 export async function restoreProject(actor: Actor, projectId: number, adminRoles: string[], input: { confirmation?: unknown; expectedUpdatedAt?: unknown }) {
   return db.transaction(async (tx) => {
-    const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1).for("update");
     if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
     const email = await requireAuthority(tx, actor, project, adminRoles);
     if (project.status !== "archived")
@@ -86,7 +86,7 @@ export async function restoreProject(actor: Actor, projectId: number, adminRoles
       throw new ProjectRetirementError("PROJECT_RESTORATION_PREVIEW_STALE", 409, "The project changed after the restoration preview.");
     const restoredAt = new Date();
     const [updated] = await tx.update(projectsTable).set({ status: "active", updatedAt: restoredAt })
-      .where(and(eq(projectsTable.id, projectId), eq(projectsTable.status, "archived"), eq(projectsTable.updatedAt, project.updatedAt))).returning();
+      .where(and(eq(projectsTable.id, projectId), eq(projectsTable.status, "archived"))).returning();
     if (!updated) throw new ProjectRetirementError("PROJECT_RESTORATION_CONCURRENT_CHANGE", 409, "The project changed during restoration. No restoration was committed.");
     const recordCounts = await collectProjectRetirementInventory(projectId);
     await tx.insert(adminActionsLogTable).values({ adminUserId: actor.userId, adminEmail: email, action: "restore_project",
