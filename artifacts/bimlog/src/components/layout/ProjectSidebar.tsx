@@ -331,7 +331,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
 
   const renderNavGroup = (group: NavGroup, variant: "desktop" | "mobile" = "desktop") => {
     const isActiveParent = group.id === activeGroup;
-    const isOpen = variant === "mobile" ? true : !!expandedGroups[group.id];
+    const isOpen = !!expandedGroups[group.id];
     const bodyId = `project-nav-${variant}-${group.id}`;
     const label = tr(group.labelEn, group.labelEs);
     const description = tr(group.descriptionEn, group.descriptionEs);
@@ -344,7 +344,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
           aria-expanded={isOpen}
           aria-controls={bodyId}
           title={`${label} - ${description}`}
-          onClick={() => { if (variant === "desktop") toggleGroup(group.id); }}
+          onClick={() => toggleGroup(group.id)}
         >
           <span className="phasea-nav-group-label">{label}</span>
           {isOpen ? <ChevronDown className="phasea-nav-chevron" /> : <ChevronRight className="phasea-nav-chevron" />}

@@ -614,6 +614,11 @@ iframe[aria-label*="Replit" i],
   font-weight: 700;
   cursor: pointer;
 }
+.phasea-mobile-nav-panel .phasea-nav-group-trigger,
+.phasea-mobile-nav-panel .phasea-nav-item,
+.phasea-mobile-nav-panel .phasea-mobile-nav-close {
+  min-height: 44px;
+}
 .phasea-mobile-project-card {
   margin-top: 12px;
 }
