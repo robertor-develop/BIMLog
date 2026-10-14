@@ -71,6 +71,13 @@ export function MasterSidebar() {
     ["/admin", "/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates", "/total-control"]
       .some(route => location === route || location.startsWith(`${route}/`)),
   );
+  const [showProjectManagementNavigation, setShowProjectManagementNavigation] = useState(() =>
+    location === "/admin" || location.startsWith("/admin/") || location === "/total-control" || location.startsWith("/total-control/"),
+  );
+  const [showCompanySetupNavigation, setShowCompanySetupNavigation] = useState(() =>
+    ["/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates"]
+      .some(route => location === route || location.startsWith(`${route}/`)),
+  );
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -457,12 +464,28 @@ export function MasterSidebar() {
               </button>
             )}
             <div id="headquarters-administration-navigation" hidden={(!sidebarCollapsed || isMobile) && !showAdministrationNavigation}>
-              {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
-              {showCompanyCatalogs && navButton(t("Company Catalogs", "Catálogos de Empresa"), "/company-catalogs", Building2)}
-              {showCompanyCatalogs && navButton(t("Delivery Workflows", "Flujos de Entrega"), "/company-workflows", Building2)}
-              {showCompanyCatalogs && navButton(t("Workflow Governance", "Gobernanza de Flujos"), "/company-workflow-governance", ShieldCheck)}
-              {showCompanyCatalogs && navButton(t("APU Library", "Biblioteca APU"), "/company-pricing-templates", Building2)}
-              {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
+              {(showAdminPanel || showTotalControl) && (!sidebarCollapsed || isMobile) && (
+                <button type="button" aria-expanded={showProjectManagementNavigation} aria-controls="headquarters-project-management-navigation" className="sidebar-nav-subgroup" onClick={() => setShowProjectManagementNavigation(value => !value)}>
+                  <span>{t("Projects & oversight", "Proyectos y supervisión")}</span>
+                  <ChevronRight aria-hidden />
+                </button>
+              )}
+              <div id="headquarters-project-management-navigation" hidden={(!sidebarCollapsed || isMobile) && !showProjectManagementNavigation}>
+                {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
+                {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
+              </div>
+              {showCompanyCatalogs && (!sidebarCollapsed || isMobile) && (
+                <button type="button" aria-expanded={showCompanySetupNavigation} aria-controls="headquarters-company-setup-navigation" className="sidebar-nav-subgroup" onClick={() => setShowCompanySetupNavigation(value => !value)}>
+                  <span>{t("Company setup", "Configuración de empresa")}</span>
+                  <ChevronRight aria-hidden />
+                </button>
+              )}
+              <div id="headquarters-company-setup-navigation" hidden={(!sidebarCollapsed || isMobile) && !showCompanySetupNavigation}>
+                {showCompanyCatalogs && navButton(t("Company Catalogs", "Catálogos de Empresa"), "/company-catalogs", Building2)}
+                {showCompanyCatalogs && navButton(t("Delivery Workflows", "Flujos de Entrega"), "/company-workflows", Building2)}
+                {showCompanyCatalogs && navButton(t("Workflow Governance", "Gobernanza de Flujos"), "/company-workflow-governance", ShieldCheck)}
+                {showCompanyCatalogs && navButton(t("APU Library", "Biblioteca APU"), "/company-pricing-templates", Building2)}
+              </div>
             </div>
           </>
         )}

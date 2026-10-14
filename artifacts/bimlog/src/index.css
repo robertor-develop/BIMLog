@@ -376,6 +376,10 @@ iframe[aria-label*="Replit" i],
 .sidebar-project-desc { font-size: 10px; color: rgba(255,255,255,0.7); margin-top: 2px; }
 .sidebar-nav { min-height: 0; padding: 10px 8px; flex: 1; overflow-y: auto; overscroll-behavior: contain; }
 .sidebar-section-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.62); letter-spacing: 0.08em; text-transform: uppercase; padding: 8px 9px 4px; display: block; }
+.sidebar-nav-subgroup { width: calc(100% - 12px); margin: 3px 6px; padding: 7px 8px; border: 0; border-radius: 6px; background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.76); cursor: pointer; display: flex; align-items: center; justify-content: space-between; text-align: left; font-size: 11px; font-weight: 700; }
+.sidebar-nav-subgroup:hover, .sidebar-nav-subgroup:focus-visible { color: #fff; background: rgba(255,255,255,0.09); outline: 2px solid rgba(147,197,253,0.8); outline-offset: -2px; }
+.sidebar-nav-subgroup svg { width: 12px; height: 12px; transition: transform .16s ease; }
+.sidebar-nav-subgroup[aria-expanded="true"] svg { transform: rotate(90deg); }
 .sidebar-nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 9px; border-radius: 6px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.75); cursor: pointer; margin-bottom: 1px; transition: all 0.12s ease; text-decoration: none; }
 .sidebar-nav-item:hover { color: rgba(255,255,255,0.88); background: rgba(255,255,255,0.06); }
 .sidebar-nav-item.active { color: #fff; background: rgba(37,99,235,0.28); }
