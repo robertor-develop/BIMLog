@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "fcc448169df0d418ede5526b03eee9814fe06737afeb641d7d37329e38dee6c4",
-  "itemCount": 393,
+  "sourceSha256": "ff972392dfac55563c36798437ef3d5c01aa9906a72aab50571fce8a0cf034ac",
+  "itemCount": 395,
   "counts": {
-    "ACTIVE": 349,
+    "ACTIVE": 351,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7159,6 +7159,42 @@
       "evidence": [
         "OPEN_LOOP.md:5630",
         "Enterprise launch configuration Block 12 — Builds 56–60 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "bb007c3ce0d53dde",
+      "sourceLine": 5636,
+      "heading": "Enterprise launch configuration Builds 61-70 — 2026-10-14",
+      "statement": "Push and publish exact Build 70 source, then complete authenticated production Chrome acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5636",
+        "Enterprise launch configuration Builds 61-70 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "cda01046f8f380b8",
+      "sourceLine": 5637,
+      "heading": "Enterprise launch configuration Builds 61-70 — 2026-10-14",
+      "statement": "Builds 71-75: final source-bound completion dossier and terminal reconciliation.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5637",
+        "Enterprise launch configuration Builds 61-70 — 2026-10-14"
       ],
       "currentAuthority": false
     }

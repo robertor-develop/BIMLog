@@ -139,6 +139,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/job-operations.ts
 - artifacts/api-server/src/routes/launch-configuration.behavior.ts
 - artifacts/api-server/src/routes/launch-configuration.ts
+- artifacts/api-server/src/routes/launch-historical-integrity-route.behavior.ts
+- artifacts/api-server/src/routes/launch-owner-input-route.behavior.ts
 - artifacts/api-server/src/routes/linked_items.ts
 - artifacts/api-server/src/routes/living_brief.ts
 - artifacts/api-server/src/routes/master-catalogs.ts
@@ -1004,6 +1006,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/launch-email-provider.behavior.ts
 - artifacts/api-server/src/lib/launch-email-provider.ts
 - artifacts/api-server/src/lib/launch-email-routes.behavior.ts
+- artifacts/api-server/src/lib/launch-historical-integrity.behavior.ts
+- artifacts/api-server/src/lib/launch-historical-integrity.ts
+- artifacts/api-server/src/lib/launch-owner-input-checklist.behavior.ts
+- artifacts/api-server/src/lib/launch-owner-input-checklist.ts
 - artifacts/api-server/src/lib/launch-payment-activation.behavior.ts
 - artifacts/api-server/src/lib/launch-payment-activation.ts
 - artifacts/api-server/src/lib/launch-payment-provider.behavior.ts
