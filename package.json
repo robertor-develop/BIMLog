@@ -24,6 +24,7 @@
     "test:launch-payment-audit-migration": "node scripts/test-launch-payment-audit-migration.mjs",
     "test:enterprise-launch-configuration-block07": "node scripts/test-enterprise-launch-configuration-block07.mjs",
     "test:enterprise-launch-configuration-block08": "node scripts/test-enterprise-launch-configuration-block08.mjs",
+    "test:enterprise-launch-configuration-block09": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/launch-configuration-restore.behavior.ts && node scripts/test-enterprise-launch-configuration-block09.mjs",
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "audit:platform": "node scripts/platform-audit.mjs",
     "audit:platform:blocking": "node scripts/platform-audit.mjs --enforce",
