@@ -303,7 +303,8 @@
     "test:pre-release-adoption-observability": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/adoption-observability.behavior.ts && pnpm run audit:platform:blocking && pnpm --filter @workspace/bimlog run typecheck",
     "test:enterprise-launch-configuration-block10": "node scripts/test-enterprise-launch-configuration-block10.mjs",
     "test:enterprise-launch-configuration-block11": "node scripts/test-enterprise-launch-configuration-block11.mjs",
-    "test:enterprise-launch-configuration-block12": "node scripts/test-enterprise-launch-configuration-block12.mjs"
+    "test:enterprise-launch-configuration-block12": "node scripts/test-enterprise-launch-configuration-block12.mjs",
+    "test:enterprise-launch-configuration-block13": "node scripts/test-enterprise-launch-configuration-block13.mjs"
   },
   "private": true,
   "devDependencies": {
