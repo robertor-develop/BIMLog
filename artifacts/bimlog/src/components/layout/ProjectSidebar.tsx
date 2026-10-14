@@ -317,17 +317,31 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       group.items.some(item => item.id === activeTab) ||
       group.actions?.some(action => action.id === activeTab),
   )?.id ?? navGroups[0]?.id ?? "command";
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => ({ [activeGroup]: true }));
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(() => {
+    if (typeof window === "undefined") return { [activeGroup]: true };
+    try {
+      const saved = JSON.parse(window.localStorage.getItem("bimlog-project-navigation-groups") ?? "{}") as Record<string, unknown>;
+      return Object.fromEntries(navGroups.map(group => [group.id, group.id === activeGroup || saved[group.id] === true]));
+    } catch {
+      return { [activeGroup]: true };
+    }
+  });
 
   useEffect(() => {
     setExpandedGroups(prev => ({ ...prev, [activeGroup]: true }));
   }, [activeGroup]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const bounded = Object.fromEntries(navGroups.map(group => [group.id, expandedGroups[group.id] === true]));
+    window.localStorage.setItem("bimlog-project-navigation-groups", JSON.stringify(bounded));
+  }, [expandedGroups]);
+
   const closeMobile = () => {
     setMobileOpen(false);
     requestAnimationFrame(() => mobileTriggerRef.current?.focus());
   };
-  const toggleGroup = (id: string) => setExpandedGroups(prev => ({ ...prev, [id]: !prev[id] }));
+  const toggleGroup = (id: string) => setExpandedGroups(prev => ({ ...prev, [id]: id === activeGroup ? true : !prev[id] }));
 
   const renderNavGroup = (group: NavGroup, variant: "desktop" | "mobile" = "desktop") => {
     const isActiveParent = group.id === activeGroup;
