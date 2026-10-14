@@ -9,6 +9,7 @@ import { createLiveLaunchEmailAdapters } from "../lib/launch-email-provider-live
 import { liveSmtpLaunchProbe } from "../lib/launch-smtp-probe";
 import { verifyLaunchPaymentMethod } from "../lib/launch-payment-verification";
 import { paymentActivationBlockers } from "../lib/launch-payment-activation";
+import { inspectLaunchActivationPreflight } from "../lib/launch-activation-preflight";
 import { launchPaymentMethods, type LaunchPaymentMethod } from "../lib/launch-payment-provider";
 import { LaunchConfigurationConflict, listLaunchConfigurationHistory, listLatestLaunchPaymentVerifications, readLaunchConfiguration, readLatestLaunchEmailVerification, recordLaunchEmailVerification, recordLaunchPaymentVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
 
@@ -42,7 +43,21 @@ export async function executeLaunchEmailCheck(input: { record: { configuration: 
 
 router.get("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
-  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(await readLaunchConfiguration(pool, target)), emailVerification: await readLatestLaunchEmailVerification(pool, target), paymentVerifications: await listLatestLaunchPaymentVerifications(pool, target) });
+  const current = await readLaunchConfiguration(pool, target);
+  const emailVerification = await readLatestLaunchEmailVerification(pool, target);
+  const paymentVerifications = await listLatestLaunchPaymentVerifications(pool, target);
+  const stored = current?.configuration as StoredLaunchConfiguration | undefined;
+  const preflight = current ? inspectLaunchActivationPreflight({
+    environment: target,
+    configurationRevision: current.revision,
+    configurationEntered: !!(current.readiness as any)?.launchConfigurationEntered,
+    active: current.state === "active",
+    emailProvider: stored?.emailDelivery?.provider,
+    emailEvidence: emailVerification,
+    selectedPaymentMethods: stored?.enabledPaymentMethods ?? [],
+    paymentEvidence: paymentVerifications,
+  }) : null;
+  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(current), emailVerification, paymentVerifications, preflight });
 });
 
 router.get("/admin/launch-configuration/:environment/history", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
