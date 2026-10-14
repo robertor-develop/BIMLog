@@ -862,7 +862,15 @@ export function JobIntakeWorkspace() {
           `Falló la verificación de activación: se esperaban ${expected.workItems} partidas, ${expected.tasks} tareas y ${expected.resourcePlans} planes de recursos; se recibieron ${actualWorkItems}, ${actualTasks} y ${actualAssignments}.`,
         ));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause));
+      if (cause instanceof JobIntakeRequestError && cause.code === "JOB_INTAKE_CONFIRMATION_STALE") {
+        await load();
+        setError(tt(
+          "The saved Intake changed after confirmation. BIMLog reloaded the current readiness result; review it and activate again.",
+          "El ingreso guardado cambió después de la confirmación. BIMLog recargó la preparación actual; revísela y vuelva a activar.",
+        ));
+      } else {
+        setError(cause instanceof Error ? cause.message : String(cause));
+      }
     } finally {
       activationInFlightRef.current = false;
       setActivationBusy(false);
@@ -959,6 +967,11 @@ export function JobIntakeWorkspace() {
         label: item,
       }));
   const activationPreview = jobIntakeActivationPreview(data, completion, canEnrich || (!isActivated && capabilities.fullCommercialActivation));
+  const activationReceiptCurrent = Boolean(
+    intake.activationConfirmation?.ready &&
+    intake.activationConfirmation.revision === intake.revision &&
+    intake.activationConfirmation.fingerprint === completion.fingerprint
+  );
   const activationStructure = jobIntakeActivationStructure(effectiveStatus, activationPreview, intake.activation);
   const activeChangeDestinations = jobIntakeActiveChangeDestinations(projectId, capabilities.contracts);
   const activeNextActions = activeIntakeNextActions(projectId, capabilities.contracts);
@@ -2462,7 +2475,8 @@ export function JobIntakeWorkspace() {
                     className="primary"
                     disabled={
                       busy ||
-                      !completion.ready
+                      !completion.ready ||
+                      !activationReceiptCurrent
                     }
                     onClick={activate}
                   >
