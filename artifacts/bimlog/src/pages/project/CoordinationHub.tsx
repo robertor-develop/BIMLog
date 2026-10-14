@@ -345,7 +345,7 @@ export function CoordinationHub({
             {fields.map((f, i) => {
               const c = CHIP_COLORS[i % CHIP_COLORS.length];
               return (
-                <span key={f.id} style={{
+                <span key={`${f.fieldOrder}:${f.label}`} style={{
                   display: "inline-flex", alignItems: "center", padding: "4px 10px",
                   borderRadius: 5, background: c.bg, color: c.color, border: `1px solid ${c.border}`,
                   fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
