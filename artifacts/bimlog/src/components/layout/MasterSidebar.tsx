@@ -67,6 +67,10 @@ export function MasterSidebar() {
 
   const [showSearch, setShowSearch] = useState(false);
   const [showSettingsNavigation, setShowSettingsNavigation] = useState(() => location === "/profile" || location.startsWith("/settings/"));
+  const [showAdministrationNavigation, setShowAdministrationNavigation] = useState(() =>
+    ["/admin", "/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates", "/total-control"]
+      .some(route => location === route || location.startsWith(`${route}/`)),
+  );
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -439,13 +443,27 @@ export function MasterSidebar() {
 
         {(showAdminPanel || showCompanyCatalogs || showTotalControl) && (
           <>
-            {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Administration", "Administración")}</span>}
-            {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
-            {showCompanyCatalogs && navButton(t("Company Catalogs", "Catálogos de Empresa"), "/company-catalogs", Building2)}
-            {showCompanyCatalogs && navButton(t("Delivery Workflows", "Flujos de Entrega"), "/company-workflows", Building2)}
-            {showCompanyCatalogs && navButton(t("Workflow Governance", "Gobernanza de Flujos"), "/company-workflow-governance", ShieldCheck)}
-            {showCompanyCatalogs && navButton(t("APU Library", "Biblioteca APU"), "/company-pricing-templates", Building2)}
-            {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
+            {(!sidebarCollapsed || isMobile) && (
+              <button
+                type="button"
+                aria-expanded={showAdministrationNavigation}
+                aria-controls="headquarters-administration-navigation"
+                className="sidebar-section-label"
+                onClick={() => setShowAdministrationNavigation(value => !value)}
+                style={{ width: "calc(100% - 20px)", margin: "8px 10px 3px", padding: "5px 4px", border: 0, background: "transparent", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}
+              >
+                <span>{t("Administration", "Administración")}</span>
+                <ChevronRight aria-hidden style={{ width: 12, height: 12, transform: showAdministrationNavigation ? "rotate(90deg)" : undefined, transition: "transform .16s ease" }} />
+              </button>
+            )}
+            <div id="headquarters-administration-navigation" hidden={(!sidebarCollapsed || isMobile) && !showAdministrationNavigation}>
+              {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
+              {showCompanyCatalogs && navButton(t("Company Catalogs", "Catálogos de Empresa"), "/company-catalogs", Building2)}
+              {showCompanyCatalogs && navButton(t("Delivery Workflows", "Flujos de Entrega"), "/company-workflows", Building2)}
+              {showCompanyCatalogs && navButton(t("Workflow Governance", "Gobernanza de Flujos"), "/company-workflow-governance", ShieldCheck)}
+              {showCompanyCatalogs && navButton(t("APU Library", "Biblioteca APU"), "/company-pricing-templates", Building2)}
+              {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
+            </div>
           </>
         )}
 
