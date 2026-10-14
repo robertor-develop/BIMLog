@@ -21,10 +21,20 @@ export type LaunchConfigurationSection<T> = Readonly<{
 
 export const ownerReservedLaunchFields = Object.freeze([
   "legalBusinessName",
+  "tradeName",
   "businessIdentificationNumber",
   "businessAddress",
   "billingAddress",
+  "businessPhone",
   "supportEmail",
+  "supportPhone",
+  "legalContactName",
+  "legalContactEmail",
+  "websiteUrl",
+  "invoiceIdentity",
+  "customerFacingFooter",
+  "termsUrl",
+  "privacyUrl",
   "transactionalEmailAddress",
   "emailProvider",
   "manualPaymentMethods",
@@ -44,7 +54,16 @@ export type BusinessIdentityInput = Readonly<{
   billingAddress?: string;
   supportEmail?: string;
   billingEmail?: string;
+  businessPhone?: string;
+  supportPhone?: string;
+  legalContactName?: string;
+  legalContactEmail?: string;
+  websiteUrl?: string;
   logoReference?: string;
+  invoiceIdentity?: string;
+  customerFacingFooter?: string;
+  termsUrl?: string;
+  privacyUrl?: string;
 }>;
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,7 +83,16 @@ export function inspectBusinessIdentity(input: BusinessIdentityInput): LaunchCon
     billingAddress: clean(input.billingAddress, 320) ?? undefined,
     supportEmail: clean(input.supportEmail, 254)?.toLowerCase() ?? undefined,
     billingEmail: clean(input.billingEmail, 254)?.toLowerCase() ?? undefined,
+    businessPhone: clean(input.businessPhone, 40) ?? undefined,
+    supportPhone: clean(input.supportPhone, 40) ?? undefined,
+    legalContactName: clean(input.legalContactName, 160) ?? undefined,
+    legalContactEmail: clean(input.legalContactEmail, 254)?.toLowerCase() ?? undefined,
+    websiteUrl: clean(input.websiteUrl, 500) ?? undefined,
     logoReference: clean(input.logoReference, 500) ?? undefined,
+    invoiceIdentity: clean(input.invoiceIdentity, 500) ?? undefined,
+    customerFacingFooter: clean(input.customerFacingFooter, 1_000) ?? undefined,
+    termsUrl: clean(input.termsUrl, 500) ?? undefined,
+    privacyUrl: clean(input.privacyUrl, 500) ?? undefined,
   });
   const issues: string[] = [];
   for (const field of ["legalBusinessName", "businessIdentificationNumber", "country", "jurisdiction", "businessAddress", "billingAddress"] as const) {
