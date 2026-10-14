@@ -37,6 +37,15 @@ export function phaseRequiresCompletedConvention(phase: ConventionFlowPhase): bo
     || phase === "changes_review";
 }
 
+export function guardedConventionPhase(
+  setupStatus: ConventionSetupStatus,
+  flowPhase: ConventionFlowPhase,
+): ConventionFlowPhase {
+  if (setupStatus === "completed" && flowPhase === "setup_context") return "checkpoint";
+  if (setupStatus !== "completed" && phaseRequiresCompletedConvention(flowPhase)) return "setup_context";
+  return flowPhase;
+}
+
 export function resolveCheckpointContinuation(hasExisting: boolean): { flowPhase: ConventionFlowPhase; step: number } {
   return hasExisting
     ? { flowPhase: "main_wizard", step: 4 }
@@ -56,8 +65,8 @@ export function useConventionPhaseGuard<T extends { flowPhase: ConventionFlowPha
   const { setupStatus, flowPhase, justSaved, setState } = options;
   useEffect(() => {
     if (justSaved) return;
-    if (setupStatus !== "completed" && phaseRequiresCompletedConvention(flowPhase)) {
-      setState(state => ({ ...state, flowPhase: "setup_context", step: 0 }));
-    }
+    const guardedPhase = guardedConventionPhase(setupStatus, flowPhase);
+    if (guardedPhase !== flowPhase)
+      setState(state => ({ ...state, flowPhase: guardedPhase, step: 0 }));
   }, [setupStatus, flowPhase, justSaved, setState]);
 }
