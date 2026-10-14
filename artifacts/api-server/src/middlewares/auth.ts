@@ -51,6 +51,21 @@ export function verifyToken(token: string): AuthPayload {
   return jwt.verify(token, JWT_SECRET) as AuthPayload;
 }
 
+export function signLaunchStepUpToken(userId: number): string {
+  return jwt.sign({ userId, scope: "launch_configuration_step_up" }, JWT_SECRET, { expiresIn: "10m" });
+}
+
+export function requireLaunchStepUp(req: Request, res: Response, next: NextFunction): void {
+  try {
+    const token = req.header("x-bimlog-step-up");
+    const proof = token ? jwt.verify(token, JWT_SECRET) as { userId?: number; scope?: string } : null;
+    if (!proof || proof.scope !== "launch_configuration_step_up" || proof.userId !== req.user?.userId) throw new Error("invalid");
+    next();
+  } catch {
+    res.status(401).json({ code: "LAUNCH_STEP_UP_REQUIRED" });
+  }
+}
+
 export async function authMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
