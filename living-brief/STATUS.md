@@ -4384,3 +4384,5 @@ Builds 36–40 derive one protected final-activation preflight from the exact sa
 
 Release-gate repair `9e5273d9` narrows the already runtime-validated preflight booleans at the strict browser return boundary. It changes no runtime decision or presentation; the focused parser behavior, forced workspace typecheck and frontend typecheck pass before the complete gate repeat.
 
+Blocking-audit repair `2ed39a60` replaces symbolic checklist glyphs with explicit bilingual Ready/Pending labels. The preflight meaning is unchanged; the blocking platform audit returns to its accepted P0-zero/P1-baseline state and the frontend typecheck passes before the complete gate repeat.
+
