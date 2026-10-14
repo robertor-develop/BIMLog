@@ -12,6 +12,7 @@ import { paymentActivationBlockers } from "../lib/launch-payment-activation";
 import { inspectLaunchActivationPreflight } from "../lib/launch-activation-preflight";
 import { inspectLaunchHistoricalIntegrity } from "../lib/launch-historical-integrity";
 import { inspectLaunchOwnerInputChecklist } from "../lib/launch-owner-input-checklist";
+import { inspectLaunchCompletionDossier } from "../lib/launch-completion-dossier";
 import { prepareLaunchConfigurationRestore } from "../lib/launch-configuration-restore";
 import { launchPaymentMethods, type LaunchPaymentMethod } from "../lib/launch-payment-provider";
 import { LaunchConfigurationConflict, listLaunchConfigurationHistory, listLatestLaunchPaymentVerifications, readLaunchConfiguration, readLaunchConfigurationVersion, readLatestLaunchEmailVerification, recordLaunchEmailVerification, recordLaunchPaymentVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
@@ -62,7 +63,8 @@ router.get("/admin/launch-configuration/:environment", authMiddleware, isSuperAd
   }) : null;
   const historicalIntegrity = inspectLaunchHistoricalIntegrity();
   const ownerInputChecklist = inspectLaunchOwnerInputChecklist({ configured: !!(current?.readiness as any)?.launchConfigurationEntered, active: current?.state === "active", preflight });
-  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(current), emailVerification, paymentVerifications, preflight, historicalIntegrity, ownerInputChecklist });
+  const completionDossier = inspectLaunchCompletionDossier({ preflight, pendingOwnerSteps: ownerInputChecklist.pendingCount });
+  res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(current), emailVerification, paymentVerifications, preflight, historicalIntegrity, ownerInputChecklist, completionDossier });
 });
 
 router.get("/admin/launch-configuration/:environment/history", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
