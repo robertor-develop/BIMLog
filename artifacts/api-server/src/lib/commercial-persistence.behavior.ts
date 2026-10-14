@@ -25,7 +25,7 @@ console.log("COMMERCIAL_PERSISTENCE_B221=PASS");
 
 const writes: string[]=[];
 const writeClient:CommercialQueryClient={async query(text){writes.push(text);
-  if(text.startsWith("SELECT s.id"))return {rows:[{id:"sub-company-7"}],rowCount:1};
+  if(text.startsWith("SELECT s.id"))return {rows:[{id:"sub-company-7",customer_name:"Synthetic Customer",customer_address:"1 Test",customer_phone:null,launch_revision:7,supplier_identity:{legalBusinessName:"Synthetic Supplier",tradeName:"Supplier",businessIdentificationNumber:"TEST-1",businessAddress:"2 Test",billingAddress:"2 Test",supportEmail:"support@example.test",supportPhone:null,invoiceIdentity:"Synthetic invoice identity",customerFacingFooter:"Synthetic only"}}],rowCount:1};
   if(text.startsWith("SELECT id,fingerprint"))return {rows:[],rowCount:0};
   if(text.includes("RETURNING id"))return {rows:[{id:"checkout-company-7"}],rowCount:1};
   return {rows:[],rowCount:null};
@@ -53,7 +53,7 @@ console.log("COMMERCIAL_PERSISTENCE_B223=PASS");
 
 const invoiceWrites:string[]=[];
 const invoiceClient:CommercialQueryClient={async query(text){invoiceWrites.push(text);
-  if(text.startsWith("SELECT s.id"))return {rows:[{id:"sub-company-7"}],rowCount:1};
+  if(text.startsWith("SELECT s.id"))return {rows:[{id:"sub-company-7",customer_name:"Synthetic Customer",customer_address:"1 Test",customer_phone:null,launch_revision:7,supplier_identity:{legalBusinessName:"Synthetic Supplier",tradeName:"Supplier",businessIdentificationNumber:"TEST-1",businessAddress:"2 Test",billingAddress:"2 Test",supportEmail:"support@example.test",supportPhone:null,invoiceIdentity:"Synthetic invoice identity",customerFacingFooter:"Synthetic only"}}],rowCount:1};
   if(text.startsWith("INSERT INTO commercial_invoices"))return {rows:[{id:"invoice-company-7"}],rowCount:1};
   if(text.startsWith("SELECT sequence"))return {rows:[{sequence:4,event_digest:"b".repeat(64)}],rowCount:1};
   return {rows:[],rowCount:null};
@@ -92,3 +92,4 @@ const unsupportedStateSettlement=await settlePersistentProviderReceipt({async qu
 assert.deepEqual(unsupportedStateSettlement,{id:"receipt-company-8",status:"failed"});
 await assert.rejects(()=>settlePersistentProviderReceipt({async query(){return {rows:[],rowCount:0};}},{id:"receipt-company-7",companyId:7,outcome:"ignored",failureCode:"LINEAGE_NOT_FOUND",processedAt:"2026-10-04T13:05:00Z"}),/unsupported-event/);
 console.log("COMMERCIAL_PERSISTENCE_B229=PASS");
+
