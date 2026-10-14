@@ -68109,8 +68109,8 @@
     },
     {
       "taskId": "gauntlet-responsive-navigation-block18",
-      "reviewedThroughCommit": "ed22da5d37c4d03f01a3ba6133a96da871754278",
-      "reviewedAt": "2026-10-14T20:45:00Z",
+      "reviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
+      "reviewedAt": "2026-10-14T20:58:00Z",
       "status": "local_candidate",
       "captureTiming": "normal_acceptance_boundary",
       "authorities": [
@@ -68172,9 +68172,17 @@
       ],
       "reason": "Builds 81 through 90 repair the audited Headquarters and project navigation hierarchy and responsive drawer behavior. Existing routes and authorization remain singular; the change adds accessible disclosures, active-path continuity, bounded preference persistence, modal focus containment, background-scroll control, narrow-width containment and touch sizing. STATUS and OPEN_LOOP record the two five-build blocks. No customer data, payment, email, provider, Native, installer, Feedback or MAIN 04 behavior changes.",
       "reviewedChangedPaths": [
-        "living-brief/impact-declarations.json"
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
+        "artifacts/bimlog/src/index.css",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-gauntlet-responsive-navigation-block18.mjs"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "e83f180fcc93b128c546b43e87c68df44416e9d3ba421321954d0a4661710121"
     }
   ]
 }
