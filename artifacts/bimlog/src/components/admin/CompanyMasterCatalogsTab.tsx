@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { COMPANY_CATALOG_GUIDANCE, filterCompanyCatalogEntries, summarizeCompanyCatalog, type CompanyCatalogEntryState } from "@/lib/company-catalog-guidance";
+import { COMPANY_CATALOG_GUIDANCE, filterCompanyCatalogEntries, summarizeCompanyCatalog, validateCompanyCatalogDraft, type CompanyCatalogDraftIssue, type CompanyCatalogEntryState } from "@/lib/company-catalog-guidance";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Kind = "client" | "discipline" | "service" | "phase";
@@ -28,6 +28,23 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const t = (en: string, es: string) => spanish ? es : en;
+  const explainDraftIssue = (issue: CompanyCatalogDraftIssue) => ({
+    code_required: t("Enter a code.", "Ingrese un código."),
+    code_format: t("Use 1–64 uppercase letters, numbers, periods, underscores, or hyphens; begin with a letter or number.", "Use de 1 a 64 letras mayúsculas, números, puntos, guiones bajos o guiones; comience con una letra o número."),
+    name_required: t("Enter a name.", "Ingrese un nombre."),
+    name_format: t("Use a plain name of 200 characters or fewer.", "Use un nombre sencillo de 200 caracteres o menos."),
+    aliases_limit: t("Use no more than 20 aliases, each 200 characters or fewer.", "Use como máximo 20 alias, cada uno de 200 caracteres o menos."),
+  } as const)[issue as Exclude<CompanyCatalogDraftIssue, null>] ?? "";
+  const explainRequestError = (error: unknown) => {
+    const code = error instanceof Error ? error.message : String(error);
+    const known: Record<string, string> = {
+      COMPANY_CATALOG_DUPLICATE: t("That code already exists in this company catalog.", "Ese código ya existe en este catálogo de empresa."),
+      COMPANY_CATALOG_NOT_FOUND_OR_VERSION_CONFLICT: t("This value changed in another session. Reloaded values are shown; review and retry.", "Este valor cambió en otra sesión. Se muestran los valores recargados; revíselos y vuelva a intentar."),
+      COMPANY_CATALOG_PMO_REQUIRED: t("Company PMO permission is required for this change.", "Se requiere permiso PMO de empresa para este cambio."),
+      COMPANY_CATALOG_POLICY_STALE: t("The policy changed in another session. Reload and review it before saving.", "La política cambió en otra sesión. Recárguela y revísela antes de guardar."),
+    };
+    return known[code] ?? t("The change could not be saved. Review the values and retry.", "No se pudo guardar el cambio. Revise los valores y vuelva a intentar.");
+  };
   const request = useCallback(async (path: string, init?: RequestInit) => {
     const response = await fetch(`${base}/api/v1${path}`, { ...init, headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } });
     const body = await response.json().catch(() => ({}));
@@ -54,7 +71,7 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
       setDrafts(current => ({ ...current, [kind]: { code: "", name: "", aliases: "" } }));
       await load();
       setMessage(t("Company value created.", "Valor de la empresa creado."));
-    } catch (error) { setMessage(String(error)); } finally { setBusy(false); }
+    } catch (error) { setMessage(explainRequestError(error)); } finally { setBusy(false); }
   }
 
   async function toggle(kind: Kind, entry: Entry) {
@@ -112,6 +129,7 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
 
   const ready = capability !== null && !loading && !loadError;
   const visibleEntries = useMemo(() => filterCompanyCatalogEntries(entries[selectedKind], search, stateFilter), [entries, search, selectedKind, stateFilter]);
+  const selectedDraftIssue = validateCompanyCatalogDraft(drafts[selectedKind]);
   return <section aria-labelledby="company-master-title" style={{ display: "grid", gap: 16, minWidth: 0, width: "100%" }}>
     <div><h2 id="company-master-title">{t("Company Master Catalogs", "Catálogos maestros de la empresa")}</h2><p>{t("Clients, disciplines, services, and phases are configured once for this company and reused across its projects. Changes do not rename historical project snapshots.", "Clientes, disciplinas, servicios y fases se configuran una vez para esta empresa y se reutilizan en sus proyectos. Los cambios no renombran registros históricos.")}</p></div>
     {loading && <p role="status">{t("Loading company catalogs…", "Cargando catálogos de la empresa…")}</p>}
@@ -136,7 +154,7 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
         <button type="button" disabled={!search && stateFilter === "all"} onClick={() => { setSearch(""); setStateFilter("all"); }}>{t("Clear", "Limpiar")}</button>
       </div>
       {kind === "client" && <p>{t("Client names come from canonical Companies. Company PMO can add or deactivate options here; name corrections require Company Directory administration.", "Los nombres de clientes provienen de Empresas canónicas. PMO puede agregar o desactivar opciones aquí; las correcciones de nombres requieren administración del Directorio de Empresas.")}</p>}
-      {capability?.canManage && <div style={{ display: "grid", gap: 7, marginBottom: 12, minWidth: 0 }}><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Code", "Código")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].code} maxLength={64} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], code: event.target.value.toUpperCase() } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Name", "Nombre")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].name} maxLength={200} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], name: event.target.value } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Aliases (comma separated)", "Alias (separados por comas)")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].aliases} maxLength={1000} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], aliases: event.target.value } }))} /></label><button type="button" disabled={busy || !drafts[kind].code.trim() || !drafts[kind].name.trim()} onClick={() => void create(kind)}>{t("Add to company catalog", "Agregar al catálogo de empresa")}</button></div>}
+      {capability?.canManage && <div style={{ display: "grid", gap: 7, marginBottom: 12, minWidth: 0 }}><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Code", "Código")} <input aria-invalid={selectedDraftIssue === "code_required" || selectedDraftIssue === "code_format"} aria-describedby={`catalog-${kind}-draft-guidance`} style={{ width: "100%", minWidth: 0 }} value={drafts[kind].code} maxLength={64} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], code: event.target.value.toUpperCase() } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Name", "Nombre")} <input aria-invalid={selectedDraftIssue === "name_required" || selectedDraftIssue === "name_format"} aria-describedby={`catalog-${kind}-draft-guidance`} style={{ width: "100%", minWidth: 0 }} value={drafts[kind].name} maxLength={200} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], name: event.target.value } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Aliases (comma separated)", "Alias (separados por comas)")} <input aria-invalid={selectedDraftIssue === "aliases_limit"} aria-describedby={`catalog-${kind}-draft-guidance`} style={{ width: "100%", minWidth: 0 }} value={drafts[kind].aliases} maxLength={1000} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], aliases: event.target.value } }))} /></label><p id={`catalog-${kind}-draft-guidance`} role="status" style={{ margin: 0, minHeight: 20 }}>{selectedDraftIssue ? explainDraftIssue(selectedDraftIssue) : t("Code and name are ready to add.", "El código y el nombre están listos para agregar.")}</p><button type="button" disabled={busy || selectedDraftIssue !== null} onClick={() => void create(kind)}>{t("Add to company catalog", "Agregar al catálogo de empresa")}</button></div>}
       {entries[kind].length === 0 && <p>{capability?.mode === "approved_only"
         ? t("No approved company values yet. Add one before making a new project selection of this kind.", "Aún no hay valores de empresa aprobados. Agregue uno antes de hacer una nueva selección de este tipo en el proyecto.")
         : t("No company values yet; BIMLog defaults remain available in project choices.", "Aún no hay valores de empresa; los valores predeterminados de BIMLog siguen disponibles en las opciones del proyecto.")}</p>}

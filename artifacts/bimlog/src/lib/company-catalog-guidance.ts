@@ -49,3 +49,17 @@ export function filterCompanyCatalogEntries<T extends { code: string; name: stri
     return [entry.code, entry.name, ...entry.aliases].some(value => value.toLocaleLowerCase().includes(needle));
   });
 }
+
+export type CompanyCatalogDraftIssue = "code_required" | "code_format" | "name_required" | "name_format" | "aliases_limit" | null;
+
+export function validateCompanyCatalogDraft(input: { code: string; name: string; aliases: string }): CompanyCatalogDraftIssue {
+  const code = input.code.trim();
+  const name = input.name.trim();
+  if (!code) return "code_required";
+  if (!/^[A-Z0-9][A-Z0-9._-]{0,63}$/.test(code)) return "code_format";
+  if (!name) return "name_required";
+  if (name.length > 200 || /[\u0000-\u001f\u007f]/.test(name)) return "name_format";
+  const aliases = input.aliases.split(/[\n,]/).map(value => value.trim()).filter(Boolean);
+  if (aliases.length > 20 || aliases.some(value => value.length > 200 || /[\u0000-\u001f\u007f]/.test(value))) return "aliases_limit";
+  return null;
+}
