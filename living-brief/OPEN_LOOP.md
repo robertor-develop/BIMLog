@@ -5634,5 +5634,16 @@ Final production activation remains an explicit Super Admin action after owner-s
 - [x] Builds 61-65: historical-integrity registry, protected projection, bilingual Super Admin proof, and aggregate gate.
 - [x] Builds 66-70: exact owner/external-input checklist, protected projection, bilingual Super Admin guidance, and aggregate gate.
 - [ ] Push and publish exact Build 70 source, then complete authenticated production Chrome acceptance.
-- [ ] Builds 71-75: final source-bound completion dossier and terminal reconciliation.
+- [x] Builds 71-75: final source-bound completion dossier and terminal reconciliation.
+
+## Enterprise launch configuration Block 15 — Builds 71–75 — 2026-10-14
+
+- [x] Derive one launch-completion dossier from the canonical activation preflight and exact owner checklist.
+- [x] Preserve the distinction between code-owned product readiness and owner-controlled launch inputs.
+- [x] Expose the dossier only through the existing authenticated Super Admin configuration route with private no-store caching.
+- [x] Present the exact classification and pending owner-step count in compact English and Spanish guidance.
+- [x] Bind the library, protected route, UI and prior owner-checklist behavior to a permanent aggregate gate.
+- [ ] Pass the complete exact-head gate and push Builds 71–75. Keep them unpublished until the next five builds complete a ten-build interval unless Roberto explicitly changes the cadence.
+
+No automatic activation, credential, provider call, payment, invoice, email, customer record, Native, installer, Feedback or MAIN 04 behavior is created by this block.
 

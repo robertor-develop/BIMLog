@@ -137,6 +137,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/intelligence.ts
 - artifacts/api-server/src/routes/job-intake.ts
 - artifacts/api-server/src/routes/job-operations.ts
+- artifacts/api-server/src/routes/launch-completion-dossier-route.behavior.ts
 - artifacts/api-server/src/routes/launch-configuration.behavior.ts
 - artifacts/api-server/src/routes/launch-configuration.ts
 - artifacts/api-server/src/routes/launch-historical-integrity-route.behavior.ts
@@ -990,6 +991,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/launch-activation-preflight-route.behavior.ts
 - artifacts/api-server/src/lib/launch-activation-preflight.behavior.ts
 - artifacts/api-server/src/lib/launch-activation-preflight.ts
+- artifacts/api-server/src/lib/launch-completion-dossier.behavior.ts
+- artifacts/api-server/src/lib/launch-completion-dossier.ts
 - artifacts/api-server/src/lib/launch-configuration-migration.behavior.ts
 - artifacts/api-server/src/lib/launch-configuration-migration.ts
 - artifacts/api-server/src/lib/launch-configuration-restore.behavior.ts
