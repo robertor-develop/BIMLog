@@ -5659,4 +5659,6 @@ No automatic activation, credential, provider call, payment, invoice, email, cus
 - [x] Restore the missing `commercial_invoices.party_snapshot` column in the disposable Replit development database through the guarded sync.
 - [x] Align the three launch audit index declarations with the existing descending production definitions and add a guarded additive uniqueness migration (`9c34eb3f`).
 - [ ] Run the duplicate-checked additive production uniqueness migration, rerun the guarded development sync and exact bidirectional parity, then publish only when the provider proposes no drop.
+- [x] Run the duplicate-checked additive production uniqueness migration and preserve its PASS receipt.
+- [ ] Reconcile the three retained Helium launch-audit indexes to the production-verified descending definitions, rerun exact bidirectional parity, and publish only when the provider proposes no drop.
 

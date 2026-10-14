@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "eb06cb1e656f5710042df7a1494f94aa5632503c4607acf88d575bd44ce10451",
-  "itemCount": 397,
+  "sourceSha256": "abfd78b24d16b68c50d293a891a15f3832ef56ffee9d0b090089c280bbf78922",
+  "itemCount": 398,
   "counts": {
-    "ACTIVE": 353,
+    "ACTIVE": 354,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7230,6 +7230,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:5661",
+        "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "a00e208dd6f4fb0f",
+      "sourceLine": 5663,
+      "heading": "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14",
+      "statement": "Reconcile the three retained Helium launch-audit indexes to the production-verified descending definitions, rerun exact bidirectional parity, and publish only when the provider proposes no drop.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5663",
         "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14"
       ],
       "currentAuthority": false
