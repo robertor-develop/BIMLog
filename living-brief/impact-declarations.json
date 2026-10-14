@@ -67678,6 +67678,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "51054ea586348b3b1af08f8e9cac62eb9b21b3a306191a5e1518822cefcb59a3"
+    },
+    {
+      "taskId": "enterprise-launch-configuration-block12-gate-order-repair",
+      "reviewedThroughCommit": "dde5b1f856b6849652aaf436e32a657c35de3986",
+      "reviewedAt": "2026-10-14T09:28:51Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "updated"
+        },
+        {
+          "key": "vision",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "open_loop",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "audit",
+          "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "The complete gate exposed that the new Block 11 and Block 12 aggregate checks were placed before the established workspace declaration refresh. The repair restores typecheck:libs as the first pre-push step, retains both invoice identity gates immediately afterward, and adds a regression assertion for that ordering. It changes release proof orchestration only; no product, production data, provider, Native, installer, or MAIN 04 behavior changes.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
