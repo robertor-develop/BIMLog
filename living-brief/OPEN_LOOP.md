@@ -5656,4 +5656,7 @@ No automatic activation, credential, provider call, payment, invoice, email, cus
 - [x] Share one ordered convention consumer across Name Generator, Files and Coordination Hub.
 - [x] Repair the Coordination Hub field-key mismatch exposed by the Replit exact-source typecheck.
 - [ ] Pass the complete exact-head gate, push Builds 76–80, publish the complete Builds 71–80 interval, and complete authenticated desktop/mobile Chrome acceptance.
+- [x] Restore the missing `commercial_invoices.party_snapshot` column in the disposable Replit development database through the guarded sync.
+- [x] Align the three launch audit index declarations with the existing descending production definitions and add a guarded additive uniqueness migration (`9c34eb3f`).
+- [ ] Run the duplicate-checked additive production uniqueness migration, rerun the guarded development sync and exact bidirectional parity, then publish only when the provider proposes no drop.
 

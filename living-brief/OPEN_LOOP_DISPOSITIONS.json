@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "d3c20e2b4a18373753c23b247ba0497e4f792ed5054c09c3cbc1cbfc5d978114",
-  "itemCount": 396,
+  "sourceSha256": "eb06cb1e656f5710042df7a1494f94aa5632503c4607acf88d575bd44ce10451",
+  "itemCount": 397,
   "counts": {
-    "ACTIVE": 352,
+    "ACTIVE": 353,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7212,6 +7212,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:5658",
+        "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ccaa1e0d6fb78189",
+      "sourceLine": 5661,
+      "heading": "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14",
+      "statement": "Run the duplicate-checked additive production uniqueness migration, rerun the guarded development sync and exact bidirectional parity, then publish only when the provider proposes no drop.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5661",
         "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14"
       ],
       "currentAuthority": false
