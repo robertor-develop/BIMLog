@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4991a31f0b15e4aa27a578c231b390105fee0ed4b7f9b09cea342887c52bad9b",
-  "itemCount": 388,
+  "sourceSha256": "8ba124aefb97dffa7b2bba77da9aadee45adab2778b652d1dba893555c2ca1e4",
+  "itemCount": 390,
   "counts": {
-    "ACTIVE": 345,
+    "ACTIVE": 347,
     "SUPERSEDED": 31,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7069,6 +7069,42 @@
       "evidence": [
         "OPEN_LOOP.md:5575",
         "Enterprise launch configuration Block 7 — Builds 31–35 — 2026-10-13"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3b6e53a9edd36b90",
+      "sourceLine": 5586,
+      "heading": "Enterprise launch configuration Block 8 — Builds 36–40 — 2026-10-14",
+      "statement": "Pass the complete exact-head gate and push Builds 36–40.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5586",
+        "Enterprise launch configuration Block 8 — Builds 36–40 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "b8f0580cf12a0c96",
+      "sourceLine": 5587,
+      "heading": "Enterprise launch configuration Block 8 — Builds 36–40 — 2026-10-14",
+      "statement": "Publish the complete Builds 31–40 interval and complete authenticated Chrome production acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5587",
+        "Enterprise launch configuration Block 8 — Builds 36–40 — 2026-10-14"
       ],
       "currentAuthority": false
     }

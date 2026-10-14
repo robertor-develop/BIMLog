@@ -5576,3 +5576,15 @@ The first live publication receipt correctly stopped with `schemaAction=STOP_COM
 
 Owner-supplied real identity values remain intentionally pending. This block creates no production identity, credential, payment, invoice, email or customer record and changes no schema, Native, installer or MAIN 04 behavior.
 
+## Enterprise launch configuration Block 8 — Builds 36–40 — 2026-10-14
+
+- [x] Derive one final-activation preflight from the exact saved revision and current provider evidence.
+- [x] Expose the preflight only through the existing protected Super Admin configuration route.
+- [x] Reject malformed and contradictory readiness in the browser.
+- [x] Show bilingual business, email and payment readiness without exposing secrets.
+- [x] Bind the complete server, route, browser and presentation path to a permanent aggregate regression.
+- [ ] Pass the complete exact-head gate and push Builds 36–40.
+- [ ] Publish the complete Builds 31–40 interval and complete authenticated Chrome production acceptance.
+
+Final production activation remains an explicit Super Admin action after owner-supplied configuration and current verification evidence. No automatic activation or external transaction is authorized by this preflight.
+
