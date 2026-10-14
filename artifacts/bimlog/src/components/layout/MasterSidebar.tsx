@@ -154,6 +154,17 @@ export function MasterSidebar() {
   useEffect(() => setMobileOpen(false), [location]);
 
   useEffect(() => {
+    const projectManagementActive = location === "/admin" || location.startsWith("/admin/") || location === "/total-control" || location.startsWith("/total-control/");
+    const companySetupActive = ["/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates"]
+      .some(route => location === route || location.startsWith(`${route}/`));
+    const settingsActive = location === "/profile" || location.startsWith("/settings/");
+    if (projectManagementActive || companySetupActive) setShowAdministrationNavigation(true);
+    if (projectManagementActive) setShowProjectManagementNavigation(true);
+    if (companySetupActive) setShowCompanySetupNavigation(true);
+    if (settingsActive) setShowSettingsNavigation(true);
+  }, [location]);
+
+  useEffect(() => {
     if (!notificationPanelResizing) return;
     const resize = (event: PointerEvent) => {
       const next = Math.min(Math.min(720, window.innerWidth - 24), Math.max(300, event.clientX));
@@ -465,7 +476,7 @@ export function MasterSidebar() {
             )}
             <div id="headquarters-administration-navigation" hidden={(!sidebarCollapsed || isMobile) && !showAdministrationNavigation}>
               {(showAdminPanel || showTotalControl) && (!sidebarCollapsed || isMobile) && (
-                <button type="button" aria-expanded={showProjectManagementNavigation} aria-controls="headquarters-project-management-navigation" className="sidebar-nav-subgroup" onClick={() => setShowProjectManagementNavigation(value => !value)}>
+                <button type="button" aria-expanded={showProjectManagementNavigation} aria-controls="headquarters-project-management-navigation" data-active={location === "/admin" || location.startsWith("/admin/") || location === "/total-control" || location.startsWith("/total-control/") || undefined} className="sidebar-nav-subgroup" onClick={() => setShowProjectManagementNavigation(value => !value)}>
                   <span>{t("Projects & oversight", "Proyectos y supervisión")}</span>
                   <ChevronRight aria-hidden />
                 </button>
@@ -475,7 +486,7 @@ export function MasterSidebar() {
                 {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
               </div>
               {showCompanyCatalogs && (!sidebarCollapsed || isMobile) && (
-                <button type="button" aria-expanded={showCompanySetupNavigation} aria-controls="headquarters-company-setup-navigation" className="sidebar-nav-subgroup" onClick={() => setShowCompanySetupNavigation(value => !value)}>
+                <button type="button" aria-expanded={showCompanySetupNavigation} aria-controls="headquarters-company-setup-navigation" data-active={["/company-catalogs", "/company-workflows", "/company-workflow-governance", "/company-pricing-templates"].some(route => location === route || location.startsWith(`${route}/`)) || undefined} className="sidebar-nav-subgroup" onClick={() => setShowCompanySetupNavigation(value => !value)}>
                   <span>{t("Company setup", "Configuración de empresa")}</span>
                   <ChevronRight aria-hidden />
                 </button>
