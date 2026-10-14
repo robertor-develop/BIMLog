@@ -5672,3 +5672,13 @@ No automatic activation, credential, provider call, payment, invoice, email, cus
 
 This block changes navigation hierarchy and discoverability only. Existing route, role, tenant, catalog, workflow, APU, Total Control, customer, payment, email, Native, installer, Feedback and MAIN 04 authorities remain unchanged. It is pushed after its complete gate and stays unpublished until Builds 86–90 complete the next ten-build interval.
 
+## Gauntlet responsive navigation Block 18 — Builds 86–90 — 2026-10-14
+
+- [x] Contain keyboard focus and restore the trigger for the Headquarters mobile drawer.
+- [x] Contain keyboard focus, restore the trigger and lock background scrolling for the project mobile drawer.
+- [x] Make project groups genuinely collapsible on mobile with 44-pixel touch targets.
+- [x] Preserve bounded project disclosure preferences while keeping the active destination visible.
+- [x] Remove the legacy CSS override that forced closed mobile groups open and bind the complete responsive contract to a permanent gate.
+
+This block changes responsive navigation behavior only. Existing route, role, tenant, record, customer, payment, email, Native, installer, Feedback and MAIN 04 authorities remain unchanged. Builds 81–90 now require the complete exact-head gate, one push, controlled publication and authenticated desktop/mobile Chrome acceptance.
+

@@ -622,9 +622,6 @@ iframe[aria-label*="Replit" i],
 .phasea-mobile-project-card {
   margin-top: 12px;
 }
-.phasea-nav-mobile-list .phasea-nav-group-body {
-  display: block;
-}
 .phasea-surface {
   display: flex;
   flex-direction: column;
