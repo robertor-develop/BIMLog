@@ -5647,3 +5647,12 @@ Final production activation remains an explicit Super Admin action after owner-s
 
 No automatic activation, credential, provider call, payment, invoice, email, customer record, Native, installer, Feedback or MAIN 04 behavior is created by this block.
 
+## Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14
+
+- [x] Distinguish truly incomplete Intake data from a stale confirmation receipt.
+- [x] Bind activation to one server-issued revision and readiness fingerprint.
+- [x] Reload canonical readiness after a stale-confirmation response and prevent mismatched activation.
+- [x] Reopen completed conventions at their saved checkpoint instead of the first-run front door.
+- [x] Share one ordered convention consumer across Name Generator, Files and Coordination Hub.
+- [ ] Pass the complete exact-head gate, push Builds 76–80, publish the complete Builds 71–80 interval, and complete authenticated desktop/mobile Chrome acceptance.
+

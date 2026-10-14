@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "56c465d36ad5bdfc578b268509099ecc120f4ca4e56a2097d0b093d5634a69ec",
-  "itemCount": 395,
+  "sourceSha256": "6001e5772cb7faa2132a8318d96271f2a3f9347fbbfd2af2357d45d65a046f5f",
+  "itemCount": 396,
   "counts": {
-    "ACTIVE": 351,
+    "ACTIVE": 352,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7195,6 +7195,24 @@
       "evidence": [
         "OPEN_LOOP.md:5646",
         "Enterprise launch configuration Block 15 — Builds 71–75 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6631ecc39e1f518d",
+      "sourceLine": 5657,
+      "heading": "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14",
+      "statement": "Pass the complete exact-head gate, push Builds 76–80, publish the complete Builds 71–80 interval, and complete authenticated desktop/mobile Chrome acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5657",
+        "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14"
       ],
       "currentAuthority": false
     }

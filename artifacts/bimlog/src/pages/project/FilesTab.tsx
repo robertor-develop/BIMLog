@@ -3,6 +3,7 @@ import { useLocation, useSearch, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { useListFiles, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
+import { suggestedConventionName } from "@/lib/convention-consumer";
 import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useToast } from "@/hooks/use-toast";
@@ -153,13 +154,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const toggleRejected = (fileId: number) =>
     setExpandedRejected(prev => { const s = new Set(prev); s.has(fileId) ? s.delete(fileId) : s.add(fileId); return s; });
 
-  const suggestedNameFromConvention = (() => {
-    if (!convention || !convention.fields || !convention.isActive) return null;
-    const sorted = [...convention.fields].sort((a: any, b: any) => a.fieldOrder - b.fieldOrder);
-    const parts = sorted.map((f: any) => (f.allowedValues && f.allowedValues.length > 0 ? f.allowedValues[0] : "???"));
-    if (parts.length === 0) return null;
-    return parts.join(convention.separator);
-  })();
+  const suggestedNameFromConvention = suggestedConventionName(convention);
 
   const handleCopyRej = (fileId: number, name: string) => {
     navigator.clipboard.writeText(name).then(() => {
@@ -1097,13 +1092,7 @@ function UploadForm({ projectId, onClose }: { projectId: number; onClose: () => 
   const conventionBlocked = fileIntakeRequiresConvention(intakeMode) && !convention?.isActive;
 
   // Build suggested compliant name from the active convention
-  const suggestedName = (() => {
-    if (!convention || !convention.fields || !convention.isActive) return null;
-    const sorted = [...convention.fields].sort((a: any, b: any) => a.fieldOrder - b.fieldOrder);
-    const parts = sorted.map((f: any) => (f.allowedValues && f.allowedValues.length > 0 ? f.allowedValues[0] : "???"));
-    if (parts.length === 0) return null;
-    return parts.join(convention.separator);
-  })();
+  const suggestedName = suggestedConventionName(convention);
 
   const handleCopySuggestion = (name: string) => {
     navigator.clipboard.writeText(name).then(() => {

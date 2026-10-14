@@ -15,6 +15,7 @@ import {
   type CoordinationProposedField,
   type CoordinationConventionFieldSnapshot,
 } from "@workspace/api-client-react";
+import { activeConventionFields } from "@/lib/convention-consumer";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuthStore } from "@/store/auth";
 import { useToast } from "@/hooks/use-toast";
@@ -180,10 +181,7 @@ export function CoordinationHub({
   const recentRef = useRef<HTMLDivElement>(null);
 
   const isActive = !!(convention?.isActive && (convention.fields?.length ?? 0) > 0);
-  const fields = useMemo(
-    () => [...(convention?.fields ?? [])].sort((a, b) => a.fieldOrder - b.fieldOrder),
-    [convention],
-  );
+  const fields = useMemo(() => activeConventionFields(convention), [convention]);
 
   function reset() {
     setIntakeResult(null);

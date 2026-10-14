@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useGetConvention } from "@workspace/api-client-react";
+import { activeConventionFields, conventionSeparator, selectedConventionName } from "@/lib/convention-consumer";
 import { useI18n } from "@/lib/i18n";
 import { safeProjectReturnTarget } from "@/lib/return-context";
 
@@ -194,8 +195,7 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
   useEffect(() => {
     if (!convention || !convention.fields) return;
     const initial: Record<string, string> = {};
-    [...convention.fields]
-      .sort((a: any, b: any) => a.fieldOrder - b.fieldOrder)
+    activeConventionFields(convention)
       .forEach((field: any) => {
         if (field.allowedValues && field.allowedValues.length > 0) {
           initial[field.label] = field.allowedValues[0];
@@ -252,15 +252,13 @@ export function NameGenerator({ projectId: projectIdProp, onGoToConvention }: { 
     );
   }
 
-  const sep: string = (convention as any).separator || "-";
-
-  const fields = [...convention.fields]
-    .sort((a: any, b: any) => a.fieldOrder - b.fieldOrder);
+  const sep = conventionSeparator(convention);
+  const fields = activeConventionFields(convention);
 
   const tokens = fields
     .filter((field: any) => !disabledFields[field.label])
     .map((field: any) => selections[field.label] || "");
-  const generatedName = tokens.filter(Boolean).join(sep);
+  const generatedName = selectedConventionName(convention, selections, disabledFields);
 
   const handleCopy = () => {
     if (!generatedName) return;
