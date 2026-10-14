@@ -5590,3 +5590,13 @@ Final production activation remains an explicit Super Admin action after owner-s
 
 - [x] Repair the strict TypeScript narrowing exposed by the complete gate without changing preflight behavior.
 - [x] Replace prohibited symbolic checklist glyphs with explicit bilingual readiness labels and restore the blocking audit baseline.
+
+## Enterprise launch configuration Block 9 — Builds 41–45 — 2026-10-14
+
+- [x] Read one exact environment-bound historical launch configuration revision.
+- [x] Preserve current encrypted secrets and deny revival of historical credentials during restore.
+- [x] Add a protected, reason-bearing, revision-safe restore operation that creates a new non-active revision.
+- [x] Expose bilingual restore guidance and actions through immutable Super Admin history.
+- [x] Bind Builds 41–45 to a permanent focused aggregate gate and API/frontend TypeScript.
+- [ ] Push Builds 41–45 and keep them unpublished until Builds 46–50 complete the ten-build interval.
+

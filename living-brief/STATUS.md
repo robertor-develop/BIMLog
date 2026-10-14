@@ -4386,3 +4386,8 @@ Release-gate repair `9e5273d9` narrows the already runtime-validated preflight b
 
 Blocking-audit repair `2ed39a60` replaces symbolic checklist glyphs with explicit bilingual Ready/Pending labels. The preflight meaning is unchanged; the blocking platform audit returns to its accepted P0-zero/P1-baseline state and the frontend typecheck passes before the complete gate repeat.
 
+
+## Enterprise launch configuration Block 9 — reversible history — 2026-10-14
+
+Builds 41–45 close the evidence-based reversibility gap in the existing Super Admin launch configuration center. An authorized Super Admin can restore an earlier non-secret configuration snapshot only as a new non-active audited revision, with an explicit reason and exact current-revision guard. The operation preserves the current encrypted secret envelopes and cannot revive historical credentials; current or future revisions are rejected. The bilingual history explains this boundary and offers restore only for older revisions. Focused behavior, aggregate acceptance and API/frontend TypeScript pass. Implementation commits are `b896dd4f`, `2e088adc`, `c07d26a5`, `b9b02cf8` and `1256c3ef`. This five-build block is push-only and remains unpublished until Builds 46–50 complete the next ten-build interval.
+

@@ -988,6 +988,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/launch-activation-preflight.ts
 - artifacts/api-server/src/lib/launch-configuration-migration.behavior.ts
 - artifacts/api-server/src/lib/launch-configuration-migration.ts
+- artifacts/api-server/src/lib/launch-configuration-restore.behavior.ts
+- artifacts/api-server/src/lib/launch-configuration-restore.ts
 - artifacts/api-server/src/lib/launch-configuration-secret.behavior.ts
 - artifacts/api-server/src/lib/launch-configuration-secret.ts
 - artifacts/api-server/src/lib/launch-configuration-store.behavior.ts

@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 777,
+    "apiRoutes": 778,
     "frontendApiReferences": 308,
     "routeOwnedTables": 72
   },
@@ -5151,6 +5151,12 @@
     {
       "method": "GET",
       "path": "/admin/launch-configuration/:environment/history",
+      "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/admin/launch-configuration/:environment/restore",
       "owner": "artifacts/api-server/src/routes/launch-configuration.ts",
       "tables": []
     },
