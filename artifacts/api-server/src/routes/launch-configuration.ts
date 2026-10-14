@@ -10,8 +10,9 @@ import { liveSmtpLaunchProbe } from "../lib/launch-smtp-probe";
 import { verifyLaunchPaymentMethod } from "../lib/launch-payment-verification";
 import { paymentActivationBlockers } from "../lib/launch-payment-activation";
 import { inspectLaunchActivationPreflight } from "../lib/launch-activation-preflight";
+import { prepareLaunchConfigurationRestore } from "../lib/launch-configuration-restore";
 import { launchPaymentMethods, type LaunchPaymentMethod } from "../lib/launch-payment-provider";
-import { LaunchConfigurationConflict, listLaunchConfigurationHistory, listLatestLaunchPaymentVerifications, readLaunchConfiguration, readLatestLaunchEmailVerification, recordLaunchEmailVerification, recordLaunchPaymentVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
+import { LaunchConfigurationConflict, listLaunchConfigurationHistory, listLatestLaunchPaymentVerifications, readLaunchConfiguration, readLaunchConfigurationVersion, readLatestLaunchEmailVerification, recordLaunchEmailVerification, recordLaunchPaymentVerification, writeLaunchConfiguration, type LaunchEnvironment, type LaunchStoredState } from "../lib/launch-configuration-store";
 
 const router: IRouter = Router();
 const environments = new Set<LaunchEnvironment>(["development", "staging", "production"]);
@@ -63,6 +64,19 @@ router.get("/admin/launch-configuration/:environment", authMiddleware, isSuperAd
 router.get("/admin/launch-configuration/:environment/history", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const target = environment(String(req.params.environment)); if (!target) { res.status(400).json({ code: "LAUNCH_ENVIRONMENT_INVALID" }); return; }
   res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ items: await listLaunchConfigurationHistory(pool, target) });
+});
+
+router.post("/admin/launch-configuration/:environment/restore", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+  const target = environment(String(req.params.environment)), changeReason = reason(req.body?.reason), expectedRevision = Number(req.body?.expectedRevision), sourceRevision = Number(req.body?.sourceRevision);
+  if (!target || !changeReason || !Number.isSafeInteger(expectedRevision) || expectedRevision < 1 || !Number.isSafeInteger(sourceRevision) || sourceRevision < 1 || sourceRevision >= expectedRevision) { res.status(400).json({ code: "LAUNCH_CONFIGURATION_RESTORE_INVALID" }); return; }
+  const [current, historical] = await Promise.all([readLaunchConfiguration(pool, target), readLaunchConfigurationVersion(pool, target, sourceRevision)]);
+  if (!current) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_NOT_FOUND" }); return; }
+  if (!historical) { res.status(404).json({ code: "LAUNCH_CONFIGURATION_REVISION_NOT_FOUND" }); return; }
+  const restored = prepareLaunchConfigurationRestore({ current: current.configuration, historical: historical.configuration });
+  try {
+    const item = await writeLaunchConfiguration(pool, { environment: target, expectedRevision, state: restored.state, configuration: restored.configuration, readiness: restored.readiness, actorUserId: req.user!.userId, reason: changeReason, action: "restored" });
+    res.set("Cache-Control", "private, no-store, max-age=0"); res.json({ item: response(item), restoredFromRevision: sourceRevision });
+  } catch (error) { if (error instanceof LaunchConfigurationConflict) { res.status(409).json({ code: "LAUNCH_CONFIGURATION_STALE" }); return; } throw error; }
 });
 
 router.put("/admin/launch-configuration/:environment", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
