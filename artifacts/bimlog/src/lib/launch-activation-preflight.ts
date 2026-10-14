@@ -22,14 +22,19 @@ export function parseLaunchActivationPreflight(value: unknown): LaunchActivation
   if (item.activationReady !== (item.configurationReady && item.emailReady && item.paymentsReady)) throw new Error("LAUNCH_ACTIVATION_PREFLIGHT_CONTRADICTORY");
   if (item.classification === "LAUNCH_CONFIGURATION_PENDING" && item.activationReady) throw new Error("LAUNCH_ACTIVATION_PREFLIGHT_CONTRADICTORY");
   if (item.classification !== "LAUNCH_CONFIGURATION_PENDING" && !item.activationReady) throw new Error("LAUNCH_ACTIVATION_PREFLIGHT_CONTRADICTORY");
+  const configurationReady = item.configurationReady as boolean;
+  const emailReady = item.emailReady as boolean;
+  const paymentsReady = item.paymentsReady as boolean;
+  const activationReady = item.activationReady as boolean;
+  const blockers = item.blockers as string[];
   return Object.freeze({
     environment: item.environment as LaunchActivationPreflight["environment"],
     configurationRevision: Number(item.configurationRevision),
-    configurationReady: item.configurationReady,
-    emailReady: item.emailReady,
-    paymentsReady: item.paymentsReady,
-    activationReady: item.activationReady,
+    configurationReady,
+    emailReady,
+    paymentsReady,
+    activationReady,
     classification: item.classification as LaunchActivationPreflight["classification"],
-    blockers: Object.freeze([...item.blockers] as string[]),
+    blockers: Object.freeze([...blockers]),
   });
 }
