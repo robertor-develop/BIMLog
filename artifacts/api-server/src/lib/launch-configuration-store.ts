@@ -55,6 +55,12 @@ export async function listLaunchConfigurationHistory(pool: Queryable, environmen
   return result.rows;
 }
 
+export async function readLaunchConfigurationVersion(pool: Queryable, environment: LaunchEnvironment, revision: number) {
+  const result = await pool.query(`SELECT id,configuration_id AS "configurationId",environment,revision,state,configuration,readiness,reason,actor_user_id AS "actorUserId",created_at AS "createdAt" FROM launch_configuration_versions WHERE environment=$1 AND revision=$2`, [environment, revision]);
+  const row = result.rows[0];
+  return row ? { ...row, revision: Number(row.revision), createdAt: new Date(row.createdAt).toISOString() } : null;
+}
+
 export async function recordLaunchEmailVerification(pool: Queryable, input: { configurationId: string; environment: LaunchEnvironment; revision: number; provider: "smtp" | "sendgrid"; action: "verify" | "send_test"; status: string; resultCode: string; actorUserId: number }) {
   await pool.query(`INSERT INTO launch_email_verification_audit(id,configuration_id,environment,revision,provider,action,status,result_code,actor_user_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [randomUUID(), input.configurationId, input.environment, input.revision, input.provider, input.action, input.status, input.resultCode, input.actorUserId]);
 }
