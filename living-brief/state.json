@@ -1,20 +1,22 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
+  "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "00b3ddca67099a0f57093f9a9ea6ef3fdb9f8c224ce4b4a106a6c760ff8912c0",
+  "bundleSha256": "a72417222278f3d044373a3b5b4ce3027fa8bc8e8df739f416b6a923ade61423",
   "impact": {
-    "baselineCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
+    "baselineCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
     "changedPaths": [
-      "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
-      "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
+      "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.authorities.behavior.tsx",
+      "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
       "artifacts/bimlog/src/index.css",
+      "artifacts/bimlog/src/lib/company-catalog-guidance.behavior.ts",
+      "artifacts/bimlog/src/lib/company-catalog-guidance.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
       "package.json",
-      "scripts/test-gauntlet-responsive-navigation-block18.mjs"
+      "scripts/test-gauntlet-company-catalogs-block19.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -30,11 +32,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "claude",
@@ -42,11 +44,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "quality",
@@ -54,11 +56,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "vision",
@@ -66,11 +68,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "platform",
@@ -78,11 +80,11 @@
       "sha256": "d081830013db6846b5feb7c9f1776a21aec8fb3aa415b080438b459cc044a195",
       "sourceChangedAt": "2026-10-14T10:42:05-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "plugin",
@@ -90,11 +92,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "report_design_system",
@@ -102,11 +104,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "standards_register",
@@ -114,35 +116,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "3d3612850e2d045a4872bf25947fd91acd9541af80b6a2e54eb2781759cc57c6",
-      "sourceChangedAt": "2026-10-14T20:58:00.000Z",
+      "sha256": "5e2531ae03c50c1def42d312651d6d5f3ce6023ccea7aee88fad671c4e44f541",
+      "sourceChangedAt": "2026-10-14T22:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "d615bd8bc2930453ba16c12060223dd01192ec01463269b147133d357326c5f4",
-      "sourceChangedAt": "2026-10-14T20:58:00.000Z",
+      "sha256": "4fc7077ea8f542560a2bec2e687ffae4aeaa1278598f0433268fc604c7072c78",
+      "sourceChangedAt": "2026-10-14T22:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     },
     {
       "key": "audit",
@@ -150,11 +152,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewedThroughCommit": "c9d7d0b15d2efa0e32615ae85fa5024e9dfed75c",
-      "semanticReviewTask": "gauntlet-responsive-navigation-block18",
+      "reconciledThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewedThroughCommit": "98d610e92feacbe947f2cc14c04efd3f2df4855f",
+      "semanticReviewTask": "gauntlet-company-catalogs-block19",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-14T20:58:00Z"
+      "semanticReviewedAt": "2026-10-14T22:30:00Z"
     }
   ]
 }

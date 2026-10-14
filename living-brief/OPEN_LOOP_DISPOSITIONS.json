@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "d615bd8bc2930453ba16c12060223dd01192ec01463269b147133d357326c5f4",
-  "itemCount": 398,
+  "sourceSha256": "4fc7077ea8f542560a2bec2e687ffae4aeaa1278598f0433268fc604c7072c78",
+  "itemCount": 399,
   "counts": {
-    "ACTIVE": 354,
+    "ACTIVE": 355,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7249,6 +7249,24 @@
       "evidence": [
         "OPEN_LOOP.md:5663",
         "Gauntlet repair Block 16 — Builds 76–80 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "56362ae93b69836d",
+      "sourceLine": 5692,
+      "heading": "Gauntlet company catalogs Block 19 — Builds 91–95 — 2026-10-14",
+      "statement": "Pass the complete exact-head gate and push Builds 91–95 once. Keep this block unpublished until Builds 96–100 complete the next ten-build interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5692",
+        "Gauntlet company catalogs Block 19 — Builds 91–95 — 2026-10-14"
       ],
       "currentAuthority": false
     }
