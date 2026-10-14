@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bb70f5b68cbd9669fb56642be34c72dfd30536a53f6b2bc1ec02763332b80224",
-  "itemCount": 391,
+  "sourceSha256": "56cbfc216fa0e450453c5c6c2e66666a7ddd4af5cfcbb7bb098b6b1fb99f662d",
+  "itemCount": 392,
   "counts": {
     "ACTIVE": 348,
-    "SUPERSEDED": 31,
+    "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -7123,6 +7123,24 @@
       "evidence": [
         "OPEN_LOOP.md:5601",
         "Enterprise launch configuration Block 9 — Builds 41–45 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "8b4709bf5ca3c25f",
+      "sourceLine": 5611,
+      "heading": "Enterprise launch configuration Block 10 — Builds 46–50 — 2026-10-14",
+      "statement": "Push and publish the complete Builds 41–50 interval, then verify exact live identity and authenticated Chrome production behavior.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
       ],
       "currentAuthority": false
     }

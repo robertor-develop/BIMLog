@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 778,
+    "apiRoutes": 779,
     "frontendApiReferences": 308,
     "routeOwnedTables": 72
   },
@@ -1141,6 +1141,19 @@
       "path": "/ai-control/usage",
       "owner": "artifacts/api-server/src/routes/ai-control-plane.ts",
       "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/auth/launch-step-up",
+      "owner": "artifacts/api-server/src/routes/auth.ts",
+      "tables": [
+        "usersTable",
+        "companiesTable",
+        "projectMembersTable",
+        "filesTable",
+        "rfisTable",
+        "submittalsTable"
+      ]
     },
     {
       "method": "POST",

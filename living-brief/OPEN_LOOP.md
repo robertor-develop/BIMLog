@@ -5600,3 +5600,12 @@ Final production activation remains an explicit Super Admin action after owner-s
 - [x] Bind Builds 41–45 to a permanent focused aggregate gate and API/frontend TypeScript.
 - [ ] Push Builds 41–45 and keep them unpublished until Builds 46–50 complete the ten-build interval.
 
+
+## Enterprise launch configuration Block 10 — Builds 46–50 — 2026-10-14
+
+- [x] Issue a short-lived, launch-only, account-bound step-up proof.
+- [x] Verify the current Super Admin password without persisting or returning it.
+- [x] Require step-up for save, restore, activate, and deactivate mutations.
+- [x] Add bilingual identity-confirmation guidance and disabled mutation states.
+- [x] Add and pass the permanent Block 10 aggregate acceptance gate.
+- [ ] Push and publish the complete Builds 41–50 interval, then verify exact live identity and authenticated Chrome production behavior.
