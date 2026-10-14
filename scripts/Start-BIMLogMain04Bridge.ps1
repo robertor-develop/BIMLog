@@ -6,10 +6,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $node = (Get-Command node -ErrorAction Stop).Source
-$codex = 'C:\Users\soporte\AppData\Local\OpenAI\Codex\bin\f544b3844e0f14e9\codex.exe'
+$codexRoot = 'C:\Users\soporte\AppData\Local\OpenAI\Codex\bin'
+$codex = Get-ChildItem -LiteralPath $codexRoot -Filter 'codex.exe' -File -Recurse -ErrorAction SilentlyContinue |
+  Sort-Object LastWriteTimeUtc -Descending |
+  Select-Object -First 1 -ExpandProperty FullName
 $rollout = 'C:\Users\soporte\.codex\sessions\2026\10\05\rollout-2026-10-05T01-42-21-01a10a95-a2e5-73d3-a471-6738addc7e42.jsonl'
 if (-not (Test-Path -LiteralPath $SecretPath)) { throw "Missing protected bridge token: $SecretPath" }
-if (-not (Test-Path -LiteralPath $codex)) { throw "Missing Codex executable: $codex" }
+if (-not $codex -or -not (Test-Path -LiteralPath $codex)) { throw "Missing Codex executable beneath: $codexRoot" }
 if (-not (Test-Path -LiteralPath $rollout)) { throw "Missing MAIN 04 rollout: $rollout" }
 
 $secure = Get-Content -LiteralPath $SecretPath -Raw | ConvertTo-SecureString
