@@ -49,7 +49,7 @@ export const launchConfigurationAuditTable = pgTable("launch_configuration_audit
 }, table => [
   check("launch_configuration_audit_action_check", sql`${table.action} in ('created','updated','activated','deactivated','restored')`),
   check("launch_configuration_audit_revision_check", sql`${table.revision} > 0`),
-  index("launch_configuration_audit_time_idx").on(table.environment, table.createdAt),
+  index("launch_configuration_audit_time_idx").on(table.environment, table.createdAt.desc()),
 ]);
 
 export type LaunchConfigurationRecord = typeof launchConfigurationsTable.$inferSelect;
@@ -66,7 +66,7 @@ export const launchEmailVerificationAuditTable = pgTable("launch_email_verificat
   check("launch_email_verification_audit_provider_check", sql`${table.provider} in ('smtp','sendgrid')`),
   check("launch_email_verification_audit_action_check", sql`${table.action} in ('verify','send_test')`),
   check("launch_email_verification_audit_status_check", sql`${table.status} in ('verified','sent','rejected','unavailable')`),
-  index("launch_email_verification_audit_time_idx").on(table.environment, table.createdAt),
+  index("launch_email_verification_audit_time_idx").on(table.environment, table.createdAt.desc()),
 ]);
 
 export const launchPaymentVerificationAuditTable = pgTable("launch_payment_verification_audit", {
@@ -85,7 +85,7 @@ export const launchPaymentVerificationAuditTable = pgTable("launch_payment_verif
   check("launch_payment_verification_audit_method_check", sql`${table.method} in ('bank_transfer','qr_payment','stripe')`),
   check("launch_payment_verification_audit_mode_check", sql`${table.mode} in ('manual','sandbox','production')`),
   check("launch_payment_verification_audit_status_check", sql`${table.status} in ('configured','verified','failed','unavailable')`),
-  index("launch_payment_verification_audit_time_idx").on(table.environment, table.createdAt),
+  index("launch_payment_verification_audit_time_idx").on(table.environment, table.createdAt.desc()),
 ]);
 
 export type LaunchPaymentVerificationAuditEntry = typeof launchPaymentVerificationAuditTable.$inferSelect;
