@@ -67538,6 +67538,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0f74a02e4dd5cd18eded1c00d4d7bea47333d1a84644268e2c3e9d6019b06570"
+    },
+    {
+      "taskId": "enterprise-launch-configuration-block11-release-fixture-repair",
+      "reviewedThroughCommit": "afd22540cec3c5d677e9cfbe41caacc037a6f42c",
+      "reviewedAt": "2026-10-14T08:01:36Z",
+      "status": "accepted",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "claude",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "quality",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "updated"
+        },
+        {
+          "key": "vision",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "platform",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "plugin",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "report_design_system",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "standards_register",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "status",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "open_loop",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        },
+        {
+          "key": "audit",
+          "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+          "result": "reviewed_no_semantic_change"
+        }
+      ],
+      "reason": "The exact-head release gate exposed that the guarded disposable artifact fixture did not deterministically apply the additive commercial invoice party_snapshot column. The repair adds that existing declared column to the fixture preparer and binds it to the Block 11 aggregate test. It changes release proof infrastructure only; no production data, provider transaction, Native, installer, or MAIN 04 behavior changes.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
