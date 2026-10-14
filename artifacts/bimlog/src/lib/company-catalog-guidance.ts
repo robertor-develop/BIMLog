@@ -36,3 +36,16 @@ export function summarizeCompanyCatalog(entries: Array<{ state: CompanyCatalogEn
   for (const entry of entries) summary[entry.state] += 1;
   return summary;
 }
+
+export function filterCompanyCatalogEntries<T extends { code: string; name: string; aliases: string[]; state: CompanyCatalogEntryState }>(
+  entries: T[],
+  query: string,
+  state: CompanyCatalogEntryState | "all",
+): T[] {
+  const needle = query.trim().toLocaleLowerCase();
+  return entries.filter((entry) => {
+    if (state !== "all" && entry.state !== state) return false;
+    if (!needle) return true;
+    return [entry.code, entry.name, ...entry.aliases].some(value => value.toLocaleLowerCase().includes(needle));
+  });
+}

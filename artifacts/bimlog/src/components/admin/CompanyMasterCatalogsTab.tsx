@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { COMPANY_CATALOG_GUIDANCE, summarizeCompanyCatalog } from "@/lib/company-catalog-guidance";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { COMPANY_CATALOG_GUIDANCE, filterCompanyCatalogEntries, summarizeCompanyCatalog, type CompanyCatalogEntryState } from "@/lib/company-catalog-guidance";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Kind = "client" | "discipline" | "service" | "phase";
@@ -20,6 +20,8 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   const [policyDraft, setPolicyDraft] = useState<PolicyMode>("defaults_allowed");
   const [editing, setEditing] = useState<{ kind: Kind; id: string; name: string; aliases: string; version: number } | null>(null);
   const [selectedKind, setSelectedKind] = useState<Kind>("client");
+  const [search, setSearch] = useState("");
+  const [stateFilter, setStateFilter] = useState<CompanyCatalogEntryState | "all">("all");
   const [usage, setUsage] = useState<Record<string, Usage | "loading" | "error">>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -109,6 +111,7 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   }
 
   const ready = capability !== null && !loading && !loadError;
+  const visibleEntries = useMemo(() => filterCompanyCatalogEntries(entries[selectedKind], search, stateFilter), [entries, search, selectedKind, stateFilter]);
   return <section aria-labelledby="company-master-title" style={{ display: "grid", gap: 16, minWidth: 0, width: "100%" }}>
     <div><h2 id="company-master-title">{t("Company Master Catalogs", "Catálogos maestros de la empresa")}</h2><p>{t("Clients, disciplines, services, and phases are configured once for this company and reused across its projects. Changes do not rename historical project snapshots.", "Clientes, disciplinas, servicios y fases se configuran una vez para esta empresa y se reutilizan en sus proyectos. Los cambios no renombran registros históricos.")}</p></div>
     {loading && <p role="status">{t("Loading company catalogs…", "Cargando catálogos de la empresa…")}</p>}
@@ -119,7 +122,7 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
     {message && <p role="status" style={{ padding: 10, background: "#fef3c7", borderRadius: 8 }}>{message}</p>}
     {ready && capability?.isSuperAdmin && <section style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14 }}><h3>{t("Grant or revoke Company PMO access", "Otorgar o revocar acceso PMO de empresa")}</h3><p>{t("Enter the existing user's email. The server binds the grant to that user's own company; it does not grant global Super Admin.", "Ingrese el correo de la cuenta existente. El servidor vincula el permiso a la empresa de esa cuenta; no otorga Super Administrador global.")}</p><label>{t("User email", "Correo del usuario")} <input type="email" value={grantEmail} onChange={event => setGrantEmail(event.target.value)} /></label><div style={{ display: "flex", gap: 8, marginTop: 9 }}><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("grant")}>{t("Grant PMO", "Otorgar PMO")}</button><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("revoke")}>{t("Revoke PMO", "Revocar PMO")}</button></div></section>}
     {ready && capability && <nav aria-label={t("Company catalog sections", "Secciones del catálogo de empresa")} style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8, position: "sticky", top: 0, zIndex: 2, padding: "8px 0", background: "white" }}>
-      {kinds.map(kind => { const summary = summarizeCompanyCatalog(entries[kind]); return <button key={kind} type="button" aria-pressed={selectedKind === kind} onClick={() => { setSelectedKind(kind); setEditing(null); }} style={{ minWidth: 0, padding: "10px 8px", borderRadius: 8, border: selectedKind === kind ? "2px solid #2563eb" : "1px solid #cbd5e1", background: selectedKind === kind ? "#eff6ff" : "white" }}>
+      {kinds.map(kind => { const summary = summarizeCompanyCatalog(entries[kind]); return <button key={kind} type="button" aria-pressed={selectedKind === kind} onClick={() => { setSelectedKind(kind); setEditing(null); setSearch(""); setStateFilter("all"); }} style={{ minWidth: 0, padding: "10px 8px", borderRadius: 8, border: selectedKind === kind ? "2px solid #2563eb" : "1px solid #cbd5e1", background: selectedKind === kind ? "#eff6ff" : "white" }}>
         <span style={{ display: "block", fontWeight: 700 }}>{spanish ? labels[kind][1] : labels[kind][0]}</span>
         <small>{summary.active} {t("active", "activos")} · {summary.total} {t("total", "total")}</small>
       </button>})}
@@ -127,12 +130,18 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
     {ready && capability && <div style={{ display: "grid", gap: 14, minWidth: 0 }}>{kinds.filter(kind => kind === selectedKind).map(kind => <section key={kind} aria-labelledby={`catalog-${kind}-title`} style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14, minWidth: 0 }}><h3 id={`catalog-${kind}-title`}>{spanish ? labels[kind][1] : labels[kind][0]}</h3>
       <p>{spanish ? COMPANY_CATALOG_GUIDANCE[kind].purpose.es : COMPANY_CATALOG_GUIDANCE[kind].purpose.en}</p>
       <p><strong>{t("Used by", "Usado por")}:</strong> {spanish ? COMPANY_CATALOG_GUIDANCE[kind].usedBy.es : COMPANY_CATALOG_GUIDANCE[kind].usedBy.en}</p>
+      <div role="search" aria-label={t("Filter company catalog", "Filtrar catálogo de empresa")} style={{ display: "grid", gridTemplateColumns: "minmax(0,2fr) minmax(150px,1fr) auto", gap: 8, alignItems: "end", marginBottom: 12 }}>
+        <label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Search code, name, or alias", "Buscar código, nombre o alias")}<input type="search" value={search} onChange={event => setSearch(event.target.value)} /></label>
+        <label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("State", "Estado")}<select value={stateFilter} onChange={event => setStateFilter(event.target.value as CompanyCatalogEntryState | "all")}><option value="all">{t("All states", "Todos los estados")}</option><option value="active">{t("Active", "Activo")}</option><option value="inactive">{t("Inactive", "Inactivo")}</option><option value="retired">{t("Retired", "Retirado")}</option></select></label>
+        <button type="button" disabled={!search && stateFilter === "all"} onClick={() => { setSearch(""); setStateFilter("all"); }}>{t("Clear", "Limpiar")}</button>
+      </div>
       {kind === "client" && <p>{t("Client names come from canonical Companies. Company PMO can add or deactivate options here; name corrections require Company Directory administration.", "Los nombres de clientes provienen de Empresas canónicas. PMO puede agregar o desactivar opciones aquí; las correcciones de nombres requieren administración del Directorio de Empresas.")}</p>}
       {capability?.canManage && <div style={{ display: "grid", gap: 7, marginBottom: 12, minWidth: 0 }}><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Code", "Código")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].code} maxLength={64} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], code: event.target.value.toUpperCase() } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Name", "Nombre")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].name} maxLength={200} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], name: event.target.value } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Aliases (comma separated)", "Alias (separados por comas)")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].aliases} maxLength={1000} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], aliases: event.target.value } }))} /></label><button type="button" disabled={busy || !drafts[kind].code.trim() || !drafts[kind].name.trim()} onClick={() => void create(kind)}>{t("Add to company catalog", "Agregar al catálogo de empresa")}</button></div>}
       {entries[kind].length === 0 && <p>{capability?.mode === "approved_only"
         ? t("No approved company values yet. Add one before making a new project selection of this kind.", "Aún no hay valores de empresa aprobados. Agregue uno antes de hacer una nueva selección de este tipo en el proyecto.")
         : t("No company values yet; BIMLog defaults remain available in project choices.", "Aún no hay valores de empresa; los valores predeterminados de BIMLog siguen disponibles en las opciones del proyecto.")}</p>}
-      <div style={{ display: "grid", gap: 7 }}>{entries[kind].map(entry => {
+      {visibleEntries.length === 0 && entries[kind].length > 0 && <p role="status">{t("No company values match these filters.", "Ningún valor de empresa coincide con estos filtros.")}</p>}
+      <div style={{ display: "grid", gap: 7 }}>{visibleEntries.map(entry => {
         const isEditing = editing?.kind === kind && editing.id === entry.id;
         const entryUsage = usage[entry.id];
         return <div key={entry.id} style={{ borderTop: "1px solid #e2e8f0", paddingTop: 7, display: "grid", gap: 7, minWidth: 0 }}>
