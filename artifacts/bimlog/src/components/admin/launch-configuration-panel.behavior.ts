@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 const panel=readFileSync(new URL("./LaunchConfigurationPanel.tsx",import.meta.url),"utf8"),page=readFileSync(new URL("../../pages/TotalControl.tsx",import.meta.url),"utf8");
 for(const token of ["Launch configuration","Configuración de lanzamiento","development","staging","production","Save revision","Immutable revision history","New SMTP password","blockers.length"])assert.ok(panel.includes(token),token);
+for(const token of ["Launch completion dossier","Expediente de finalización de lanzamiento","Product ready — launch configuration remains","Producto listo — falta configuración de lanzamiento","completionDossier.pendingOwnerSteps"])assert.ok(panel.includes(token),token);
 for(const token of ["enabledPaymentMethods","bank_transfer","qr_payment","stripeSecretKey","stripeWebhookSecret","Sandbox","Production"])assert.ok(panel.includes(token),token);
 for(const token of ["paymentVerifications","payment/verify","checkPayment","not verified","no verificado"])assert.ok(panel.includes(token),token);
 assert.ok(!panel.includes("decryptLaunchSecret"));assert.ok(page.includes("LaunchConfigurationPanel"));
