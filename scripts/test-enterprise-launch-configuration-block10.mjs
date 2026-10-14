@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const read = path => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const auth = read("artifacts/api-server/src/middlewares/auth.ts");
+const authRoute = read("artifacts/api-server/src/routes/auth.ts");
+const launch = read("artifacts/api-server/src/routes/launch-configuration.ts");
+const ui = read("artifacts/bimlog/src/components/admin/LaunchConfigurationPanel.tsx");
+for (const token of ["launch_configuration_step_up",'expiresIn: "10m"',"proof.userId !== req.user?.userId","LAUNCH_STEP_UP_REQUIRED"]) assert.ok(auth.includes(token), token);
+for (const token of ['/auth/launch-step-up',"bcrypt.compare(password, user.passwordHash)","isSuperAdmin","private, no-store"]) assert.ok(authRoute.includes(token), token);
+assert.equal((launch.match(/requireLaunchStepUp/g) ?? []).length, 4);
+for (const token of ["Confirm identity for sensitive changes","Confirme su identidad para cambios sensibles","x-bimlog-step-up","!stepUpToken"]) assert.ok(ui.includes(token), token);
+assert.ok(!authRoute.includes("passwordHash }));"));
+console.log("Enterprise launch configuration Block 10 step-up acceptance: PASS");
