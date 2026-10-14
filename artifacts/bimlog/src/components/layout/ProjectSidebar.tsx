@@ -152,18 +152,44 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
   );
   const [sidebarResizing, setSidebarResizing] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobilePanelRef = useRef<HTMLElement>(null);
+  const mobileCloseRef = useRef<HTMLButtonElement>(null);
 
   const adjustSidebarWidth = (nextWidth: number) => {
     setSidebarWidth(Math.min(420, Math.max(220, nextWidth)));
   };
 
   useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
     const handler = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileOpen(false);
+      if (event.key === "Escape") {
+        closeMobile();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(mobilePanelRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])') ?? [])
+        .filter(element => !element.hidden && element.getAttribute("aria-hidden") !== "true");
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
+    document.body.style.overflow = "hidden";
     document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, []);
+    requestAnimationFrame(() => mobileCloseRef.current?.focus());
+    return () => {
+      document.removeEventListener("keydown", handler);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileOpen]);
 
   useEffect(() => {
     if (!sidebarResizing) return;
@@ -297,7 +323,10 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
     setExpandedGroups(prev => ({ ...prev, [activeGroup]: true }));
   }, [activeGroup]);
 
-  const closeMobile = () => setMobileOpen(false);
+  const closeMobile = () => {
+    setMobileOpen(false);
+    requestAnimationFrame(() => mobileTriggerRef.current?.focus());
+  };
   const toggleGroup = (id: string) => setExpandedGroups(prev => ({ ...prev, [id]: !prev[id] }));
 
   const renderNavGroup = (group: NavGroup, variant: "desktop" | "mobile" = "desktop") => {
@@ -408,6 +437,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       )}
 
       <button
+        ref={mobileTriggerRef}
         type="button"
         className="phasea-mobile-nav-trigger"
         aria-expanded={mobileOpen}
@@ -421,12 +451,15 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       {mobileOpen && (
         <div className="phasea-mobile-nav-backdrop" role="presentation" onClick={closeMobile}>
           <aside
+            ref={mobilePanelRef}
             id="phasea-mobile-project-nav"
             className="phasea-mobile-nav-panel"
+            role="dialog"
+            aria-modal="true"
             aria-label={tr("Project navigation", "Navegación del proyecto")}
             onClick={event => event.stopPropagation()}
           >
-            <button type="button" className="phasea-mobile-nav-close" onClick={closeMobile}>
+            <button ref={mobileCloseRef} type="button" className="phasea-mobile-nav-close" onClick={closeMobile}>
               <X style={{ width: 14, height: 14 }} />
               {tr("Close", "Cerrar")}
             </button>
