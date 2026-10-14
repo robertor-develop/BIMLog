@@ -1,5 +1,5 @@
 import {sql} from "drizzle-orm";
-import {boolean,check,index,integer,pgTable,text,timestamp,uniqueIndex} from "drizzle-orm/pg-core";
+import {boolean,check,index,integer,jsonb,pgTable,text,timestamp,uniqueIndex} from "drizzle-orm/pg-core";
 import {companiesTable} from "./users";
 import {usersTable} from "./users";
 
@@ -155,6 +155,7 @@ export const commercialInvoicesTable=pgTable("commercial_invoices",{
   issuedAt:timestamp("issued_at",{withTimezone:true}).notNull(),
   dueAt:timestamp("due_at",{withTimezone:true}),
   paidAt:timestamp("paid_at",{withTimezone:true}),
+  partySnapshot:jsonb("party_snapshot"),
   createdAt:timestamp("created_at",{withTimezone:true}).notNull().defaultNow(),
   updatedAt:timestamp("updated_at",{withTimezone:true}).notNull().defaultNow(),
 },table=>[
