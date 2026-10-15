@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { pool } from "@workspace/db";
 import { BIMLOG_MAIN04_THREAD_ID, dispatchBimlogMain04, readBimlogMain04, type Main04QuestionContext } from "./main04-agent-transport";
 
-export type PageAgentState = "reserved" | "running" | "complete" | "failed";
+export type PageAgentState = "reserved" | "running" | "uncertain" | "complete" | "failed";
 export type PageAgentTurn = { requestId:string; conversationId:string; projectId:number|null; question:string; answer:string|null; state:PageAgentState; errorCode:string|null; createdAt:string; updatedAt:string; completedAt:string|null };
 type ReserveInput = { requestId:string; conversationId:string; companyId:number; userId:number; projectId:number|null; question:string; context:Main04QuestionContext };
 let migration: Promise<void> | null = null;
@@ -19,11 +19,14 @@ function ensureSchema() {
         user_id integer NOT NULL REFERENCES users(id), project_id integer REFERENCES projects(id), question text NOT NULL,
         context jsonb NOT NULL, answer text, answer_digest text, state text NOT NULL DEFAULT 'reserved', error_code text,
         created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), completed_at timestamptz,
-        CONSTRAINT page_agent_turns_state_chk CHECK(state IN ('reserved','running','complete','failed')),
+        CONSTRAINT page_agent_turns_state_chk CHECK(state IN ('reserved','running','uncertain','complete','failed')),
         CONSTRAINT page_agent_turns_question_chk CHECK(length(question) BETWEEN 1 AND 2000)
       )`);
+      await client.query("ALTER TABLE page_agent_turns DROP CONSTRAINT IF EXISTS page_agent_turns_state_chk");
+      await client.query("ALTER TABLE page_agent_turns ADD CONSTRAINT page_agent_turns_state_chk CHECK(state IN ('reserved','running','uncertain','complete','failed'))");
       await client.query("CREATE INDEX IF NOT EXISTS page_agent_turns_actor_history_idx ON page_agent_turns(company_id,user_id,conversation_id,created_at,request_id)");
-      await client.query("CREATE UNIQUE INDEX IF NOT EXISTS page_agent_turns_actor_active_idx ON page_agent_turns(company_id,user_id,conversation_id) WHERE state IN ('reserved','running')");
+      await client.query("DROP INDEX IF EXISTS page_agent_turns_actor_active_idx");
+      await client.query("CREATE UNIQUE INDEX page_agent_turns_actor_active_idx ON page_agent_turns(company_id,user_id,conversation_id) WHERE state IN ('reserved','running','uncertain')");
       await client.query("COMMIT");
     } catch(error) { await client.query("ROLLBACK"); migration=null; throw error; } finally { client.release(); }
   })();
@@ -55,12 +58,18 @@ async function processTurn(input:ReserveInput){
   if(!current||current.state==="complete"||current.state==="failed")return;
   try {
     if(claimed.rows.length) {
-      const dispatched=await dispatchBimlogMain04(input);
-      if(dispatched.answer){await complete(input.requestId,dispatched.answer);return;}
+      try {
+        const dispatched=await dispatchBimlogMain04(input);
+        if(dispatched.answer){await complete(input.requestId,dispatched.answer);return;}
+      } catch(error:any) {
+        const code=String(error?.message||"MAIN04_DISPATCH_UNCERTAIN").slice(0,120);
+        await pool.query("UPDATE page_agent_turns SET state='uncertain',error_code=$2,updated_at=now() WHERE request_id=$1 AND state='running'",[input.requestId,code]);
+        console.warn(JSON.stringify({event:"page_agent_dispatch_uncertain",requestId:input.requestId,code}));
+      }
     }
     const deadline=Date.now()+10*60_000;
-    while(Date.now()<deadline){const result=await readBimlogMain04(input.requestId);if(result.answer){await complete(input.requestId,result.answer);return;}await new Promise(resolve=>setTimeout(resolve,1500));}
-    throw new Error("MAIN04_TRANSPORT_TIMEOUT");
+    while(Date.now()<deadline){try{const result=await readBimlogMain04(input.requestId);if(result.answer){await complete(input.requestId,result.answer);return;}}catch(error:any){console.warn(JSON.stringify({event:"page_agent_reconcile_pending",requestId:input.requestId,code:String(error?.message||"UNKNOWN")}));}await new Promise(resolve=>setTimeout(resolve,1500));}
+    await pool.query("UPDATE page_agent_turns SET state='uncertain',error_code='MAIN04_TRANSPORT_TIMEOUT',updated_at=now() WHERE request_id=$1 AND state<>'complete'",[input.requestId]);
   } catch(error:any) {
     const code=String(error?.message||"PAGE_AGENT_FAILED").slice(0,120);
     await pool.query("UPDATE page_agent_turns SET state='failed',error_code=$2,updated_at=now() WHERE request_id=$1 AND state<>'complete'",[input.requestId,code]);
