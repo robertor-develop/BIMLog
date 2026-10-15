@@ -15,9 +15,28 @@ if (-not (Test-Path -LiteralPath $SecretPath)) { throw "Missing protected bridge
 if (-not $codex -or -not (Test-Path -LiteralPath $codex)) { throw "Missing Codex executable beneath: $codexRoot" }
 if (-not (Test-Path -LiteralPath $rollout)) { throw "Missing MAIN 04 rollout: $rollout" }
 
-$secure = Get-Content -LiteralPath $SecretPath -Raw | ConvertTo-SecureString
-$credential = [pscredential]::new('bimlog-main04', $secure)
-$env:BIMLOG_MAIN04_BRIDGE_TOKEN = $credential.GetNetworkCredential().Password
+$protectedToken = (Get-Content -LiteralPath $SecretPath -Raw).Trim()
+if ($protectedToken.StartsWith('DPAPI_LOCAL_MACHINE_V1:')) {
+  Add-Type -AssemblyName System.Security
+  $ciphertext = [Convert]::FromBase64String($protectedToken.Substring('DPAPI_LOCAL_MACHINE_V1:'.Length))
+  $entropy = [Text.Encoding]::UTF8.GetBytes('BIMLog MAIN04 bridge v1')
+  $plaintext = [Security.Cryptography.ProtectedData]::Unprotect(
+    $ciphertext,
+    $entropy,
+    [Security.Cryptography.DataProtectionScope]::LocalMachine
+  )
+  try {
+    $env:BIMLOG_MAIN04_BRIDGE_TOKEN = [Text.Encoding]::UTF8.GetString($plaintext)
+  } finally {
+    [Array]::Clear($plaintext, 0, $plaintext.Length)
+    [Array]::Clear($ciphertext, 0, $ciphertext.Length)
+    [Array]::Clear($entropy, 0, $entropy.Length)
+  }
+} else {
+  $secure = $protectedToken | ConvertTo-SecureString
+  $credential = [pscredential]::new('bimlog-main04', $secure)
+  $env:BIMLOG_MAIN04_BRIDGE_TOKEN = $credential.GetNetworkCredential().Password
+}
 $env:BIMLOG_MAIN04_LOCAL_PORT = [string]$Port
 $env:BIMLOG_CODEX_EXECUTABLE = $codex
 $env:BIMLOG_MAIN04_ROLLOUT_PATH = $rollout
