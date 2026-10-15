@@ -810,7 +810,12 @@ router.get("/projects/:projectId/files/handover.zip", authMiddleware, requirePro
     for (const file of selected) {
       const expectedBytes = file.fileSizeBytes ?? file.fileSize;
       if (!file.storagePath || !file.fileHash || !/^[a-f0-9]{64}$/.test(file.fileHash) || !Number.isSafeInteger(expectedBytes) || expectedBytes < 0) {
-        return res.status(409).json({ code: "HANDOVER_FILE_NOT_PORTABLE", error: `File ${file.id} does not have complete portable custody evidence.` });
+        const binaryAvailability = fileCustodyState(file);
+        return res.status(409).json({
+          code: "HANDOVER_FILE_NOT_PORTABLE",
+          error: `File ${file.id} does not have complete portable custody evidence.`,
+          file: { id: file.id, fileName: file.fileName, binaryAvailability },
+        });
       }
       totalBytes += expectedBytes;
       if (totalBytes > 250 * 1024 * 1024) return res.status(413).json({ code: "HANDOVER_PACKAGE_TOO_LARGE", error: "The selected handover exceeds the 250 MB package limit. Narrow the visible filters." });

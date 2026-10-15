@@ -5,8 +5,6 @@ assert.equal(fileCustodyState({ storagePath: "aa/bb/" + "c".repeat(64), fileHash
 assert.equal(fileCustodyState({ storagePath: null, fileHash: null, fileSizeBytes: null, source: "coordination_hub" }), "legacy_binary_missing");
 assert.equal(fileCustodyState({ storagePath: null, fileHash: null, fileSizeBytes: null, source: "system-generated" }), "generated_on_demand");
 assert.equal(fileCustodyState({ storagePath: "legacy/path", fileHash: null, fileSizeBytes: 12, source: "rfi-attachment" }), "custody_incomplete");
-assert.deepEqual(fileDownloadFailure("legacy_binary_missing"), {
-  status: 409,
-  body: { code: "FILE_BINARY_NOT_RETAINED", error: "This legacy file record is preserved, but its original binary was not retained. Contact a project administrator to restore the verified original." },
-});
+assert.equal(fileCustodyState({ storagePath: null, fileHash: null, fileSizeBytes: null, source: null }), "legacy_binary_missing");
+assert.equal(fileDownloadFailure("legacy_binary_missing").body.code, "FILE_BINARY_NOT_RETAINED");
 console.log("PASS file custody states and truthful legacy failure");

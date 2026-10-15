@@ -2,7 +2,7 @@ export type FileCustodyInput = {
   storagePath: string | null;
   fileHash: string | null;
   fileSizeBytes: number | null;
-  source: string;
+  source: string | null;
 };
 
 export type FileCustodyState =
