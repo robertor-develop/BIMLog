@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "e74a09630a8c0d7756f0920e37655688b7b4c9915ec8bd6d57a8ce08615c6961",
-  "itemCount": 407,
+  "sourceSha256": "4356b08831b52bb30386c1fe7fb20e6f1e4282b32ac1d5bc71339b42844b9607",
+  "itemCount": 406,
   "counts": {
-    "ACTIVE": 362,
+    "ACTIVE": 361,
     "SUPERSEDED": 33,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7357,24 +7357,6 @@
       "evidence": [
         "OPEN_LOOP.md:5719",
         "Protected legacy binary custody — 2026-10-14"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "983e5dbad212bbff",
-      "sourceLine": 5750,
-      "heading": "MAIN 04 production-recovery acceptance — 2026-10-15",
-      "statement": "Pass the complete exact-head release gate after the persistent-token correction.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:5750",
-        "MAIN 04 production-recovery acceptance — 2026-10-15"
       ],
       "currentAuthority": false
     },
