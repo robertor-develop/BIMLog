@@ -24,6 +24,7 @@ import {
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { ProjectFileUploadError, inspectProjectFileUpload } from "../lib/project-file-upload-contract";
 import { buildProjectHandoverPackage, type HandoverFileRecord } from "../lib/project-handover-package";
+import { fileCustodyState } from "../lib/file-custody";
 
 async function pdfParse(buffer: Buffer) {
   const { PDFParse: PDFParseClass } = await import("pdf-parse");
@@ -52,7 +53,7 @@ function serializePublicFile<T extends FileRow, E extends Record<string, unknown
     fileMetadata: _fileMetadata,
     ...publicFile
   } = file;
-  return { ...publicFile, ...(extra || {}) };
+  return { ...publicFile, binaryAvailability: fileCustodyState(file), ...(extra || {}) };
 }
 
 const BIM_EXTENSIONS = new Set(["rvt", "nwd", "dwg", "ifc", "dxf", "nwf", "nwc", "rfa", "rte"]);
