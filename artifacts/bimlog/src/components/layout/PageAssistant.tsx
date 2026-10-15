@@ -18,7 +18,7 @@ export function PageAssistant() {
   const { token, user } = useAuthStore();
   const { lang, tt } = useI18n();
   const [open,setOpen]=useState(false),[question,setQuestion]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState(""),[repairLoadError,setRepairLoadError]=useState(""),[notice,setNotice]=useState(""),[proposal,setProposal]=useState<string|null>(null),[repairScope,setRepairScope]=useState("");
-  const [includeSelected,setIncludeSelected]=useState(false),[activeTool,setActiveTool]=useState<"ask"|"feedback"|"fix">("ask");
+  const [includeSelected,setIncludeSelected]=useState(false);
   const [messages,setMessages]=useState<Message[]>([]),[feedbackReceipt,setFeedbackReceipt]=useState<{stableId:string;status:string;notificationState:string}|null>(null);
   const [voiceListening,setVoiceListening]=useState(false),[voiceStatus,setVoiceStatus]=useState("");
   const [workspaceStatus,setWorkspaceStatus]=useState("");
@@ -85,13 +85,13 @@ export function PageAssistant() {
           <small>{tt("RECOMMENDED NEXT","SIGUIENTE RECOMENDADO")}</small>
           <strong>{tt("Continue with this page","Continuar con esta página")}</strong>
           <p>{tt("Ask the BIMLog Agent what needs attention without losing your place or changing project data.","Pregunta al Agente BIMLog qué necesita atención sin perder tu lugar ni cambiar datos del proyecto.")}</p>
-          <button type="button" onClick={()=>{setActiveTool("ask");input.current?.focus();}}>{tt("Ask about this workspace","Preguntar sobre este espacio")}</button>
+          <button type="button" onClick={()=>input.current?.focus()}>{tt("Ask about this workspace","Preguntar sobre este espacio")}</button>
         </section>
         <div className="page-assistant-section-label">{tt("ASK A QUESTION","HACER UNA PREGUNTA")}</div>
         <nav className="page-assistant-actions" aria-label={tt("Assistant actions","Acciones del asistente")}>
-          <button type="button" aria-pressed={activeTool==="ask"} onClick={()=>setActiveTool("ask")}>{tt("Ask a question","Hacer una pregunta")}</button>
-          <button type="button" aria-pressed={activeTool==="feedback"} onClick={()=>{setActiveTool("feedback");submitFeedback(false);}}>{tt("Submit feedback","Enviar comentarios")}</button>
-          <button type="button" aria-pressed={activeTool==="fix"} disabled={!canAuthorize} title={!canAuthorize?tt("Repair authorization is required.","Se requiere autorización de reparación."):undefined} onClick={()=>setActiveTool("fix")}>{tt("Request a fix","Solicitar corrección")}</button>
+          <button type="button" aria-pressed="true" onClick={()=>input.current?.focus()}>{tt("Ask a question","Hacer una pregunta")}</button>
+          <button type="button" className="page-assistant-coming-soon" aria-disabled="true" title={tt("Coming soon","Próximamente")} onClick={event=>event.preventDefault()}>{tt("Submit feedback","Enviar comentarios")}</button>
+          <button type="button" className="page-assistant-coming-soon" aria-disabled="true" title={tt("Coming soon","Próximamente")} onClick={event=>event.preventDefault()}>{tt("Request a fix","Solicitar corrección")}</button>
         </nav>
 
         <section className="page-assistant-question" aria-label={tt("Conversation","Conversación")}>
@@ -117,16 +117,11 @@ export function PageAssistant() {
         </details>
 
         <details className="page-assistant-section">
-          <summary>{tt("Submit feedback · My feedback","Enviar comentarios · Mis comentarios")}{feedbackReceipt&&<small>{feedbackReceipt.status}</small>}</summary>
-          <div className="page-assistant-section-body"><p>{tt("Report a bug or confusing workflow. BIMLog adds this page context and keeps evidence consent explicit.","Reporta un error o flujo confuso. BIMLog agrega el contexto de esta página y mantiene explícito el consentimiento de evidencia.")}</p><button type="button" onClick={()=>submitFeedback(false)}>{tt("Open feedback form","Abrir formulario de comentarios")}</button>{feedbackReceipt&&<div className="page-assistant-case-receipt" role="status"><strong>{feedbackReceipt.stableId}</strong><span>{tt("Case status","Estado del caso")}: {feedbackReceipt.status}</span><span>{tt("Operations alert","Alerta de Operations")}: {feedbackReceipt.notificationState}</span><button type="button" onClick={()=>submitFeedback(true)}>{tt("View status and history","Ver estado e historial")}</button></div>}</div>
-        </details>
-
-        <details className="page-assistant-section">
           <summary>{tt("Page guide and work status","Guía de página y estado del trabajo")}</summary>
           <div className="page-assistant-section-body page-assistant-guide-actions"><button type="button" onClick={()=>void ask(tt("Explain the focused section and its visible controls.","Explica la sección enfocada y sus controles visibles."))}>{tt("Explain this page","Explicar esta página")}</button><button type="button" onClick={()=>void ask(tt("What required setup is missing on this page? Do not invent requirements.","¿Qué configuración obligatoria falta en esta página? No inventes requisitos."))}>{tt("Check required setup","Revisar configuración obligatoria")}</button><small>{tt("Guidance and reporting are available to every user. Repair authorization is restricted.","La orientación y los reportes están disponibles para todos. La autorización de reparación es restringida.")}</small></div>
         </details>
 
-        {canAuthorize&&activeTool==="fix"&&<details className="page-assistant-section page-assistant-repairs" open>
+        {false&&canAuthorize&&<details className="page-assistant-section page-assistant-repairs" open>
           <summary>{tt("Fix with authorization","Corregir con autorización")}</summary>
           <div className="page-assistant-section-body">
             {repairLoadError&&<div role="alert" className="page-assistant-error">{repairLoadError}</div>}
