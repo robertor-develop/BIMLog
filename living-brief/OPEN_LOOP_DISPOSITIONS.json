@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "8206f7e6d4a99b41b330ce5f23da99599aa35c6f6752c010da39b126f0d92cec",
-  "itemCount": 408,
+  "sourceSha256": "e74a09630a8c0d7756f0920e37655688b7b4c9915ec8bd6d57a8ce08615c6961",
+  "itemCount": 407,
   "counts": {
-    "ACTIVE": 363,
+    "ACTIVE": 362,
     "SUPERSEDED": 33,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7361,28 +7361,10 @@
       "currentAuthority": false
     },
     {
-      "id": "c3c24db278e6e14b",
-      "sourceLine": 5749,
-      "heading": "MAIN 04 production-recovery acceptance — 2026-10-15",
-      "statement": "Install and start the task under Roberto's logged-in Windows identity.",
-      "classification": "ACTIVE",
-      "workClass": "PRODUCT_WORK",
-      "ownership": {
-        "owner": "Platform",
-        "route": "/dashboard",
-        "module": "artifacts/bimlog/src/App.tsx"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:5749",
-        "MAIN 04 production-recovery acceptance — 2026-10-15"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "2bf236e1f522eace",
+      "id": "983e5dbad212bbff",
       "sourceLine": 5750,
       "heading": "MAIN 04 production-recovery acceptance — 2026-10-15",
-      "statement": "Pass the complete exact-head release gate.",
+      "statement": "Pass the complete exact-head release gate after the persistent-token correction.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {

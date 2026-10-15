@@ -5746,7 +5746,7 @@ The currently connected Chrome session showed the public signed-out landing page
 - [x] Preserve `gpt-5.6-sol`, Light/low reasoning, read-only execution and the existing FIFO boundary.
 - [x] Add bounded active-writer retry, exact request correlation checks and protected readiness diagnostics.
 - [x] Provide an interactive-user scheduled-task installer so DPAPI-protected credentials remain usable after restart.
-- [ ] Install and start the task under Roberto's logged-in Windows identity.
-- [ ] Pass the complete exact-head release gate.
+- [x] Install and start the task under Roberto's logged-in Windows identity.
+- [ ] Pass the complete exact-head release gate after the persistent-token correction.
 - [ ] Push and publish the exact accepted source.
 - [ ] Return a real correlated MAIN 04.00 answer in authenticated desktop and mobile Chrome without Feedback, MAIN-00 or another MAIN.
