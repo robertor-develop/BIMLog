@@ -1,4 +1,4 @@
-import { pgTable, uuid, integer, text, jsonb, timestamp, index, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, uuid, integer, text, jsonb, timestamp, index, uniqueIndex, check } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { companiesTable, usersTable } from "./users";
 import { projectsTable } from "./projects";
@@ -21,6 +21,8 @@ export const pageAgentTurnsTable = pgTable("page_agent_turns", {
 }, table => [
   index("page_agent_turns_actor_history_idx").on(table.companyId, table.userId, table.conversationId, table.createdAt, table.requestId),
   uniqueIndex("page_agent_turns_actor_active_idx").on(table.companyId, table.userId, table.conversationId).where(sql`${table.state} IN ('reserved','running')`),
+  check("page_agent_turns_state_chk", sql`${table.state} IN ('reserved','running','complete','failed')`),
+  check("page_agent_turns_question_chk", sql`length(${table.question}) BETWEEN 1 AND 2000`),
 ]);
 
 export type PageAgentTurn = typeof pageAgentTurnsTable.$inferSelect;
