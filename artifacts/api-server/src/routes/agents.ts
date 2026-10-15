@@ -8,37 +8,38 @@ import { runClashAgent } from "../agents/clash-agent";
 import { runRfiAgent } from "../agents/rfi-agent";
 import { sendAiUsageError } from "../lib/ai-usage";
 import { BIMLOG_ASSISTANT_MAX_QUESTION, cleanAssistantList, cleanAssistantText } from "../lib/page-assistant-agent-contract";
-import { askBimlogMain04 } from "../lib/main04-agent-transport";
+import { getPageAgentTurn, listPageAgentTurns, refreshPageAgentTurn, reservePageAgentTurn, startPageAgentTurn } from "../lib/page-agent-conversation-store";
 
 const router: Router = Router();
 
 type AssistantContext = { route?: unknown; page?: unknown; section?: unknown; language?: unknown; focusedControl?: unknown; controls?: unknown; pageText?: unknown };
 
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+function pageAgentContext(req:any) {
+  const context = (req.body?.context || {}) as AssistantContext;
+  return { route: cleanAssistantText(context.route, 300), page: cleanAssistantText(context.page, 160), section: cleanAssistantText(context.section, 160), language: context.language === "es" ? "es" as const : "en" as const, focusedControl: cleanAssistantText(context.focusedControl, 120), controls: cleanAssistantList(context.controls, 80, 240), pageText: cleanAssistantList(context.pageText, 120, 240), history: [] };
+}
 async function answerPageQuestion(req: any, res: any, projectId: number | null) {
   try {
     const question = cleanAssistantText(req.body?.question, BIMLOG_ASSISTANT_MAX_QUESTION);
     if (!question) return res.status(400).json({ error: "A question is required." });
-    const context = (req.body?.context || {}) as AssistantContext;
-    const controls = cleanAssistantList(context.controls, 80, 240);
-    const pageText = cleanAssistantList(context.pageText, 120, 240);
-    const history = Array.isArray(req.body?.history) ? req.body.history.slice(-8).map((item: any) => ({
-      role: item?.role === "assistant" ? "assistant" : "user",
-      content: cleanAssistantText(item?.text, 2000),
-    })).filter((item: any) => item.content) : [];
-    const result = await askBimlogMain04({
-      question, userId: req.user.userId, projectId,
-      context: { route: cleanAssistantText(context.route, 300), page: cleanAssistantText(context.page, 160), section: cleanAssistantText(context.section, 160), language: context.language === "es" ? "es" : "en", focusedControl: cleanAssistantText(context.focusedControl, 120), controls, pageText, history },
-    });
-    res.json({ answer: result.answer, highlightLabels: [], proposal: null, transport: "main04", contextual: true, agent: { threadId: result.threadId, requestId: result.requestId, answerDigest: result.answerDigest } });
+    const requestId=String(req.body?.requestId||"");const conversationId=String(req.body?.conversationId||"");
+    if(!UUID.test(requestId)||!UUID.test(conversationId))return res.status(400).json({error:"Valid requestId and conversationId are required."});
+    const input={requestId,conversationId,question,userId:req.user.userId,companyId:req.user.companyId,projectId,context:pageAgentContext(req)};
+    const turn=await reservePageAgentTurn(input);startPageAgentTurn(input);
+    res.status(turn.state==="complete"?200:202).set("Cache-Control","private, no-store, max-age=0").json({turn,transport:"main04",contextual:true});
   } catch (err) {
     if (sendAiUsageError(res, err)) return;
     console.error(JSON.stringify({ event: "main04_assistant_error", code: err instanceof Error ? err.message : "UNKNOWN" }));
-    res.status(502).json({ error: "BIMLog's hosted assistant is temporarily unavailable.", code: "ASSISTANT_PROVIDER_UNAVAILABLE" });
+    const code=err instanceof Error?err.message:"ASSISTANT_PROVIDER_UNAVAILABLE";
+    res.status(code==="PAGE_AGENT_CONVERSATION_BUSY"?409:502).json({ error: code==="PAGE_AGENT_CONVERSATION_BUSY"?"This conversation already has a question in progress.":"BIMLog's hosted assistant is temporarily unavailable.", code });
   }
 }
 
 router.post("/assistant/ask", authMiddleware, (req, res) => answerPageQuestion(req, res, null));
 router.post("/projects/:projectId/assistant/ask", authMiddleware, requireProjectMember(), (req, res) => answerPageQuestion(req, res, Number(req.params.projectId)));
+router.get("/assistant/conversations/:conversationId",authMiddleware,async(req,res):Promise<void>=>{const id=String(req.params.conversationId||"");if(!UUID.test(id)){res.status(400).json({error:"Invalid conversationId."});return;}res.set("Cache-Control","private, no-store, max-age=0").json({turns:await listPageAgentTurns(id,req.user!.companyId,req.user!.userId)});});
+router.get("/assistant/requests/:requestId",authMiddleware,async(req,res):Promise<void>=>{const id=String(req.params.requestId||"");if(!UUID.test(id)){res.status(400).json({error:"Invalid requestId."});return;}const turn=await refreshPageAgentTurn(id,req.user!.companyId,req.user!.userId);if(!turn){res.status(404).json({error:"Question not found."});return;}res.set("Cache-Control","private, no-store, max-age=0").json({turn});});
 
 // GET insights for a project
 router.get("/projects/:projectId/insights", authMiddleware, requireProjectMember(), async (req, res) => {
