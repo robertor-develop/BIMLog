@@ -5759,6 +5759,7 @@ The currently connected Chrome session showed the public signed-out landing page
 - [x] Verify the complete positive/negative matrix for Project Administrator, Company Lead, Drafter, Project Manager, and Read Only personas across the ten required action families.
 - [x] Verify saved Intake stages, explicit human activation, exact receipt/fingerprint continuity, refresh-safe acceptance, and Operations handoff without contradictory state.
 - [x] Pass the aggregate Block 3 gate, strict API typecheck, and real disposable-PostgreSQL Intake activation integration.
+- [x] Refresh the governed AI entry-point inventory and repair disposable proof-fixture custody/schema without touching production data.
 - [ ] Push B-GA011–B-GA015 once. Keep the block unpublished until B-GA016–B-GA020 completes the ten-build interval.
 
 This block adds deterministic acceptance contracts around existing general product authorities; it creates no customer-specific runtime path, production data mutation, payment, invoice, email, external delivery, project deletion, Native change, or MAIN change. The temporary production Gauntlet project remains unchanged. The thirteen protected legacy binaries remain an independent recovery and final-GA blocker.

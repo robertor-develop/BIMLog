@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "c39354a0496f66422aafbf664e1d86c65df62ca22d392dcac4968e039c0ba511",
+  "sourceSha256": "4791ce59ba3402c32abea1bb12421e5f555dfe1818a4e2d695a38b1771edf648",
   "itemCount": 405,
   "counts": {
     "ACTIVE": 361,
@@ -7362,7 +7362,7 @@
     },
     {
       "id": "660f6ed637e3b201",
-      "sourceLine": 5762,
+      "sourceLine": 5763,
       "heading": "Recovery and GA-readiness Block 3 — B-GA011–B-GA015 — 2026-10-15",
       "statement": "Push B-GA011–B-GA015 once. Keep the block unpublished until B-GA016–B-GA020 completes the ten-build interval.",
       "classification": "ACTIVE",
@@ -7373,7 +7373,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5762",
+        "OPEN_LOOP.md:5763",
         "Recovery and GA-readiness Block 3 — B-GA011–B-GA015 — 2026-10-15"
       ],
       "currentAuthority": false
