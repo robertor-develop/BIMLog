@@ -24,7 +24,7 @@ import {
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { ProjectFileUploadError, inspectProjectFileUpload } from "../lib/project-file-upload-contract";
 import { buildProjectHandoverPackage, type HandoverFileRecord } from "../lib/project-handover-package";
-import { fileCustodyState } from "../lib/file-custody";
+import { fileCustodyState, fileDownloadFailure } from "../lib/file-custody";
 
 async function pdfParse(buffer: Buffer) {
   const { PDFParse: PDFParseClass } = await import("pdf-parse");
@@ -885,7 +885,8 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
 
     // Only system-generated response docs can be downloaded — generate on the fly
     if (file.source !== "system-generated" || !file.linkedRfiId) {
-      res.status(501).json({ error: "Binary download not available — only system-generated documents can be downloaded directly." });
+      const failure = fileDownloadFailure(fileCustodyState(file));
+      res.status(failure.status).json(failure.body);
       return;
     }
 
