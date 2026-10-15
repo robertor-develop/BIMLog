@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 780,
-    "frontendApiReferences": 309,
+    "apiRoutes": 782,
+    "frontendApiReferences": 311,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -955,6 +955,22 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/assistant/ask",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/conversations/:conversationId",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/assistant/requests/:requestId",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
         "agentInsightsTable"
@@ -10111,6 +10127,14 @@
     {
       "screen": "artifacts/bimlog/src/components/layout/Navbar.tsx",
       "apiPath": "${BASE}/api/v1/users/me/company-profile"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+      "apiPath": "/api/v1/assistant/conversations/${encodeURIComponent(id)}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",
+      "apiPath": "/api/v1/assistant/requests/${encodeURIComponent(requestId)}"
     },
     {
       "screen": "artifacts/bimlog/src/components/layout/PageAssistant.tsx",

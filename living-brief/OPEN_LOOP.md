@@ -5763,3 +5763,15 @@ The currently connected Chrome session showed the public signed-out landing page
 - [ ] Push B-GA011–B-GA015 once. Keep the block unpublished until B-GA016–B-GA020 completes the ten-build interval.
 
 This block adds deterministic acceptance contracts around existing general product authorities; it creates no customer-specific runtime path, production data mutation, payment, invoice, email, external delivery, project deletion, Native change, or MAIN change. The temporary production Gauntlet project remains unchanged. The thirteen protected legacy binaries remain an independent recovery and final-GA blocker.
+
+## BIMLog Agent durable conversation repair — 2026-10-15
+
+- [x] Reserve the exact question before bridge dispatch with tenant, user, conversation and request correlation.
+- [x] Keep MAIN 04A identity private and server-owned while preserving the existing protected bridge.
+- [x] Persist paired question/answer history and reload it after browser navigation or refresh.
+- [x] Enforce one active writer per authenticated user conversation and keep different users isolated.
+- [x] Match Vega's compact Ask-first panel flow using the BIMLog palette, resizable dock and page reflow.
+- [x] Keep Feedback and Request a fix inert with a Coming soon explanation.
+- [ ] Push and publish the exact accepted source, then prove a real correlated answer in authenticated production Chrome for a BIMTech user.
+
+No production answer or publication claim is accepted until the final live Chrome gate passes.

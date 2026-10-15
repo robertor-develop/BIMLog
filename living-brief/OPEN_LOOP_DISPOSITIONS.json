@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4791ce59ba3402c32abea1bb12421e5f555dfe1818a4e2d695a38b1771edf648",
-  "itemCount": 405,
+  "sourceSha256": "adea8156dbfe74b15219c7f68d2073ad180626a331ffe8f977f921382ff1fbe3",
+  "itemCount": 406,
   "counts": {
-    "ACTIVE": 361,
+    "ACTIVE": 362,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7375,6 +7375,24 @@
       "evidence": [
         "OPEN_LOOP.md:5763",
         "Recovery and GA-readiness Block 3 — B-GA011–B-GA015 — 2026-10-15"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1b57a2cf5397aded",
+      "sourceLine": 5775,
+      "heading": "BIMLog Agent durable conversation repair — 2026-10-15",
+      "statement": "Push and publish the exact accepted source, then prove a real correlated answer in authenticated production Chrome for a BIMTech user.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5775",
+        "BIMLog Agent durable conversation repair — 2026-10-15"
       ],
       "currentAuthority": false
     }
