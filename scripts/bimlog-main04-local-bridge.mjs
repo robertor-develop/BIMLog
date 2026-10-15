@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { createHash, timingSafeEqual } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -13,6 +13,12 @@ const CODEX = process.env.BIMLOG_CODEX_EXECUTABLE || "C:\\Users\\soporte\\AppDat
 const ROLLOUT = process.env.BIMLOG_MAIN04_ROLLOUT_PATH || "C:\\Users\\soporte\\.codex\\sessions\\2026\\10\\05\\rollout-2026-10-05T01-42-21-01a10a95-a2e5-73d3-a471-6738addc7e42.jsonl";
 let queue = Promise.resolve();
 const jobs = new Map();
+
+function runtimeReadiness() {
+  const codexReady = existsSync(CODEX) && statSync(CODEX).isFile();
+  const rolloutReady = existsSync(ROLLOUT) && statSync(ROLLOUT).isFile();
+  return { ready: Boolean(TOKEN && codexReady && rolloutReady), codexReady, rolloutReady, threadId: THREAD_ID, model: THREAD_MODEL };
+}
 
 function authorized(value) {
   if (!TOKEN || !value?.startsWith("Bearer ")) return false;
@@ -122,7 +128,11 @@ if (process.argv[1] && import.meta.url === new URL(`file:///${process.argv[1].re
   createServer(async (request, response) => {
     response.setHeader("content-type", "application/json; charset=utf-8");
     response.setHeader("cache-control", "no-store");
-    if (request.method === "GET" && request.url === "/healthz") return response.end(JSON.stringify({ ok: true, threadId: THREAD_ID }));
+    if (request.method === "GET" && (request.url === "/healthz" || request.url === "/readyz")) {
+      const readiness = runtimeReadiness();
+      response.statusCode = readiness.ready ? 200 : 503;
+      return response.end(JSON.stringify(readiness));
+    }
     if (!authorized(request.headers.authorization)) {
       response.statusCode = 404;
       return response.end(JSON.stringify({ error: "NOT_FOUND" }));
