@@ -832,6 +832,24 @@ router.get("/projects/:projectId/files/handover.zip", authMiddleware, requirePro
   }
 });
 
+router.get("/projects/:projectId/files/custody-summary", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0) return res.status(400).json({ code: "CUSTODY_PROJECT_INVALID", error: "Invalid project id" });
+    const rows = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+    const counts = { portable: 0, generated_on_demand: 0, legacy_binary_missing: 0, custody_incomplete: 0 };
+    const files = rows.map(file => {
+      const state = fileCustodyState(file);
+      counts[state] += 1;
+      return { id: file.id, fileName: file.fileName, fileSize: file.fileSizeBytes ?? file.fileSize, source: file.source, binaryAvailability: state };
+    });
+    return res.json({ projectId, total: files.length, counts, files });
+  } catch (error) {
+    console.error("[file-custody-summary] failed", error instanceof Error ? error.message : "unknown error");
+    return res.status(500).json({ code: "CUSTODY_SUMMARY_FAILED", error: "File custody status could not be verified." });
+  }
+});
+
 // Helper: extract base name (without extension, lower-cased for comparison)
 function getBaseName(fileName: string): string {
   return (fileName.includes(".") ? fileName.substring(0, fileName.lastIndexOf(".")) : fileName).toLowerCase();
