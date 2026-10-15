@@ -930,6 +930,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ga-protected-object-evidence.ts
 - artifacts/api-server/src/lib/ga-protected-project-recovery.ts
 - artifacts/api-server/src/lib/ga-protected-projects.ts
+- artifacts/api-server/src/lib/gauntlet-catalog-acceptance.behavior.ts
+- artifacts/api-server/src/lib/gauntlet-catalog-acceptance.ts
+- artifacts/api-server/src/lib/gauntlet-directory-acceptance.behavior.ts
+- artifacts/api-server/src/lib/gauntlet-directory-acceptance.ts
+- artifacts/api-server/src/lib/gauntlet-intake-acceptance.behavior.ts
+- artifacts/api-server/src/lib/gauntlet-intake-acceptance.ts
+- artifacts/api-server/src/lib/gauntlet-project-configuration.behavior.ts
+- artifacts/api-server/src/lib/gauntlet-project-configuration.ts
+- artifacts/api-server/src/lib/gauntlet-role-matrix.behavior.ts
+- artifacts/api-server/src/lib/gauntlet-role-matrix.ts
 - artifacts/api-server/src/lib/generic-apu-budget-control.ts
 - artifacts/api-server/src/lib/generic-apu-contract.ts
 - artifacts/api-server/src/lib/generic-apu-engine-edge.behavior.ts

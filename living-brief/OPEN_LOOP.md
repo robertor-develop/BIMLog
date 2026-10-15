@@ -5750,3 +5750,15 @@ The currently connected Chrome session showed the public signed-out landing page
 - [x] Pass the complete exact-head release gate after the persistent-token correction.
 - [x] Push and publish exact release source `091c6d117ec9f3ae7612ccb1311ce6c404e6d01a` as successful deployment `a34f876f-539a-49d6-bc40-d6281bb9d28b` at `https://bimlog.app`.
 - [x] Return real correlated MAIN 04.00 answers in authenticated desktop and exact 390×844 mobile Chrome without Feedback, MAIN-00 or another MAIN. Desktop returned `5 proyectos visibles. Confirmo que veo PRO-521-TEST, ELA01 e IBQ-LIT.` Mobile returned the exact requested text `BIMLOG MOBILE MAIN04 OK`.
+
+## Recovery and GA-readiness Block 3 — B-GA011–B-GA015 — 2026-10-15
+
+- [x] Bind complete persisted synthetic-project configuration to an exact deterministic fingerprint while forbidding billing and external notification effects.
+- [x] Require all thirteen company-scoped catalog families and their downstream consumers without cross-company values or duplicate identities.
+- [x] Verify two-company project directory scope, contacts, active/inactive lifecycle, export authority, and denied reads.
+- [x] Verify the complete positive/negative matrix for Project Administrator, Company Lead, Drafter, Project Manager, and Read Only personas across the ten required action families.
+- [x] Verify saved Intake stages, explicit human activation, exact receipt/fingerprint continuity, refresh-safe acceptance, and Operations handoff without contradictory state.
+- [x] Pass the aggregate Block 3 gate, strict API typecheck, and real disposable-PostgreSQL Intake activation integration.
+- [ ] Push B-GA011–B-GA015 once. Keep the block unpublished until B-GA016–B-GA020 completes the ten-build interval.
+
+This block adds deterministic acceptance contracts around existing general product authorities; it creates no customer-specific runtime path, production data mutation, payment, invoice, email, external delivery, project deletion, Native change, or MAIN change. The temporary production Gauntlet project remains unchanged. The thirteen protected legacy binaries remain an independent recovery and final-GA blocker.
