@@ -5718,4 +5718,24 @@ No cleanup, retirement, restoration, purge, project creation, production data mu
 - [ ] Produce a checksum-bound dry run proving that only the missing protected objects will be written and that active project records, dependencies and unwanted samples remain untouched.
 - [ ] Perform the controlled restoration, verify every protected object independently, then rerun the protected recovery gate before considering cleanup or publication.
 
-The exact original bytes are an external recovery input and cannot be reconstructed from database metadata. The sample-project purge remains blocked until this custody issue passes; no production data mutation, cleanup, deployment or publication is part of this repair block.
+The exact original bytes are an external recovery input and cannot be reconstructed from database metadata. Roberto clarified that only dependent recovery acceptance and final GA are blocked by these bytes. Independent implementation, automated verification and eligible publication continue. Sample purge is deferred wherever exact deletion scope or shared-storage ownership is uncertain. Backup exhaustion has not been established.
+
+## Resumed 35-build program reconciliation — 2026-10-14
+
+- B-GA001–004: prior source implementations exist; production inventory and live acceptance must be reverified, not inferred from commits.
+- B-GA005: BLOCKED recovery acceptance for the thirteen unverified original binaries and incomplete provider/object evidence. Authorized source investigation remains available.
+- B-GA006: read-only exact-code allowlist reconciler implemented with synthetic negative tests; authoritative production ID matching remains pending. No IDs inferred.
+- B-GA007: read-only dependency evidence assessor implemented using the existing schema dependency map; synthetic tests pass. Actual per-project exports, independent checksums, shared-object ownership and external audit evidence remain pending.
+- B-GA008: dry-run preview and adapter-based transaction protocol implemented. Synthetic tests pass for stale identity, exact confirmations, incomplete evidence, duplicate storage, detached reports, rollback on row/audit/outbox failures, protected invariance, and idempotent storage retry. The production database/storage adapter and authoritative inventory remain pending; no HTTP route or executable production purge command is exposed.
+- B-GA009–010: production purge and resulting four-project roster acceptance deferred pending exact scope, recovery manifests and shared-storage ownership. Missing protected bytes alone are not the reason for this deferral.
+- B-GA011–015: temporary project, catalogs, directory, roles and Intake work remain eligible for code/fixture verification; live acceptance requires authenticated access.
+- B-GA016–017: checkpoint field count and current filename example now consume the same active convention helper as Name Generator. Removed the fabricated sample that used the first company as both Project Code and Originator. Focused synthetic tests, existing hook-order test, frontend typecheck and frontend production build pass. Browser acceptance remains pending.
+- B-GA018: latest accepted-version selection no longer falls back to older nonempty catalogs. Checkpoint requests clear stale results, ignore cancelled responses, distinguish loading/empty/error and provide retry. Selection and hook-order tests pass; full version lifecycle and live acceptance remain pending.
+- B-GA019–020: templates/EDT and synthetic file lifecycle remain eligible. Existing implementations must be reviewed before making changes; no completion is asserted here.
+- B-GA021–025: RFI, Submittal, transmittal, change/meeting and schedule lifecycle remain eligible; live acceptance is pending.
+- B-GA026–030: APU, forecasts, reports, analytics and approved integration verification remain eligible. Native affected-model acceptance is separate and unproven.
+- B-GA031–033: security, accessibility and failure/recovery testing remain eligible using synthetic fixtures and available runtimes.
+- B-GA034: temporary-project deletion depends on completed lifecycle evidence and verified synthetic-only ownership.
+- B-GA035: final GA remains blocked by incomplete program acceptance including protected-file recovery.
+
+The currently connected Chrome session showed the public signed-out landing page. This blocks authenticated live testing only. The new reconciliation tools perform no production reads or writes and their fixtures are explicitly synthetic. Work on B-GA006/007/008/016/017 does not yet constitute five accepted builds; no new push/publication or GA claim is recorded. Changes are preserved in the working tree pending remaining implementation and release verification.
