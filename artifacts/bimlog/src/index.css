@@ -1498,7 +1498,7 @@ body.bimlog-assistant-docked[data-assistant-collapsed="true"][data-assistant-doc
 
 /* Vega/AutoMarketing panel contract, with BIMLog identity and palette only. */
 :root{--bimlog-agent-dock-width:352px}
-.page-assistant-panel{min-width:320px;max-width:min(680px,80vw);font:14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;background:var(--bimlog-agent-cream)}
+.page-assistant-panel{min-width:320px;max-width:min(680px,80vw);font:14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;background:var(--bimlog-agent-cream);overflow-x:hidden;overflow-y:auto}
 .page-assistant-panel>header{min-height:104px;padding:20px;background:var(--bimlog-agent-blue-dark)}
 .page-assistant-section-label{padding:18px 20px 9px}
 .page-assistant-actions{padding:0 20px 12px;gap:5px}
@@ -1513,7 +1513,7 @@ body.bimlog-assistant-docked[data-assistant-collapsed="true"][data-assistant-doc
 .page-assistant-turn-question{font-weight:650;padding-bottom:10px!important}.page-assistant-turn-answer{border-top:1px solid var(--bimlog-agent-line);padding-top:10px!important}
 .page-assistant-history{margin:0}.page-assistant-history>summary,.page-assistant-conversation-tools>summary{min-height:44px;padding:12px 4px;font-weight:650;cursor:pointer}.page-assistant-history .page-assistant-turn{margin-top:8px!important}
 .page-assistant-conversation-tools{margin:0 20px 8px;border:0;background:transparent}.page-assistant-conversation-tools>summary{padding-left:0}.page-assistant-conversation-tools .page-assistant-section-body{padding:0;grid-template-columns:1fr}
-.page-assistant-recommended{order:5;padding:18px 20px;display:block}.page-assistant-recommended p{margin:1em 0}.page-assistant-recommended button{max-width:none;min-height:42px}
+.page-assistant-recommended{order:5;padding:18px 20px;display:block}.page-assistant-recommended small,.page-assistant-recommended strong{display:block}.page-assistant-recommended strong{margin-top:4px}.page-assistant-recommended p{margin:10px 0 14px}.page-assistant-recommended button{max-width:none;min-height:42px}
 .page-assistant-status-strip{order:6;padding:16px 20px!important}
 @media(min-width:1180px){body.bimlog-assistant-docked[data-assistant-dock-side="right"] #root{margin-right:calc(var(--bimlog-agent-dock-width) + 24px)}body.bimlog-assistant-docked[data-assistant-dock-side="left"] #root{margin-left:calc(var(--bimlog-agent-dock-width) + 24px)}}
 @media(max-width:1179px){body.bimlog-assistant-docked #root{margin:0!important}.page-assistant-panel{width:min(390px,94vw)!important;max-width:94vw}}
