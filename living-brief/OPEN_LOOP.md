@@ -5748,5 +5748,5 @@ The currently connected Chrome session showed the public signed-out landing page
 - [x] Provide an interactive-user scheduled-task installer so DPAPI-protected credentials remain usable after restart.
 - [x] Install and start the task under Roberto's logged-in Windows identity.
 - [x] Pass the complete exact-head release gate after the persistent-token correction.
-- [ ] Push and publish the exact accepted source.
-- [ ] Return a real correlated MAIN 04.00 answer in authenticated desktop and mobile Chrome without Feedback, MAIN-00 or another MAIN.
+- [x] Push and publish exact release source `091c6d117ec9f3ae7612ccb1311ce6c404e6d01a` as successful deployment `a34f876f-539a-49d6-bc40-d6281bb9d28b` at `https://bimlog.app`.
+- [x] Return real correlated MAIN 04.00 answers in authenticated desktop and exact 390×844 mobile Chrome without Feedback, MAIN-00 or another MAIN. Desktop returned `5 proyectos visibles. Confirmo que veo PRO-521-TEST, ELA01 e IBQ-LIT.` Mobile returned the exact requested text `BIMLOG MOBILE MAIN04 OK`.
