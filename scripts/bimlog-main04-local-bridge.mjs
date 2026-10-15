@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 export const THREAD_ID = "01a10a95-a2e5-73d3-a471-6738addc7e42";
+export const THREAD_MODEL = "gpt-5.6-sol";
 const PORT = Number(process.env.BIMLOG_MAIN04_LOCAL_PORT || 8791);
 const TOKEN = process.env.BIMLOG_MAIN04_BRIDGE_TOKEN || "";
 const CODEX = process.env.BIMLOG_CODEX_EXECUTABLE || "C:\\Users\\soporte\\AppData\\Local\\OpenAI\\Codex\\bin\\f544b3844e0f14e9\\codex.exe";
@@ -39,7 +40,7 @@ function resumeQuestion(message) {
   const folder = mkdtempSync(join(tmpdir(), "bimlog-main04-"));
   const output = join(folder, "answer.txt");
   return new Promise((resolve, reject) => {
-    const child = spawn(CODEX, ["exec", "--skip-git-repo-check", "resume", "-c", 'sandbox_mode="read-only"', "--output-last-message", output, THREAD_ID, "-"], {
+    const child = spawn(CODEX, ["exec", "--skip-git-repo-check", "resume", "--all", "-m", THREAD_MODEL, "-c", 'model_reasoning_effort="low"', "-c", 'sandbox_mode="read-only"', "--output-last-message", output, THREAD_ID, "-"], {
       cwd: "F:\\BIMLog",
       windowsHide: true,
       stdio: ["pipe", "ignore", "pipe"],
@@ -50,7 +51,11 @@ function resumeQuestion(message) {
     child.on("error", () => reject(new Error("CODEX_RESUME_FAILED")));
     child.on("exit", code => {
       try {
-        if (code !== 0) return reject(new Error(/active writer|already has an active/i.test(error) ? "CODEX_DESTINATION_BUSY" : "CODEX_RESUME_FAILED"));
+        if (code !== 0) {
+          if (/active writer|already has an active/i.test(error)) return reject(new Error("CODEX_DESTINATION_BUSY"));
+          if (/no rollout found/i.test(error)) return reject(new Error("CODEX_THREAD_BINDING_MISSING"));
+          return reject(new Error("CODEX_RESUME_FAILED"));
+        }
         const answer = readFileSync(output, "utf8").trim();
         if (!answer) return reject(new Error("MAIN04_ANSWER_MISSING"));
         resolve(answer);
