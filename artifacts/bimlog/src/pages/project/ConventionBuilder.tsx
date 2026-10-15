@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { activeConventionFields, suggestedConventionName } from "@/lib/convention-consumer";
 import {
   ChevronRight, ChevronLeft, Check, Plus, Trash2,
   Edit2, GripVertical, Search, ChevronDown, ChevronUp,
@@ -3691,6 +3692,8 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
   onGoToGenerator?: () => void;
 }) {
   const [latestVersion, setLatestVersion] = useState<ConventionVersionSnapshot | null>(null);
+  const { data: currentConvention, isLoading: currentConventionLoading, isError: currentConventionError } = useGetConvention(projectId);
+  const currentFields = activeConventionFields(currentConvention);
 
   useEffect(() => {
     fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions`, {
@@ -3708,22 +3711,8 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
 
   const sep = ws.separator || "-";
 
-  function buildSampleName(version: ConventionVersionSnapshot): string {
-    const fieldMap: Record<string, string> = {
-      "Project Code": ws.companies[0]?.code || "PROJ",
-      "Originator":   ws.companies[0]?.code || "ORG",
-      "Discipline":   version.acceptedDisciplines[0]?.code || "DIS",
-      "Level":        ws.levelList?.[0]?.code || "L01",
-      "Type":         version.acceptedDocTypes[0]?.code || "TYPE",
-      "Sequence":     "0001",
-      "Status":       ws.statusCodes?.find(s => s.selected)?.code || "S0",
-      "Revision":     ws.revisionFormat === "numerical" ? "01" : "P01",
-    };
-    const order = version.acceptedFieldOrder.length > 0
-      ? version.acceptedFieldOrder
-      : Object.keys(fieldMap);
-    return order.map(f => fieldMap[f] || f.slice(0, 4).toUpperCase()).join(sep);
-  }
+  const currentSampleName = currentConventionError || currentConventionLoading
+    ? null : suggestedConventionName(currentConvention);
 
   const snap = latestVersion;
 
@@ -3763,8 +3752,8 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
               <code style={{ fontFamily: "var(--font-mono)", background: "#DCFCE7", padding: "1px 6px", borderRadius: 3, fontWeight: 700 }}>{sep}</code>
             </div>
             <div>
-              <span style={{ fontWeight: 700, color: "#15803D" }}>{w("Fields", "Campos", lang)}:</span>{" "}
-              <strong>{snap.acceptedFieldOrder.length}</strong>
+              <span style={{ fontWeight: 700, color: "#15803D" }}>{w("Current active fields", "Campos activos actuales", lang)}:</span>{" "}
+              <strong>{currentConventionLoading ? w("Loading…", "Cargando…", lang) : currentConventionError ? w("Unavailable", "No disponible", lang) : currentFields.length}</strong>
             </div>
             <div>
               <span style={{ fontWeight: 700, color: "#15803D" }}>{w("Disciplines", "Disciplinas", lang)}:</span>{" "}
@@ -3867,10 +3856,10 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
             {/* Sample naming string */}
             <div>
               <div style={{ fontWeight: 600, color: "#6B7280", marginBottom: 5, textTransform: "uppercase", fontSize: 10, letterSpacing: "0.06em" }}>
-                {w("Sample Convention String", "Ejemplo de nombre de archivo", lang)}
+                {w("Current active convention example", "Ejemplo de la convención activa actual", lang)}
               </div>
               <code style={{ display: "block", padding: "8px 12px", background: "#F3F4F6", borderRadius: 6, fontFamily: "monospace", fontSize: 13, color: "#111827", letterSpacing: "0.03em" }}>
-                {buildSampleName(snap)}
+                {currentSampleName ?? w("Current convention example unavailable", "Ejemplo de convención actual no disponible", lang)}
               </code>
               {snap.acceptedFieldOrder.length > 0 && (
                 <div style={{ color: "#9CA3AF", marginTop: 5, fontSize: 11 }}>
