@@ -827,6 +827,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/field-quality-dashboard.ts
 - artifacts/api-server/src/lib/field-reinspection.behavior.ts
 - artifacts/api-server/src/lib/field-reinspection.ts
+- artifacts/api-server/src/lib/file-custody.ts
 - artifacts/api-server/src/lib/financial-apu-allocation.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-contract.ts

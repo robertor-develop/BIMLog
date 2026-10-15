@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 779,
+    "apiRoutes": 780,
     "frontendApiReferences": 309,
     "routeOwnedTables": 72
   },
@@ -4277,6 +4277,23 @@
     {
       "method": "GET",
       "path": "/projects/:projectId/files/handover.zip",
+      "owner": "artifacts/api-server/src/routes/files.ts",
+      "tables": [
+        "filesTable",
+        "namingConventionsTable",
+        "namingFieldsTable",
+        "namingConventionVersionsTable",
+        "activityLogTable",
+        "usersTable",
+        "companiesTable",
+        "rfisTable",
+        "projectsTable",
+        "projectMembersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/files/custody-summary",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
         "filesTable",

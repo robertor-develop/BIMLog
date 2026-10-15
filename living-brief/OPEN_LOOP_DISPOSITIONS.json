@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "64a89b148a62e7d4e935866a8d9e1eb8248e594d2d6b2b158641a5d5a4d5ded6",
-  "itemCount": 401,
+  "sourceSha256": "06ddce0ec9d674cfce1bd842bd89d71f1e4254e4b20f369144d387e237345a23",
+  "itemCount": 404,
   "counts": {
-    "ACTIVE": 357,
+    "ACTIVE": 360,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7303,6 +7303,60 @@
       "evidence": [
         "OPEN_LOOP.md:5706",
         "Recovery and GA-readiness Block 1 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2464837c40f780cd",
+      "sourceLine": 5717,
+      "heading": "Protected legacy binary custody — 2026-10-14",
+      "statement": "Recover the original bytes for `BIM-BCPCM-AL-ZZ-NL-0001-S0-P01.docx`, `ISBT-BCPCM-MR-ZZ-BI-0005-S0-S2.pdf`, and the eleven registered ELA01 Lens images from an authoritative backup or original Navisworks source.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5717",
+        "Protected legacy binary custody — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3d138c4a4cae1adc",
+      "sourceLine": 5718,
+      "heading": "Protected legacy binary custody — 2026-10-14",
+      "statement": "Produce a checksum-bound dry run proving that only the missing protected objects will be written and that active project records, dependencies and unwanted samples remain untouched.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5718",
+        "Protected legacy binary custody — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "50e0056a4e7460a4",
+      "sourceLine": 5719,
+      "heading": "Protected legacy binary custody — 2026-10-14",
+      "statement": "Perform the controlled restoration, verify every protected object independently, then rerun the protected recovery gate before considering cleanup or publication.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5719",
+        "Protected legacy binary custody — 2026-10-14"
       ],
       "currentAuthority": false
     }

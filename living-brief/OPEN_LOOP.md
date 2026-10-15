@@ -5706,3 +5706,16 @@ This block changes the existing company-catalog presentation and validation only
 - [ ] Pass the complete exact-head gate and push Block 1. Do not publish unless the protected visibility or safety repair is approved for production.
 
 No cleanup, retirement, restoration, purge, project creation, production data mutation, deployment or publication is authorized by this block.
+
+## Protected legacy binary custody — 2026-10-14
+
+- [x] Classify portable, generated-on-demand, missing-legacy and incomplete-custody file records from the existing storage contract.
+- [x] Expose truthful binary availability in authenticated file responses without exposing storage paths or hashes.
+- [x] Return exact `FILE_BINARY_NOT_RETAINED` and `FILE_CUSTODY_INCOMPLETE` conflicts instead of a generic unsupported-download response.
+- [x] Add an authenticated project-level custody summary and exact handover blocker identity.
+- [x] Bind all five behaviors to permanent focused gates and strict API typechecking.
+- [ ] Recover the original bytes for `BIM-BCPCM-AL-ZZ-NL-0001-S0-P01.docx`, `ISBT-BCPCM-MR-ZZ-BI-0005-S0-S2.pdf`, and the eleven registered ELA01 Lens images from an authoritative backup or original Navisworks source.
+- [ ] Produce a checksum-bound dry run proving that only the missing protected objects will be written and that active project records, dependencies and unwanted samples remain untouched.
+- [ ] Perform the controlled restoration, verify every protected object independently, then rerun the protected recovery gate before considering cleanup or publication.
+
+The exact original bytes are an external recovery input and cannot be reconstructed from database metadata. The sample-project purge remains blocked until this custody issue passes; no production data mutation, cleanup, deployment or publication is part of this repair block.
