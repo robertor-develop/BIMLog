@@ -242,8 +242,11 @@ export function Dashboard() {
     staleTime: 30000,
   });
   const savedProjectView = (() => { try { return JSON.parse(localStorage.getItem("bimlog:headquarters-project-view") || "{}"); } catch { return {}; } })();
-  const [projectSearch, setProjectSearch] = useState(typeof savedProjectView.search === "string" ? savedProjectView.search : "");
-  const [projectStatus, setProjectStatus] = useState(["active", "testing", "retired", "all"].includes(savedProjectView.status) ? savedProjectView.status : "active");
+  // Search/status are session navigation, not durable preferences. Always reopen
+  // Headquarters on the customer-facing active roster so a stale retired or
+  // test filter cannot make live projects appear deleted.
+  const [projectSearch, setProjectSearch] = useState("");
+  const [projectStatus, setProjectStatus] = useState("active");
   const [projectSort, setProjectSort] = useState<"name_asc" | "name_desc" | "code_asc" | "status_asc">(["name_asc", "name_desc", "code_asc", "status_asc"].includes(savedProjectView.sort) ? savedProjectView.sort : "name_asc");
   const [preferredTestProjectId, setPreferredTestProjectId] = useState<number | null>(() => {
     const value = Number(localStorage.getItem("bimlog:preferred-test-project"));
@@ -256,8 +259,8 @@ export function Dashboard() {
   const [showSecondaryWorkspace, setShowSecondaryWorkspace] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem("bimlog:headquarters-project-view", JSON.stringify({ search: projectSearch, status: projectStatus, sort: projectSort }));
-  }, [projectSearch, projectSort, projectStatus]);
+    localStorage.setItem("bimlog:headquarters-project-view", JSON.stringify({ sort: projectSort }));
+  }, [projectSort]);
 
   // ── Existing helpers ───────────────────────────────────────────────────────
   function clearSessionAndRetry() {

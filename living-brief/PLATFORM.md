@@ -827,6 +827,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/field-quality-dashboard.ts
 - artifacts/api-server/src/lib/field-reinspection.behavior.ts
 - artifacts/api-server/src/lib/field-reinspection.ts
+- artifacts/api-server/src/lib/file-custody.ts
 - artifacts/api-server/src/lib/financial-apu-allocation.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-contract.ts
@@ -922,6 +923,13 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/for-record-issuance.ts
 - artifacts/api-server/src/lib/for-record-receipt.behavior.ts
 - artifacts/api-server/src/lib/for-record-receipt.ts
+- artifacts/api-server/src/lib/ga-build001-inventory.behavior.ts
+- artifacts/api-server/src/lib/ga-build002-recovery-check.behavior.ts
+- artifacts/api-server/src/lib/ga-build004-protected-lock.behavior.ts
+- artifacts/api-server/src/lib/ga-build005-provider-recovery.behavior.ts
+- artifacts/api-server/src/lib/ga-protected-object-evidence.ts
+- artifacts/api-server/src/lib/ga-protected-project-recovery.ts
+- artifacts/api-server/src/lib/ga-protected-projects.ts
 - artifacts/api-server/src/lib/generic-apu-budget-control.ts
 - artifacts/api-server/src/lib/generic-apu-contract.ts
 - artifacts/api-server/src/lib/generic-apu-engine-edge.behavior.ts

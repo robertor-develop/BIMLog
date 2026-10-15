@@ -24,6 +24,7 @@ import {
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { ProjectFileUploadError, inspectProjectFileUpload } from "../lib/project-file-upload-contract";
 import { buildProjectHandoverPackage, type HandoverFileRecord } from "../lib/project-handover-package";
+import { fileCustodyState, fileDownloadFailure } from "../lib/file-custody";
 
 async function pdfParse(buffer: Buffer) {
   const { PDFParse: PDFParseClass } = await import("pdf-parse");
@@ -52,7 +53,7 @@ function serializePublicFile<T extends FileRow, E extends Record<string, unknown
     fileMetadata: _fileMetadata,
     ...publicFile
   } = file;
-  return { ...publicFile, ...(extra || {}) };
+  return { ...publicFile, binaryAvailability: fileCustodyState(file), ...(extra || {}) };
 }
 
 const BIM_EXTENSIONS = new Set(["rvt", "nwd", "dwg", "ifc", "dxf", "nwf", "nwc", "rfa", "rte"]);
@@ -809,7 +810,12 @@ router.get("/projects/:projectId/files/handover.zip", authMiddleware, requirePro
     for (const file of selected) {
       const expectedBytes = file.fileSizeBytes ?? file.fileSize;
       if (!file.storagePath || !file.fileHash || !/^[a-f0-9]{64}$/.test(file.fileHash) || !Number.isSafeInteger(expectedBytes) || expectedBytes < 0) {
-        return res.status(409).json({ code: "HANDOVER_FILE_NOT_PORTABLE", error: `File ${file.id} does not have complete portable custody evidence.` });
+        const binaryAvailability = fileCustodyState(file);
+        return res.status(409).json({
+          code: "HANDOVER_FILE_NOT_PORTABLE",
+          error: `File ${file.id} does not have complete portable custody evidence.`,
+          file: { id: file.id, fileName: file.fileName, binaryAvailability },
+        });
       }
       totalBytes += expectedBytes;
       if (totalBytes > 250 * 1024 * 1024) return res.status(413).json({ code: "HANDOVER_PACKAGE_TOO_LARGE", error: "The selected handover exceeds the 250 MB package limit. Narrow the visible filters." });
@@ -828,6 +834,24 @@ router.get("/projects/:projectId/files/handover.zip", authMiddleware, requirePro
   } catch (error) {
     console.error("[project-handover] export failed", error instanceof Error ? error.message : "unknown error");
     return res.status(500).json({ code: "HANDOVER_EXPORT_FAILED", error: "The owner handover package could not be completed." });
+  }
+});
+
+router.get("/projects/:projectId/files/custody-summary", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0) return res.status(400).json({ code: "CUSTODY_PROJECT_INVALID", error: "Invalid project id" });
+    const rows = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+    const counts = { portable: 0, generated_on_demand: 0, legacy_binary_missing: 0, custody_incomplete: 0 };
+    const files = rows.map(file => {
+      const state = fileCustodyState(file);
+      counts[state] += 1;
+      return { id: file.id, fileName: file.fileName, fileSize: file.fileSizeBytes ?? file.fileSize, source: file.source, binaryAvailability: state };
+    });
+    return res.json({ projectId, total: files.length, counts, files });
+  } catch (error) {
+    console.error("[file-custody-summary] failed", error instanceof Error ? error.message : "unknown error");
+    return res.status(500).json({ code: "CUSTODY_SUMMARY_FAILED", error: "File custody status could not be verified." });
   }
 });
 
@@ -884,7 +908,8 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
 
     // Only system-generated response docs can be downloaded — generate on the fly
     if (file.source !== "system-generated" || !file.linkedRfiId) {
-      res.status(501).json({ error: "Binary download not available — only system-generated documents can be downloaded directly." });
+      const failure = fileDownloadFailure(fileCustodyState(file));
+      res.status(failure.status).json(failure.body);
       return;
     }
 
