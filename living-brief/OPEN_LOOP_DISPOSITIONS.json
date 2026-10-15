@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a03ee1826422676818251d5d6c35d4392c0540b42e67f369f64597431cb84aa7",
-  "itemCount": 404,
+  "sourceSha256": "4356b08831b52bb30386c1fe7fb20e6f1e4282b32ac1d5bc71339b42844b9607",
+  "itemCount": 406,
   "counts": {
-    "ACTIVE": 360,
-    "SUPERSEDED": 32,
+    "ACTIVE": 361,
+    "SUPERSEDED": 33,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -7357,6 +7357,42 @@
       "evidence": [
         "OPEN_LOOP.md:5719",
         "Protected legacy binary custody — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7e38232382390331",
+      "sourceLine": 5751,
+      "heading": "MAIN 04 production-recovery acceptance — 2026-10-15",
+      "statement": "Push and publish the exact accepted source.",
+      "classification": "SUPERSEDED",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "cd18c680007c0dce",
+      "sourceLine": 5752,
+      "heading": "MAIN 04 production-recovery acceptance — 2026-10-15",
+      "statement": "Return a real correlated MAIN 04.00 answer in authenticated desktop and mobile Chrome without Feedback, MAIN-00 or another MAIN.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Feedback",
+        "route": "/feedback",
+        "module": "artifacts/bimlog/src/components/FeedbackWidget.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5752",
+        "MAIN 04 production-recovery acceptance — 2026-10-15"
       ],
       "currentAuthority": false
     }

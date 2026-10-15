@@ -1,17 +1,24 @@
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { createHash, timingSafeEqual } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 export const THREAD_ID = "01a10a95-a2e5-73d3-a471-6738addc7e42";
+export const THREAD_MODEL = "gpt-5.6-sol";
 const PORT = Number(process.env.BIMLOG_MAIN04_LOCAL_PORT || 8791);
 const TOKEN = process.env.BIMLOG_MAIN04_BRIDGE_TOKEN || "";
 const CODEX = process.env.BIMLOG_CODEX_EXECUTABLE || "C:\\Users\\soporte\\AppData\\Local\\OpenAI\\Codex\\bin\\f544b3844e0f14e9\\codex.exe";
 const ROLLOUT = process.env.BIMLOG_MAIN04_ROLLOUT_PATH || "C:\\Users\\soporte\\.codex\\sessions\\2026\\10\\05\\rollout-2026-10-05T01-42-21-01a10a95-a2e5-73d3-a471-6738addc7e42.jsonl";
 let queue = Promise.resolve();
 const jobs = new Map();
+
+function runtimeReadiness() {
+  const codexReady = existsSync(CODEX) && statSync(CODEX).isFile();
+  const rolloutReady = existsSync(ROLLOUT) && statSync(ROLLOUT).isFile();
+  return { ready: Boolean(TOKEN && codexReady && rolloutReady), codexReady, rolloutReady, threadId: THREAD_ID, model: THREAD_MODEL };
+}
 
 function authorized(value) {
   if (!TOKEN || !value?.startsWith("Bearer ")) return false;
@@ -39,7 +46,7 @@ function resumeQuestion(message) {
   const folder = mkdtempSync(join(tmpdir(), "bimlog-main04-"));
   const output = join(folder, "answer.txt");
   return new Promise((resolve, reject) => {
-    const child = spawn(CODEX, ["exec", "--skip-git-repo-check", "resume", "-c", 'sandbox_mode="read-only"', "--output-last-message", output, THREAD_ID, "-"], {
+    const child = spawn(CODEX, ["exec", "--skip-git-repo-check", "resume", "--all", "-m", THREAD_MODEL, "-c", 'model_reasoning_effort="low"', "-c", 'sandbox_mode="read-only"', "--output-last-message", output, THREAD_ID, "-"], {
       cwd: "F:\\BIMLog",
       windowsHide: true,
       stdio: ["pipe", "ignore", "pipe"],
@@ -50,7 +57,11 @@ function resumeQuestion(message) {
     child.on("error", () => reject(new Error("CODEX_RESUME_FAILED")));
     child.on("exit", code => {
       try {
-        if (code !== 0) return reject(new Error(/active writer|already has an active/i.test(error) ? "CODEX_DESTINATION_BUSY" : "CODEX_RESUME_FAILED"));
+        if (code !== 0) {
+          if (/active writer|already has an active/i.test(error)) return reject(new Error("CODEX_DESTINATION_BUSY"));
+          if (/no rollout found/i.test(error)) return reject(new Error("CODEX_THREAD_BINDING_MISSING"));
+          return reject(new Error("CODEX_RESUME_FAILED"));
+        }
         const answer = readFileSync(output, "utf8").trim();
         if (!answer) return reject(new Error("MAIN04_ANSWER_MISSING"));
         resolve(answer);
@@ -64,6 +75,18 @@ function resumeQuestion(message) {
   });
 }
 
+async function resumeQuestionWithRetry(message, delays = [250, 500, 1_000, 2_000, 4_000, 8_000, 16_000]) {
+  for (let attempt = 0; attempt <= delays.length; attempt += 1) {
+    try {
+      return await resumeQuestion(message);
+    } catch (error) {
+      if (!(error instanceof Error) || error.message !== "CODEX_DESTINATION_BUSY" || attempt === delays.length) throw error;
+      await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+    }
+  }
+  throw new Error("CODEX_DESTINATION_BUSY");
+}
+
 export function invokeMain04(payload) {
   const work = async () => {
     if (payload?.schemaVersion !== "bimlog-main04-question.v1" || payload?.destinationThreadId !== THREAD_ID || typeof payload?.requestId !== "string" || typeof payload?.question !== "string" || !payload.question.trim()) throw new Error("REQUEST_REFUSED");
@@ -74,7 +97,7 @@ export function invokeMain04(payload) {
       `EXACT_QUESTION=${JSON.stringify(payload.question)}`,
       `TRUSTED_PAGE_CONTEXT=${JSON.stringify(payload.context || {})}`,
     ].join("\n");
-    const answer = await resumeQuestion(message);
+    const answer = await resumeQuestionWithRetry(message);
     return { threadId: THREAD_ID, requestId: payload.requestId, answer, answerDigest: createHash("sha256").update(answer).digest("hex") };
   };
   const result = queue.then(work, work);
@@ -105,7 +128,11 @@ if (process.argv[1] && import.meta.url === new URL(`file:///${process.argv[1].re
   createServer(async (request, response) => {
     response.setHeader("content-type", "application/json; charset=utf-8");
     response.setHeader("cache-control", "no-store");
-    if (request.method === "GET" && request.url === "/healthz") return response.end(JSON.stringify({ ok: true, threadId: THREAD_ID }));
+    if (request.method === "GET" && (request.url === "/healthz" || request.url === "/readyz")) {
+      const readiness = runtimeReadiness();
+      response.statusCode = readiness.ready ? 200 : 503;
+      return response.end(JSON.stringify(readiness));
+    }
     if (!authorized(request.headers.authorization)) {
       response.statusCode = 404;
       return response.end(JSON.stringify({ error: "NOT_FOUND" }));
