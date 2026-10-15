@@ -2,6 +2,7 @@ import { db } from "@workspace/db";
 import { adminActionsLogTable, filesTable, projectMembersTable, projectsTable, usersTable } from "@workspace/db/schema";
 import { and, count, eq, inArray } from "drizzle-orm";
 import { collectProjectRetirementInventory, PROJECT_RETIREMENT_INVENTORY_VERSION, PROJECT_RETIREMENT_OWNERSHIP, totalProjectRetirementRecords } from "./project-retirement-inventory";
+import { gaProtectedProjectById, isGaProtectedProjectId } from "./ga-protected-projects";
 
 export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 137;
 
@@ -14,6 +15,26 @@ export class ProjectRetirementError extends Error {
 type Actor = { userId: number; email: string };
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 type Executor = typeof db | Tx;
+
+async function rejectProtectedProjectMutation(actor: Actor, projectId: number, attemptedAction: string) {
+  if (!isGaProtectedProjectId(projectId)) return;
+  const protectedProject = gaProtectedProjectById(projectId)!;
+  await db.insert(adminActionsLogTable).values({
+    adminUserId: actor.userId,
+    adminEmail: actor.email,
+    action: "deny_protected_project_mutation",
+    targetType: "project",
+    targetId: String(projectId),
+    details: {
+      attemptedAction,
+      projectCode: protectedProject.code,
+      projectName: protectedProject.name,
+      reason: "GA_PROTECTED_PROJECT",
+      deniedAt: new Date().toISOString(),
+    },
+  });
+  throw new ProjectRetirementError("GA_PROTECTED_PROJECT", 409, `${protectedProject.code} is protected from lifecycle and cleanup changes.`);
+}
 
 async function requireAuthority(executor: Executor, actor: Actor, project: { id: number; createdById: number }, adminRoles: string[]) {
   const [fresh] = await executor.select({ email: usersTable.email, isSuperAdmin: usersTable.isSuperAdmin })
@@ -50,6 +71,7 @@ export async function previewProjectRetirement(actor: Actor, projectId: number, 
 }
 
 export async function retireProject(actor: Actor, projectId: number, adminRoles: string[], input: { confirmation?: unknown; expectedUpdatedAt?: unknown }) {
+  await rejectProtectedProjectMutation(actor, projectId, "retire_project");
   return db.transaction(async (tx) => {
     const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1).for("update");
     if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
@@ -98,6 +120,7 @@ export async function restoreProject(actor: Actor, projectId: number, adminRoles
 }
 
 export async function setProjectWorkspaceState(actor: Actor, projectId: number, adminRoles: string[], input: { state?: unknown; expectedUpdatedAt?: unknown }) {
+  await rejectProtectedProjectMutation(actor, projectId, "change_project_workspace_state");
   return db.transaction(async (tx) => {
     const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
     if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
@@ -134,6 +157,8 @@ export async function setProjectWorkspaceStateBatch(actor: Actor, adminRoles: st
   });
   if (new Set(items.map(item => item.projectId)).size !== items.length)
     throw new ProjectRetirementError("PROJECT_WORKSPACE_BATCH_DUPLICATE", 400, "Each project can appear only once.");
+
+  for (const item of items) await rejectProtectedProjectMutation(actor, item.projectId, "change_project_workspace_state_batch");
 
   return db.transaction(async (tx) => {
     const projects = await tx.select().from(projectsTable).where(inArray(projectsTable.id, items.map(item => item.projectId)));
