@@ -1,10 +1,10 @@
 export type AssistantDockSide = "left" | "right";
 
-export const ASSISTANT_WIDTH_MIN = 360;
-export const ASSISTANT_WIDTH_DEFAULT = 440;
+export const ASSISTANT_WIDTH_MIN = 320;
+export const ASSISTANT_WIDTH_DEFAULT = 352;
 export const ASSISTANT_WIDTH_MAX = 680;
 export const ASSISTANT_WIDTH_STEP = 20;
-export const ASSISTANT_MOBILE_BREAKPOINT = 900;
+export const ASSISTANT_MOBILE_BREAKPOINT = 1179;
 
 export function clampAssistantWidth(width: number, viewportWidth = Number.POSITIVE_INFINITY) {
   const viewportLimit = Number.isFinite(viewportWidth) ? Math.max(ASSISTANT_WIDTH_MIN, viewportWidth - 320) : ASSISTANT_WIDTH_MAX;

@@ -22,9 +22,7 @@ function ensureSchema() {
         CONSTRAINT page_agent_turns_state_chk CHECK(state IN ('reserved','running','complete','failed')),
         CONSTRAINT page_agent_turns_question_chk CHECK(length(question) BETWEEN 1 AND 2000)
       )`);
-      await client.query("CREATE INDEX IF NOT EXISTS page_agent_turns_actor_history_idx ON page_agent_turns(company_id,user_id,conversation_id,created_at,id)").catch(async()=>{
-        await client.query("CREATE INDEX IF NOT EXISTS page_agent_turns_actor_history_idx ON page_agent_turns(company_id,user_id,conversation_id,created_at,request_id)");
-      });
+      await client.query("CREATE INDEX IF NOT EXISTS page_agent_turns_actor_history_idx ON page_agent_turns(company_id,user_id,conversation_id,created_at,request_id)");
       await client.query("CREATE UNIQUE INDEX IF NOT EXISTS page_agent_turns_actor_active_idx ON page_agent_turns(company_id,user_id,conversation_id) WHERE state IN ('reserved','running')");
       await client.query("COMMIT");
     } catch(error) { await client.query("ROLLBACK"); migration=null; throw error; } finally { client.release(); }

@@ -1495,6 +1495,29 @@ body.bimlog-assistant-docked[data-assistant-collapsed="true"][data-assistant-doc
 .page-assistant-voice[aria-pressed=true]{border-color:var(--bimlog-agent-blue-dark);background:var(--bimlog-agent-blue-dark);color:#fff}
 .page-assistant-voice-status{margin:0;color:var(--bimlog-agent-muted);font-size:11px;line-height:1.35}
 .page-assistant-coming-soon[aria-disabled="true"]{opacity:.62;cursor:not-allowed;background:#f5f5f2!important;color:#6d756f!important;border-color:#c8cfca!important}
+
+/* Vega/AutoMarketing panel contract, with BIMLog identity and palette only. */
+:root{--bimlog-agent-dock-width:352px}
+.page-assistant-panel{min-width:320px;max-width:min(680px,80vw);font:14px/1.5 Inter,ui-sans-serif,system-ui,sans-serif;background:var(--bimlog-agent-cream)}
+.page-assistant-panel>header{min-height:104px;padding:20px;background:var(--bimlog-agent-blue-dark)}
+.page-assistant-section-label{padding:18px 20px 9px}
+.page-assistant-actions{padding:0 20px 12px;gap:5px}
+.page-assistant-actions button{min-height:42px;padding:7px;font-size:12px}
+.page-assistant-question,.page-assistant-question:not([open]){flex:0 0 auto;min-height:0;overflow:visible}
+.page-assistant-question form{padding:0 20px 0;gap:8px}
+.page-assistant-question textarea{min-height:112px;max-height:28dvh;padding:12px;font-size:14px}
+.page-assistant-form-actions{display:block;margin:0}.page-assistant-form-actions button{width:100%;min-height:44px}.page-assistant-form-actions button+button{display:none}
+.page-assistant-messages{min-height:0!important;max-height:min(52dvh,420px);margin:12px 20px 0!important;border:0;background:transparent;overflow-y:auto!important;display:block}
+.page-assistant-messages>p,.page-assistant-turn{box-sizing:border-box;margin:0 0 8px!important;padding:12px!important;border-left:3px solid var(--bimlog-agent-blue-dark)!important;background:#e8eef5!important;color:var(--bimlog-agent-ink)}
+.page-assistant-turn-question,.page-assistant-turn-answer{margin:0!important;padding:0!important;background:transparent!important;border-radius:0!important;white-space:pre-wrap;overflow-wrap:anywhere}
+.page-assistant-turn-question{font-weight:650;padding-bottom:10px!important}.page-assistant-turn-answer{border-top:1px solid var(--bimlog-agent-line);padding-top:10px!important}
+.page-assistant-history{margin:0}.page-assistant-history>summary,.page-assistant-conversation-tools>summary{min-height:44px;padding:12px 4px;font-weight:650;cursor:pointer}.page-assistant-history .page-assistant-turn{margin-top:8px!important}
+.page-assistant-conversation-tools{margin:0 20px 8px;border:0;background:transparent}.page-assistant-conversation-tools>summary{padding-left:0}.page-assistant-conversation-tools .page-assistant-section-body{padding:0;grid-template-columns:1fr}
+.page-assistant-recommended{order:5;padding:18px 20px;display:block}.page-assistant-recommended p{margin:1em 0}.page-assistant-recommended button{max-width:none;min-height:42px}
+.page-assistant-status-strip{order:6;padding:16px 20px!important}
+@media(min-width:1180px){body.bimlog-assistant-docked[data-assistant-dock-side="right"] #root{margin-right:calc(var(--bimlog-agent-dock-width) + 24px)}body.bimlog-assistant-docked[data-assistant-dock-side="left"] #root{margin-left:calc(var(--bimlog-agent-dock-width) + 24px)}}
+@media(max-width:1179px){body.bimlog-assistant-docked #root{margin:0!important}.page-assistant-panel{width:min(390px,94vw)!important;max-width:94vw}}
+@media(max-width:760px){html:has(body.bimlog-assistant-docked),body.bimlog-assistant-docked{overflow:hidden}.page-assistant-panel{inset:0!important;width:100vw!important;max-width:100vw;min-width:0;height:100dvh!important;padding-bottom:env(safe-area-inset-bottom)}.page-assistant-panel>header{min-height:80px;padding:12px 16px}.page-assistant-resize-handle{display:none}.page-assistant-actions,.page-assistant-question form,.page-assistant-status-strip{padding-left:16px!important;padding-right:16px!important}.page-assistant-messages,.page-assistant-conversation-tools{margin-left:16px!important;margin-right:16px!important}.page-assistant-question textarea{min-height:88px;font-size:16px}.page-assistant-history .page-assistant-turn{max-height:none}}
 /* A prerequisite opened from Job Intake always exposes the saved return path. */
 .intake-return-banner {
   display: flex;
