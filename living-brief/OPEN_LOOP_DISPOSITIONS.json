@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4fc7077ea8f542560a2bec2e687ffae4aeaa1278598f0433268fc604c7072c78",
-  "itemCount": 399,
+  "sourceSha256": "64a89b148a62e7d4e935866a8d9e1eb8248e594d2d6b2b158641a5d5a4d5ded6",
+  "itemCount": 401,
   "counts": {
-    "ACTIVE": 355,
+    "ACTIVE": 357,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7267,6 +7267,42 @@
       "evidence": [
         "OPEN_LOOP.md:5692",
         "Gauntlet company catalogs Block 19 — Builds 91–95 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "4d8f2f0650ebf246",
+      "sourceLine": 5705,
+      "heading": "Recovery and GA-readiness Block 1 — 2026-10-14",
+      "statement": "Export provider backup/snapshot/PITR metadata and independently verify all registered protected file objects.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5705",
+        "Recovery and GA-readiness Block 1 — 2026-10-14"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "473f0af060fc4902",
+      "sourceLine": 5706,
+      "heading": "Recovery and GA-readiness Block 1 — 2026-10-14",
+      "statement": "Pass the complete exact-head gate and push Block 1. Do not publish unless the protected visibility or safety repair is approved for production.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5706",
+        "Recovery and GA-readiness Block 1 — 2026-10-14"
       ],
       "currentAuthority": false
     }

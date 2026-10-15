@@ -5693,3 +5693,16 @@ This block changes responsive navigation behavior only. Existing route, role, te
 
 This block changes the existing company-catalog presentation and validation only. Existing server authority, tenant isolation, catalog persistence, workflow lifecycle, project history, customer records, payment, email, Native, installer, Feedback and MAIN 04 behavior remain unchanged.
 
+
+## Recovery and GA-readiness Block 1 — 2026-10-14
+
+- [x] Establish the exact immutable protected-project identity for IDs 23, 26 and 35.
+- [x] Verify the production projects are active and require no restoration mutation.
+- [x] Prevent stale Headquarters status/search state from hiding the active customer roster on reopen.
+- [x] Reject and audit retirement and workspace-cleanup state changes for protected IDs.
+- [x] Require exact byte-size and SHA-256 evidence plus provider backup metadata for a complete recovery package.
+- [x] Correct retirement coverage to the current 302-table schema and 187 project-dependent tables.
+- [ ] Export provider backup/snapshot/PITR metadata and independently verify all registered protected file objects.
+- [ ] Pass the complete exact-head gate and push Block 1. Do not publish unless the protected visibility or safety repair is approved for production.
+
+No cleanup, retirement, restoration, purge, project creation, production data mutation, deployment or publication is authorized by this block.
