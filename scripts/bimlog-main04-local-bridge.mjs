@@ -69,6 +69,18 @@ function resumeQuestion(message) {
   });
 }
 
+async function resumeQuestionWithRetry(message, delays = [250, 500, 1_000, 2_000, 4_000, 8_000, 16_000]) {
+  for (let attempt = 0; attempt <= delays.length; attempt += 1) {
+    try {
+      return await resumeQuestion(message);
+    } catch (error) {
+      if (!(error instanceof Error) || error.message !== "CODEX_DESTINATION_BUSY" || attempt === delays.length) throw error;
+      await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+    }
+  }
+  throw new Error("CODEX_DESTINATION_BUSY");
+}
+
 export function invokeMain04(payload) {
   const work = async () => {
     if (payload?.schemaVersion !== "bimlog-main04-question.v1" || payload?.destinationThreadId !== THREAD_ID || typeof payload?.requestId !== "string" || typeof payload?.question !== "string" || !payload.question.trim()) throw new Error("REQUEST_REFUSED");
@@ -79,7 +91,7 @@ export function invokeMain04(payload) {
       `EXACT_QUESTION=${JSON.stringify(payload.question)}`,
       `TRUSTED_PAGE_CONTEXT=${JSON.stringify(payload.context || {})}`,
     ].join("\n");
-    const answer = await resumeQuestion(message);
+    const answer = await resumeQuestionWithRetry(message);
     return { threadId: THREAD_ID, requestId: payload.requestId, answer, answerDigest: createHash("sha256").update(answer).digest("hex") };
   };
   const result = queue.then(work, work);
