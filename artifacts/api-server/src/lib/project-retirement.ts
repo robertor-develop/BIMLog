@@ -4,7 +4,7 @@ import { and, count, eq, inArray } from "drizzle-orm";
 import { collectProjectRetirementInventory, PROJECT_RETIREMENT_INVENTORY_VERSION, PROJECT_RETIREMENT_OWNERSHIP, totalProjectRetirementRecords } from "./project-retirement-inventory";
 import { gaProtectedProjectById, isGaProtectedProjectId } from "./ga-protected-projects";
 
-export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 137;
+export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 187;
 
 export class ProjectRetirementError extends Error {
   constructor(public readonly code: string, public readonly status: number, message: string) {
