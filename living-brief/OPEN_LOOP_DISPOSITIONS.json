@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3d78f8c58809aadd1aa58ea5c78432a55decd876369727e4602550d7eb33f560",
-  "itemCount": 411,
+  "sourceSha256": "e60db2d687bacbe3de979fe79ade1a6ed6a733fbe513d6cacbbaef769aed3567",
+  "itemCount": 412,
   "counts": {
-    "ACTIVE": 367,
+    "ACTIVE": 368,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7483,6 +7483,24 @@
       "evidence": [
         "OPEN_LOOP.md:5836",
         "Release integrity recovery Block 2 — B06-B10 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "eae2d2986a3ddc7d",
+      "sourceLine": 5847,
+      "heading": "Recovery GA authenticated-evidence correction — 2026-10-16",
+      "statement": "Push this five-build evidence block. Keep it unpublished until the next five-build block reaches the ten-build publication boundary.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5847",
+        "Recovery GA authenticated-evidence correction — 2026-10-16"
       ],
       "currentAuthority": false
     }

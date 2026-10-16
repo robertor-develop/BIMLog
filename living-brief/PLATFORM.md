@@ -1189,6 +1189,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/public-commercial-availability.ts
 - artifacts/api-server/src/lib/public-legal-identity.behavior.ts
 - artifacts/api-server/src/lib/public-legal-identity.ts
+- artifacts/api-server/src/lib/recovery-ga-authenticated-http.ts
 - artifacts/api-server/src/lib/release-metadata.behavior.ts
 - artifacts/api-server/src/lib/release-metadata.ts
 - artifacts/api-server/src/lib/repair-authority-migration.ts

@@ -5837,3 +5837,15 @@ No production answer or publication claim is accepted until the final live Chrom
 
 External Stripe and SendGrid configuration and the thirteen unrecovered legacy binary originals remain separate explicit limitations. This block does not claim to resolve them and does not mutate production or protected-project data.
 
+## Recovery GA authenticated-evidence correction — 2026-10-16
+
+- [x] Replace project configuration object-only validation with authenticated project create, reload, workspace-register and company-binding HTTP/database evidence.
+- [x] Replace catalog object-only validation with mounted company-catalog write/read, PMO authorization and cross-tenant isolation evidence.
+- [x] Replace directory object-only validation with mounted company/contact lifecycle, reuse, member read and denial evidence.
+- [x] Replace role-decision object-only validation with JWT-authenticated production middleware and route decisions for admin, write, read-only, anonymous and nonmember actors.
+- [x] Bind the aggregate block gate to the authenticated HTTP suite and the existing real Intake activation-to-Operations PostgreSQL lifecycle.
+- [ ] Push this five-build evidence block. Keep it unpublished until the next five-build block reaches the ten-build publication boundary.
+
+The fixtures are unmistakably synthetic and disposable. They do not touch production data or claim deployed Chrome acceptance.
+The generated platform inventory and Living Brief state must remain exact-head clean at push.
+

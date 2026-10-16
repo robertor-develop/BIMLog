@@ -16,12 +16,12 @@ const reviewedChangedPaths = [...changed].sort();
 const declarationsPath = path.join(root, "living-brief", "impact-declarations.json");
 const declarations = JSON.parse(fs.readFileSync(declarationsPath, "utf8"));
 const authorityKeys = declarations.reviews.at(-1).authorities.map(({ key }) => key);
-const reason = "Release integrity B06-B10 repair the audited Agent workspace contract across desktop, tablet and mobile, remove obsolete floating behavior, fit split-workspace widths, enforce current acceptance, and restore keyboard focus without production or customer-data mutation.";
+const reason = "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation.";
 const updated = new Set(["status", "open_loop"]);
 declarations.reviews.push({
-  taskId: "release-integrity-block02-20261016",
+  taskId: "recovery-ga-authenticated-evidence-20261016",
   reviewedThroughCommit,
-  reviewedAt: "2026-10-16T11:50:00.000Z",
+  reviewedAt: new Date().toISOString(),
   status: "local_candidate",
   captureTiming: "pre_release_reconciliation",
   authorities: authorityKeys.map((key) => ({ key, result: updated.has(key) ? "updated" : "reviewed_no_semantic_change", reason })),
