@@ -112,6 +112,8 @@
     "test:sealed-web-package": "node scripts/test-sealed-web-package.mjs",
     "test:runtime-release-identity": "node scripts/test-runtime-release-identity.mjs",
     "test:migration-catalog-truth": "node scripts/test-migration-catalog-truth.mjs",
+    "test:deployment-rollback-gate": "node scripts/test-deployment-rollback-gate.mjs",
+    "test:release-integrity-block01": "node scripts/test-release-integrity-block01.mjs",
     "check:lens-next-native-release": "node scripts/check-lens-next-native-release.mjs",
     "test:release-identity": "node scripts/test-release-identity.mjs",
     "check:release-receipt": "node scripts/check-release-receipt.mjs",
