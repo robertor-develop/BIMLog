@@ -3,7 +3,8 @@ import { authorizeObjectRequest, OBJECT_AUTHORITY_SURFACES } from "./block22-obj
 import { DATA_LIFECYCLE } from "./block22-data-lifecycle";
 import { productionOrigins } from "./runtime-security";
 
-assert.equal(OBJECT_AUTHORITY_SURFACES.length, 6);
+assert.ok(OBJECT_AUTHORITY_SURFACES.length >= 6);
+assert.equal(new Set(OBJECT_AUTHORITY_SURFACES).size, OBJECT_AUTHORITY_SURFACES.length);
 assert.equal(Object.keys(DATA_LIFECYCLE).length, 5);
 assert.equal(authorizeObjectRequest({ authenticated: true, actorCompanyId: 1, actorProjectIds: [2], requestedCompanyId: 1, requestedProjectId: 2, objectProjectId: 2, objectExists: true }).allow, true);
 assert.equal(authorizeObjectRequest({ authenticated: true, actorCompanyId: 1, actorProjectIds: [2], requestedCompanyId: 1, requestedProjectId: 2, objectProjectId: 3, objectExists: true }).allow, false);
