@@ -28,8 +28,10 @@ assert.deepEqual(exact.rateSource, { kind: "saved_apu_rate", sourceId: "apu-plan
 assert.equal(original[0].billingHourlyRate, "0");
 assert.notEqual(connected, original);
 
-const priced = connectContractItemsToApu([{ billingHourlyRate: "0", unit: "Hours" }], { version: 8, name: "Published APU", sellingPrice: "47.25", currency: "USD" })[0];
+const priced = connectContractItemsToApu([{ quantity: "10", billingHourlyRate: "0", unit: "Hours" }], { version: 8, name: "Published APU", sellingPrice: "472.50", currency: "USD" })[0];
 assert.equal(priced.billingHourlyRate, "47.25");
 assert.equal(priced.rateSource?.unitRate, "47.25");
+assert.equal(priced.rateSource?.planSellingPrice, "472.50");
+assert.equal(priced.rateSource?.rateCalculation, "plan_total_divided_by_contract_quantity");
 
 console.log("job-intake-apu-connection.behavior: PASS");

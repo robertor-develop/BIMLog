@@ -35,13 +35,17 @@ assert.deepEqual(
       { version: 3, sellingPrice: "37.99" },
     ],
     "2",
+    { quantity: "2", billingHourlyRate: "5", unit: "Hours" },
   ),
   {
     apuPlanVersion: 2,
-    billingHourlyRate: "35.47",
+    quantity: "2",
+    billingHourlyRate: "17.735",
+    unit: "Hours",
     rateSource: {
       kind: "saved_apu_rate", sourceId: "apu-plan-v2", sourceLabel: "APU v2",
-      unitRate: "35.47", unit: "Hours", currency: "", apuPlanVersion: 2, apuFingerprint: null,
+      unitRate: "17.735", unit: "Hours", currency: "", apuPlanVersion: 2, apuFingerprint: null,
+      planSellingPrice: "35.47", rateCalculation: "plan_total_divided_by_contract_quantity",
     },
   },
 );
