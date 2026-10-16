@@ -37,6 +37,7 @@ import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
 import { allocateWorkflowPhaseHours } from "./workflow-phase-hours";
+import { previewGovernedWorkflowAllocation } from "./delivery-workflow-allocation-source";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
 import { rollbackWithOperationalEvidence } from "./operational-failure";
 import { activatedLineageReceipt, canonicalIntakeContractItemSource } from "./job-intake-contract-lineage";
@@ -1092,7 +1093,13 @@ async function createCoreActivationWithClient(
       executeUserId: input.data.team.assignments.find((assignment: JobIntakeData["team"]["assignments"][number]) => assignment.scopeItemId === item.id && assignment.userId)?.userId ?? null,
       leaderUserId: input.data.team.projectLeaderUserId,
     });
-    const phaseHours = allocateWorkflowPhaseHours(item.plannedHours, workflowBinding.definition?.phases ?? []);
+    const workflowPhases = workflowBinding.definition?.phases ?? [];
+    const economic = workflowBinding.definition?.economicAllocation;
+    const allocation = economic ? await previewGovernedWorkflowAllocation({
+      client, companyId: input.companyId, sourceVersionId: economic.sourceVersionId,
+      proposal: economic.proposal, workflowPhases,
+    }) : undefined;
+    const phaseHours = allocateWorkflowPhaseHours(item.plannedHours, workflowPhases, allocation?.rows);
     const needsScopeDeliveryTask =
       item.workPackages.length === 0 ||
       input.data.team.assignments.some(
