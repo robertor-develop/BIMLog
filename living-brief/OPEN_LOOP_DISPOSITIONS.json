@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "58bb055f7f3427d598835f8cbf7fdcbac28731e6f36dd3f01b5439fb50cf326b",
-  "itemCount": 420,
+  "sourceSha256": "953358ebbd26110f478a4995f984a9cde2e58daf0ed104aaf7b515016fd93d9a",
+  "itemCount": 421,
   "counts": {
-    "ACTIVE": 376,
+    "ACTIVE": 377,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7645,6 +7645,24 @@
       "evidence": [
         "OPEN_LOOP.md:5890",
         "Protected-file recovery closure Block 7 — B-GA005R1–B-GA005R5 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c79034072bd52229",
+      "sourceLine": 5899,
+      "heading": "Lorena P1 correction block — 2026-10-16",
+      "statement": "Independent Viva re-audit, publication, authenticated production Chrome acceptance, and Lorena field acceptance remain separate gates.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5899",
+        "Lorena P1 correction block — 2026-10-16"
       ],
       "currentAuthority": false
     }

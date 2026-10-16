@@ -70435,6 +70435,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ce6d29d4e9056a3198f6534c3847a038f3029b225bafc6673643daf32f948be6"
+    },
+    {
+      "taskId": "lorena-p1-correction-block-20261016",
+      "reviewedThroughCommit": "d8ad6fab9e8c5138422e3bf65236331a31bcdeae",
+      "reviewedAt": "2026-10-16T18:22:31Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates."
+        }
+      ],
+      "reason": "Viva P1 corrections replace plan-total copying with exact quantity-based rate derivation, bind guidance to the selected immutable workflow definition, and allocate activation hours from the verified frozen Commercial APU allocation; STATUS and OPEN_LOOP record the candidate and remaining independent/live gates.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b0e0a843eb9bc8caacc87e382c0b441b050ece71db852cbc1da24c2ebd077398"
     }
   ]
 }

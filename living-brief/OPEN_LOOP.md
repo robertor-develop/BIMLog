@@ -5890,3 +5890,11 @@ No production or protected-project mutation occurred. The authenticated producti
 - [ ] Push this five-build block, publish the completed ten-build interval with B-GA031–B-GA035, and run authenticated desktop/mobile Chrome smoke.
 
 The previous 13-record summary is superseded for current recovery planning. Historical receipts remain preserved as historical evidence. No protected project or file record was mutated.
+## Lorena P1 correction block — 2026-10-16
+
+- [x] Derive a selected saved APU's Contract Item unit rate from its explicit published unit rate or, when the legacy plan exposes only a selling total, from exact selling total divided by the Contract Item quantity. Preserve the plan total and calculation provenance separately.
+- [x] Derive each Contract Item's submittal strategy and milestones from the selected immutable Delivery Workflow version, including custom company definitions, while preserving genuine user overrides.
+- [x] Allocate activated phase hours from the selected workflow's verified frozen Commercial APU allocation; reject incomplete, mismatched, or non-100-percent multi-phase allocations.
+- [x] Cover custom allocation, PRE/COO/FOR/ASB aliases, deterministic rounding, save-compatible fields, and idempotent replay through the real production helpers.
+- [ ] Independent Viva re-audit, publication, authenticated production Chrome acceptance, and Lorena field acceptance remain separate gates.
+
