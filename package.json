@@ -114,6 +114,7 @@
     "test:migration-catalog-truth": "node scripts/test-migration-catalog-truth.mjs",
     "test:deployment-rollback-gate": "node scripts/test-deployment-rollback-gate.mjs",
     "test:release-integrity-block01": "node scripts/test-release-integrity-block01.mjs",
+    "test:release-integrity-block02": "node scripts/test-release-integrity-block02-build010-agent-acceptance.mjs && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/page-assistant-workspace.behavior.ts && pnpm --filter @workspace/bimlog run typecheck",
     "check:lens-next-native-release": "node scripts/check-lens-next-native-release.mjs",
     "test:release-identity": "node scripts/test-release-identity.mjs",
     "check:release-receipt": "node scripts/check-release-receipt.mjs",
