@@ -22,6 +22,8 @@ assert.equal(exactProduct("1e3", "30"), "—");
 assert.deepEqual(eligibleBudgetFiles([{ id: 71, fileName: "Budget.xlsx", version: 2 }, { id: 72, fileName: "Budget.xlsx", version: 1 }, { id: 73, fileName: "drawing.pdf" }]).map(item => item.id), [71, 72]);
 assert.deepEqual(intakeCreatedContracts({ activatedContractId: "C1" }), [{ contractId: "C1" }]);
 assert.deepEqual(intakeCreatedContracts({ activatedContractId: "C1", activationSummary: { contracts: [{ profileId: "P2", contractId: "C2" }] } }), [{ profileId: "P2", contractId: "C2" }]);
+assert.deepEqual(intakeCreatedContracts({}, [{ id: "P1", existingContractId: "C3", existingContractVersionId: "V3" }]), [{ profileId: "P1", contractId: "C3" }]);
+assert.deepEqual(intakeCreatedContracts({}, [{ id: "P1", existingContractId: "C3" }, { id: "P2", existingContractId: "C3" }]), [{ profileId: "P1", contractId: "C3" }]);
 const capabilities = { costValuePlanner: false, budget: false, contracts: false, fullCommercialActivation: false };
 const core = renderToStaticMarkup(<IntakeCommercialReadiness capabilities={capabilities} errors={[]} activated={false} hasContracts={false} tt={en => en} onRetry={() => {}}/>);
 assert.match(core, /Core job activation does not require buying/);

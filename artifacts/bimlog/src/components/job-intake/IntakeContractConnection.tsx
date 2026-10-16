@@ -3,15 +3,20 @@ import { Link } from "wouter";
 import { withIntakeReturn } from "../../lib/return-context";
 import { agreementSummaries } from "../../lib/agreement-language";
 
-export function intakeCreatedContracts(intake: any) {
+export function intakeCreatedContracts(intake: any, profiles: any[] = []) {
   const rows = Array.isArray(intake.activationSummary?.contracts) ? intake.activationSummary.contracts : [];
-  return rows.length ? rows.filter((row: any) => row.contractId) : intake.activatedContractId ? [{ contractId: intake.activatedContractId }] : [];
+  const candidates = rows.length
+    ? rows.filter((row: any) => row.contractId)
+    : intake.activatedContractId
+      ? [{ contractId: intake.activatedContractId }]
+      : profiles.filter(profile => profile?.existingContractId).map(profile => ({ profileId: profile.id, contractId: profile.existingContractId }));
+  return candidates.filter((candidate: any, index: number) => candidates.findIndex((row: any) => row.contractId === candidate.contractId) === index);
 }
 
 export function IntakeContractConnection({ intake, profiles, projectId, tt }: {
   intake: any; profiles: any[]; projectId: number; tt: (en: string, es: string) => string;
 }) {
-  const contracts = intakeCreatedContracts(intake);
+  const contracts = intakeCreatedContracts(intake, profiles);
   const summaries = agreementSummaries(intake.data ?? intake);
   return <div className="ji-guide">
     <strong>{tt("From setup to contract", "De la configuración al contrato")}</strong>
