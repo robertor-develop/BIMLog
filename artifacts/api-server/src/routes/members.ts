@@ -819,9 +819,15 @@ router.delete(
         return;
       }
 
-      await db
-        .delete(projectMembersTable)
-        .where(eq(projectMembersTable.id, memberId));
+      await db.transaction(async (tx) => {
+        await tx.delete(projectMembersTable).where(eq(projectMembersTable.id, memberId));
+        await tx.insert(activityLogTable).values({
+          projectId, userId: req.user!.userId, userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName, actionType: "remove_member",
+          entityType: "member", entityId: memberId,
+          details: `Removed project member ${memberId}`,
+        });
+      });
 
       res.json({ success: true });
     } catch (error) {
@@ -1012,6 +1018,12 @@ router.delete(
               eq(projectInvitations.status, "pending"),
             ),
           );
+        await tx.insert(activityLogTable).values({
+          projectId, userId: req.user!.userId, userFullName: req.user!.fullName,
+          userCompanyName: req.user!.companyName, actionType: "cancel_invitation",
+          entityType: "invitation", entityId: invId,
+          details: `Cancelled pending invitation for ${email}`,
+        });
         return "cancelled" as const;
       });
       if (cancellation === "not_found") {
