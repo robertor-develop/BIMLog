@@ -5818,3 +5818,10 @@ No production answer or publication claim is accepted until the final live Chrom
 - Watching: publish candidate c3732347669db470a3b3d366144d949ceb562dc3 with the B3+B4 ten-build interval and complete authenticated production Chrome smoke.
 - Untested: Procore OAuth company/project/folder browsing and authorized download require an approved connected Procore account. CSV preview/commit is independently gated; BIMLog does not claim continuous Procore synchronization.
 
+
+## Release integrity recovery Block 1 — B01-B05 — 2026-10-16
+
+- B01-B05 are locally implemented and focused-verified: canonical source identity, deterministic package sealing, immutable runtime identity, migration catalog truth, and atomic deployment/rollback evidence.
+- Push the complete clean five-build block after the full repository build passes.
+- Do not publish this first half. Complete the next five-build block, then publish the exact ten-build candidate and run authenticated Chrome smoke.
+- External Stripe and SendGrid configuration and the thirteen unrecovered legacy binary originals remain explicit external/recovery limitations; these builds do not claim to resolve them.

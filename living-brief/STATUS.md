@@ -4498,3 +4498,7 @@ The release retry also keeps the B08 acceptance module inside the API TypeScript
 ### Corrective Block B4 candidate — 2026-10-16
 Builds B16-B20 standardize integration readiness, gate governed Procore RFI import, clarify the Procore OAuth boundary, verify provider/notification evidence, and gate the BIMLog MAIN 04 Agent lifecycle. Procore OAuth live browsing/download remains untested without an approved connected account; no continuous synchronization is claimed. Candidate implementation commit: c3732347669db470a3b3d366144d949ceb562dc3.
 
+
+## Release integrity recovery Block 1 — B01-B05 — 2026-10-16
+
+Five independently committed builds bind the active branch to its matching upstream, create a deterministic SHA-256 seal for assembled web files, derive an immutable runtime identity from release/source/tree/package/schema inputs, inventory all 27 mounted migration modules with source hashes and destructive-operation detection, and require candidate/remote/deployment/rollback identity agreement before publication. The focused block gate passes with zero production mutations. This is the first five-build half of a ten-build publication interval; it is pushed only after the complete source gate passes and remains unpublished until the next five-build block.
