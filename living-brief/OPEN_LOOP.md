@@ -5905,7 +5905,7 @@ The previous 13-record summary is superseded for current recovery planning. Hist
 - [x] B01: align release identity checks with the active P37 source/package/schema identity.
 - [x] B02: prove core activation through a published workflow and verified frozen PRE/COO/FOR/ASB economic allocation; preserve exact hours without fallback percentages.
 - [x] B03: pass strict TypeScript and the repeatable API build-termination/runtime-assembly gate from the reconciled candidate.
-- [ ] B04: repair and browser-verify populated and empty APU CSV exports, including the prepared-file fallback.
-- [ ] B05: preserve a usable main workspace at 761–1024 pixels while retaining desktop dock resizing, mobile fullscreen, close/collapse behavior and focus return.
-- [ ] After B05, pass the complete exact-head repository build and local release gate, push the five-build block, and keep it unpublished until the next five-build block reaches the ten-build publication boundary.
+- [x] B04: preserve populated and empty APU CSV browser downloads and expose a prepared-file fallback without revoking the object URL immediately.
+- [x] B05: preserve a usable main workspace at 761–1024 pixels while retaining desktop dock resizing, mobile fullscreen, close/collapse behavior and focus return.
+- [ ] Pass the complete exact-head repository build and local release gate, push the five-build block, and keep it unpublished until the next five-build block reaches the ten-build publication boundary.
 
