@@ -5,9 +5,10 @@ export const ASSISTANT_WIDTH_DEFAULT = 352;
 export const ASSISTANT_WIDTH_MAX = 680;
 export const ASSISTANT_WIDTH_STEP = 20;
 export const ASSISTANT_FULLSCREEN_BREAKPOINT = 760;
+export const ASSISTANT_WORKSPACE_MIN = 320;
 
 export function clampAssistantWidth(width: number, viewportWidth = Number.POSITIVE_INFINITY) {
-  const viewportLimit = Number.isFinite(viewportWidth) ? Math.max(ASSISTANT_WIDTH_MIN, viewportWidth - 320) : ASSISTANT_WIDTH_MAX;
+  const viewportLimit = Number.isFinite(viewportWidth) ? Math.max(ASSISTANT_WIDTH_MIN, viewportWidth - ASSISTANT_WORKSPACE_MIN) : ASSISTANT_WIDTH_MAX;
   return Math.round(Math.min(Math.max(width, ASSISTANT_WIDTH_MIN), ASSISTANT_WIDTH_MAX, viewportLimit));
 }
 
@@ -26,6 +27,10 @@ export function fitAssistantWidthToViewport(width: number, viewportWidth: number
 
 export function assistantWorkspaceMode(viewportWidth: number) {
   return viewportWidth <= ASSISTANT_FULLSCREEN_BREAKPOINT ? "fullscreen" as const : "split" as const;
+}
+
+export function assistantMainWorkspaceWidth(panelWidth: number, viewportWidth: number) {
+  return assistantWorkspaceMode(viewportWidth) === "fullscreen" ? 0 : viewportWidth - fitAssistantWidthToViewport(panelWidth, viewportWidth);
 }
 
 export function readAssistantWorkspace(storage: Pick<Storage, "getItem"> | null) {

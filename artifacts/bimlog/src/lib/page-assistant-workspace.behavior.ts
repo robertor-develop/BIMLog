@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { ASSISTANT_WIDTH_DEFAULT, assistantWidthFromPointer, assistantWorkspaceMode, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
+import { ASSISTANT_WIDTH_DEFAULT, ASSISTANT_WORKSPACE_MIN, assistantMainWorkspaceWidth, assistantWidthFromPointer, assistantWorkspaceMode, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
 
 assert.equal(clampAssistantWidth(120), 320);
 assert.equal(clampAssistantWidth(900), 680);
@@ -12,6 +12,9 @@ assert.equal(fitAssistantWidthToViewport(680,980),660);
 assert.equal(fitAssistantWidthToViewport(680,390),680);
 assert.equal(assistantWorkspaceMode(761),"split");
 assert.equal(assistantWorkspaceMode(760),"fullscreen");
+assert.equal(assistantMainWorkspaceWidth(680,761),ASSISTANT_WORKSPACE_MIN);
+assert.equal(assistantMainWorkspaceWidth(352,900),548);
+assert.equal(assistantMainWorkspaceWidth(352,1024),672);
 assert.deepEqual(readAssistantWorkspace(null), { width: ASSISTANT_WIDTH_DEFAULT, dock: "right", collapsed: false });
 
 const values = new Map<string,string>();
