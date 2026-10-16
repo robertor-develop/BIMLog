@@ -5849,3 +5849,14 @@ External Stripe and SendGrid configuration and the thirteen unrecovered legacy b
 The fixtures are unmistakably synthetic and disposable. They do not touch production data or claim deployed Chrome acceptance.
 The generated platform inventory and Living Brief state must remain exact-head synchronized and clean at push.
 
+## Recovery GA authenticated-evidence Block 2 — 2026-10-16
+
+- [x] Prove active convention save, ordered field persistence, readback and nonmember denial through mounted authenticated routes.
+- [x] Prove completed conventions reject destructive partial saves and read-only actors cannot mutate them.
+- [x] Repair convention-version mutation authorization and prove authoritative empty latest-version readback with read-only mutation denial.
+- [x] Prove all four file-custody states and exact missing-legacy download behavior through mounted authenticated routes.
+- [x] Bind the complete second block to real PostgreSQL/HTTP evidence plus the existing naming, governed-template, EDT and Intake regressions.
+- [ ] Pass the exact-head full build, push the block, publish the completed ten-build interval, and run authenticated production Chrome smoke.
+
+The thirteen unrecovered protected legacy binaries and external owner-supplied Stripe/SendGrid configuration remain explicit limitations; this block does not invent or replace them.
+
