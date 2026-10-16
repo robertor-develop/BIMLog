@@ -3,6 +3,7 @@ import express from "express";
 import { pool } from "@workspace/db";
 import projectsRouter from "../routes/projects";
 import companyMasterCatalogsRouter from "../routes/company-master-catalogs";
+import projectDirectoryRouter from "../routes/project_directory";
 import { signToken } from "../middlewares/auth";
 import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
 
@@ -28,7 +29,7 @@ await pool.query(`INSERT INTO company_master_catalog_administrators(id,company_i
   ('00000000-0000-4000-8000-000000000011',$1,$2,$2)`, [companyId, user.get("admin@example.test")!.id]);
 
 const token = (email: string) => signToken({ userId: user.get(email)!.id, email, companyId: user.get(email)!.companyId, fullName: email, companyName: "Synthetic", isSuperAdmin: false });
-const app = express(); app.use(express.json({ limit: "32kb" })); app.use("/api/v1", projectsRouter); app.use("/api/v1", companyMasterCatalogsRouter);
+const app = express(); app.use(express.json({ limit: "32kb" })); app.use("/api/v1", projectsRouter); app.use("/api/v1", companyMasterCatalogsRouter); app.use("/api/v1", projectDirectoryRouter);
 const server = await new Promise<ReturnType<typeof app.listen>>((resolve) => { const value = app.listen(0, "127.0.0.1", () => resolve(value)); });
 const address = server.address(); if (!address || typeof address === "string") throw new Error("HTTP evidence server did not bind.");
 const request = async (path: string, email?: string, init: RequestInit = {}) => {
@@ -60,6 +61,21 @@ try {
     const deniedWrite = await request("/company/master-catalogs/discipline", "reader@example.test", { method: "POST", body: JSON.stringify({ code: "ARC", name: "Architecture" }) });
     assert.equal(deniedWrite.status, 403);
     checks.catalog = { create: 201, readerRead: 200, tenantIsolation: true, unauthorizedWrite: 403 };
+  }
+  if (scenario === "directory" || scenario === "all") {
+    const seeded = await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('Synthetic Directory Project','GA-DIR-001','active',$1) RETURNING id`, [user.get("admin@example.test")!.id]);
+    const projectId = Number(seeded.rows[0].id);
+    await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active'),($1,$3,'read_only','active')`, [projectId, user.get("admin@example.test")!.id, user.get("reader@example.test")!.id]);
+    const company = await request(`/projects/${projectId}/directory/companies`, "admin@example.test", { method: "POST", body: JSON.stringify({ company_name: "Synthetic Directory Company", industry: "Testing" }) });
+    assert.equal(company.status, 201); const directoryCompanyId = Number(company.body.id); assert.ok(directoryCompanyId > 0);
+    const repeated = await request(`/projects/${projectId}/directory/companies`, "admin@example.test", { method: "POST", body: JSON.stringify({ company_name: "Synthetic Directory Company" }) });
+    assert.equal(repeated.status, 200); assert.equal(Number(repeated.body.id), directoryCompanyId);
+    const contact = await request(`/projects/${projectId}/directory/contacts`, "admin@example.test", { method: "POST", body: JSON.stringify({ full_name: "Synthetic Contact", company_id: directoryCompanyId, role: "Coordinator" }) });
+    assert.equal(contact.status, 201); const contactId = Number(contact.body.id); assert.ok(contactId > 0);
+    const listing = await request(`/projects/${projectId}/directory`, "reader@example.test"); assert.equal(listing.status, 200); assert.ok(listing.body.some((row: any) => Number(row.id) === contactId));
+    const denied = await request(`/projects/${projectId}/directory/companies`, "reader@example.test", { method: "POST", body: JSON.stringify({ company_name: "Forbidden Company" }) }); assert.equal(denied.status, 403);
+    assert.equal((await request(`/projects/${projectId}/directory`, "outsider@example.test")).status, 403);
+    checks.directory = { companyCreate: 201, idempotentReuse: 200, contactCreate: 201, memberRead: 200, readOnlyWrite: 403, outsider: 403 };
   }
 } finally {
   await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
