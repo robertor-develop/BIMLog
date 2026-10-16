@@ -5877,3 +5877,16 @@ The final reconciliation commit is release evidence and does not add a sixth pro
 - [ ] Push this complete five-build block once. Keep it unpublished until the next five-build block reaches the ten-build publication boundary.
 
 No production or protected-project mutation occurred. The authenticated production Convention Builder Agent retest against release `3b69cdd28128dc501f542662129d5b2739f47848` returned the exact visible version `1`, closing that prior smoke defect.
+
+## Protected-file recovery closure Block 7 — B-GA005R1–B-GA005R5 — 2026-10-16
+
+- [x] Reconcile the authenticated production custody API to 16 non-portable protected records: two IBQ-LIT and fourteen ELA01.
+- [x] Require exact filename, byte length and authoritative SHA-256 before any original is eligible for restoration.
+- [x] Search F:, Roberto's user profile and reachable Git history read-only; preserve no-match receipts without claiming backup exhaustion.
+- [x] Keep provider snapshot/PITR and provider object-version sources explicitly unresolved because governed read-only evidence is not currently visible.
+- [x] Generate a dry-run-only restoration plan that creates new custody objects only for verified originals, never overwrites existing custody, and blocks stale record identity.
+- [ ] Obtain authoritative provider recovery-window and object-version evidence or verified original files for all 16 records.
+- [ ] Execute restoration only after the complete dry run is independently accepted; then close B-GA005, B-GA034 and B-GA035 through real production evidence.
+- [ ] Push this five-build block, publish the completed ten-build interval with B-GA031–B-GA035, and run authenticated desktop/mobile Chrome smoke.
+
+The previous 13-record summary is superseded for current recovery planning. Historical receipts remain preserved as historical evidence. No protected project or file record was mutated.

@@ -16,10 +16,10 @@ const reviewedChangedPaths = [...changed].sort();
 const declarationsPath = path.join(root, "living-brief", "impact-declarations.json");
 const declarations = JSON.parse(fs.readFileSync(declarationsPath, "utf8"));
 const authorityKeys = declarations.reviews.at(-1).authorities.map(({ key }) => key);
-const reason = "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed.";
+const reason = "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed.";
 const updated = new Set(["status", "open_loop"]);
 declarations.reviews.push({
-  taskId: "recovery-ga-final-block06-20261016",
+  taskId: "protected-file-recovery-closure-block07-20261016",
   reviewedThroughCommit,
   reviewedAt: new Date().toISOString(),
   status: "local_candidate",
