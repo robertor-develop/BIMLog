@@ -1,0 +1,23 @@
+{
+  "block": 4,
+  "programBuilds": ["B-GA026", "B-GA027", "B-GA028", "B-GA029", "B-GA030"],
+  "scope": ["apu_lifecycle", "forecast_lifecycle", "reports", "analytics", "approved_integrations"],
+  "syntheticFixturesOnly": true,
+  "productionDataMutations": 0,
+  "protectedProjectsChanged": false,
+  "legacyMissingBinariesClaimedRecovered": false,
+  "nativeAffectedModelAcceptanceClaimed": false,
+  "publicationCadence": {
+    "blockBuilds": 5,
+    "combinedUnpublishedBuilds": 10,
+    "publishNow": true,
+    "authenticatedChromeSmokeRequired": true
+  },
+  "acceptance": {
+    "apu": "pass",
+    "forecast": "pass",
+    "reports": "pass",
+    "analytics": "pass",
+    "approvedIntegrations": "pass"
+  }
+}
