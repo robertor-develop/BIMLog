@@ -1,0 +1,22 @@
+{
+  "block": 3,
+  "programBuilds": ["B-GA021", "B-GA022", "B-GA023", "B-GA024", "B-GA025"],
+  "scope": ["rfi_lifecycle", "submittal_lifecycle", "transmittal_delivery", "changes_and_meetings", "schedule_and_sprints"],
+  "syntheticFixturesOnly": true,
+  "productionDataMutations": 0,
+  "protectedProjectsChanged": false,
+  "legacyMissingBinariesClaimedRecovered": false,
+  "publicationCadence": {
+    "blockBuilds": 5,
+    "combinedUnpublishedBuilds": 5,
+    "publishNow": false,
+    "publishAfterNextBlock": true
+  },
+  "acceptance": {
+    "rfi": "pass",
+    "submittal": "pass",
+    "transmittal": "pass_after_delivery_truth_fix",
+    "changesAndMeetings": "pass",
+    "schedule": "pass"
+  }
+}
