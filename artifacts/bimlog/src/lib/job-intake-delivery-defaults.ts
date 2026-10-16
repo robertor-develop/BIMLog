@@ -26,3 +26,22 @@ export function selectDeliveryWorkflow(current: any, workflowTemplate: string) {
     milestoneSummary: replaceMilestones ? next.milestoneSummary : current.milestoneSummary,
   };
 }
+
+type WorkflowDefinition = {
+  phases: Array<{ name: string; tasks: Array<{ name?: string }> }>;
+};
+
+export function selectPublishedDeliveryWorkflow(current: any, option: { versionId: string; definition: WorkflowDefinition } | null) {
+  if (!option) return { ...current, deliveryWorkflowVersionId: "" };
+  const taskNames = option.definition.phases.flatMap(phase => phase.tasks.map(task => String(task.name ?? "").trim()).filter(Boolean));
+  const strategy = taskNames.join(" → ");
+  const milestones = option.definition.phases.map(phase => phase.name.trim()).filter(Boolean).join(" → ");
+  const priorGenerated = current?.deliveryWorkflowDerivedFromVersionId && current.deliveryWorkflowDerivedFromVersionId === current.deliveryWorkflowVersionId;
+  return {
+    ...current,
+    deliveryWorkflowVersionId: option.versionId,
+    submittalStrategy: !String(current?.submittalStrategy ?? "").trim() || priorGenerated ? strategy : current.submittalStrategy,
+    milestoneSummary: !String(current?.milestoneSummary ?? "").trim() || priorGenerated ? milestones : current.milestoneSummary,
+    deliveryWorkflowDerivedFromVersionId: option.versionId,
+  };
+}

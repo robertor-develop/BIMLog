@@ -3,6 +3,7 @@ import { compatibleApuVersions, type IntakeApuVersion } from "../../lib/job-inta
 import { ArrowUp, ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
+import { selectPublishedDeliveryWorkflow } from "../../lib/job-intake-delivery-defaults";
 import { changeContractItemRate, manualContractRateSource } from "../../lib/contract-item-rate-source";
 
 type Translate = (en: string, es: string) => string;
@@ -19,7 +20,7 @@ type Props = {
   deliveryWorkflowOptions?: Array<{ versionId: string; name: string; source: string; version: number;
     governancePolicy?: { code: string; version: number } | null;
     activationBlock?: { code: string; message: string } | null;
-    definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: unknown[] }> } }>;
+    definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: Array<{ name?: string }> }> } }>;
   deliveryWorkflowMode?: "approved_only" | "defaults_allowed";
   capabilities: { costValuePlanner: boolean; budget: boolean };
   contracts: any[];
@@ -609,7 +610,10 @@ export function ContractItemBulkEditor(props: Props) {
               </label>
               <label>
                 {props.tt("Delivery Workflow version", "Versión del flujo de entrega")}
-                <select value={item.deliveryWorkflowVersionId || ""} onChange={event => update(index, { deliveryWorkflowVersionId: event.target.value })}>
+                <select value={item.deliveryWorkflowVersionId || ""} onChange={event => {
+                  const option = (props.deliveryWorkflowOptions ?? []).find(candidate => candidate.versionId === event.target.value) ?? null;
+                  update(index, selectPublishedDeliveryWorkflow(item, option));
+                }}>
                   <option value="">{props.tt("Auto-select when exactly one is applicable", "Selección automática si solo hay una opción aplicable")}</option>
                   {item.deliveryWorkflowVersionId && intakeWorkflowPreview(props.deliveryWorkflowOptions ?? [], item.deliverableType || "GENERAL", item.deliveryWorkflowVersionId).unavailableSavedVersion && <option value={item.deliveryWorkflowVersionId}>{props.tt("Saved version unavailable — select a replacement", "Versión guardada no disponible — seleccione un reemplazo")}</option>}
                   {(props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")).map(option => <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.source === "company" ? props.tt("Company", "Empresa") : "BIMLog"}{option.activationBlock ? ` · ${props.tt("Blocked by policy", "Bloqueado por política")}` : ""}</option>)}

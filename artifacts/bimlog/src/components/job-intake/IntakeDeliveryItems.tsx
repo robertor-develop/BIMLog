@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
 import { applyShopDrawingPreset, deriveShopDrawingPackages } from "../../lib/shop-drawing-delivery";
+import { selectPublishedDeliveryWorkflow } from "../../lib/job-intake-delivery-defaults";
 type Props = {
   items: any[];
   setItems: (updater: (items: any[]) => any[]) => void;
@@ -8,7 +9,7 @@ type Props = {
   deliveryWorkflowOptions?: Array<{ versionId: string; name: string; source: string; version: number;
     governancePolicy?: { code: string; version: number } | null;
     activationBlock?: { code: string; message: string } | null;
-    definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: unknown[] }> } }>;
+    definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: Array<{ name?: string }> }> } }>;
   deliveryWorkflowMode?: "approved_only" | "defaults_allowed";
   bimtechEligible?: boolean;
   scopeStructure?: { levels?: any[] };
@@ -58,7 +59,10 @@ export function IntakeDeliveryItems(props: Props) {
               </label>
               <label>
                 {props.tt("Delivery Workflow version", "Versión del flujo de entrega")}
-                <select value={item.deliveryWorkflowVersionId || ""} onChange={event => update(index, { deliveryWorkflowVersionId: event.target.value })}>
+                <select value={item.deliveryWorkflowVersionId || ""} onChange={event => {
+                  const option = (props.deliveryWorkflowOptions ?? []).find(candidate => candidate.versionId === event.target.value) ?? null;
+                  update(index, selectPublishedDeliveryWorkflow(item, option));
+                }}>
                   <option value="">{props.tt("Auto-select when exactly one is applicable", "Selección automática si solo hay una opción aplicable")}</option>
                   {item.deliveryWorkflowVersionId && intakeWorkflowPreview(props.deliveryWorkflowOptions ?? [], item.deliverableType || "GENERAL", item.deliveryWorkflowVersionId).unavailableSavedVersion && <option value={item.deliveryWorkflowVersionId}>{props.tt("Saved version unavailable — select a replacement", "Versión guardada no disponible — seleccione un reemplazo")}</option>}
                   {(props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")).map(option => <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.source === "company" ? props.tt("Company", "Empresa") : "BIMLog"}{option.activationBlock ? ` · ${props.tt("Blocked by policy", "Bloqueado por política")}` : ""}</option>)}
@@ -69,6 +73,9 @@ export function IntakeDeliveryItems(props: Props) {
                   {selected.activationBlock && <small role="alert">{props.tt("Activation blocked by published Governance Policy", "Activación bloqueada por la política de gobernanza publicada")}: {selected.activationBlock.code}</small>}
                 </> : <small role="alert">{props.deliveryWorkflowMode === "approved_only" && matches.length === 0 ? props.tt("Company PMO must publish a matching workflow before activation.", "PMO debe publicar un flujo compatible antes de activar.") : props.tt("Select one company workflow before activation.", "Seleccione un flujo de empresa antes de activar.")}</small>; })()}
               </label>
+
+              <label>{props.tt("Submittal strategy", "Estrategia de submittals")}<textarea value={item.submittalStrategy ?? ""} onChange={event => update(index, { submittalStrategy: event.target.value })}/></label>
+              <label>{props.tt("Milestones and distribution", "Hitos y distribución")}<textarea value={item.milestoneSummary ?? ""} onChange={event => update(index, { milestoneSummary: event.target.value })}/></label>
 
 </div></div>)}
  {props.items.some(item => item.deliverableType === "SHOP_DRAWING") && <button type="button" onClick={() => props.setItems(items => items.map(item => item.deliverableType !== "SHOP_DRAWING" ? item : ({...item, workPackages:deriveShopDrawingPackages({scopeItemId:item.id,existing:item.workPackages,levels:props.scopeStructure?.levels ?? [],disciplines:props.projectDisciplines ?? []})})))}>{props.tt("Build selected floor × discipline shop drawing plan", "Crear plan de planos por piso × disciplina seleccionados")}</button>}
