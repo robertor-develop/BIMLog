@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "b3110effd87fef219db2d5739e5b9d235a4a34283ec0c4bf080cf3425612563e",
-  "itemCount": 414,
+  "sourceSha256": "021cf2cf4c9ef5946852ef2791f5fc3efe7bd1d440018a9f6a4a033cb0b8fe7b",
+  "itemCount": 417,
   "counts": {
-    "ACTIVE": 370,
+    "ACTIVE": 373,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7537,6 +7537,60 @@
       "evidence": [
         "OPEN_LOOP.md:5866",
         "Recovery GA authenticated-evidence Block 2 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "9a759a1b5ae495f6",
+      "sourceLine": 5874,
+      "heading": "Recovery and GA-readiness Block 6 — B-GA031–B-GA035 — 2026-10-16",
+      "statement": "B-GA034 execution: delete the temporary Gauntlet project only after complete synthetic ownership, dependency, storage-object and audit evidence is independently accepted.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5874",
+        "Recovery and GA-readiness Block 6 — B-GA031–B-GA035 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f7a1ed52ded81f11",
+      "sourceLine": 5876,
+      "heading": "Recovery and GA-readiness Block 6 — B-GA031–B-GA035 — 2026-10-16",
+      "statement": "B-GA035 acceptance: recover and independently verify the thirteen protected legacy binaries, close B-GA034 safely, and complete exact-three final production acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5876",
+        "Recovery and GA-readiness Block 6 — B-GA031–B-GA035 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3928e6366bd73057",
+      "sourceLine": 5877,
+      "heading": "Recovery and GA-readiness Block 6 — B-GA031–B-GA035 — 2026-10-16",
+      "statement": "Push this complete five-build block once. Keep it unpublished until the next five-build block reaches the ten-build publication boundary.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5877",
+        "Recovery and GA-readiness Block 6 — B-GA031–B-GA035 — 2026-10-16"
       ],
       "currentAuthority": false
     }

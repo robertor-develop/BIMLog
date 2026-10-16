@@ -70010,6 +70010,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "32333e998759e414173a600af225cf23fef82abd26627a030012be4e13a8659c"
+    },
+    {
+      "taskId": "recovery-ga-final-block06-20261016",
+      "reviewedThroughCommit": "aef9d77478c06bd418da97b5959b891c8784014d",
+      "reviewedAt": "2026-10-16T14:37:40.284Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed."
+        }
+      ],
+      "reason": "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/record-release-integrity-review.mjs"
+      ],
+      "reviewedChangeSha256": "d83f2f2b883bb080a9843cb52c7f0e8767dd2aff25310de5600717702a010255"
     }
   ]
 }
