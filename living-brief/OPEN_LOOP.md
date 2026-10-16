@@ -5864,3 +5864,16 @@ The final reconciliation commit is release evidence and does not add a sixth pro
 
 - [x] Expose the already-visible active Convention Builder summary to the allowlisted BIMLog Agent page context (`3190f830`).
 - [ ] Pass the repaired exact-head build, republish, and repeat the authenticated production Agent question until the visible convention version is returned.
+
+## Recovery and GA-readiness Block 6 — B-GA031–B-GA035 — 2026-10-16
+
+- [x] B-GA031: pass authenticated mounted HTTP/database security and isolation plus the complete object-authority matrix.
+- [x] B-GA032: pass the exact responsive Agent route matrix, keyboard/focus labels, touch targets and reduced-motion contracts.
+- [x] B-GA033: pass retry, rollback, provider, tenant, integration, upload, autosave, deployment and commercial recovery behaviors.
+- [x] B-GA034 gate: keep temporary-project deletion fail-closed and prove the project is untouched while custody evidence is incomplete.
+- [ ] B-GA034 execution: delete the temporary Gauntlet project only after complete synthetic ownership, dependency, storage-object and audit evidence is independently accepted.
+- [x] B-GA035 gate: emit a deterministic blocked final-GA verdict instead of claiming unsupported acceptance.
+- [ ] B-GA035 acceptance: recover and independently verify the thirteen protected legacy binaries, close B-GA034 safely, and complete exact-three final production acceptance.
+- [ ] Push this complete five-build block once. Keep it unpublished until the next five-build block reaches the ten-build publication boundary.
+
+No production or protected-project mutation occurred. The authenticated production Convention Builder Agent retest against release `3b69cdd28128dc501f542662129d5b2739f47848` returned the exact visible version `1`, closing that prior smoke defect.

@@ -16,10 +16,10 @@ const reviewedChangedPaths = [...changed].sort();
 const declarationsPath = path.join(root, "living-brief", "impact-declarations.json");
 const declarations = JSON.parse(fs.readFileSync(declarationsPath, "utf8"));
 const authorityKeys = declarations.reviews.at(-1).authorities.map(({ key }) => key);
-const reason = "Recovery GA evidence Block 2 proves convention, version authorization and file custody through authenticated mounted routes and disposable PostgreSQL while retaining governed template, EDT and Intake regressions without production mutation.";
+const reason = "Recovery GA Block 6 verifies authenticated isolation, responsive accessibility and failure recovery while keeping temporary-project deletion and final GA fail-closed until complete custody and protected-binary evidence exists; no production data changed.";
 const updated = new Set(["status", "open_loop"]);
 declarations.reviews.push({
-  taskId: "recovery-ga-authenticated-evidence-block02-20261016",
+  taskId: "recovery-ga-final-block06-20261016",
   reviewedThroughCommit,
   reviewedAt: new Date().toISOString(),
   status: "local_candidate",
