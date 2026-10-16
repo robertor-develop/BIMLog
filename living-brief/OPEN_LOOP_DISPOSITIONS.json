@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3078cf0084c46f1c46bf3cc41c8c5d94e61b9e9cd430cd918f42930e0316e5d7",
-  "itemCount": 421,
+  "sourceSha256": "a8084b7b3b65122202e5171eaa808807e0f4d9d87a31ab87e036021b40c906f7",
+  "itemCount": 424,
   "counts": {
-    "ACTIVE": 377,
+    "ACTIVE": 380,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7663,6 +7663,60 @@
       "evidence": [
         "OPEN_LOOP.md:5901",
         "Lorena P1 correction block — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "4d01e80f95a1324f",
+      "sourceLine": 5908,
+      "heading": "Lorena P1 release repair Block 1 — 2026-10-16",
+      "statement": "B04: repair and browser-verify populated and empty APU CSV exports, including the prepared-file fallback.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5908",
+        "Lorena P1 release repair Block 1 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d96393913c38f733",
+      "sourceLine": 5909,
+      "heading": "Lorena P1 release repair Block 1 — 2026-10-16",
+      "statement": "B05: preserve a usable main workspace at 761–1024 pixels while retaining desktop dock resizing, mobile fullscreen, close/collapse behavior and focus return.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5909",
+        "Lorena P1 release repair Block 1 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f48010ae7767816a",
+      "sourceLine": 5910,
+      "heading": "Lorena P1 release repair Block 1 — 2026-10-16",
+      "statement": "After B05, pass the complete exact-head repository build and local release gate, push the five-build block, and keep it unpublished until the next five-build block reaches the ten-build publication boundary.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5910",
+        "Lorena P1 release repair Block 1 — 2026-10-16"
       ],
       "currentAuthority": false
     }
