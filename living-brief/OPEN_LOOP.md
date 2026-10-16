@@ -5741,6 +5741,8 @@ The exact original bytes are an external recovery input and cannot be reconstruc
 
 B-GA016–B-GA020 complete the second five-build block and the ten-build publication interval with GA-F01-B001–B005. The exact-head release gate, one push, controlled publication and authenticated Chrome smoke are required. The thirteen protected legacy binaries remain an external recovery and final-GA blocker; this block does not claim their recovery.
 
+Release repair `9919ab03` restores the Replit development API workflow by resolving `app.ts` under `tsx` while retaining the production `app.mjs` bundle target. The failure occurred before publication, changed no production data, and is protected by a dedicated development/production bootstrap gate. Exact-head release checks, Replit restart and health, publication and Chrome smoke must be repeated.
+
 The currently connected Chrome session showed the public signed-out landing page. This blocks authenticated live testing only. The new reconciliation tools perform no production reads or writes and their fixtures are explicitly synthetic. Work on B-GA006/007/008/016/017 does not yet constitute five accepted builds; no new push/publication or GA claim is recorded. Changes are preserved in the working tree pending remaining implementation and release verification.
 
 ## MAIN 04 production-recovery acceptance — 2026-10-15

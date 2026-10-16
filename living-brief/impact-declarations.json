@@ -68771,6 +68771,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b9929ec5d36a5b062a515f482298c4bb7c9ce9b41b0b4ce4043a8d48ee73150a"
+    },
+    {
+      "taskId": "replit-api-development-bootstrap-repair",
+      "reviewedThroughCommit": "9919ab03a0eb54274f81e0be6858d064fa0b1739",
+      "reviewedAt": "2026-10-16T00:57:10Z",
+      "status": "local_candidate",
+      "captureTiming": "blocking_gate_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates."
+        }
+      ],
+      "reason": "Replit pre-publication restart exposed a development-only bootstrap target mismatch. The bounded repair selects app.ts only under tsx development and preserves the production app.mjs bundle target. No product behavior or production data changed; STATUS and OPEN_LOOP retain all external recovery and live-acceptance gates.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "374f024d6f740ee672e6b1a524439edcc198dad3aa426d70bb733fedaafea993"
     }
   ]
 }
