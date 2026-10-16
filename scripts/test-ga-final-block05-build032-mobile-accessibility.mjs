@@ -45,4 +45,4 @@ for (const token of ["aria-label", "aria-live", "Resize BIMLog Agent panel", "ar
   assert.ok(assistant.includes(token), `BIMLog Agent mobile/accessibility contract missing ${token}`);
 }
 
-console.log("GA-F05-B032 exact 390x844 surface inventory, keyboard/focus semantics, announcements, touch navigation and reduced motion: PASS");
+console.log("GA-F05-B032 STRUCTURAL PASS: accessibility contracts present; rendered 390x844/keyboard/screen-reader acceptance UNTESTED");

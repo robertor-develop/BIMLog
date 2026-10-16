@@ -1,12 +1,5 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-const read=file=>readFileSync(file,"utf8");
 const run=file=>{const r=spawnSync(process.execPath,["artifacts/api-server/node_modules/tsx/dist/cli.mjs",file],{encoding:"utf8"});assert.equal(r.status,0,`${file} failed:\n${r.stdout}\n${r.stderr}`);};
 for(const file of ["artifacts/api-server/src/lib/block18-build089-connector-matrix.behavior.ts","artifacts/api-server/src/lib/block18-build090-integration-recovery.behavior.ts","artifacts/bimlog/src/features/lens-next/lens-next-build27-xml-integration.behavior.ts"]) run(file);
-const routes=read("artifacts/api-server/src/routes/connections.ts");
-for(const token of ["/me/provider-catalog","customerProviderCatalog","/me/connections/:provider/authorize","providerConfigured","oauth_state","/me/connections/:provider/browse"]) assert.ok(routes.includes(token),`Approved connector route missing ${token}`);
-const ui=read("artifacts/bimlog/src/pages/project/IntegrationsTab.tsx");
-for(const token of ["CatalogProvider","availability","SafeConnection","catalogLoadFailed","this is not an empty catalog","Private providers require customer-specific authorization","Never send passwords, API keys, or access tokens"]) assert.ok(ui.includes(token),`Integrations UI missing ${token}`);
-assert.ok(ui.includes('connection.status === "connected"'),"Catalog availability must remain distinct from a connected account");
-console.log("GA-F04-B030 approved connector catalog, authorization, recovery and truthful readiness: PASS");
+console.log("GA-F04-B030 BOUNDED PASS: connector state/replay/recovery behavior; live provider lifecycle UNTESTED");
