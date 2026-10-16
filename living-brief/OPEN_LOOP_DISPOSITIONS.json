@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a6c7ccafbf9aa0a834baec5aa568f6a41b92e4d77c66b811cfdb2a0cfaf62215",
-  "itemCount": 423,
+  "sourceSha256": "cdb75de30214f30c20df5288df780ee780c57aee580bd2bd9f1affa80243db59",
+  "itemCount": 422,
   "counts": {
-    "ACTIVE": 379,
+    "ACTIVE": 378,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7663,24 +7663,6 @@
       "evidence": [
         "OPEN_LOOP.md:5901",
         "Lorena P1 correction block — 2026-10-16"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "03986724781e4467",
-      "sourceLine": 5910,
-      "heading": "Lorena P1 release repair Block 1 — 2026-10-16",
-      "statement": "Pass the complete exact-head repository build and local release gate, push the five-build block, and keep it unpublished until the next five-build block reaches the ten-build publication boundary.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:5910",
-        "Lorena P1 release repair Block 1 — 2026-10-16"
       ],
       "currentAuthority": false
     },
