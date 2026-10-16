@@ -9,5 +9,6 @@ for(const marker of ["data-dock={dock}","data-collapsed={collapsed}","page-assis
 assert.match(css,/@media\(max-width:480px\)/);
 assert.match(css,/font-size:16px/);
 assert.match(css,/safe-area-inset-bottom/);
-assert.match(css,/page-assistant-actions\{grid-template-columns:repeat\(3,minmax\(116px,1fr\)\);overflow-x:auto/);
+assert.match(css,/page-assistant-actions\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\);overflow-x:hidden/);
+assert.match(css,/page-assistant-actions button\{min-width:0;white-space:normal;overflow-wrap:anywhere/);
 console.log("page assistant responsive workspace: pass");

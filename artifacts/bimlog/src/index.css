@@ -1481,11 +1481,12 @@ body.bimlog-assistant-docked[data-assistant-collapsed="true"][data-assistant-doc
 @media(max-width:900px){.page-assistant-panel>header{min-height:74px}.page-assistant-recommended{padding:9px 12px}.page-assistant-actions,.page-assistant-question form,.page-assistant-status-strip{padding-left:12px!important;padding-right:12px!important}.page-assistant-section{margin-left:12px;margin-right:12px}.page-assistant-messages{margin-left:12px!important;margin-right:12px!important}}
 @media(max-width:480px){
   .page-assistant-panel{padding-bottom:env(safe-area-inset-bottom);max-width:100vw}
-  .page-assistant-actions{grid-template-columns:repeat(3,minmax(116px,1fr));overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin}
+  .page-assistant-actions{grid-template-columns:repeat(3,minmax(0,1fr));overflow-x:hidden}
+  .page-assistant-actions button{min-width:0;white-space:normal;overflow-wrap:anywhere}
   .page-assistant-question textarea{font-size:16px}
   .page-assistant-form-actions{grid-template-columns:minmax(0,1fr) auto}
   .page-assistant-form-actions button{white-space:normal;line-height:1.15}
-  .page-assistant-status-strip{grid-template-columns:repeat(3,minmax(112px,1fr));overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-width:thin}
+  .page-assistant-status-strip{grid-template-columns:repeat(3,minmax(0,1fr));overflow-x:hidden}
   .page-assistant-status-strip>div{min-width:0}
 }
 

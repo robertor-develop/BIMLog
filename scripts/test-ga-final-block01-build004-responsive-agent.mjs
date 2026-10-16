@@ -9,7 +9,7 @@ assert.match(css, /@media\(max-width:760px\)\{[^}]*body\.bimlog-assistant-docked
 assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.page-assistant-panel\{inset:0!important;width:100vw!important;max-width:100vw;min-width:0;height:100dvh!important/);
 assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.page-assistant-resize-handle\{display:none\}/);
 assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.page-assistant-question textarea\{min-height:88px;font-size:16px\}/);
-assert.match(css, /\.page-assistant-status-strip\{grid-template-columns:repeat\(3,minmax\(112px,1fr\)\);overflow-x:auto/);
+assert.match(css, /\.page-assistant-status-strip\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\);overflow-x:hidden/);
 assert.match(panel, /aria-label=\{voiceListening\?tt\("Stop dictation","Detener dictado"\):tt\("Dictate your question","Dictar tu pregunta"\)\}/);
 assert.match(panel, /aria-live="polite" aria-busy=\{busy\}/);
 assert.match(panel, /aria-keyshortcuts="Alt\+Shift\+A"/);
