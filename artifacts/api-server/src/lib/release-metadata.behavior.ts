@@ -13,7 +13,7 @@ const environment = {
   BIMLOG_DATABASE_MIGRATION_LEVEL: "delivery-workflow-v1",
 };
 const metadata = resolveReleaseMetadata(environment);
-assert.equal(metadata.release, "v1.05.N18-P34");
+assert.equal(metadata.release, "v1.05.N18-P37");
 assert.equal(metadata.sourceCommit, commit);
 assert.equal(metadata.assetManifestSha256, asset);
 assert.equal(metadata.bound, true);

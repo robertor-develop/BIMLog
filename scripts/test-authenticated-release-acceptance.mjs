@@ -5,10 +5,10 @@ const sha = "a".repeat(64), commit = "b".repeat(40), tree = "c".repeat(40);
 const valid = {
   schemaVersion: "bimlog-authenticated-release-acceptance-v1",
   status: "PASS",
-  release: "v1.05.N18-P34",
+  release: "v1.05.N18-P37",
   source: { commit, tree },
   provider: { sourceTree: tree, publicationReceiptId: "provider-receipt" },
-  live: { healthStatus: 200, release: "v1.05.N18-P34", sourceCommit: commit, assetManifestSha256: sha, packageId: "bimlog-package", databaseMigrationLevel: "schema-contract", identityBound: true },
+  live: { healthStatus: 200, release: "v1.05.N18-P37", sourceCommit: commit, assetManifestSha256: sha, packageId: "bimlog-package", databaseMigrationLevel: "schema-contract", identityBound: true },
   assets: { manifestSha256: sha, sessionCoordinatorAssets: [{ path: "/assets/index.js", packageSha256: sha, servedSha256: sha }] },
   actors: {
     superAdmin: { authenticated: true, totalControl: true, livingBrief: true },
