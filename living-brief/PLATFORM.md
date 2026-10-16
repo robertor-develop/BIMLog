@@ -1416,6 +1416,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/workflow-governance-role-authority.ts
 - artifacts/api-server/src/lib/workflow-governance-runtime-change.ts
 - artifacts/api-server/src/lib/workflow-governance-threshold.ts
+- artifacts/api-server/src/lib/workflow-phase-hours.behavior.ts
+- artifacts/api-server/src/lib/workflow-phase-hours.ts
 
 ## Agents (artifacts/api-server/src/agents)
 - artifacts/api-server/src/agents/base-agent.ts
