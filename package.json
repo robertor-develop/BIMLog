@@ -46,6 +46,7 @@
     "test:corrective-b01": "node scripts/test-corrective-b01-traceability.mjs",
     "test:corrective-b02": "node scripts/test-corrective-b02-independent-evidence.mjs && node scripts/test-ga-final-block01-build005-acceptance.mjs",
     "test:corrective-b03": "node scripts/test-corrective-b03-behavioral-gates.mjs",
+    "test:corrective-b04": "node scripts/test-corrective-b04-candidate-identity.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
