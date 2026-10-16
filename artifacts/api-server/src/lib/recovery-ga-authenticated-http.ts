@@ -130,6 +130,19 @@ try {
     const reopened = await request(`/projects/${projectId}/conventions`, "reader@example.test"); assert.equal(reopened.status, 200); assert.equal(reopened.body.setupStatus, "completed"); assert.equal(reopened.body.fields.length, 8);
     checks.conventionIntegrity = { completion: 200, destructivePartialSave: 400, readOnlyWrite: 403, preservedFields: 8 };
   }
+  if (scenario === "versions" || scenario === "all") {
+    const seeded = await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('Synthetic Convention Versions','GA-CON-003','active',$1) RETURNING id`, [user.get("admin@example.test")!.id]);
+    const projectId = Number(seeded.rows[0].id);
+    await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active'),($1,$3,'read_only','active')`, [projectId, user.get("admin@example.test")!.id, user.get("reader@example.test")!.id]);
+    const first = await request(`/projects/${projectId}/convention/versions`, "admin@example.test", { method: "POST", body: JSON.stringify({ acceptedDisciplines: [{ code: "ARC", label: "Architecture" }], acceptedDocTypes: [{ code: "DR", label: "Drawing" }], changeSummary: "Synthetic baseline" }) });
+    assert.equal(first.status, 200); assert.equal(first.body.conventionVersion, 1);
+    const latestEmpty = await request(`/projects/${projectId}/convention/versions`, "admin@example.test", { method: "POST", body: JSON.stringify({ acceptedDisciplines: [], acceptedDocTypes: [], changeSummary: "Synthetic empty accepted version" }) });
+    assert.equal(latestEmpty.status, 200); assert.equal(latestEmpty.body.conventionVersion, 2);
+    const denied = await request(`/projects/${projectId}/convention/versions`, "reader@example.test", { method: "POST", body: JSON.stringify({ acceptedDisciplines: [{ code: "BAD", label: "Forbidden" }] }) }); assert.equal(denied.status, 403);
+    const versions = await request(`/projects/${projectId}/convention/versions`, "reader@example.test"); assert.equal(versions.status, 200); assert.equal(versions.body[0].conventionVersion, 2); assert.deepEqual(versions.body[0].acceptedDisciplines, []); assert.equal(versions.body.length, 2);
+    assert.equal((await request(`/projects/${projectId}/convention/versions`, "outsider@example.test")).status, 403);
+    checks.versions = { versions: [2, 1], emptyLatestPreserved: true, readOnlyWrite: 403, outsider: 403 };
+  }
 } finally {
   await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   await pool.end();

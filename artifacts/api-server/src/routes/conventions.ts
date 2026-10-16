@@ -870,7 +870,7 @@ router.get("/projects/:projectId/convention/status", authMiddleware, requireProj
 });
 
 // ── Convention Versions — save snapshot ──────────────────────────────────────
-router.post("/projects/:projectId/convention/versions", authMiddleware, requireProjectMember(), async (req, res) => {
+router.post("/projects/:projectId/convention/versions", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const projectId = parseInt(String(req.params.projectId), 10);
     if (isNaN(projectId)) { res.status(400).json({ error: "Invalid projectId" }); return; }
