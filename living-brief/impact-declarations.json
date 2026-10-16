@@ -69723,6 +69723,78 @@
         "scripts/record-release-integrity-review.mjs"
       ],
       "reviewedChangeSha256": "bbd1f8d9d0210817deea561bb03156576a764089e43da3bb4714ee17c1bca8bc"
+    },
+    {
+      "taskId": "recovery-ga-authenticated-evidence-20261016",
+      "reviewedThroughCommit": "2a0aed237109f542c824a33ba6dbac9a6a80c799",
+      "reviewedAt": "2026-10-16T13:14:58.892Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation."
+        }
+      ],
+      "reason": "Recovery GA evidence correction replaces object-only validators with authenticated mounted-route and disposable PostgreSQL evidence for project, catalog, directory, role and Intake lifecycles without production or protected-project mutation.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7589f8e14a6d82f2e4fe85f4b1b1ae1de608fdc91abdb029547ab8d7471df042"
     }
   ]
 }

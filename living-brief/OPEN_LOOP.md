@@ -5847,5 +5847,5 @@ External Stripe and SendGrid configuration and the thirteen unrecovered legacy b
 - [ ] Push this five-build evidence block. Keep it unpublished until the next five-build block reaches the ten-build publication boundary.
 
 The fixtures are unmistakably synthetic and disposable. They do not touch production data or claim deployed Chrome acceptance.
-The generated platform inventory and Living Brief state must remain exact-head clean at push.
+The generated platform inventory and Living Brief state must remain exact-head synchronized and clean at push.
 
