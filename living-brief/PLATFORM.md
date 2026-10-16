@@ -930,9 +930,17 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ga-build002-recovery-check.behavior.ts
 - artifacts/api-server/src/lib/ga-build004-protected-lock.behavior.ts
 - artifacts/api-server/src/lib/ga-build005-provider-recovery.behavior.ts
+- artifacts/api-server/src/lib/ga-protected-file-inventory.behavior.ts
+- artifacts/api-server/src/lib/ga-protected-file-inventory.ts
 - artifacts/api-server/src/lib/ga-protected-object-evidence.ts
 - artifacts/api-server/src/lib/ga-protected-project-recovery.ts
 - artifacts/api-server/src/lib/ga-protected-projects.ts
+- artifacts/api-server/src/lib/ga-recovery-candidate-match.behavior.ts
+- artifacts/api-server/src/lib/ga-recovery-candidate-match.ts
+- artifacts/api-server/src/lib/ga-recovery-restoration-plan.behavior.ts
+- artifacts/api-server/src/lib/ga-recovery-restoration-plan.ts
+- artifacts/api-server/src/lib/ga-recovery-source-assessment.behavior.ts
+- artifacts/api-server/src/lib/ga-recovery-source-assessment.ts
 - artifacts/api-server/src/lib/gauntlet-catalog-acceptance.behavior.ts
 - artifacts/api-server/src/lib/gauntlet-catalog-acceptance.ts
 - artifacts/api-server/src/lib/gauntlet-directory-acceptance.behavior.ts

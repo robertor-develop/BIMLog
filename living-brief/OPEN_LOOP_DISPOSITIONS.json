@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "021cf2cf4c9ef5946852ef2791f5fc3efe7bd1d440018a9f6a4a033cb0b8fe7b",
-  "itemCount": 417,
+  "sourceSha256": "58bb055f7f3427d598835f8cbf7fdcbac28731e6f36dd3f01b5439fb50cf326b",
+  "itemCount": 420,
   "counts": {
-    "ACTIVE": 373,
+    "ACTIVE": 376,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7591,6 +7591,60 @@
       "evidence": [
         "OPEN_LOOP.md:5877",
         "Recovery and GA-readiness Block 6 — B-GA031–B-GA035 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "61ed0a723ee60b67",
+      "sourceLine": 5888,
+      "heading": "Protected-file recovery closure Block 7 — B-GA005R1–B-GA005R5 — 2026-10-16",
+      "statement": "Obtain authoritative provider recovery-window and object-version evidence or verified original files for all 16 records.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5888",
+        "Protected-file recovery closure Block 7 — B-GA005R1–B-GA005R5 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "908021e39dd8c96c",
+      "sourceLine": 5889,
+      "heading": "Protected-file recovery closure Block 7 — B-GA005R1–B-GA005R5 — 2026-10-16",
+      "statement": "Execute restoration only after the complete dry run is independently accepted; then close B-GA005, B-GA034 and B-GA035 through real production evidence.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5889",
+        "Protected-file recovery closure Block 7 — B-GA005R1–B-GA005R5 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "39e1f3ddde323bad",
+      "sourceLine": 5890,
+      "heading": "Protected-file recovery closure Block 7 — B-GA005R1–B-GA005R5 — 2026-10-16",
+      "statement": "Push this five-build block, publish the completed ten-build interval with B-GA031–B-GA035, and run authenticated desktop/mobile Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5890",
+        "Protected-file recovery closure Block 7 — B-GA005R1–B-GA005R5 — 2026-10-16"
       ],
       "currentAuthority": false
     }
