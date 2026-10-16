@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+const read = file => readFileSync(file, "utf8");
+const run = file => { const r=spawnSync(process.execPath,["artifacts/api-server/node_modules/tsx/dist/cli.mjs",file],{encoding:"utf8"}); assert.equal(r.status,0,`${file} failed:\n${r.stdout}\n${r.stderr}`); };
+run("artifacts/api-server/src/lib/cost-value-forecast.behavior.ts");
+run("artifacts/api-server/src/lib/commercial-forecast-reconciliation.behavior.ts");
+const routes=read("artifacts/api-server/src/routes/financial-apu.ts");
+for(const pattern of [/router\.get\("\/projects\/:projectId\/financial\/apu\/forecast"/,/router\.put\("\/projects\/:projectId\/financial\/apu\/forecast"/,/router\.get\("\/projects\/:projectId\/financial\/apu\/forecast\.csv"/]) assert.match(routes,pattern);
+const ui=read("artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx");
+for(const token of ["loadForecast","saveForecast","exportForecast","Forecast calculated and preserved","forecastHistory"]) assert.ok(ui.includes(token),`Forecast lifecycle missing ${token}`);
+console.log("GA-F04-B027 forecast calculation, history, reconciliation and export: PASS");
