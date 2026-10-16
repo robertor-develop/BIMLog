@@ -17,7 +17,7 @@ import { RegisterBody, LoginBody } from "@workspace/api-zod";
 import {
   signToken,
   signLaunchStepUpToken,
-  authMiddleware,
+  authMiddleware, credentialVersion,
   type AuthPayload,
 } from "../middlewares/auth";
 import { effectiveCommercialAccessForUser } from "../lib/commercial-entitlement";
@@ -130,6 +130,7 @@ router.post("/auth/register", async (req, res) => {
       companyId: user.companyId,
       fullName: user.fullName,
       companyName,
+      credentialVersion: credentialVersion(user.passwordHash),
     };
 
     const token = signToken(payload);
@@ -228,6 +229,7 @@ router.post("/auth/login", async (req, res) => {
       fullName: user.fullName,
       companyName,
       isSuperAdmin: user.isSuperAdmin,
+      credentialVersion: credentialVersion(user.passwordHash),
     };
 
     const token = signToken(payload);

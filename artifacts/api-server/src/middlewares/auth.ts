@@ -6,6 +6,8 @@ import { eq, and } from "drizzle-orm";
 import { getRolesByPermission } from "./config-validator";
 
 import crypto from "crypto";
+import { credentialVersion } from "../lib/session-credential-version.js";
+export { credentialVersion } from "../lib/session-credential-version.js";
 
 function resolveJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
@@ -28,6 +30,7 @@ export interface AuthPayload {
   companyName: string;
   isSuperAdmin?: boolean;
   sessionIssuedAt?: number;
+  credentialVersion?: string;
 }
 
 declare global {
@@ -87,14 +90,17 @@ export async function authMiddleware(req: Request, res: Response, next: NextFunc
     // A still-valid token must not retain the old company after a governed move.
     const [current] = await db.select({ userId: usersTable.id, email: usersTable.email,
       fullName: usersTable.fullName, companyId: usersTable.companyId, companyName: companiesTable.name,
-      isSuperAdmin: usersTable.isSuperAdmin, retiredIntoCompanyId: companiesTable.retiredIntoCompanyId })
+      isSuperAdmin: usersTable.isSuperAdmin, passwordHash: usersTable.passwordHash, retiredIntoCompanyId: companiesTable.retiredIntoCompanyId })
       .from(usersTable).innerJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
       .where(eq(usersTable.id, payload.userId)).limit(1);
     if (!current || current.retiredIntoCompanyId !== null) {
       res.status(401).json({ code: "AUTHORITY_INVALID", error: "Account company requires administrator review" });
       return;
     }
-    const { retiredIntoCompanyId: _retirement, ...identity } = current;
+    if (payload.credentialVersion && payload.credentialVersion !== credentialVersion(current.passwordHash)) {
+      res.status(401).json({ code: "SESSION_REVOKED", error: "Session was revoked after credentials changed" }); return;
+    }
+    const { retiredIntoCompanyId: _retirement, passwordHash: _passwordHash, ...identity } = current;
     req.user = { ...identity, sessionIssuedAt: payload.sessionIssuedAt };
     next();
   } catch {
