@@ -1,0 +1,11 @@
+{
+  "schema": "bimlog.ga-recovery-source-receipts.v1",
+  "sources": [
+    { "source": "local_f_root", "state": "searched_no_match", "checkedAt": "2026-10-16T10:55:43.0838111-04:00", "evidence": "Exact protected filenames and Lens viewpoint pattern searched read-only across F root; no candidates returned." },
+    { "source": "local_user_profile", "state": "searched_no_match", "checkedAt": "2026-10-16T10:55:43.0838111-04:00", "evidence": "Exact protected filenames and Lens viewpoint pattern searched read-only under the Roberto user profile; no candidates returned." },
+    { "source": "git_history", "state": "searched_no_match", "checkedAt": "2026-10-16T10:55:43.0838111-04:00", "evidence": "All reachable repository objects searched for exact protected filenames and Lens viewpoint prefix; no candidates returned." },
+    { "source": "production_database", "state": "searched_no_match", "checkedAt": "2026-10-16T10:55:43.0838111-04:00", "evidence": "Authenticated production API reconciled 16 metadata rows; all lack storage paths, and 14 also lack authoritative hashes. Database metadata is not original-byte custody." },
+    { "source": "provider_snapshot", "state": "not_visible", "checkedAt": null, "evidence": "No authoritative provider snapshot/PITR receipt or recovery-window metadata was available through the current read-only application and connector evidence." },
+    { "source": "provider_object_storage", "state": "not_visible", "checkedAt": null, "evidence": "No governed provider object-version listing or exact-byte readback receipt was available through the current read-only application and connector evidence." }
+  ]
+}
