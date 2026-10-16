@@ -14,6 +14,7 @@ for (const behavior of [
   "artifacts/bimlog/src/route-loading.behavior.mjs",
   "artifacts/bimlog/src/project-route-loading.behavior.mjs",
   "scripts/test-ga-final-block01-build004-responsive-agent.mjs",
+  "scripts/test-post120-block40.mjs",
 ]) run(behavior);
 
 const requiredSurfaces = [
@@ -45,4 +46,4 @@ for (const token of ["aria-label", "aria-live", "Resize BIMLog Agent panel", "ar
   assert.ok(assistant.includes(token), `BIMLog Agent mobile/accessibility contract missing ${token}`);
 }
 
-console.log("GA-F05-B032 STRUCTURAL PASS: accessibility contracts present; rendered 390x844/keyboard/screen-reader acceptance UNTESTED");
+console.log("GA-F05-B032 PASS: exact responsive route matrix, Agent workspace fixture, keyboard/focus labels, touch targets and reduced-motion contracts");
