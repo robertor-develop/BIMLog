@@ -52,6 +52,14 @@ export function ConnectModal({
         </div>
 
         <div style={{ padding: 20 }}>
+          {integration.name.toLowerCase().includes("procore") && (
+            <p role="status" style={{ margin: "0 0 12px", fontSize: 12, lineHeight: 1.5, color: "hsl(var(--muted-foreground))" }}>
+              {tr(
+                "Procore CSV import is available after project binding and preview. OAuth file browsing requires an approved connected Procore account. BIMLog does not claim continuous Procore synchronization.",
+                "La importación CSV de Procore está disponible después de vincular el proyecto y revisar la vista previa. Explorar archivos por OAuth requiere una cuenta Procore conectada y aprobada. BIMLog no afirma sincronización continua con Procore.",
+              )}
+            </p>
+          )}
           <div style={{ display: "flex", gap: 10, padding: 13, borderRadius: 9, background: "#EFF6FF", border: "1px solid #BFDBFE", color: "#1E40AF", fontSize: 12, lineHeight: 1.55 }}>
             <LockKeyhole style={{ width: 17, height: 17, flexShrink: 0, marginTop: 1 }} />
             <span>

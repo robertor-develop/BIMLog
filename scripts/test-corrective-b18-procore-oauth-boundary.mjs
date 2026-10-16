@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const oauth=readFileSync("artifacts/api-server/src/lib/oauth.ts","utf8");
+const cloud=readFileSync("artifacts/api-server/src/lib/cloud-files.ts","utf8");
+const routes=readFileSync("artifacts/api-server/src/routes/connections.ts","utf8");
+const modal=readFileSync("artifacts/bimlog/src/components/IntegrationModal.tsx","utf8");
+for(const token of ["https://login.procore.com/oauth/authorize","https://login.procore.com/oauth/token"]) assert.ok(oauth.includes(token),token);
+for(const token of ["/rest/v1.0/companies","/rest/v1.0/projects?company_id=","/rest/v1.0/folders?project_id=","/rest/v1.0/files/"]) assert.ok(cloud.includes(token),token);
+for(const token of ["/me/connections/:provider/authorize","/connections/:provider/callback","/me/connections/:provider/browse","isProviderOperationAllowed"]) assert.ok(routes.includes(token),token);
+assert.match(modal,/does not claim continuous Procore synchronization/);
+assert.match(modal,/no afirma sincronización continua con Procore/);
+console.log("CORRECTIVE-B18 Procore OAuth/API structural boundary: PASS; permitted-account live browsing/download: UNTESTED");

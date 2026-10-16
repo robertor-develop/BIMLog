@@ -55,6 +55,7 @@
     "test:corrective-b15": "node scripts/test-corrective-b15-gauntlet-contract.mjs && node scripts/run-corrective-b15-gauntlet.mjs",
     "test:corrective-b16": "node scripts/test-corrective-b16-integration-state.mjs",
     "test:corrective-b17": "node scripts/test-corrective-b17-procore-rfi-flow.mjs",
+    "test:corrective-b18": "node scripts/test-corrective-b18-procore-oauth-boundary.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
