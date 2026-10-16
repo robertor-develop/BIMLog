@@ -1,8 +1,9 @@
-import { parseIntakeReturn, type IntakeReturnContext } from "./return-context";
+import { parseIntakeReturn, safeProjectReturnTarget, type IntakeReturnContext } from "./return-context";
 
 export type ContractDeepLink = {
   contractId: string | null;
   intakeReturn: IntakeReturnContext | null;
+  operationReturn: string | null;
   invalid: boolean;
 };
 
@@ -15,10 +16,14 @@ export function parseContractDeepLink(search: string, projectId: number): Contra
   const contractId = contractIdPattern.test(rawId) ? rawId : null;
   const parsedReturn = parseIntakeReturn(search);
   const intakeReturn = parsedReturn?.projectId === projectId ? parsedReturn : null;
-  const invalidReturn = params.has("returnTo") && !intakeReturn;
+  const rawReturn = params.get("returnTo");
+  const safeReturn = safeProjectReturnTarget(rawReturn, projectId);
+  const operationReturn = safeReturn && new RegExp(`^/projects/${projectId}/operations(?:\\?taskId=[A-Za-z0-9_-]{1,120})?$`).test(safeReturn) ? safeReturn : null;
+  const invalidReturn = params.has("returnTo") && !intakeReturn && !operationReturn;
   return {
     contractId,
     intakeReturn,
+    operationReturn,
     invalid: ids.length > 1 || (ids.length === 1 && !contractId) || invalidReturn,
   };
 }

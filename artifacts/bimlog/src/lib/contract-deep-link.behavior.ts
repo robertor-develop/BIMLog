@@ -6,6 +6,7 @@ const linked = parseContractDeepLink("contractId=contract-7&returnTo=" + encodeU
 assert.equal(linked.contractId, "contract-7");
 assert.equal(linked.intakeReturn?.href, "/projects/7/intake?stage=contract&item=ji-contract-2");
 assert.equal(linked.invalid, false);
+assert.equal(linked.operationReturn, null);
 assert.equal(contractRegisterHref(7, linked.intakeReturn), "/projects/7/financial/contracts?returnTo=%2Fprojects%2F7%2Fintake%3Fstage%3Dcontract%26item%3Dji-contract-2");
 
 for (const search of ["contractId=", "contractId=one&contractId=two", "contractId=../escape", "contractId=" + "x".repeat(129)]) {
@@ -14,13 +15,17 @@ for (const search of ["contractId=", "contractId=one&contractId=two", "contractI
   assert.equal(result.invalid, true);
 }
 assert.equal(parseContractDeepLink("contractId=contract-7&returnTo=" + encodeURIComponent("/projects/8/intake?stage=contract"), 7).invalid, true);
+const operations = parseContractDeepLink("contractId=contract-7&returnTo=" + encodeURIComponent("/projects/7/operations?taskId=task-9"), 7);
+assert.equal(operations.operationReturn, "/projects/7/operations?taskId=task-9");
+assert.equal(operations.invalid, false);
+assert.equal(parseContractDeepLink("contractId=contract-7&returnTo=" + encodeURIComponent("/projects/8/operations?taskId=task-9"), 7).invalid, true);
 const workspace = readFileSync(new URL("../pages/FinancialContractWorkspace.tsx", import.meta.url), "utf8");
 assert.match(workspace, /parseContractDeepLink\(routeSearch, projectId\)/);
 assert.match(workspace, /No other contract was substituted/);
 assert.match(workspace, /does not belong to this project/);
 assert.match(workspace, /String\(contract\.id\) === requestedContract\) return true/);
 assert.match(workspace, /remains visible even if register filters do not match it/);
-assert.match(workspace, /Return to the same Intake step/);
+assert.match(workspace, /Return to the previous workspace/);
 assert.match(workspace, /aria-current=\{contract\.id === requestedContract/);
-assert.match(workspace, /deepLink\.intakeReturn \? tt\("Opened from Job Intake"/);
+assert.match(workspace, /linkedReturnHref/);
 console.log("Contract deep link: bounded identity and exact same-project Intake origin PASS");
