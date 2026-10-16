@@ -5825,3 +5825,15 @@ No production answer or publication claim is accepted until the final live Chrom
 - Push the complete clean five-build block after the full repository build passes.
 - Do not publish this first half. Complete the next five-build block, then publish the exact ten-build candidate and run authenticated Chrome smoke.
 - External Stripe and SendGrid configuration and the thirteen unrecovered legacy binary originals remain explicit external/recovery limitations; these builds do not claim to resolve them.
+## Release integrity recovery Block 2 — B06-B10 — 2026-10-16
+
+- [x] Reserve the Agent dock width across desktop and tablet split-workspace breakpoints; use full-screen mode only at 760 pixels and below.
+- [x] Remove the obsolete floating-panel CSS and enforce one left/right dock model.
+- [x] Replace stale workspace assertions with the current BIMLog/Vega panel contract.
+- [x] Fit restored and resized widths so split mode always preserves at least 320 pixels for the application workspace.
+- [x] Restore keyboard focus after Escape or the visible close control and label the window-control group.
+- [x] Pass the consolidated Block 2 behavior and strict frontend TypeScript gate through `6d0074e5805a7926bb2fa1c130c2b4fe0f123563`.
+- [ ] Pass the exact-head full build, push B06-B10, publish the resulting B01-B10 interval, and complete authenticated production Chrome smoke against the exact live commit.
+
+External Stripe and SendGrid configuration and the thirteen unrecovered legacy binary originals remain separate explicit limitations. This block does not claim to resolve them and does not mutate production or protected-project data.
+

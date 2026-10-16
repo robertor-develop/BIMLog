@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "52b69f80f86e52ec27f96998d3cebecd3ba693796bb968afd65b98caa011b1e8",
-  "itemCount": 410,
+  "sourceSha256": "3d78f8c58809aadd1aa58ea5c78432a55decd876369727e4602550d7eb33f560",
+  "itemCount": 411,
   "counts": {
-    "ACTIVE": 366,
+    "ACTIVE": 367,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7465,6 +7465,24 @@
       "evidence": [
         "OPEN_LOOP.md:5808",
         "Recovery and GA-readiness Block 5 release closure — 2026-10-15"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "b6e8495086c024d1",
+      "sourceLine": 5836,
+      "heading": "Release integrity recovery Block 2 — B06-B10 — 2026-10-16",
+      "statement": "Pass the exact-head full build, push B06-B10, publish the resulting B01-B10 interval, and complete authenticated production Chrome smoke against the exact live commit.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5836",
+        "Release integrity recovery Block 2 — B06-B10 — 2026-10-16"
       ],
       "currentAuthority": false
     }
