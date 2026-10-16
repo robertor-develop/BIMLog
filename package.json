@@ -63,6 +63,7 @@
     "test:corrective-b23": "node scripts/test-corrective-b23-sendgrid-live-boundary.mjs",
     "test:corrective-b24": "node scripts/test-corrective-b24-public-commercial-readiness.mjs",
     "test:corrective-b25": "node scripts/test-corrective-b25-commercial-gauntlet.mjs && node scripts/run-corrective-b25-commercial-gauntlet.mjs",
+    "test:corrective-b26": "node scripts/test-corrective-b26-checkout-lifecycle.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
