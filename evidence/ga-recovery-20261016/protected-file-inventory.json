@@ -1,0 +1,24 @@
+{
+  "schema": "bimlog.ga-protected-file-inventory.v1",
+  "capturedAt": "2026-10-16T10:55:43.0838111-04:00",
+  "captureMethod": "authenticated-production-custody-api",
+  "productionSourceCommit": "3b69cdd28128dc501f542662129d5b2739f47848",
+  "files": [
+    { "projectId": 23, "fileId": 12, "fileName": "BIM-BCPCM-AL-ZZ-NL-0001-S0-P01.docx", "expectedBytes": 43687, "expectedSha256": "f4ae483b58ca0020dd7cbf348c4d7e4bbd3c26226a55cefb5dfa22932d9d3c2a", "source": "coordination_hub", "storagePathPresent": false },
+    { "projectId": 23, "fileId": 13, "fileName": "ISBT-BCPCM-MR-ZZ-BI-0005-S0-S2.pdf", "expectedBytes": 2550790, "expectedSha256": "8d103807da11c5f96ae90a0bed5d7d15f34107aadb7e0655d4cee49f2a111a80", "source": "coordination_hub", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 22, "fileName": "viewpoint-1185RI-26E614.png", "expectedBytes": 153305, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 23, "fileName": "viewpoint-1185RI-B27E54.png", "expectedBytes": 150539, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 24, "fileName": "viewpoint-1185RI-CE78A4.png", "expectedBytes": 174443, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 25, "fileName": "viewpoint-1185RI-9646E0.png", "expectedBytes": 182505, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 26, "fileName": "viewpoint-1185RI-78C208.png", "expectedBytes": 181939, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 27, "fileName": "viewpoint-1185RI-ED72FE.png", "expectedBytes": 204037, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 28, "fileName": "1185 RIVER AVE - BIM EXECUTION PLAN 1.pdf", "expectedBytes": 456142, "expectedSha256": null, "source": "rfi-attachment", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 29, "fileName": "Meeting minutes-027.pdf", "expectedBytes": 123131, "expectedSha256": null, "source": "rfi-attachment", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 30, "fileName": "viewpoint-1185RI-A9C9F0.png", "expectedBytes": 153855, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 31, "fileName": "1185 RIVER AVE - BIM EXECUTION PLAN 1.pdf", "expectedBytes": 456142, "expectedSha256": null, "source": "submittal-attachment", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 32, "fileName": "viewpoint-1185RI-9646E0.png", "expectedBytes": 163219, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 33, "fileName": "viewpoint-1185RI-9646E0.png", "expectedBytes": 168760, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 34, "fileName": "viewpoint-1185RI-A9C9F0.png", "expectedBytes": 166656, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false },
+    { "projectId": 26, "fileId": 35, "fileName": "viewpoint-1185RI-A9C9F0.png", "expectedBytes": 165642, "expectedSha256": null, "source": "lens-viewpoint", "storagePathPresent": false }
+  ]
+}
