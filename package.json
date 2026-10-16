@@ -50,6 +50,7 @@
     "test:corrective-b05": "node scripts/test-corrective-b05-gauntlet-contract.mjs",
     "test:corrective-b11": "node scripts/test-corrective-b11-issue-lifecycle.mjs",
     "test:corrective-b12": "node scripts/test-corrective-b12-project-record-integrity.mjs",
+    "test:corrective-b13": "node scripts/test-corrective-b13-document-attachment-lifecycle.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",

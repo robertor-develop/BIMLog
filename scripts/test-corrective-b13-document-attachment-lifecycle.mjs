@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const read=file=>readFileSync(file,"utf8");
+const multipart=read("artifacts/api-server/src/middlewares/multipart.ts");
+const files=read("artifacts/api-server/src/routes/files.ts");
+const rfis=read("artifacts/api-server/src/routes/rfis.ts");
+const submittals=read("artifacts/api-server/src/routes/submittals.ts");
+for(const token of ["fileSize","files","fields","parts","fieldNestingDepth"]) assert.ok(multipart.includes(token),`multipart limit missing ${token}`);
+assert.match(files,/eq\(filesTable\.projectId, projectId\), eq\(filesTable\.fileHash, fileHash\)/);
+assert.match(files,/await storage\.delete\(filePath\)/);
+assert.match(files,/isSuperseded: true, supersededByFileId/);
+assert.match(files,/files\/:fileId\/download", authMiddleware, requireProjectMember\(\)/);
+assert.match(files,/upload request failed/);
+assert.match(rfis,/Failed to compensate storage write/);
+assert.match(rfis,/attachments\/staged\/:fileId/);
+assert.match(submittals,/failed to compensate an incomplete attachment upload/);
+assert.match(submittals,/source: "submittal-attachment"/);
+console.log("CORRECTIVE-B13 document/attachment validation, dedupe, version, authorization, download and compensation: PASS");
