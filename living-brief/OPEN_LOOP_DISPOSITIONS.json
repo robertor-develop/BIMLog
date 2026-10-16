@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "35fb722a96c40e3bc77de78f42531bd8587835611d29fcda7de50c85aa8ab520",
-  "itemCount": 413,
+  "sourceSha256": "b3110effd87fef219db2d5739e5b9d235a4a34283ec0c4bf080cf3425612563e",
+  "itemCount": 414,
   "counts": {
-    "ACTIVE": 369,
+    "ACTIVE": 370,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7518,6 +7518,24 @@
       },
       "evidence": [
         "OPEN_LOOP.md:5859",
+        "Recovery GA authenticated-evidence Block 2 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7bb7a82b3de105de",
+      "sourceLine": 5866,
+      "heading": "Recovery GA authenticated-evidence Block 2 — 2026-10-16",
+      "statement": "Pass the repaired exact-head build, republish, and repeat the authenticated production Agent question until the visible convention version is returned.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5866",
         "Recovery GA authenticated-evidence Block 2 — 2026-10-16"
       ],
       "currentAuthority": false
