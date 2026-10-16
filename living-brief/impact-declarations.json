@@ -70296,6 +70296,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "post-publish-accessibility-repair-20261016",
+      "reviewedThroughCommit": "d4b9ba7f572cd5c634cac1ed60c57f92a218677b",
+      "reviewedAt": "2026-10-16T16:23:12.270Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority."
+        }
+      ],
+      "reason": "Authenticated post-publication Chrome testing found four unlabeled form identities; the repair assigns stable id and name attributes to Headquarters filters and the BIMLog Agent context checkbox without changing product behavior or Living Brief authority.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
