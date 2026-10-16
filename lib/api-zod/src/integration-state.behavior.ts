@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { INTEGRATION_STATES, integrationCapabilities } from "./integration-state";
+assert.equal(INTEGRATION_STATES.length, 9);
+assert.equal(new Set(INTEGRATION_STATES).size, 9);
+assert.equal(integrationCapabilities("connected").canRoute, false);
+assert.equal(integrationCapabilities("routing_ready").canRoute, true);
+assert.equal(integrationCapabilities("import_ready").canImport, true);
+assert.equal(integrationCapabilities("failed").needsAttention, true);
+assert.equal(integrationCapabilities("revoked").configured, false);
+console.log("CORRECTIVE-B16 integration states: PASS");
