@@ -6,7 +6,8 @@
   "impact": {
     "baselineCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
     "changedPaths": [
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "scripts/record-release-integrity-review.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -25,7 +26,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "claude",
@@ -37,7 +38,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "quality",
@@ -49,7 +50,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "vision",
@@ -61,7 +62,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "platform",
@@ -73,7 +74,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "plugin",
@@ -85,7 +86,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "report_design_system",
@@ -97,7 +98,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "standards_register",
@@ -109,7 +110,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "status",
@@ -120,8 +121,8 @@
       "reconciledThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "open_loop",
@@ -132,8 +133,8 @@
       "reconciledThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     },
     {
       "key": "audit",
@@ -145,7 +146,7 @@
       "semanticReviewedThroughCommit": "a4972e0a78bc504afbd4939468e5d6799cd71286",
       "semanticReviewTask": "protected-file-recovery-closure-block07-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T15:05:23.717Z"
+      "semanticReviewedAt": "2026-10-16T15:08:11.154Z"
     }
   ]
 }
