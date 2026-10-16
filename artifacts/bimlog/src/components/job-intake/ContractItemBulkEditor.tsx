@@ -47,7 +47,7 @@ export function selectSavedApuVersion(
     (version) => version.version === Number(selectedVersion),
   );
   return selected
-    ? item?.billingHourlyRate ? connectContractItemsToApu([item], selected)[0] : { apuPlanVersion: selected.version }
+    ? connectContractItemsToApu([item ?? {}], selected)[0]
     : { apuPlanVersion: null };
 }
 
@@ -352,8 +352,8 @@ export function ContractItemBulkEditor(props: Props) {
           <span>
             {eligibleApuVersions.length > 0
               ? props.tt(
-                  `${eligibleApuVersions.length} immutable version(s) available. A plan's total selling price is not a unit rate. Select a version and enter the Contract Item's unit rate separately.`,
-                  `${eligibleApuVersions.length} versión(es) inmutable(s) disponibles. El precio de venta total del plan no es una tarifa unitaria. Seleccione una versión e ingrese por separado la tarifa de la Partida de Contrato.`,
+                  `${eligibleApuVersions.length} immutable version(s) available. Selecting one applies its saved selling rate to the Contract Item; you can still review the rate before activation.`,
+                  `${eligibleApuVersions.length} versión(es) inmutable(s) disponibles. Al seleccionar una se aplica su tarifa de venta guardada a la Partida de Contrato; aún puede revisar la tarifa antes de activar.`,
                 )
               : props.tt(
                   "No saved APU versions are available yet. Continue with an editable rate, or save a version in Cost & Value Planner.",

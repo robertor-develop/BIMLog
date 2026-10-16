@@ -36,7 +36,14 @@ assert.deepEqual(
     ],
     "2",
   ),
-  { apuPlanVersion: 2 },
+  {
+    apuPlanVersion: 2,
+    billingHourlyRate: "35.47",
+    rateSource: {
+      kind: "saved_apu_rate", sourceId: "apu-plan-v2", sourceLabel: "APU v2",
+      unitRate: "35.47", unit: "Hours", currency: "", apuPlanVersion: 2, apuFingerprint: null,
+    },
+  },
 );
 assert.deepEqual(selectSavedApuVersion([], ""), { apuPlanVersion: null });
 

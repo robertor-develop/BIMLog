@@ -8,16 +8,17 @@ export type ContractItemApuConnection = {
 
 export function connectContractItemsToApu<T extends ContractItemApuConnection>(
   items: T[],
-  apu: { version: number; name?: string; currency?: string; fingerprint?: string | null },
+  apu: { version: number; name?: string; sellingPrice?: string; currency?: string; fingerprint?: string | null },
 ): T[] {
   return items.map((item) => ({
     ...item,
     apuPlanVersion: apu.version,
-    rateSource: item.billingHourlyRate ? {
+    ...(apu.sellingPrice ? { billingHourlyRate: apu.sellingPrice } : {}),
+    rateSource: (apu.sellingPrice || item.billingHourlyRate) ? {
       kind: "saved_apu_rate",
       sourceId: `apu-plan-v${apu.version}`,
       sourceLabel: apu.name || `APU v${apu.version}`,
-      unitRate: item.billingHourlyRate,
+      unitRate: apu.sellingPrice || item.billingHourlyRate,
       unit: item.unit || "Hours",
       currency: apu.currency || "",
       apuPlanVersion: apu.version,
