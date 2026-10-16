@@ -1,14 +1,14 @@
 import assert from "node:assert/strict";
 import { ASSISTANT_WIDTH_DEFAULT, assistantWidthFromPointer, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
 
-assert.equal(clampAssistantWidth(120), 360);
+assert.equal(clampAssistantWidth(120), 320);
 assert.equal(clampAssistantWidth(900), 680);
 assert.equal(clampAssistantWidth(600, 800), 480);
-assert.equal(assistantWidthFromPointer(300,1200,"left"),360);
+assert.equal(assistantWidthFromPointer(300,1200,"left"),320);
 assert.equal(assistantWidthFromPointer(700,1200,"right"),500);
 assert.equal(stepAssistantWidth(440,"ArrowLeft","left",1200),420);
 assert.equal(stepAssistantWidth(440,"ArrowLeft","right",1200),460);
-assert.equal(fitAssistantWidthToViewport(680,980),660);
+assert.equal(fitAssistantWidthToViewport(680,980),680);
 assert.equal(fitAssistantWidthToViewport(680,390),680);
 assert.deepEqual(readAssistantWorkspace(null), { width: ASSISTANT_WIDTH_DEFAULT, dock: "right", collapsed: false });
 
