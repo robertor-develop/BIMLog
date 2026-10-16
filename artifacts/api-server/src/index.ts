@@ -19,7 +19,7 @@ if (Number.isNaN(port) || port <= 0) {
 // answer liveness before the full application graph is parsed. The build
 // emits app.cjs beside index.cjs; the runtime string intentionally keeps that
 // graph out of the bootstrap bundle.
-const applicationBundle = "./app.mjs";
+const applicationBundle = process.env.NODE_ENV === "development" ? "./app.ts" : "./app.mjs";
 const bootstrap = createApplicationBootstrap(() => import(applicationBundle));
 
 async function main(): Promise<void> {
