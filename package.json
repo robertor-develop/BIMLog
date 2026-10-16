@@ -43,6 +43,7 @@
     "test:ga-final-block05-build031": "node scripts/test-ga-final-block05-build031-security-isolation.mjs",
     "test:ga-final-block05-build032": "node scripts/test-ga-final-block05-build032-mobile-accessibility.mjs",
     "test:ga-final-block05-build033": "node scripts/test-ga-final-block05-build033-failure-recovery.mjs",
+    "test:ga-final-block05-build034": "node scripts/test-ga-final-block05-build034-temp-cleanup-readiness.mjs",
     "test:corrective-b01": "node scripts/test-corrective-b01-traceability.mjs",
     "test:corrective-b02": "node scripts/test-corrective-b02-independent-evidence.mjs && node scripts/test-ga-final-block01-build005-acceptance.mjs",
     "test:corrective-b03": "node scripts/test-corrective-b03-behavioral-gates.mjs",
