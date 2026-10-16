@@ -42,7 +42,7 @@ const MAX_ITEMS = 500;
 export function selectSavedApuVersion(
   versions: Array<{ version: number; name?: string; sellingPrice: string; currency?: string; fingerprint?: string | null }>,
   selectedVersion: string,
-  item?: { billingHourlyRate?: string; unit?: string },
+  item?: { quantity?: string; billingHourlyRate?: string; unit?: string },
 ) {
   const selected = versions.find(
     (version) => version.version === Number(selectedVersion),
