@@ -12,8 +12,10 @@ assert.deepEqual(compatibleApuVersions(versions, "USD").map(item => item.version
 const item = { id: "S1", billingHourlyRate: "30", quantity: "12", plannedHours: "80" };
 const selectedApu = { ...item, ...selectSavedApuVersion(compatibleApuVersions(versions, "USD"), "2", item) };
 assert.equal(selectedApu.apuPlanVersion, 2);
-assert.equal(selectedApu.billingHourlyRate, "1200");
-assert.equal(selectedApu.rateSource?.unitRate, "1200");
+assert.equal(selectedApu.billingHourlyRate, "100");
+assert.equal(selectedApu.rateSource?.unitRate, "100");
+assert.equal(selectedApu.rateSource?.planSellingPrice, "1200");
+assert.equal(selectedApu.rateSource?.rateCalculation, "plan_total_divided_by_contract_quantity");
 assert.equal(exactProduct(item.quantity, item.billingHourlyRate), "360");
 assert.equal(exactProduct("0.123456", "1.000001"), "0.123456");
 assert.equal(exactProduct("1e3", "30"), "—");
