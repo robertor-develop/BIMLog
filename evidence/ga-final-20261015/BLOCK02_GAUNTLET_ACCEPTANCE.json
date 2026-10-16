@@ -1,0 +1,16 @@
+{
+  "program": "GA final readiness",
+  "block": "02",
+  "buildRange": "B-GA016..B-GA020",
+  "buildCount": 5,
+  "scope": "Convention, naming, accepted-version recovery, governed templates/EDT and synthetic file lifecycle",
+  "productionDataMutations": 0,
+  "protectedProjectsChanged": false,
+  "syntheticOnly": true,
+  "blockedExternalGate": "Thirteen protected legacy binaries still require authoritative recovery and independent checksum verification.",
+  "publicationCadence": {
+    "combinedUnpublishedBuilds": 10,
+    "publicationRequired": true,
+    "authenticatedChromeSmokeRequiredAfterPublication": true
+  }
+}
