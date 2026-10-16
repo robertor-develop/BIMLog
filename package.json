@@ -66,6 +66,7 @@
     "test:corrective-b26": "node scripts/test-corrective-b26-checkout-lifecycle.mjs",
     "test:corrective-b27": "node scripts/test-corrective-b27-subscription-provider-lifecycle.mjs",
     "test:corrective-b28": "node scripts/test-corrective-b28-transactional-email.mjs",
+    "test:corrective-b29": "node scripts/test-corrective-b29-support-data-rights.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
