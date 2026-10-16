@@ -69205,6 +69205,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d5fa56404e86d216e5b4cdeea7ff7d712fda645555af9abd1c4c6cd0746a3f6d"
+    },
+    {
+      "taskId": "post-audit-corrective-b2-20261016",
+      "reviewedThroughCommit": "0385f7721c9cee4221cd2a5a8e4db831fba6956c",
+      "reviewedAt": "2026-10-16T05:46:40.713Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes."
+        }
+      ],
+      "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes.",
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dd5bbd198740d1b1ac48be1532a90c58e57ca828123b66fdc2925c80f09694f8"
     }
   ]
 }

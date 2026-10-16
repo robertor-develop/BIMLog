@@ -39,7 +39,7 @@ function kekFor(version: string): Buffer {
 
 type Envelope = { secretCiphertext: string; secretIv: string; secretTag: string; wrappedDataKey: string; wrapIv: string; wrapTag: string; keyVersion: string };
 
-function encryptSecret(connectionId: string, secret: string): Envelope {
+export function encryptSecret(connectionId: string, secret: string): Envelope {
   const { key: kek, version } = activeKek();
   const dek = crypto.randomBytes(32);
   const secretIv = crypto.randomBytes(12);

@@ -1,4 +1,6 @@
 import { pool } from "@workspace/db";
+import crypto from "node:crypto";
+import { encryptSecret } from "./ai-control-plane.js";
 
 export async function ensureAiControlPlaneSchema(): Promise<void> {
   await pool.query(`
@@ -138,4 +140,18 @@ export async function ensureAiControlPlaneSchema(): Promise<void> {
       IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='ai_price_schedules_audit_trigger') THEN CREATE TRIGGER ai_price_schedules_audit_trigger AFTER INSERT ON ai_price_schedules FOR EACH ROW EXECUTE FUNCTION bimlog_ai_config_audit_insert(); END IF;
     END $$;
   `);
+  const client=await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const legacy=await client.query(`SELECT id,company_id,openai_api_key FROM users WHERE openai_api_key IS NOT NULL FOR UPDATE`);
+    for(const row of legacy.rows){
+      const existing=await client.query(`SELECT 1 FROM provider_connections WHERE owner_type='personal' AND user_id=$1 AND provider='openai' AND status<>'revoked'`,[row.id]);
+      if(!existing.rows[0]){
+        const id=crypto.randomUUID(), e=encryptSecret(id,String(row.openai_api_key));
+        await client.query(`INSERT INTO provider_connections(id,owner_type,user_id,company_id,provider,status,label,allowed_models,secret_ciphertext,secret_iv,secret_tag,wrapped_data_key,wrap_iv,wrap_tag,key_version,created_by_id) VALUES($1,'personal',$2,$3,'openai','pending_validation','Migrated legacy OpenAI connection','[]'::jsonb,$4,$5,$6,$7,$8,$9,$10,$2)`,[id,row.id,row.company_id,e.secretCiphertext,e.secretIv,e.secretTag,e.wrappedDataKey,e.wrapIv,e.wrapTag,e.keyVersion]);
+      }
+      await client.query(`UPDATE users SET openai_api_key=NULL WHERE id=$1`,[row.id]);
+    }
+    await client.query("COMMIT");
+  } catch(error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }

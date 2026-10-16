@@ -602,6 +602,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordinator-bulk-actions.ts
 - artifacts/api-server/src/lib/coordinator-saved-view-migration.ts
 - artifacts/api-server/src/lib/coordinator-saved-views.ts
+- artifacts/api-server/src/lib/corrective-b07-invitation-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/corrective-b08-session-revocation.behavior.ts
+- artifacts/api-server/src/lib/corrective-b10-ai-control.behavior.ts
 - artifacts/api-server/src/lib/cost-value-bonus-allocation.behavior.ts
 - artifacts/api-server/src/lib/cost-value-bonus-allocation.ts
 - artifacts/api-server/src/lib/cost-value-bonus-service.ts
@@ -1167,6 +1170,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-retirement-inventory.behavior.ts
 - artifacts/api-server/src/lib/project-retirement-inventory.ts
 - artifacts/api-server/src/lib/project-retirement.ts
+- artifacts/api-server/src/lib/project-role-catalog.behavior.ts
+- artifacts/api-server/src/lib/project-role-catalog.ts
 - artifacts/api-server/src/lib/project-role-readiness.behavior.ts
 - artifacts/api-server/src/lib/project-role-readiness.ts
 - artifacts/api-server/src/lib/project-scope-structure.behavior.ts
@@ -1257,6 +1262,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/sendgrid-transport.ts
 - artifacts/api-server/src/lib/service-capability-rollout.behavior.ts
 - artifacts/api-server/src/lib/service-capability-rollout.ts
+- artifacts/api-server/src/lib/session-credential-version.ts
 - artifacts/api-server/src/lib/sharepoint-allowed-destinations.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-allowed-destinations.ts
 - artifacts/api-server/src/lib/sharepoint-application-token-lifecycle.behavior.ts
