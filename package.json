@@ -109,6 +109,7 @@
     "generate:release-identity": "node scripts/generate-release-identity.mjs",
     "check:release-identity": "node scripts/check-release-identity.mjs",
     "test:release-source-identity": "node scripts/test-release-source-identity.mjs",
+    "test:sealed-web-package": "node scripts/test-sealed-web-package.mjs",
     "check:lens-next-native-release": "node scripts/check-lens-next-native-release.mjs",
     "test:release-identity": "node scripts/test-release-identity.mjs",
     "check:release-receipt": "node scripts/check-release-receipt.mjs",
