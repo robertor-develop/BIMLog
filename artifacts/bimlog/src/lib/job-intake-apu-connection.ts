@@ -9,7 +9,7 @@ export type ContractItemApuConnection = {
 export function connectContractItemsToApu<T extends ContractItemApuConnection>(
   items: T[],
   apu: { version: number; name?: string; sellingPrice?: string; currency?: string; fingerprint?: string | null },
-): T[] {
+): Array<T & ContractItemApuConnection> {
   return items.map((item) => ({
     ...item,
     apuPlanVersion: apu.version,

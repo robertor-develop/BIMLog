@@ -13,7 +13,7 @@ export function edtReadinessRepair(code: string, projectId: number, taskId?: str
     : `/projects/${projectId}/operations`;
   const withReturn = (href: string) => `${href}${href.includes("?") ? "&" : "?"}returnTo=${encodeURIComponent(returnTo)}`;
   if (["EDT_CONTRACT_SOURCE_MISSING", "EDT_CONTRACT_SOURCE_MISMATCH"].includes(code))
-    return { missing: "Contract version", href: withReturn(`/projects/${projectId}/financial/contracts`) };
+    return { missing: "Activated Intake contract source", href: withReturn(`/projects/${projectId}/intake?stage=contract&item=ji-contract`) };
   if (["EDT_WORKFLOW_SOURCE_MISSING", "EDT_WORKFLOW_SOURCE_MISMATCH"].includes(code))
     return { missing: "Delivery Workflow binding", href: withReturn(`/company-workflows?projectId=${projectId}`) };
   if (["EDT_GOVERNANCE_SOURCE_MISSING", "EDT_ACTIVATION_SOURCE_INCOMPLETE"].includes(code))
@@ -29,8 +29,8 @@ export function describeEdtPreviewError(cause: unknown, tt: (english: string, sp
     return tt("EDT readiness can be checked after this Job Intake is activated. Finish the required template, governance, contract, and budget approvals in Intake first; no work was changed.",
       "La preparación de la EDT se puede verificar después de activar este ingreso de trabajo. Primero complete en Ingreso las aprobaciones requeridas de plantilla, gobernanza, contrato y presupuesto; no se cambió ningún trabajo.");
   if (code === "EDT_CONTRACT_SOURCE_MISSING" || code === "EDT_CONTRACT_SOURCE_MISMATCH")
-    return tt("This activated Intake has no verifiable canonical Contract version. Existing work is unchanged; complete the Contract source before using the EDT preview.",
-      "Este ingreso activado no tiene una versión verificable del contrato canónico. El trabajo existente no cambió; complete el contrato de origen antes de usar la vista EDT.");
+    return tt("This activated Intake has no verifiable canonical Contract version. Open the Intake Contract Setup that owns the source profile, confirm its Contract Items, then activate or retry the preserved Commercial source.",
+      "Este ingreso activado no tiene una versión verificable del contrato canónico. Abra la Configuración contractual del Ingreso que conserva el perfil de origen, confirme sus Partidas de Contrato y luego active o reintente el origen Comercial preservado.");
   if (code === "EDT_LOCATION_AMBIGUOUS" || code === "EDT_PLAN_COVERAGE_MISMATCH")
     return tt("This Intake needs exactly one saved floor or area Work Package for each Work Item before an EDT plan can be projected.",
       "Este ingreso necesita exactamente un paquete de trabajo de piso o área guardado por cada elemento de trabajo antes de proyectar el plan EDT.");
