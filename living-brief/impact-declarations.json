@@ -68843,6 +68843,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "374f024d6f740ee672e6b1a524439edcc198dad3aa426d70bb733fedaafea993"
+    },
+    {
+      "taskId": "replit-api-cold-start-budget-repair",
+      "reviewedThroughCommit": "3032437b096500cfbc448e3bad085c13ccdcb8f9",
+      "reviewedAt": "2026-10-15T21:20:00-04:00",
+      "status": "local_candidate",
+      "captureTiming": "blocking_gate_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates."
+        }
+      ],
+      "reason": "Exact-head Replit verification proved that serialized cold-start migrations were still healthy at 52.8 seconds when the former 45-second bootstrap deadline terminated the API. The bounded repair raises the allowance to 120 seconds while preserving fail-closed readiness; STATUS and OPEN_LOOP retain publication, Chrome, recovery, and final-GA gates.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "99afe96f0f9a9394e4ff008179095bb6750d3aa1bd76ae37a345e42a8cbf86a2"
     }
   ]
 }

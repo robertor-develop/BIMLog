@@ -5743,6 +5743,8 @@ B-GA016–B-GA020 complete the second five-build block and the ten-build publica
 
 Release repair `9919ab03` restores the Replit development API workflow by resolving `app.ts` under `tsx` while retaining the production `app.mjs` bundle target. The failure occurred before publication, changed no production data, and is protected by a dedicated development/production bootstrap gate. Exact-head release checks, Replit restart and health, publication and Chrome smoke must be repeated.
 
+Cold-start repair raises the bounded serialized migration allowance from 45 seconds to 120 seconds after exact-head Replit verification proved healthy migrations were still running at 52.8 seconds. The API remains fail-closed and `/api/v1/healthz` remains unavailable until the complete startup barrier drains. A permanent source gate protects the bounded value. Repeat exact-head synchronization, API health, publication and authenticated Chrome smoke before acceptance.
+
 The currently connected Chrome session showed the public signed-out landing page. This blocks authenticated live testing only. The new reconciliation tools perform no production reads or writes and their fixtures are explicitly synthetic. Work on B-GA006/007/008/016/017 does not yet constitute five accepted builds; no new push/publication or GA claim is recorded. Changes are preserved in the working tree pending remaining implementation and release verification.
 
 ## MAIN 04 production-recovery acceptance — 2026-10-15

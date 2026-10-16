@@ -4441,6 +4441,10 @@ Five builds establish the immutable production identity for protected projects 2
 
 ## Protected file-custody repair block — Builds B-GA006R–B-GA010R — 2026-10-14
 
+## GA ten-build publication repair — 2026-10-15
+
+Exact-head Replit verification passed Builds B-GA001–B-GA010, strict typechecks, database safety, Living Brief integrity and both production builds. The development bootstrap target mismatch is repaired at `9919ab03`. A second real startup failure showed the serialized migration barrier still active after the former 45-second deadline; the bounded allowance is now 120 seconds and remains fail-closed until every required startup task completes. Production has not yet been published from this repaired candidate. API health, publication and authenticated desktop/mobile Chrome acceptance remain required. The thirteen protected legacy binaries remain the external recovery and final-GA blocker.
+
 Five recovery builds classify every registered project file by actual binary custody, expose the classification without leaking storage identifiers, replace the legacy download dead end with exact actionable conflict responses, add an authenticated project custody summary, and bind handover plus recovery acceptance to the exact missing file identity. The source gates pass without changing production or customer data. Prior production evidence reports 13 protected legacy records without verified original bytes: two IBQ-LIT documents and eleven ELA01 Lens images. Recovery acceptance and final GA remain open. Roberto explicitly clarified that these missing originals do not block independent implementation or otherwise valid publication. Purge is deferred wherever exact deletion scope or shared-storage ownership remains uncertain. The five repair commits are supplementary work, not completion of original program builds B-GA006 through B-GA010.
 
 ## MAIN 04 production-recovery Block 1 — five implementation builds — 2026-10-15
