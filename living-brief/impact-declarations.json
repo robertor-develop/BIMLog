@@ -70580,6 +70580,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c4d395517580e93fcb3d63341a0628ecf2f73b31e9b860ac46376e99d95fdfcc"
+    },
+    {
+      "taskId": "lorena-typecheck-correction-20261016",
+      "reviewedThroughCommit": "e640fe2299b2940113b9808f0a3aafda58114dfa",
+      "reviewedAt": "2026-10-16T18:40:55Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero."
+        }
+      ],
+      "reason": "Verification correction keeps Intake and Operations integration evidence inside their owning TypeScript package roots and widens the APU-selection helper input to include the quantity required by its exact rate calculation; both package typechecks now settle with exit code zero.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "aafe2afc53a0587436b129d50015d5c980cfffd6ab38e52a30b42bb9fdf2b25a"
     }
   ]
 }

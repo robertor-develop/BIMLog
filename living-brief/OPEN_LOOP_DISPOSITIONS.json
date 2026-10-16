@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2171b5c1966a99477656692563d469bcb2940ce209cf1b2b22ef5883ada0a337",
+  "sourceSha256": "3078cf0084c46f1c46bf3cc41c8c5d94e61b9e9cd430cd918f42930e0316e5d7",
   "itemCount": 421,
   "counts": {
     "ACTIVE": 377,
@@ -7650,7 +7650,7 @@
     },
     {
       "id": "c79034072bd52229",
-      "sourceLine": 5900,
+      "sourceLine": 5901,
       "heading": "Lorena P1 correction block — 2026-10-16",
       "statement": "Independent Viva re-audit, publication, authenticated production Chrome acceptance, and Lorena field acceptance remain separate gates.",
       "classification": "ACTIVE",
@@ -7661,7 +7661,7 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:5900",
+        "OPEN_LOOP.md:5901",
         "Lorena P1 correction block — 2026-10-16"
       ],
       "currentAuthority": false
