@@ -3758,7 +3758,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
   }
 );
 
-router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", authMiddleware, requireProjectMember(), async (req, res) => {
+router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);
   const clashId = Number(req.params.clashId);
@@ -3766,7 +3766,14 @@ router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", au
     const allowed: Record<string, any> = {};
     const { status, resolutionNotes, assignedToName, assignedToEmail, dueDate,
             clashIdOriginal, description, element1, element2, discipline1, level, priority } = req.body ?? {};
-    if (status !== undefined) allowed.status = status;
+    if (status !== undefined) {
+      const normalizedStatus = String(status).trim().toLowerCase();
+      if (!["open", "in_progress", "resolved", "closed"].includes(normalizedStatus)) {
+        res.status(422).json({ error: "invalid_status", message: "Issue status must be open, in_progress, resolved, or closed." });
+        return;
+      }
+      allowed.status = normalizedStatus;
+    }
     if (resolutionNotes !== undefined) allowed.resolutionNotes = resolutionNotes;
     if (assignedToName !== undefined) allowed.assignedToName = assignedToName;
     if (assignedToEmail !== undefined) allowed.assignedToEmail = assignedToEmail;
@@ -3779,13 +3786,24 @@ router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", au
     if (level !== undefined) allowed.level = level;
     if (priority !== undefined) allowed.priority = priority;
     allowed.updatedAt = new Date();
-    const [updated] = await db.update(clashesTable).set(allowed)
-      .where(clashScopeWhere(projectId, reportId, clashId)).returning();
-    if (!updated) {
+    const result = await db.transaction(async tx => {
+      const [before] = await tx.select().from(clashesTable).where(clashScopeWhere(projectId, reportId, clashId));
+      if (!before) return null;
+      const [updated] = await tx.update(clashesTable).set(allowed)
+        .where(clashScopeWhere(projectId, reportId, clashId)).returning();
+      await tx.insert(activityLogTable).values({
+        projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+        actionType: "update", entityType: "clash", entityId: clashId,
+        details: JSON.stringify({ before, after: updated, reportId }),
+      });
+      return updated;
+    });
+    if (!result) {
       res.status(404).json({ error: "not_found" });
       return;
     }
-    res.json(updated);
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: "update_failed", message: err instanceof Error ? err.message : String(err) });
   }
