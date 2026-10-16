@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
-import { workflowPolicyErrorMessage } from "@/lib/workflow-policy-error";
+import { governanceReviewerGuidance, workflowPolicyErrorMessage } from "@/lib/workflow-policy-error";
 import { governanceThresholdLabel } from "@/lib/governance-threshold-presentation";
 import "./CompanyWorkflowGovernance.css";
 
@@ -162,6 +162,7 @@ export function CompanyWorkflowGovernance() {
             <td><input aria-label={`${label(rule.action)} threshold`} type="number" min="0" step="1" disabled={!editable || !rule.threshold} value={rule.threshold?.amountMinor ?? ""}
               onChange={event => edit(value => { if(value.approvalRules[index].threshold) value.approvalRules[index].threshold!.amountMinor=Number(event.target.value); })} />
               <small>{governanceThresholdLabel(rule.threshold, spanish)}</small></td></tr>)}</tbody></table></div>
+        <p className="wgp-guidance" role="note">{governanceReviewerGuidance(draft.approvalRules.flatMap(rule => rule.roles), spanish)}</p>
       </section>
       <section className="wgp-card"><h3>{t("Change control","Control de cambios")}</h3>
         <div className="wgp-table-wrap"><table><thead><tr><th>{t("Change","Cambio")}</th><th>{t("Allowed","Permitido")}</th><th>{t("Reapproval","Reaprobación")}</th><th>{t("New version","Nueva versión")}</th></tr></thead>

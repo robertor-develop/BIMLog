@@ -65,3 +65,11 @@ export function workflowPolicyErrorMessage(
     ? "No se pudo completar la acción de gobernanza. Recargue la política y vuelva a intentarlo."
     : "The Governance action could not be completed. Reload the policy and try again.");
 }
+
+export function governanceReviewerGuidance(roles: readonly string[], spanish: boolean): string {
+  const normalized = [...new Set(roles.map(role => role.trim().toUpperCase()).filter(Boolean))];
+  const roleList = normalized.length ? normalized.join(", ") : (spanish ? "ningún rol configurado" : "no configured role");
+  return spanish
+    ? `Esta política exige uno de estos roles configurados: ${roleList}. El código del rol no identifica a una persona ni concede acceso. La aprobación la realiza otro usuario que ya tenga la autoridad PMO/Finanzas requerida.`
+    : `This policy requires one of these configured roles: ${roleList}. A role code does not identify a person or grant access. Approval must come from another user who already has the required PMO/Finance authority.`;
+}
