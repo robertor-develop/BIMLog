@@ -5,6 +5,7 @@ import projectsRouter from "../routes/projects";
 import companyMasterCatalogsRouter from "../routes/company-master-catalogs";
 import projectDirectoryRouter from "../routes/project_directory";
 import conventionsRouter from "../routes/conventions";
+import filesRouter from "../routes/files";
 import { signToken } from "../middlewares/auth";
 import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
 
@@ -34,7 +35,7 @@ await pool.query(`INSERT INTO company_master_catalog_administrators(id,company_i
   ('00000000-0000-4000-8000-000000000011',$1,$2,$2)`, [companyId, user.get("admin@example.test")!.id]);
 
 const token = (email: string) => signToken({ userId: user.get(email)!.id, email, companyId: user.get(email)!.companyId, fullName: email, companyName: "Synthetic", isSuperAdmin: false });
-const app = express(); app.use(express.json({ limit: "32kb" })); app.use("/api/v1", projectsRouter); app.use("/api/v1", companyMasterCatalogsRouter); app.use("/api/v1", projectDirectoryRouter); app.use("/api/v1", conventionsRouter);
+const app = express(); app.use(express.json({ limit: "32kb" })); app.use("/api/v1", projectsRouter); app.use("/api/v1", companyMasterCatalogsRouter); app.use("/api/v1", projectDirectoryRouter); app.use("/api/v1", conventionsRouter); app.use("/api/v1", filesRouter);
 const server = await new Promise<ReturnType<typeof app.listen>>((resolve) => { const value = app.listen(0, "127.0.0.1", () => resolve(value)); });
 const address = server.address(); if (!address || typeof address === "string") throw new Error("HTTP evidence server did not bind.");
 const request = async (path: string, email?: string, init: RequestInit = {}) => {
@@ -142,6 +143,22 @@ try {
     const versions = await request(`/projects/${projectId}/convention/versions`, "reader@example.test"); assert.equal(versions.status, 200); assert.equal(versions.body[0].conventionVersion, 2); assert.deepEqual(versions.body[0].acceptedDisciplines, []); assert.equal(versions.body.length, 2);
     assert.equal((await request(`/projects/${projectId}/convention/versions`, "outsider@example.test")).status, 403);
     checks.versions = { versions: [2, 1], emptyLatestPreserved: true, readOnlyWrite: 403, outsider: 403 };
+  }
+  if (scenario === "files" || scenario === "all") {
+    const seeded = await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('Synthetic File Custody','GA-FILE-001','active',$1) RETURNING id`, [user.get("admin@example.test")!.id]);
+    const projectId = Number(seeded.rows[0].id); const uploaderId = user.get("admin@example.test")!.id;
+    await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active'),($1,$3,'read_only','active')`, [projectId, uploaderId, user.get("reader@example.test")!.id]);
+    await pool.query(`INSERT INTO files(project_id,file_name,file_size,file_type,status,uploaded_by_id,source,storage_path,file_hash,file_size_bytes) VALUES
+      ($1,'portable.pdf',12,'pdf','approved',$2,'user-uploaded','synthetic/portable.pdf',$3,12),
+      ($1,'generated.pdf',13,'pdf','approved',$2,'system-generated',NULL,NULL,NULL),
+      ($1,'legacy.pdf',14,'pdf','approved',$2,'user-uploaded',NULL,NULL,NULL),
+      ($1,'incomplete.pdf',15,'pdf','approved',$2,'user-uploaded','synthetic/incomplete.pdf',NULL,15)`, [projectId, uploaderId, "a".repeat(64)]);
+    assert.equal((await request(`/projects/${projectId}/files/custody-summary`)).status, 401);
+    const summary = await request(`/projects/${projectId}/files/custody-summary`, "reader@example.test"); assert.equal(summary.status, 200); assert.equal(summary.body.total, 4); assert.deepEqual(summary.body.counts, { portable: 1, generated_on_demand: 1, legacy_binary_missing: 1, custody_incomplete: 1 });
+    const legacyId = Number(summary.body.files.find((file: any) => file.fileName === "legacy.pdf").id);
+    const legacyDownload = await request(`/projects/${projectId}/files/${legacyId}/download`, "reader@example.test"); assert.equal(legacyDownload.status, 409); assert.equal(legacyDownload.body.code, "FILE_BINARY_NOT_RETAINED");
+    assert.equal((await request(`/projects/${projectId}/files/custody-summary`, "outsider@example.test")).status, 403);
+    checks.files = { summary: 200, states: summary.body.counts, legacyDownload: 409, outsider: 403 };
   }
 } finally {
   await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
