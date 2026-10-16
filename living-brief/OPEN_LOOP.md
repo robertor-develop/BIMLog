@@ -5794,4 +5794,5 @@ No production answer or publication claim is accepted until the final live Chrom
 - Live publication and authenticated Chrome acceptance remain open until the exact pushed B2 source builds successfully in Replit, is published, and its source/package identity is verified.
 - Governed audio transcription remains intentionally unavailable. It may return only through an audited control-plane audio capability; the retired plaintext user-key path must not be restored.
 - Password-change revocation applies to newly issued credential-versioned sessions. Existing pre-B2 tokens expire under their original bounded lifetime and continue to receive current-user, company and project-membership checks on every request.
+- The API-root session acceptance repair must pass the exact Replit workspace build before publication; it adds no new production behavior.
 
