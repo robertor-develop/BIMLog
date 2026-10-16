@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Commercial provider activation boundary — 2026-10-16
+
+- [x] Gate the complete six-slot Stripe price catalog and duplicate-price rejection.
+- [x] Gate Stripe account, price, webhook, portal, mode, origin, and secret-safe verification behavior.
+- [x] Gate SendGrid account, verified sender, support inbox, and secret-safe verification behavior.
+- [x] Gate truthful public paid-plan availability and the exact nine approved configuration keys.
+- [ ] Configure the nine approved production values through the protected deployment environment, then run real Stripe and SendGrid verification. Do not claim paid-sales launch readiness before both providers pass.
+
 ## Enterprise launch configuration Blocks 5–6 — payment verification — 2026-10-13
 
 - [x] Select provider-neutral payment methods per launch environment: bank transfer, QR payment, or Stripe.

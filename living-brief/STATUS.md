@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Corrective commercial acceptance Builds 21–25 — 2026-10-16
+
+- Builds 21–24 lock the six-slot Stripe catalog, live Stripe account/webhook/portal verification boundary, live SendGrid account/verified-sender boundary, and the exact nine-key public launch-readiness contract.
+- Build 25 runs those gates together and records a machine-readable receipt without reading configured secrets or mutating protected production data.
+- Local implementation acceptance is complete only when the consolidated gate passes. Real Stripe and SendGrid acceptance remains blocked until the nine approved production values are configured and the live provider checks run successfully.
+
 ## Enterprise launch configuration Blocks 5–6 candidate — 2026-10-13
 
 Builds 21–30 complete the provider-neutral payment-verification authority in the centralized Super Admin launch workspace. BIMLog can select bank transfer, QR payment, or Stripe per environment; stores Stripe credentials as encrypted write-only values; records immutable verification evidence for the exact environment, method, and configuration revision; exposes protected no-store verification actions; and blocks production activation until every selected method has current successful evidence. Bank-transfer and QR checks validate configured launch data without moving money. Stripe verification fails safely as unavailable until the owner supplies the governed live account, credentials, and adapter. The block creates no customer payment, invoice, subscription, email, or financial transaction. Owner-controlled legal identity, contact, sender, banking, invoicing, and payment-provider values remain explicit external launch inputs. Focused behavior, route, database-safety, TypeScript, route-graph, and artifact-proof gates pass through implementation repair \`33974fbcbb0848b5444ca0633c787fd7d9852ce4\`; the complete exact-head gate, push, controlled publication, live source verification, and authenticated desktop/mobile Chrome acceptance remain required before release acceptance.

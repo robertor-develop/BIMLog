@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "bimlog-corrective-b25-commercial-gauntlet-v1",
+  "scope": "implementation and deterministic provider-boundary verification",
+  "results": [
+    {
+      "gate": "test:corrective-b21",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "0baca9b8a740c6a9943e90eca2b973ce76c32b301573dce52377b32177bba1e6"
+    },
+    {
+      "gate": "test:corrective-b22",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "8e64061c096109099083844cbd2af568095a2d26d6b9a7ffc8d2b39391b98d25"
+    },
+    {
+      "gate": "test:corrective-b23",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "325b52a420b72edc0046b9de17f2362abb24c1bad902da50f2aafe9bf2c4a151"
+    },
+    {
+      "gate": "test:corrective-b24",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "c2eb3cd00f57561817dc53312ded9f05fe844ba9d45b85b9e62c36e381753443"
+    }
+  ],
+  "protectedProductionDataMutations": 0,
+  "configuredSecretsInspected": 0,
+  "remainingExternalConfiguration": [
+    "BIMLOG_STRIPE_PRICE_IDS",
+    "BIMLOG_COMMERCIAL_MODE",
+    "STRIPE_SECRET_KEY",
+    "BIMLOG_APP_ORIGIN",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_PORTAL_CONFIGURATION_ID",
+    "SENDGRID_API_KEY",
+    "BIMLOG_SUPPORT_FROM_EMAIL",
+    "BIMLOG_SUPPORT_INBOX_EMAIL"
+  ],
+  "liveStripeVerification": "BLOCKED_PENDING_CONFIGURATION",
+  "liveSendGridVerification": "BLOCKED_PENDING_CONFIGURATION",
+  "overall": "LOCAL_PASS_EXTERNAL_CONFIGURATION_REQUIRED"
+}
