@@ -5892,6 +5892,7 @@ No production or protected-project mutation occurred. The authenticated producti
 The previous 13-record summary is superseded for current recovery planning. Historical receipts remain preserved as historical evidence. No protected project or file record was mutated.
 ## Lorena P1 correction block — 2026-10-16
 
+- [x] Correct re-audit finding: persist the exact generated strategy/milestone provenance, clear only generated guidance, replace only unchanged generated values, and preserve genuine user edits across clear, reselect, version change, and reload.
 - [x] Derive a selected saved APU's Contract Item unit rate from its explicit published unit rate or, when the legacy plan exposes only a selling total, from exact selling total divided by the Contract Item quantity. Preserve the plan total and calculation provenance separately.
 - [x] Derive each Contract Item's submittal strategy and milestones from the selected immutable Delivery Workflow version, including custom company definitions, while preserving genuine user overrides.
 - [x] Allocate activated phase hours from the selected workflow's verified frozen Commercial APU allocation; reject incomplete, mismatched, or non-100-percent multi-phase allocations.

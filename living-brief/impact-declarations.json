@@ -70508,6 +70508,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b0e0a843eb9bc8caacc87e382c0b441b050ece71db852cbc1da24c2ebd077398"
+    },
+    {
+      "taskId": "lorena-workflow-provenance-correction-20261016",
+      "reviewedThroughCommit": "a0014db81b7ed0a63eb16a7d13034ce615e5677c",
+      "reviewedAt": "2026-10-16T18:31:19Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior."
+        }
+      ],
+      "reason": "Corrective re-audit repair tracks the exact last generated workflow strategy and milestone values, clears only generated guidance, preserves genuine user edits, and covers clear, reselect, save-reload, unavailable-version-compatible provenance, and version-change behavior.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c4d395517580e93fcb3d63341a0628ecf2f73b31e9b860ac46376e99d95fdfcc"
     }
   ]
 }
