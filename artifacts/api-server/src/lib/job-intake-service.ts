@@ -36,6 +36,7 @@ import { applyIntakePolicyDefaults, normalizeIntakePolicy } from "./job-intake-p
 import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
+import { allocateWorkflowPhaseHours } from "./workflow-phase-hours";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
 import { rollbackWithOperationalEvidence } from "./operational-failure";
 import { activatedLineageReceipt, canonicalIntakeContractItemSource } from "./job-intake-contract-lineage";
@@ -1084,13 +1085,14 @@ async function createCoreActivationWithClient(
         "The operational work item could not be created.",
       );
     if (inserted) workItemsCreated += 1;
-    await bindDeliveryWorkflowWithClient({
+    const workflowBinding = await bindDeliveryWorkflowWithClient({
       client, companyId: input.companyId, projectId: input.projectId, workItemId: actualWorkItemId,
       actorUserId: input.actorUserId, deliverableType: item.deliverableType,
       selectedVersionId: item.deliveryWorkflowVersionId,
       executeUserId: input.data.team.assignments.find((assignment: JobIntakeData["team"]["assignments"][number]) => assignment.scopeItemId === item.id && assignment.userId)?.userId ?? null,
       leaderUserId: input.data.team.projectLeaderUserId,
     });
+    const phaseHours = allocateWorkflowPhaseHours(item.plannedHours, workflowBinding.definition?.phases ?? []);
     const needsScopeDeliveryTask =
       item.workPackages.length === 0 ||
       input.data.team.assignments.some(
@@ -1098,7 +1100,15 @@ async function createCoreActivationWithClient(
           assignment.scopeItemId === item.id && !assignment.workPackageId,
       );
     let actualTaskId: string | null = null;
-    if (needsScopeDeliveryTask) {
+    for (const [phaseIndex, phase] of phaseHours.entries()) {
+      const phaseTask = (await client.query(`INSERT INTO job_activation_tasks(id,work_item_id,task_key,name_en,name_es,sequence,status,planned_hours,created_by_id,phase_id,phase_code,phase_name)
+        VALUES($1,$2,$3,$4,$4,$5,'not_started',$6,$7,$8,$9,$10)
+        ON CONFLICT(work_item_id,task_key) DO UPDATE SET planned_hours=EXCLUDED.planned_hours,phase_id=EXCLUDED.phase_id,phase_code=EXCLUDED.phase_code,phase_name=EXCLUDED.phase_name RETURNING id`,
+        [uuid(),actualWorkItemId,`workflow-phase:${phase.code}`,phase.name,phaseIndex+1,phase.plannedHours,input.actorUserId,phase.id,phase.code,phase.name])).rows[0];
+      if (!actualTaskId) actualTaskId = phaseTask.id;
+      tasksCreated += 1;
+    }
+    if (needsScopeDeliveryTask && phaseHours.length === 0) {
       const taskId = uuid();
       const taskInserted = (
         await client.query(

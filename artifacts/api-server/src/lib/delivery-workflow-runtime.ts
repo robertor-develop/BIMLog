@@ -68,7 +68,10 @@ export async function bindDeliveryWorkflowWithClient(input: {
 }) {
   const prior = (await input.client.query(`SELECT work_item_id FROM company_delivery_workflow_work_items
     WHERE work_item_id=$1 AND company_id=$2 AND project_id=$3`, [input.workItemId,input.companyId,input.projectId])).rows[0];
-  if (prior) return { workItemId: input.workItemId, created: false };
+  if (prior) {
+    const saved = (await input.client.query(`SELECT definition FROM company_delivery_workflow_work_items WHERE work_item_id=$1`, [input.workItemId])).rows[0];
+    return { workItemId: input.workItemId, created: false, definition: saved?.definition ?? null };
+  }
   const available = await deliveryWorkflowOptions(
     input.client,
     input.companyId,
@@ -109,7 +112,7 @@ export async function bindDeliveryWorkflowWithClient(input: {
       ],
     )
   ).rows[0];
-  if (!inserted) return { workItemId: input.workItemId, created: false };
+  if (!inserted) return { workItemId: input.workItemId, created: false, definition: option.definition };
   for (const phase of option.definition.phases) {
     await input.client.query(
       `INSERT INTO company_delivery_workflow_phase_checks(work_item_id,phase_id) VALUES($1,$2)`,
@@ -161,6 +164,7 @@ export async function bindDeliveryWorkflowWithClient(input: {
     created: true,
     versionId: option.versionId,
     fingerprint: option.fingerprint,
+    definition: option.definition,
   };
 }
 
