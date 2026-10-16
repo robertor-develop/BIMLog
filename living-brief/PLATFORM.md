@@ -1167,6 +1167,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-invitation-migration.ts
 - artifacts/api-server/src/lib/project-invitation-service.ts
 - artifacts/api-server/src/lib/project-invitation.behavior.ts
+- artifacts/api-server/src/lib/project-record-lineage.behavior.ts
+- artifacts/api-server/src/lib/project-record-lineage.ts
 - artifacts/api-server/src/lib/project-retirement-inventory.behavior.ts
 - artifacts/api-server/src/lib/project-retirement-inventory.ts
 - artifacts/api-server/src/lib/project-retirement.ts

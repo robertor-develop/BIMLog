@@ -4482,3 +4482,7 @@ Corrective B06–B10 establish one canonical current project-role catalog while 
 
 The release retry also keeps the B08 acceptance module inside the API TypeScript root while reading the frontend session contract as test data; this changes no runtime behavior and closes the exact Replit workspace typecheck failure.
 
+
+### Corrective Block B4 candidate — 2026-10-16
+Builds B16-B20 standardize integration readiness, gate governed Procore RFI import, clarify the Procore OAuth boundary, verify provider/notification evidence, and gate the BIMLog MAIN 04 Agent lifecycle. Procore OAuth live browsing/download remains untested without an approved connected account; no continuous synchronization is claimed. Candidate implementation commit: c3732347669db470a3b3d366144d949ceb562dc3.
+

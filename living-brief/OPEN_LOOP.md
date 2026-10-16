@@ -5796,3 +5796,8 @@ No production answer or publication claim is accepted until the final live Chrom
 - Password-change revocation applies to newly issued credential-versioned sessions. Existing pre-B2 tokens expire under their original bounded lifetime and continue to receive current-user, company and project-membership checks on every request.
 - The API-root session acceptance repair must pass the exact Replit workspace build before publication; it adds no new production behavior.
 
+
+### Corrective Block B4 release gates — 2026-10-16
+- Watching: publish candidate c3732347669db470a3b3d366144d949ceb562dc3 with the B3+B4 ten-build interval and complete authenticated production Chrome smoke.
+- Untested: Procore OAuth company/project/folder browsing and authorized download require an approved connected Procore account. CSV preview/commit is independently gated; BIMLog does not claim continuous Procore synchronization.
+
