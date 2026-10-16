@@ -24,6 +24,7 @@
     "test:ga-final-block01-build002": "node scripts/test-ga-final-block01-build002-agent-isolation.mjs",
     "test:ga-final-block01-build003": "node scripts/test-ga-final-block01-build003-desktop-agent.mjs",
     "test:ga-final-block01-build004": "node scripts/test-ga-final-block01-build004-responsive-agent.mjs",
+    "test:ga-final-block01-build005": "node scripts/test-ga-final-block01-build005-acceptance.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
     "test:launch-payment-audit-migration": "node scripts/test-launch-payment-audit-migration.mjs",
     "test:enterprise-launch-configuration-block07": "node scripts/test-enterprise-launch-configuration-block07.mjs",

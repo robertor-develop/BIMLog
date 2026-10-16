@@ -1,0 +1,38 @@
+{
+  "program": "GA final readiness",
+  "block": "01",
+  "buildCount": 5,
+  "sourceBase": "dc2cc5af06ca3bad87182efe96a030a62b67ddcd",
+  "scope": "BIMLog Dedicated Agent access, isolation, desktop and responsive acceptance",
+  "builds": [
+    { "id": "GA-F01-B001", "gate": "authenticated BIMTech role access" },
+    { "id": "GA-F01-B002", "gate": "tenant, actor and project isolation" },
+    { "id": "GA-F01-B003", "gate": "desktop panel reflow, resize and recovery" },
+    { "id": "GA-F01-B004", "gate": "responsive and accessible panel behavior" },
+    { "id": "GA-F01-B005", "gate": "consolidated acceptance receipt" }
+  ],
+  "authenticatedRolesCovered": [
+    "super_admin",
+    "company_admin",
+    "project_admin",
+    "coordinator",
+    "member",
+    "viewer"
+  ],
+  "productionEvidence": {
+    "sourceCommit": "1446d109",
+    "question": "What page am I viewing? Reply with the page name only.",
+    "answer": "BIMLog Headquarters",
+    "persistenceAfterReload": true,
+    "staleErrorAfterAnswer": false
+  },
+  "limitations": [
+    "This block proves the universal authenticated role contract; it does not claim separate live impersonation sessions for named employees.",
+    "This is the first five-build block in a ten-build publication interval and is not a publication receipt."
+  ],
+  "publicationCadence": {
+    "unpublishedBuildsAfterBlock": 5,
+    "publishAtBuildCount": 10,
+    "authenticatedChromeSmokeRequiredAfterPublication": true
+  }
+}
