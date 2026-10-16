@@ -46,4 +46,11 @@ for (const token of ["aria-label", "aria-live", "Resize BIMLog Agent panel", "ar
   assert.ok(assistant.includes(token), `BIMLog Agent mobile/accessibility contract missing ${token}`);
 }
 
+const dashboard = read("artifacts/bimlog/src/pages/Dashboard.tsx");
+for (const token of [
+  'id="headquarters-project-search"', 'name="projectSearch"',
+  'id="headquarters-project-status"', 'name="projectStatus"',
+  'id="headquarters-project-sort"', 'name="projectSort"',
+]) assert.ok(dashboard.includes(token), `Headquarters filter control identity missing ${token}`);
+
 console.log("GA-F05-B032 PASS: exact responsive route matrix, Agent workspace fixture, keyboard/focus labels, touch targets and reduced-motion contracts");

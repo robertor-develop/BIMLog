@@ -702,6 +702,8 @@ export function Dashboard() {
               <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
                 {tt("Search projects", "Buscar proyectos")}
                 <Input
+                  id="headquarters-project-search"
+                  name="projectSearch"
                   value={projectSearch}
                   onChange={event => setProjectSearch(event.target.value)}
                   placeholder={tt("Name, code, client or location...", "Nombre, codigo, cliente o ubicacion...")}
@@ -709,7 +711,7 @@ export function Dashboard() {
               </label>
               <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
                 {tt("Project status", "Estado del proyecto")}
-                <select className="input" value={projectStatus} onChange={event => setProjectStatus(event.target.value)}>
+                <select id="headquarters-project-status" name="projectStatus" className="input" value={projectStatus} onChange={event => setProjectStatus(event.target.value)}>
                   <option value="active">{tt("Active projects", "Proyectos activos")}</option>
                   <option value="testing">{tt("Testing projects", "Proyectos de prueba")}</option>
                   <option value="retired">{tt("Retired projects", "Proyectos retirados")}</option>
@@ -718,7 +720,7 @@ export function Dashboard() {
               </label>
               <label style={{ display: "grid", gap: 4, minWidth: 0, fontSize: 11, fontWeight: 700 }}>
                 {tt("Sort projects", "Ordenar proyectos")}
-                <select className="input" value={projectSort} onChange={event => setProjectSort(event.target.value as typeof projectSort)}>
+                <select id="headquarters-project-sort" name="projectSort" className="input" value={projectSort} onChange={event => setProjectSort(event.target.value as typeof projectSort)}>
                   <option value="name_asc">{tt("Name A-Z", "Nombre A-Z")}</option>
                   <option value="name_desc">{tt("Name Z-A", "Nombre Z-A")}</option>
                   <option value="code_asc">{tt("Project code", "Codigo del proyecto")}</option>

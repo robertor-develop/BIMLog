@@ -14,5 +14,6 @@ assert.match(css, /\.page-assistant-status-strip\{grid-template-columns:repeat\(
 assert.match(panel, /aria-label=\{voiceListening\?tt\("Stop dictation","Detener dictado"\):tt\("Dictate your question","Dictar tu pregunta"\)\}/);
 assert.match(panel, /aria-live="polite" aria-busy=\{busy\}/);
 assert.match(panel, /aria-keyshortcuts="Alt\+Shift\+A"/);
+assert.match(panel, /id="bimlog-agent-include-selected" name="includeSelectedFieldValue" type="checkbox"/);
 
 console.log("GA-F01-B004 responsive and accessible agent acceptance: PASS");
