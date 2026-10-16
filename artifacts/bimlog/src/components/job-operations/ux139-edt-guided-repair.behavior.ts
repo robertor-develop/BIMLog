@@ -3,6 +3,8 @@ import { edtReadinessRepair } from "./EdtPlanPreviewPanel";
 
 const operationReturn = encodeURIComponent("/projects/59/operations?taskId=task-7");
 assert.deepEqual(edtReadinessRepair("EDT_CONTRACT_SOURCE_MISSING", 59, "task-7"), { missing: "Activated Intake contract source", href: `/projects/59/intake?stage=contract&item=ji-contract&returnTo=${operationReturn}` });
+assert.deepEqual(edtReadinessRepair("EDT_CONTRACT_SOURCE_MISMATCH", 59, "task-7", "contract-9"), { missing: "Activated Intake contract source", href: `/projects/59/financial/contracts?contractId=contract-9&returnTo=${operationReturn}` });
+assert.doesNotMatch(edtReadinessRepair("EDT_CONTRACT_SOURCE_MISMATCH", 59, "task-7", "../bad")?.href ?? "", /financial\/contracts/);
 assert.match(edtReadinessRepair("EDT_WORKFLOW_SOURCE_MISMATCH", 59, "task-7")?.href ?? "", new RegExp(`company-workflows.*returnTo=${operationReturn}`));
 assert.match(edtReadinessRepair("EDT_GOVERNANCE_SOURCE_MISSING", 59, "task-7")?.href ?? "", new RegExp(`/projects/59/intake\\?stage=review&returnTo=${operationReturn}`));
 assert.match(edtReadinessRepair("EDT_LOCATION_AMBIGUOUS", 59, "task-7")?.href ?? "", new RegExp(`/projects/59/intake\\?stage=scope&returnTo=${operationReturn}`));
