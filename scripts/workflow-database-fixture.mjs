@@ -12,6 +12,7 @@ export const workflowFixtureNames = Object.freeze([
   "economic_allocation_test",
   "bimlog_intake_integration_test",
   "company_pricing_template_test",
+  "bimlog_recovery_ga_http_test",
 ]);
 
 export function validateWorkflowFixture(name, adminUrl) {
