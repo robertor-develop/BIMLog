@@ -106,11 +106,12 @@ for (const [version,price] of [[1,"25"],[2,"42.5"]] as const)
     VALUES($1,$2,$3,$4::jsonb,'{}'::jsonb,$5,$6)`,
     [`intake-apu-${version}`,projectId,version,JSON.stringify({ currency:"USD",sellingPrice:price }),`intake-apu-fp-${version}`,actor.id]);
 
-async function publishedTemplate(name: string,price: string,classified = false) {
+async function publishedTemplate(name: string,price: string,classified = false,
+  phases=[{phaseId:"production",code:"PROD",name:"Production",percent:"100"}]) {
   const templateId = randomUUID(), versionId = randomUUID();
   const definition = { schemaVersion:1,currency:"USD",industry:"BIM Services",name,
     nodes:[{ id:"labor",label:"Labor",method:"fixed_amount",amount:price },...(classified?[{id:"reserve",label:"TEST explicit reserve",method:"fixed_amount",amount:"30"}]:[])],
-    ...(classified ? {economicAllocation:{directProductionNodeIds:["labor"],phases:[{phaseId:"production",code:"PROD",name:"Production",percent:"100"}]},
+    ...(classified ? {economicAllocation:{directProductionNodeIds:["labor"],phases},
       economicPools:{fixedCompanyCost:[],directProduction:["labor"],projectAdministration:[],incentiveReserve:["reserve"],projectEarnings:[]}} : {}) };
   const validated = validatePricingTemplate(definition);
   await pool.query(`INSERT INTO generic_apu_template_versions
@@ -228,12 +229,34 @@ try {
     ] },
     review:{ scopeConfirmed:true,pricingConfirmed:true,contractConfirmed:true,deliveryConfirmed:true,teamConfirmed:true },
   };
+  const corePhases=[
+    {phaseId:"pre",code:"PRE",name:"TEST Preparation",percent:"25"},
+    {phaseId:"coo",code:"COO",name:"TEST Coordination",percent:"25"},
+    {phaseId:"for",code:"FOR",name:"TEST Formal review",percent:"25"},
+    {phaseId:"asb",code:"ASB",name:"TEST As-built",percent:"25"},
+  ];
+  const coreAllocationTemplate=await publishedTemplate("Core Activation Allocation","100",true,corePhases);
+  const coreWorkflowId=randomUUID(),coreWorkflowVersionId=randomUUID();
+  const coreWorkflowDefinition=validateDeliveryWorkflowDefinition({schemaVersion:1,deliverableTypes:["SHOP_DRAWING"],
+    roles:{execute:"DRAFTER",review:"QC_REVIEWER",approve:"PROJECT_MANAGER"},
+    phases:corePhases.map((phase,index)=>({id:phase.phaseId,code:phase.code,name:phase.name,order:index+1,
+      tasks:[{id:`${phase.phaseId}-task`,code:`${phase.code}-TASK`,name:`${phase.name} task`,order:1,requiredDocuments:[]}],
+      completionRule:"all_tasks_complete",qcRequired:true,approvalRequired:true})),
+    transitions:corePhases.slice(0,-1).map((phase,index)=>({from:phase.phaseId,to:corePhases[index+1].phaseId,
+      gate:"qc_approved",requiredDocuments:[]})),reopen:{role:"approve",reasonRequired:true},
+    economicAllocation:{sourceVersionId:coreAllocationTemplate.versionId,proposal:{method:"apu_default"}}});
+  await pool.query(`INSERT INTO company_delivery_workflow_templates(id,company_id,code,name,created_by_id)
+    VALUES($1,$2,'TEST-CORE-ALLOCATED','TEST Core allocated workflow',$3)`,[coreWorkflowId,companyId,actor.id]);
+  await pool.query(`INSERT INTO company_delivery_workflow_versions
+    (id,template_id,version,state,revision,definition,fingerprint,effective_from,approved_at,approved_by_id,published_at,published_by_id,created_by_id,updated_by_id)
+    VALUES($1,$2,1,'published',3,$3::jsonb,$4,now(),now(),$5,now(),$6,$6,$6)`,
+    [coreWorkflowVersionId,coreWorkflowId,JSON.stringify(coreWorkflowDefinition),deliveryWorkflowFingerprint(coreWorkflowDefinition),checker.id,actor.id]);
   const coreProjectId=Number((await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('TEST core enrichment','TEST-CORE-ENRICH','active',$1) RETURNING id`,[actor.id])).rows[0].id);
   await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'admin','active'),($1,$3,'member','active')`,[coreProjectId,actor.id,checker.id]);
   const corePath=`/projects/${coreProjectId}/intake`;
   const coreInitial=await request('POST',corePath);
   const coreData={...data,team:{...data.team,projectLeaderUserId:null,assignments:data.team.assignments.map(a=>({...a,userId:null,personName:"",plannedHours:"1"}))},commercial:{...data.commercial,budgetSnapshotId:'',contracts:data.commercial.contracts.map(({pricingTemplateVersionId,...contract})=>contract)},
-    scopeItems:data.scopeItems.map(({apuPlanVersion,budgetSnapshotLineId,projectCostNodeId,...item})=>({...item,quantity:"12",unit:"Drawings",workPackages:item.workPackages.map(pkg=>({...pkg,id:`CORE-${pkg.id}`,packageCode:`CORE-${pkg.packageCode}`}))}))};
+    scopeItems:data.scopeItems.map(({apuPlanVersion,budgetSnapshotLineId,projectCostNodeId,...item})=>({...item,deliveryWorkflowVersionId:coreWorkflowVersionId,quantity:"12",unit:"Drawings",workPackages:item.workPackages.map(pkg=>({...pkg,id:`CORE-${pkg.id}`,packageCode:`CORE-${pkg.packageCode}`}))}))};
   const coreSaved=await request('PUT',corePath,{expectedRevision:coreInitial.body.revision,data:coreData});
   assert.equal(coreSaved.status,200,JSON.stringify(coreSaved.body));
   const coreRequest={expectedRevision:coreSaved.body.revision,confirmationFingerprint:coreSaved.body.completion.fingerprint};
@@ -313,7 +336,9 @@ try {
     (id,template_id,version,state,revision,definition,fingerprint,effective_from,approved_at,approved_by_id,published_at,published_by_id,created_by_id,updated_by_id)
     VALUES($1,$2,1,'published',3,$3::jsonb,$4,now(),now(),$5,now(),$6,$6,$6)`,
     [productionWorkflowVersionId,productionWorkflowId,JSON.stringify(productionDefinition),productionWorkflowFingerprint,checker.id,actor.id]);
-  let correctedData = { ...data,scopeItems:data.scopeItems.map(item=>item.contractId==='ADD'?{...item,deliveryWorkflowVersionId:productionWorkflowVersionId}:item),commercial:{ ...data.commercial,contracts:[data.commercial.contracts[0],
+  let correctedData = { ...data,scopeItems:data.scopeItems.map(item=>item.contractId==='ADD'
+    ? {...item,deliveryWorkflowVersionId:productionWorkflowVersionId}
+    : {...item,deliveryWorkflowVersionId:coreWorkflowVersionId}),commercial:{ ...data.commercial,contracts:[data.commercial.contracts[0],
     { ...data.commercial.contracts[1],pricingTemplateVersionId:replacement.versionId }] } };
   const recovered = await request("PUT",intakePath,{ expectedRevision:reopened.body.revision,data:correctedData });
   assert.equal(recovered.status,200,JSON.stringify(recovered.body));
@@ -345,11 +370,13 @@ try {
     JOIN job_activation_work_items w ON w.id=t.work_item_id
     JOIN job_activation_work_package_tasks p ON p.task_id=t.id WHERE w.project_id=$1`,[projectId])).rows;
   assert.equal(packageTasks.length,2);
-  assert.equal(packageTasks.reduce((sum:number,task:any) => sum+Number(task.planned_hours),0),14,"Package links reuse the planned scope hours without duplication");
+  const activatedTaskHours=Number((await pool.query(`SELECT COALESCE(SUM(t.planned_hours),0)::text total FROM job_activation_tasks t
+    JOIN job_activation_work_items w ON w.id=t.work_item_id WHERE w.project_id=$1`,[projectId])).rows[0].total);
+  assert.equal(activatedTaskHours,14,"Verified workflow phases preserve the planned scope hours without duplication");
+  assert.ok(packageTasks.every((task:any)=>Number(task.planned_hours)>0),"Each package links to a real allocated workflow task");
   await assert.rejects(pool.query(`UPDATE job_activation_tasks SET planned_hours=-1 WHERE id=$1`,[packageTasks[0].id]),
     (error:any) => error.constraint === "job_activation_task_hours_chk");
-  await assert.rejects(pool.query(`UPDATE job_activation_tasks SET planned_hours=0 WHERE task_key='scope-delivery'
-    AND work_item_id IN(SELECT id FROM job_activation_work_items WHERE project_id=$1)`,[projectId]),
+  await assert.rejects(pool.query(`UPDATE job_activation_tasks SET planned_hours=0 WHERE id=$1`,[packageTasks[1].id]),
     (error:any) => error.constraint === "job_activation_task_hours_chk");
   const activationState = async () => (await pool.query(`SELECT
     (SELECT jsonb_agg(to_jsonb(c) ORDER BY c.id) FROM financial_contracts c WHERE c.project_id=$1) contracts,
