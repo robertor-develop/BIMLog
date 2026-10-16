@@ -5789,3 +5789,9 @@ No production answer or publication claim is accepted until the final live Chrom
 - [x] Pass the focused Page Assistant workspace, responsive and universal-access gates.
 - [x] Refresh the three source-derived transmittal line references in the governed 45-entry AI inventory without changing provider or acquisition authority.
 - [ ] Pass the complete exact-head local release gate and push B-GA021–B-GA025 once. Keep the block unpublished until B-GA026–B-GA030 completes the ten-build interval.
+## Post-audit corrective Block B2 release boundary — 2026-10-16
+
+- Live publication and authenticated Chrome acceptance remain open until the exact pushed B2 source builds successfully in Replit, is published, and its source/package identity is verified.
+- Governed audio transcription remains intentionally unavailable. It may return only through an audited control-plane audio capability; the retired plaintext user-key path must not be restored.
+- Password-change revocation applies to newly issued credential-versioned sessions. Existing pre-B2 tokens expire under their original bounded lifetime and continue to receive current-user, company and project-membership checks on every request.
+
