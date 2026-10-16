@@ -4,7 +4,7 @@ import path from "node:path";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const scenario = process.argv.find((value) => value.startsWith("--scenario="))?.slice(11) ?? "all";
-const allowed = new Set(["project", "catalog", "directory", "roles", "all"]);
+const allowed = new Set(["project", "catalog", "directory", "roles", "convention", "convention-integrity", "versions", "files", "all"]);
 if (!allowed.has(scenario)) throw new Error(`Unsupported recovery GA HTTP scenario: ${scenario}`);
 function run(args, cwd = root, env = process.env) {
   const result = spawnSync(process.execPath, args, { cwd, env, stdio: "inherit", windowsHide: true });

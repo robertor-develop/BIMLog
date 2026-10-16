@@ -4,6 +4,7 @@ import { pool } from "@workspace/db";
 import projectsRouter from "../routes/projects";
 import companyMasterCatalogsRouter from "../routes/company-master-catalogs";
 import projectDirectoryRouter from "../routes/project_directory";
+import conventionsRouter from "../routes/conventions";
 import { signToken } from "../middlewares/auth";
 import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
 
@@ -33,7 +34,7 @@ await pool.query(`INSERT INTO company_master_catalog_administrators(id,company_i
   ('00000000-0000-4000-8000-000000000011',$1,$2,$2)`, [companyId, user.get("admin@example.test")!.id]);
 
 const token = (email: string) => signToken({ userId: user.get(email)!.id, email, companyId: user.get(email)!.companyId, fullName: email, companyName: "Synthetic", isSuperAdmin: false });
-const app = express(); app.use(express.json({ limit: "32kb" })); app.use("/api/v1", projectsRouter); app.use("/api/v1", companyMasterCatalogsRouter); app.use("/api/v1", projectDirectoryRouter);
+const app = express(); app.use(express.json({ limit: "32kb" })); app.use("/api/v1", projectsRouter); app.use("/api/v1", companyMasterCatalogsRouter); app.use("/api/v1", projectDirectoryRouter); app.use("/api/v1", conventionsRouter);
 const server = await new Promise<ReturnType<typeof app.listen>>((resolve) => { const value = app.listen(0, "127.0.0.1", () => resolve(value)); });
 const address = server.address(); if (!address || typeof address === "string") throw new Error("HTTP evidence server did not bind.");
 const request = async (path: string, email?: string, init: RequestInit = {}) => {
@@ -99,6 +100,21 @@ try {
     }
     assert.deepEqual(writeStatus, { project_admin: 201, convention_manager: 201, member: 201, read_only: 403 });
     checks.roles = { unauthenticated: 401, memberReads: 4, outsider: 403, writes: writeStatus };
+  }
+  if (scenario === "convention" || scenario === "all") {
+    const seeded = await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('Synthetic Convention Project','GA-CON-001','active',$1) RETURNING id`, [user.get("admin@example.test")!.id]);
+    const projectId = Number(seeded.rows[0].id);
+    await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active'),($1,$3,'read_only','active')`, [projectId, user.get("admin@example.test")!.id, user.get("reader@example.test")!.id]);
+    const fields = [
+      { label: "Originator", fieldOrder: 1, allowedValues: ["SYN"] },
+      { label: "Project Code", fieldOrder: 0, allowedValues: ["GA-CON-001"] },
+      { label: "Discipline", fieldOrder: 2, allowedValues: ["ARC"] },
+    ];
+    const saved = await request(`/projects/${projectId}/conventions`, "admin@example.test", { method: "PUT", body: JSON.stringify({ separator: "-", isActive: true, enforceUppercase: true, fields }) });
+    assert.equal(saved.status, 200); assert.equal(saved.body.isActive, true); assert.equal(saved.body.fields[0].label, "Project Code");
+    const reopened = await request(`/projects/${projectId}/conventions`, "reader@example.test"); assert.equal(reopened.status, 200); assert.equal(reopened.body.separator, "-"); assert.deepEqual(reopened.body.fields.map((field: any) => field.label), ["Project Code", "Originator", "Discipline"]);
+    assert.equal((await request(`/projects/${projectId}/conventions`, "outsider@example.test")).status, 403);
+    checks.convention = { save: 200, reload: 200, orderedFields: true, outsider: 403 };
   }
 } finally {
   await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
