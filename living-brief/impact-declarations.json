@@ -70867,6 +70867,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "14563a387aeeeb1de341088912e88f272617bdfb5281f192b31d64bb88718cec"
+    },
+    {
+      "taskId": "lorena-p1-block01-apu-rate-gate-20261016",
+      "reviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "reviewedAt": "2026-10-16T22:40:00Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged."
+        }
+      ],
+      "reason": "Release-gate correction aligns the stale Commercial Intake acceptance with the already-implemented quantity-aware APU rate and preserved plan-total provenance; runtime behavior and production data are unchanged.",
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7f48c757a4ff72a85eeba84dcefb152e751ea88c8fc0b9cdb864b9b680f1f868"
     }
   ]
 }

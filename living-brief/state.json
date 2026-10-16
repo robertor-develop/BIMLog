@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
+  "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "b1fe83b3d5102de6f19108bebf32cb8263e185563fea3c70561341eea98f19ba",
+  "bundleSha256": "ded9f4f93c7385107adb16494e04e0184db1e5c992c63e1b5a3ac50604457835",
   "impact": {
-    "baselineCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
+    "baselineCommit": "8953f3799cb60b347b44df14468329a410a8d429",
     "changedPaths": [
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -22,11 +22,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "claude",
@@ -34,11 +34,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "quality",
@@ -46,11 +46,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "vision",
@@ -58,11 +58,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "platform",
@@ -70,11 +70,11 @@
       "sha256": "edff1940f273bd4ff2c7138e5a0e9cb1eb849f563d2090b25511de0cda2f11b2",
       "sourceChangedAt": "2026-10-16T14:41:43-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "plugin",
@@ -82,11 +82,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "report_design_system",
@@ -94,11 +94,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "standards_register",
@@ -106,23 +106,23 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "875f4d49f811a15e02b2dd52e793bb42a992ea899bf85b54e3c47a8e38ff1aa3",
-      "sourceChangedAt": "2026-10-16T22:31:37.000Z",
+      "sha256": "8c4dc482a84187edb00f9a55f2567d931f1e2c0d030491c2ab3c45d21a51e32e",
+      "sourceChangedAt": "2026-10-16T22:51:55.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "open_loop",
@@ -130,11 +130,11 @@
       "sha256": "6fab4fabd83c132d92a21326a72c5038ded4a40647fc029f50fe961c2478dd9f",
       "sourceChangedAt": "2026-10-16T18:26:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     },
     {
       "key": "audit",
@@ -142,11 +142,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewedThroughCommit": "a5292a8501df670a044631fd769249a4f20a7e6a",
-      "semanticReviewTask": "lorena-p1-block01-release-gate-fixture-20261016",
+      "reconciledThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewedThroughCommit": "8953f3799cb60b347b44df14468329a410a8d429",
+      "semanticReviewTask": "lorena-p1-block01-apu-rate-gate-20261016",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-16T22:32:00Z"
+      "semanticReviewedAt": "2026-10-16T22:40:00Z"
     }
   ]
 }

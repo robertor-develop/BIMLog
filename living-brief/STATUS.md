@@ -4539,3 +4539,6 @@ B01 aligns the governed release-identity acceptance with the active P37 release.
 
 The first full release-gate retry found a stale expected list in the bounded workflow-database fixture test after the authenticated recovery fixture had become the sixth approved disposable database. The expectation now matches the existing fail-closed allowlist; the focused fixture contract passes. This correction adds no database, runtime route, or product behavior.
 
+
+The second release-gate retry found one stale quantity-aware APU assertion. The corrected acceptance now proves a 1,200 plan total divided by quantity 12 yields unit rate 100 while preserving the 1,200 plan-total provenance and calculation method. The focused UX block passes; runtime behavior is unchanged.
+
