@@ -69208,7 +69208,7 @@
     },
     {
       "taskId": "post-audit-corrective-b2-20261016",
-      "reviewedThroughCommit": "0385f7721c9cee4221cd2a5a8e4db831fba6956c",
+      "reviewedThroughCommit": "f23f2200cb19b6bcd7065ba261e096bec93c8048",
       "reviewedAt": "2026-10-16T05:46:40.713Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
@@ -69271,10 +69271,9 @@
       ],
       "reason": "Corrective B06-B10 reconcile canonical roles, immutable membership and invitation revocation audit, password-change session revocation, the complete tenant/project isolation surface matrix, and transactional migration of legacy plaintext AI keys into encrypted governed provider connections. Legacy audio is explicitly unavailable until governed capability exists; no Native product doctrine changes.",
       "reviewedChangedPaths": [
-        "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "dd5bbd198740d1b1ac48be1532a90c58e57ca828123b66fdc2925c80f09694f8"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
