@@ -70227,6 +70227,75 @@
         "scripts/record-release-integrity-review.mjs"
       ],
       "reviewedChangeSha256": "6554ccd247f534ca1f0533e28b3d545320e182ca1d426aa4fc629d91d08c53f1"
+    },
+    {
+      "taskId": "protected-file-recovery-closure-block07-20261016",
+      "reviewedThroughCommit": "1014c7b88cc0882ba1cd7ef0a74d34e69b780aae",
+      "reviewedAt": "2026-10-16T15:40:13.332Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed."
+        }
+      ],
+      "reason": "Protected-file recovery closure Block 7 reconciles the authenticated live inventory to 16 non-portable records, requires exact candidate identity, preserves source-search truth and produces a no-overwrite dry run while provider recovery sources remain unresolved; no production data changed.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
