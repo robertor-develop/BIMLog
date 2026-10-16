@@ -116,6 +116,20 @@ try {
     assert.equal((await request(`/projects/${projectId}/conventions`, "outsider@example.test")).status, 403);
     checks.convention = { save: 200, reload: 200, orderedFields: true, outsider: 403 };
   }
+  if (scenario === "convention-integrity" || scenario === "all") {
+    const seeded = await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('Synthetic Convention Integrity','GA-CON-002','active',$1) RETURNING id`, [user.get("admin@example.test")!.id]);
+    const projectId = Number(seeded.rows[0].id);
+    await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'project_admin','active'),($1,$3,'read_only','active')`, [projectId, user.get("admin@example.test")!.id, user.get("reader@example.test")!.id]);
+    const labels = ["Project Code", "Originator", "Discipline", "Level", "Type", "Sequence", "Status", "Revision"];
+    const fields = labels.map((label, fieldOrder) => ({ label, fieldOrder, allowedValues: [label === "Project Code" ? "GA-CON-002" : `V${fieldOrder}`] }));
+    const completed = await request(`/projects/${projectId}/conventions`, "admin@example.test", { method: "PUT", body: JSON.stringify({ separator: "_", isActive: true, markCompleted: true, fields }) });
+    assert.equal(completed.status, 200); assert.equal(completed.body.setupStatus, "completed");
+    const wipe = await request(`/projects/${projectId}/conventions`, "admin@example.test", { method: "PUT", body: JSON.stringify({ separator: "_", isActive: true, fields: fields.slice(0, 2) }) });
+    assert.equal(wipe.status, 400);
+    const readOnlyWrite = await request(`/projects/${projectId}/conventions`, "reader@example.test", { method: "PUT", body: JSON.stringify({ separator: "-", isActive: false }) }); assert.equal(readOnlyWrite.status, 403);
+    const reopened = await request(`/projects/${projectId}/conventions`, "reader@example.test"); assert.equal(reopened.status, 200); assert.equal(reopened.body.setupStatus, "completed"); assert.equal(reopened.body.fields.length, 8);
+    checks.conventionIntegrity = { completion: 200, destructivePartialSave: 400, readOnlyWrite: 403, preservedFields: 8 };
+  }
 } finally {
   await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   await pool.end();
