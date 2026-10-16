@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+const read=file=>readFileSync(file,"utf8");
+const run=file=>{const r=spawnSync(process.execPath,["artifacts/api-server/node_modules/tsx/dist/cli.mjs",file],{encoding:"utf8"});assert.equal(r.status,0,`${file} failed:\n${r.stdout}\n${r.stderr}`);};
+for(const file of ["artifacts/api-server/src/lib/professional-report-package.behavior.ts","artifacts/api-server/src/lib/professional-report-parity.behavior.ts"]) run(file);
+const routes=read("artifacts/api-server/src/routes/reports.ts");
+for(const route of ["current-view/pdf","project-health/pdf","compliance/pdf","rfi-aging/pdf","submittal-status/pdf","audit-certificate/pdf","meeting-minutes/pdf","change-order-log/pdf","transmittal-log/pdf","cvr/pdf"]) assert.ok(routes.includes(route),`Reports API missing ${route}`);
+assert.ok((routes.match(/requireProjectMember\(\)/g)||[]).length>=10,"Governed project reports must enforce membership");
+const ui=read("artifacts/bimlog/src/pages/project/ReportsTab.tsx");
+for(const token of ["PDF_REPORTS","REPORT_QUESTIONS","reportExportPreview","launchSelectedReport","exportReportsHubCurrentView","evidenceSufficiency"]) assert.ok(ui.includes(token),`Reports Hub missing ${token}`);
+console.log("GA-F04-B028 governed report discovery, evidence, filtering and PDF parity: PASS");
