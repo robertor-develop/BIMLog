@@ -41,6 +41,7 @@
     "test:ga-final-block04-build029": "node scripts/test-ga-final-block04-build029-analytics-lifecycle.mjs",
     "test:ga-final-block04-build030": "node scripts/test-ga-final-block04-build030-integration-verification.mjs",
     "test:ga-final-block05-build031": "node scripts/test-ga-final-block05-build031-security-isolation.mjs",
+    "test:ga-final-block05-build032": "node scripts/test-ga-final-block05-build032-mobile-accessibility.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",

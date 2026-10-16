@@ -5,7 +5,6 @@ const source = readFileSync(new URL("./pages/AdminPanel.tsx", import.meta.url), 
 const login = readFileSync(new URL("./pages/Login.tsx", import.meta.url), "utf8");
 const css = readFileSync(new URL("./index.css", import.meta.url), "utf8");
 const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
-const footer = readFileSync(new URL("./components/layout/Footer.tsx", import.meta.url), "utf8");
 
 const checks = [
   ["admin modal fits an exact 390px viewport", /padding: 12[\s\S]*minWidth: 0[\s\S]*width: "min\(100%, 560px\)"/.test(source)],
@@ -19,8 +18,8 @@ const checks = [
   ["password visibility control remains keyboard reachable", !/tabIndex=\{-1\}[\s\S]{0,120}aria-label=\{showPassword/.test(login)],
   ["password visibility control has a sufficient touch target", /padding: 8, width: 32, height: 32/.test(login)],
   ["password recovery link has a sufficient touch target", login.includes("inline-flex min-h-6 items-center text-xs")],
-  ["public footer collapses to one column at 390px", /@media\(max-width:390px\)[\s\S]*\.public-footer-grid\{grid-template-columns:minmax\(0,1fr\)!important\}/.test(footer)],
-  ["public footer metadata stacks without clipping", footer.includes(".public-footer-meta{align-items:flex-start!important;flex-direction:column}")],
+  ["public footer collapses to one column at 390px", /@media\s*\(max-width:\s*390px\)\s*\{[\s\S]*?\.public-footer-grid\s*\{\s*grid-template-columns:\s*minmax\(0,1fr\)\s*!important;/.test(css)],
+  ["public footer metadata stacks without clipping", /\.public-footer-meta\s*\{\s*align-items:\s*flex-start\s*!important;\s*flex-direction:\s*column;/.test(css)],
 ];
 
 for (const [name, passed] of checks) {
