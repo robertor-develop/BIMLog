@@ -24,7 +24,7 @@ type TransmittalRegisterFilters = {
   sort: "created_desc" | "created_asc" | "sent_desc" | "title_asc" | "status_asc";
 };
 
-const TRANSMITTAL_STATUSES = new Set(["all", "draft", "sent", "acknowledged"]);
+const TRANSMITTAL_STATUSES = new Set(["all", "draft", "sent", "acknowledged", "failed", "cancelled"]);
 const TRANSMITTAL_SORTS = new Set(["created_desc", "created_asc", "sent_desc", "title_asc", "status_asc"]);
 
 function textQuery(value: unknown, fallback = "") {
@@ -368,28 +368,23 @@ router.post("/projects/:projectId/transmittals/:transmittalId/send", authMiddlew
       .where(and(eq(transmittalsTable.id, txId), eq(transmittalsTable.projectId, projectId)));
     if (!tx) { res.status(404).json({ error: "Not found" }); return; }
 
-    const sentAt = new Date();
-    await db.update(transmittalsTable).set({ status: "sent", sentAt, updatedAt: new Date() })
-      .where(eq(transmittalsTable.id, txId));
-
     const recipients = (tx.sentTo as { email?: string; userId?: number; name?: string }[]) ?? [];
     const appUrl = process.env.APP_URL || "https://bimlog.app";
+    const deliveryResults: Array<{ recipient: string; state: "sent" | "skipped" | "failed" }> = [];
 
     for (const r of recipients) {
       if (r.email) {
-        setImmediate(async () => {
-          try {
-            await sendEmail({
-              to: r.email!,
-              subject: `Transmittal ${tx.number}: ${tx.title}`,
-              html: `<p>Hi ${r.name ?? ""},</p>
+        const state = await sendEmail({
+          to: r.email,
+          subject: `Transmittal ${tx.number}: ${tx.title}`,
+          triggerType: "transmittal_delivery",
+          html: `<p>Hi ${r.name ?? ""},</p>
 <p>A transmittal has been sent to you from BIMLog.</p>
 <p><strong>${tx.number}</strong> — ${tx.title}</p>
 ${tx.purpose ? `<p>${tx.purpose}</p>` : ""}
 <p><a href="${appUrl}/projects/${projectId}/transmittals/${txId}">View Transmittal</a></p>`,
-            });
-          } catch { /* non-fatal */ }
         });
+        deliveryResults.push({ recipient: r.email, state });
       }
       if (r.userId) {
         await createNotification(r.userId, projectId, "transmittal_received",
@@ -398,17 +393,43 @@ ${tx.purpose ? `<p>${tx.purpose}</p>` : ""}
       }
     }
 
+    const externalDeliveryRequested = deliveryResults.length > 0;
+    const externalDeliverySucceeded = externalDeliveryRequested && deliveryResults.every(result => result.state === "sent");
+    const deliveryStatus = externalDeliveryRequested && !externalDeliverySucceeded ? "failed" : "sent";
+    const sentAt = deliveryStatus === "sent" ? new Date() : null;
+    await db.update(transmittalsTable).set({ status: deliveryStatus, sentAt, updatedAt: new Date() })
+      .where(and(eq(transmittalsTable.id, txId), eq(transmittalsTable.projectId, projectId)));
+
     await db.insert(activityLogTable).values({
       projectId, userId: req.user!.userId,
       userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
-      actionType: "send", entityType: "transmittal", entityId: txId,
+      actionType: deliveryStatus === "sent" ? "send" : "delivery_failed", entityType: "transmittal", entityId: txId,
       fileNameBefore: null, fileNameAfter: null,
-      details: `Sent transmittal ${tx.number} to ${recipients.length} recipient(s)`,
+      details: JSON.stringify({ event: "transmittal.delivery", number: tx.number, retained: true, deliveryStatus, deliveryResults }),
     });
-    res.json({ ok: true });
+    res.status(deliveryStatus === "sent" ? 200 : 502).json({ ok: deliveryStatus === "sent", retained: true, deliveryStatus, deliveryResults });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
+});
+
+// Cancellation preserves the controlled transmittal and its audit trail. A
+// cancelled record is retained evidence and is never represented as delivered.
+router.post("/projects/:projectId/transmittals/:transmittalId/cancel", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = Number(req.params.projectId);
+  const txId = Number(req.params.transmittalId);
+  const [tx] = await db.select().from(transmittalsTable)
+    .where(and(eq(transmittalsTable.id, txId), eq(transmittalsTable.projectId, projectId)));
+  if (!tx) { res.status(404).json({ error: "Not found" }); return; }
+  if (tx.status === "acknowledged") { res.status(409).json({ error: "An acknowledged transmittal cannot be cancelled." }); return; }
+  const [cancelled] = await db.update(transmittalsTable).set({ status: "cancelled", updatedAt: new Date() })
+    .where(and(eq(transmittalsTable.id, txId), eq(transmittalsTable.projectId, projectId))).returning();
+  await db.insert(activityLogTable).values({
+    projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+    actionType: "cancel", entityType: "transmittal", entityId: txId, fileNameBefore: null, fileNameAfter: null,
+    details: JSON.stringify({ event: "transmittal.cancelled", number: tx.number, retained: true }),
+  });
+  res.json({ ...cancelled, retained: true, deliveryStatus: "cancelled" });
 });
 
 // ── POST /projects/:projectId/transmittals/:transmittalId/acknowledge ─────────
