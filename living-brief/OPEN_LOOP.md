@@ -5787,4 +5787,5 @@ No production answer or publication claim is accepted until the final live Chrom
 
 - [x] Align stale Page Assistant width expectations with the existing 320 px minimum and mobile full-width behavior without changing runtime UI behavior.
 - [x] Pass the focused Page Assistant workspace, responsive and universal-access gates.
+- [x] Refresh the three source-derived transmittal line references in the governed 45-entry AI inventory without changing provider or acquisition authority.
 - [ ] Pass the complete exact-head local release gate and push B-GA021–B-GA025 once. Keep the block unpublished until B-GA026–B-GA030 completes the ten-build interval.

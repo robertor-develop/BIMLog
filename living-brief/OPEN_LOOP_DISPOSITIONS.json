@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bb1300571f4b19d37b5ea522dd02bde60c7bf2ab8732440a7657f5e78127b03f",
+  "sourceSha256": "4b3d47c3c8e94c77fb9527304b9775ac9e9722a63dc34f0e93a9d3808f49c8e1",
   "itemCount": 407,
   "counts": {
     "ACTIVE": 363,
@@ -7398,7 +7398,7 @@
     },
     {
       "id": "75c0f40766e1ee90",
-      "sourceLine": 5790,
+      "sourceLine": 5791,
       "heading": "Recovery and GA-readiness Block 5 release closure — 2026-10-15",
       "statement": "Pass the complete exact-head local release gate and push B-GA021–B-GA025 once. Keep the block unpublished until B-GA026–B-GA030 completes the ten-build interval.",
       "classification": "ACTIVE",
@@ -7409,7 +7409,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5790",
+        "OPEN_LOOP.md:5791",
         "Recovery and GA-readiness Block 5 release closure — 2026-10-15"
       ],
       "currentAuthority": false
