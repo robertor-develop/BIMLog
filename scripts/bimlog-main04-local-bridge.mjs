@@ -75,12 +75,62 @@ function resumeQuestion(message) {
   });
 }
 
+export function queuedAgentAnswer(bytes, message) {
+  let turnId = "";
+  for (const line of bytes.toString("utf8").split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    let row;
+    try { row = JSON.parse(line); } catch { continue; }
+    const payload = row?.payload;
+    if (!turnId && row?.type === "event_msg" && payload?.item?.type === "UserMessage" && payload.item.content?.some(item => item?.type === "text" && item?.text === message)) turnId = payload.turn_id || "";
+    if (!turnId && row?.type === "response_item" && payload?.type === "message" && payload?.role === "user" && payload.content?.some(item => item?.type === "input_text" && item?.text === message)) turnId = payload.internal_chat_message_metadata_passthrough?.turn_id || "";
+    if (turnId && payload?.turn_id === turnId && row?.type === "event_msg" && payload?.item?.type === "AgentMessage" && payload.item.phase === "final_answer") {
+      const answer = payload.item.content?.filter(item => item?.type === "Text").map(item => item.text).join("\n").trim();
+      if (answer) return answer;
+    }
+    if (turnId && row?.type === "response_item" && payload?.type === "message" && payload?.role === "assistant" && payload?.phase === "final_answer" && payload.internal_chat_message_metadata_passthrough?.turn_id === turnId) {
+      const answer = payload.content?.filter(item => item?.type === "output_text").map(item => item.text).join("\n").trim();
+      if (answer) return answer;
+    }
+  }
+  return null;
+}
+
+function queueQuestion(message) {
+  const start = statSync(ROLLOUT).size;
+  return new Promise((resolve, reject) => {
+    const child = spawn(CODEX, ["queue", "-C", "F:\\BIMLog", "--thread", THREAD_ID, "--message", message], {
+      cwd: "F:\\BIMLog", windowsHide: true, stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, USERPROFILE: "C:\\Users\\soporte", HOME: "C:\\Users\\soporte", CODEX_HOME: "C:\\Users\\soporte\\.codex" },
+    });
+    let output = "", error = "", settled = false;
+    const finish = problem => { if (settled) return; settled = true; clearTimeout(timer); problem ? reject(problem) : waitForQueuedAnswer(); };
+    child.stdout.on("data", chunk => { if (output.length < 8192) output += String(chunk); });
+    child.stderr.on("data", chunk => { if (error.length < 8192) error += String(chunk); });
+    child.on("error", () => finish(new Error("CODEX_QUEUE_FAILED")));
+    child.on("exit", code => code === 0 && /Queued message\s+[A-Za-z0-9-]+\s+for thread/.test(output) ? finish() : finish(new Error(/active writer|already has an active/i.test(error) ? "CODEX_DESTINATION_BUSY" : "CODEX_QUEUE_FAILED")));
+    const timer = setTimeout(() => { child.kill(); finish(new Error("CODEX_QUEUE_TIMEOUT")); }, 30_000);
+    const waitForQueuedAnswer = async () => {
+      const deadline = Date.now() + 10 * 60_000;
+      while (Date.now() < deadline) {
+        if (statSync(ROLLOUT).size > start) {
+          const answer = queuedAgentAnswer(readFileSync(ROLLOUT).subarray(start), message);
+          if (answer) return resolve(answer);
+        }
+        await new Promise(done => setTimeout(done, 500));
+      }
+      reject(new Error("CODEX_QUEUE_TIMEOUT"));
+    };
+  });
+}
+
 async function resumeQuestionWithRetry(message, delays = [250, 500, 1_000, 2_000, 4_000, 8_000, 16_000]) {
   for (let attempt = 0; attempt <= delays.length; attempt += 1) {
     try {
       return await resumeQuestion(message);
     } catch (error) {
-      if (!(error instanceof Error) || error.message !== "CODEX_DESTINATION_BUSY" || attempt === delays.length) throw error;
+      if (!(error instanceof Error) || error.message !== "CODEX_DESTINATION_BUSY") throw error;
+      if (attempt === delays.length) return queueQuestion(message);
       await new Promise(resolve => setTimeout(resolve, delays[attempt]));
     }
   }

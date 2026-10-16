@@ -18,6 +18,8 @@ assert.match(store, /company_id=\$2 AND user_id=\$3/);
 assert.match(store, /ORDER BY created_at,request_id/);
 assert.match(store, /dispatchBimlogMain04/);
 assert.match(store, /readBimlogMain04/);
+assert.match(store, /result\.state\.toUpperCase\(\)\s*===\s*"FAILED"/);
+assert.match(store, /await fail\(requestId,result\.errorCode\|\|"MAIN04_FAILED"\)/);
 
 assert.match(transport, /BIMLOG_MAIN04_THREAD_ID/);
 assert.match(transport, /destinationThreadId:\s*BIMLOG_MAIN04_THREAD_ID/);
@@ -26,6 +28,7 @@ assert.match(transport, /MAIN04_REQUEST_MISMATCH/);
 assert.match(transport, /MAIN04_DESTINATION_MISMATCH/);
 assert.match(transport, /BIMLOG_MAIN04_ACCESS_CLIENT_ID/);
 assert.match(transport, /BIMLOG_MAIN04_ACCESS_CLIENT_SECRET/);
+assert.match(transport, /errorCode:/);
 assert.doesNotMatch(route, /feedback|MAIN-00|Lumen/i);
 
 console.log("PASS authenticated durable BIMLog MAIN 04 FIFO gateway");

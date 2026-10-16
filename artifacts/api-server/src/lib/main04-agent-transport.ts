@@ -4,7 +4,7 @@ import { BIMLOG_ASSISTANT_ROUTES } from "./assistant-route-registry";
 export const BIMLOG_MAIN04_THREAD_ID = BIMLOG_ASSISTANT_ROUTES.conversation.threadId;
 
 export type Main04QuestionContext = { route: string; page: string; section: string; language: "en" | "es"; focusedControl: string; controls: string[]; pageText: string[]; history: Array<{ role: "user" | "assistant"; content: string }> };
-type Main04BridgeResponse = { threadId?: unknown; answer?: unknown; requestId?: unknown; state?: unknown };
+type Main04BridgeResponse = { threadId?: unknown; answer?: unknown; requestId?: unknown; state?: unknown; error?: unknown };
 
 function bridgeConfiguration(environment: NodeJS.ProcessEnv = process.env) {
   const url = environment.BIMLOG_MAIN04_BRIDGE_URL?.trim();
@@ -43,11 +43,11 @@ export async function dispatchBimlogMain04(input: { requestId: string; question:
 export async function readBimlogMain04(requestId: string, dependencies: { fetch?: typeof fetch; environment?: NodeJS.ProcessEnv } = {}) {
   const { url } = bridgeConfiguration(dependencies.environment);
   const response = await (dependencies.fetch ?? fetch)(new URL(encodeURIComponent(requestId), url.endsWith("/") ? url : `${url}/`).toString(), { method: "GET", headers: bridgeHeaders(requestId, dependencies.environment), signal: AbortSignal.timeout(30_000) });
-  if (!response.ok && response.status !== 202) throw new Error(`MAIN04_TRANSPORT_FAILED_${response.status}`);
   const result = await response.json() as Main04BridgeResponse;
+  if (!response.ok && response.status !== 202 && String(result.state || "").toUpperCase() !== "FAILED") throw new Error(`MAIN04_TRANSPORT_FAILED_${response.status}`);
   if (result.requestId !== requestId) throw new Error("MAIN04_REQUEST_MISMATCH");
   if (result.threadId !== undefined && result.threadId !== BIMLOG_MAIN04_THREAD_ID) throw new Error("MAIN04_DESTINATION_MISMATCH");
-  return { state: String(result.state || (response.status === 202 ? "RUNNING" : "COMPLETE")), answer: typeof result.answer === "string" ? result.answer.trim() : "" };
+  return { state: String(result.state || (response.status === 202 ? "RUNNING" : "COMPLETE")), answer: typeof result.answer === "string" ? result.answer.trim() : "", errorCode: typeof result.error === "string" ? result.error.slice(0, 120) : "" };
 }
 
 export async function askBimlogMain04(input: { question: string; context: Main04QuestionContext; userId: number; projectId: number | null; companyId?: number }, dependencies: { fetch?: typeof fetch; environment?: NodeJS.ProcessEnv } = {}) {

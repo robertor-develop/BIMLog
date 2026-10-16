@@ -47,7 +47,7 @@ export async function reservePageAgentTurn(input:ReserveInput){
 
 export async function getPageAgentTurn(requestId:string,companyId:number,userId:number){await ensureSchema();const result=await pool.query("SELECT * FROM page_agent_turns WHERE request_id=$1 AND company_id=$2 AND user_id=$3",[requestId,companyId,userId]);return result.rows[0]?row(result.rows[0]):null;}
 export async function listPageAgentTurns(conversationId:string,companyId:number,userId:number){await ensureSchema();const result=await pool.query("SELECT * FROM page_agent_turns WHERE conversation_id=$1 AND company_id=$2 AND user_id=$3 ORDER BY created_at,request_id LIMIT 100",[conversationId,companyId,userId]);return result.rows.map(row);}
-export async function refreshPageAgentTurn(requestId:string,companyId:number,userId:number){const current=await getPageAgentTurn(requestId,companyId,userId);if(!current||current.state==="complete"||current.state==="failed")return current;try{const result=await readBimlogMain04(requestId);if(result.answer){await complete(requestId,result.answer);return await getPageAgentTurn(requestId,companyId,userId);}}catch(error:any){if(!String(error?.message||"").includes("404"))console.warn(JSON.stringify({event:"page_agent_refresh_pending",requestId,code:String(error?.message||"UNKNOWN")}));}return current;}
+export async function refreshPageAgentTurn(requestId:string,companyId:number,userId:number){const current=await getPageAgentTurn(requestId,companyId,userId);if(!current||current.state==="complete"||current.state==="failed")return current;try{const result=await readBimlogMain04(requestId);if(result.answer){await complete(requestId,result.answer);return await getPageAgentTurn(requestId,companyId,userId);}if(result.state.toUpperCase()==="FAILED"){await fail(requestId,result.errorCode||"MAIN04_FAILED");return await getPageAgentTurn(requestId,companyId,userId);}}catch(error:any){if(!String(error?.message||"").includes("404"))console.warn(JSON.stringify({event:"page_agent_refresh_pending",requestId,code:String(error?.message||"UNKNOWN")}));}return current;}
 
 async function processTurn(input:ReserveInput){
   const claimed=await pool.query("UPDATE page_agent_turns SET state='running',updated_at=now() WHERE request_id=$1 AND company_id=$2 AND user_id=$3 AND state='reserved' RETURNING request_id",[input.requestId,input.companyId,input.userId]);
@@ -65,7 +65,7 @@ async function processTurn(input:ReserveInput){
       }
     }
     const deadline=Date.now()+10*60_000;
-    while(Date.now()<deadline){try{const result=await readBimlogMain04(input.requestId);if(result.answer){await complete(input.requestId,result.answer);return;}}catch(error:any){console.warn(JSON.stringify({event:"page_agent_reconcile_pending",requestId:input.requestId,code:String(error?.message||"UNKNOWN")}));}await new Promise(resolve=>setTimeout(resolve,1500));}
+    while(Date.now()<deadline){try{const result=await readBimlogMain04(input.requestId);if(result.answer){await complete(input.requestId,result.answer);return;}if(result.state.toUpperCase()==="FAILED"){await fail(input.requestId,result.errorCode||"MAIN04_FAILED");return;}}catch(error:any){console.warn(JSON.stringify({event:"page_agent_reconcile_pending",requestId:input.requestId,code:String(error?.message||"UNKNOWN")}));}await new Promise(resolve=>setTimeout(resolve,1500));}
     await pool.query("UPDATE page_agent_turns SET error_code='MAIN04_TRANSPORT_TIMEOUT',updated_at=now() WHERE request_id=$1 AND state='running'",[input.requestId]);
   } catch(error:any) {
     const code=String(error?.message||"PAGE_AGENT_FAILED").slice(0,120);
@@ -74,6 +74,7 @@ async function processTurn(input:ReserveInput){
   }
 }
 async function complete(requestId:string,answer:string){const clean=answer.trim().slice(0,16000);if(!clean)throw new Error("MAIN04_ANSWER_MISSING");await pool.query("UPDATE page_agent_turns SET state='complete',answer=$2,answer_digest=$3,error_code=NULL,updated_at=now(),completed_at=now() WHERE request_id=$1",[requestId,clean,createHash("sha256").update(clean,"utf8").digest("hex")]);}
+async function fail(requestId:string,errorCode:string){await pool.query("UPDATE page_agent_turns SET state='failed',error_code=$2,updated_at=now(),completed_at=now() WHERE request_id=$1 AND state<>'complete'",[requestId,errorCode.slice(0,120)]);}
 export function startPageAgentTurn(input:ReserveInput){if(active.has(input.requestId))return;const work=processTurn(input).finally(()=>active.delete(input.requestId));active.set(input.requestId,work);}
 export function newConversationId(){return randomUUID();}
 export const PAGE_AGENT_DESTINATION=BIMLOG_MAIN04_THREAD_ID;
