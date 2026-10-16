@@ -50,6 +50,8 @@
     "test:ga-recovery-closure-build02": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/ga-recovery-candidate-match.behavior.ts",
     "test:ga-recovery-closure-build03": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/ga-recovery-source-assessment.behavior.ts",
     "test:ga-recovery-closure-build04": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/ga-recovery-restoration-plan.behavior.ts",
+    "test:ga-recovery-closure-build05": "node scripts/test-ga-final-block05-build035-final-ga-verdict.mjs",
+    "test:ga-recovery-closure-block01": "node scripts/test-ga-recovery-closure-block01.mjs",
     "test:corrective-b01": "node scripts/test-corrective-b01-traceability.mjs",
     "test:corrective-b02": "node scripts/test-corrective-b02-independent-evidence.mjs && node scripts/test-ga-final-block01-build005-acceptance.mjs",
     "test:corrective-b03": "node scripts/test-corrective-b03-behavioral-gates.mjs",

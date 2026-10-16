@@ -14,8 +14,9 @@ assert.match(cleanup, /BLOCKED-SAFE/);
 const status = readFileSync("living-brief/STATUS.md", "utf8");
 const openLoop = readFileSync("living-brief/OPEN_LOOP.md", "utf8");
 const acceptance = JSON.parse(readFileSync("evidence/ga-final-20261015/BLOCK02_GAUNTLET_ACCEPTANCE.json", "utf8"));
+const protectedInventory = JSON.parse(readFileSync("evidence/ga-recovery-20261016/protected-file-inventory.json", "utf8"));
 
-assert.match(status, /thirteen protected legacy binaries remain (?:the |an )?(?:external )?recovery and final-GA blocker/i);
+assert.equal(protectedInventory.files.length, 16);
 assert.match(openLoop, /B-GA034: temporary-project deletion depends on completed lifecycle evidence and verified synthetic-only ownership/);
 assert.match(openLoop, /B-GA035: final GA remains blocked by incomplete program acceptance including protected-file recovery/);
 assert.match(acceptance.blockedExternalGate, /Thirteen protected legacy binaries/);
@@ -25,7 +26,7 @@ const verdict = Object.freeze({
   verdict: "BLOCKED",
   gaReady: false,
   blockers: Object.freeze([
-    "thirteen protected legacy binaries lack authoritative recovery and independent checksum verification",
+    "sixteen protected file records lack portable custody; authoritative original recovery and independent checksum verification remain incomplete",
     "temporary Gauntlet deletion lacks complete synthetic ownership and lifecycle evidence",
     "exact-three final production acceptance cannot be claimed before those gates close",
   ]),
