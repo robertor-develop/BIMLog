@@ -35,6 +35,7 @@
     "test:ga-final-block03-build023": "node scripts/test-ga-final-block03-build023-transmittal-delivery.mjs",
     "test:ga-final-block03-build024": "node scripts/test-ga-final-block03-build024-changes-meetings.mjs",
     "test:ga-final-block03-build025": "node scripts/test-ga-final-block03-build025-schedule-sprint.mjs",
+    "test:ga-final-block04-build026": "node scripts/test-ga-final-block04-build026-apu-lifecycle.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
