@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+execFileSync(process.execPath,["artifacts/api-server/node_modules/tsx/dist/cli.mjs","artifacts/api-server/src/lib/project-record-lineage.behavior.ts"],{stdio:"inherit"});
+const files=readFileSync("artifacts/api-server/src/routes/files.ts","utf8");
+const rfis=readFileSync("artifacts/api-server/src/routes/rfis.ts","utf8");
+const clashes=readFileSync("artifacts/api-server/src/routes/clash_reports.ts","utf8");
+assert.match(files,/eq\(filesTable\.id, fileId\), eq\(filesTable\.projectId, projectId\)/);
+assert.match(rfis,/A BIMLog file locator belongs to a different project/);
+assert.match(rfis,/error: "rfi_stale_update"/);
+assert.match(clashes,/eq\(lensViewpointsTable\.lifecycleStatus, "active"\)/);
+assert.match(clashes,/eq\(rfisTable\.projectId, projectId\).*isNull\(rfisTable\.deletedAt\)/s);
+assert.match(clashes,/eq\(submittalsTable\.projectId, projectId\).*isNull\(submittalsTable\.deletedAt\)/s);
+console.log("CORRECTIVE-B12 authoritative identity survives issue/file/RFI/submittal links: PASS");
