@@ -12,8 +12,8 @@ for (const surface of OBJECT_AUTHORITY_SURFACES) {
 }
 
 const route = (name: string) => fs.readFileSync(new URL(`../routes/${name}.ts`, import.meta.url), "utf8");
-const files = route("files"), reports = route("reports"), lens = route("clash_reports"), feedback = route("feedback"), integrations = route("coordination-hub");
-for (const [name, source] of Object.entries({ files, reports })) {
+const files = route("files"), reports = route("reports"), lens = route("clash_reports"), feedback = route("feedback"), integrations = route("coordination-hub"), rfis=route("rfis"), submittals=route("submittals"), projects=route("projects");
+for (const [name, source] of Object.entries({ files, reports, rfis, submittals, projects })) {
   assert.match(source, /requireProjectMember\(\)/, `${name}: missing membership boundary`);
   assert.match(source, /projectId/, `${name}: missing project scope`);
 }
@@ -24,4 +24,4 @@ assert.match(feedback, /actor\.companyId !== row\.companyId|feedback\.companyId 
 assert.match(feedback, /projectAuthorized\(/);
 assert.match(integrations, /projectId/);
 
-console.log("block22 build106 tenant/project object authorization: PASS surfaces=6 cross_tenant=deny guessed_id=deny");
+console.log(`block22 build106 tenant/project object authorization: PASS surfaces=${OBJECT_AUTHORITY_SURFACES.length} cross_tenant=deny guessed_id=deny`);

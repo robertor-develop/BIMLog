@@ -1,10 +1,16 @@
 export const OBJECT_AUTHORITY_SURFACES = [
   "api",
+  "projects",
+  "models",
+  "issues",
   "files",
+  "rfis",
+  "submittals",
   "reports",
   "lens_next",
   "feedback",
   "integrations",
+  "agent_context",
 ] as const;
 
 export type ObjectAuthoritySurface = (typeof OBJECT_AUTHORITY_SURFACES)[number];
