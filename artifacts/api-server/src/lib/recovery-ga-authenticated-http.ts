@@ -17,13 +17,17 @@ const companyId = Number(companies.rows[0].id);
 const otherCompanyId = Number(companies.rows[1].id);
 const users = await pool.query(`INSERT INTO users(email,password_hash,full_name,company_id,is_super_admin) VALUES
   ('admin@example.test','synthetic','Synthetic Administrator',$1,false),
+  ('manager@example.test','synthetic','Synthetic Convention Manager',$1,false),
+  ('member@example.test','synthetic','Synthetic Member',$1,false),
   ('reader@example.test','synthetic','Synthetic Reader',$1,false),
   ('outsider@example.test','synthetic','Synthetic Outsider',$2,false) RETURNING id,email,company_id`, [companyId, otherCompanyId]);
 const user = new Map(users.rows.map((row) => [String(row.email), { id: Number(row.id), companyId: Number(row.company_id) }]));
 await pool.query(`INSERT INTO config_options(category,value,label,label_es,sort_order,meta) VALUES
   ('project_status','active','Active','Activo',1,'{}'),
   ('member_role','project_admin','Project administrator','Administrador de proyecto',1,'{"permission":"admin"}'),
-  ('member_role','read_only','Read only','Solo lectura',2,'{"permission":"read"}')`);
+  ('member_role','convention_manager','Convention manager','Administrador de convenciones',2,'{"permission":"write"}'),
+  ('member_role','member','Member','Miembro',3,'{"permission":"write"}'),
+  ('member_role','read_only','Read only','Solo lectura',4,'{"permission":"read"}')`);
 await ensureCompanyMasterCatalogSchema();
 await pool.query(`INSERT INTO company_master_catalog_administrators(id,company_id,user_id,granted_by_id) VALUES
   ('00000000-0000-4000-8000-000000000011',$1,$2,$2)`, [companyId, user.get("admin@example.test")!.id]);
@@ -76,6 +80,25 @@ try {
     const denied = await request(`/projects/${projectId}/directory/companies`, "reader@example.test", { method: "POST", body: JSON.stringify({ company_name: "Forbidden Company" }) }); assert.equal(denied.status, 403);
     assert.equal((await request(`/projects/${projectId}/directory`, "outsider@example.test")).status, 403);
     checks.directory = { companyCreate: 201, idempotentReuse: 200, contactCreate: 201, memberRead: 200, readOnlyWrite: 403, outsider: 403 };
+  }
+  if (scenario === "roles" || scenario === "all") {
+    const seeded = await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('Synthetic Role Project','GA-ROLE-001','active',$1) RETURNING id`, [user.get("admin@example.test")!.id]);
+    const projectId = Number(seeded.rows[0].id);
+    const personas = [
+      ["admin@example.test", "project_admin"], ["manager@example.test", "convention_manager"],
+      ["member@example.test", "member"], ["reader@example.test", "read_only"],
+    ] as const;
+    for (const [email, role] of personas) await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,$3,'active')`, [projectId, user.get(email)!.id, role]);
+    assert.equal((await request(`/projects/${projectId}`)).status, 401);
+    for (const [email] of personas) assert.equal((await request(`/projects/${projectId}`, email)).status, 200, `${email} should read the project`);
+    assert.equal((await request(`/projects/${projectId}`, "outsider@example.test")).status, 403);
+    const writeStatus: Record<string, number> = {};
+    for (const [email, role] of personas) {
+      const result = await request(`/projects/${projectId}/directory/companies`, email, { method: "POST", body: JSON.stringify({ company_name: `Synthetic ${role} Company` }) });
+      writeStatus[role] = result.status;
+    }
+    assert.deepEqual(writeStatus, { project_admin: 201, convention_manager: 201, member: 201, read_only: 403 });
+    checks.roles = { unauthenticated: 401, memberReads: 4, outsider: 403, writes: writeStatus };
   }
 } finally {
   await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
