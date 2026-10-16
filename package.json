@@ -31,6 +31,7 @@
     "test:ga-final-block02-build009": "node scripts/test-ga-final-block02-build009-template-edt.mjs",
     "test:ga-final-block02-build010": "node scripts/test-ga-final-block02-build010-file-lifecycle.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
+    "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
     "test:launch-payment-audit-migration": "node scripts/test-launch-payment-audit-migration.mjs",
     "test:enterprise-launch-configuration-block07": "node scripts/test-enterprise-launch-configuration-block07.mjs",

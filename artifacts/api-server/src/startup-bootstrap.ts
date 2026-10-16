@@ -19,7 +19,11 @@ interface BootstrapOptions {
   logger?: StartupLogger;
 }
 
-const DEFAULT_INITIALIZATION_TIMEOUT_MS = 45_000;
+// The production schema barrier is intentionally serialized to prevent DDL
+// deadlocks. A cold Replit start can therefore exceed 45 seconds even when
+// every migration is making progress. Keep the deadline bounded, but allow
+// enough time for the governed startup queue to drain before failing closed.
+const DEFAULT_INITIALIZATION_TIMEOUT_MS = 120_000;
 
 const NOT_READY_BODY = {
   starting: JSON.stringify({
