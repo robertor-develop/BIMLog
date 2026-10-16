@@ -31,6 +31,7 @@
     "test:ga-final-block02-build009": "node scripts/test-ga-final-block02-build009-template-edt.mjs",
     "test:ga-final-block02-build010": "node scripts/test-ga-final-block02-build010-file-lifecycle.mjs",
     "test:ga-final-block03-build021": "node scripts/test-ga-final-block03-build021-rfi-lifecycle.mjs",
+    "test:ga-final-block03-build022": "node scripts/test-ga-final-block03-build022-submittal-lifecycle.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
