@@ -5859,4 +5859,5 @@ The generated platform inventory and Living Brief state must remain exact-head s
 - [ ] Pass the exact-head full build, push the block, publish the completed ten-build interval, and run authenticated production Chrome smoke.
 
 The thirteen unrecovered protected legacy binaries and external owner-supplied Stripe/SendGrid configuration remain explicit limitations; this block does not invent or replace them.
+The final reconciliation commit is release evidence and does not add a sixth product build.
 

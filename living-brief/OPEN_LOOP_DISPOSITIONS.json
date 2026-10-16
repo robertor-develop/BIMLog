@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "fa03d769a748ade275fd4e015ec920831c6fd31f77126366ecfa8c1f122c4957",
-  "itemCount": 412,
+  "sourceSha256": "35fb722a96c40e3bc77de78f42531bd8587835611d29fcda7de50c85aa8ab520",
+  "itemCount": 413,
   "counts": {
-    "ACTIVE": 368,
+    "ACTIVE": 369,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7501,6 +7501,24 @@
       "evidence": [
         "OPEN_LOOP.md:5847",
         "Recovery GA authenticated-evidence correction — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5b244579eb30990c",
+      "sourceLine": 5859,
+      "heading": "Recovery GA authenticated-evidence Block 2 — 2026-10-16",
+      "statement": "Pass the exact-head full build, push the block, publish the completed ten-build interval, and run authenticated production Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5859",
+        "Recovery GA authenticated-evidence Block 2 — 2026-10-16"
       ],
       "currentAuthority": false
     }
