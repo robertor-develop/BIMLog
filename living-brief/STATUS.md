@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Lorena P1 release repair Block 2 — B06–B10 — 2026-10-16
+
+B06–B10 close the remaining user-facing continuity gaps from Lorena's report. Governance now explains that role codes such as `CEO` describe configured policy eligibility and do not identify a person or grant access. Intake continues to expose exact existing canonical contracts when no activation summary exists. EDT repair can open the exact affected contract, and the Contract workspace preserves a validated same-project return to the originating Operations task. A permanent consolidated gate covers all four contracts and strict frontend TypeScript. Together with B01–B05 this reaches the ten-build publication boundary; exact-head full gate, push, controlled publication, exact live identity and authenticated desktop/mobile Chrome acceptance remain required.
+
 ## Corrective commercial customer-lifecycle Builds 26–30 — 2026-10-16
 
 - Builds 26–29 consolidate tenant-scoped subscription setup and checkout, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, and support/complaint/data-rights/export behavior.

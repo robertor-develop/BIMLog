@@ -5909,3 +5909,12 @@ The previous 13-record summary is superseded for current recovery planning. Hist
 - [x] B05: preserve a usable main workspace at 761–1024 pixels while retaining desktop dock resizing, mobile fullscreen, close/collapse behavior and focus return.
 - [ ] Pass the complete exact-head repository build and local release gate, push the five-build block, and keep it unpublished until the next five-build block reaches the ten-build publication boundary.
 
+## Lorena P1 release repair Block 2 — 2026-10-16
+
+- [x] B06: explain configured governance reviewer role codes without presenting `CEO` as a named-person requirement or granting authority from display text.
+- [x] B07: keep existing canonical contracts visible in Intake even before an activation summary is available, with duplicate identities removed.
+- [x] B08: route an EDT contract-source repair to the exact safe contract identity when the server supplies it; retain the Intake fallback otherwise.
+- [x] B09: accept only the exact same-project Operations return from a contract deep link and preserve the originating task without accepting cross-project or arbitrary destinations.
+- [x] B10: add one permanent consolidated Block 2 gate covering governance guidance, canonical contract visibility, EDT repair identity and secure Operations return.
+- [ ] Pass the complete exact-head build and release gate, push B06–B10, publish the accumulated B01–B10 candidate, verify exact production identity and run full authenticated desktop/mobile Chrome smoke.
+
