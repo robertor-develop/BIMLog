@@ -47,6 +47,7 @@
     "test:ga-final-block05-build035": "node scripts/test-ga-final-block05-build035-final-ga-verdict.mjs",
     "test:ga-final-block05": "node scripts/test-ga-final-block05.mjs",
     "test:ga-recovery-closure-build01": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/ga-protected-file-inventory.behavior.ts",
+    "test:ga-recovery-closure-build02": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/ga-recovery-candidate-match.behavior.ts",
     "test:corrective-b01": "node scripts/test-corrective-b01-traceability.mjs",
     "test:corrective-b02": "node scripts/test-corrective-b02-independent-evidence.mjs && node scripts/test-ga-final-block01-build005-acceptance.mjs",
     "test:corrective-b03": "node scripts/test-corrective-b03-behavioral-gates.mjs",
