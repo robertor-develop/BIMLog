@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 782,
+    "apiRoutes": 783,
     "frontendApiReferences": 311,
     "routeOwnedTables": 72
   },
@@ -9733,6 +9733,22 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/transmittals/:transmittalId/send",
+      "owner": "artifacts/api-server/src/routes/transmittals.ts",
+      "tables": [
+        "transmittalsTable",
+        "transmittalItemsTable",
+        "activityLogTable",
+        "projectsTable",
+        "usersTable",
+        "filesTable",
+        "projectMembersTable",
+        "linkedItemsTable",
+        "agentInsightsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/transmittals/:transmittalId/cancel",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
         "transmittalsTable",

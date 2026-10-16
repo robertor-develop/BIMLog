@@ -5733,7 +5733,7 @@ The exact original bytes are an external recovery input and cannot be reconstruc
 - B-GA018: accepted. The latest accepted version remains authoritative even when its catalogs are empty; invalid or duplicate version identities fail closed, and checkpoint loading exposes explicit empty, error and retry states.
 - B-GA019: accepted. Governed delivery-template version, fingerprint and economic-allocation contracts plus EDT authorization, preview, activation and change-request routes pass the isolated acceptance gate.
 - B-GA020: accepted with synthetic fixtures. File list, custody summary and download require project membership; mutations require write authority; portable, generated, missing-legacy and incomplete custody states remain distinct; upload cleanup and exact download conflicts are bound to the gate.
-- B-GA021–025: RFI, Submittal, transmittal, change/meeting and schedule lifecycle remain eligible; live acceptance is pending.
+- B-GA021–025: accepted with deterministic synthetic fixtures and production-source contracts. The transmittal gate found and repaired premature sent-state recording; retained evidence, external delivery failure, retry and cancellation are now distinct. No production data or protected project changed. Live acceptance will occur at the next ten-build publication boundary.
 - B-GA026–030: APU, forecasts, reports, analytics and approved integration verification remain eligible. Native affected-model acceptance is separate and unproven.
 - B-GA031–033: security, accessibility and failure/recovery testing remain eligible using synthetic fixtures and available runtimes.
 - B-GA034: temporary-project deletion depends on completed lifecycle evidence and verified synthetic-only ownership.
