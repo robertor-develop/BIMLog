@@ -5861,3 +5861,6 @@ The generated platform inventory and Living Brief state must remain exact-head s
 The thirteen unrecovered protected legacy binaries and external owner-supplied Stripe/SendGrid configuration remain explicit limitations; this block does not invent or replace them.
 The final reconciliation commit is release evidence and does not add a sixth product build.
 
+
+- [x] Expose the already-visible active Convention Builder summary to the allowlisted BIMLog Agent page context (`3190f830`).
+- [ ] Pass the repaired exact-head build, republish, and repeat the authenticated production Agent question until the visible convention version is returned.
