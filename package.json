@@ -58,6 +58,7 @@
     "test:corrective-b18": "node scripts/test-corrective-b18-procore-oauth-boundary.mjs",
     "test:corrective-b19": "node scripts/test-corrective-b19-providers-notifications.mjs",
     "test:corrective-b20": "node scripts/test-corrective-b20-bimlog-agent.mjs",
+    "test:corrective-b21": "node scripts/test-corrective-b21-commercial-catalog.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
