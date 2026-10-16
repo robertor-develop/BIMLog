@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Corrective commercial customer-lifecycle Builds 26–30 — 2026-10-16
+
+- Builds 26–29 consolidate tenant-scoped subscription setup and checkout, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, and support/complaint/data-rights/export behavior.
+- Build 30 combines Builds 21–30 into one deterministic release gauntlet. Local provider transports prove fail-closed behavior but do not replace live Stripe or SendGrid acceptance.
+- The ten-build candidate requires exact-source publication followed by authenticated production Chrome acceptance. Live paid-sales activation still requires the nine protected production values and successful real-provider verification.
+
 ## Corrective commercial acceptance Builds 21–25 — 2026-10-16
 
 - Builds 21–24 lock the six-slot Stripe catalog, live Stripe account/webhook/portal verification boundary, live SendGrid account/verified-sender boundary, and the exact nine-key public launch-readiness contract.

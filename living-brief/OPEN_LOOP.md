@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Corrective commercial customer-lifecycle publication — 2026-10-16
+
+- [x] Gate subscription setup, checkout authority, idempotency, persistence, and truthful failure responses.
+- [x] Gate renewal, payment failure, cancellation, refund, billing portal, and bounded reconciliation behavior.
+- [x] Gate transactional-email transport, outbox, activation evidence, and support notifications.
+- [x] Gate customer support, complaints, data requests, review, fulfillment, and verified private export.
+- [ ] Publish the exact ten-build candidate and complete authenticated desktop/mobile production Chrome acceptance.
+- [ ] After the nine approved production values are configured, verify live Stripe and SendGrid provider behavior before enabling paid sales.
+
 ## Commercial provider activation boundary — 2026-10-16
 
 - [x] Gate the complete six-slot Stripe price catalog and duplicate-price rejection.

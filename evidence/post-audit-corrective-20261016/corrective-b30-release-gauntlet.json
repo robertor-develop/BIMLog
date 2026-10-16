@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "bimlog-corrective-b30-release-gauntlet-v1",
+  "scope": "ten-build commercial customer-lifecycle release candidate",
+  "results": [
+    {
+      "gate": "test:corrective-b25",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "900d23a2dcf13ac732fc7564904b8f9f38e73601506015bc702ec12018060bae"
+    },
+    {
+      "gate": "test:corrective-b26",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "9947edc81f40099928d955707fed3c79c692ff504d6a0338340a3e1642b4e2d9"
+    },
+    {
+      "gate": "test:corrective-b27",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "59c90d008091f70e4b5e2fc835efd47e792c6f85725996770f48f731fcf5f361"
+    },
+    {
+      "gate": "test:corrective-b28",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "1db7d114127416becb0469f829dd93f88370c6de32aa18344bcebe829ffc65cb"
+    },
+    {
+      "gate": "test:corrective-b29",
+      "result": "PASS",
+      "exitCode": 0,
+      "outputSha256": "d05547937fca822da7364e174b1cc40d36b7bef138dc4092e8f67549b08cbf85"
+    }
+  ],
+  "protectedProductionDataMutations": 0,
+  "configuredSecretsInspected": 0,
+  "unpublishedBuilds": 10,
+  "publicationRequired": true,
+  "postPublicationAuthenticatedChromeRequired": true,
+  "liveStripeVerification": "BLOCKED_PENDING_CONFIGURATION",
+  "liveSendGridVerification": "BLOCKED_PENDING_CONFIGURATION",
+  "overall": "LOCAL_PASS_READY_FOR_PUBLICATION"
+}

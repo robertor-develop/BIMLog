@@ -69427,6 +69427,82 @@
         "scripts/test-corrective-b25-commercial-gauntlet.mjs"
       ],
       "reviewedChangeSha256": "4014ffee037e2445108e16e6f51262ddb7b319930c126d1a6169cac73e592709"
+    },
+    {
+      "taskId": "post-audit-corrective-b6-20261016",
+      "reviewedThroughCommit": "6e1a870832ae39ac8a1154309f4b4c352e0cbee4",
+      "reviewedAt": "2026-10-16T09:57:41.823Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance."
+        }
+      ],
+      "reason": "Corrective B26-B30 consolidate tenant-scoped checkout and subscription setup, provider renewal/failure/cancellation/refund reconciliation, transactional-email outbox and activation, customer support and data-rights workflows, and the ten-build release gauntlet. Deterministic provider transports remain explicitly distinct from live Stripe and SendGrid acceptance.",
+      "reviewedChangedPaths": [
+        "evidence/post-audit-corrective-20261016/corrective-b30-release-gauntlet.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/run-corrective-b30-release-gauntlet.mjs",
+        "scripts/test-corrective-b30-release-gauntlet.mjs"
+      ],
+      "reviewedChangeSha256": "e7929d52069d567910fa16c068210fa771cf03080830ffcb020674f89b7c5894"
     }
   ]
 }
