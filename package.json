@@ -21,6 +21,7 @@
     "test:edt-engine-block13": "node ./scripts/test-edt-engine-block13.mjs",
     "test:edt-engine-block14": "node ./scripts/test-edt-engine-block14.mjs",
     "test:ga-final-block01-build001": "node scripts/test-ga-final-block01-build001-agent-access.mjs",
+    "test:ga-final-block01-build002": "node scripts/test-ga-final-block01-build002-agent-isolation.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
     "test:launch-payment-audit-migration": "node scripts/test-launch-payment-audit-migration.mjs",
     "test:enterprise-launch-configuration-block07": "node scripts/test-enterprise-launch-configuration-block07.mjs",
