@@ -32,16 +32,29 @@ type WorkflowDefinition = {
 };
 
 export function selectPublishedDeliveryWorkflow(current: any, option: { versionId: string; definition: WorkflowDefinition } | null) {
-  if (!option) return { ...current, deliveryWorkflowVersionId: "" };
+  const priorStrategy = String(current?.deliveryWorkflowGeneratedStrategy ?? "");
+  const priorMilestones = String(current?.deliveryWorkflowGeneratedMilestones ?? "");
+  const strategyIsGenerated = !!priorStrategy && current?.submittalStrategy === priorStrategy;
+  const milestonesAreGenerated = !!priorMilestones && current?.milestoneSummary === priorMilestones;
+  if (!option) return {
+    ...current,
+    deliveryWorkflowVersionId: "",
+    submittalStrategy: strategyIsGenerated ? "" : current?.submittalStrategy,
+    milestoneSummary: milestonesAreGenerated ? "" : current?.milestoneSummary,
+    deliveryWorkflowDerivedFromVersionId: null,
+    deliveryWorkflowGeneratedStrategy: null,
+    deliveryWorkflowGeneratedMilestones: null,
+  };
   const taskNames = option.definition.phases.flatMap(phase => phase.tasks.map(task => String(task.name ?? "").trim()).filter(Boolean));
   const strategy = taskNames.join(" → ");
   const milestones = option.definition.phases.map(phase => phase.name.trim()).filter(Boolean).join(" → ");
-  const priorGenerated = current?.deliveryWorkflowDerivedFromVersionId && current.deliveryWorkflowDerivedFromVersionId === current.deliveryWorkflowVersionId;
   return {
     ...current,
     deliveryWorkflowVersionId: option.versionId,
-    submittalStrategy: !String(current?.submittalStrategy ?? "").trim() || priorGenerated ? strategy : current.submittalStrategy,
-    milestoneSummary: !String(current?.milestoneSummary ?? "").trim() || priorGenerated ? milestones : current.milestoneSummary,
+    submittalStrategy: !String(current?.submittalStrategy ?? "").trim() || strategyIsGenerated ? strategy : current.submittalStrategy,
+    milestoneSummary: !String(current?.milestoneSummary ?? "").trim() || milestonesAreGenerated ? milestones : current.milestoneSummary,
     deliveryWorkflowDerivedFromVersionId: option.versionId,
+    deliveryWorkflowGeneratedStrategy: strategy,
+    deliveryWorkflowGeneratedMilestones: milestones,
   };
 }
