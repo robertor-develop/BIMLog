@@ -434,7 +434,7 @@ router.post("/admin/users", async (req, res) => {
     if (projectId) {
       const existing = await db.select().from(projectMembersTable).where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, user.id))).limit(1);
       if (existing.length === 0) {
-        await db.insert(projectMembersTable).values({ projectId, userId: user.id, role: role || "viewer", status: "active" });
+        await db.insert(projectMembersTable).values({ projectId, userId: user.id, role: role || "read_only", status: "active" });
       }
     }
 
@@ -809,7 +809,7 @@ router.post("/admin/fix-specific-link", async (req, res) => {
     if (!project) { res.status(404).json({ error: `Project ${projectId} not found` }); return; }
     const existing = (await db.select().from(projectMembersTable).where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId))).limit(1))[0];
     if (existing) { res.json({ ok: true, message: "Link already exists", memberId: existing.id }); return; }
-    const [member] = await db.insert(projectMembersTable).values({ projectId, userId, role: "viewer", status: "active" }).returning();
+    const [member] = await db.insert(projectMembersTable).values({ projectId, userId, role: "read_only", status: "active" }).returning();
     await logAdminAction({ adminUserId: req.user.userId, adminEmail: req.user.email, action: "fix_specific_link", details: { userId, projectId, memberId: member.id, userName: user.fullName, projectCode: project.code } });
     res.json({ ok: true, memberId: member.id, userId, projectId, userName: user.fullName, projectCode: project.code });
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Failed" }); }

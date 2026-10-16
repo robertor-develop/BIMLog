@@ -1,4 +1,5 @@
-export type CurrentProjectRole = "project_admin" | "convention_manager" | "discipline_lead" | "member" | "drafter" | "sub_trade" | "read_only";
+import { PROJECT_ROLES, canonicalProjectRole, type ProjectRole as CurrentProjectRole } from "./project-role-catalog.js";
+export type { ProjectRole as CurrentProjectRole } from "./project-role-catalog.js";
 export type LegacyProjectRole = "admin" | "viewer";
 export type CurrentPermissionCategory = "admin" | "write" | "read";
 
@@ -27,12 +28,13 @@ const PERMISSION_CEILINGS: Record<CurrentPermissionCategory, ReadonlySet<string>
   read: new Set(["project:read"]),
 };
 
-export const CURRENT_PROJECT_ROLES = Object.freeze(["project_admin", "convention_manager", "discipline_lead", "member", "drafter", "sub_trade", "read_only"] as const);
+export const CURRENT_PROJECT_ROLES = PROJECT_ROLES;
 export const LEGACY_PROJECT_ROLE_ALIASES = Object.freeze(["admin", "viewer"] as const);
 
 export function mapCurrentProjectRole(role: string | null | undefined, permissionCategory?: string | null): ScopedAuthorityMapping {
   const key = String(role ?? "");
-  if (!Object.prototype.hasOwnProperty.call(ROLE_AUTHORITIES, key)) {
+  const canonical = canonicalProjectRole(key);
+  if (!canonical || !Object.prototype.hasOwnProperty.call(ROLE_AUTHORITIES, key)) {
     return { knownRole: false, role: key, permissionCategory: null, authorities: [] };
   }
   const category = permissionCategory === undefined
