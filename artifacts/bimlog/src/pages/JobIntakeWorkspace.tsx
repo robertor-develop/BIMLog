@@ -44,6 +44,7 @@ import {
 } from "@/lib/job-intake-directory-options";
 
 import { applySoleApuToUnboundItems, contractApuCoverage, soleCompatibleApuVersion } from "@/lib/job-intake-apu-default";
+import { selectDeliveryWorkflow } from "@/lib/job-intake-delivery-defaults";
 import {
   blankJobIntakeData,
   clearMatchingJobIntakeRecovery,
@@ -2363,9 +2364,11 @@ export function JobIntakeWorkspace() {
                     <select
                       value={data.delivery.workflowTemplate}
                       disabled={configurationPolicy.enforcementMode === "enforced"}
-                      onChange={(e) =>
-                        change("delivery", "workflowTemplate", e.target.value)
-                      }
+                      onChange={(e) => setData((old: any) => ({
+                        ...old,
+                        delivery: selectDeliveryWorkflow(old.delivery, e.target.value),
+                        review: { ...old.review, deliveryConfirmed: false },
+                      }))}
                     >
                       <option value="bim-submittal">
                         {tt(
