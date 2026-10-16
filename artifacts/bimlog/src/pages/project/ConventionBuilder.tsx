@@ -3739,7 +3739,7 @@ function CheckpointScreen({ ws, projectId, token, lang, onContinueEditing, onReE
 
       {/* ── Issue 1: Completion Screen (active convention) ─────────────────── */}
       {!isFirstRun && snap && (
-        <div style={{
+        <div data-assistant-context="true" style={{
           background: "linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%)",
           border: "1px solid #86EFAC",
           borderLeft: "4px solid #16A34A",
