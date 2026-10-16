@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { matchRecoveryCandidate } from "./ga-recovery-candidate-match";
+import { buildProtectedRestorationDryRun } from "./ga-recovery-restoration-plan";
+
+const bytes = Buffer.from("verified original");
+const record = { projectId: 23, fileId: 12, fileName: "original.pdf", expectedBytes: bytes.length, expectedSha256: createHash("sha256").update(bytes).digest("hex"), source: "coordination_hub", storagePathPresent: false } as const;
+const current = { projectId: 23, fileId: 12, storagePathPresent: false, expectedSha256: record.expectedSha256, expectedBytes: record.expectedBytes } as const;
+const match = matchRecoveryCandidate(record, { fileName: record.fileName, bytes });
+const ready = buildProtectedRestorationDryRun({ inventory: [record], current: [current], matches: [match] });
+assert.equal(ready.ready, true);
+assert.equal(ready.restoreCount, 1);
+assert.equal(ready.executionAuthorized, false);
+assert.equal(ready.overwriteCount, 0);
+assert.equal(buildProtectedRestorationDryRun({ inventory: [record], current: [{ ...current, storagePathPresent: true }], matches: [match] }).actions[0].reason, "existing_custody_must_not_be_overwritten");
+assert.equal(buildProtectedRestorationDryRun({ inventory: [record], current: [{ ...current, expectedBytes: current.expectedBytes + 1 }], matches: [match] }).actions[0].reason, "current_record_changed");
+const noCandidate = buildProtectedRestorationDryRun({ inventory: [record], current: [current], matches: [] });
+assert.equal(noCandidate.ready, false);
+assert.equal(noCandidate.blockedCount, 1);
+console.log("B-GA005R4 restoration dry run: PASS verified-new-object only; overwrite=0; stale/current mismatch blocked");
