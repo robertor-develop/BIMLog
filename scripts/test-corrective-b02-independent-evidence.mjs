@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { verifyIndependentEvidence } from "./lib/independent-evidence-contract.mjs";
+const historical=JSON.parse(readFileSync("evidence/ga-final-20261015/BLOCK01_AGENT_ACCESS_ACCEPTANCE.json","utf8"));
+assert.equal(verifyIndependentEvidence(historical).valid,false,"hand-authored receipt must not validate itself");
+const root=mkdtempSync(join(tmpdir(),"bimlog-evidence-"));
+const artifact=Buffer.from("captured independently by the test harness\n");
+writeFileSync(join(root,"browser.log"),artifact);
+const packet={schemaVersion:"bimlog-independent-evidence-v1",sourceSha:"a".repeat(40),claims:[{id:"agent-answer",result:"PASS"}],observations:[{claimId:"agent-answer",result:"PASS",artifact:"browser.log",sha256:createHash("sha256").update(artifact).digest("hex")} ]};
+assert.equal(verifyIndependentEvidence(packet,{root}).valid,true);
+packet.observations[0].sha256="0".repeat(64);
+assert.deepEqual(verifyIndependentEvidence(packet,{root}).errors,["observation:0:digest"]);
+packet.observations=[];
+assert.ok(verifyIndependentEvidence(packet,{root}).errors.includes("unbacked-pass-claim"));
+console.log("CORRECTIVE-B02 independent evidence PASS: self-authored receipt rejected; missing/tampered/unbacked proof fails closed");

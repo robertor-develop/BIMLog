@@ -44,6 +44,7 @@
     "test:ga-final-block05-build032": "node scripts/test-ga-final-block05-build032-mobile-accessibility.mjs",
     "test:ga-final-block05-build033": "node scripts/test-ga-final-block05-build033-failure-recovery.mjs",
     "test:corrective-b01": "node scripts/test-corrective-b01-traceability.mjs",
+    "test:corrective-b02": "node scripts/test-corrective-b02-independent-evidence.mjs && node scripts/test-ga-final-block01-build005-acceptance.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
