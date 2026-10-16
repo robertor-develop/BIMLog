@@ -69572,9 +69572,10 @@
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
+        "living-brief/impact-declarations.json",
+        "scripts/record-release-integrity-review.mjs"
       ],
-      "reviewedChangeSha256": "0f5d4c11597493e482c17d086ecd164e73dc7f7acce8abfa2856e0a08e28dacf"
+      "reviewedChangeSha256": "81b2d7ba6ce572772c01b4fd040c361dc22088cd265e0f4d6f2bc8b6fdd7480c"
     }
   ]
 }
