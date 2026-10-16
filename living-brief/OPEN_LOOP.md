@@ -5782,3 +5782,9 @@ This block adds deterministic acceptance contracts around existing general produ
 - [ ] Push and publish the exact accepted source, then prove a real correlated answer in authenticated production Chrome for a BIMTech user.
 
 No production answer or publication claim is accepted until the final live Chrome gate passes.
+
+## Recovery and GA-readiness Block 5 release closure — 2026-10-15
+
+- [x] Align stale Page Assistant width expectations with the existing 320 px minimum and mobile full-width behavior without changing runtime UI behavior.
+- [x] Pass the focused Page Assistant workspace, responsive and universal-access gates.
+- [ ] Pass the complete exact-head local release gate and push B-GA021–B-GA025 once. Keep the block unpublished until B-GA026–B-GA030 completes the ten-build interval.
