@@ -1,5 +1,5 @@
 const messages: Record<string, [string,string]> = {
-  WORKFLOW_POLICY_ROLE_REQUIRED: ["The next approval requires a different authorized role.","La próxima aprobación requiere otro rol autorizado."],
+  WORKFLOW_POLICY_ROLE_REQUIRED: ["The next approval requires the role named by the published policy. CEO approval is required only when that exact policy stage names CEO.","La próxima aprobación requiere el rol indicado por la política publicada. La aprobación del CEO se exige únicamente cuando esa etapa exacta de la política nombra al CEO."],
   WORKFLOW_POLICY_COMPANY_REQUIRED: ["This action requires membership in the project's company.","Esta acción requiere pertenecer a la empresa del proyecto."],
   WORKFLOW_POLICY_PROJECT_MEMBER_REQUIRED: ["Active project membership is required.","Se requiere pertenencia activa al proyecto."],
   WORKFLOW_POLICY_AMOUNT_REQUIRED: ["The frozen contract-item amount is missing; the threshold cannot be evaluated.","Falta el importe congelado del elemento contractual; no se puede evaluar el umbral."],

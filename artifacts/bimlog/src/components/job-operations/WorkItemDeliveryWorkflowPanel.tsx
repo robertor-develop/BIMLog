@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { useAuthStore } from "@/store/auth";
 import { governanceDecisionMessage, workflowActionError } from "@/lib/workflow-governance-decision-message";
 import { governedDeliveryState } from "@/lib/shop-drawing-delivery";
+import { governanceApprovalStatus } from "@/lib/governance-approval-status";
 
 type Translate = (en: string, es: string) => string;
 type Runtime = {
@@ -213,8 +214,7 @@ function ScopedWorkflowPanel({ projectId, workItemId, members, files, api, tt }:
                 ) : <span>{tt("BIMLog defaults; no company policy was bound", "Valores BIMLog; no se vinculó una política de empresa")}</span>}
               </div>
               {decision && <div role="status" style={{overflowWrap:"anywhere"}}>
-                {decision.progress && <p>{tt("Policy approvals", "Aprobaciones de política")}: {decision.progress.approved}/{decision.progress.stages.length}
-                  {decision.progress.next && <> · {tt("Next role", "Próximo rol")}: {decision.progress.next.role} ({decision.progress.next.level})</>}</p>}
+                {decision.progress && <p>{tt("Policy approvals", "Aprobaciones de política")}: {decision.progress.approved}/{decision.progress.stages.length}. {governanceApprovalStatus(decision.progress, runtime.governancePolicy?.code ?? null, tt("no", "sí") === "sí")}</p>}
                 {decision.approvalCode && <p>{governanceDecisionMessage(decision.approvalCode,tt)}</p>}
                 {decision.currentChangeCode && <p>{governanceDecisionMessage(decision.currentChangeCode,tt)}</p>}
                 {decision.reopenCode && decision.reopenCode !== decision.currentChangeCode && <p>{governanceDecisionMessage(decision.reopenCode,tt)}</p>}
