@@ -1,0 +1,13 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+const read=file=>readFileSync(file,"utf8");
+const run=file=>{const r=spawnSync(process.execPath,["artifacts/api-server/node_modules/tsx/dist/cli.mjs",file],{encoding:"utf8"});assert.equal(r.status,0,`${file} failed:\n${r.stdout}\n${r.stderr}`);};
+for(const file of ["artifacts/bimlog/src/pages/project/post120-build176-report-measures.behavior.ts","artifacts/bimlog/src/pages/project/post120-build177-report-questions.behavior.ts"]) run(file);
+const routes=read("artifacts/api-server/src/routes/coordinator-actions.ts");
+for(const token of ["/projects/:projectId/project-insights","/projects/:projectId/project-insights/export-pdf","loadProjectInsightsSummary","buildProjectAnalyticsCurrentViewPdf","X-BIMLog-Content-SHA256","private, no-store"]) assert.ok(routes.includes(token),`Analytics API missing ${token}`);
+const service=read("artifacts/api-server/src/lib/project-insights-metrics.ts");
+for(const token of ["linksGrantAuthority: false","aiUsed: false","removedFromInsights","unavailable","metricAuthority"]) assert.ok(service.includes(token),`Analytics truth contract missing ${token}`);
+const ui=read("artifacts/bimlog/src/pages/project/AnalyticsTab.tsx");
+for(const token of ["requiresReason","projectInsightsAccessHeaders","metricAuthority","Unavailable analytics","exportSections"]) assert.ok(ui.includes(token),`Analytics UI missing ${token}`);
+console.log("GA-F04-B029 source-aware analytics, access, unavailable-state and export lifecycle: PASS");

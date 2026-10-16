@@ -38,6 +38,7 @@
     "test:ga-final-block04-build026": "node scripts/test-ga-final-block04-build026-apu-lifecycle.mjs",
     "test:ga-final-block04-build027": "node scripts/test-ga-final-block04-build027-forecast-lifecycle.mjs",
     "test:ga-final-block04-build028": "node scripts/test-ga-final-block04-build028-report-lifecycle.mjs",
+    "test:ga-final-block04-build029": "node scripts/test-ga-final-block04-build029-analytics-lifecycle.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
