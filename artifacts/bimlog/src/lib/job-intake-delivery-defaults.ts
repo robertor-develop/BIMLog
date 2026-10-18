@@ -13,6 +13,12 @@ export const deliveryWorkflowDefaults: Record<string, { submittalStrategy: strin
   },
 };
 
+export function deliveryGuidanceStatus(item: any) {
+  const strategyGenerated = !!item?.deliveryWorkflowGeneratedStrategy && item.submittalStrategy === item.deliveryWorkflowGeneratedStrategy;
+  const milestonesGenerated = !!item?.deliveryWorkflowGeneratedMilestones && item.milestoneSummary === item.deliveryWorkflowGeneratedMilestones;
+  return { strategyGenerated, milestonesGenerated, generated: strategyGenerated && milestonesGenerated };
+}
+
 export function selectDeliveryWorkflow(current: any, workflowTemplate: string) {
   const next = deliveryWorkflowDefaults[workflowTemplate];
   if (!next) return { ...current, workflowTemplate };

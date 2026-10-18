@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
 import { applyShopDrawingPreset, deriveShopDrawingPackages } from "../../lib/shop-drawing-delivery";
-import { selectPublishedDeliveryWorkflow } from "../../lib/job-intake-delivery-defaults";
+import { deliveryGuidanceStatus, selectPublishedDeliveryWorkflow } from "../../lib/job-intake-delivery-defaults";
 type Props = {
   items: any[];
   setItems: (updater: (items: any[]) => any[]) => void;
@@ -74,8 +74,8 @@ export function IntakeDeliveryItems(props: Props) {
                 </> : <small role="alert">{props.deliveryWorkflowMode === "approved_only" && matches.length === 0 ? props.tt("Company PMO must publish a matching workflow before activation.", "PMO debe publicar un flujo compatible antes de activar.") : props.tt("Select one company workflow before activation.", "Seleccione un flujo de empresa antes de activar.")}</small>; })()}
               </label>
 
-              <label>{props.tt("Submittal strategy", "Estrategia de submittals")}<textarea value={item.submittalStrategy ?? ""} onChange={event => update(index, { submittalStrategy: event.target.value })}/></label>
-              <label>{props.tt("Milestones and distribution", "Hitos y distribución")}<textarea value={item.milestoneSummary ?? ""} onChange={event => update(index, { milestoneSummary: event.target.value })}/></label>
+              <label>{props.tt("Submittal strategy", "Estrategia de submittals")}<textarea value={item.submittalStrategy ?? ""} onChange={event => update(index, { submittalStrategy: event.target.value })}/><small>{deliveryGuidanceStatus(item).strategyGenerated ? props.tt("Generated from the selected immutable workflow version. Editing preserves your reviewed text.", "Generada desde la versión inmutable seleccionada. Al editar se conserva su texto revisado.") : props.tt("Reviewed project text. Changing the workflow will not replace it silently.", "Texto revisado del proyecto. Cambiar el flujo no lo reemplazará silenciosamente.")}</small></label>
+              <label>{props.tt("Milestones and distribution", "Hitos y distribución")}<textarea value={item.milestoneSummary ?? ""} onChange={event => update(index, { milestoneSummary: event.target.value })}/><small>{deliveryGuidanceStatus(item).milestonesGenerated ? props.tt("Generated from the selected workflow phases.", "Generados desde las fases del flujo seleccionado.") : props.tt("Reviewed project milestones. They remain until you replace them.", "Hitos revisados del proyecto. Permanecen hasta que los reemplace.")}</small></label>
 
 </div></div>)}
  {props.items.some(item => item.deliverableType === "SHOP_DRAWING") && <button type="button" onClick={() => props.setItems(items => items.map(item => item.deliverableType !== "SHOP_DRAWING" ? item : ({...item, workPackages:deriveShopDrawingPackages({scopeItemId:item.id,existing:item.workPackages,levels:props.scopeStructure?.levels ?? [],disciplines:props.projectDisciplines ?? []})})))}>{props.tt("Build selected floor × discipline shop drawing plan", "Crear plan de planos por piso × disciplina seleccionados")}</button>}
