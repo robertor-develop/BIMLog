@@ -4,7 +4,7 @@ import { ArrowUp, ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
 import { selectPublishedDeliveryWorkflow } from "../../lib/job-intake-delivery-defaults";
-import { changeContractItemRate, manualContractRateSource } from "../../lib/contract-item-rate-source";
+import { changeContractItemRate, contractItemRateExplanation, manualContractRateSource } from "../../lib/contract-item-rate-source";
 
 type Translate = (en: string, es: string) => string;
 
@@ -445,6 +445,7 @@ export function ContractItemBulkEditor(props: Props) {
             <Trash2 size={14} />
           </button>
           {props.capabilities.costValuePlanner && <output className="ji-advanced" aria-label={props.tt(`Price calculation row ${index + 1}`, `Cálculo del precio fila ${index + 1}`)}>{item.quantity ?? item.plannedHours} {item.unit} × {item.billingHourlyRate || "0"} {props.currency}/{item.unit} = {exactProduct(item.quantity ?? item.plannedHours, item.billingHourlyRate)} {props.currency}<small style={{display:"block"}}>{props.tt("Contract value uses quantity, not labor hours. Values retain up to six decimal places; saved APU plan totals are separate.", "El valor contractual usa cantidad, no horas de trabajo. Los valores conservan hasta seis decimales; los totales del plan APU son independientes.")}</small></output>}
+          {contractItemRateExplanation(item.rateSource, item.quantity ?? item.plannedHours, props.tt("en", "es") === "es") && <output className="ji-advanced" aria-label={props.tt(`APU rate source row ${index + 1}`, `Origen de tarifa APU fila ${index + 1}`)}>{contractItemRateExplanation(item.rateSource, item.quantity ?? item.plannedHours, props.tt("en", "es") === "es")}</output>}
           <details className="ji-advanced">
             <summary>
               {props.tt(

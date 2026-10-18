@@ -9,6 +9,20 @@ export type ContractItemRateSource = {
   apuFingerprint?: string | null;
 };
 
+export function contractItemRateExplanation(source: any, quantity: unknown, spanish = false): string | null {
+  if (!source || source.kind !== "saved_apu_rate") return null;
+  const version = Number(source.apuPlanVersion);
+  const prefix = Number.isSafeInteger(version) && version > 0 ? `APU v${version}` : "APU";
+  if (source.rateCalculation === "plan_total_divided_by_contract_quantity" && source.planSellingPrice) {
+    return spanish
+      ? `${prefix}: total del plan ${source.planSellingPrice} ÷ cantidad ${String(quantity ?? "")} = tarifa unitaria ${source.unitRate}.`
+      : `${prefix}: plan total ${source.planSellingPrice} ÷ quantity ${String(quantity ?? "")} = unit rate ${source.unitRate}.`;
+  }
+  return spanish
+    ? `${prefix}: tarifa unitaria publicada ${source.unitRate}.`
+    : `${prefix}: published unit rate ${source.unitRate}.`;
+}
+
 export function manualContractRateSource(input: { unitRate: unknown; unit: unknown; currency: unknown; apuPlanVersion?: unknown }): ContractItemRateSource {
   const version = Number(input.apuPlanVersion);
   return {
