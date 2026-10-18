@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { intakeWorkflowPreview } from "../../lib/intake-workflow-preview-selection";
 import { applyShopDrawingPreset, deriveShopDrawingPackages } from "../../lib/shop-drawing-delivery";
 import { deliveryGuidanceStatus, selectPublishedDeliveryWorkflow } from "../../lib/job-intake-delivery-defaults";
+import { intakePhaseHoursPreview } from "../../lib/intake-phase-hours-preview";
 type Props = {
   items: any[];
   setItems: (updater: (items: any[]) => any[]) => void;
@@ -71,6 +72,7 @@ export function IntakeDeliveryItems(props: Props) {
                   <small>{selected.definition.phases.map(phase => `${phase.name} (${phase.tasks.length})`).join(" → ")}</small>
                   <small>{selected.governancePolicy ? `${props.tt("Published company Governance Policy", "Política de gobernanza empresarial publicada")}: ${selected.governancePolicy.code} · v${selected.governancePolicy.version}` : props.tt("No published company Governance Policy applies to this workflow.", "Ninguna política de gobernanza empresarial publicada aplica a este flujo.")}</small>
                   {selected.activationBlock && <small role="alert">{props.tt("Activation blocked by published Governance Policy", "Activación bloqueada por la política de gobernanza publicada")}: {selected.activationBlock.code}</small>}
+                  {intakePhaseHoursPreview(item.plannedHours, selected.definition).length > 0 && <small role="status">{props.tt("Activation hour preview", "Vista previa de horas al activar")}: {intakePhaseHoursPreview(item.plannedHours, selected.definition).map(row => `${row.code} ${row.plannedHours}h`).join(" · ")}</small>}
                 </> : <small role="alert">{props.deliveryWorkflowMode === "approved_only" && matches.length === 0 ? props.tt("Company PMO must publish a matching workflow before activation.", "PMO debe publicar un flujo compatible antes de activar.") : props.tt("Select one company workflow before activation.", "Seleccione un flujo de empresa antes de activar.")}</small>; })()}
               </label>
 
