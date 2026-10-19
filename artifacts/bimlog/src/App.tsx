@@ -339,7 +339,8 @@ function App() {
             <PublicRouteMetadata />
             <RouteAccessibility />
             <LivingBriefHotkey />
-            <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground font-sans">
+            <div className="bimlog-workspace-split">
+            <div className="bimlog-workspace-content min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground font-sans">
               <a className="skip-to-main" href="#main-content">Skip to main content / Ir al contenido principal</a>
               <Navbar />
               <main id="main-content" tabIndex={-1} className="flex-1">
@@ -348,8 +349,9 @@ function App() {
                 </Suspense>
               </main>
             </div>
-            <DeferredFeedbackWidget />
             <Suspense fallback={null}><PageAssistant /></Suspense>
+            </div>
+            <DeferredFeedbackWidget />
           </WouterRouter>
           <Toaster />
         </TooltipProvider>
