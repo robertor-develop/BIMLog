@@ -52,3 +52,14 @@ export function verifyAgentWorkspace(receipt){
   if(receipt?.focusRestored!==true)errors.push("focus-restoration");
   return Object.freeze({pass:errors.length===0,errors:Object.freeze(errors)});
 }
+
+export function verifyHostedAgentAcceptance(receipt){
+  const gates=Object.freeze({
+    release:verifyReleaseIdentity(receipt?.release),
+    answer:verifyCorrelatedAnswer(receipt?.answer),
+    scope:verifyAuthenticatedScope(receipt?.scope),
+    workspace:verifyAgentWorkspace(receipt?.workspace),
+  });
+  const failed=Object.freeze(Object.entries(gates).filter(([,result])=>!result.pass).map(([name])=>name));
+  return Object.freeze({pass:failed.length===0,failed,gates});
+}

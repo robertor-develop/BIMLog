@@ -81,6 +81,7 @@
     "test:corrective-b32": "node scripts/test-corrective-b32-agent-answer-correlation.mjs",
     "test:corrective-b33": "node scripts/test-corrective-b33-agent-authenticated-scope.mjs",
     "test:corrective-b34": "node scripts/test-corrective-b34-agent-workspace-controls.mjs",
+    "test:corrective-b35": "pnpm test:corrective-b31 && pnpm test:corrective-b32 && pnpm test:corrective-b33 && pnpm test:corrective-b34 && node scripts/test-corrective-b35-agent-live-gauntlet.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
