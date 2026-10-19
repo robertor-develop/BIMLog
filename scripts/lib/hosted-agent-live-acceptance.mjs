@@ -39,3 +39,16 @@ export function verifyAuthenticatedScope(receipt){
   if(receipt?.crossTenantAccessDenied!==true)errors.push("cross-tenant-denial");
   return Object.freeze({pass:errors.length===0,errors:Object.freeze(errors)});
 }
+
+export function verifyAgentWorkspace(receipt){
+  const errors=[];
+  if(!["left","right"].includes(receipt?.dock))errors.push("dock");
+  if(!Number.isFinite(receipt?.widthBefore)||!Number.isFinite(receipt?.widthAfter)||receipt.widthBefore===receipt.widthAfter)errors.push("resize");
+  if(receipt?.widthAfter<360||receipt?.widthAfter>760)errors.push("resize-range");
+  if(!Number.isFinite(receipt?.mainWorkspaceWidth)||receipt.mainWorkspaceWidth<320)errors.push("workspace-width");
+  if(receipt?.contentClipped===true)errors.push("content-clipping");
+  if(receipt?.feedbackEnabled!==false||receipt?.fixEnabled!==false)errors.push("coming-soon-actions");
+  if(receipt?.feedbackHint!=="Coming soon"||receipt?.fixHint!=="Coming soon")errors.push("coming-soon-hint");
+  if(receipt?.focusRestored!==true)errors.push("focus-restoration");
+  return Object.freeze({pass:errors.length===0,errors:Object.freeze(errors)});
+}
