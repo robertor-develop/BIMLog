@@ -12,6 +12,14 @@ export function assistantBrowserStorage(kind: "localStorage" | "sessionStorage")
   catch { return null; }
 }
 
+export function safeAssistantSession(storage: () => Pick<Storage, "getItem" | "setItem" | "removeItem"> | null = () => assistantBrowserStorage("sessionStorage")) {
+  return {
+    getItem(key: string): string | null { try { return storage()?.getItem(key) ?? null; } catch { return null; } },
+    setItem(key: string, value: string) { try { storage()?.setItem(key, value); } catch { /* In-memory state remains usable. */ } },
+    removeItem(key: string) { try { storage()?.removeItem(key); } catch { /* Persistence is optional. */ } },
+  };
+}
+
 export function readAssistantOpen(storage: Pick<Storage, "getItem"> | null, userId: number | string | undefined) {
   if (userId == null) return false;
   try { return storage?.getItem(`bimlog:assistant-open:${userId}`) === "true"; }

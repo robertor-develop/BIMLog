@@ -323,7 +323,7 @@
     "test:headquarters-daily-clarity-block01": "node scripts/test-headquarters-daily-clarity-block01.mjs",
     "test:headquarters-daily-clarity-block02": "node scripts/test-headquarters-daily-clarity-block02.mjs",
     "test:page-assistant-workspace-block01": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/page-assistant-workspace.behavior.ts && node scripts/test-page-assistant-workspace-block01.mjs",
-    "test:page-assistant-workspace-block02": "node scripts/test-page-assistant-workspace-block02.mjs && pnpm run test:page-assistant-universal-access",
+    "test:page-assistant-workspace-block02": "node scripts/test-agent-structural-dock.mjs && node scripts/test-page-assistant-workspace-block02.mjs && pnpm run test:page-assistant-universal-access",
     "test:page-assistant-universal-access": "node scripts/test-page-assistant-universal-access.mjs",
     "test:page-assistant-block01": "node scripts/test-page-assistant-block01.mjs && node scripts/test-bimlog-assistant-bridge.mjs && node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/repair-authority.behavior.ts",
     "test:headquarters-daily-clarity-block03": "node scripts/test-headquarters-daily-clarity-block03.mjs",

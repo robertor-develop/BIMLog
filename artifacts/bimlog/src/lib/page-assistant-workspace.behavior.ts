@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { readAssistantOpen, writeAssistantOpen, ASSISTANT_WIDTH_DEFAULT, ASSISTANT_WORKSPACE_MIN, assistantMainWorkspaceWidth, assistantWidthFromPointer, assistantWorkspaceMode, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
+import { safeAssistantSession, readAssistantOpen, writeAssistantOpen, ASSISTANT_WIDTH_DEFAULT, ASSISTANT_WORKSPACE_MIN, assistantMainWorkspaceWidth, assistantWidthFromPointer, assistantWorkspaceMode, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
 
 assert.equal(clampAssistantWidth(120), 320);
 assert.equal(clampAssistantWidth(900), 680);
@@ -25,3 +25,5 @@ console.log("page assistant workspace behavior: pass");
 
 writeAssistantOpen(storage,1,true);assert.equal(readAssistantOpen(storage,1),true);assert.equal(readAssistantOpen(storage,2),false);writeAssistantOpen(storage,1,false);assert.equal(readAssistantOpen(storage,1),false);assert.equal(readAssistantOpen({getItem(){throw new Error('blocked');}},1),false);assert.doesNotThrow(()=>writeAssistantOpen({setItem(){throw new Error('blocked');}},1,true));
 assert.deepEqual(readAssistantWorkspace({getItem(){throw new Error("blocked");}}), {width:352,dock:"right",collapsed:false}); assert.doesNotThrow(()=>writeAssistantWorkspace({setItem(){throw new Error("quota");}},512,"left",true));
+
+const deniedSession = safeAssistantSession(()=>{throw new Error("denied getter");}); assert.equal(deniedSession.getItem("draft"),null); assert.doesNotThrow(()=>deniedSession.setItem("draft","test")); assert.doesNotThrow(()=>deniedSession.removeItem("draft"));
