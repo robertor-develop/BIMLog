@@ -5953,3 +5953,9 @@ No production record, protected project, deployment, or customer data changed du
 - [x] Preserve real IDs, contact identities, approved-client selection and contractual participants; codes create no accounts or records.
 - [x] Pass real HTTP/PostgreSQL new-project, anonymous/nonmember denial and zero read-side mutation checks; pass shared/API/frontend TypeScript and client regression.
 - [ ] Publish the complete corrected candidate after release checks, then inspect authenticated platform forms and obtain access to Ruben's Boys and Girls Club for exact field acceptance.
+# BIMLog Agent hosted-provider recovery — 2026-10-19
+
+- [x] Diagnose the production failure: the protected hostname first returned 502 because the local origin was down; after origin restart, the local bridge returned `CODEX_RESUME_FAILED` because the retired MAIN04 thread is no longer resumable from the CLI thread store.
+- [x] Replace the page Agent's fragile desktop-thread dependency with BIMLog's existing server-side governed Anthropic integration while preserving authenticated tenant/project isolation, request correlation, durable conversations, allowlisted page context and usage accounting.
+- [x] Pass API TypeScript plus focused transport, hosted-provider, tenant-isolation, durable-conversation and corrective B20 gates.
+- [ ] Push the reconciled exact head, synchronize and publish through the existing Replit Shell path, verify exact live source identity, and pass a fresh authenticated Chrome question/answer before starting the next five-build block.

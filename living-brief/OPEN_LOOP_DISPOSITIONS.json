@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "41db084a1b77016b6c17b34b9907d25230d90783dc66c22e7a0cdcd8531d4d41",
-  "itemCount": 425,
+  "sourceSha256": "bd5af9adf020c0a79f177cac10554434e90b99e73428be94f1514898a7a36344",
+  "itemCount": 426,
   "counts": {
-    "ACTIVE": 381,
+    "ACTIVE": 382,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7735,6 +7735,24 @@
       "evidence": [
         "OPEN_LOOP.md:5955",
         "Ruben platform-wide company choices — 2026-10-19"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5564651330a9389f",
+      "sourceLine": 5961,
+      "heading": "BIMLog Agent hosted-provider recovery — 2026-10-19",
+      "statement": "Push the reconciled exact head, synchronize and publish through the existing Replit Shell path, verify exact live source identity, and pass a fresh authenticated Chrome question/answer before starting the next five-build block.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5961",
+        "BIMLog Agent hosted-provider recovery — 2026-10-19"
       ],
       "currentAuthority": false
     }

@@ -71804,6 +71804,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "agent-hosted-provider-recovery-20261019",
+      "reviewedThroughCommit": "f7159a193528efb316d37c2be0f089572cfb7edd",
+      "reviewedAt": "2026-10-19T22:50:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "post_production_defect_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed."
+        }
+      ],
+      "reason": "Production diagnosis proved the retired local MAIN04 Codex rollout could no longer be resumed. The page Agent now uses BIMLog existing governed Anthropic provider path with the same authenticated tenant and project boundary, durable request correlation, allowlisted page context and AI usage accounting; no product doctrine, permissions, project data or Agent panel behavior changed.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a14b1d627fc0d59330ea3655bbf66f622e652247f632e3e87db6e64bc3efcbdf"
     }
   ]
 }
