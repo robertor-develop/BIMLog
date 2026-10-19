@@ -328,6 +328,7 @@ function Router() {
 }
 
 function App() {
+  const assistantAccount = useAuthStore(state => state.token ? state.user?.id : undefined);
   useEffect(() => installAuthStorageContinuity(), []);
   return (
     <QueryClientProvider client={queryClient}>
@@ -349,7 +350,7 @@ function App() {
                 </Suspense>
               </main>
             </div>
-            <Suspense fallback={null}><PageAssistant /></Suspense>
+            <Suspense fallback={null}><PageAssistant key={assistantAccount ?? "signed-out"} /></Suspense>
             </div>
             <DeferredFeedbackWidget />
           </WouterRouter>
