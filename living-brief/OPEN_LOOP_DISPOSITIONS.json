@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ab916bb4a0a9a7af7544c43f23da6408c76e8b0732d066da79028de93a525e64",
-  "itemCount": 423,
+  "sourceSha256": "c976e0a96415329ece6672cf8cf56d26550f06a070ade1bca402f8ddaf1b5408",
+  "itemCount": 424,
   "counts": {
-    "ACTIVE": 379,
+    "ACTIVE": 380,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7699,6 +7699,24 @@
       "evidence": [
         "OPEN_LOOP.md:5939",
         "Lorena P1 release repair Block 4 — 2026-10-19"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3f282fc50494c786",
+      "sourceLine": 5948,
+      "heading": "Ruben new-project company choices repair — 2026-10-19",
+      "statement": "Complete release checks and publish the repair with the pending B11–B20 interval; verify authenticated Chrome and Ruben's Boys and Girls Club selector. No production project data may be changed for this check.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5948",
+        "Ruben new-project company choices repair — 2026-10-19"
       ],
       "currentAuthority": false
     }

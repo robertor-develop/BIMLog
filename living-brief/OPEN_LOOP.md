@@ -5940,3 +5940,9 @@ No production record, protected project, deployment, or customer data changed in
 
 No production record, protected project, deployment, or customer data changed during implementation.
 
+
+## Ruben new-project company choices repair — 2026-10-19
+
+- [x] Include saved project company codes and the existing authenticated project directory in Lens Next Responsible company choices without requiring contractor user accounts.
+- [x] Verify the new-project regression, directory-only names, deduplication, permission denial and strict frontend TypeScript.
+- [ ] Complete release checks and publish the repair with the pending B11–B20 interval; verify authenticated Chrome and Ruben's Boys and Girls Club selector. No production project data may be changed for this check.

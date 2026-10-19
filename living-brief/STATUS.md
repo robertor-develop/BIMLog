@@ -4556,3 +4556,7 @@ Builds B11–B15 make the repaired Intake and Operations flow directly reviewabl
 
 Builds B16–B20 harden the review surface before the ten-build publication boundary. Invalid APU divisors no longer produce misleading arithmetic; verified phase allocations show their exact total; generated guidance names its immutable workflow version; and the internal-cost governance message reflects whether the current user already has approval authority. The aggregate Block 4 gate and strict frontend TypeScript pass locally. Exact-head build, push, publication, deployed-source verification, and authenticated Chrome acceptance remain the release gates.
 
+
+## Ruben new-project company choices repair — 2026-10-19
+
+Lens Next's Responsible company selector omitted saved convention company codes unless a project user matched a company name, and did not read the existing project directory. The web client now combines saved project company codes, member companies and the authenticated same-project directory/history endpoint. No memberships, conventions, company records, native installers or production data are changed. Regression coverage reproduces a new BIMTECH project with BIM/DDS/WP/RL/MEGA and no contractor accounts, preserves directory-only companies, deduplicates entries and rejects denied directory access. Focused behavior and frontend TypeScript pass. Publication and Ruben's actual project acceptance remain pending; the current Roberto Test 1 browser roster does not expose Boys and Girls Club.
