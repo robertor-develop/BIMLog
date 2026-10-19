@@ -71526,6 +71526,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d9f0d3be9b85fd344c36dab55887799e7dd74c1e340723283e110a19744f4dbe"
+    },
+    {
+      "taskId": "ux-structural-dock-block1-20261019",
+      "reviewedThroughCommit": "2f59ae86d1ac378ea6a9a4af05c9262539c9db45",
+      "reviewedAt": "2026-10-19T18:28:28.941Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication."
+        }
+      ],
+      "reason": "Five focused shared-dock repairs preserve existing behavior and palette while replacing viewport-overlay geometry. Browser synthetic geometry passes at 1440/1024/768/390/320; authenticated new-release acceptance remains pending publication.",
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "15294997bd7adc7c546338cef50c279df4aba52bb76a292a7b25f33cefb4b584"
     }
   ]
 }
