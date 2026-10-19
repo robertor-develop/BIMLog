@@ -24,7 +24,8 @@ for (const token of ["proposeInternalCostPolicy", "proposeMemberInternalCostProf
 assert.match(routes, /internal-cost\/:kind\/:versionId\/decision/);
 console.log("UX128 CEO approval workflow and immutable decision identity: PASS");
 assert.match(operations, /internalCostGovernance/);
-for (const phrase of ["Internal cost governance", "Gobernanza del costo interno", "Job Intake cannot edit or bypass this authority", "aprobación del CEO"]) assert.match(page, new RegExp(phrase));
+for (const phrase of ["Internal cost governance", "Gobernanza del costo interno", "Job Intake cannot edit or bypass this authority", "Su autoridad CEO ya configurada", "otro usuario autorizado que ya tenga el rol CEO configurado", "no identifica a una persona ni concede acceso"]) assert.match(page, new RegExp(phrase));
+assert.match(page, /internalCostGovernance\.canApprove/);
 console.log("UX129 permission-appropriate project governance view: PASS");
 const snapshot = { internalHourlyRate:"5.1",plannedInternalCost:"51",internalCostProfileVersionId:"profile-v1",internalCostPolicyVersionId:"policy-v1",internalCostEffectiveDate:"2026-09-30",billingHourlyRate:"30" };
 assert.deepEqual(protectInternalCostAssignment(snapshot,false),{...snapshot,internalHourlyRate:null,plannedInternalCost:null,internalCostProfileVersionId:null,internalCostPolicyVersionId:null,internalCostEffectiveDate:null});
