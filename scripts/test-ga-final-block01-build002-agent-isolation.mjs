@@ -11,8 +11,10 @@ assert.match(store, /WHERE conversation_id=\$1 AND company_id=\$2 AND user_id=\$
 assert.match(store, /page_agent_turns_actor_active_idx/, "one active writer must be enforced per tenant, actor and conversation");
 assert.match(store, /ON CONFLICT\(request_id\) DO NOTHING/, "request replay must be idempotent");
 assert.match(store, /PAGE_AGENT_REQUEST_CONFLICT/, "mismatched replay must fail closed");
-assert.match(transport, /actor:\s*\{ userId: input\.userId, companyId: input\.companyId, projectId: input\.projectId \}/);
-assert.match(transport, /MAIN04_REQUEST_MISMATCH/);
-assert.match(transport, /MAIN04_DESTINATION_MISMATCH/);
+assert.match(transport, /tenant:\s*\{ companyId: input\.companyId, projectId: input\.projectId \}/);
+assert.match(transport, /userId:\s*input\.userId/);
+assert.match(transport, /projectId:\s*input\.projectId/);
+assert.match(transport, /visibleControls:\s*input\.context\.controls/);
+assert.match(transport, /allowed\.has\(label\)/);
 
 console.log("GA-F01-B002 agent tenant, actor and project isolation: PASS");

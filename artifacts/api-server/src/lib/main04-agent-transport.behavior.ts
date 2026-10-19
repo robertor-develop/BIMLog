@@ -73,7 +73,7 @@ const concurrent = await Promise.all([
   askBimlogMain04({ question: "third exact question", context, userId: 9, projectId: 64 }, { fetch: fifoFetch, environment: fifoEnvironment }),
 ]);
 assert.deepEqual(dispatchOrder, ["first exact question", "second exact question", "third exact question"], "simultaneous questions must dispatch in FIFO order");
-assert.equal(maximumActive, 1, "only one MAIN 04.00 request may be active at a time");
+assert.equal(maximumActive, 3, "independent tenant/user requests must not block each other");
 assert.deepEqual(concurrent.map(item => item.answer), ["answer for first exact question", "answer for second exact question", "answer for third exact question"], "each answer must return to its own request");
 
 console.log("main04-agent-transport.behavior: PASS");
