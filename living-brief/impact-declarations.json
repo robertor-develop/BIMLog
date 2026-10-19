@@ -71596,6 +71596,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "15294997bd7adc7c546338cef50c279df4aba52bb76a292a7b25f33cefb4b584"
+    },
+    {
+      "taskId": "ux-dock-resilience-block2-20261019",
+      "reviewedThroughCommit": "74159b0a17b430546dba2c287436c08e6144ddba",
+      "reviewedAt": "2026-10-19T18:40:07.636Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending."
+        }
+      ],
+      "reason": "Five focused follow-up builds handle unavailable dock and session storage, remount open state on account transitions, cancel mode-change drags, make geometry fixtures portable and include structural checks in the existing workspace gate. No production data or agent transport changes. TypeScript and focused regressions pass; publication and authenticated acceptance remain pending.",
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d1c241cee4be8d0c4b522c4de7f772e2000489050fdcb8bce81756db03fb94c1"
     }
   ]
 }
