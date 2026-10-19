@@ -1401,7 +1401,7 @@ body.bimlog-assistant-docked .page-assistant-launcher{display:none}
 .page-assistant-section{flex:0 0 auto;border-bottom:1px solid hsl(var(--border));background:hsl(var(--background))}.page-assistant-section>summary{display:flex;align-items:center;gap:9px;min-height:48px;padding:11px 14px;font-weight:800;cursor:pointer;list-style:none}.page-assistant-section>summary::-webkit-details-marker{display:none}.page-assistant-section>summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:500}.page-assistant-section[open]>summary::after{content:"−"}.page-assistant-section>summary small{margin-left:auto;color:hsl(var(--muted-foreground));font-weight:600}.page-assistant-section>summary:focus-visible{outline:3px solid #2563eb;outline-offset:-3px}
 .page-assistant-question{display:flex;flex:1 1 auto;min-height:250px;overflow:hidden;flex-direction:column}.page-assistant-question:not([open]){flex:0 0 auto;min-height:0}.page-assistant-question>summary{flex:0 0 auto}.page-assistant-question .page-assistant-messages{min-height:120px}.page-assistant-section-body{display:grid;gap:10px;padding:0 14px 14px}.page-assistant-section-body p{margin:0;color:hsl(var(--muted-foreground));font-size:13px}.page-assistant-section-body button,.page-assistant-section-body input{min-height:40px}.page-assistant-guide-actions small{color:hsl(var(--muted-foreground))}
 .page-assistant-repairs{max-height:none;overflow:visible;padding:0}.page-assistant-repairs .page-assistant-section-body{max-height:46vh;overflow:auto}.page-assistant-repairs summary{padding:11px 14px}.page-assistant-repairs article,.page-assistant-repairs section{margin-top:0}
-@media(max-width:900px){.page-assistant-panel{border:0}.page-assistant-panel>header{padding-top:max(14px,env(safe-area-inset-top))}.page-assistant-context{padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(14px,env(safe-area-inset-right))!important}.page-assistant-question form{padding-bottom:max(14px,env(safe-area-inset-bottom))}}
+@media(max-width:760px){.page-assistant-panel{border:0}.page-assistant-panel>header{padding-top:max(14px,env(safe-area-inset-top))}.page-assistant-context{padding-left:max(14px,env(safe-area-inset-left))!important;padding-right:max(14px,env(safe-area-inset-right))!important}.page-assistant-question form{padding-bottom:max(14px,env(safe-area-inset-bottom))}}
 @media(max-width:420px){.page-assistant-panel>header strong{font-size:14px}.page-assistant-context span:first-child{max-width:52vw}.page-assistant-section>summary{min-height:52px}.page-assistant-messages article{max-width:96%}}
 @media(prefers-reduced-motion:reduce){body #root{transition:none}}
 @media(forced-colors:active){.page-assistant-panel{border-left:2px solid CanvasText}.page-assistant-section{border-bottom:1px solid CanvasText}.page-assistant-close{border:1px solid CanvasText}}
@@ -1419,7 +1419,7 @@ body.bimlog-assistant-docked .page-assistant-launcher{display:none}
 .page-assistant-error,.page-assistant-notice{margin:0 16px 10px;padding:10px 12px;border-radius:8px}.page-assistant-error{color:#9f1d24;background:#fff0f1}.page-assistant-notice{color:#1d4f38;background:#edf8f2}
 .page-assistant-section{flex:0 0 auto;margin:0 12px 10px;border:1px solid var(--bimlog-agent-line);border-radius:10px;background:#fff;overflow:hidden}.page-assistant-section>summary{display:flex;align-items:center;min-height:44px;padding:10px 12px;font-size:13px;font-weight:700;cursor:pointer;list-style:none}.page-assistant-section>summary::before{content:"▸";margin-right:6px}.page-assistant-section[open]>summary::before{content:"▾"}.page-assistant-section>summary::after{content:none}.page-assistant-section-body{display:grid;gap:9px;padding:0 12px 12px}.page-assistant-section-body p{font-size:12px;line-height:1.45}.page-assistant-section-body button{border:1px solid var(--bimlog-agent-line);border-radius:8px;background:var(--bimlog-agent-tint);color:var(--bimlog-agent-blue);font-weight:700}
 .page-assistant-repairs{max-height:48vh;overflow:auto}.page-assistant-launcher{background:var(--bimlog-agent-blue);border-color:var(--bimlog-agent-blue)}
-@media(max-width:900px){.page-assistant-panel{border:0}.page-assistant-question textarea{min-height:110px}}
+@media(max-width:760px){.page-assistant-panel{border:0}.page-assistant-question textarea{min-height:110px}}
 
 /* Agent workspace controls: bounded resizable dock, reversible side, and compact rail. */
 :root{--bimlog-agent-collapsed-width:72px}
@@ -1442,7 +1442,7 @@ body.bimlog-assistant-docked .page-assistant-launcher{display:none}
 .page-assistant-panel[data-collapsed="true"] .page-assistant-window-controls{flex-direction:column;margin:0}
 .page-assistant-panel[data-collapsed="true"] .page-assistant-window-controls button[aria-label^="Dock"],.page-assistant-panel[data-collapsed="true"] .page-assistant-window-controls button[aria-label^="Acoplar"],.page-assistant-panel[data-collapsed="true"] .page-assistant-close{display:none}
 .page-assistant-panel[data-collapsed="true"]>.page-assistant-resize-handle{display:none}
-@media(max-width:900px){.page-assistant-panel[data-collapsed="true"]{border:1px solid hsl(var(--border))}.page-assistant-panel[data-collapsed="true"]>header{height:72px;min-height:72px;border-radius:11px}.page-assistant-resize-handle,.page-assistant-window-controls button[aria-label^="Dock"],.page-assistant-window-controls button[aria-label^="Acoplar"]{display:none}}
+@media(max-width:760px){.page-assistant-panel[data-collapsed="true"]{border:1px solid hsl(var(--border))}.page-assistant-panel[data-collapsed="true"]>header{height:72px;min-height:72px;border-radius:11px}.page-assistant-resize-handle,.page-assistant-window-controls button[aria-label^="Dock"],.page-assistant-window-controls button[aria-label^="Acoplar"]{display:none}}
 .page-assistant-question:not([open]){display:flex;flex:1 1 auto;min-height:0}
 
 /* Lumen-density agent shell, expressed in BIMLog's blue palette. */
@@ -1458,7 +1458,7 @@ body.bimlog-assistant-docked .page-assistant-launcher{display:none}
 .page-assistant-error,.page-assistant-notice{order:2;margin:0 20px 10px;border-radius:8px}.page-assistant-messages{order:3;flex:0 0 auto!important;min-height:165px!important;margin:0 20px 18px!important;padding:0!important;border-left:3px solid var(--bimlog-agent-blue-dark);background:#edf2f5;overflow:visible!important}.page-assistant-messages>p{padding:16px!important;background:transparent!important;border-radius:0!important}.page-assistant-messages article p{padding:13px 14px!important;border-radius:0!important;background:transparent!important}.page-assistant-messages article[data-role=user]{display:none}.page-assistant-messages article[data-role=assistant] p{background:transparent!important}
 .page-assistant-section{margin:0 20px 9px;border-color:#c5d0da;border-radius:9px}.page-assistant-section>summary{min-height:42px}.page-assistant-repairs{margin-bottom:12px}
 .page-assistant-status-strip{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:16px 20px!important;border-top:1px solid #d8dee5!important;border-bottom:0!important;background:var(--bimlog-agent-cream)}.page-assistant-status-strip>div{display:grid;gap:4px;min-height:66px;padding:10px;border:1px solid #c5d0da;border-radius:10px;background:#fffdf8;align-content:center}.page-assistant-status-strip small{font-size:10px;color:#4f6174}.page-assistant-status-strip strong{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-@media(max-width:900px){.page-assistant-panel{}.page-assistant-panel>header{min-height:96px}.page-assistant-recommended{padding:15px 16px}.page-assistant-section-label{padding-left:16px}.page-assistant-actions,.page-assistant-question form,.page-assistant-status-strip{padding-left:16px!important;padding-right:16px!important}.page-assistant-messages{margin-left:16px!important;margin-right:16px!important}}
+@media(max-width:760px){.page-assistant-panel{}.page-assistant-panel>header{min-height:96px}.page-assistant-recommended{padding:15px 16px}.page-assistant-section-label{padding-left:16px}.page-assistant-actions,.page-assistant-question form,.page-assistant-status-strip{padding-left:16px!important;padding-right:16px!important}.page-assistant-messages{margin-left:16px!important;margin-right:16px!important}}
 
 /* Keep the question and its latest answer visible together at 100% browser zoom. */
 .page-assistant-panel>header{min-height:78px;padding:12px 16px}
@@ -1470,7 +1470,7 @@ body.bimlog-assistant-docked .page-assistant-launcher{display:none}
 .page-assistant-error,.page-assistant-notice{margin:0 16px 6px}.page-assistant-messages{min-height:72px!important;max-height:110px;margin:0 16px 7px!important;overflow-y:auto!important}.page-assistant-messages>p{padding:10px!important;font-size:12px}.page-assistant-messages article p{padding:9px 10px!important;font-size:12px;line-height:1.35!important}
 .page-assistant-section{margin:0 16px 5px}.page-assistant-section>summary{min-height:32px;padding:5px 10px;font-size:12px}.page-assistant-section-body{gap:6px;padding:0 10px 9px}.page-assistant-section-body p{font-size:12px}.page-assistant-section-body button,.page-assistant-section-body input{min-height:34px}
 .page-assistant-status-strip{gap:6px;padding:7px 16px!important}.page-assistant-status-strip>div{gap:1px;min-height:46px;padding:6px 8px;border-radius:8px}.page-assistant-status-strip small{font-size:9px}.page-assistant-status-strip strong{font-size:11px}
-@media(max-width:900px){.page-assistant-panel>header{min-height:74px}.page-assistant-recommended{padding:9px 12px}.page-assistant-actions,.page-assistant-question form,.page-assistant-status-strip{padding-left:12px!important;padding-right:12px!important}.page-assistant-section{margin-left:12px;margin-right:12px}.page-assistant-messages{margin-left:12px!important;margin-right:12px!important}}
+@media(max-width:760px){.page-assistant-panel>header{min-height:74px}.page-assistant-recommended{padding:9px 12px}.page-assistant-actions,.page-assistant-question form,.page-assistant-status-strip{padding-left:12px!important;padding-right:12px!important}.page-assistant-section{margin-left:12px;margin-right:12px}.page-assistant-messages{margin-left:12px!important;margin-right:12px!important}}
 @media(max-width:480px){
   .page-assistant-panel{padding-bottom:env(safe-area-inset-bottom)}
   .page-assistant-actions{grid-template-columns:repeat(3,minmax(0,1fr));overflow-x:hidden}
@@ -1554,10 +1554,14 @@ body.bimlog-assistant-docked .page-assistant-launcher{display:none}
 .bimlog-workspace-content{min-width:0;contain:layout;position:relative}
 [data-page-assistant]{min-width:0}
 [data-page-assistant-open="false"]{display:contents}
-body.bimlog-assistant-docked .bimlog-workspace-split{grid-template-columns:minmax(0,1fr) var(--bimlog-agent-dock-width)}
-body.bimlog-assistant-docked[data-assistant-dock-side="left"] .bimlog-workspace-split{grid-template-columns:var(--bimlog-agent-dock-width) minmax(0,1fr)}
+body.bimlog-assistant-docked .bimlog-workspace-split{grid-template-columns:minmax(0,1fr) var(--bimlog-agent-active-width)}
+body.bimlog-assistant-docked[data-assistant-dock-side="left"] .bimlog-workspace-split{grid-template-columns:var(--bimlog-agent-active-width) minmax(0,1fr)}
 body[data-assistant-dock-side="left"] [data-page-assistant-open="true"]{grid-column:1;grid-row:1}
 body[data-assistant-dock-side="left"] .bimlog-workspace-content{grid-column:2;grid-row:1}
 body:not(.bimlog-assistant-docked) .bimlog-workspace-content{grid-column:1}
 .page-assistant-panel{position:sticky;top:0;width:100%;min-width:0;max-width:100%;height:100dvh;max-height:100dvh;border-radius:0;box-shadow:none;resize:none}
 @media(max-width:760px){body.bimlog-assistant-docked .bimlog-workspace-split{display:block}body.bimlog-assistant-docked .bimlog-workspace-content{display:none}.page-assistant-panel{width:100%;height:100dvh}}
+
+body{--bimlog-agent-active-width:var(--bimlog-agent-dock-width)}
+body[data-assistant-collapsed="true"]{--bimlog-agent-active-width:72px}
+@media(min-width:761px){.page-assistant-resize-handle{display:block}.page-assistant-panel[data-collapsed="true"]>.page-assistant-resize-handle{display:none}}
