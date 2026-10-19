@@ -71456,6 +71456,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a32c998427c924485928055398c2afdde39d38165995c2358db14a27d11bdbd8"
+    },
+    {
+      "taskId": "ruben-release-governance-assertion-20261019",
+      "reviewedThroughCommit": "18bb1774d1f7d92cfdd04ea2974a4d3a23cf5126",
+      "reviewedAt": "2026-10-19T17:47:26.5340680Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending."
+        }
+      ],
+      "reason": "Test-only correction of obsolete governance text assertion; runtime implementation unchanged. Preserve the failed full-run evidence and retest current bilingual authority behavior. Publication remains pending.",
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d9f0d3be9b85fd344c36dab55887799e7dd74c1e340723283e110a19744f4dbe"
     }
   ]
 }
