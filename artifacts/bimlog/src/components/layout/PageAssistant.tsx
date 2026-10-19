@@ -29,6 +29,7 @@ export function PageAssistant() {
   const input=useRef<HTMLTextAreaElement|null>(null),opener=useRef<HTMLButtonElement|null>(null),selectedField=useRef<string|null>(null),recognition=useRef<SpeechRecognitionLike|null>(null),voiceBase=useRef(""),voiceError=useRef("");
   const resizeCleanup=useRef<(()=>void)|null>(null);
   useEffect(()=>()=>resizeCleanup.current?.(),[]);
+  useEffect(()=>{resizeCleanup.current?.();},[open,collapsed,dock,token]);
   useEffect(()=>{writeAssistantOpen(assistantBrowserStorage("sessionStorage"),user?.id,open);},[open,user?.id]);
   useEffect(()=>{if(!token)setOpen(false);},[token]);
   const context=collectPageAssistantContext(lang);
