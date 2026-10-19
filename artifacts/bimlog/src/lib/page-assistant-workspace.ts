@@ -7,6 +7,11 @@ export const ASSISTANT_WIDTH_STEP = 20;
 export const ASSISTANT_FULLSCREEN_BREAKPOINT = 760;
 export const ASSISTANT_WORKSPACE_MIN = 320;
 
+export function assistantBrowserStorage(kind: "localStorage" | "sessionStorage"): Storage | null {
+  try { return typeof window === "undefined" ? null : window[kind]; }
+  catch { return null; }
+}
+
 export function readAssistantOpen(storage: Pick<Storage, "getItem"> | null, userId: number | string | undefined) {
   if (userId == null) return false;
   try { return storage?.getItem(`bimlog:assistant-open:${userId}`) === "true"; }
@@ -46,6 +51,7 @@ export function assistantMainWorkspaceWidth(panelWidth: number, viewportWidth: n
 }
 
 export function readAssistantWorkspace(storage: Pick<Storage, "getItem"> | null) {
+  try {
   const rawWidth = Number(storage?.getItem("bimlog:assistant-width"));
   const rawDock = storage?.getItem("bimlog:assistant-dock");
   return {
@@ -53,10 +59,13 @@ export function readAssistantWorkspace(storage: Pick<Storage, "getItem"> | null)
     dock: rawDock === "left" ? "left" as const : "right" as const,
     collapsed: storage?.getItem("bimlog:assistant-collapsed") === "true",
   };
+  } catch { return { width: ASSISTANT_WIDTH_DEFAULT, dock: "right" as const, collapsed: false }; }
 }
 
 export function writeAssistantWorkspace(storage: Pick<Storage, "setItem"> | null, width: number, dock: AssistantDockSide, collapsed = false) {
+  try {
   storage?.setItem("bimlog:assistant-width", String(clampAssistantWidth(width)));
   storage?.setItem("bimlog:assistant-dock", dock);
   storage?.setItem("bimlog:assistant-collapsed", String(collapsed));
+  } catch { /* Keep the current in-memory layout when persistence is unavailable. */ }
 }
