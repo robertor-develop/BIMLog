@@ -379,6 +379,7 @@
     ,"test:recovery-ga-block03": "node scripts/test-recovery-ga-block03.mjs && pnpm --filter @workspace/api-server run typecheck"
     ,"test:recovery-ga-block04": "node scripts/test-recovery-ga-block04.mjs && pnpm --filter @workspace/api-server run typecheck"
     ,"test:lorena-p1-release-block02": "node scripts/test-lorena-p1-release-block02.mjs && pnpm --filter @workspace/bimlog run typecheck"
+    ,"test:lorena-p1-release-block03": "node scripts/test-lorena-p1-release-block03.mjs && pnpm --filter @workspace/bimlog run typecheck"
   },
   "private": true,
   "devDependencies": {
