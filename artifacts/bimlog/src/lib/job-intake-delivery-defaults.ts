@@ -19,6 +19,19 @@ export function deliveryGuidanceStatus(item: any) {
   return { strategyGenerated, milestonesGenerated, generated: strategyGenerated && milestonesGenerated };
 }
 
+export function deliveryGuidanceStatusLabel(item: any, field: "strategy" | "milestones", spanish = false) {
+  const status = deliveryGuidanceStatus(item);
+  const generated = field === "strategy" ? status.strategyGenerated : status.milestonesGenerated;
+  if (!generated) return spanish
+    ? "Texto revisado del proyecto. Cambiar el flujo no lo reemplazará silenciosamente."
+    : "Reviewed project text. Changing the workflow will not replace it silently.";
+  const version = String(item?.deliveryWorkflowDerivedFromVersionId ?? item?.deliveryWorkflowVersionId ?? "").trim();
+  const source = version ? (spanish ? `versión ${version}` : `version ${version}`) : (spanish ? "versión seleccionada" : "selected version");
+  return field === "strategy"
+    ? (spanish ? `Generada desde la ${source} inmutable del flujo. Al editar se conserva su texto revisado.` : `Generated from immutable workflow ${source}. Editing preserves your reviewed text.`)
+    : (spanish ? `Generados desde las fases de la ${source} inmutable.` : `Generated from the immutable workflow phases in ${source}.`);
+}
+
 export function selectDeliveryWorkflow(current: any, workflowTemplate: string) {
   const next = deliveryWorkflowDefaults[workflowTemplate];
   if (!next) return { ...current, workflowTemplate };
