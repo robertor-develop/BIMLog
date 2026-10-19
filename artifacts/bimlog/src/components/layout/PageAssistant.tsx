@@ -3,7 +3,7 @@ import { Bot, Mic, Minus, PanelLeft, PanelRight, Plus, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { collectPageAssistantContext, highlightAssistantControls, selectedAssistantControl } from "@/lib/page-assistant-context";
-import { ASSISTANT_WIDTH_DEFAULT, assistantWidthFromPointer, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
+import { ASSISTANT_WIDTH_DEFAULT, readAssistantOpen, writeAssistantOpen, assistantWidthFromPointer, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
 
 type Message = { role: "user" | "assistant"; text: string; projectId: number | null };
 type AgentTurn = { requestId:string; conversationId:string; projectId:number|null; question:string; answer:string|null; state:"reserved"|"running"|"complete"|"failed"; errorCode:string|null };
@@ -18,7 +18,7 @@ type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
 export function PageAssistant() {
   const { token, user } = useAuthStore();
   const { lang, tt } = useI18n();
-  const [open,setOpen]=useState(false),[question,setQuestion]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState(""),[repairLoadError,setRepairLoadError]=useState(""),[notice,setNotice]=useState(""),[proposal,setProposal]=useState<string|null>(null),[repairScope,setRepairScope]=useState("");
+  const [open,setOpen]=useState(()=>readAssistantOpen(window.sessionStorage,user?.id)),[question,setQuestion]=useState(""),[busy,setBusy]=useState(false),[error,setError]=useState(""),[repairLoadError,setRepairLoadError]=useState(""),[notice,setNotice]=useState(""),[proposal,setProposal]=useState<string|null>(null),[repairScope,setRepairScope]=useState("");
   const [includeSelected,setIncludeSelected]=useState(false);
   const [messages,setMessages]=useState<Message[]>([]),[turns,setTurns]=useState<AgentTurn[]>([]),[feedbackReceipt,setFeedbackReceipt]=useState<{stableId:string;status:string;notificationState:string}|null>(null);
   const [voiceListening,setVoiceListening]=useState(false),[voiceStatus,setVoiceStatus]=useState("");
@@ -29,6 +29,8 @@ export function PageAssistant() {
   const input=useRef<HTMLTextAreaElement|null>(null),opener=useRef<HTMLButtonElement|null>(null),selectedField=useRef<string|null>(null),recognition=useRef<SpeechRecognitionLike|null>(null),voiceBase=useRef(""),voiceError=useRef("");
   const resizeCleanup=useRef<(()=>void)|null>(null);
   useEffect(()=>()=>resizeCleanup.current?.(),[]);
+  useEffect(()=>{writeAssistantOpen(window.sessionStorage,user?.id,open);},[open,user?.id]);
+  useEffect(()=>{if(!token)setOpen(false);},[token]);
   const context=collectPageAssistantContext(lang);
   const contextKey=`bimlog-assistant:${context.projectId ?? "global"}`;
   const conversationKey=`${contextKey}:conversation-id`;
@@ -43,7 +45,7 @@ export function PageAssistant() {
   useEffect(()=>{const key=(event:KeyboardEvent)=>{if(event.altKey&&event.shiftKey&&event.key.toLowerCase()==="a"){event.preventDefault();if(open)closeAssistant();else setOpen(true);}if(event.key==="Escape"&&open){event.preventDefault();closeAssistant();}};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key);},[open]);
   useEffect(()=>{if(open)window.setTimeout(()=>input.current?.focus(),0);},[open]);
   useEffect(()=>{if(open&&token)void loadConversation(conversationId);},[open,token,conversationId]);
-  useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open);document.body.dataset.assistantDockSide=dock;document.body.dataset.assistantCollapsed=String(collapsed);document.documentElement.style.setProperty("--bimlog-agent-dock-width",`${panelWidth}px`);writeAssistantWorkspace(window.localStorage,panelWidth,dock,collapsed);return()=>{document.body.classList.remove("bimlog-assistant-docked");delete document.body.dataset.assistantDockSide;delete document.body.dataset.assistantCollapsed;};},[open,panelWidth,dock,collapsed]);
+  useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open&&Boolean(token));document.body.dataset.assistantDockSide=dock;document.body.dataset.assistantCollapsed=String(collapsed);document.documentElement.style.setProperty("--bimlog-agent-dock-width",`${panelWidth}px`);writeAssistantWorkspace(window.localStorage,panelWidth,dock,collapsed);return()=>{document.body.classList.remove("bimlog-assistant-docked");delete document.body.dataset.assistantDockSide;delete document.body.dataset.assistantCollapsed;};},[open,panelWidth,dock,collapsed,token]);
   useEffect(()=>{const fit=()=>setPanelWidth(current=>fitAssistantWidthToViewport(current,window.innerWidth));window.addEventListener("resize",fit);fit();return()=>window.removeEventListener("resize",fit);},[]);
   useEffect(()=>{if(open&&token)void loadRepairs();},[open,token]);
   useEffect(()=>{if(!open||!token)return;const refresh=window.setInterval(()=>void loadRepairs(),15000);return()=>window.clearInterval(refresh);},[open,token]);

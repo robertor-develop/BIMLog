@@ -7,6 +7,18 @@ export const ASSISTANT_WIDTH_STEP = 20;
 export const ASSISTANT_FULLSCREEN_BREAKPOINT = 760;
 export const ASSISTANT_WORKSPACE_MIN = 320;
 
+export function readAssistantOpen(storage: Pick<Storage, "getItem"> | null, userId: number | string | undefined) {
+  if (userId == null) return false;
+  try { return storage?.getItem(`bimlog:assistant-open:${userId}`) === "true"; }
+  catch { return false; }
+}
+
+export function writeAssistantOpen(storage: Pick<Storage, "setItem"> | null, userId: number | string | undefined, open: boolean) {
+  if (userId == null) return;
+  try { storage?.setItem(`bimlog:assistant-open:${userId}`, String(open)); }
+  catch { /* Storage restrictions must not prevent opening or closing the panel. */ }
+}
+
 export function clampAssistantWidth(width: number, viewportWidth = Number.POSITIVE_INFINITY) {
   const viewportLimit = Number.isFinite(viewportWidth) ? Math.max(ASSISTANT_WIDTH_MIN, viewportWidth - ASSISTANT_WORKSPACE_MIN) : ASSISTANT_WIDTH_MAX;
   return Math.round(Math.min(Math.max(width, ASSISTANT_WIDTH_MIN), ASSISTANT_WIDTH_MAX, viewportLimit));
