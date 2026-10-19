@@ -77,6 +77,7 @@
     "test:corrective-b28": "node scripts/test-corrective-b28-transactional-email.mjs",
     "test:corrective-b29": "node scripts/test-corrective-b29-support-data-rights.mjs",
     "test:corrective-b30": "node scripts/test-corrective-b30-release-gauntlet.mjs && node scripts/run-corrective-b30-release-gauntlet.mjs",
+    "test:corrective-b31": "node scripts/test-corrective-b31-agent-release-identity.mjs",
     "test:api-development-bootstrap": "node scripts/test-api-development-bootstrap.mjs",
     "test:api-cold-start-budget": "node scripts/test-api-cold-start-budget.mjs",
     "test:launch-schema-contract": "node scripts/test-launch-schema-contract.mjs",
