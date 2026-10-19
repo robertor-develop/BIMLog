@@ -4552,3 +4552,7 @@ The second release-gate retry found one stale quantity-aware APU assertion. The 
 
 Builds B11–B15 make the repaired Intake and Operations flow directly reviewable. Derived APU rates now expose their exact plan-total/quantity arithmetic; generated delivery guidance identifies whether it remains generated or has been reviewed; verified frozen workflow allocations preview phase hours before activation; and governance guidance explains the configured CEO role without implying a named person or granting authority. One aggregate gate permanently covers these behaviors plus the exact EDT contract repair. This is the first five-build half of the next ten-build publication interval, so it is pushed but remains unpublished until B16–B20 passes.
 
+## Lorena P1 release repair Block 4 — 2026-10-19
+
+Builds B16–B20 harden the review surface before the ten-build publication boundary. Invalid APU divisors no longer produce misleading arithmetic; verified phase allocations show their exact total; generated guidance names its immutable workflow version; and the internal-cost governance message reflects whether the current user already has approval authority. The aggregate Block 4 gate and strict frontend TypeScript pass locally. Exact-head build, push, publication, deployed-source verification, and authenticated Chrome acceptance remain the release gates.
+

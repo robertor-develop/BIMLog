@@ -71236,6 +71236,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "533f14efd29f817488c9858802714efaf09ad675f1e52d939dbb3e4c336da753"
+    },
+    {
+      "taskId": "lorena-p1-release-repair-block04-20261019",
+      "reviewedThroughCommit": "d4669765af2ec85f40dbd5028e455c48285f8b6d",
+      "reviewedAt": "2026-10-19T16:50:28.632Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending."
+        }
+      ],
+      "reason": "Block 4 preserves existing authority while clarifying invalid APU arithmetic, phase-hour totals, workflow provenance and actor-aware governance guidance. Release and live acceptance remain pending.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e740062225f15e2d78b29f8da0d80cf25a6748b881569b1d6499ed488a2aab53"
     }
   ]
 }

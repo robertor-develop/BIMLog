@@ -5925,7 +5925,18 @@ The previous 13-record summary is superseded for current recovery planning. Hist
 - [x] B13: preview verified PRE/COO/FOR/ASB phase-hour distribution before activation without inventing fallback percentages.
 - [x] B14: explain that `CEO` is the configured governance role and neither names a person nor grants authority.
 - [x] B15: bind all four behaviors and the exact EDT contract repair to one permanent aggregate gate.
-- [ ] Push B11–B15 once. Keep the block unpublished until B16–B20 completes the ten-build publication interval.
+- [x] Push B11–B15 once. Keep the block unpublished until B16–B20 completes the ten-build publication interval.
 
 No production record, protected project, deployment, or customer data changed in this block.
+
+## Lorena P1 release repair Block 4 — 2026-10-19
+
+- [x] B16: suppress a derived APU arithmetic explanation when the Contract Item divisor is zero or invalid.
+- [x] B17: label the phase-hour preview as a verified workflow allocation and display its preserved total.
+- [x] B18: identify the exact immutable workflow version behind generated strategy and milestone guidance.
+- [x] B19: tailor the governance next action to whether the signed-in user already holds the configured approval authority.
+- [x] B20: bind the complete B16–B19 behavior and exact EDT repair to one permanent aggregate gate.
+- [ ] Pass the exact-head build, push B16–B20, publish the accumulated B11–B20 candidate, verify exact production identity, and run full authenticated Chrome smoke.
+
+No production record, protected project, deployment, or customer data changed during implementation.
 

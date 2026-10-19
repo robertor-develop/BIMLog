@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3b891ff89a50894d7dd91a8ede3234fe34fcbdc58953d2e29e8dee5502130f67",
+  "sourceSha256": "ab916bb4a0a9a7af7544c43f23da6408c76e8b0732d066da79028de93a525e64",
   "itemCount": 423,
   "counts": {
     "ACTIVE": 379,
@@ -7685,10 +7685,10 @@
       "currentAuthority": false
     },
     {
-      "id": "c53822a746f67ad0",
-      "sourceLine": 5928,
-      "heading": "Lorena P1 release repair Block 3 — 2026-10-19",
-      "statement": "Push B11–B15 once. Keep the block unpublished until B16–B20 completes the ten-build publication interval.",
+      "id": "0d97b85f771e19ba",
+      "sourceLine": 5939,
+      "heading": "Lorena P1 release repair Block 4 — 2026-10-19",
+      "statement": "Pass the exact-head build, push B16–B20, publish the accumulated B11–B20 candidate, verify exact production identity, and run full authenticated Chrome smoke.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -7697,8 +7697,8 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5928",
-        "Lorena P1 release repair Block 3 — 2026-10-19"
+        "OPEN_LOOP.md:5939",
+        "Lorena P1 release repair Block 4 — 2026-10-19"
       ],
       "currentAuthority": false
     }
