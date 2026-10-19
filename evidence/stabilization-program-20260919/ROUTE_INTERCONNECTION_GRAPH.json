@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 5,
     "apiRoutes": 783,
-    "frontendApiReferences": 311,
+    "frontendApiReferences": 313,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -10247,6 +10247,14 @@
     {
       "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",
       "apiPath": "/api/v1/projects/29/conventions"
+    },
+    {
+      "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",
+      "apiPath": "/api/v1/projects/29/clash-reports/lens-viewpoints/responsible-companies"
+    },
+    {
+      "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",
+      "apiPath": "/api/v1/projects/71/"
     },
     {
       "screen": "artifacts/bimlog/src/features/lens-next/lens-next-attachments.behavior.ts",
