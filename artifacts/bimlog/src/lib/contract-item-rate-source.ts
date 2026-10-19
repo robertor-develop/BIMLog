@@ -13,11 +13,13 @@ export function contractItemRateExplanation(source: any, quantity: unknown, span
   if (!source || source.kind !== "saved_apu_rate") return null;
   const version = Number(source.apuPlanVersion);
   const prefix = Number.isSafeInteger(version) && version > 0 ? `APU v${version}` : "APU";
-  if (source.rateCalculation === "plan_total_divided_by_contract_quantity" && source.planSellingPrice) {
+  const divisor = Number(quantity);
+  if (source.rateCalculation === "plan_total_divided_by_contract_quantity" && source.planSellingPrice && Number.isFinite(divisor) && divisor > 0) {
     return spanish
       ? `${prefix}: total del plan ${source.planSellingPrice} ÷ cantidad ${String(quantity ?? "")} = tarifa unitaria ${source.unitRate}.`
       : `${prefix}: plan total ${source.planSellingPrice} ÷ quantity ${String(quantity ?? "")} = unit rate ${source.unitRate}.`;
   }
+  if (source.rateCalculation === "plan_total_divided_by_contract_quantity") return null;
   return spanish
     ? `${prefix}: tarifa unitaria publicada ${source.unitRate}.`
     : `${prefix}: published unit rate ${source.unitRate}.`;

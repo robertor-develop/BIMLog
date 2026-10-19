@@ -6,4 +6,6 @@ assert.equal(contractItemRateExplanation(derived,"10"),"APU v7: plan total 1250.
 assert.equal(contractItemRateExplanation(derived,"10",true),"APU v7: total del plan 1250.00 ÷ cantidad 10 = tarifa unitaria 125.");
 assert.equal(contractItemRateExplanation({kind:"saved_apu_rate",apuPlanVersion:2,rateCalculation:"published_unit_rate",unitRate:"45"},"8"),"APU v2: published unit rate 45.");
 assert.equal(contractItemRateExplanation({kind:"manual_contract_rate"},"8"),null);
+assert.equal(contractItemRateExplanation(derived,"0"),null);
+assert.equal(contractItemRateExplanation(derived,"not-a-number"),null);
 console.log("contract item APU rate explanation: PASS");
