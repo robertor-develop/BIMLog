@@ -71735,6 +71735,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "agent-timeout-recovery-20261019",
+      "reviewedThroughCommit": "525ac4890832bebf662144a0d4203603f67f4f22",
+      "reviewedAt": "2026-10-19T20:44:01.340Z",
+      "status": "local_candidate",
+      "captureTiming": "post_production_defect_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data."
+        }
+      ],
+      "reason": "Authenticated production smoke found that timed-out BIMLog Agent turns remained active indefinitely. The repair terminally fails timed-out turns after the governed deadline and reclaims stale turns during refresh, preserving tenant isolation and allowing the next question without changing prompts, permissions, or project data.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
