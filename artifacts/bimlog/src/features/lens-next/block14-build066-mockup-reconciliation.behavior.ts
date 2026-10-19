@@ -1,5 +1,15 @@
 import assert from "node:assert/strict";
 import { createLensNextApiClient } from "./lens-next-client";
+import { conventionCompanyCodes, uniqueProjectCompanyLabels } from "@workspace/api-zod";
+import { readSavedConventionFoundation } from "../../pages/project/convention-builder/convention-document-state";
+
+assert.deepEqual(conventionCompanyCodes({ companyCode: "OLD", fields: [{ label: "Originator", allowedValues: [] }] }), []);
+assert.deepEqual(conventionCompanyCodes({ companyCode: " BIM, DDS, bim " }), ["BIM", "DDS"]);
+assert.deepEqual(uniqueProjectCompanyLabels([null, {}, " DDS ", "dds", "BIMTECH   CORP"]), ["BIMTECH CORP", "DDS"]);
+assert.deepEqual(readSavedConventionFoundation({ fields: [
+  { label: "Project Code", allowedValues: ["BUILDING-01"] },
+  { label: "Originator", allowedValues: ["DDS", "WP"] },
+] }).companyCodes, ["DDS", "WP"]);
 
 const calls: string[] = [];
 const client = createLensNextApiClient({
@@ -61,7 +71,8 @@ const newProject = createLensNextApiClient({
     if (url.endsWith("/levels")) return Response.json({ levels: [] });
     if (url.endsWith("/members")) return Response.json([{ userCompanyName: "BIMTECH CORP" }]);
     if (url.endsWith("/conventions")) return Response.json({
-      companyCode: "BIM,DDS,WP,RL,MEGA",
+      companyCode: "STALE",
+      fields: [{ label: "Originator", allowedValues: ["BIM", "DDS", "WP", "RL", "MEGA"] }],
       companyAssignmentStatus: [{ code: "DDS", hasUsers: false }],
     });
     if (url.endsWith("/responsible-companies")) return Response.json({ companies: [] });

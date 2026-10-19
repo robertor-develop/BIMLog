@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
+import { useProjectCompanyChoices } from "@/hooks/use-project-company-choices";
 import { Download, UserCheck, UserPlus, Users } from "lucide-react";
 
 interface DirectoryEntry {
@@ -53,6 +54,7 @@ const DEFAULT_PDF_OPTIONS: DirectoryPdfOptions = {
 const normalizeEmail = (value: string | undefined) => (value || "").trim().toLowerCase();
 
 export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
+  const companyChoices = useProjectCompanyChoices(projectId);
   const { lang } = useI18n();
   const { token } = useAuthStore();
   const t = (en: string, es: string) => lang === "es" ? es : en;
@@ -340,6 +342,11 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
 
   return (
     <div className="tab-content-wrapper">
+      <details style={{ marginBottom: 16 }}>
+        <summary>{t("Project company choices", "Empresas disponibles del proyecto")}</summary>
+        <p>{t("Saved originator codes and connected company names are available across project forms. A code alone does not create a contact, membership or contract participant.", "Los códigos de originador guardados y las empresas vinculadas están disponibles en los formularios del proyecto. Un código solo no crea un contacto, membresía ni participante contractual.")}</p>
+        {companyChoices.error ? <p role="alert">{t("Company choices could not be loaded.", "No se pudieron cargar las empresas.")} <button type="button" onClick={() => void companyChoices.refresh()}>{t("Retry", "Reintentar")}</button></p> : <p>{companyChoices.loading ? t("Loading…", "Cargando…") : companyChoices.companies.join(" · ") || t("No saved companies yet.", "Todavía no hay empresas guardadas.")}</p>}
+      </details>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
         <div>
           <h2 style={{ fontWeight: 700, fontSize: 18, margin: 0 }}>{t("Project Directory", "Directorio del Proyecto")}</h2>

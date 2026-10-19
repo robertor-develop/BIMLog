@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { useToast } from "@/hooks/use-toast";
+import { useProjectCompanyChoices } from "@/hooks/use-project-company-choices";
 import { Button } from "@/components/ui/button";
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
@@ -1482,6 +1483,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
 
 // ─── New Submittal Form ───────────────────────────────────────────────────────
 function NewSubmittalForm({ projectId, lang, onClose, seed }: { projectId: number; lang: string; onClose: () => void; seed: PackageDraftSeed | null }) {
+  const projectCompanies = useProjectCompanyChoices(projectId);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
@@ -1543,6 +1545,7 @@ function NewSubmittalForm({ projectId, lang, onClose, seed }: { projectId: numbe
   }, [projectId]);
 
   const companyOptions = uniqSorted([
+    ...projectCompanies.companies,
     ...directory.map(d => d.companyName),
     form.responsibleCompany,
     form.submittedByCompany,
@@ -2137,6 +2140,7 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
   revisionFamily: Submittal[]; onOpenRevision: (s: Submittal) => void;
   closeRequestRef?: React.MutableRefObject<(() => void) | null>;
 }) {
+  const projectCompanies = useProjectCompanyChoices(projectId);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [viewEvents, setViewEvents] = useState<ViewEvent[]>([]);
@@ -2221,6 +2225,7 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
   }, [closeRequestRef, editDirty, editSaving, uploadingAttachment, onClose]);
   const setEdit = (key: string, value: string) => setEditForm(f => ({ ...f, [key]: value }));
   const companyOptions = uniqSorted([
+    ...projectCompanies.companies,
     ...directory.map(d => d.companyName),
     submittal.responsibleCompany,
     submittal.submittedByCompany,

@@ -6,3 +6,4 @@ export * from "./release-identity";
 export * from "./exact-allocation";
 export * from "./calendar-date";
 export * from "./directory-email";
+export * from "./project-company-choices";

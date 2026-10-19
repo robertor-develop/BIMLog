@@ -118,7 +118,7 @@ export function resolveConventionSetupStatus(convention: SavedConventionDocument
 
 export function readSavedConventionFoundation(convention: SavedConventionDocument | null | undefined): SavedConventionFoundation {
   const fields = Array.isArray(convention?.fields) ? convention.fields as Array<{ label?: unknown; allowedValues?: unknown }> : [];
-  const projectCode = fields.find(field => field.label === "Project Code");
+  const projectCode = fields.find(field => field.label === "Originator") ?? fields.find(field => field.label === "Project Code");
   const level = fields.find(field => field.label === "Level");
   return {
     separator: convention?.separator === "_" ? "_" : "-",

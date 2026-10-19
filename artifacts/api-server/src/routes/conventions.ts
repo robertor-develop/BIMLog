@@ -1,4 +1,5 @@
 import { Router, type IRouter } from "express";
+import { conventionCompanyCodes } from "@workspace/api-zod";
 import { db } from "@workspace/db";
 import { namingConventionsTable, namingFieldsTable, namingConventionVersionsTable, projectMembersTable, usersTable, companiesTable, activityLogTable, projectsTable } from "@workspace/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
@@ -46,7 +47,7 @@ router.get("/projects/:projectId/conventions", authMiddleware, requireProjectMem
       .where(eq(namingFieldsTable.conventionId, convention.id))
       .orderBy(namingFieldsTable.fieldOrder);
 
-    const conventionCodes = (convention.companyCode ?? "").split(",").map(c => c.trim()).filter(Boolean);
+    const conventionCodes = conventionCompanyCodes({ companyCode: convention.companyCode, fields });
     let companyAssignmentStatus: Array<{ code: string; hasUsers: boolean; companyName?: string }> = [];
     if (conventionCodes.length > 0) {
       const memberCompanies = await db

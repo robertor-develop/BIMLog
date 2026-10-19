@@ -11,6 +11,7 @@ import contractItemWorkflowsRouter from "../routes/contract-item-workflows";
 import edtRouter from "../routes/edt-engine";
 import reportsRouter from "../routes/reports";
 import financialApuRouter from "../routes/financial-apu";
+import projectDirectoryRouter from "../routes/project_directory";
 import { ensureEdtEngineSchema, EDT_ENGINE_ECONOMIC_SQL } from "./edt-engine-migration";
 import { getTeamPerformance } from "./team-performance-service";
 import { approvedLaborEvidenceSql, buildApprovedLaborEvidence, type ApprovedLaborSource } from "./approved-labor-evidence";
@@ -125,7 +126,7 @@ async function publishedTemplate(name: string,price: string,classified = false,
 const drawingTemplate = await publishedTemplate("Drawing Reference","300");
 const reviewTemplate = await publishedTemplate("Review Reference","200");
 
-const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,contractItemWorkflowsRouter,edtRouter,reportsRouter,financialApuRouter);
+const app = express(); app.use(express.json()); app.use("/api/v1",intakeRouter,contractsRouter,contractItemWorkflowsRouter,edtRouter,reportsRouter,financialApuRouter,projectDirectoryRouter);
 const server = app.listen(0,"127.0.0.1");
 await new Promise<void>(resolve => server.once("listening",resolve));
 const address = server.address(); assert.ok(address && typeof address !== "string");
@@ -139,6 +140,24 @@ async function request(method:string,path:string,body?:unknown,authorization=tok
 }
 const intakePath = `/projects/${projectId}/intake`;
 try {
+  // Reproduce a newly configured project: originators exist without contractor accounts.
+  const choicesProject = Number((await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('Synthetic company choices','CHOICES','active',$1) RETURNING id`, [actor.id])).rows[0].id);
+  await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'member','active')`, [choicesProject, checker.id]);
+  const conventionId = Number((await pool.query(`INSERT INTO naming_conventions(project_id,separator,company_code) VALUES($1,'-','STALE') RETURNING id`, [choicesProject])).rows[0].id);
+  await pool.query(`INSERT INTO naming_fields(convention_id,label,field_order,allowed_values) VALUES($1,'Originator',1,$2::json)`, [conventionId, JSON.stringify(['BIM','DDS','WP','RL','MEGA'])]);
+  const memberToken = signToken({ userId:checker.id,email:checker.email,fullName:checker.full_name,companyId,companyName:'Synthetic',isSuperAdmin:false });
+  const counts = async () => (await pool.query(`SELECT (SELECT count(*) FROM companies)::int AS companies,(SELECT count(*) FROM project_members)::int AS members,(SELECT count(*) FROM project_directory)::int AS directory`)).rows[0];
+  const beforeChoices = await counts();
+  const options = await request('GET', `/projects/${choicesProject}/company-options`, undefined, memberToken);
+  assert.equal(options.status, 200);
+  for (const code of ['BIM','DDS','WP','RL','MEGA']) assert.ok(options.body.companies.includes(code));
+  assert.ok(!options.body.companies.includes('STALE'));
+  assert.deepEqual(await counts(), beforeChoices, 'Reading choices creates no company, membership or directory row');
+  const privateProject = Number((await pool.query(`INSERT INTO projects(name,code,status,created_by_id) VALUES('Synthetic private choices','PRIVATE-CHOICES','active',$1) RETURNING id`, [actor.id])).rows[0].id);
+  const deniedChoices = await request('GET', `/projects/${privateProject}/company-options`, undefined, memberToken);
+  assert.ok([403,404].includes(deniedChoices.status));
+  assert.equal((await fetch(`${base}/projects/${choicesProject}/company-options`)).status, 401);
+  console.log('Project company choices HTTP/database PASS: saved Originator dictionary, no contractor accounts, stale scalar excluded, member access, anonymous/nonmember denial, zero read-side mutations');
   // Exercise the production renderer, not a substitute report generator.
   const pdfOutput = process.env.BIMLOG_FINANCIAL_PDF_PROOF_OUTPUT;
   if (pdfOutput) {

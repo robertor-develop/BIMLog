@@ -9,6 +9,7 @@ import {
   assertLensNextProjectId,
   createLensNextOpenWorkingViewRequest,
 } from "./lens-next-model.ts";
+import { conventionCompanyCodes } from "@workspace/api-zod";
 import type {
   LensNextBridgeProjectContext,
   LensNextHistory,
@@ -265,9 +266,7 @@ export function createLensNextApiClient(
         : [];
       // Saved originator codes are project choices even before those companies
       // have user accounts. Assignment status alone omits these new-project choices.
-      const conventionCodes = typeof conventionBody?.companyCode === "string"
-        ? conventionBody.companyCode.split(",").map(value => value.trim()).filter(Boolean)
-        : [];
+      const conventionCodes = conventionCompanyCodes(conventionBody);
       const directoryBody = directoryRaw && typeof directoryRaw === "object" && !Array.isArray(directoryRaw)
         ? directoryRaw as Record<string, unknown> : null;
       const directoryCompanies = Array.isArray(directoryBody?.companies)

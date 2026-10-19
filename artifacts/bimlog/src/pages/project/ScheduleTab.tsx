@@ -1,3 +1,4 @@
+import { useProjectCompanyChoices } from "@/hooks/use-project-company-choices";
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import { useI18n } from "@/lib/i18n";
@@ -139,6 +140,7 @@ function applyScheduleFilters(items: ScheduleItem[], options: ScheduleFilterOpti
 }
 
 export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
+  const projectCompanies = useProjectCompanyChoices(projectId);
   const { lang } = useI18n();
   const { token } = useAuthStore();
   const { toast } = useToast();
@@ -1126,7 +1128,7 @@ export function ScheduleTab({ projectId, canWrite }: { projectId: number; canWri
             </div>
           </form>
           <datalist id="schedule-trades">{trades.map(v => <option key={v} value={v} />)}</datalist>
-          <datalist id="schedule-companies">{companies.map(v => <option key={v} value={v} />)}</datalist>
+          <datalist id="schedule-companies">{uniq([...companies, ...projectCompanies.companies]).map(v => <option key={v} value={v} />)}</datalist>
         </div>
       )}
 

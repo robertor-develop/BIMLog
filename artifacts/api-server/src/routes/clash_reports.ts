@@ -1,5 +1,6 @@
 ﻿import { Router } from "express";
 import { db, pool } from "@workspace/db";
+import { loadProjectCompanyChoices } from "../lib/project-company-choices";
 import type { Request } from "express";
 import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable, filesTable } from "@workspace/db/schema";
 import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
@@ -2018,7 +2019,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
         companyName: row.name,
         source: row.retiredIntoCompanyId == null ? "company" : "directory_alias",
       }));
-      const names = new Set<string>();
+      const names = new Set<string>((await loadProjectCompanyChoices(projectId)).companies);
       const references: ReturnType<typeof resolveLensCompanyDirectoryReference>[] = [];
       for (const row of directoryRows) {
         const v = row.companyName?.trim();

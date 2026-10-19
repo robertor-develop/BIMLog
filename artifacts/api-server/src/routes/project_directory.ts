@@ -1,4 +1,5 @@
 import { isDirectoryRecipientEmail } from "@workspace/api-zod";
+import { loadProjectCompanyChoices } from "../lib/project-company-choices";
 import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-migration";
@@ -45,6 +46,11 @@ import {
 } from "../lib/pdf-kit";
 
 const router: Router = Router();
+
+router.get("/projects/:projectId/company-options", authMiddleware, requireProjectMember(), async (req, res) => {
+  try { res.json(await loadProjectCompanyChoices(Number(req.params.projectId))); }
+  catch { res.status(500).json({ error: "project_company_options_failed" }); }
+});
 
 const normalizeCompanyName = (value: string) =>
   value.trim().replace(/\s+/g, " ");

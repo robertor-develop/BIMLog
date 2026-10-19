@@ -1,4 +1,5 @@
-﻿import { useState, useEffect, useRef, Fragment } from "react";
+import { useProjectCompanyChoices } from "@/hooks/use-project-company-choices";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
@@ -334,6 +335,7 @@ export function MeetingsTab({
   };
 
   const queryClient = useQueryClient();
+  const projectCompanies = useProjectCompanyChoices(projectId);
   const { data: members } = useListMembers(projectId);
   const memberList = members ?? [];
   const [directoryEntries, setDirectoryEntries] = useState<
@@ -347,6 +349,7 @@ export function MeetingsTab({
     return match?.[1]?.trim() || "";
   };
   const companyMap = new Map<string, string>();
+  for (const company of projectCompanies.companies) companyMap.set(companyKey(company), company);
   const companyIdByName = new Map<string, number>();
   for (const company of memberList
     .map((m) => m.userCompanyName)
