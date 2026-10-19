@@ -4,11 +4,15 @@ import { readFileSync } from "node:fs";
 const panel = readFileSync("artifacts/bimlog/src/components/layout/PageAssistant.tsx", "utf8");
 const css = readFileSync("artifacts/bimlog/src/index.css", "utf8");
 
-assert.match(css, /@media\(min-width:761px\) and \(max-width:1179px\)\{[\s\S]*?\.page-assistant-panel\{width:var\(--bimlog-agent-dock-width\)!important;max-width:calc\(100vw - 320px\)\}\}/);
-assert.match(css, /@media\(min-width:761px\) and \(max-width:1024px\)\{[\s\S]*?body\.bimlog-assistant-docked:not\(\[data-assistant-collapsed="true"\]\) #root\{min-width:320px\}/);
+assert.match(css, /\.bimlog-workspace-split\{display:grid;grid-template-columns:minmax\(0,1fr\);min-height:100dvh\}/);
+assert.match(css, /body\.bimlog-assistant-docked \.bimlog-workspace-split\{grid-template-columns:minmax\(0,1fr\) var\(--bimlog-agent-active-width\)/);
+assert.match(css, /body\.bimlog-assistant-docked\[data-assistant-dock-side="left"\] \.bimlog-workspace-split\{grid-template-columns:var\(--bimlog-agent-active-width\) minmax\(0,1fr\)\}/);
+assert.match(css, /\.page-assistant-panel\{position:sticky;top:0;width:100%;min-width:0;max-width:100%;height:100dvh/);
+assert.match(css, /body\{--bimlog-agent-active-width:var\(--bimlog-agent-dock-width\)\}/);
+assert.match(css, /body\[data-assistant-collapsed="true"\]\{--bimlog-agent-active-width:72px\}/);
 assert.match(css, /@media\(min-width:761px\) and \(max-width:1024px\)\{[\s\S]*?\.app-shell>\.sidebar\{display:none\}[\s\S]*?\.app-shell>\.main-area\{width:100%;min-width:0;flex-basis:100%\}/);
 assert.match(css, /@media\(max-width:760px\)\{html:has\(body\.bimlog-assistant-docked\),body\.bimlog-assistant-docked\{overflow:hidden\}/);
-assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.page-assistant-panel\{inset:0!important;width:100vw!important;max-width:100vw;min-width:0;height:100dvh!important/);
+assert.match(css, /@media\(max-width:760px\)\{body\.bimlog-assistant-docked \.bimlog-workspace-split\{display:block\}body\.bimlog-assistant-docked \.bimlog-workspace-content\{display:none\}\.page-assistant-panel\{width:100%;height:100dvh\}\}/);
 assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.page-assistant-panel\{[^}]*z-index:1400/);
 assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.page-assistant-resize-handle\{display:none\}/);
 assert.match(css, /@media\(max-width:760px\)[\s\S]*?\.page-assistant-question textarea\{min-height:88px;font-size:16px\}/);
