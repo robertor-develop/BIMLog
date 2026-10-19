@@ -238,10 +238,11 @@ export function createLensNextApiClient(
     },
     async loadReferenceData(projectId: number, signal?: AbortSignal) {
       const exactProjectId = assertLensNextProjectId(projectId);
-      const [levelsRaw, membersRaw, conventionRaw] = await Promise.all([
+      const [levelsRaw, membersRaw, conventionRaw, directoryRaw] = await Promise.all([
         get(`/projects/${exactProjectId}/levels`, signal),
         get(`/projects/${exactProjectId}/members`, signal),
         get(`/projects/${exactProjectId}/conventions`, signal),
+        get(`/projects/${exactProjectId}/clash-reports/lens-viewpoints/responsible-companies`, signal),
       ]);
       const levelsBody = levelsRaw && typeof levelsRaw === "object" && !Array.isArray(levelsRaw)
         ? levelsRaw as Record<string, unknown>
@@ -262,7 +263,18 @@ export function createLensNextApiClient(
             .map(company => company && typeof company === "object" ? String((company as Record<string, unknown>).companyName ?? "").trim() : "")
             .filter(Boolean)
         : [];
-      const responsibleCompanies = [...memberCompanies, ...conventionCompanies];
+      // Saved originator codes are project choices even before those companies
+      // have user accounts. Assignment status alone omits these new-project choices.
+      const conventionCodes = typeof conventionBody?.companyCode === "string"
+        ? conventionBody.companyCode.split(",").map(value => value.trim()).filter(Boolean)
+        : [];
+      const directoryBody = directoryRaw && typeof directoryRaw === "object" && !Array.isArray(directoryRaw)
+        ? directoryRaw as Record<string, unknown> : null;
+      const directoryCompanies = Array.isArray(directoryBody?.companies)
+        ? directoryBody.companies.filter((value): value is string => typeof value === "string")
+            .map(value => value.trim()).filter(Boolean)
+        : [];
+      const responsibleCompanies = [...memberCompanies, ...conventionCompanies, ...conventionCodes, ...directoryCompanies];
       return Object.freeze({
         floors: [...new Set(floors)].sort(),
         responsibleCompanies: [...new Set(responsibleCompanies)].sort(),
