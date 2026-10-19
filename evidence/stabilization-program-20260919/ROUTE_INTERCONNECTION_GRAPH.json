@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 783,
-    "frontendApiReferences": 313,
+    "apiRoutes": 784,
+    "frontendApiReferences": 314,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -6739,6 +6739,20 @@
     },
     {
       "method": "GET",
+      "path": "/projects/:projectId/company-options",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/projects/:projectId/directory",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
@@ -10287,6 +10301,10 @@
     {
       "screen": "artifacts/bimlog/src/features/lens-next/lens-next-linking.behavior.ts",
       "apiPath": "/api/v1/projects/41/clash-reports/lens-next/issues/73/links/9"
+    },
+    {
+      "screen": "artifacts/bimlog/src/hooks/use-project-company-choices.ts",
+      "apiPath": "/api/v1/projects/${projectId}/company-options"
     },
     {
       "screen": "artifacts/bimlog/src/integration-catalog-harness.tsx",

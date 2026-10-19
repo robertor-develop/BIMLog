@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "c976e0a96415329ece6672cf8cf56d26550f06a070ade1bca402f8ddaf1b5408",
-  "itemCount": 424,
+  "sourceSha256": "41db084a1b77016b6c17b34b9907d25230d90783dc66c22e7a0cdcd8531d4d41",
+  "itemCount": 425,
   "counts": {
-    "ACTIVE": 380,
+    "ACTIVE": 381,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7717,6 +7717,24 @@
       "evidence": [
         "OPEN_LOOP.md:5948",
         "Ruben new-project company choices repair — 2026-10-19"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7e7212fb73958750",
+      "sourceLine": 5955,
+      "heading": "Ruben platform-wide company choices — 2026-10-19",
+      "statement": "Publish the complete corrected candidate after release checks, then inspect authenticated platform forms and obtain access to Ruben's Boys and Girls Club for exact field acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5955",
+        "Ruben platform-wide company choices — 2026-10-19"
       ],
       "currentAuthority": false
     }

@@ -5946,3 +5946,10 @@ No production record, protected project, deployment, or customer data changed du
 - [x] Include saved project company codes and the existing authenticated project directory in Lens Next Responsible company choices without requiring contractor user accounts.
 - [x] Verify the new-project regression, directory-only names, deduplication, permission denial and strict frontend TypeScript.
 - [ ] Complete release checks and publish the repair with the pending B11–B20 interval; verify authenticated Chrome and Ruben's Boys and Girls Club selector. No production project data may be changed for this check.
+
+## Ruben platform-wide company choices — 2026-10-19
+
+- [x] Correct Originator-versus-legacy-scalar source mismatch and share authenticated project company labels across party pickers, submittals, Schedule, Meetings, Directory and Lens.
+- [x] Preserve real IDs, contact identities, approved-client selection and contractual participants; codes create no accounts or records.
+- [x] Pass real HTTP/PostgreSQL new-project, anonymous/nonmember denial and zero read-side mutation checks; pass shared/API/frontend TypeScript and client regression.
+- [ ] Publish the complete corrected candidate after release checks, then inspect authenticated platform forms and obtain access to Ruben's Boys and Girls Club for exact field acceptance.

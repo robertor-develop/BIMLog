@@ -71381,6 +71381,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2d25d9354eb597c00010d23bee2cfa02bf0fbefe937f470094d7c362f7efde20"
+    },
+    {
+      "taskId": "ruben-platform-company-choices-20261019",
+      "reviewedThroughCommit": "c31590af421c6283d7b3eb7f0775fde0f9ed8f10",
+      "reviewedAt": "2026-10-19T17:18:33.6090707Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending."
+        }
+      ],
+      "reason": "Platform-wide read-only project company labels use the saved Originator dictionary and existing project directory/member names. No identity, membership, contractual authority or production data changes. API route inventory changes; native binaries unchanged; live acceptance pending.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a32c998427c924485928055398c2afdde39d38165995c2358db14a27d11bdbd8"
     }
   ]
 }
