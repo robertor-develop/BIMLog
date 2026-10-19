@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "cdb75de30214f30c20df5288df780ee780c57aee580bd2bd9f1affa80243db59",
-  "itemCount": 422,
+  "sourceSha256": "3b891ff89a50894d7dd91a8ede3234fe34fcbdc58953d2e29e8dee5502130f67",
+  "itemCount": 423,
   "counts": {
-    "ACTIVE": 378,
+    "ACTIVE": 379,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7681,6 +7681,24 @@
       "evidence": [
         "OPEN_LOOP.md:5919",
         "Lorena P1 release repair Block 2 — 2026-10-16"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c53822a746f67ad0",
+      "sourceLine": 5928,
+      "heading": "Lorena P1 release repair Block 3 — 2026-10-19",
+      "statement": "Push B11–B15 once. Keep the block unpublished until B16–B20 completes the ten-build publication interval.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5928",
+        "Lorena P1 release repair Block 3 — 2026-10-19"
       ],
       "currentAuthority": false
     }

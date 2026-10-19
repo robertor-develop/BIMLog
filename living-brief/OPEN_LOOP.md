@@ -5918,3 +5918,14 @@ The previous 13-record summary is superseded for current recovery planning. Hist
 - [x] B10: add one permanent consolidated Block 2 gate covering governance guidance, canonical contract visibility, EDT repair identity and secure Operations return.
 - [ ] Pass the complete exact-head build and release gate, push B06–B10, publish the accumulated B01–B10 candidate, verify exact production identity and run full authenticated desktop/mobile Chrome smoke.
 
+## Lorena P1 release repair Block 3 — 2026-10-19
+
+- [x] B11: show the exact saved-APU plan total, Contract Item quantity, division, and resulting unit rate beside each derived rate.
+- [x] B12: identify workflow-generated strategy and milestone guidance separately from user-reviewed text.
+- [x] B13: preview verified PRE/COO/FOR/ASB phase-hour distribution before activation without inventing fallback percentages.
+- [x] B14: explain that `CEO` is the configured governance role and neither names a person nor grants authority.
+- [x] B15: bind all four behaviors and the exact EDT contract repair to one permanent aggregate gate.
+- [ ] Push B11–B15 once. Keep the block unpublished until B16–B20 completes the ten-build publication interval.
+
+No production record, protected project, deployment, or customer data changed in this block.
+

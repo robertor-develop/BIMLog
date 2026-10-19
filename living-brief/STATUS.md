@@ -4548,3 +4548,7 @@ The first full release-gate retry found a stale expected list in the bounded wor
 
 The second release-gate retry found one stale quantity-aware APU assertion. The corrected acceptance now proves a 1,200 plan total divided by quantity 12 yields unit rate 100 while preserving the 1,200 plan-total provenance and calculation method. The focused UX block passes; runtime behavior is unchanged.
 
+## Lorena P1 release repair Block 3 — 2026-10-19
+
+Builds B11–B15 make the repaired Intake and Operations flow directly reviewable. Derived APU rates now expose their exact plan-total/quantity arithmetic; generated delivery guidance identifies whether it remains generated or has been reviewed; verified frozen workflow allocations preview phase hours before activation; and governance guidance explains the configured CEO role without implying a named person or granting authority. One aggregate gate permanently covers these behaviors plus the exact EDT contract repair. This is the first five-build half of the next ten-build publication interval, so it is pushed but remains unpublished until B16–B20 passes.
+
