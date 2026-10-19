@@ -46,7 +46,7 @@ export function PageAssistant() {
   useEffect(()=>{if(open)window.setTimeout(()=>input.current?.focus(),0);},[open]);
   useEffect(()=>{if(open&&token)void loadConversation(conversationId);},[open,token,conversationId]);
   useEffect(()=>{document.body.classList.toggle("bimlog-assistant-docked",open&&Boolean(token));document.body.dataset.assistantDockSide=dock;document.body.dataset.assistantCollapsed=String(collapsed);document.documentElement.style.setProperty("--bimlog-agent-dock-width",`${panelWidth}px`);writeAssistantWorkspace(window.localStorage,panelWidth,dock,collapsed);return()=>{document.body.classList.remove("bimlog-assistant-docked");delete document.body.dataset.assistantDockSide;delete document.body.dataset.assistantCollapsed;};},[open,panelWidth,dock,collapsed,token]);
-  useEffect(()=>{const fit=()=>setPanelWidth(current=>fitAssistantWidthToViewport(current,window.innerWidth));window.addEventListener("resize",fit);fit();return()=>window.removeEventListener("resize",fit);},[]);
+  useEffect(()=>{const fit=()=>{setPanelWidth(current=>fitAssistantWidthToViewport(current,window.innerWidth));if(window.innerWidth<=760)setCollapsed(false);};window.addEventListener("resize",fit);fit();return()=>window.removeEventListener("resize",fit);},[]);
   useEffect(()=>{if(open&&token)void loadRepairs();},[open,token]);
   useEffect(()=>{if(!open||!token)return;const refresh=window.setInterval(()=>void loadRepairs(),15000);return()=>window.clearInterval(refresh);},[open,token]);
   useEffect(()=>{

@@ -10,9 +10,8 @@ for(const contract of [
 ]) assert.ok(panel.includes(contract),`missing Block 2 workspace contract: ${contract}`);
 assert.doesNotMatch(panel,/onClick=\{\(\)=>\{setActiveTool\("feedback"\);submitFeedback\(false\);\}\}/);
 assert.doesNotMatch(panel,/onClick=\{\(\)=>submitFeedback\(false\)\}/);
-assert.match(css,/body\.bimlog-assistant-docked #root\{width:auto!important/);
-assert.match(css,/body\.bimlog-assistant-docked\[data-assistant-dock-side="left"\] #root/);
-assert.match(css,/body\.bimlog-assistant-docked\[data-assistant-dock-side="right"\] #root/);
-assert.match(css,/@media\(max-width:900px\).*body\.bimlog-assistant-docked/s);
+assert.match(css,/@media\(max-width:760px\).*body\.bimlog-assistant-docked/s);
 assert.match(css,/@media\(max-width:480px\)/);
+assert.match(css,/bimlog-workspace-split/);
+assert.match(css,/contain:layout/);
 console.log("page assistant workspace Block 2 acceptance: pass");
