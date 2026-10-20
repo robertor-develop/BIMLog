@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4d9eeeaa3f781f8cfa8c051139bb07ab3f7367c98868fb16fe6248229d7a28bd",
-  "itemCount": 436,
+  "sourceSha256": "8ca51f63e6f6885545bb17187bd53d0a90a0443294092e3368ddf659f28ddae5",
+  "itemCount": 438,
   "counts": {
-    "ACTIVE": 392,
+    "ACTIVE": 394,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7933,6 +7933,42 @@
       "evidence": [
         "OPEN_LOOP.md:6008",
         "2026-10-20 — Reusable project trade catalog"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "4e3297e2e3a83b85",
+      "sourceLine": 6019,
+      "heading": "2026-10-20 — Full-GA remediation Block 1",
+      "statement": "Publish the exact reconciled candidate, verify its deployed SHA, and complete authenticated production Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6019",
+        "2026-10-20 — Full-GA remediation Block 1"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "62e8444cf01d0b75",
+      "sourceLine": 6020,
+      "heading": "2026-10-20 — Full-GA remediation Block 1",
+      "statement": "Exercise Procore discovery with an approved connected customer account before claiming live Procore acceptance; absence of such credentials remains an external gate.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6020",
+        "2026-10-20 — Full-GA remediation Block 1"
       ],
       "currentAuthority": false
     }

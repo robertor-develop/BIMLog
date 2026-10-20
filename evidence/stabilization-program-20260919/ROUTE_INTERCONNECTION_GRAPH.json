@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 785,
-    "frontendApiReferences": 314,
+    "apiRoutes": 788,
+    "frontendApiReferences": 315,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -942,6 +942,14 @@
         "featureFlagsTable",
         "adminActionsLogTable",
         "namingConventionsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/intake-agent/preview",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
       ]
     },
     {
@@ -2662,6 +2670,24 @@
     {
       "method": "GET",
       "path": "/me/provider-catalog",
+      "owner": "artifacts/api-server/src/routes/connections.ts",
+      "tables": [
+        "userConnectionsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/connections/procore/status",
+      "owner": "artifacts/api-server/src/routes/connections.ts",
+      "tables": [
+        "userConnectionsTable",
+        "usersTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/connections/procore/discovery/preview",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
         "userConnectionsTable",
@@ -10787,6 +10813,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
       "apiPath": "/api/v1/me/connections"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/connections/procore/discovery/preview"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",

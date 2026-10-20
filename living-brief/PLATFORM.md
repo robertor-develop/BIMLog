@@ -279,6 +279,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/access-route-authority.behavior.ts
 - artifacts/api-server/src/lib/accountability-outbox.behavior.ts
 - artifacts/api-server/src/lib/accountability-outbox.ts
+- artifacts/api-server/src/lib/agent-lane-contract.ts
 - artifacts/api-server/src/lib/ai-assistance-governance.behavior.ts
 - artifacts/api-server/src/lib/ai-assistance-governance.ts
 - artifacts/api-server/src/lib/ai-assistance-truth.behavior.ts
@@ -513,6 +514,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/composite-qc.ts
 - artifacts/api-server/src/lib/composite-source-control.behavior.ts
 - artifacts/api-server/src/lib/composite-source-control.ts
+- artifacts/api-server/src/lib/connector-crawl-preview.ts
 - artifacts/api-server/src/lib/connector-credential-enrollment.behavior.ts
 - artifacts/api-server/src/lib/connector-credential-enrollment.ts
 - artifacts/api-server/src/lib/connector-credential-envelope.behavior.ts
@@ -926,6 +928,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/for-record-issuance.ts
 - artifacts/api-server/src/lib/for-record-receipt.behavior.ts
 - artifacts/api-server/src/lib/for-record-receipt.ts
+- artifacts/api-server/src/lib/ga-block01-agent-integration.behavior.ts
 - artifacts/api-server/src/lib/ga-build001-inventory.behavior.ts
 - artifacts/api-server/src/lib/ga-build002-recovery-check.behavior.ts
 - artifacts/api-server/src/lib/ga-build004-protected-lock.behavior.ts
