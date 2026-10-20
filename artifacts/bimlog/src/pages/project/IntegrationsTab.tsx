@@ -20,11 +20,20 @@ interface CatalogProvider {
   availability: "available" | "setup_required" | "review_required";
   oauthParam: string | null;
   route: string | null;
+  permissionState?: "approved" | "approval_required";
+  configured?: boolean;
 }
 
 interface SafeConnection {
   provider: string;
   status: string;
+  accountLabel?: string | null;
+  expiresAt?: string | null;
+  lastError?: string | null;
+  permissionState?: string;
+  selectedCompanyId?: string | null;
+  selectedProjectId?: string | null;
+  lastSuccessfulOperationAt?: string | null;
 }
 
 export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
@@ -42,6 +51,9 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const [availability, setAvailability] = useState("all");
   const [connection, setConnection] = useState("all");
   const [exporting, setExporting] = useState(false);
+  const [procorePreview,setProcorePreview]=useState<{state:string;recordsFound:number;pagesRead:number;canonicalMutation:false}|null>(null);
+  const [procoreBusy,setProcoreBusy]=useState(false);
+  const [procoreError,setProcoreError]=useState("");
 
   useEffect(() => {
     if (!token) return;
@@ -147,6 +159,11 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
     navigate("/contact");
   }
 
+  async function previewProcoreDiscovery(){
+    if(!token||procoreBusy)return;setProcoreBusy(true);setProcoreError("");
+    try{const response=await fetch(`/api/v1/projects/${projectId}/connections/procore/discovery/preview`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({requestId:crypto.randomUUID(),ref:"",query:""})});const data=await response.json();if(!response.ok)throw new Error(data.code||data.error||"PROCORE_DISCOVERY_FAILED");setProcorePreview(data);}catch(error){setProcoreError(error instanceof Error?error.message:"PROCORE_DISCOVERY_FAILED");}finally{setProcoreBusy(false);}
+  }
+
   return (
     <div id="integrations-current-view" className="px-4 py-5 sm:px-8 sm:py-7" aria-busy={loading} style={{ maxWidth: 1120 }}>
       <div className="mb-6 flex flex-wrap items-start gap-4">
@@ -238,6 +255,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
           {visibleProviders.map((provider) => {
             const isConnected = connected(provider.key);
+            const connectionDetail=connections.find(item=>item.provider===provider.key);
             const label = lang === "es" ? provider.label.es : provider.label.en;
             const description = lang === "es" ? provider.description.es : provider.description.en;
             const available = provider.availability === "available";
@@ -275,6 +293,19 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                     {tr(readiness.action, readinessState === "ready" ? "Usar integración" : readinessState === "permission_required" ? "Contactar administrador" : "Abrir configuración")}
                   </button>
                 </div>
+                {provider.key==="procore"&&<section aria-label={tr("Procore governed connection","Conexión gobernada de Procore")} style={{marginTop:14,paddingTop:12,borderTop:"1px solid hsl(var(--border))",display:"grid",gap:8,fontSize:11}}>
+                  <div><strong>{tr("Permission","Permiso")}:</strong> {provider.permissionState==="approved"?tr("Approved for this company","Aprobado para esta empresa"):tr("Company approval required","Se requiere aprobación de la empresa")}</div>
+                  <div><strong>{tr("Account","Cuenta")}:</strong> {connectionDetail?.accountLabel||tr("Not connected","No conectada")}</div>
+                  <div><strong>{tr("Token expiry","Vencimiento del token")}:</strong> {connectionDetail?.expiresAt?new Date(connectionDetail.expiresAt).toLocaleString(lang):tr("Unavailable until connected","No disponible hasta conectar")}</div>
+                  <div><strong>{tr("Project binding","Vínculo del proyecto")}:</strong> {connectionDetail?.selectedCompanyId&&connectionDetail?.selectedProjectId?`${connectionDetail.selectedCompanyId} / ${connectionDetail.selectedProjectId}`:tr("Select an authorized company and project during discovery","Seleccione una empresa y proyecto autorizados durante el descubrimiento")}</div>
+                  {connectionDetail?.lastError&&<div role="alert" style={{color:"#991B1B"}}>{connectionDetail.lastError}</div>}
+                  <div style={{display:"flex",flexWrap:"wrap",gap:7}}>
+                    <button type="button" disabled={!isConnected||procoreBusy} onClick={()=>void previewProcoreDiscovery()}>{procoreBusy?tr("Discovering…","Descubriendo…"):tr("Preview read-only discovery","Vista previa de descubrimiento")}</button>
+                    <button type="button" onClick={()=>navigate("/profile")}>{isConnected?tr("Reconnect","Reconectar"):tr("Connect Procore","Conectar Procore")}</button>
+                  </div>
+                  {procoreError&&<div role="alert" style={{color:"#991B1B"}}>{tr("Discovery unavailable: ","Descubrimiento no disponible: ")}{procoreError}. {tr("No records were imported.","No se importó ningún registro.")}</div>}
+                  {procorePreview&&<div role="status" style={{padding:9,borderRadius:7,background:"#EFF6FF",color:"#1E40AF"}}>{tr(`Preview ready: ${procorePreview.recordsFound} records across ${procorePreview.pagesRead} page(s). Sent only to MAIN 04B review; canonical records remain unchanged.`,`Vista previa lista: ${procorePreview.recordsFound} registros en ${procorePreview.pagesRead} página(s). Enviada solo a revisión de MAIN 04B; los registros canónicos no cambiaron.`)}</div>}
+                </section>}
               </article>
             );
           })}

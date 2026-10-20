@@ -9,6 +9,7 @@ import { runRfiAgent } from "../agents/rfi-agent";
 import { sendAiUsageError } from "../lib/ai-usage";
 import { BIMLOG_ASSISTANT_MAX_QUESTION, cleanAssistantList, cleanAssistantText } from "../lib/page-assistant-agent-contract";
 import { getPageAgentTurn, listPageAgentTurns, refreshPageAgentTurn, reservePageAgentTurn, startPageAgentTurn } from "../lib/page-agent-conversation-store";
+import { assertConversationLane, parseIntakeEnvelope, intakeEnvelopeDigest, BIMLOG_AGENT_LANES } from "../lib/agent-lane-contract";
 
 const router: Router = Router();
 
@@ -21,13 +22,14 @@ function pageAgentContext(req:any) {
 }
 async function answerPageQuestion(req: any, res: any, projectId: number | null) {
   try {
+    assertConversationLane((req.body||{}) as Record<string,unknown>);
     const question = cleanAssistantText(req.body?.question, BIMLOG_ASSISTANT_MAX_QUESTION);
     if (!question) return res.status(400).json({ error: "A question is required." });
     const requestId=String(req.body?.requestId||"");const conversationId=String(req.body?.conversationId||"");
     if(!UUID.test(requestId)||!UUID.test(conversationId))return res.status(400).json({error:"Valid requestId and conversationId are required."});
     const input={requestId,conversationId,question,userId:req.user.userId,companyId:req.user.companyId,projectId,context:pageAgentContext(req)};
     const turn=await reservePageAgentTurn(input);startPageAgentTurn(input);
-    res.status(turn.state==="complete"?200:202).set("Cache-Control","private, no-store, max-age=0").json({turn,transport:"main04",contextual:true});
+    res.status(turn.state==="complete"?200:202).set("Cache-Control","private, no-store, max-age=0").json({turn,transport:"main04",laneTransport:BIMLOG_AGENT_LANES.conversation.transport,contextual:true});
   } catch (err) {
     if (sendAiUsageError(res, err)) return;
     console.error(JSON.stringify({ event: "main04_assistant_error", code: err instanceof Error ? err.message : "UNKNOWN" }));
@@ -35,6 +37,10 @@ async function answerPageQuestion(req: any, res: any, projectId: number | null) 
     res.status(code==="PAGE_AGENT_CONVERSATION_BUSY"?409:502).json({ error: code==="PAGE_AGENT_CONVERSATION_BUSY"?"This conversation already has a question in progress.":"BIMLog's hosted assistant is temporarily unavailable.", code });
   }
 }
+
+router.post("/projects/:projectId/intake-agent/preview",authMiddleware,requireProjectMember(),(req,res)=>{
+  try{const envelope=parseIntakeEnvelope(req.body);if(envelope.projectId!==Number(req.params.projectId)||envelope.companyId!==req.user!.companyId){res.status(403).json({code:"INTAKE_AUTHORITY_MISMATCH"});return;}res.status(202).set("Cache-Control","private, no-store, max-age=0").json({transport:BIMLOG_AGENT_LANES.intake.transport,threadId:BIMLOG_AGENT_LANES.intake.threadId,reviewProposal:{state:"preview",digest:intakeEnvelopeDigest(envelope),recordCount:envelope.records.length,canonicalMutation:false}});}catch(error){const code=error instanceof Error?error.message:"INTAKE_ENVELOPE_INVALID";res.status(code.includes("CROSSOVER")?409:400).json({code});}
+});
 
 router.post("/assistant/ask", authMiddleware, (req, res) => answerPageQuestion(req, res, null));
 router.post("/projects/:projectId/assistant/ask", authMiddleware, requireProjectMember(), (req, res) => answerPageQuestion(req, res, Number(req.params.projectId)));

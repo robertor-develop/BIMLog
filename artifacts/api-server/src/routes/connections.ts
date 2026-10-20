@@ -2,7 +2,9 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { userConnectionsTable, usersTable } from "@workspace/db/schema";
 import { eq, and } from "drizzle-orm";
-import { authMiddleware, signOAuthState, verifyOAuthState } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember, signOAuthState, verifyOAuthState } from "../middlewares/auth";
+import { createHash, randomUUID } from "node:crypto";
+import { buildZeroImportPreview } from "../lib/connector-crawl-preview";
 import { getAppUrl } from "../lib/email";
 import { browseCloud } from "../lib/cloud-files";
 import { OAUTH_PROVIDERS, providerFromParam, redirectUriFor, providerConfigured, buildAuthorizeUrl, exchangeCodeForTokens, getValidAccessToken } from "../lib/oauth";
@@ -16,6 +18,8 @@ const router: Router = Router();
 
 // Safe projection — never leaks `credentials`.
 function toSafe(c: typeof userConnectionsTable.$inferSelect) {
+  const credentialMeta=(c.credentials||{}) as {expiresAt?:unknown};
+  const metadata=(c.metadata||{}) as Record<string,unknown>;
   return {
     provider: c.provider,
     kind: c.kind,
@@ -24,6 +28,11 @@ function toSafe(c: typeof userConnectionsTable.$inferSelect) {
     lastError: c.lastError,
     connectedAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
+    expiresAt: typeof credentialMeta.expiresAt === "string" ? credentialMeta.expiresAt : null,
+    permissionState: typeof metadata.permissionState === "string" ? metadata.permissionState : "provider_managed",
+    selectedCompanyId: typeof metadata.selectedCompanyId === "string" ? metadata.selectedCompanyId : null,
+    selectedProjectId: typeof metadata.selectedProjectId === "string" ? metadata.selectedProjectId : null,
+    lastSuccessfulOperationAt: typeof metadata.lastSuccessfulOperationAt === "string" ? metadata.lastSuccessfulOperationAt : null,
   };
 }
 
@@ -47,6 +56,23 @@ router.get("/me/provider-catalog", authMiddleware, (_req, res) => {
   res.json({
     providers: customerProviderCatalog(_req.user!.companyId, providerConfigured),
   });
+});
+
+router.get("/projects/:projectId/connections/procore/status",authMiddleware,requireProjectMember(),async(req,res)=>{
+  const [connection]=await db.select().from(userConnectionsTable).where(and(eq(userConnectionsTable.userId,req.user!.userId),eq(userConnectionsTable.provider,"procore"))).limit(1);
+  const catalog=customerProviderCatalog(req.user!.companyId,providerConfigured).find(item=>item.key==="procore");
+  res.set("Cache-Control","private, no-store, max-age=0").json({provider:"procore",configured:providerConfigured("procore"),approved:isProviderOperationAllowed("procore",req.user!.companyId,"catalog"),connection:connection?toSafe(connection):null,availability:catalog?.availability??"review_required",credentialsExposed:false});
+});
+
+router.post("/projects/:projectId/connections/procore/discovery/preview",authMiddleware,requireProjectMember(),async(req,res)=>{
+  if(!isProviderOperationAllowed("procore",req.user!.companyId,"browse")){res.status(403).json({code:"PROVIDER_NOT_APPROVED"});return;}
+  if(req.body?.cancelled===true){res.json({state:"cancelled",pagesRead:0,recordsFound:0,canonicalMutation:false});return;}
+  try{
+    const result=await browseCloud(req.user!.userId,"procore",String(req.body?.ref||""),String(req.body?.query||""));
+    const page={nextCursor:null,records:result.items.slice(0,100).map((item,index)=>{const descriptor=JSON.stringify({ref:item.ref,name:item.name,type:item.type,size:item.size??0,mimeType:item.mimeType??null});return {sourceId:item.ref||`record-${index+1}`,versionId:createHash("sha256").update(descriptor).digest("hex").slice(0,16),locator:item.ref,name:item.name,bytes:item.size??0,content:descriptor};})};
+    const preview=buildZeroImportPreview({requestId:typeof req.body?.requestId==="string"?req.body.requestId:randomUUID(),companyId:req.user!.companyId,projectId:Number(req.params.projectId),source:"procore",sourceAccountId:"authenticated-procore-account",pages:[page]});
+    res.set("Cache-Control","private, no-store, max-age=0").json({...preview,progress:{state:"complete",pagesRead:1,maximumPages:25,retryable:true},credentialsExposed:false});
+  }catch(error){const message=error instanceof Error?error.message:"PROCORE_DISCOVERY_FAILED";res.status(message==="not_connected"?428:502).json({code:message==="not_connected"?"PROCORE_NOT_CONNECTED":"PROCORE_DISCOVERY_FAILED",retryable:true,canonicalMutation:false});}
 });
 
 router.get("/me/ai-usage", authMiddleware, async (req, res) => {

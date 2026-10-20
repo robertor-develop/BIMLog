@@ -1,5 +1,6 @@
 export const BIMLOG_ASSISTANT_ROUTES = Object.freeze({
   conversation: { agentId: "bimlog-dedicated-agent", threadId: "01a10a95-a2e5-73d3-a471-6738addc7e42", contractVersion: "bimlog-page-assistant/v1" },
+  intake: { agentId: "bimlog-intake-agent", threadId: "01a15b79-db29-7131-a627-474d99495909", contractVersion: "bimlog-intake-envelope/v1" },
   feedback: { agentId: "ignitesmart-central-feedback-agent", threadId: "01a10d7d-ffa2-71e2-a085-ec1b954a3d4f", contractVersion: "feedback-case/v1" },
   repair: { agentId: "orion-main", threadId: "01a0eaec-81ed-7381-a9fc-74fb7e1d9c37", contractVersion: "bimlog-repair/v1" },
 });

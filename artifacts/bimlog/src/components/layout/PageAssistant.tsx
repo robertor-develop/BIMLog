@@ -3,6 +3,7 @@ import { Bot, Mic, Minus, PanelLeft, PanelRight, Plus, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { collectPageAssistantContext, highlightAssistantControls, selectedAssistantControl } from "@/lib/page-assistant-context";
+import { usePageAssistantContextState } from "@/lib/page-assistant-context-state";
 import { ASSISTANT_WIDTH_DEFAULT, assistantBrowserStorage, safeAssistantSession, readAssistantOpen, writeAssistantOpen, assistantWidthFromPointer, assistantWorkspaceForViewport, fitAssistantWidthToViewport, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
 
 type Message = { role: "user" | "assistant"; text: string; projectId: number | null };
@@ -33,7 +34,8 @@ export function PageAssistant() {
   useEffect(()=>{resizeCleanup.current?.();},[open,collapsed,dock,token]);
   useEffect(()=>{writeAssistantOpen(assistantBrowserStorage("sessionStorage"),user?.id,open);},[open,user?.id]);
   useEffect(()=>{if(!token)setOpen(false);},[token]);
-  const context=collectPageAssistantContext(lang);
+  const contextState=usePageAssistantContextState(lang);
+  const context=contextState.context;
   const contextKey=`bimlog-assistant:${context.projectId ?? "global"}`;
   const conversationKey=`${contextKey}:conversation-id`;
   const [conversationId,setConversationId]=useState(()=>assistantSession.getItem(conversationKey)||crypto.randomUUID());
@@ -147,7 +149,7 @@ export function PageAssistant() {
           <p>{tt("Ask the BIMLog Agent what needs attention without losing your place or changing project data.","Pregunta al Agente BIMLog qué necesita atención sin perder tu lugar ni cambiar datos del proyecto.")}</p>
           <button type="button" onClick={()=>input.current?.focus()}>{tt("Ask about this workspace","Preguntar sobre este espacio")}</button>
         </section>        <footer className="page-assistant-status-strip">
-          <div><small>{tt("Workspace","Espacio")}</small><strong>{context.page||tt("Current page","Página actual")}</strong></div>
+          <div><small>{tt("Workspace","Espacio")}</small><strong>{contextState.status==="verifying"?tt("Verifying current page…","Verificando página actual…"):contextState.status==="error"?tt("Context unavailable — retry","Contexto no disponible — reintentar"):context.page||tt("Current page","Página actual")}</strong>{contextState.status==="error"&&<button type="button" onClick={contextState.retry}>{tt("Retry","Reintentar")}</button>}</div>
           <div><small>{tt("Agent","Agente")}</small><strong>{busy?tt("Answering","Respondiendo"):tt("Connected","Conectado")}</strong></div>
           <div><small>{tt("Recent result","Resultado reciente")}</small><strong>{messages.some(item=>item.role==="assistant")?tt("Available","Disponible"):tt("None yet","Aún ninguno")}</strong></div>
         </footer>

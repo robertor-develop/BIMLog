@@ -187,15 +187,19 @@ export function customerProviderCatalog(
   rawApprovals?: string,
 ) {
   return PROVIDERS
-    .filter((provider) => isProviderOperationAllowed(provider.key, companyId, "catalog", rawApprovals))
+    .filter((provider) => provider.key === "procore" || isProviderOperationAllowed(provider.key, companyId, "catalog", rawApprovals))
     .map((provider) => ({
       key: provider.key,
       label: provider.label,
       description: provider.description,
       category: provider.category,
-      availability: provider.oauth
+      availability: provider.key === "procore" && !isProviderOperationAllowed(provider.key, companyId, "catalog", rawApprovals)
+        ? "review_required"
+        : provider.oauth
         ? (configured(provider.oauth) ? "available" : "setup_required")
         : (provider.visibility === "public" ? "available" : "review_required"),
+      permissionState: isProviderOperationAllowed(provider.key, companyId, "catalog", rawApprovals) ? "approved" : "approval_required",
+      configured: provider.oauth ? configured(provider.oauth) : true,
       oauthParam: provider.oauth?.replace(/_/g, "-") ?? null,
       route: provider.route ?? null,
     }));

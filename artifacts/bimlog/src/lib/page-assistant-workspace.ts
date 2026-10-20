@@ -51,11 +51,11 @@ export function fitAssistantWidthToViewport(width: number, viewportWidth: number
 }
 
 export function assistantWorkspaceMode(viewportWidth: number) {
-  return viewportWidth <= ASSISTANT_FULLSCREEN_BREAKPOINT ? "fullscreen" as const : "split" as const;
+  return viewportWidth <= ASSISTANT_FULLSCREEN_BREAKPOINT ? "sheet" as const : "split" as const;
 }
 
 export function assistantMainWorkspaceWidth(panelWidth: number, viewportWidth: number) {
-  return assistantWorkspaceMode(viewportWidth) === "fullscreen" ? 0 : viewportWidth - fitAssistantWidthToViewport(panelWidth, viewportWidth);
+  return assistantWorkspaceMode(viewportWidth) === "sheet" ? viewportWidth : viewportWidth - fitAssistantWidthToViewport(panelWidth, viewportWidth);
 }
 
 export function readAssistantWorkspace(storage: Pick<Storage, "getItem"> | null) {
@@ -75,7 +75,7 @@ export function assistantWorkspaceForViewport(storage: Pick<Storage, "getItem"> 
   return {
     width: fitAssistantWidthToViewport(saved.width, viewportWidth),
     dock: saved.dock,
-    collapsed: assistantWorkspaceMode(viewportWidth) === "fullscreen" ? false : saved.collapsed,
+    collapsed: assistantWorkspaceMode(viewportWidth) === "sheet" ? false : saved.collapsed,
   };
 }
 
