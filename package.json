@@ -147,6 +147,8 @@
     "test:ga-closure-build012": "node scripts/test-ga-closure-build012-temp-project-dry-run.mjs",
     "test:ga-closure-build013": "node scripts/test-ga-closure-build013-release-suite.mjs",
     "test:ga-closure-build014": "node scripts/test-ga-closure-build014-publication-cadence.mjs",
+    "test:ga-closure-build015": "node scripts/test-ga-closure-build015-dossier.mjs",
+    "test:ga-closure-block03": "node scripts/test-ga-closure-block03.mjs",
     "check:authenticated-release-acceptance": "node scripts/check-authenticated-release-acceptance.mjs",
     "test:authenticated-release-acceptance": "node scripts/test-authenticated-release-acceptance.mjs",
     "check:checkout-readiness": "node scripts/check-checkout-readiness.mjs",

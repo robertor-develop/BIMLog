@@ -1,0 +1,46 @@
+{
+  "schema": "bimlog.ga-closure.dossier.v1",
+  "preparedBy": "Orion",
+  "certificationAuthority": "independent_read_only_review",
+  "gaReady": false,
+  "dimensions": {
+    "code": {
+      "state": "pass",
+      "evidence": "bounded release suite, responsive contracts, security/isolation, recovery behavior, and frontend/API typechecks"
+    },
+    "currentCandidate": {
+      "state": "unpublished",
+      "evidence": "Builds 11-15 are held at 5/10 by the authorized publication cadence"
+    },
+    "deployed": {
+      "state": "pass_previous_published_head",
+      "source": "02d9d9834eeb47a7ce9a223fd7412e53a4b3542b",
+      "deploymentId": "a34f876f-539a-49d6-bc40-d6281bb9d28b"
+    },
+    "authenticatedLive": {
+      "state": "pass_previous_published_head",
+      "evidence": "desktop 1440x900, tablet 820x1180, mobile 390x844, Agent controls/questions/persistence, representative project routes, zero captured console errors"
+    },
+    "procoreAccount": {
+      "state": "partial_external_block",
+      "passed": ["authenticated account", "Elara East project browse", "document-folder browse"],
+      "blocked": ["authorized download without a safe non-customer document", "RFI commit without a verified safe Procore test project"]
+    },
+    "protectedFileRecovery": {
+      "state": "unresolved",
+      "registeredFiles": 16,
+      "portableCustodyVerified": 0,
+      "claim": "No recovered originals claimed"
+    },
+    "temporaryProjectCleanup": {
+      "state": "blocked_safe",
+      "deleteCount": 0,
+      "claim": "No deletion authorized or performed"
+    },
+    "customerFieldAcceptance": {
+      "state": "not_claimed",
+      "evidence": "independent customer acceptance remains outside Orion self-certification"
+    }
+  },
+  "nextIndependentGate": "Review the exact future 10-build deployed head, close or explicitly accept the external Procore and protected-file gates, and issue the independent GA verdict."
+}
