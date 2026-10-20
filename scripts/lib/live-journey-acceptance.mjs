@@ -70,3 +70,20 @@ export function validateProcoreBrowseJourney(receipt) {
   }
   return result(gate.errors);
 }
+
+export function validateProcoreRfiJourney(receipt) {
+  const gate = checker(); requireIdentity(receipt, gate);
+  gate.require(receipt?.kind === "procore-rfi", "kind", "wrong journey kind");
+  gate.require(["PASS","BLOCKED_EXTERNAL"].includes(receipt?.status), "status", "status must be PASS or BLOCKED_EXTERNAL");
+  gate.require(receipt?.protectedProjectsUnchanged === true, "protectedProjectsUnchanged", "protected project state was not proven unchanged");
+  if (receipt?.status === "BLOCKED_EXTERNAL") {
+    gate.require(["NO_CONNECTED_ACCOUNT","CONSENT_REQUIRED","PROVIDER_UNAVAILABLE","NO_SAFE_TEST_PROJECT"].includes(receipt?.blockerCode), "blockerCode", "exact external blocker is required");
+    gate.require(receipt?.dataMutated === false, "dataMutated", "blocked probe must not mutate data");
+  } else {
+    gate.require(receipt?.safeTestProject === true, "safeTestProject", "RFI acceptance must use a verified safe test project");
+    for (const check of ["preview","commit","idempotentReplay","conflict","rollback","auditHistory"])
+      gate.require(receipt?.checks?.[check] === true, `checks.${check}`, `${check} acceptance failed`);
+    gate.require(typeof receipt?.correlationId === "string" && receipt.correlationId.length >= 16, "correlationId", "correlation identity is required");
+  }
+  return result(gate.errors);
+}
