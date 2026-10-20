@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "bimlog-deployment-ledger-supersession-v1",
+  "recordedAt": "2026-10-20T00:00:00-04:00",
+  "mutationPolicy": "ADDITIVE_ONLY",
+  "ambiguousProviderId": "a34f876f-539a-49d6-bc40-d6281bb9d28b",
+  "historicalObservations": [
+    {
+      "sourceCommit": "58b773b6c4a43c3f1c30a4ab47190fc13dc1953a",
+      "outcome": "FAILED_BEFORE_PROMOTION",
+      "evidence": "living-brief/STATUS.md:2171",
+      "interpretation": "Provider attempt failed after a tracked .replit mutation made the deployment snapshot dirty."
+    },
+    {
+      "sourceCommit": "091c6d117ec9f3ae7612ccb1311ce6c404e6d01a",
+      "outcome": "PUBLISHED_AND_LIVE_VERIFIED_AT_THE_TIME",
+      "evidence": "living-brief/STATUS.md:4470",
+      "interpretation": "A later successful publication was recorded with the same provider identifier."
+    }
+  ],
+  "supersession": {
+    "rule": "The reused provider identifier is not an immutable release identity and must never identify source by itself.",
+    "authoritativeIdentityFields": [
+      "sourceCommit",
+      "assetManifestSha256",
+      "packageId",
+      "databaseMigrationLevel",
+      "observedAt"
+    ],
+    "currentProductionObservation": {
+      "sourceCommit": "89921a87291071d1bdf62a4fe67e836c0ca320f6",
+      "state": "LIVE_VERIFIED",
+      "independentAccepted": false,
+      "customerAccepted": false,
+      "evidenceBasis": "Authenticated Chrome and live health observation recorded before this unpublished repair block."
+    }
+  },
+  "historicalRecordsRewritten": false,
+  "historicalRecordsDeleted": false
+}
