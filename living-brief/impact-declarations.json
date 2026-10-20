@@ -72376,8 +72376,8 @@
     },
     {
       "taskId": "full-ga-remediation-block01-20261020",
-      "reviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "reviewedAt": "2026-10-20T23:12:08.3458520Z",
+      "reviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "reviewedAt": "2026-10-20T23:13:56.9323417Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -72423,12 +72423,12 @@
         },
         {
           "key": "status",
-          "result": "reviewed_semantic_change",
+          "result": "reviewed_no_semantic_change",
           "reason": "Full-GA remediation Block 1 separates conversation and intake lanes, adds governed zero-import Procore discovery, makes Agent context states explicit, and preserves visible workspace context across the required responsive widths. Production publication and real connected-account Procore acceptance remain open."
         },
         {
           "key": "open_loop",
-          "result": "reviewed_semantic_change",
+          "result": "reviewed_no_semantic_change",
           "reason": "Full-GA remediation Block 1 separates conversation and intake lanes, adds governed zero-import Procore discovery, makes Agent context states explicit, and preserves visible workspace context across the required responsive widths. Production publication and real connected-account Procore acceptance remain open."
         },
         {
@@ -72439,12 +72439,10 @@
       ],
       "reason": "Full-GA remediation Block 1 separates conversation and intake lanes, adds governed zero-import Procore discovery, makes Agent context states explicit, and preserves visible workspace context across the required responsive widths. Production publication and real connected-account Procore acceptance remain open.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "0e5b40a8df6931c15fb17853b6f9738bd48139aab280234fffe9d7b5b8f187fa"
+      "reviewedChangeSha256": "4091f1e33aee0a565da17f83edcef8f91a985354223e614a7b95ff9190fccaeb"
     }
   ]
 }

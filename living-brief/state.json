@@ -1,14 +1,12 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+  "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "cd54bbfaf0b535e8cfe622438480b51e03b2e18ee02bd5abf9eedada66149827",
+  "bundleSha256": "38278bebff63d8b8c288760a70380260eb2afb5a1262df58cb34fd1d7a509944",
   "impact": {
-    "baselineCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+    "baselineCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
     "changedPaths": [
-      "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-      "living-brief/PLATFORM.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
@@ -24,11 +22,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "claude",
@@ -36,11 +34,11 @@
       "sha256": "8da1b9a19adf692034e15f33849cfb56708cdec6e0dbef0f98f68e32bd4c7cde",
       "sourceChangedAt": "2026-09-29T09:05:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "quality",
@@ -48,11 +46,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "vision",
@@ -60,23 +58,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "c671fb19a33526ca2078be17e913de2eca5f2882728ba2c51abe7d3a4950b009",
-      "sourceChangedAt": "2026-10-20T23:12:08.345Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "sourceChangedAt": "2026-10-20T19:12:40-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "plugin",
@@ -84,11 +82,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "report_design_system",
@@ -96,11 +94,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "standards_register",
@@ -108,35 +106,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "8dc0e2985e2d1955b76095a1f59832d143a5d2d541a83dac04aee8ccdf33fe69",
-      "sourceChangedAt": "2026-10-20T19:11:37-04:00",
+      "sha256": "cc4daee25b8d108f6b535347ada7b841b4051268105f9d1fd863ce0c46a66350",
+      "sourceChangedAt": "2026-10-20T19:13:42-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
-      "semanticReviewResult": "reviewed_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "8ca51f63e6f6885545bb17187bd53d0a90a0443294092e3368ddf659f28ddae5",
-      "sourceChangedAt": "2026-10-20T19:11:37-04:00",
+      "sha256": "592941aa50d2b796ab9225614e49ef894dfcd3927d4ae139a1c1c16a78038a21",
+      "sourceChangedAt": "2026-10-20T19:13:42-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
-      "semanticReviewResult": "reviewed_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     },
     {
       "key": "audit",
@@ -144,11 +142,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
-      "semanticReviewedThroughCommit": "9e05a26bc31d350a324f9db1e69f1cf47e624787",
+      "reconciledThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
+      "semanticReviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
       "semanticReviewTask": "full-ga-remediation-block01-20261020",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-20T23:12:08.3458520Z"
+      "semanticReviewedAt": "2026-10-20T23:13:56.9323417Z"
     }
   ]
 }
