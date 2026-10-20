@@ -32,3 +32,21 @@ export function validateAuthenticatedShellJourney(receipt) {
   }
   return result(gate.errors);
 }
+
+export function validateProjectLifecycleJourney(receipt) {
+  const gate = checker(); requireIdentity(receipt, gate);
+  gate.require(receipt?.kind === "project-lifecycle", "kind", "wrong journey kind");
+  gate.require(receipt?.authenticated === true, "authenticated", "project journey was not authenticated");
+  gate.require(receipt?.readOnly === true, "readOnly", "journey must not mutate production project data");
+  const required = ["documents","rfis","submittals","transmittals","meetings","schedule","apus","edt-wbs"];
+  for (const module of required) {
+    const check = receipt?.modules?.[module];
+    gate.require(check?.loaded === true, `modules.${module}.loaded`, "module did not load");
+    gate.require(check?.projectId === receipt?.projectId, `modules.${module}.projectId`, "module lost project scope");
+    gate.require(check?.consoleErrors === 0, `modules.${module}.consoleErrors`, "module produced console errors");
+  }
+  gate.require(receipt?.denials?.crossTenant === 403, "denials.crossTenant", "cross-tenant access was not denied");
+  gate.require(receipt?.denials?.insufficientRole === 403, "denials.insufficientRole", "insufficient role was not denied");
+  gate.require(receipt?.denials?.anonymous === 401, "denials.anonymous", "anonymous access was not denied");
+  return result(gate.errors);
+}
