@@ -6018,3 +6018,5 @@ The generated platform inventory is reconciled; publication and the non-customer
 - [x] Preserve visible workspace context and usable Agent controls across 320, 390, 768, 1440 and 1920 pixel contracts.
 - [ ] Publish the exact reconciled candidate, verify its deployed SHA, and complete authenticated production Chrome smoke.
 - [ ] Exercise Procore discovery with an approved connected customer account before claiming live Procore acceptance; absence of such credentials remains an external gate.
+
+The implementation-unit reconciliation is bound to source commit `22318d77`; the remaining items are release and external-account acceptance actions.
