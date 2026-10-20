@@ -1,0 +1,12 @@
+{
+  "schema": "bimlog.ga-closure.publication-cadence.v1",
+  "lastPublishedSource": "02d9d9834eeb47a7ce9a223fd7412e53a4b3542b",
+  "completedBuildsSincePublication": 5,
+  "publishEveryBuilds": 10,
+  "maximumUnpublishedBuilds": 10,
+  "publicationDue": false,
+  "publicationState": "cadence_hold",
+  "productionChangedByThisBlock": false,
+  "authenticatedChromeRequiredAfterNextPublication": true,
+  "acceptedSourcePolicy": "publish only the exact clean pushed head after the next five-build block completes and release checks pass"
+}
