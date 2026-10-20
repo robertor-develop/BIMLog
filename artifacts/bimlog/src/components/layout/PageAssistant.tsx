@@ -3,7 +3,7 @@ import { Bot, Mic, Minus, PanelLeft, PanelRight, Plus, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { collectPageAssistantContext, highlightAssistantControls, selectedAssistantControl } from "@/lib/page-assistant-context";
-import { ASSISTANT_WIDTH_DEFAULT, assistantBrowserStorage, safeAssistantSession, readAssistantOpen, writeAssistantOpen, assistantWidthFromPointer, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
+import { ASSISTANT_WIDTH_DEFAULT, assistantBrowserStorage, safeAssistantSession, readAssistantOpen, writeAssistantOpen, assistantWidthFromPointer, assistantWorkspaceForViewport, fitAssistantWidthToViewport, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
 
 type Message = { role: "user" | "assistant"; text: string; projectId: number | null };
 type AgentTurn = { requestId:string; conversationId:string; projectId:number|null; question:string; answer:string|null; state:"reserved"|"running"|"complete"|"failed"; errorCode:string|null };
@@ -24,7 +24,7 @@ export function PageAssistant() {
   const [messages,setMessages]=useState<Message[]>([]),[turns,setTurns]=useState<AgentTurn[]>([]),[feedbackReceipt,setFeedbackReceipt]=useState<{stableId:string;status:string;notificationState:string}|null>(null);
   const [voiceListening,setVoiceListening]=useState(false),[voiceStatus,setVoiceStatus]=useState("");
   const [workspaceStatus,setWorkspaceStatus]=useState("");
-  const initialWorkspace=useRef(readAssistantWorkspace(assistantBrowserStorage("localStorage")));
+  const initialWorkspace=useRef(assistantWorkspaceForViewport(assistantBrowserStorage("localStorage"),typeof window==="undefined"?Number.POSITIVE_INFINITY:window.innerWidth));
   const [panelWidth,setPanelWidth]=useState(initialWorkspace.current.width),[dock,setDock]=useState<AssistantDockSide>(initialWorkspace.current.dock),[collapsed,setCollapsed]=useState(initialWorkspace.current.collapsed);
   const [repairs,setRepairs]=useState<Repair[]>([]),[canAuthorize,setCanAuthorize]=useState(false),[executionConnected,setExecutionConnected]=useState(false),[pin,setPin]=useState(""),[newPin,setNewPin]=useState(""),[delegateEmail,setDelegateEmail]=useState("");
   const input=useRef<HTMLTextAreaElement|null>(null),opener=useRef<HTMLButtonElement|null>(null),selectedField=useRef<string|null>(null),recognition=useRef<SpeechRecognitionLike|null>(null),voiceBase=useRef(""),voiceError=useRef("");

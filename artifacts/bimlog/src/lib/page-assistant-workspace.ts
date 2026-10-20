@@ -70,6 +70,15 @@ export function readAssistantWorkspace(storage: Pick<Storage, "getItem"> | null)
   } catch { return { width: ASSISTANT_WIDTH_DEFAULT, dock: "right" as const, collapsed: false }; }
 }
 
+export function assistantWorkspaceForViewport(storage: Pick<Storage, "getItem"> | null, viewportWidth: number) {
+  const saved = readAssistantWorkspace(storage);
+  return {
+    width: fitAssistantWidthToViewport(saved.width, viewportWidth),
+    dock: saved.dock,
+    collapsed: assistantWorkspaceMode(viewportWidth) === "fullscreen" ? false : saved.collapsed,
+  };
+}
+
 export function writeAssistantWorkspace(storage: Pick<Storage, "setItem"> | null, width: number, dock: AssistantDockSide, collapsed = false) {
   try {
   storage?.setItem("bimlog:assistant-width", String(clampAssistantWidth(width)));

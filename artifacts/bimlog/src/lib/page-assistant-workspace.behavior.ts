@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { safeAssistantSession, readAssistantOpen, writeAssistantOpen, ASSISTANT_WIDTH_DEFAULT, ASSISTANT_WORKSPACE_MIN, assistantMainWorkspaceWidth, assistantWidthFromPointer, assistantWorkspaceMode, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
+import { safeAssistantSession, readAssistantOpen, writeAssistantOpen, ASSISTANT_WIDTH_DEFAULT, ASSISTANT_WORKSPACE_MIN, assistantMainWorkspaceWidth, assistantWidthFromPointer, assistantWorkspaceMode, assistantWorkspaceForViewport, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
 
 assert.equal(clampAssistantWidth(120), 320);
 assert.equal(clampAssistantWidth(900), 680);
@@ -21,6 +21,12 @@ const values = new Map<string,string>();
 const storage = { getItem: (key:string)=>values.get(key) ?? null, setItem: (key:string,value:string)=>void values.set(key,value) };
 writeAssistantWorkspace(storage, 512, "left", true);
 assert.deepEqual(readAssistantWorkspace(storage), { width: 512, dock: "left", collapsed: true });
+assert.deepEqual(assistantWorkspaceForViewport(storage, 1180), { width: 512, dock: "left", collapsed: true });
+assert.deepEqual(assistantWorkspaceForViewport(storage, 900), { width: 512, dock: "left", collapsed: true });
+assert.deepEqual(assistantWorkspaceForViewport(storage, 760), { width: 512, dock: "left", collapsed: false });
+writeAssistantWorkspace(storage, 680, "right", false);
+assert.deepEqual(assistantWorkspaceForViewport(storage, 761), { width: 441, dock: "right", collapsed: false });
+assert.equal(assistantMainWorkspaceWidth(assistantWorkspaceForViewport(storage,761).width,761),320);
 console.log("page assistant workspace behavior: pass");
 
 writeAssistantOpen(storage,1,true);assert.equal(readAssistantOpen(storage,1),true);assert.equal(readAssistantOpen(storage,2),false);writeAssistantOpen(storage,1,false);assert.equal(readAssistantOpen(storage,1),false);assert.equal(readAssistantOpen({getItem(){throw new Error('blocked');}},1),false);assert.doesNotThrow(()=>writeAssistantOpen({setItem(){throw new Error('blocked');}},1,true));
