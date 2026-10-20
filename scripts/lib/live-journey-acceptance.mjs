@@ -87,3 +87,21 @@ export function validateProcoreRfiJourney(receipt) {
   }
   return result(gate.errors);
 }
+
+export function validateAgentJourney(receipt) {
+  const gate = checker(); requireIdentity(receipt, gate);
+  gate.require(receipt?.kind === "agent-correlated", "kind", "wrong journey kind");
+  gate.require(receipt?.authenticated === true, "authenticated", "Agent journey was not authenticated");
+  gate.require(receipt?.tenantIsolationDenied === true, "tenantIsolationDenied", "cross-tenant Agent access was not denied");
+  for (const page of ["headquarters","project"]) {
+    const turn = receipt?.turns?.[page];
+    gate.require(typeof turn?.question === "string" && turn.question.length > 0, `turns.${page}.question`, "fresh question is required");
+    gate.require(typeof turn?.answer === "string" && turn.answer.length > 0, `turns.${page}.answer`, "correlated answer is required");
+    gate.require(turn?.requestId === turn?.correlatedRequestId, `turns.${page}.requestId`, "request correlation failed");
+    gate.require(turn?.conversationId === turn?.correlatedConversationId, `turns.${page}.conversationId`, "conversation correlation failed");
+    gate.require(turn?.persistedAfterReload === true, `turns.${page}.persistedAfterReload`, "answer did not persist after reload");
+  }
+  gate.require(receipt?.navigationPreservedConversation === true, "navigationPreservedConversation", "navigation lost conversation state");
+  gate.require(receipt?.consoleErrors === 0, "consoleErrors", "Agent journey produced console errors");
+  return result(gate.errors);
+}
