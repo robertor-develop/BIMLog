@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "02cb4a0c01264812c8336bceeb1b14a3c2345496ff83cca09656c82a70412d66",
-  "itemCount": 430,
+  "sourceSha256": "e596afad78a50640ceaa13f08d0d4a64bc496a3a3bd383d65f8395589eb7afc0",
+  "itemCount": 434,
   "counts": {
-    "ACTIVE": 386,
+    "ACTIVE": 390,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7825,6 +7825,78 @@
       "evidence": [
         "OPEN_LOOP.md:5981",
         "2026-10-20 — Independent-audit repair Block 2 acceptance execution"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0a3ae478b1bdfc12",
+      "sourceLine": 5989,
+      "heading": "2026-10-20 — Independent-audit closure Block 3",
+      "statement": "Obtain authoritative provider snapshot/object-version evidence and original bytes/checksums for every protected file before claiming recovery acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5989",
+        "2026-10-20 — Independent-audit closure Block 3"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "dcfa4269e5c2afee",
+      "sourceLine": 5990,
+      "heading": "2026-10-20 — Independent-audit closure Block 3",
+      "statement": "Obtain complete temporary-project dependency and shared-storage ownership proof plus independent approval before any deletion.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5990",
+        "2026-10-20 — Independent-audit closure Block 3"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3ff4da7dbd0ec3ae",
+      "sourceLine": 5991,
+      "heading": "2026-10-20 — Independent-audit closure Block 3",
+      "statement": "Complete the next five builds, publish the exact ten-build candidate, verify deployed identity and run full authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5991",
+        "2026-10-20 — Independent-audit closure Block 3"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f2da372b961bf632",
+      "sourceLine": 5992,
+      "heading": "2026-10-20 — Independent-audit closure Block 3",
+      "statement": "Complete safe-test-project Procore download and RFI live acceptance when an approved connected account and disposable project exist.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "RFI",
+        "route": "/projects/:id/rfis",
+        "module": "artifacts/bimlog/src/pages/project/RfisTab.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5992",
+        "2026-10-20 — Independent-audit closure Block 3"
       ],
       "currentAuthority": false
     }

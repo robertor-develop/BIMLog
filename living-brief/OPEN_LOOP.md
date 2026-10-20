@@ -5979,3 +5979,14 @@ No production record, protected project, deployment, or customer data changed du
 - [x] Define fresh Headquarters/project Agent correlation, reload, navigation and tenant-isolation evidence.
 - [ ] Publish the exact ten-build candidate and populate these receipts only from real authenticated production observations.
 - [ ] If no approved Procore account or safe test project exists, record the exact external blocker without mutating data or claiming acceptance.
+
+## 2026-10-20 — Independent-audit closure Block 3
+
+- [x] Reconcile 16 protected-file custody records with the retained inventory, receipts and SHA evidence; preserve provider snapshot/object/version evidence as unresolved and claim zero recovered originals.
+- [x] Complete a read-only temporary-Gauntlet deletion dry run and keep deletion disabled while complete dependency, storage ownership, integration and independent-acceptance proof remains absent.
+- [x] Run the bounded release suite and repair the Windows command runner so frontend and API TypeScript checks terminate with their real exit codes.
+- [x] Record the five-of-ten publication hold and produce a final dossier that keeps source, deployed, live, Procore, recovery and customer-acceptance evidence separate.
+- [ ] Obtain authoritative provider snapshot/object-version evidence and original bytes/checksums for every protected file before claiming recovery acceptance.
+- [ ] Obtain complete temporary-project dependency and shared-storage ownership proof plus independent approval before any deletion.
+- [ ] Complete the next five builds, publish the exact ten-build candidate, verify deployed identity and run full authenticated Chrome smoke.
+- [ ] Complete safe-test-project Procore download and RFI live acceptance when an approved connected account and disposable project exist.
