@@ -101,6 +101,7 @@ export function LensNextPanel({
   const [issues, setIssues] = useState<readonly LensNextIssue[]>([]);
   const [referenceFloors, setReferenceFloors] = useState<readonly string[]>([]);
   const [responsibleCompanies, setResponsibleCompanies] = useState<readonly string[]>([]);
+  const [customTrades, setCustomTrades] = useState<readonly string[]>([]);
   const [selectedServerId, setSelectedServerId] = useState<number | null>(null);
   const [filters, setFilters] = useState<LensNextFilters>({
     ...LENS_NEXT_DEFAULT_FILTERS,
@@ -251,8 +252,8 @@ export function LensNextPanel({
     [visibleIssues, viewSettings],
   );
   const trades = useMemo(
-    () => mergeLensTradeOptions(issues.map((issue) => issue.trade)),
-    [issues],
+    () => mergeLensTradeOptions([...issues.map((issue) => issue.trade), ...customTrades]),
+    [issues, customTrades],
   );
   const floors = useMemo(
     () =>
@@ -304,6 +305,7 @@ export function LensNextPanel({
         setIssues((current) => reconcileLensNextRefresh(current, incoming));
         setReferenceFloors(referenceData.floors);
         setResponsibleCompanies(referenceData.responsibleCompanies);
+        setCustomTrades(referenceData.customTrades);
         setSelectedServerId((current) =>
           current !== null &&
           incoming.some((issue) => issue.identity.serverId === current)

@@ -2041,9 +2041,51 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
         const v = row.responsibleCompany?.trim();
         if (v) names.add(v);
       }
-      res.json({ success: true, companies: Array.from(names).sort((a, b) => a.localeCompare(b)), references });
+      const customTradeRows = await pool.query(
+        `SELECT name FROM lens_project_trades WHERE project_id=$1 ORDER BY lower(name), id`,
+        [projectId],
+      );
+      res.json({ success: true, companies: Array.from(names).sort((a, b) => a.localeCompare(b)), references,
+        trades: customTradeRows.rows.map((row) => String(row.name)) });
     } catch (err) {
       res.status(500).json({ error: "responsible_companies_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// Project-scoped reusable Lens trades. Creating a trade changes only the
+// catalog; it never creates or edits a viewpoint. Project write authority is
+// required and duplicate spelling/case variants resolve idempotently.
+router.post("/projects/:projectId/clash-reports/lens-viewpoints/trades",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const name = String(req.body?.name ?? "").trim().replace(/\s+/g, " ");
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || name.length < 2 || name.length > 80) {
+      res.status(400).json({ error: "invalid_trade", message: "Trade must contain 2 to 80 characters." });
+      return;
+    }
+    if (!/^[\p{L}\p{N}][\p{L}\p{N} &/()+.,'-]*$/u.test(name)) {
+      res.status(400).json({ error: "invalid_trade", message: "Trade contains unsupported characters." });
+      return;
+    }
+    const normalized = name.toLocaleLowerCase("en-US");
+    try {
+      const result = await pool.query(
+        `INSERT INTO lens_project_trades(project_id,name,normalized_name,created_by_id)
+         VALUES($1,$2,$3,$4)
+         ON CONFLICT(project_id,normalized_name) DO UPDATE SET name=lens_project_trades.name
+         RETURNING id,name,created_at`,
+        [projectId, name, normalized, req.user!.userId],
+      );
+      await db.insert(activityLogTable).values({ projectId, userId: req.user!.userId,
+        userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+        actionType: "lens_trade_added", entityType: "lens_trade", entityId: result.rows[0].id,
+        details: `Reusable Lens trade added: ${result.rows[0].name}` });
+      res.status(201).json({ success: true, trade: result.rows[0] });
+    } catch (err) {
+      res.status(500).json({ error: "lens_trade_create_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
 );

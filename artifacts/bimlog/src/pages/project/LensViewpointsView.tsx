@@ -217,6 +217,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [responsibleReason, setResponsibleReason] = useState("");
   const [responsiblePhase, setResponsiblePhase] = useState<"input" | "submitting">("input");
   const [responsibleError, setResponsibleError] = useState("");
+  const [customTrades, setCustomTrades] = useState<string[]>([]);
+  const [newTrade, setNewTrade] = useState("");
+  const [tradeSaving, setTradeSaving] = useState(false);
+  const [tradeError, setTradeError] = useState("");
   // null = still checking, true = plugin reachable, false = not reachable.
   const [pluginConnected, setPluginConnected] = useState<boolean | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -392,6 +396,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           const d = await r.json();
           if (Array.isArray(d.companies)) {
             setResponsibleCompanies(d.companies.filter((x: unknown): x is string => typeof x === "string" && x.trim() !== ""));
+          }
+          if (Array.isArray(d.trades)) {
+            setCustomTrades(d.trades.filter((x: unknown): x is string => typeof x === "string" && x.trim() !== ""));
           }
         }
       } catch {
@@ -763,7 +770,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
 
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((x): x is string => !!x))).sort();
-  const trades = mergeLensTradeOptions(viewpoints.map(v => v.trade));
+  const trades = mergeLensTradeOptions([...viewpoints.map(v => v.trade), ...customTrades]);
   const floors = uniq(viewpoints.map(v => v.floor));
   const correctionFloorOptions = uniq([...floorLevels, ...floors]);
   const reportTypes = uniq(viewpoints.map(v => v.reportType));
@@ -940,6 +947,23 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const selStyle = { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 } as const;
+  const saveTrade = async () => {
+    const name = newTrade.trim().replace(/\s+/g, " ");
+    if (name.length < 2) { setTradeError(t("Enter a trade name.", "Ingrese una disciplina.")); return; }
+    setTradeSaving(true); setTradeError("");
+    try {
+      const response = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/trades`, {
+        method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ name }),
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.message || body.error || t("Could not save trade.", "No se pudo guardar la disciplina."));
+      const saved = String(body.trade?.name ?? name).trim();
+      setCustomTrades(current => Array.from(new Set([...current, saved])).sort((a, b) => a.localeCompare(b)));
+      setFTrade(saved); setNewTrade("");
+      showToast(t(`${saved} is available for later use.`, `${saved} quedo disponible para uso posterior.`));
+    } catch (err) { setTradeError(err instanceof Error ? err.message : String(err)); }
+    finally { setTradeSaving(false); }
+  };
 
   return (
     <div>
@@ -1031,7 +1055,18 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           <option value="all">{t("All Statuses", "Todos los Estados")}</option>
           {LENS_STATUS_ORDER.map(x => <option key={x} value={x}>{lensStatusLabel(x)}</option>)}
         </select>
+        {canWrite && (
+          <form onSubmit={e => { e.preventDefault(); void saveTrade(); }} style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <input value={newTrade} onChange={e => setNewTrade(e.target.value)} maxLength={80}
+              aria-label={t("New reusable trade", "Nueva disciplina reutilizable")}
+              placeholder={t("Add trade…", "Agregar disciplina…")} style={{ ...selStyle, minWidth: 150 }} />
+            <button type="submit" className="btn btn-sm btn-outline" disabled={tradeSaving || newTrade.trim().length < 2}>
+              {tradeSaving ? t("Saving…", "Guardando…") : t("Add trade", "Agregar disciplina")}
+            </button>
+          </form>
+        )}
       </div>
+      {tradeError && <div role="alert" style={{ color: "#B91C1C", fontSize: 12, margin: "-8px 0 12px" }}>{tradeError}</div>}
 
       <div style={{ display: "flex", gap: 14, marginBottom: 14, flexWrap: "wrap", alignItems: "center", background: "#F8FAFC", border: "1px solid #E5E7EB", borderRadius: 8, padding: "8px 12px" }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: "#6B7280", textTransform: "uppercase" }}>{t("View", "Vista")}</span>

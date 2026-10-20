@@ -1279,6 +1279,16 @@ const livingBriefAndLensStartupBarrier = queueDatabaseStartup(async () => {
       current_seq INTEGER NOT NULL DEFAULT 0,
       CONSTRAINT lens_viewpoint_sequence_counters_ptf_unique UNIQUE (project_id, trade, floor)
     )`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS lens_project_trades (
+      id SERIAL PRIMARY KEY,
+      project_id INTEGER NOT NULL REFERENCES projects(id),
+      name TEXT NOT NULL,
+      normalized_name TEXT NOT NULL,
+      created_by_id INTEGER NOT NULL REFERENCES users(id),
+      created_at TIMESTAMP NOT NULL DEFAULT now(),
+      CONSTRAINT lens_project_trades_project_name_unique UNIQUE (project_id, normalized_name),
+      CONSTRAINT lens_project_trades_name_length CHECK (char_length(name) BETWEEN 2 AND 80)
+    )`);
 
     // Convert the two unique constraints to PARTIAL unique indexes scoped to
     // active rows, so a superseded row and a new active row can coexist for the

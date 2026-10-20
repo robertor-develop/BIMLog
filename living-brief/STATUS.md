@@ -4597,3 +4597,7 @@ Builds 11–15 reconcile all 16 protected-file custody records against retained 
 The Platform Lens view and Lens Next workspace now use one shared trade catalog. Geothermal and Pool are always available for filtering, creation, and reassignment, while existing project-specific trade values remain preserved and deduplicated. This changes no viewpoint record, project data, Native bridge contract, or authorization boundary.
 
 Post-implementation reconciliation confirms commit `9a627b34` is the reviewed source unit for this catalog expansion.
+
+## 2026-10-20 — Reusable project trade catalog
+
+Authorized project writers can now add a validated Lens trade without creating or editing a viewpoint. The trade is stored once in a project-scoped catalog, audited, returned through the existing authenticated reference-data boundary, and reused by both Platform Lens and Lens Next. Default trades and historical viewpoint trades remain available. Duplicate case variants are idempotent, cross-project access remains governed by existing project membership/write middleware, and project deletion does not cascade through this new record. TypeScript, focused Lens behavior, database safety and the full release build are required before publication.

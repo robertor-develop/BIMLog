@@ -5998,3 +5998,11 @@ No production record, protected project, deployment, or customer data changed du
 - [ ] Publish the exact source candidate and verify both new choices in authenticated production Chrome without changing project data.
 
 The implementation-unit reconciliation is bound to source commit `9a627b34`; publication evidence must identify its final metadata successor exactly.
+
+## 2026-10-20 — Reusable project trade catalog
+
+- [x] Add a project-scoped persisted Lens trade catalog with authenticated read and authorized write boundaries.
+- [x] Expose one bilingual Add trade control that saves a choice for later use without fabricating a viewpoint.
+- [x] Reuse saved project trades in Platform Lens filters/reassignment and Lens Next creation/reassignment.
+- [x] Record catalog creation in the project activity log and keep duplicate names idempotent.
+- [ ] Publish the exact clean source, verify its bound production identity, then add a harmless custom trade in the temporary synthetic project and confirm it survives reload.

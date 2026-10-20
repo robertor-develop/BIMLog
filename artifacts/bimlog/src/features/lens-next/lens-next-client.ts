@@ -125,7 +125,7 @@ export interface LensNextApiClientOptions {
 export interface LensNextApiClient {
   resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId?: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
-  loadReferenceData(projectId: number, signal?: AbortSignal): Promise<{ floors: string[]; responsibleCompanies: string[] }>;
+  loadReferenceData(projectId: number, signal?: AbortSignal): Promise<{ floors: string[]; responsibleCompanies: string[]; customTrades: string[] }>;
   loadHistory(
     identity: LensNextImmutableIssueIdentity,
     signal?: AbortSignal,
@@ -273,10 +273,15 @@ export function createLensNextApiClient(
         ? directoryBody.companies.filter((value): value is string => typeof value === "string")
             .map(value => value.trim()).filter(Boolean)
         : [];
+      const customTrades = Array.isArray(directoryBody?.trades)
+        ? directoryBody.trades.filter((value): value is string => typeof value === "string")
+            .map(value => value.trim()).filter(Boolean)
+        : [];
       const responsibleCompanies = [...memberCompanies, ...conventionCompanies, ...conventionCodes, ...directoryCompanies];
       return Object.freeze({
         floors: [...new Set(floors)].sort(),
         responsibleCompanies: [...new Set(responsibleCompanies)].sort(),
+        customTrades: [...new Set(customTrades)].sort(),
       });
     },
     async loadHistory(

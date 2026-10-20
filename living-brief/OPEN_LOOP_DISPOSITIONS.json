@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3fd1401a139616dfdb5e9b511fd0781f8b80b2d169c4a15e46aa52d90cccec5b",
-  "itemCount": 435,
+  "sourceSha256": "da1d195c0ba1b0fa36452e2396714fd8cd40ec4e56f4f81a550e6f5aadcc1771",
+  "itemCount": 436,
   "counts": {
-    "ACTIVE": 391,
+    "ACTIVE": 392,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7915,6 +7915,24 @@
       "evidence": [
         "OPEN_LOOP.md:5998",
         "2026-10-20 — Lens trade catalog expansion"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "bcef7b01c2128633",
+      "sourceLine": 6008,
+      "heading": "2026-10-20 — Reusable project trade catalog",
+      "statement": "Publish the exact clean source, verify its bound production identity, then add a harmless custom trade in the temporary synthetic project and confirm it survives reload.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6008",
+        "2026-10-20 — Reusable project trade catalog"
       ],
       "currentAuthority": false
     }

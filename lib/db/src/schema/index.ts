@@ -34,6 +34,7 @@ export * from "./clash_reports";
 export * from "./lens-viewpoints";
 export * from "./lens-viewpoint-reports";
 export * from "./lens-viewpoint-sequence-counters";
+export * from "./lens-project-trades";
 export * from "./lens-next-publishing";
 export * from "./lens-next-model-bindings";
 export * from "./lens-imports";
