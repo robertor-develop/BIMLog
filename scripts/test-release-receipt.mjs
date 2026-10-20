@@ -1,15 +1,17 @@
 import assert from "node:assert/strict";
 import { validateReleaseReceipt } from "./release-receipt.mjs";
+import { readReleaseIdentity } from "./release-identity.mjs";
 
 const commit = "a".repeat(40), tree = "b".repeat(40), manifest = "c".repeat(64);
+const release = readReleaseIdentity().label;
 const valid = {
   schemaVersion: "bimlog-release-receipt-v1",
-  release: "v1.05.N18-P33",
+  release,
   source: { commit, tree },
   assets: { manifestSha256: manifest },
   database: { migrationLevel: "delivery-workflow-v1" },
   provider: { name: "replit", publicationReceiptId: "receipt-123", deploymentId: "deployment-456" },
-  live: { release: "v1.05.N18-P33", sourceCommit: commit, assetManifestSha256: manifest, databaseMigrationLevel: "delivery-workflow-v1", packageId: "deployment-456" },
+  live: { release, sourceCommit: commit, assetManifestSha256: manifest, databaseMigrationLevel: "delivery-workflow-v1", packageId: "deployment-456" },
 };
 assert.equal(validateReleaseReceipt(valid).ok, true);
 for (const [field, mutate] of [
