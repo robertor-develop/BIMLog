@@ -5990,3 +5990,9 @@ No production record, protected project, deployment, or customer data changed du
 - [ ] Obtain complete temporary-project dependency and shared-storage ownership proof plus independent approval before any deletion.
 - [ ] Complete the next five builds, publish the exact ten-build candidate, verify deployed identity and run full authenticated Chrome smoke.
 - [ ] Complete safe-test-project Procore download and RFI live acceptance when an approved connected account and disposable project exist.
+
+## 2026-10-20 — Lens trade catalog expansion
+
+- [x] Add Geothermal and Pool to the shared Lens trade catalog used by Platform Lens and Lens Next.
+- [x] Preserve and deduplicate project-specific trade values alongside the governed defaults.
+- [ ] Publish the exact source candidate and verify both new choices in authenticated production Chrome without changing project data.

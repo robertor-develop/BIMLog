@@ -7,6 +7,7 @@ import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { bootstrapLensNextBridgeSession, createLensNextApiClient, createLensNextBridgeClient } from "@/features/lens-next/lens-next-client";
 import { openBimlogWorkingView } from "@/features/lens-next/lens-next-working-view";
+import { mergeLensTradeOptions } from "@/features/lens-next/lens-trade-options";
 
 const API = "/api/v1";
 interface LensViewpoint {
@@ -762,7 +763,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
 
   const uniq = (vals: (string | null | undefined)[]) =>
     Array.from(new Set(vals.filter((x): x is string => !!x))).sort();
-  const trades = uniq(viewpoints.map(v => v.trade));
+  const trades = mergeLensTradeOptions(viewpoints.map(v => v.trade));
   const floors = uniq(viewpoints.map(v => v.floor));
   const correctionFloorOptions = uniq([...floorLevels, ...floors]);
   const reportTypes = uniq(viewpoints.map(v => v.reportType));

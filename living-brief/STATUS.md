@@ -4591,3 +4591,7 @@ Builds 6–10 define strict live acceptance receipts for the authenticated respo
 ## 2026-10-20 — Independent-audit closure Block 3 implemented, push-only
 
 Builds 11–15 reconcile all 16 protected-file custody records against retained recovery evidence without claiming recovered bytes; prove that the temporary Gauntlet project remains undeleted because ownership, dependency, storage and independent-acceptance evidence is incomplete; run the bounded release suite with a repaired Windows TypeScript runner; enforce the established five-of-ten publication hold; and produce an Orion dossier that separates source, deployed, live, Procore, recovery and customer-acceptance states. The bounded gates pass after the runner correction. Zero protected files are claimed recovered, zero temporary-project deletes are authorized, and final GA remains false. This first five-build block is pushed but remains unpublished until the next five builds reach the ten-build publication boundary.
+
+## 2026-10-20 — Lens trade catalog expansion
+
+The Platform Lens view and Lens Next workspace now use one shared trade catalog. Geothermal and Pool are always available for filtering, creation, and reassignment, while existing project-specific trade values remain preserved and deduplicated. This changes no viewpoint record, project data, Native bridge contract, or authorization boundary.

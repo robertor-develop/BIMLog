@@ -51,11 +51,8 @@ import {
 import "./lens-next-panel.css";
 import { openBimlogWorkingView, repairBimlogWorkingViewFromCurrent } from "./lens-next-working-view";
 import { loadExportableLensNextPackages, lensNextXmlSkippedSummary } from "./lens-next-xml-export-selection";
+import { mergeLensTradeOptions } from "./lens-trade-options";
 
-const LENS_NEXT_TRADE_OPTIONS = [
-  "Fire Protection", "Plumbing", "HVAC", "Electrical", "Structural",
-  "Architectural", "Mechanical", "General Contractor", "Owner", "Other",
-] as const;
 const LENS_NEXT_REPORT_TYPE_OPTIONS = ["SHOP", "SLEEVE", "COORDINATION", "FIELD", "OTHER"] as const;
 const LENS_NEXT_FALLBACK_FLOORS = ["CELLAR", "1", "2", "3", "4", "5", "ROOF", "Other"] as const;
 
@@ -254,14 +251,7 @@ export function LensNextPanel({
     [visibleIssues, viewSettings],
   );
   const trades = useMemo(
-    () =>
-      [
-        ...new Set(
-          [...LENS_NEXT_TRADE_OPTIONS, ...issues
-            .map((issue) => issue.trade)
-            .filter((value): value is string => Boolean(value))],
-        ),
-      ].sort(),
+    () => mergeLensTradeOptions(issues.map((issue) => issue.trade)),
     [issues],
   );
   const floors = useMemo(
