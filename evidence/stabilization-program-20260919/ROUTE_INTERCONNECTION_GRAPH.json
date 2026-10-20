@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 784,
+    "apiRoutes": 785,
     "frontendApiReferences": 314,
     "routeOwnedTables": 72
   },
@@ -1829,6 +1829,20 @@
     {
       "method": "GET",
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/responsible-companies",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/clash-reports/lens-viewpoints/trades",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
         "clashReportsTable",

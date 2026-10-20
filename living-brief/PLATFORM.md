@@ -1468,6 +1468,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/lens-imports.ts
 - lib/db/src/schema/lens-next-model-bindings.ts
 - lib/db/src/schema/lens-next-publishing.ts
+- lib/db/src/schema/lens-project-trades.ts
 - lib/db/src/schema/lens-viewpoint-reports.ts
 - lib/db/src/schema/lens-viewpoint-sequence-counters.ts
 - lib/db/src/schema/lens-viewpoints.ts
