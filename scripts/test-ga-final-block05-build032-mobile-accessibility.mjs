@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { runNodeGate } from "./lib/observable-gate-runner.mjs";
 
 const read = (file) => readFileSync(file, "utf8");
-const run = (file) => {
-  const result = spawnSync(process.execPath, [file], { encoding: "utf8" });
-  assert.equal(result.status, 0, `${file} failed:\n${result.stdout}\n${result.stderr}`);
-};
+const run = file => runNodeGate(file);
 
 for (const behavior of [
   "artifacts/bimlog/src/accessibility.behavior.mjs",

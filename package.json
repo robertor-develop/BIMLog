@@ -46,6 +46,8 @@
     "test:ga-final-block05-build034": "node scripts/test-ga-final-block05-build034-temp-cleanup-readiness.mjs",
     "test:ga-final-block05-build035": "node scripts/test-ga-final-block05-build035-final-ga-verdict.mjs",
     "test:ga-final-block05": "node scripts/test-ga-final-block05.mjs",
+    "test:ga-typechecks": "node scripts/test-ga-typechecks.mjs",
+    "test:observable-gate-runner": "node scripts/test-observable-gate-runner.mjs",
     "test:ga-recovery-closure-build01": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/ga-protected-file-inventory.behavior.ts",
     "test:ga-recovery-closure-build02": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/ga-recovery-candidate-match.behavior.ts",
     "test:ga-recovery-closure-build03": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/ga-recovery-source-assessment.behavior.ts",

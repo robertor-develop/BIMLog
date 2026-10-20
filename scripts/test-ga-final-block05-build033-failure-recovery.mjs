@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-const run = (file, ts = false) => {
-  const args = ts ? ["artifacts/api-server/node_modules/tsx/dist/cli.mjs", file] : [file];
-  const result = spawnSync(process.execPath, args, { encoding: "utf8" });
-  assert.equal(result.status, 0, `${file} failed:\n${result.stdout}\n${result.stderr}`);
-};
+import { runNodeGate, runTsGate } from "./lib/observable-gate-runner.mjs";
+const run = (file, ts = false) => ts ? runTsGate(file) : runNodeGate(file);
 
 for (const file of [
   "artifacts/api-server/src/lib/ux-failure-journey.behavior.ts",

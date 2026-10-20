@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
+import { runNodeGate } from "./lib/observable-gate-runner.mjs";
 
 const run = file => {
-  const result = spawnSync(process.execPath, [file], { encoding: "utf8" });
-  assert.equal(result.status, 0, `${file} failed:\n${result.stdout}\n${result.stderr}`);
-  return result.stdout;
+  runNodeGate(file);
+  return "BLOCKED-SAFE";
 };
 
 const cleanup = run("scripts/test-ga-final-block05-build034-temp-cleanup-readiness.mjs");

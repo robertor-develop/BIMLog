@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { runObservableGate } from "./lib/observable-gate-runner.mjs";
 
 const commands = [
   ["scripts/test-recovery-ga-http.mjs", "--scenario=all"],
@@ -9,5 +9,5 @@ const commands = [
   ["scripts/test-ga-final-block02-build009-template-edt.mjs"],
   ["scripts/test-ga-final-block02-build010-file-lifecycle.mjs"],
 ];
-for (const args of commands) execFileSync(process.execPath, args, { cwd: process.cwd(), stdio: "inherit" });
+for (const args of commands) runObservableGate(args.join(" "), process.execPath, args, { timeout: 120_000 });
 console.log("RECOVERY_GA_BLOCK04=PASS builds=B-GA016..B-GA020 authenticated_http=true real_postgresql=true production_mutations=0 protected_projects_unchanged=true");
