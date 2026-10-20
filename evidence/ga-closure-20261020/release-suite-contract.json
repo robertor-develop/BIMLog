@@ -1,0 +1,17 @@
+{
+  "schema": "bimlog.ga-closure.release-suite.v1",
+  "bounded": true,
+  "perGateTimeoutMs": 300000,
+  "unexplainedSkips": 0,
+  "gates": [
+    "test:ga-closure-build011",
+    "test:ga-closure-build012",
+    "test:release-integrity-block02",
+    "test:corrective-b17",
+    "test:corrective-b18",
+    "test:corrective-b35",
+    "test:ga-final-block05",
+    "test:ga-typechecks"
+  ],
+  "gaCertification": "independent_review_required"
+}
