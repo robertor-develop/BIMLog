@@ -5959,3 +5959,13 @@ No production record, protected project, deployment, or customer data changed du
 - [x] Replace the page Agent's fragile desktop-thread dependency with BIMLog's existing server-side governed Anthropic integration while preserving authenticated tenant/project isolation, request correlation, durable conversations, allowlisted page context and usage accounting.
 - [x] Pass API TypeScript plus focused transport, hosted-provider, tenant-isolation, durable-conversation and corrective B20 gates.
 - [ ] Push the reconciled exact head, synchronize and publish through the existing Replit Shell path, verify exact live source identity, and pass a fresh authenticated Chrome question/answer before starting the next five-build block.
+
+## 2026-10-20 — Independent-audit repair Block 1 release state
+
+- [x] Repair the 761–1179 px Agent dock contract so the panel reserves width and the main workspace retains at least 320 px.
+- [x] Normalize saved Agent width, side and minimized state for desktop/tablet while forcing the approved mobile full-screen state.
+- [x] Make final-GA and TypeScript gates observable, bounded and exit-code preserving.
+- [x] Add an exact release-candidate receipt contract with package, asset, schema, viewport journey and timestamp fields, while separating build, live, independent and customer states.
+- [x] Additively reconcile deployment identifier `a34f876f-539a-49d6-bc40-d6281bb9d28b`; never use that reused provider identifier alone as immutable source identity.
+- [ ] Publish only at the established two-block/ten-build cadence, then run authenticated production Chrome acceptance against the exact published source.
+- [ ] Keep final GA blocked until protected-file custody and temporary-project lifecycle evidence pass independent review.

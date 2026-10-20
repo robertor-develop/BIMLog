@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bd5af9adf020c0a79f177cac10554434e90b99e73428be94f1514898a7a36344",
-  "itemCount": 426,
+  "sourceSha256": "9aaaaea64b32b8ff82dff0d8d8f671a56ed90377005f1dc8c112d03599d599e8",
+  "itemCount": 428,
   "counts": {
-    "ACTIVE": 382,
+    "ACTIVE": 384,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7753,6 +7753,42 @@
       "evidence": [
         "OPEN_LOOP.md:5961",
         "BIMLog Agent hosted-provider recovery — 2026-10-19"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "05598c24e1403438",
+      "sourceLine": 5970,
+      "heading": "2026-10-20 — Independent-audit repair Block 1 release state",
+      "statement": "Publish only at the established two-block/ten-build cadence, then run authenticated production Chrome acceptance against the exact published source.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5970",
+        "2026-10-20 — Independent-audit repair Block 1 release state"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "29d7bb1d840f1625",
+      "sourceLine": 5971,
+      "heading": "2026-10-20 — Independent-audit repair Block 1 release state",
+      "statement": "Keep final GA blocked until protected-file custody and temporary-project lifecycle evidence pass independent review.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5971",
+        "2026-10-20 — Independent-audit repair Block 1 release state"
       ],
       "currentAuthority": false
     }
