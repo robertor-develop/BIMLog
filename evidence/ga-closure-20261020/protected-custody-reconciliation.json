@@ -1,0 +1,17 @@
+{
+  "schema": "bimlog.ga-closure.protected-custody.v1",
+  "inventorySource": "evidence/ga-recovery-20261016/protected-file-inventory.json",
+  "sourceReceipts": "evidence/ga-recovery-20261016/recovery-source-receipts.json",
+  "protectedProjects": [23, 26, 35],
+  "registeredFiles": 16,
+  "portableCustodyVerified": 0,
+  "authoritativeHashesAvailable": 2,
+  "authoritativeHashesMissing": 14,
+  "providerSnapshotEvidence": "unavailable",
+  "providerObjectVersionEvidence": "unavailable",
+  "recoveryState": "unresolved",
+  "executionAuthorized": false,
+  "customerRowsChanged": 0,
+  "storageObjectsChanged": 0,
+  "claim": "No protected original is represented as recovered. Provider recovery evidence remains required."
+}

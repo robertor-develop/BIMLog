@@ -143,6 +143,7 @@
     "test:live-journey-build009": "node scripts/test-live-journey-build009-procore-rfi.mjs",
     "test:live-journey-build010": "node scripts/test-live-journey-build010-agent.mjs",
     "test:live-journey-block02": "node scripts/test-live-journey-block02.mjs",
+    "test:ga-closure-build011": "node scripts/test-ga-closure-build011-protected-custody.mjs",
     "check:authenticated-release-acceptance": "node scripts/check-authenticated-release-acceptance.mjs",
     "test:authenticated-release-acceptance": "node scripts/test-authenticated-release-acceptance.mjs",
     "check:checkout-readiness": "node scripts/check-checkout-readiness.mjs",
