@@ -1,0 +1,35 @@
+{
+  "schema": "bimlog.ga-closure.temp-project-deletion-dry-run.v1",
+  "mode": "dry_run_only",
+  "project": {
+    "id": 64,
+    "code": "QA-GAUNTLET-1014",
+    "name": "TEMP GAUNTLET ACCEPTANCE 20261014",
+    "declaredPurpose": "Temporary synthetic full-lifecycle acceptance project. No customer, payment, invoice, or production work. Delete after verification."
+  },
+  "protectedProjectIds": [23, 26, 35],
+  "ownershipEvidence": {
+    "syntheticDeclarationVisible": true,
+    "customerOwnershipExcluded": true,
+    "paymentOwnershipExcluded": true,
+    "invoiceOwnershipExcluded": true,
+    "productionWorkExcluded": true
+  },
+  "dependencyEvidence": {
+    "allProjectDependentTablesEnumerated": false,
+    "allStorageObjectsEnumerated": false,
+    "sharedStorageOwnershipVerified": false,
+    "integrationReferencesVerified": false,
+    "auditHistoryPreservedOutsideDeletionScope": false
+  },
+  "readyForIndependentReview": false,
+  "executionAuthorized": false,
+  "deleteCount": 0,
+  "protectedProjectsTouched": 0,
+  "blockers": [
+    "complete project-dependent table inventory is not bound",
+    "storage-object and shared-ownership inventory is not bound",
+    "integration references are not independently verified",
+    "audit-history preservation outside deletion scope is not proven"
+  ]
+}
