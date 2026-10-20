@@ -6008,3 +6008,13 @@ The implementation-unit reconciliation is bound to source commit `9a627b34`; pub
 - [ ] Publish the exact clean source, verify its bound production identity, then add a harmless custom trade in the temporary synthetic project and confirm it survives reload.
 
 The generated platform inventory is reconciled; publication and the non-customer synthetic-project reload check remain the only release actions for this change.
+
+## 2026-10-20 — Full-GA remediation Block 1
+
+- [x] Separate MAIN 04A conversation requests from MAIN 04B intake envelopes and reject cross-lane payload fields.
+- [x] Present Procore in the integration catalog with explicit configuration, company-permission, connection, expiry, binding and last-operation truth.
+- [x] Implement a bounded, deduplicated, cancellable Procore discovery preview that performs no canonical import and hands review proposals only to MAIN 04B.
+- [x] Add bounded Agent context verification with explicit unauthorized, unavailable and retryable-error states.
+- [x] Preserve visible workspace context and usable Agent controls across 320, 390, 768, 1440 and 1920 pixel contracts.
+- [ ] Publish the exact reconciled candidate, verify its deployed SHA, and complete authenticated production Chrome smoke.
+- [ ] Exercise Procore discovery with an approved connected customer account before claiming live Procore acceptance; absence of such credentials remains an external gate.
