@@ -137,6 +137,7 @@
     "test:release-receipt": "node scripts/test-release-receipt.mjs",
     "test:release-candidate-receipt": "node scripts/test-release-candidate-receipt.mjs",
     "test:deployment-ledger-supersession": "node scripts/test-deployment-ledger-supersession.mjs",
+    "test:live-journey-build006": "node scripts/test-live-journey-build006-shell.mjs",
     "check:authenticated-release-acceptance": "node scripts/check-authenticated-release-acceptance.mjs",
     "test:authenticated-release-acceptance": "node scripts/test-authenticated-release-acceptance.mjs",
     "check:checkout-readiness": "node scripts/check-checkout-readiness.mjs",
