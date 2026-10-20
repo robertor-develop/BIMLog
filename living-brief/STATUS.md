@@ -4595,3 +4595,5 @@ Builds 11–15 reconcile all 16 protected-file custody records against retained 
 ## 2026-10-20 — Lens trade catalog expansion
 
 The Platform Lens view and Lens Next workspace now use one shared trade catalog. Geothermal and Pool are always available for filtering, creation, and reassignment, while existing project-specific trade values remain preserved and deduplicated. This changes no viewpoint record, project data, Native bridge contract, or authorization boundary.
+
+Post-implementation reconciliation confirms commit `9a627b34` is the reviewed source unit for this catalog expansion.

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "e596afad78a50640ceaa13f08d0d4a64bc496a3a3bd383d65f8395589eb7afc0",
-  "itemCount": 434,
+  "sourceSha256": "3fd1401a139616dfdb5e9b511fd0781f8b80b2d169c4a15e46aa52d90cccec5b",
+  "itemCount": 435,
   "counts": {
-    "ACTIVE": 390,
+    "ACTIVE": 391,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7897,6 +7897,24 @@
       "evidence": [
         "OPEN_LOOP.md:5992",
         "2026-10-20 — Independent-audit closure Block 3"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0fd7b819108ee103",
+      "sourceLine": 5998,
+      "heading": "2026-10-20 — Lens trade catalog expansion",
+      "statement": "Publish the exact source candidate and verify both new choices in authenticated production Chrome without changing project data.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5998",
+        "2026-10-20 — Lens trade catalog expansion"
       ],
       "currentAuthority": false
     }

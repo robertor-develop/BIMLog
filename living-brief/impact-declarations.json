@@ -72161,6 +72161,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "7c58f91707af568c0f80b2d8c8e0f67c01afa3d2823dac9c2cfca31e313c187a"
+    },
+    {
+      "taskId": "lens-geothermal-pool-trades-20261020",
+      "reviewedThroughCommit": "9a627b341b7af8858457d106f66c7fd30dd578de",
+      "reviewedAt": "2026-10-20T20:56:56.1923632Z",
+      "status": "local_candidate",
+      "captureTiming": "post_implementation_pre_push",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract."
+        }
+      ],
+      "reason": "The shared Lens trade catalog adds Geothermal and Pool to the existing Platform and Lens Next selectors while retaining all project-specific trade values. It changes no record, authorization, Native bridge, lifecycle, storage, or reporting contract.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dc719c27b853f0d3bd983a038ec32afbb9ce83f237c9a45b65fa0f42467ed46a"
     }
   ]
 }

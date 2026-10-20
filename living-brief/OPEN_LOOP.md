@@ -5996,3 +5996,5 @@ No production record, protected project, deployment, or customer data changed du
 - [x] Add Geothermal and Pool to the shared Lens trade catalog used by Platform Lens and Lens Next.
 - [x] Preserve and deduplicate project-specific trade values alongside the governed defaults.
 - [ ] Publish the exact source candidate and verify both new choices in authenticated production Chrome without changing project data.
+
+The implementation-unit reconciliation is bound to source commit `9a627b34`; publication evidence must identify its final metadata successor exactly.
