@@ -4601,3 +4601,5 @@ Post-implementation reconciliation confirms commit `9a627b34` is the reviewed so
 ## 2026-10-20 — Reusable project trade catalog
 
 Authorized project writers can now add a validated Lens trade without creating or editing a viewpoint. The trade is stored once in a project-scoped catalog, audited, returned through the existing authenticated reference-data boundary, and reused by both Platform Lens and Lens Next. Default trades and historical viewpoint trades remain available. Duplicate case variants are idempotent, cross-project access remains governed by existing project membership/write middleware, and project deletion does not cascade through this new record. TypeScript, focused Lens behavior, database safety and the full release build are required before publication.
+
+The deterministic platform and route inventories now include the reusable-trade endpoint and its project-scoped storage table; this additive reconciliation does not change the product behavior described above.

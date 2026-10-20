@@ -6006,3 +6006,5 @@ The implementation-unit reconciliation is bound to source commit `9a627b34`; pub
 - [x] Reuse saved project trades in Platform Lens filters/reassignment and Lens Next creation/reassignment.
 - [x] Record catalog creation in the project activity log and keep duplicate names idempotent.
 - [ ] Publish the exact clean source, verify its bound production identity, then add a harmless custom trade in the temporary synthetic project and confirm it survives reload.
+
+The generated platform inventory is reconciled; publication and the non-customer synthetic-project reload check remain the only release actions for this change.
