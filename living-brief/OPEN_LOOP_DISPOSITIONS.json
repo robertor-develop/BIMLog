@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "9aaaaea64b32b8ff82dff0d8d8f671a56ed90377005f1dc8c112d03599d599e8",
-  "itemCount": 428,
+  "sourceSha256": "02cb4a0c01264812c8336bceeb1b14a3c2345496ff83cca09656c82a70412d66",
+  "itemCount": 430,
   "counts": {
-    "ACTIVE": 384,
+    "ACTIVE": 386,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7789,6 +7789,42 @@
       "evidence": [
         "OPEN_LOOP.md:5971",
         "2026-10-20 — Independent-audit repair Block 1 release state"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0a58c475c74427ea",
+      "sourceLine": 5980,
+      "heading": "2026-10-20 — Independent-audit repair Block 2 acceptance execution",
+      "statement": "Publish the exact ten-build candidate and populate these receipts only from real authenticated production observations.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5980",
+        "2026-10-20 — Independent-audit repair Block 2 acceptance execution"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "a8dd8c725652ed08",
+      "sourceLine": 5981,
+      "heading": "2026-10-20 — Independent-audit repair Block 2 acceptance execution",
+      "statement": "If no approved Procore account or safe test project exists, record the exact external blocker without mutating data or claiming acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5981",
+        "2026-10-20 — Independent-audit repair Block 2 acceptance execution"
       ],
       "currentAuthority": false
     }

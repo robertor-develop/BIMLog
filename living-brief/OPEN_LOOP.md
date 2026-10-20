@@ -5969,3 +5969,13 @@ No production record, protected project, deployment, or customer data changed du
 - [x] Additively reconcile deployment identifier `a34f876f-539a-49d6-bc40-d6281bb9d28b`; never use that reused provider identifier alone as immutable source identity.
 - [ ] Publish only at the established two-block/ten-build cadence, then run authenticated production Chrome acceptance against the exact published source.
 - [ ] Keep final GA blocked until protected-file custody and temporary-project lifecycle evidence pass independent review.
+
+## 2026-10-20 — Independent-audit repair Block 2 acceptance execution
+
+- [x] Define fail-closed exact-identity receipts for authenticated desktop, tablet and exact 390x844 shell acceptance.
+- [x] Define representative project-module read and anonymous, role and cross-tenant denial evidence.
+- [x] Define Procore connected-account browse/download evidence with an explicit external-blocker state and no continuous-sync claim.
+- [x] Define safe-test-project Procore RFI preview, commit, replay, conflict, rollback and audit-history evidence.
+- [x] Define fresh Headquarters/project Agent correlation, reload, navigation and tenant-isolation evidence.
+- [ ] Publish the exact ten-build candidate and populate these receipts only from real authenticated production observations.
+- [ ] If no approved Procore account or safe test project exists, record the exact external blocker without mutating data or claiming acceptance.
