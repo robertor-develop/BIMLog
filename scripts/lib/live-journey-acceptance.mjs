@@ -50,3 +50,23 @@ export function validateProjectLifecycleJourney(receipt) {
   gate.require(receipt?.denials?.anonymous === 401, "denials.anonymous", "anonymous access was not denied");
   return result(gate.errors);
 }
+
+export function validateProcoreBrowseJourney(receipt) {
+  const gate = checker(); requireIdentity(receipt, gate);
+  gate.require(receipt?.kind === "procore-browse", "kind", "wrong journey kind");
+  gate.require(["PASS","BLOCKED_EXTERNAL"].includes(receipt?.status), "status", "status must be PASS or BLOCKED_EXTERNAL");
+  gate.require(receipt?.continuousSyncClaimed === false, "continuousSyncClaimed", "BIMLog must not claim continuous Procore sync");
+  if (receipt?.status === "BLOCKED_EXTERNAL") {
+    gate.require(["NO_CONNECTED_ACCOUNT","CONSENT_REQUIRED","PROVIDER_UNAVAILABLE"].includes(receipt?.blockerCode), "blockerCode", "exact external blocker is required");
+    gate.require(receipt?.dataMutated === false, "dataMutated", "blocked probe must not mutate data");
+  } else {
+    gate.require(receipt?.authenticatedAccount === true, "authenticatedAccount", "approved Procore account was not authenticated");
+    gate.require(receipt?.companyListLoaded === true, "companyListLoaded", "company list did not load");
+    gate.require(receipt?.projectListLoaded === true, "projectListLoaded", "project list did not load");
+    gate.require(receipt?.folderListLoaded === true, "folderListLoaded", "folder list did not load");
+    gate.require(receipt?.authorizedDownload?.status === 200, "authorizedDownload.status", "authorized download failed");
+    gate.require(SHA256.test(receipt?.authorizedDownload?.sha256 ?? ""), "authorizedDownload.sha256", "download checksum is required");
+    gate.require(receipt?.auditEventRecorded === true, "auditEventRecorded", "provider read was not audited");
+  }
+  return result(gate.errors);
+}

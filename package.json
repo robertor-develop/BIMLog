@@ -139,6 +139,7 @@
     "test:deployment-ledger-supersession": "node scripts/test-deployment-ledger-supersession.mjs",
     "test:live-journey-build006": "node scripts/test-live-journey-build006-shell.mjs",
     "test:live-journey-build007": "node scripts/test-live-journey-build007-project.mjs",
+    "test:live-journey-build008": "node scripts/test-live-journey-build008-procore-browse.mjs",
     "check:authenticated-release-acceptance": "node scripts/check-authenticated-release-acceptance.mjs",
     "test:authenticated-release-acceptance": "node scripts/test-authenticated-release-acceptance.mjs",
     "check:checkout-readiness": "node scripts/check-checkout-readiness.mjs",
