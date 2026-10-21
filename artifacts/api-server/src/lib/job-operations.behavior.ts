@@ -43,7 +43,7 @@ assert.match(service, /ON CONFLICT\(task_id,file_id,deliverable_type\)/);
 assert.match(service, /FROM files WHERE id=\$1 AND project_id=\$2/);
 assert.match(service, /job_activation_operation_events/);
 assert.match(service, /LEFT JOIN LATERAL \(SELECT SUM\(hours\)/, "time aggregation must not multiply when deliverables are joined");
-assert.match(service, /internalHourlyRate: showBudget \? row\.internalHourlyRate : null/);
+assert.match(service, /protectInternalCostAssignment\(sourceRow, showBudget\)/, "assignment internal cost must pass through the shared redaction contract");
 assert.match(service, /billingHourlyRate: showPlanner \? row\.billingHourlyRate : null/);
 assert.match(service, /plannedInternalCost: showBudget \? totals\.rows\[0\]\.plannedInternalCost : null/);
 assert.match(service, /earnedBillableValue: showPlanner \? totals\.rows\[0\]\.earnedBillableValue : null/);
