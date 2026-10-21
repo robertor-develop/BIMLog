@@ -4,6 +4,8 @@ import fs from "node:fs";
 const source = fs.readFileSync(new URL("../routes/dashboard_briefing.ts", import.meta.url), "utf8");
 assert.match(source, /router\.get\("\/dashboard\/adoption-summary", authMiddleware/);
 assert.match(source, /getScopedProjectIds\(req\.user!\.userId\)/);
+assert.match(source, /eq\(projectMembersTable\.status, "active"\)/);
+assert.match(source, /ne\(projectsTable\.status, "archived"\)/);
 assert.match(source, /\.limit\(15\)/);
 assert.match(source, /\.limit\(200\)/);
 assert.match(source, /boundedDashboardAdoptionSummary/);

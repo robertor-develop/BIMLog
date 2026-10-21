@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Outcome-first constructor correction acknowledgment — 2026-10-21
+
+BIMLog MAIN read the authorized `Outcome-first constructor correction — 2026-10-21` in the coordination Living Brief at the safe boundary after Full-GA remediation Block 5. It first applies to Full-GA remediation Block 6, Builds 26–30. Feature-completion credit in that block requires an actual necessary runtime or visible delta recorded before commit, exact-candidate journey/reference evidence where applicable, and independent acceptance; verification-only work is labeled infrastructure. IMPLEMENTED, PUSHED, PUBLISHED and ACCEPTED remain distinct, and the existing five-build push / ten-build publication cadence continues without a new stop gate.
+
+## Outcome remediation Block 1 — B26–B27 candidate — 2026-10-21
+
+B26 is release infrastructure and receives no feature-completion credit: branch and upstream are exact at `115b460e9fe31f3fbea417d7c71e6a3cf066d6d5`, while production remains at `88592e903fb454081141c3a987277c867930ef39`; its live acceptance debt stays open until the ten-build boundary is published and exact production identity is observed. B27 has a real runtime delta: Headquarters keeps retired projects in lifecycle administration but removes retired/inactive projects from continuation, attention, assigned-work, recent-work, and first-value recommendations. The server summary now scopes every recommendation query to an active membership and a non-retired project, while the browser independently refuses ineligible destinations.
+
 ## Full-GA remediation Block 5 candidate — 2026-10-21
 
 Builds 21–25 bind the exact published source and authenticated desktop route, preserve tenant and role isolation, enforce the current responsive Agent split-workspace contract, exercise recovery and rollback behavior, and keep protected-file recovery plus every purge operation fail-closed. The implementation block passes without production data mutation. Five builds are unpublished, so publication is not due until the next five-build block completes the ten-build interval. Final GA remains blocked by external protected-original recovery evidence, independently verified synthetic-only cleanup ownership, and live paid-provider configuration and verification.

@@ -30,6 +30,7 @@ import { firstValueEvidenceDestination } from "@/lib/first-value-evidence";
 import { chooseRoleAwareTodayAction, type TodayCandidate } from "@/lib/today-action";
 import { assignedItemDestination } from "@/lib/assigned-item-destination";
 import { EMPTY_DASHBOARD_ADOPTION_SUMMARY, loadDashboardAdoptionSummary } from "@/lib/dashboard-adoption-summary";
+import { recommendationEligibleProjects } from "@/lib/headquarters-project-eligibility";
 import { dashboardGuidanceState } from "@/lib/dashboard-guidance-state";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
@@ -270,6 +271,8 @@ export function Dashboard() {
   }
 
   const allProjectRows = (projects ?? []) as Array<any>;
+  const recommendationProjects = useMemo(() => recommendationEligibleProjects(allProjectRows), [allProjectRows]);
+  const recommendationProjectMap = useMemo(() => new Map<number, any>(recommendationProjects.map((project: any) => [Number(project.id), project])), [recommendationProjects]);
   const projectRows = useMemo(() => {
     const query = projectSearch.trim().toLowerCase();
     return allProjectRows
@@ -371,9 +374,8 @@ export function Dashboard() {
   }
 
   // ── Derived aggregate stats ────────────────────────────────────────────────
-  const projectMap = new Map<number, any>(allProjectRows.map((p: any) => [Number(p.id), p]));
-
-  const attentionRows = adoptionSummary.attention.map(item => ({
+  const projectMap = new Map<number, any>(allProjectRows.map((project: any) => [Number(project.id), project]));
+  const attentionRows = adoptionSummary.attention.filter(item => recommendationProjectMap.has(item.projectId)).map(item => ({
     pid: item.projectId,
     issue: item.kind === "rfi" ? tt("Has overdue RFIs", "Tiene RFI vencidos") : item.kind === "file" ? tt("Naming violations detected", "Se detectaron incumplimientos de nomenclatura") : tt("Pending submittals", "Submittals pendientes"),
     color: item.kind === "submittal" ? "#2563EB" : "#D97706",
@@ -381,12 +383,12 @@ export function Dashboard() {
   }));
   const recentActivity = adoptionSummary.recentActivity;
   const todayCandidates: TodayCandidate[] = [
-    ...adoptionSummary.assigned.flatMap(item => {
+    ...adoptionSummary.assigned.filter(item => recommendationProjectMap.has(item.projectId)).flatMap(item => {
       const href = assignedItemDestination(item);
       return href ? [{ kind: item.kind, title: item.kind === "rfi" ? tt(`RFI ${item.number} needs your response`, `RFI ${item.number} necesita su respuesta`) : tt(`Submittal ${item.number} needs your review`, `Submittal ${item.number} necesita su revisión`), detail: item.title, href }] : [];
     }),
-    ...attentionRows.slice(0, 1).map(item => ({ kind: "attention" as const, title: item.issue, detail: `${projectMap.get(item.pid)?.code || tt("Project", "Proyecto")} · ${projectMap.get(item.pid)?.name || ""}`, href: item.href })),
-    ...allProjectRows.slice(0, 1).map(item => ({ kind: "project" as const, title: tt("Continue project work", "Continuar trabajo del proyecto"), detail: `${item.code} · ${item.name}`, href: `/projects/${item.id}` })),
+    ...attentionRows.slice(0, 1).map(item => ({ kind: "attention" as const, title: item.issue, detail: `${recommendationProjectMap.get(item.pid)?.code || tt("Project", "Proyecto")} · ${recommendationProjectMap.get(item.pid)?.name || ""}`, href: item.href })),
+    ...recommendationProjects.slice(0, 1).map(item => ({ kind: "project" as const, title: tt("Continue project work", "Continuar trabajo del proyecto"), detail: `${item.code} · ${item.name}`, href: `/projects/${item.id}` })),
   ];
   const todayAction = chooseRoleAwareTodayAction((user as any)?.workProfile || (user as any)?.role, todayCandidates);
   const todayGuidanceState = dashboardGuidanceState({
@@ -397,14 +399,14 @@ export function Dashboard() {
   });
   const userEmail = (user as any)?.email ?? "";
   const myLatestActivity = recentActivity.find(entry => !userEmail || String(entry.userEmail || "").toLowerCase() === userEmail.toLowerCase()) || recentActivity[0];
-  const resumeProject = myLatestActivity ? projectMap.get(myLatestActivity.projectId) : null;
+  const resumeProject = myLatestActivity ? recommendationProjectMap.get(myLatestActivity.projectId) : null;
   const resumeAction = resumeProject ? {
     title: resumeProject.name,
     detail: tt(`Recent project activity · ${timeAgo(myLatestActivity.createdAt)}`, `Actividad reciente del proyecto · ${timeAgo(myLatestActivity.createdAt)}`),
     href: `/projects/${resumeProject.id}`,
     label: tt("Resume", "Reanudar"),
   } : null;
-  const firstValueProject = allProjectRows[0] ?? null;
+  const firstValueProject = recommendationProjects[0] ?? null;
   const firstValueKind = onboardingState ? chooseFirstValueAction({workProfile:onboardingState.workProfile,preferredDocumentTypes:onboardingState.preferredDocumentTypes}) : "submittal";
 
   // ── Top Naming Violators ───────────────────────────────────────────────────

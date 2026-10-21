@@ -274,7 +274,12 @@ async function getScopedProjectIds(userId: number): Promise<Array<{ projectId: n
   return db
     .select({ projectId: projectMembersTable.projectId, role: projectMembersTable.role })
     .from(projectMembersTable)
-    .where(eq(projectMembersTable.userId, userId));
+    .innerJoin(projectsTable, eq(projectsTable.id, projectMembersTable.projectId))
+    .where(and(
+      eq(projectMembersTable.userId, userId),
+      eq(projectMembersTable.status, "active"),
+      ne(projectsTable.status, "archived"),
+    ));
 }
 
 async function getDashboardExportData(userId: number) {
