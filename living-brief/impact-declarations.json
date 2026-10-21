@@ -72583,6 +72583,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "ga-lifecycle-cross-compiler-release-repair-20261020",
+      "reviewedThroughCommit": "e9330602a9890579f62011c04f2583e94b5a7b03",
+      "reviewedAt": "2026-10-21T02:45:01.7322616Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change."
+        }
+      ],
+      "reason": "The release repair changes only a GA lifecycle behavior fixture to use an explicit HOURS_REVIEWED event accepted by the Replit compiler. Product behavior, data contracts, production data, and Living Brief authority semantics do not change.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
