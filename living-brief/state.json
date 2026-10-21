@@ -28,7 +28,7 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "claude",
@@ -40,7 +40,7 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "quality",
@@ -52,7 +52,7 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "vision",
@@ -64,7 +64,7 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "platform",
@@ -76,7 +76,7 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "plugin",
@@ -88,7 +88,7 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -100,7 +100,7 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "standards_register",
@@ -112,31 +112,31 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
       "sha256": "78e2e55a6c636e3c7a4deb373bab2eb578994e25f29ed75af8cf5504f9e42d39",
-      "sourceChangedAt": "2026-10-21T04:30:00.000Z",
+      "sourceChangedAt": "2026-10-21T04:10:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
       "sha256": "831379e798b40238b1305edf90ee1775bb3f9f03e3ca77e164225f71444b7a94",
-      "sourceChangedAt": "2026-10-21T04:30:00.000Z",
+      "sourceChangedAt": "2026-10-21T04:10:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     },
     {
       "key": "audit",
@@ -148,7 +148,7 @@
       "semanticReviewedThroughCommit": "e225bbb1cea8533b1262bf385422ee13419d2ec9",
       "semanticReviewTask": "full-ga-remediation-block04-20261021",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-21T04:30:00.000Z"
+      "semanticReviewedAt": "2026-10-21T04:10:00.000Z"
     }
   ]
 }
