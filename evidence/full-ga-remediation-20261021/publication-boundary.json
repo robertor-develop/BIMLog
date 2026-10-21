@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "bimlog-full-ga-publication-boundary-v1",
+  "recordedAt": "2026-10-21T05:20:00-04:00",
+  "release": "v1.05.N18-P37",
+  "sourceCommit": "88592e903fb454081141c3a987277c867930ef39",
+  "packageId": "bimlog-88592e903fb45408-88ef538f715eac9f",
+  "identityBound": true,
+  "authenticatedDesktopRoute": "/projects/64/integrations",
+  "authenticatedDesktopResult": "loaded",
+  "productionMutation": false
+}
