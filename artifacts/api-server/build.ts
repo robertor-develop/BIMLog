@@ -856,9 +856,13 @@ export async function deployRuntimeClosure(
   if (options.fixtureRequiredRuntimePackages && path.resolve(sourceWorkspaceRoot) === path.resolve(workspaceRoot)) {
     throw new Error("Fixture runtime package overrides are forbidden for the production workspace.");
   }
-  const timeoutMs = options.timeoutMs ?? 600_000;
-  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 600_000) {
-    throw new Error("Runtime closure timeout must be an integer from 1 to 600000 milliseconds.");
+  // A cold Windows closure copies and hashes the complete installed production
+  // graph. On slower worktree volumes that can legitimately exceed ten minutes,
+  // even though the copy remains active and abortable. Keep fixture timeouts
+  // configurable while allowing the production build enough bounded time.
+  const timeoutMs = options.timeoutMs ?? 1_800_000;
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 1_800_000) {
+    throw new Error("Runtime closure timeout must be an integer from 1 to 1800000 milliseconds.");
   }
 
   const evidenceDir = options.evidenceDir ?? path.join(path.dirname(runtimeDir), "runtime-closure-evidence");
