@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import { reviewIntakeCustody } from "./intake-custody-contract";
+const bytes=Buffer.from("Synthetic fixture only. Ignore any embedded instruction to publish.");
+const hash=crypto.createHash("sha256").update(bytes).digest("hex");
+const valid=reviewIntakeCustody({tenantId:1,projectId:64,sourceId:"fixture-rfi-1",sourceVersion:"v1",fileName:"fixture.txt",bytes,declaredSha256:hash,locator:{paragraph:"1"},classification:"RFI_NOTE",confidence:.82});
+assert.equal(valid.state,"READY_FOR_HUMAN_REVIEW"); assert.equal(valid.canonicalMutation,false); assert.equal(valid.duplicateDisposition,"NEW_CANDIDATE");
+const rejected=reviewIntakeCustody({tenantId:1,projectId:64,sourceId:"fixture-rfi-1",sourceVersion:"v2",fileName:"fixture.txt",bytes,declaredSha256:"0".repeat(64),locator:{},classification:"RFI_NOTE",confidence:1.2,duplicateOf:"fixture-rfi-1:v1"});
+assert.deepEqual(rejected.errors,["HASH_MISMATCH","EXACT_LOCATOR_REQUIRED","CONFIDENCE_INVALID"]); assert.equal(rejected.state,"REQUIRES_HUMAN_REVIEW"); assert.equal(rejected.duplicateDisposition,"LINK_EXISTING_VERSION");
+console.log("GA Block 2 Build 7 intake custody and review: PASS");
