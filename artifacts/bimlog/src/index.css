@@ -1568,3 +1568,12 @@ body:not(.bimlog-assistant-docked) .bimlog-workspace-content{grid-column:1}
 body{--bimlog-agent-active-width:var(--bimlog-agent-dock-width)}
 body[data-assistant-collapsed="true"]{--bimlog-agent-active-width:72px}
 @media(min-width:761px){.page-assistant-resize-handle{display:block}.page-assistant-panel[data-collapsed="true"]>.page-assistant-resize-handle{display:none}}
+
+/* Release accessibility baseline: visible keyboard focus, zoom-safe content and resilient system colors. */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid #f2b544;outline-offset:3px}
+:where(img,svg,video,canvas){max-width:100%}
+:where(.page-content,.main-area,.bimlog-workspace-content){min-width:0}
+:where(table){max-width:100%}
+@media(max-width:760px){:where(button,a,[role="button"]){min-height:44px}:where(.page-content){overflow-wrap:anywhere}:where(table){display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}}
+@media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+@media(forced-colors:active){:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid Highlight}.page-assistant-panel,.actionable-empty-state{border:1px solid CanvasText}}
