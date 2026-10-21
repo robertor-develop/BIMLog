@@ -5,8 +5,9 @@ const component = readFileSync("artifacts/bimlog/src/components/layout/PageAssis
 const workspace = readFileSync("artifacts/bimlog/src/lib/page-assistant-workspace.ts", "utf8");
 const css = readFileSync("artifacts/bimlog/src/index.css", "utf8");
 
-for (const token of ["YOUR BIMLOG AGENT", "Ask a question", "Show me where", "Submit feedback", "Page guide and work status", "bimlog-assistant-docked"])
+for (const token of ["YOUR BIMLOG AGENT", "Ask a question", "Show me where", "Page guide and work status", "bimlog-assistant-docked"])
   assert.ok(component.includes(token) || css.includes(token), token);
+assert.doesNotMatch(component, /Submit feedback|Request a fix/);
 assert.ok(component.includes('classList.toggle("bimlog-assistant-docked",open&&Boolean(token))'));
 for (const token of ["Dock agent left", "Dock agent right", "Minimize agent", "Expand agent", "Resize BIMLog Agent panel"])
   assert.ok(component.includes(token), token);
@@ -18,7 +19,8 @@ assert.match(css,/bimlog-workspace-split/);
 assert.match(css, /data-assistant-dock-side="left"/);
 assert.match(css, /grid-template-columns:minmax\(0,1fr\) var\(--bimlog-agent-active-width\)/);
 assert.match(css, /data-collapsed="true"/);
-assert.match(css, /@media\(max-width:760px\).*bimlog-workspace-content\{display:none/s);
+assert.match(css, /@media\(max-width:760px\).*bimlog-workspace-split\{display:grid;grid-template-columns:minmax\(0,1fr\);grid-template-rows:minmax\(280px,42dvh\) minmax\(0,58dvh\)/s);
+assert.match(css, /@media\(max-width:760px\).*bimlog-workspace-content\{display:block/s);
 assert.doesNotMatch(component + css, /data-dock\s*=\s*["']?float|Float panel|startDrag/i);
 console.log("PASS assistant dock workspace source contract");
 
