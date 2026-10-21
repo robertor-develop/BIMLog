@@ -853,7 +853,7 @@ export function JobIntakeWorkspace() {
             ),
       );
       const activated = await load();
-      const expected = jobIntakeActivationPreview(dataRef.current, saved.completion, canEnrich);
+      const expected = jobIntakeActivationPreview(dataRef.current, saved.completion, canEnrich, deliveryWorkflowChoices.options ?? []);
       const actualWorkItems = activated?.activation?.workItems?.length ?? 0;
       const actualTasks = activated?.activation?.tasks?.length ?? 0;
       const actualAssignments = activated?.activation?.assignments?.length ?? 0;
@@ -967,7 +967,7 @@ export function JobIntakeWorkspace() {
         key: item,
         label: item,
       }));
-  const activationPreview = jobIntakeActivationPreview(data, completion, canEnrich || (!isActivated && capabilities.fullCommercialActivation));
+  const activationPreview = jobIntakeActivationPreview(data, completion, canEnrich || (!isActivated && capabilities.fullCommercialActivation), deliveryWorkflowChoices.options ?? []);
   const activationReceiptCurrent = Boolean(
     intake.activationConfirmation?.ready &&
     intake.activationConfirmation.revision === intake.revision &&

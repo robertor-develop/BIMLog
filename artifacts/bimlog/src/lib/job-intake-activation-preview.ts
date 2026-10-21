@@ -25,12 +25,12 @@ export function jobIntakeBlockerDestination(code: string) {
   return { stage, item: blockerAnchors[code] ?? `ji-${stage}` };
 }
 
-export function jobIntakeActivationPreview(data: any, completion: any, commercial: boolean) {
+export function jobIntakeActivationPreview(data: any, completion: any, commercial: boolean, workflowOptions: any[] = []) {
   const assignments = Array.isArray(data?.team?.assignments) ? data.team.assignments : [];
   const scopeItems = Array.isArray(data?.scopeItems) ? data.scopeItems : [];
   return {
     workItems: scopeItems.length,
-    tasks: expectedIntakeTaskCount(scopeItems, assignments),
+    tasks: expectedIntakeTaskCount(scopeItems, assignments, workflowOptions),
     // Activation persists generic rows as Intake demand, never as fake person
     // assignments. Only already named legacy rows are expected in Operations.
     resourcePlans: assignments.filter((row: any) => row.userId != null || String(row.personName ?? "").trim()).length,
