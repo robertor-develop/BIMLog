@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { conventionResolverUrl, documentIdentity, fileIntakeCanSubmit, fileIntakeModeTruth, fileIntakePreview, fileIntakeRequiresConvention, newFileAttemptKey, type FileIntakeAttemptState, type FileIntakeMode } from "@/lib/file-intake-journey";
 import { parseOperationalDocumentReturn } from "@/lib/job-operations-daily-work";
 import { ReportsReturnBanner } from "@/components/layout/ReportsReturnBanner";
+import { AnalyzeIntakeAction } from "@/components/AnalyzeIntakeAction";
 
 interface ValidationDetail {
   field: string;
@@ -445,6 +446,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         </div>
       )}
 
+      <div id="canonical-intake-queue" style={{display:"flex",justifyContent:"flex-end",marginBottom:10}}><AnalyzeIntakeAction projectId={projectId} source="files" spanish={lang === "es"} /></div>
       {/* Upload form */}
       {operationReturn && (
         <section role="status" style={{ marginBottom: 14, padding: "12px 14px", border: "1px solid #BFDBFE", borderRadius: 8, background: "#EFF6FF", color: "#1E3A8A" }}>
