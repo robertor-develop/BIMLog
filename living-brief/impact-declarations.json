@@ -72376,8 +72376,8 @@
     },
     {
       "taskId": "full-ga-remediation-block01-20261020",
-      "reviewedThroughCommit": "bf2559a07f843de399b4e44c9979be607bcbbde6",
-      "reviewedAt": "2026-10-20T23:13:56.9323417Z",
+      "reviewedThroughCommit": "62d2fecd88e912ed7f02fb5e82d4abfd2b7c69e5",
+      "reviewedAt": "2026-10-21T00:10:41.751Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
