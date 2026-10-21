@@ -72376,8 +72376,8 @@
     },
     {
       "taskId": "full-ga-remediation-block01-20261020",
-      "reviewedThroughCommit": "62d2fecd88e912ed7f02fb5e82d4abfd2b7c69e5",
-      "reviewedAt": "2026-10-21T00:10:41.751Z",
+      "reviewedThroughCommit": "b6d40fb65ea38ddc96808e367acd7ac953994edd",
+      "reviewedAt": "2026-10-21T00:11:19.114Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -72439,10 +72439,10 @@
       ],
       "reason": "Full-GA remediation Block 1 separates conversation and intake lanes, adds governed zero-import Procore discovery, makes Agent context states explicit, and preserves visible workspace context across the required responsive widths. Production publication and real connected-account Procore acceptance remain open.",
       "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "4091f1e33aee0a565da17f83edcef8f91a985354223e614a7b95ff9190fccaeb"
+      "reviewedChangeSha256": "6ff8a9d2091b049e73d69044eed9f073bc76b2d46a12d5fcfdb5573c85bee023"
     }
   ]
 }
