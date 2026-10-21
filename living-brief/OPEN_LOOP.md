@@ -6020,3 +6020,15 @@ The generated platform inventory is reconciled; publication and the non-customer
 - [ ] Exercise Procore discovery with an approved connected customer account before claiming live Procore acceptance; absence of such credentials remains an external gate.
 
 The implementation-unit reconciliation is bound to source commit `22318d77`; the remaining items are release and external-account acceptance actions.
+
+## 2026-10-21 — Full-GA remediation Block 4
+
+- [x] B16: bind all fourteen intended sample projects and all four protected projects to exact production ID/code pairs.
+- [x] B17: discover the complete project-dependent foreign-key graph and produce a row-key, digest and storage-object manifest.
+- [x] B18: require a hash-bound serializable transaction and an exact operation-authorization token; forbid broad SQL and trigger suppression.
+- [x] B19: verify protected-project dependency invariance, exact deletion counts and an external administrator receipt.
+- [x] B20: bind the four focused contracts and API TypeScript to one permanent aggregate gate.
+- [ ] Obtain a fresh production dry-run receipt and independently verify its exact scope, backup evidence and storage ownership before any execution.
+- [ ] Push this five-build block once. Keep it unpublished until the next five-build block reaches the ten-build boundary.
+
+No purge was executed and the protected projects, sample projects and temporary Gauntlet project remain unchanged.

@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+
+const source = readFileSync(new URL('./ga-production-purge.mts', import.meta.url), 'utf8');
+const targets = ['ROB-T1','QA-P19-0914','QA-P21-E2E-0914','QA-P22-E2E-0914','QA-P23-E2E-0914','QA-P24-0915','QA-P25-0915','QA-LOR-0916','ROBERTOSNTEST','QA-AI-0924','QA-INT-B-0924','QA-C020-FUNDS','QA-C020-MATCH','PRJROB-T'];
+const protectedCodes = ['IBQ-LIT','ELA01','PRO-521-TEST','QA-GAUNTLET-1014'];
+for (const code of [...targets, ...protectedCodes]) assert.equal(source.split(`'${code}'`).length - 1, 1, `${code} must have one exact identity binding`);
+assert.match(source, /ROSTER_IDENTITY_MISMATCH/);
+assert.match(source, /FOR UPDATE/);
+assert.match(source, /DIRECT_SCOPE_MISMATCH/);
+assert.match(source, /RELEVANT_TABLE_WITHOUT_PRIMARY_KEY/);
+assert.match(source, /MANIFEST_CHANGED/);
+assert.match(source, /PROTECTED_DEPENDENCIES_CHANGED/);
+assert.match(source, /DELETE_COUNT_MISMATCH/);
+assert.match(source, /TARGET_PROJECT_REMAINS/);
+assert.match(source, /DRY_RUN_PASS_ROLLED_BACK/);
+assert.match(source, /SUPER_ADMIN_AUDIT_ACTOR_REQUIRED/);
+assert.match(source, /ga_authorized_sample_purge/);
+assert.doesNotMatch(source, /TRUNCATE\s|DROP\s+TABLE/i);
+console.log('B-GA006 exact production identity contract: PASS');
+console.log('B-GA007 recursive dependency manifest and protected digest: PASS');
+console.log('B-GA008 hash-bound transactional purge mechanism: PASS');

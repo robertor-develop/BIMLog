@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "592941aa50d2b796ab9225614e49ef894dfcd3927d4ae139a1c1c16a78038a21",
-  "itemCount": 438,
+  "sourceSha256": "831379e798b40238b1305edf90ee1775bb3f9f03e3ca77e164225f71444b7a94",
+  "itemCount": 440,
   "counts": {
-    "ACTIVE": 394,
+    "ACTIVE": 396,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7969,6 +7969,42 @@
       "evidence": [
         "OPEN_LOOP.md:6020",
         "2026-10-20 — Full-GA remediation Block 1"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d773f4d1111b6ff4",
+      "sourceLine": 6031,
+      "heading": "2026-10-21 — Full-GA remediation Block 4",
+      "statement": "Obtain a fresh production dry-run receipt and independently verify its exact scope, backup evidence and storage ownership before any execution.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6031",
+        "2026-10-21 — Full-GA remediation Block 4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "06c07b6d91e859cb",
+      "sourceLine": 6032,
+      "heading": "2026-10-21 — Full-GA remediation Block 4",
+      "statement": "Push this five-build block once. Keep it unpublished until the next five-build block reaches the ten-build boundary.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6032",
+        "2026-10-21 — Full-GA remediation Block 4"
       ],
       "currentAuthority": false
     }
