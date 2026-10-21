@@ -7,6 +7,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { BarChart3, BriefcaseBusiness, CalendarDays, CircleHelp, ClipboardList, FileCheck2, FolderOpen, RefreshCw, Users } from "lucide-react";
 import "./ProjectHome.css";
+import { recordRouteSample } from "@/lib/route-performance";
 
 type IntakeSummary = { status?: string; intake?: unknown } | null;
 
@@ -19,15 +20,17 @@ export function ProjectHome({ projectId, projectName, projectCode }: { projectId
 
   useEffect(() => {
     const controller = new AbortController();
+    const startedAt = performance.now();
+    const timeout = window.setTimeout(() => controller.abort("PROJECT_HOME_TIMEOUT"), 12000);
     setState("loading");
     fetch(`${import.meta.env.VITE_API_URL || ""}/api/v1/projects/${projectId}/intake`, {
       headers: { Authorization: `Bearer ${token}` }, signal: controller.signal,
     }).then(async response => {
       if (!response.ok) throw new Error("PROJECT_HOME_STATUS_UNAVAILABLE");
       return response.json();
-    }).then(summary => { setIntake(summary); setState("ready"); })
-      .catch(() => { if (!controller.signal.aborted) setState("error"); });
-    return () => controller.abort();
+    }).then(summary => { window.clearTimeout(timeout); recordRouteSample({ route: "project-home", durationMs: Math.round(performance.now() - startedAt), outcome: "ready" }); setIntake(summary); setState("ready"); })
+      .catch(() => { window.clearTimeout(timeout); const timedOut = controller.signal.reason === "PROJECT_HOME_TIMEOUT"; recordRouteSample({ route: "project-home", durationMs: Math.round(performance.now() - startedAt), outcome: timedOut ? "timeout" : controller.signal.aborted ? "cancelled" : "error" }); if (!controller.signal.aborted || timedOut) setState("error"); });
+    return () => { window.clearTimeout(timeout); controller.abort("ROUTE_CHANGED"); };
   }, [projectId, retry, token]);
 
   const action = useMemo(() => projectJourneyAction(projectId, intake), [intake, projectId]);
