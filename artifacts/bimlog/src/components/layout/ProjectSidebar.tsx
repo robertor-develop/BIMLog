@@ -10,6 +10,7 @@ import {
   ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness, PanelLeftOpen, UsersRound, House
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { reconcileNavigationGroups, toggleNavigationGroup } from "@/lib/project-navigation";
 
 interface SidebarProps {
   projectId: number;
@@ -321,7 +322,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
     if (typeof window === "undefined") return { [activeGroup]: true };
     try {
       const saved = JSON.parse(window.localStorage.getItem("bimlog-project-navigation-groups") ?? "{}") as Record<string, unknown>;
-      return Object.fromEntries(navGroups.map(group => [group.id, group.id === activeGroup || saved[group.id] === true]));
+      return reconcileNavigationGroups(navGroups.map(group => group.id), activeGroup, saved);
     } catch {
       return { [activeGroup]: true };
     }
@@ -341,7 +342,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
     setMobileOpen(false);
     requestAnimationFrame(() => mobileTriggerRef.current?.focus());
   };
-  const toggleGroup = (id: string) => setExpandedGroups(prev => ({ ...prev, [id]: id === activeGroup ? true : !prev[id] }));
+  const toggleGroup = (id: string) => setExpandedGroups(prev => toggleNavigationGroup(prev, id, activeGroup));
 
   const renderNavGroup = (group: NavGroup, variant: "desktop" | "mobile" = "desktop") => {
     const isActiveParent = group.id === activeGroup;
@@ -542,6 +543,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
         </div>
 
         <nav className="sidebar-nav phasea-nav-list" tabIndex={0} aria-label={tr("Scrollable project navigation", "Navegación desplazable del proyecto")}>
+          <p className="phasea-nav-location" aria-live="polite">{tr("Current section", "Sección actual")}: {tr(navGroups.find(group => group.id === activeGroup)?.labelEn ?? "Project", navGroups.find(group => group.id === activeGroup)?.labelEs ?? "Proyecto")}</p>
           {navGroups.map(group => renderNavGroup(group))}
         </nav>
 
