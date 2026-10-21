@@ -7,6 +7,7 @@ import { logClientError } from "@/lib/client-log";
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { FolderWizardImportPanel } from "./FolderWizardImportPanel";
 import { connectorReadinessCopy, type ConnectorReadiness } from "../settings-experience";
+import { providerConnectionTruth } from "@/lib/provider-connection-truth";
 
 interface IntegrationsTabProps {
   projectId: number;
@@ -267,6 +268,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
             const Icon = provider.category === "file_source" ? FolderOpen : FileInput;
             const readinessState: ConnectorReadiness = isConnected ? "ready" : provider.availability === "review_required" ? "permission_required" : "setup_required";
             const readiness = connectorReadinessCopy(readinessState);
+            const truth = providerConnectionTruth({key:provider.key,availability:provider.availability,connected:isConnected,permissionState:provider.permissionState,lastSuccessfulOperationAt:connectionDetail?.lastSuccessfulOperationAt,lastError:connectionDetail?.lastError});
             return (
               <article key={provider.key} style={{ border: "1px solid hsl(var(--border))", borderRadius: 11, background: "hsl(var(--card))", padding: 17 }}>
                 <div style={{ display: "flex", gap: 11, alignItems: "flex-start" }}>
@@ -285,6 +287,8 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                       {isConnected ? tr("Account connected", "Cuenta conectada") : tr("Account not connected", "Cuenta no conectada")}
                     </div>}
                     <div style={{ marginTop: 4, maxWidth: 190, fontWeight: 500, lineHeight: 1.4 }}>{tr(readiness.detail, readinessState === "ready" ? "La conexión y el permiso requerido están verificados." : readinessState === "permission_required" ? "La integración existe, pero su rol no puede usarla ni configurarla." : "Un administrador debe configurar esta integración antes de usarla.")}</div>
+                    <div style={{marginTop:5,fontWeight:600}}>{tr("Truth","Estado real")}: {truth.state.replaceAll("_"," ")} · {tr("Next","Siguiente")}: {truth.nextAction}</div>
+                    <div style={{marginTop:4,fontWeight:500}}>{tr("Last successful operation","Última operación exitosa")}: {connectionDetail?.lastSuccessfulOperationAt?new Date(connectionDetail.lastSuccessfulOperationAt).toLocaleString(lang):tr("None recorded","Ninguna registrada")}</div>
                   </div>
                   <button
                     onClick={() => openProvider(provider)}
