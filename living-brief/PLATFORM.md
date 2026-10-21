@@ -372,6 +372,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/business-calendar.behavior.ts
 - artifacts/api-server/src/lib/business-calendar.ts
+- artifacts/api-server/src/lib/canonical-job-lifecycle.ts
 - artifacts/api-server/src/lib/clash-report-contracts.ts
 - artifacts/api-server/src/lib/clash-report-provenance.ts
 - artifacts/api-server/src/lib/clash-visual-package-truth.ts
@@ -929,6 +930,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/for-record-receipt.behavior.ts
 - artifacts/api-server/src/lib/for-record-receipt.ts
 - artifacts/api-server/src/lib/ga-block01-agent-integration.behavior.ts
+- artifacts/api-server/src/lib/ga-block02-intake-custody.behavior.ts
+- artifacts/api-server/src/lib/ga-block02-job-lifecycle.behavior.ts
 - artifacts/api-server/src/lib/ga-build001-inventory.behavior.ts
 - artifacts/api-server/src/lib/ga-build002-recovery-check.behavior.ts
 - artifacts/api-server/src/lib/ga-build004-protected-lock.behavior.ts
@@ -971,6 +974,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/help-center.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
+- artifacts/api-server/src/lib/intake-custody-contract.ts
 - artifacts/api-server/src/lib/internal-cost-contract.ts
 - artifacts/api-server/src/lib/internal-cost-governance.ts
 - artifacts/api-server/src/lib/invitation-acceptance.ts
