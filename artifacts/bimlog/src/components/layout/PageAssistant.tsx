@@ -102,8 +102,6 @@ export function PageAssistant() {
         <div className="page-assistant-section-label">{tt("ASK A QUESTION","HACER UNA PREGUNTA")}</div>
         <nav className="page-assistant-actions" aria-label={tt("Assistant actions","Acciones del asistente")}>
           <button type="button" aria-pressed="true" onClick={()=>input.current?.focus()}>{tt("Ask a question","Hacer una pregunta")}</button>
-          <button type="button" className="page-assistant-coming-soon" aria-disabled="true" title={tt("Coming soon","Próximamente")} onClick={event=>event.preventDefault()}>{tt("Submit feedback","Enviar comentarios")}</button>
-          <button type="button" className="page-assistant-coming-soon" aria-disabled="true" title={tt("Coming soon","Próximamente")} onClick={event=>event.preventDefault()}>{tt("Request a fix","Solicitar corrección")}</button>
         </nav>
 
         <section className="page-assistant-question" aria-label={tt("Conversation","Conversación")}>
