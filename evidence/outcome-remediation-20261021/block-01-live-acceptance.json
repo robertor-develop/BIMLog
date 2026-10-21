@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "bimlog-outcome-remediation-live-acceptance-v1",
+  "date": "2026-10-21",
+  "block": 1,
+  "status": "PASS",
+  "candidate": {
+    "version": "v1.05.N18-P37",
+    "sourceCommit": "61b8b914385b82942cafeaaa91f2d22645d64fc2",
+    "deploymentId": "a34f876f-539a-49d6-bc40-d6281bb9d28b",
+    "packageId": "bimlog-61b8b914385b8294-a2e61fb67e67ca7c",
+    "assetManifestSha256": "a2e61fb67e67ca7c34935a80144baeb96c95e1d491cda92e20303e3678dea281",
+    "databaseMigrationLevel": "schema-f1924344d68ab88f6fa5105c",
+    "identityBound": true
+  },
+  "acceptanceProject": {
+    "id": 64,
+    "code": "QA-GAUNTLET-1014",
+    "name": "TEMP GAUNTLET ACCEPTANCE 20261014",
+    "classification": "authorized synthetic acceptance project"
+  },
+  "builds": [
+    {
+      "build": 1,
+      "result": "PASS",
+      "scope": "Intake activation verification",
+      "observed": "Active job persisted with one work item and two governed workflow-phase tasks; the prior false activation-verification error was absent."
+    },
+    {
+      "build": 2,
+      "result": "PASS",
+      "scope": "Intake to Operations continuity",
+      "observed": "Operations opened from the saved Intake source and showed Synthetic Shop Drawing Package plus Shop Drawing Draft and Shop Drawing QC."
+    },
+    {
+      "build": 3,
+      "result": "PASS",
+      "scope": "Convention continuity",
+      "observed": "Convention Version 1 remained active with 16 disciplines, five document types, zero unresolved issues, and generated example QA-GAUNTLET-1014-BIM-ARC-B1-RP-0001-S0-P01."
+    },
+    {
+      "build": 4,
+      "result": "PASS",
+      "scope": "APU continuity",
+      "observed": "Cost & Value Planner exposed immutable published library option TEST C020 APU Shop Drawing - fondos 600 USD, version 3, in the same project."
+    },
+    {
+      "build": 5,
+      "result": "PASS",
+      "scope": "Authenticated Chrome reload persistence",
+      "observed": "After reload, the project identity, published APU v3, and connected BIMLog Agent remained present and no activation-verification or agent-answer error appeared."
+    }
+  ],
+  "verification": {
+    "browser": "authenticated existing Chrome tab",
+    "user": "Roberto Test 1",
+    "tenant": "BIMCorp Inc",
+    "localBuild": "PASS",
+    "focusedBehaviorTests": "PASS",
+    "livingBriefCheck": "PASS",
+    "productionHealth": "PASS"
+  },
+  "dataSafety": {
+    "customerDataChanged": false,
+    "protectedProjectsChanged": false,
+    "schemaChanged": false,
+    "databaseMigrationExecuted": false
+  },
+  "publication": {
+    "result": "PASS",
+    "reason": "Corrective publication of the exact failed-release repair candidate before continuing further builds."
+  }
+}
