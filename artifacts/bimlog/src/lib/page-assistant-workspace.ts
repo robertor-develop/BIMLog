@@ -20,6 +20,26 @@ export function safeAssistantSession(storage: () => Pick<Storage, "getItem" | "s
   };
 }
 
+type AssistantStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+
+export function assistantConversationKey(userId: number | string | undefined, projectId: number | null) {
+  return `bimlog-assistant:${userId ?? "anonymous"}:${projectId ?? "global"}:conversation-id`;
+}
+
+export function resolveAssistantConversationId(
+  sharedStorage: AssistantStorage,
+  tabStorage: AssistantStorage,
+  userId: number | string | undefined,
+  projectId: number | null,
+  createId: () => string,
+) {
+  const sharedKey = assistantConversationKey(userId, projectId);
+  const legacyTabKey = `bimlog-assistant:${projectId ?? "global"}:conversation-id`;
+  const id = sharedStorage.getItem(sharedKey) || tabStorage.getItem(legacyTabKey) || createId();
+  sharedStorage.setItem(sharedKey, id);
+  return id;
+}
+
 export function readAssistantOpen(storage: Pick<Storage, "getItem"> | null, userId: number | string | undefined) {
   if (userId == null) return false;
   try { return storage?.getItem(`bimlog:assistant-open:${userId}`) === "true"; }

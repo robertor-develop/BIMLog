@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { safeAssistantSession, readAssistantOpen, writeAssistantOpen, ASSISTANT_WIDTH_DEFAULT, ASSISTANT_WORKSPACE_MIN, assistantMainWorkspaceWidth, assistantWidthFromPointer, assistantWorkspaceMode, assistantWorkspaceForViewport, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
+import { assistantConversationKey, resolveAssistantConversationId, safeAssistantSession, readAssistantOpen, writeAssistantOpen, ASSISTANT_WIDTH_DEFAULT, ASSISTANT_WORKSPACE_MIN, assistantMainWorkspaceWidth, assistantWidthFromPointer, assistantWorkspaceMode, assistantWorkspaceForViewport, clampAssistantWidth, fitAssistantWidthToViewport, readAssistantWorkspace, stepAssistantWidth, writeAssistantWorkspace } from "./page-assistant-workspace";
 
 assert.equal(clampAssistantWidth(120), 320);
 assert.equal(clampAssistantWidth(900), 680);
@@ -11,7 +11,7 @@ assert.equal(stepAssistantWidth(440,"ArrowLeft","right",1200),460);
 assert.equal(fitAssistantWidthToViewport(680,980),660);
 assert.equal(fitAssistantWidthToViewport(680,390),680);
 assert.equal(assistantWorkspaceMode(761),"split");
-assert.equal(assistantWorkspaceMode(760),"fullscreen");
+assert.equal(assistantWorkspaceMode(760),"sheet");
 assert.equal(assistantMainWorkspaceWidth(680,761),ASSISTANT_WORKSPACE_MIN);
 assert.equal(assistantMainWorkspaceWidth(352,900),548);
 assert.equal(assistantMainWorkspaceWidth(352,1024),672);
@@ -33,3 +33,11 @@ writeAssistantOpen(storage,1,true);assert.equal(readAssistantOpen(storage,1),tru
 assert.deepEqual(readAssistantWorkspace({getItem(){throw new Error("blocked");}}), {width:352,dock:"right",collapsed:false}); assert.doesNotThrow(()=>writeAssistantWorkspace({setItem(){throw new Error("quota");}},512,"left",true));
 
 const deniedSession = safeAssistantSession(()=>{throw new Error("denied getter");}); assert.equal(deniedSession.getItem("draft"),null); assert.doesNotThrow(()=>deniedSession.setItem("draft","test")); assert.doesNotThrow(()=>deniedSession.removeItem("draft"));
+
+const sharedValues = new Map<string,string>(), tabOneValues = new Map<string,string>(), tabTwoValues = new Map<string,string>();
+const storageFor = (map:Map<string,string>) => ({getItem:(key:string)=>map.get(key)??null,setItem:(key:string,value:string)=>void map.set(key,value),removeItem:(key:string)=>void map.delete(key)});
+tabOneValues.set("bimlog-assistant:64:conversation-id","legacy-conversation");
+assert.equal(resolveAssistantConversationId(storageFor(sharedValues),storageFor(tabOneValues),17,64,()=>"new-one"),"legacy-conversation");
+assert.equal(sharedValues.get(assistantConversationKey(17,64)),"legacy-conversation");
+assert.equal(resolveAssistantConversationId(storageFor(sharedValues),storageFor(tabTwoValues),17,64,()=>"new-two"),"legacy-conversation");
+assert.equal(resolveAssistantConversationId(storageFor(sharedValues),storageFor(tabTwoValues),18,64,()=>"other-user"),"other-user");

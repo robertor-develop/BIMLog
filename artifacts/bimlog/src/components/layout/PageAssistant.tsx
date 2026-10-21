@@ -4,12 +4,13 @@ import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { collectPageAssistantContext, highlightAssistantControls, selectedAssistantControl } from "@/lib/page-assistant-context";
 import { usePageAssistantContextState } from "@/lib/page-assistant-context-state";
-import { ASSISTANT_WIDTH_DEFAULT, assistantBrowserStorage, safeAssistantSession, readAssistantOpen, writeAssistantOpen, assistantWidthFromPointer, assistantWorkspaceForViewport, fitAssistantWidthToViewport, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
+import { ASSISTANT_WIDTH_DEFAULT, assistantBrowserStorage, assistantConversationKey, resolveAssistantConversationId, safeAssistantSession, readAssistantOpen, writeAssistantOpen, assistantWidthFromPointer, assistantWorkspaceForViewport, fitAssistantWidthToViewport, stepAssistantWidth, writeAssistantWorkspace, type AssistantDockSide } from "@/lib/page-assistant-workspace";
 
 type Message = { role: "user" | "assistant"; text: string; projectId: number | null };
 type AgentTurn = { requestId:string; conversationId:string; projectId:number|null; question:string; answer:string|null; state:"reserved"|"running"|"complete"|"failed"; errorCode:string|null };
 type Repair = { id: string; payload: { issue: string; scope: string }; scope_digest: string; state: string; created_at?: string; execution_receipt?: { message?: string; updatedAt?: string; evidence?: Record<string,unknown> } | null };
 const assistantSession = safeAssistantSession();
+const assistantSharedSession = safeAssistantSession(() => assistantBrowserStorage("localStorage"));
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
 type SpeechResultEvent = { results: ArrayLike<{ 0?: { transcript?: string }; isFinal?: boolean }> };
@@ -37,11 +38,11 @@ export function PageAssistant() {
   const contextState=usePageAssistantContextState(lang);
   const context=contextState.context;
   const contextKey=`bimlog-assistant:${context.projectId ?? "global"}`;
-  const conversationKey=`${contextKey}:conversation-id`;
-  const [conversationId,setConversationId]=useState(()=>assistantSession.getItem(conversationKey)||crypto.randomUUID());
+  const conversationKey=assistantConversationKey(user?.id,context.projectId);
+  const [conversationId,setConversationId]=useState(()=>resolveAssistantConversationId(assistantSharedSession,assistantSession,user?.id,context.projectId,()=>crypto.randomUUID()));
   const [activeRequestId,setActiveRequestId]=useState<string|null>(null);
   const isSuperAdmin=Boolean((user as {isSuperAdmin?:boolean}|null)?.isSuperAdmin);
-  useEffect(()=>{const id=assistantSession.getItem(conversationKey)||crypto.randomUUID();assistantSession.setItem(conversationKey,id);setConversationId(id);setActiveRequestId(null);},[conversationKey]);
+  useEffect(()=>{const id=resolveAssistantConversationId(assistantSharedSession,assistantSession,user?.id,context.projectId,()=>crypto.randomUUID());setConversationId(id);setActiveRequestId(null);},[conversationKey,user?.id,context.projectId]);
   useEffect(()=>{try{setFeedbackReceipt(JSON.parse(assistantSession.getItem(`${contextKey}:feedback-receipt`)||"null"));}catch{setFeedbackReceipt(null);}},[contextKey]);
   useEffect(()=>{setQuestion(assistantSession.getItem(`${contextKey}:draft`)||"");},[contextKey]);
   useEffect(()=>{assistantSession.setItem(`${contextKey}:draft`,question);},[question,contextKey]);
@@ -74,7 +75,7 @@ export function PageAssistant() {
   function closeAssistant(){resizeCleanup.current?.();setOpen(false);window.setTimeout(()=>opener.current?.focus({preventScroll:true}),0);}
   async function ask(next=question){if(!next.trim()||busy)return;const currentContext=collectPageAssistantContext(lang);const groundedContext={...currentContext,selectedField:includeSelected?selectedField.current:null};const requestId=crypto.randomUUID();setBusy(true);setActiveRequestId(requestId);setError("");setNotice("");setProposal(null);const submitted:Message={role:"user",text:next.trim(),projectId:currentContext.projectId};setMessages(current=>[...current,submitted]);setQuestion("");try{const path=currentContext.projectId===null?"/api/v1/assistant/ask":`/api/v1/projects/${currentContext.projectId}/assistant/ask`;const data=await api(path,{method:"POST",body:JSON.stringify({requestId,conversationId,question:submitted.text,context:groundedContext})});if(data.transport!=="main04"||data.contextual!==true||data.turn?.requestId!==requestId)throw new Error(tt("The BIMLog Agent did not reserve this exact question.","El Agente BIMLog no reservó esta pregunta exacta."));if(data.turn.state==="complete"&&data.turn.answer){await loadConversation(conversationId);setBusy(false);setActiveRequestId(null);return;}void waitForAnswer(requestId);}catch(cause){setBusy(false);setActiveRequestId(null);setError(cause instanceof Error?cause.message:tt("BIMLog Dedicated Agent is unavailable on this device.","El Agente Dedicado de BIMLog no está disponible en este dispositivo."));}}
   function submitFeedback(viewStatus=false){const latest=[...messages].reverse().find(item=>item.role==="user")?.text||question;window.dispatchEvent(new CustomEvent("bimlog:feedback-open",{detail:{feedbackType:"bug",message:latest?`${latest}\n\nPage: ${context.route}`:"",viewStatus}}));}
-  function newConversation(){const id=crypto.randomUUID();assistantSession.setItem(conversationKey,id);setConversationId(id);setActiveRequestId(null);setBusy(false);setMessages([]);setTurns([]);setQuestion("");setError("");setNotice("");assistantSession.removeItem(contextKey);assistantSession.removeItem(`${contextKey}:draft`);input.current?.focus();}
+  function newConversation(){const id=crypto.randomUUID();assistantSharedSession.setItem(conversationKey,id);setConversationId(id);setActiveRequestId(null);setBusy(false);setMessages([]);setTurns([]);setQuestion("");setError("");setNotice("");assistantSession.removeItem(contextKey);assistantSession.removeItem(`${contextKey}:draft`);input.current?.focus();}
   function toggleVoice(){const current=recognition.current;if(!current){input.current?.focus();setVoiceStatus(tt("Automatic browser transcription is unavailable here. Use the microphone on your phone keyboard to dictate into this box.","La transcripción automática del navegador no está disponible aquí. Usa el micrófono del teclado de tu teléfono para dictar en este campo."));return;}if(voiceListening){current.stop();return;}voiceBase.current=question;voiceError.current="";try{current.start();}catch{setVoiceStatus(tt("Dictation is already starting. Please wait a moment.","El dictado ya está iniciando. Espera un momento."));}}
   function resizePanel(clientX:number){setPanelWidth(assistantWidthFromPointer(clientX,window.innerWidth,dock));}
   function startResize(event:React.PointerEvent<HTMLDivElement>){event.preventDefault();resizeCleanup.current?.();const move=(next:PointerEvent)=>resizePanel(next.clientX);const stop=()=>{window.removeEventListener("pointermove",move);window.removeEventListener("pointerup",stop);window.removeEventListener("pointercancel",stop);resizeCleanup.current=null;};resizeCleanup.current=stop;window.addEventListener("pointermove",move);window.addEventListener("pointerup",stop,{once:true});window.addEventListener("pointercancel",stop,{once:true});}
