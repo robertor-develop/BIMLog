@@ -1,5 +1,17 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Full-GA remediation Block 5 — 2026-10-21
+
+- [x] Bind the last published source, package identity, and authenticated desktop production route.
+- [x] Re-run tenant, role, project, object, Agent, and purge-isolation contracts.
+- [x] Repair the stale responsive acceptance contract and verify desktop, tablet, exact-390, keyboard, focus, touch, and reduced-motion behavior.
+- [x] Verify recovery, rollback, retry, upload, autosave, provider, and deployment recovery behavior.
+- [x] Preserve all 16 protected custody records without claiming recovered originals or mutating customer rows or storage objects.
+- [x] Keep temporary-project and sample purge execution disabled pending independently verified exact ownership and complete lifecycle evidence.
+- [ ] Complete the next five-build block, then publish the ten-build interval and run full authenticated desktop/mobile Chrome smoke.
+- [ ] Recover and independently checksum the protected originals before claiming final GA readiness.
+- [ ] Configure and verify the approved Stripe and SendGrid production values before enabling paid commercial sales.
+
 ## Corrective commercial customer-lifecycle publication — 2026-10-16
 
 - [x] Gate subscription setup, checkout authority, idempotency, persistence, and truthful failure responses.

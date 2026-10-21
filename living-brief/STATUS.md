@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Full-GA remediation Block 5 candidate — 2026-10-21
+
+Builds 21–25 bind the exact published source and authenticated desktop route, preserve tenant and role isolation, enforce the current responsive Agent split-workspace contract, exercise recovery and rollback behavior, and keep protected-file recovery plus every purge operation fail-closed. The implementation block passes without production data mutation. Five builds are unpublished, so publication is not due until the next five-build block completes the ten-build interval. Final GA remains blocked by external protected-original recovery evidence, independently verified synthetic-only cleanup ownership, and live paid-provider configuration and verification.
+
 ## Lorena P1 release repair Block 2 — B06–B10 — 2026-10-16
 
 B06–B10 close the remaining user-facing continuity gaps from Lorena's report. Governance now explains that role codes such as `CEO` describe configured policy eligibility and do not identify a person or grant access. Intake continues to expose exact existing canonical contracts when no activation summary exists. EDT repair can open the exact affected contract, and the Contract workspace preserves a validated same-project return to the originating Operations task. A permanent consolidated gate covers all four contracts and strict frontend TypeScript. Together with B01–B05 this reaches the ten-build publication boundary; exact-head full gate, push, controlled publication, exact live identity and authenticated desktop/mobile Chrome acceptance remain required.
