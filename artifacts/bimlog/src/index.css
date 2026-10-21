@@ -157,6 +157,7 @@ iframe[aria-label*="Replit" i],
 .route-state-technical summary { width: fit-content; cursor: pointer; font-size: 0.8rem; font-weight: 700; }
 .route-state-technical code { display: block; font-size: 0.75rem; }
 .route-state-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.actionable-empty-state{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;padding:16px;border:1px solid hsl(var(--border));border-radius:12px;background:hsl(var(--card))}.actionable-empty-state p{margin:3px 0;color:hsl(var(--muted-foreground));line-height:1.45}.actionable-empty-state small{display:block;color:hsl(var(--muted-foreground))}.actionable-empty-state button{min-height:40px;padding:8px 12px;border:1px solid #173b67;border-radius:9px;background:#173b67;color:#fff;font-weight:750}.actionable-empty-state button:focus-visible{outline:3px solid #f2b544;outline-offset:3px}@media(max-width:560px){.actionable-empty-state{grid-template-columns:auto 1fr}.actionable-empty-state button{grid-column:1/-1;width:100%}}
 .experience-stack { display: grid; gap: var(--experience-space-lg); min-width: 0; }
 .experience-panel { min-width: 0; padding: var(--experience-space-xl); border: 1px solid hsl(var(--border)); border-radius: var(--radius-lg); background: hsl(var(--card)); color: hsl(var(--card-foreground)); }
 .experience-panel > :first-child { margin-top: 0; }
