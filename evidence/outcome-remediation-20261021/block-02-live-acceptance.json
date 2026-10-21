@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "bimlog-outcome-remediation-live-acceptance-v1",
+  "date": "2026-10-21",
+  "block": 2,
+  "status": "PUBLISHED_LIVE_SMOKE_BLOCKED",
+  "candidate": {
+    "version": "v1.05.N18-P37",
+    "sourceCommit": "1213e4db3f7978ab964765760e34f002f6826599",
+    "deploymentId": "a34f876f-539a-49d6-bc40-d6281bb9d28b",
+    "packageId": "bimlog-1213e4db3f7978ab-742b5b2f923ba4c5",
+    "assetManifestSha256": "742b5b2f923ba4c592e0d19f44f19e9a3c75c0c33e78dd74f58244941f646b30",
+    "databaseMigrationLevel": "schema-f1924344d68ab88f6fa5105c",
+    "identityBound": true
+  },
+  "acceptanceProject": {
+    "id": 64,
+    "code": "QA-GAUNTLET-1014",
+    "name": "TEMP GAUNTLET ACCEPTANCE 20261014",
+    "classification": "authorized synthetic acceptance project"
+  },
+  "builds": [
+    {
+      "build": 6,
+      "result": "PASS",
+      "scope": "RFI workflow contract",
+      "verification": "test:ga-final-block03-build021"
+    },
+    {
+      "build": 7,
+      "result": "PASS",
+      "scope": "Submittal workflow contract",
+      "verification": "test:ga-final-block03-build022"
+    },
+    {
+      "build": 8,
+      "result": "PASS",
+      "scope": "Files and intake continuity",
+      "verification": "test:flow-continuity-block02 and test:ux-block09"
+    },
+    {
+      "build": 9,
+      "result": "PASS",
+      "scope": "Reports and exports",
+      "verification": "test:ga-final-block04-build028 and test:corrective-b14"
+    },
+    {
+      "build": 10,
+      "result": "PASS_AFTER_REPAIR",
+      "scope": "BIMLog Agent continuity across project tabs",
+      "defect": "The conversation identifier used sessionStorage, so a second authenticated tab did not load the existing project conversation.",
+      "repair": "The identifier is now stored in user-and-project-scoped localStorage with migration from the legacy tab session key. Drafts and panel state remain tab scoped.",
+      "verification": "page-assistant workspace behavior, frontend typecheck, corrective B31-B35, live journey build010 contract, and authenticated release acceptance"
+    }
+  ],
+  "prepublicationChromeEvidence": {
+    "result": "PASS_WITH_AGENT_DEFECT_FOUND",
+    "routes": [
+      "/projects/64/rfis",
+      "/projects/64/submittals",
+      "/projects/64/files",
+      "/projects/64/reports"
+    ],
+    "agentTwoTabResult": "FAIL",
+    "disposition": "Defect repaired before publication."
+  },
+  "verification": {
+    "localGovernedBuild": "PASS",
+    "focusedBehaviorTests": "PASS",
+    "livingBriefCheck": "PASS",
+    "replitExactSourceBuild": "PASS_TO_PRODUCTION_BUNDLE_AND_RUNTIME_CLOSURE",
+    "productionHealth": "PASS",
+    "postpublicationAuthenticatedChromeSmoke": "BLOCKED",
+    "postpublicationChromeBlocker": "The Chrome extension connection became unavailable after publication. No BIMLog authentication failure or production defect was observed."
+  },
+  "procore": {
+    "liveWriteJourney": "BLOCKED",
+    "reason": "No approved safe Procore test project is available. The existing connected tab is the protected ELARA EAST customer project, so no preview, commit, or replay mutation was attempted.",
+    "syntheticFixturesPresentedAsRecoveredOriginals": false
+  },
+  "dataSafety": {
+    "customerDataChanged": false,
+    "protectedProjectsChanged": false,
+    "schemaChanged": false,
+    "databaseMigrationExecuted": false
+  },
+  "publication": {
+    "result": "PASS",
+    "exactSourceVerified": true
+  }
+}
