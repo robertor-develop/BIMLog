@@ -1577,3 +1577,13 @@ body[data-assistant-collapsed="true"]{--bimlog-agent-active-width:72px}
 @media(max-width:760px){:where(button,a,[role="button"]){min-height:44px}:where(.page-content){overflow-wrap:anywhere}:where(table){display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}}
 @media(prefers-reduced-motion:reduce){html:focus-within{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 @media(forced-colors:active){:where(a,button,input,select,textarea,summary):focus-visible{outline:3px solid Highlight}.page-assistant-panel,.actionable-empty-state{border:1px solid CanvasText}}
+
+/* BIMLog visual system contract shared by route workspaces. */
+:root{--bimlog-control-height:40px;--bimlog-card-radius:12px;--bimlog-page-gap:16px;--bimlog-focus-ring:#f2b544;--bimlog-line:#d7e0ea;--bimlog-ink:#0f172a;--bimlog-muted:#5f6d7e;--bimlog-primary:#173b67}
+.bimlog-workspace-content :where(input,select,textarea){box-sizing:border-box;min-height:var(--bimlog-control-height);border-radius:8px}
+.bimlog-workspace-content :where(button,.btn){min-height:var(--bimlog-control-height);border-radius:8px}
+.bimlog-workspace-content :where(.card,.panel){border-radius:var(--bimlog-card-radius)}
+.bimlog-workspace-content :where(h1,h2,h3){color:var(--bimlog-ink);text-wrap:balance}
+.bimlog-workspace-content :where(p,small){text-wrap:pretty}
+.bimlog-workspace-content :where(button,.btn,a):focus-visible{outline-color:var(--bimlog-focus-ring)}
+@media(max-width:760px){:root{--bimlog-page-gap:12px}.bimlog-workspace-content :where(input,select,textarea,button,.btn){font-size:max(16px,1em)}}
