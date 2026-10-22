@@ -32,7 +32,15 @@ export function projectActivatedEdtPlan(source: ActivatedEdtSource): ProjectedEd
   const commercial = record(data.commercial);
   const profiles = list(commercial.contracts);
   const scopeItems = list(data.scopeItems);
-  const activatedContracts = list(source.intake.activationSummary.contracts);
+  const coreActivation = source.intake.activationSummary.activationMode === "core";
+  const activatedContracts = coreActivation ? profiles.map(profile => {
+    const profileId = required(profile.id, "contract profile ID");
+    return {
+      profileId,
+      contractId: `intake-contract:${source.intake.id}:${profileId}`,
+      contractVersionId: `intake-contract-version:${edtFingerprint({ intakeId: source.intake.id, revision: source.intake.revision, profile, scopeItems: scopeItems.filter(item => item.contractId === profileId) })}`,
+    };
+  }) : list(source.intake.activationSummary.contracts);
   if (!profiles.length || !scopeItems.length || !activatedContracts.length)
     throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS", "Commercial contracts and scope must be present in the activated Intake.");
   const byProfile = new Map(activatedContracts.map(entry => [required(entry.profileId,"activated contract profile"),entry]));
@@ -70,7 +78,7 @@ export function projectActivatedEdtPlan(source: ActivatedEdtSource): ProjectedEd
     const scope=byScope.get(saved.stableScopeItemId);
     if(!scope)throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS","A saved Work Item has no matching Intake scope item.");
     const contractNode=contractNodes.get(required(scope.contractId,"scope Contract profile"));
-    if(!contractNode||saved.contractId!==contractNode.sourceIdentity||saved.contractVersionId!==contractNode.snapshot.contractVersionId)
+    if(!contractNode||(!coreActivation && (saved.contractId!==contractNode.sourceIdentity||saved.contractVersionId!==contractNode.snapshot.contractVersionId)))
       throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS","Saved Work Item Contract binding differs from the activated Intake snapshot.");
     const deliverableType=required(scope.deliverableType,"scope deliverable type");
     const deliverableKey=`${contractNode.sourceIdentity}:${deliverableType}`;
@@ -106,7 +114,10 @@ export function projectActivatedEdtPlan(source: ActivatedEdtSource): ProjectedEd
   validateEdtPlanNodes(nodes);
   validateEdtPlanWorkItems(nodes,workItems);
   validateEdtPlanCoverage(source.workItems.map(item=>item.id),workItems);
-  validateEdtPlanSourceBindings(source.workItems.map(item=>({id:item.id,contractId:item.contractId,stableScopeItemId:item.stableScopeItemId})),workItems);
+  if (coreActivation) {
+    if (source.workItems.some(item => !item.stableScopeItemId))
+      throw new EdtEngineConflict("EDT_PLAN_SOURCE_MISMATCH", "Every core EDT Work Item must retain its saved Intake scope identity.");
+  } else validateEdtPlanSourceBindings(source.workItems.map(item=>({id:item.id,contractId:item.contractId,stableScopeItemId:item.stableScopeItemId})),workItems);
   return {nodes,workItems,sourceFingerprint:edtFingerprint({project:source.project,intakeId:source.intake.id,revision:source.intake.revision,
     intakeData:source.intake.data,activationSummary:source.intake.activationSummary,nodes,workItems})};
 }

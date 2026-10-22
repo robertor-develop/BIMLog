@@ -5912,6 +5912,18 @@ The previous 13-record summary is superseded for current recovery planning. Hist
 - [x] Cover custom allocation, PRE/COO/FOR/ASB aliases, deterministic rounding, save-compatible fields, and idempotent replay through the real production helpers.
 - [ ] Independent Viva re-audit, publication, authenticated production Chrome acceptance, and Lorena field acceptance remain separate gates.
 
+## Lorena activated-Intake field correction — 2026-10-22
+
+- [x] Apply the sole compatible saved APU through the same exact unit-rate and provenance path as an explicit selection.
+- [x] Replace the invisible Excel-paste overlay with a visible, keyboard-focusable two-column paste surface while preserving bounded validation.
+- [x] Remove duplicate project-level strategy and milestone inputs; keep the selected immutable workflow's per-Contract-Item guidance as the visible editing surface.
+- [x] Refresh and retry one stale activation receipt with the server's current ready revision/fingerprint instead of requiring a manual browser refresh.
+- [x] Create one idempotent visible Work Package per verified workflow phase and link it to the exact PRE/COO/FOR/ASB allocated task.
+- [x] Allow the read-only EDT preview to trace core activation to immutable Intake contract-profile identities without fabricating financial Contract records.
+- [ ] Publish the exact clean source and complete authenticated production Chrome add/save/reload/activate/Operations/EDT proof in a synthetic project before requesting Lorena field acceptance.
+
+No PRUEBA11 or other customer project data was changed during implementation or automated verification.
+
 ## Lorena P1 release repair Block 1 — 2026-10-16
 
 - [x] B01: align release identity checks with the active P37 source/package/schema identity.

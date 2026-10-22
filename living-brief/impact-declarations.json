@@ -73286,10 +73286,22 @@
       ],
       "reason": "Final Block 3 reconciles the agent workspace acceptance gate with the approved runtime: feedback and fix controls remain absent, while the mobile layout preserves the center workspace above the agent. This changes test evidence only and does not mutate production or protected customer data.",
       "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/edt-engine-build325.behavior.ts",
+        "artifacts/api-server/src/lib/edt-engine-plan-projection.ts",
+        "artifacts/api-server/src/lib/edt-engine-source-service.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json",
         "scripts/test-page-assistant-panel-workspace.mjs"
       ],
-      "reviewedChangeSha256": "0b32884d23ec6e0ad02a7d74dcbf56b2d5d864180ac59e7cd09db9b4332c893d"
+      "reviewedChangeSha256": "224bf951f429ef648e8de3170edfc6427504cb99401cbef78cc28a82dfdadd60"
     }
   ]
 }

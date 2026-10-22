@@ -2,16 +2,29 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "97f3bd4caeb112532e6137259cfdfba45236b8f1",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "40a093236084a79369e8460d4ae94bcde60724841fb92e1646dc3c6e593cef41",
+  "bundleSha256": "508de0ebdd693f0adb715e5eeee0c0c51e18eb1037ac7908ad3e7fe0bb4a9370",
   "impact": {
     "baselineCommit": "97f3bd4caeb112532e6137259cfdfba45236b8f1",
     "changedPaths": [
+      "artifacts/api-server/src/lib/edt-engine-build325.behavior.ts",
+      "artifacts/api-server/src/lib/edt-engine-plan-projection.ts",
+      "artifacts/api-server/src/lib/edt-engine-source-service.ts",
+      "artifacts/api-server/src/lib/job-intake-service.ts",
+      "artifacts/api-server/src/lib/job-intake.behavior.ts",
+      "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
+      "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+      "artifacts/bimlog/src/lib/job-intake-apu-default.behavior.ts",
+      "artifacts/bimlog/src/lib/job-intake-apu-default.ts",
+      "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+      "living-brief/OPEN_LOOP.md",
+      "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/impact-declarations.json",
       "scripts/test-page-assistant-panel-workspace.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -127,9 +140,9 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "d4e345fce0df01c7c5c9b345cbebb7b5fcf76957ff836fb86f1b000842c1dc29",
-      "sourceChangedAt": "2026-10-21T01:52:40-04:00",
-      "changeState": "accepted",
+      "sha256": "bb0158df1393d45dcac9835a09bdb8c52bf451515f79d874a72d88e793763fa2",
+      "sourceChangedAt": "2026-10-22T17:27:32.146Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "97f3bd4caeb112532e6137259cfdfba45236b8f1",
       "semanticReviewedThroughCommit": "97f3bd4caeb112532e6137259cfdfba45236b8f1",
       "semanticReviewTask": "outcome-remediation-block03-final-release-20261021",

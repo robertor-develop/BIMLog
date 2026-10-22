@@ -8,12 +8,13 @@ assert.equal(soleCompatibleApuVersion([], "USD"), null);
 assert.equal(soleCompatibleApuVersion([...only, { version: 4, sellingPrice: "40", currency: "USD" }], "USD"), null);
 assert.equal(soleCompatibleApuVersion([{ version: 0, sellingPrice: "35", currency: "USD" }], "USD"), null);
 const explicit = { id: "A", apuPlanVersion: 2, billingHourlyRate: "22" };
-const unbound = { id: "B", apuPlanVersion: null, billingHourlyRate: "0" };
+const unbound = { id: "B", quantity: "1", apuPlanVersion: null, billingHourlyRate: "0" };
 const applied = applySoleApuToUnboundItems([explicit, unbound], only, "USD");
 assert.deepEqual(applied[0], explicit);
 assert.equal(applied[1].apuPlanVersion, 3);
-assert.equal(applied[1].billingHourlyRate, "0");
-assert.equal(applySoleApuToUnboundItems([{ ...unbound, billingHourlyRate: "75" }], [{ version: 1, sellingPrice: "6000", currency: "USD" }], "USD")[0].billingHourlyRate, "75");
+assert.equal(applied[1].billingHourlyRate, "35.47");
+assert.equal(applied[1].rateSource?.rateCalculation, "plan_total_divided_by_contract_quantity");
+assert.equal(applySoleApuToUnboundItems([{ ...unbound, quantity: "10", billingHourlyRate: "75" }], [{ version: 1, sellingPrice: "6000", currency: "USD" }], "USD")[0].billingHourlyRate, "600");
 assert.equal(applySoleApuToUnboundItems([unbound], only, "BOB")[0].apuPlanVersion, null);
 assert.equal(applySoleApuToUnboundItems([unbound], [...only, { version: 4, sellingPrice: "40", currency: "USD" }], "USD")[0].apuPlanVersion, null);
 const coverage = contractApuCoverage(

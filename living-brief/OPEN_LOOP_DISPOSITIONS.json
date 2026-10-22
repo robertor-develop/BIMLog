@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "d4e345fce0df01c7c5c9b345cbebb7b5fcf76957ff836fb86f1b000842c1dc29",
-  "itemCount": 443,
+  "sourceSha256": "bb0158df1393d45dcac9835a09bdb8c52bf451515f79d874a72d88e793763fa2",
+  "itemCount": 444,
   "counts": {
-    "ACTIVE": 399,
+    "ACTIVE": 400,
     "SUPERSEDED": 32,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -7721,8 +7721,26 @@
       "currentAuthority": false
     },
     {
+      "id": "42ae8bc59f4d365e",
+      "sourceLine": 5923,
+      "heading": "Lorena activated-Intake field correction — 2026-10-22",
+      "statement": "Publish the exact clean source and complete authenticated production Chrome add/save/reload/activate/Operations/EDT proof in a synthetic project before requesting Lorena field acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:5923",
+        "Lorena activated-Intake field correction — 2026-10-22"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "7b6db25101bb3f24",
-      "sourceLine": 5931,
+      "sourceLine": 5943,
       "heading": "Lorena P1 release repair Block 2 — 2026-10-16",
       "statement": "Pass the complete exact-head build and release gate, push B06–B10, publish the accumulated B01–B10 candidate, verify exact production identity and run full authenticated desktop/mobile Chrome smoke.",
       "classification": "ACTIVE",
@@ -7733,14 +7751,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5931",
+        "OPEN_LOOP.md:5943",
         "Lorena P1 release repair Block 2 — 2026-10-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "0d97b85f771e19ba",
-      "sourceLine": 5951,
+      "sourceLine": 5963,
       "heading": "Lorena P1 release repair Block 4 — 2026-10-19",
       "statement": "Pass the exact-head build, push B16–B20, publish the accumulated B11–B20 candidate, verify exact production identity, and run full authenticated Chrome smoke.",
       "classification": "ACTIVE",
@@ -7751,14 +7769,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5951",
+        "OPEN_LOOP.md:5963",
         "Lorena P1 release repair Block 4 — 2026-10-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "3f282fc50494c786",
-      "sourceLine": 5960,
+      "sourceLine": 5972,
       "heading": "Ruben new-project company choices repair — 2026-10-19",
       "statement": "Complete release checks and publish the repair with the pending B11–B20 interval; verify authenticated Chrome and Ruben's Boys and Girls Club selector. No production project data may be changed for this check.",
       "classification": "ACTIVE",
@@ -7769,14 +7787,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:5960",
+        "OPEN_LOOP.md:5972",
         "Ruben new-project company choices repair — 2026-10-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "7e7212fb73958750",
-      "sourceLine": 5967,
+      "sourceLine": 5979,
       "heading": "Ruben platform-wide company choices — 2026-10-19",
       "statement": "Publish the complete corrected candidate after release checks, then inspect authenticated platform forms and obtain access to Ruben's Boys and Girls Club for exact field acceptance.",
       "classification": "ACTIVE",
@@ -7787,14 +7805,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:5967",
+        "OPEN_LOOP.md:5979",
         "Ruben platform-wide company choices — 2026-10-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "5564651330a9389f",
-      "sourceLine": 5973,
+      "sourceLine": 5985,
       "heading": "BIMLog Agent hosted-provider recovery — 2026-10-19",
       "statement": "Push the reconciled exact head, synchronize and publish through the existing Replit Shell path, verify exact live source identity, and pass a fresh authenticated Chrome question/answer before starting the next five-build block.",
       "classification": "ACTIVE",
@@ -7805,14 +7823,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:5973",
+        "OPEN_LOOP.md:5985",
         "BIMLog Agent hosted-provider recovery — 2026-10-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "05598c24e1403438",
-      "sourceLine": 5982,
+      "sourceLine": 5994,
       "heading": "2026-10-20 — Independent-audit repair Block 1 release state",
       "statement": "Publish only at the established two-block/ten-build cadence, then run authenticated production Chrome acceptance against the exact published source.",
       "classification": "ACTIVE",
@@ -7823,14 +7841,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:5982",
+        "OPEN_LOOP.md:5994",
         "2026-10-20 — Independent-audit repair Block 1 release state"
       ],
       "currentAuthority": false
     },
     {
       "id": "29d7bb1d840f1625",
-      "sourceLine": 5983,
+      "sourceLine": 5995,
       "heading": "2026-10-20 — Independent-audit repair Block 1 release state",
       "statement": "Keep final GA blocked until protected-file custody and temporary-project lifecycle evidence pass independent review.",
       "classification": "ACTIVE",
@@ -7841,14 +7859,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:5983",
+        "OPEN_LOOP.md:5995",
         "2026-10-20 — Independent-audit repair Block 1 release state"
       ],
       "currentAuthority": false
     },
     {
       "id": "0a58c475c74427ea",
-      "sourceLine": 5992,
+      "sourceLine": 6004,
       "heading": "2026-10-20 — Independent-audit repair Block 2 acceptance execution",
       "statement": "Publish the exact ten-build candidate and populate these receipts only from real authenticated production observations.",
       "classification": "ACTIVE",
@@ -7859,14 +7877,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:5992",
+        "OPEN_LOOP.md:6004",
         "2026-10-20 — Independent-audit repair Block 2 acceptance execution"
       ],
       "currentAuthority": false
     },
     {
       "id": "a8dd8c725652ed08",
-      "sourceLine": 5993,
+      "sourceLine": 6005,
       "heading": "2026-10-20 — Independent-audit repair Block 2 acceptance execution",
       "statement": "If no approved Procore account or safe test project exists, record the exact external blocker without mutating data or claiming acceptance.",
       "classification": "ACTIVE",
@@ -7877,14 +7895,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:5993",
+        "OPEN_LOOP.md:6005",
         "2026-10-20 — Independent-audit repair Block 2 acceptance execution"
       ],
       "currentAuthority": false
     },
     {
       "id": "0a3ae478b1bdfc12",
-      "sourceLine": 6001,
+      "sourceLine": 6013,
       "heading": "2026-10-20 — Independent-audit closure Block 3",
       "statement": "Obtain authoritative provider snapshot/object-version evidence and original bytes/checksums for every protected file before claiming recovery acceptance.",
       "classification": "ACTIVE",
@@ -7895,14 +7913,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6001",
+        "OPEN_LOOP.md:6013",
         "2026-10-20 — Independent-audit closure Block 3"
       ],
       "currentAuthority": false
     },
     {
       "id": "dcfa4269e5c2afee",
-      "sourceLine": 6002,
+      "sourceLine": 6014,
       "heading": "2026-10-20 — Independent-audit closure Block 3",
       "statement": "Obtain complete temporary-project dependency and shared-storage ownership proof plus independent approval before any deletion.",
       "classification": "ACTIVE",
@@ -7913,14 +7931,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6002",
+        "OPEN_LOOP.md:6014",
         "2026-10-20 — Independent-audit closure Block 3"
       ],
       "currentAuthority": false
     },
     {
       "id": "3ff4da7dbd0ec3ae",
-      "sourceLine": 6003,
+      "sourceLine": 6015,
       "heading": "2026-10-20 — Independent-audit closure Block 3",
       "statement": "Complete the next five builds, publish the exact ten-build candidate, verify deployed identity and run full authenticated Chrome smoke.",
       "classification": "ACTIVE",
@@ -7931,14 +7949,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6003",
+        "OPEN_LOOP.md:6015",
         "2026-10-20 — Independent-audit closure Block 3"
       ],
       "currentAuthority": false
     },
     {
       "id": "f2da372b961bf632",
-      "sourceLine": 6004,
+      "sourceLine": 6016,
       "heading": "2026-10-20 — Independent-audit closure Block 3",
       "statement": "Complete safe-test-project Procore download and RFI live acceptance when an approved connected account and disposable project exist.",
       "classification": "ACTIVE",
@@ -7949,14 +7967,14 @@
         "module": "artifacts/bimlog/src/pages/project/RfisTab.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6004",
+        "OPEN_LOOP.md:6016",
         "2026-10-20 — Independent-audit closure Block 3"
       ],
       "currentAuthority": false
     },
     {
       "id": "0fd7b819108ee103",
-      "sourceLine": 6010,
+      "sourceLine": 6022,
       "heading": "2026-10-20 — Lens trade catalog expansion",
       "statement": "Publish the exact source candidate and verify both new choices in authenticated production Chrome without changing project data.",
       "classification": "ACTIVE",
@@ -7967,14 +7985,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:6010",
+        "OPEN_LOOP.md:6022",
         "2026-10-20 — Lens trade catalog expansion"
       ],
       "currentAuthority": false
     },
     {
       "id": "bcef7b01c2128633",
-      "sourceLine": 6020,
+      "sourceLine": 6032,
       "heading": "2026-10-20 — Reusable project trade catalog",
       "statement": "Publish the exact clean source, verify its bound production identity, then add a harmless custom trade in the temporary synthetic project and confirm it survives reload.",
       "classification": "ACTIVE",
@@ -7985,14 +8003,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6020",
+        "OPEN_LOOP.md:6032",
         "2026-10-20 — Reusable project trade catalog"
       ],
       "currentAuthority": false
     },
     {
       "id": "4e3297e2e3a83b85",
-      "sourceLine": 6031,
+      "sourceLine": 6043,
       "heading": "2026-10-20 — Full-GA remediation Block 1",
       "statement": "Publish the exact reconciled candidate, verify its deployed SHA, and complete authenticated production Chrome smoke.",
       "classification": "ACTIVE",
@@ -8003,14 +8021,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:6031",
+        "OPEN_LOOP.md:6043",
         "2026-10-20 — Full-GA remediation Block 1"
       ],
       "currentAuthority": false
     },
     {
       "id": "62e8444cf01d0b75",
-      "sourceLine": 6032,
+      "sourceLine": 6044,
       "heading": "2026-10-20 — Full-GA remediation Block 1",
       "statement": "Exercise Procore discovery with an approved connected customer account before claiming live Procore acceptance; absence of such credentials remains an external gate.",
       "classification": "ACTIVE",
@@ -8021,14 +8039,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6032",
+        "OPEN_LOOP.md:6044",
         "2026-10-20 — Full-GA remediation Block 1"
       ],
       "currentAuthority": false
     },
     {
       "id": "d773f4d1111b6ff4",
-      "sourceLine": 6043,
+      "sourceLine": 6055,
       "heading": "2026-10-21 — Full-GA remediation Block 4",
       "statement": "Obtain a fresh production dry-run receipt and independently verify its exact scope, backup evidence and storage ownership before any execution.",
       "classification": "ACTIVE",
@@ -8039,14 +8057,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6043",
+        "OPEN_LOOP.md:6055",
         "2026-10-21 — Full-GA remediation Block 4"
       ],
       "currentAuthority": false
     },
     {
       "id": "06c07b6d91e859cb",
-      "sourceLine": 6044,
+      "sourceLine": 6056,
       "heading": "2026-10-21 — Full-GA remediation Block 4",
       "statement": "Push this five-build block once. Keep it unpublished until the next five-build block reaches the ten-build boundary.",
       "classification": "ACTIVE",
@@ -8057,7 +8075,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6044",
+        "OPEN_LOOP.md:6056",
         "2026-10-21 — Full-GA remediation Block 4"
       ],
       "currentAuthority": false

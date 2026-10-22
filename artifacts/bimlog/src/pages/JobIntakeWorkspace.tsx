@@ -820,15 +820,27 @@ export function JobIntakeWorkspace() {
             "Guarde y complete cada requisito del ingreso antes de activar.",
           ),
         );
-      const result = await api(`/projects/${projectId}/intake/activate`, {
+      const requestActivation = (confirmation: { revision: number; fingerprint: string }) => api(`/projects/${projectId}/intake/activate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          expectedRevision: activationConfirmation.revision,
-          confirmationFingerprint: activationConfirmation.fingerprint,
+          expectedRevision: confirmation.revision,
+          confirmationFingerprint: confirmation.fingerprint,
           requireCommercial: canEnrich,
         }),
       });
+      let result: any;
+      try {
+        result = await requestActivation(activationConfirmation);
+      } catch (cause) {
+        if (!(cause instanceof JobIntakeRequestError) || !["JOB_INTAKE_CONFIRMATION_STALE", "JOB_INTAKE_STALE"].includes(cause.code)) throw cause;
+        const refreshed = await load();
+        const currentConfirmation = refreshed?.activationConfirmation;
+        if (!currentConfirmation?.ready || currentConfirmation.revision !== refreshed.revision ||
+          currentConfirmation.fingerprint !== refreshed.completion?.fingerprint)
+          throw cause;
+        result = await requestActivation(currentConfirmation);
+      }
       const createdContracts = Array.isArray(result.contractIds)
         ? result.contractIds.length
         : result.contractId
@@ -2340,7 +2352,7 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
                 <div className="ji-grid">
-                  <label id="ji-submittal-strategy" data-assistant-label={tt("Submittal strategy", "Estrategia de submittals")}>
+                  <label id="ji-budget-governance" data-assistant-label={tt("Budget governance", "Gobernanza del presupuesto")}>
                     {tt("Budget governance", "Gobernanza del presupuesto")}
                     <select
                       value={data.governance?.budgetPolicy || "standard"}
@@ -2389,24 +2401,6 @@ export function JobIntakeWorkspace() {
                         "BIMLog incluye métodos de entrega listos para usar. Las configuraciones administradas por la empresa son opcionales y nunca son necesarias para iniciar el Ingreso.",
                       )}
                     </span>
-                  </label>
-                  <label>
-                    {tt("Submittal strategy", "Estrategia de submittals")}
-                    <textarea
-                      value={data.delivery.submittalStrategy}
-                      onChange={(e) =>
-                        change("delivery", "submittalStrategy", e.target.value)
-                      }
-                    />
-                  </label>
-                  <label>
-                    {tt("Milestones and distribution", "Hitos y distribución")}
-                    <textarea
-                      value={data.delivery.milestoneSummary}
-                      onChange={(e) =>
-                        change("delivery", "milestoneSummary", e.target.value)
-                      }
-                    />
                   </label>
                 </div>
               </section>

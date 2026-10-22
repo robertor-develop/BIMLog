@@ -1113,6 +1113,21 @@ async function createCoreActivationWithClient(
         ON CONFLICT(work_item_id,task_key) DO UPDATE SET planned_hours=EXCLUDED.planned_hours,phase_id=EXCLUDED.phase_id,phase_code=EXCLUDED.phase_code,phase_name=EXCLUDED.phase_name RETURNING id`,
         [uuid(),actualWorkItemId,`workflow-phase:${phase.code}`,phase.name,phaseIndex+1,phase.plannedHours,input.actorUserId,phase.id,phase.code,phase.name])).rows[0];
       if (!actualTaskId) actualTaskId = phaseTask.id;
+      const phasePackageCode = `${item.id}-${phase.code}`.replace(/[^A-Za-z0-9_-]/g, "-").slice(0, 120);
+      const phasePackage = (await client.query(`INSERT INTO job_activation_work_packages(
+          id,intake_id,project_id,work_item_id,package_code,title,description,package_type,status,created_by_id,
+          phase_id,phase_code,phase_name)
+        VALUES($1,$2,$3,$4,$5,$6,$7,'deliverable','draft',$8,$9,$10,$11)
+        ON CONFLICT(project_id,package_code) DO UPDATE SET
+          title=EXCLUDED.title,description=EXCLUDED.description,phase_id=EXCLUDED.phase_id,
+          phase_code=EXCLUDED.phase_code,phase_name=EXCLUDED.phase_name,updated_at=now()
+        RETURNING id`, [
+          uuid(), input.intakeId, input.projectId, actualWorkItemId, phasePackageCode,
+          `${phase.code} — ${phase.name}`, `Verified workflow allocation: ${phase.plannedHours} hours`,
+          input.actorUserId, phase.id, phase.code, phase.name,
+        ])).rows[0];
+      await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id)
+        VALUES($1,$2,$3) ON CONFLICT(package_id,task_id) DO NOTHING`, [phasePackage.id,phaseTask.id,input.actorUserId]);
       tasksCreated += 1;
     }
     if (needsScopeDeliveryTask && phaseHours.length === 0) {

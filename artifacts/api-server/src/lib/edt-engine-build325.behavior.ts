@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { previewActivatedEdtPlan } from "./edt-engine-plan-projection";
+import { previewActivatedEdtPlan, projectActivatedEdtPlan } from "./edt-engine-plan-projection";
 import type { EdtTransactionHost } from "./edt-engine-transaction";
 import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
 
@@ -24,4 +24,18 @@ assert.equal(statements.at(-1), "COMMIT");
 assert.ok(statements.every(sql => !/^\s*(INSERT|UPDATE|DELETE|ALTER|DROP)\b/i.test(sql)));
 await assert.rejects(() => previewActivatedEdtPlan({ companyId: 8, projectId: 11, intakeId: "intake-1" }, host), (error: unknown) => error instanceof Error && "code" in error && error.code === "INTAKE_NOT_FOUND");
 assert.equal(statements.at(-1), "ROLLBACK");
+const core = projectActivatedEdtPlan({
+  project: { id: 11, code: "P11", name: "Project 11" },
+  intake: { id: "intake-core", revision: 2, data: {
+    commercial: { contracts: [{ id: "BASE", contractNumber: "B1", title: "Base" }] },
+    scopeItems: [{ id: "scope-1", contractId: "BASE", deliverableType: "SLEEVE", workPackages: [{
+      id: "wp-1", dimensionType: "floor", dimensionValue: "L2",
+      classification: { disciplineId: "discipline-1", disciplineCode: "HVAC" },
+    }] }],
+  }, activationSummary: { activationMode: "core", contracts: [] } },
+  workItems: [{ id: "wi-core", stableScopeItemId: "scope-1", contractId: null, contractVersionId: null, status: "active" }],
+});
+assert.equal(core.workItems.length, 1);
+assert.match(core.workItems[0].contractSourceIdentity, /^intake-contract:intake-core:BASE$/);
+assert.match(String(core.nodes.find(node => node.kind === "contract")?.snapshot.contractVersionId), /^intake-contract-version:[a-f0-9]{64}$/);
 console.log("EDT_ENGINE_BUILD325_RESULT=PASS authorized read-only preview transaction and company isolation");

@@ -95,6 +95,8 @@ assert.match(emptyStateMarkup, /Open Cost &amp; Value Planner/);
 assert.match(emptyStateMarkup, /Approved budget link \(optional\)/);
 assert.match(emptyStateMarkup, /No approved budget snapshots are available yet/);
 assert.match(emptyStateMarkup, /Open Project Budget/);
+assert.match(emptyStateMarkup, /Click here, then paste two Excel columns/);
+assert.doesNotMatch(emptyStateMarkup, /opacity:0/);
 assert.match(emptyStateMarkup, /Production allocation row 1/);
 assert.match(emptyStateMarkup, /Administration stays separate/);
 assert.doesNotMatch(emptyStateMarkup, /Select saved APU version/);

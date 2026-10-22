@@ -56,21 +56,22 @@ export async function loadActivatedEdtSource(client: EdtTransactionClient, input
     [input.intakeId, input.projectId])).rows;
   if (!workItems.length) throw new EdtEngineConflict("EDT_WORK_ITEMS_MISSING", "The activated Intake has no saved Work Items to project.");
   const activationContracts = intake.activation_summary.contracts;
-  if (!Array.isArray(activationContracts) || !activationContracts.length || activationContracts.some(value =>
+  const coreActivation = intake.activation_summary.activationMode === "core";
+  if (!coreActivation && (!Array.isArray(activationContracts) || !activationContracts.length || activationContracts.some(value =>
     !objectRecord(value) || typeof value.contractId !== "string" || !value.contractId ||
-    typeof value.contractVersionId !== "string" || !value.contractVersionId))
+    typeof value.contractVersionId !== "string" || !value.contractVersionId)))
     throw new EdtEngineConflict("EDT_CONTRACT_SOURCE_MISSING", "The activated Intake has no complete canonical Contract bindings.");
-  const canonical = (await client.query<{ contractId: string; versionId: string; currency: string; contentFingerprint: string }>(
+  const canonical = coreActivation ? [] : (await client.query<{ contractId: string; versionId: string; currency: string; contentFingerprint: string }>(
     `SELECT c.id AS "contractId",v.id AS "versionId",v.currency,v.content_fingerprint AS "contentFingerprint"
       FROM financial_contracts c JOIN financial_contract_versions v ON v.contract_id=c.id
       WHERE c.company_id=$1 AND c.project_id=$2 AND v.id=ANY($3::text[])`,
-    [input.companyId, input.projectId, activationContracts.map(value => (value as Record<string, unknown>).contractVersionId)])).rows;
+    [input.companyId, input.projectId, (activationContracts as unknown[]).map(value => (value as Record<string, unknown>).contractVersionId)])).rows;
   const versions = new Map(canonical.map(row => [row.versionId, row]));
-  if (versions.size !== activationContracts.length || activationContracts.some(value => {
+  if (!coreActivation && (versions.size !== (activationContracts as unknown[]).length || (activationContracts as unknown[]).some(value => {
     const binding = value as Record<string, unknown>;
     const row = versions.get(String(binding.contractVersionId));
     return !row || row.contractId !== binding.contractId || !row.currency?.trim() || !/^[a-f0-9]{64}$/.test(row.contentFingerprint);
-  })) throw new EdtEngineConflict("EDT_CONTRACT_SOURCE_MISMATCH", "An activated Contract version is missing, outside this company/project, or differs from its saved binding.");
+  }))) throw new EdtEngineConflict("EDT_CONTRACT_SOURCE_MISMATCH", "An activated Contract version is missing, outside this company/project, or differs from its saved binding.");
   const workflowBindings = (await client.query<{ workItemId: string; source: string; versionId: string | null; templateCode: string; templateVersion: number; definition: unknown; fingerprint: string }>(
     `SELECT work_item_id AS "workItemId",source,version_id AS "versionId",template_code AS "templateCode",
       template_version AS "templateVersion",definition,fingerprint FROM company_delivery_workflow_work_items

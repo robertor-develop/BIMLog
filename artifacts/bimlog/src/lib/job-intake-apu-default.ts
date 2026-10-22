@@ -1,4 +1,6 @@
-export type IntakeApuVersion = { version: number; name?: string; sellingPrice: string; currency: string; fingerprint?: string | null };
+import { connectContractItemsToApu } from "./job-intake-apu-connection";
+
+export type IntakeApuVersion = { version: number; name?: string; sellingPrice: string; unitRate?: string; currency: string; fingerprint?: string | null };
 
 export function soleCompatibleApuVersion(versions: IntakeApuVersion[], currency: string) {
   const valid = compatibleApuVersions(versions, currency);
@@ -17,7 +19,7 @@ export function applySoleApuToUnboundItems(items: any[], versions: IntakeApuVers
   const sole = soleCompatibleApuVersion(versions, currency);
   if (!sole) return items;
   return items.map((item) => item.apuPlanVersion == null
-    ? { ...item, apuPlanVersion: sole.version }
+    ? connectContractItemsToApu([item], sole)[0]
     : item);
 }
 
