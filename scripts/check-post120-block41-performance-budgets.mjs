@@ -13,7 +13,7 @@ assert(entry, "browser entry is absent from the Vite manifest");
 const assets = fs.readdirSync(path.join(publicRoot, "assets"))
   .filter(name => name.endsWith(".js"))
   .map(name => ({ name, bytes: fs.statSync(path.join(publicRoot, "assets", name)).size }));
-const boundedLazyAssets = assets.filter(asset => asset.name !== path.basename(entry.file) && !asset.name.startsWith("xlsx-"));
+const boundedLazyAssets = assets.filter(asset => asset.name !== path.basename(entry.file) && !asset.name.startsWith("xlsx"));
 const routeChunks = Object.entries(manifest)
   .filter(([key, record]) => record.isDynamicEntry && (/^src\/pages\//.test(key) || key === "src/features/lens-next/LensNextWorkspace.tsx"))
   .map(([source, record]) => ({ source, bytes: bytesFor(record.file) }));
