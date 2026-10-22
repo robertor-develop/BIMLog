@@ -14,6 +14,6 @@ const routes=fs.readFileSync(path.join(import.meta.dirname,"../routes/job-operat
 const page=fs.readFileSync(path.join(import.meta.dirname,"../../../bimlog/src/pages/JobOperationsWorkspace.tsx"),"utf8");
 for(const token of ["FLOOR_HOUR_CEO_APPROVAL_REQUIRED","writeAllocationRun","sourceFingerprint","status='superseded'","customer billing"])assert.match(governance,new RegExp(token,"i"));
 assert.match(routes,/floor-hour-estimates\/:estimateVersionId\/decision/);
-assert.match(page,/Only hours beyond the CEO-approved floor estimate/);
+assert.match(page,/Only hours beyond the approved floor estimate/);
 assert.match(page,/No approved floor-hour estimate exists/);
 console.log("UX135 floor-hour boundaries, breakdown, governance, and UI acceptance: PASS");
