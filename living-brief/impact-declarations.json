@@ -73289,6 +73289,7 @@
         "artifacts/api-server/src/lib/edt-engine-build325.behavior.ts",
         "artifacts/api-server/src/lib/edt-engine-plan-projection.ts",
         "artifacts/api-server/src/lib/edt-engine-source-service.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
         "artifacts/api-server/src/lib/job-intake-service.ts",
         "artifacts/api-server/src/lib/job-intake.behavior.ts",
         "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
@@ -73299,9 +73300,11 @@
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
         "scripts/test-page-assistant-panel-workspace.mjs"
       ],
-      "reviewedChangeSha256": "224bf951f429ef648e8de3170edfc6427504cb99401cbef78cc28a82dfdadd60"
+      "reviewedChangeSha256": "c369c37a74398293d359f63aa3c63736bd66d21d104925f41b1f2d3f7104d2d9"
     }
   ]
 }

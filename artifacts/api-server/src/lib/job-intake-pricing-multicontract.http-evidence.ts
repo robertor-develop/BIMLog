@@ -385,10 +385,19 @@ try {
     expectedRevision:ready.body.revision,confirmationFingerprint:ready.body.completion.fingerprint });
   assert.equal(activated.status,200,JSON.stringify(activated.body));
   assert.equal(activated.body.contractIds.length,2);
-  const packageTasks = (await pool.query(`SELECT t.id,t.planned_hours FROM job_activation_tasks t
+  const packageTasks = (await pool.query(`SELECT t.id,t.planned_hours,t.task_key,t.phase_code "taskPhaseCode",
+    p.package_code "packageCode",p.phase_code "packagePhaseCode" FROM job_activation_tasks t
     JOIN job_activation_work_items w ON w.id=t.work_item_id
-    JOIN job_activation_work_package_tasks p ON p.task_id=t.id WHERE w.project_id=$1`,[projectId])).rows;
-  assert.equal(packageTasks.length,2);
+    JOIN job_activation_work_package_tasks l ON l.task_id=t.id
+    JOIN job_activation_work_packages p ON p.id=l.package_id WHERE w.project_id=$1`,[projectId])).rows;
+  assert.equal(packageTasks.length,7,"Two configured packages plus five workflow-phase packages remain linked");
+  const configuredPackageCodes=new Set(["WP-DRAW","WP-REVIEW"]);
+  const configuredPackageTasks=packageTasks.filter((task:any)=>configuredPackageCodes.has(task.packageCode));
+  assert.deepEqual(configuredPackageTasks.map((task:any)=>task.packageCode).sort(),["WP-DRAW","WP-REVIEW"]);
+  const phasePackageTasks=packageTasks.filter((task:any)=>!configuredPackageCodes.has(task.packageCode));
+  assert.deepEqual(phasePackageTasks.map((task:any)=>task.taskPhaseCode).sort(),["ASB","COO","FOR","PRE","PROD"]);
+  assert.ok(phasePackageTasks.every((task:any)=>task.packagePhaseCode===task.taskPhaseCode),
+    "Every generated workflow-phase package links to its exact allocated phase task");
   const activatedTaskHours=Number((await pool.query(`SELECT COALESCE(SUM(t.planned_hours),0)::text total FROM job_activation_tasks t
     JOIN job_activation_work_items w ON w.id=t.work_item_id WHERE w.project_id=$1`,[projectId])).rows[0].total);
   assert.equal(activatedTaskHours,14,"Verified workflow phases preserve the planned scope hours without duplication");

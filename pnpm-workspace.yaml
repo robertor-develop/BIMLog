@@ -47,6 +47,7 @@ overrides:
   body-parser: 2.3.0
   'brace-expansion@1': 1.1.21
   'brace-expansion@2': 2.1.7
+  follow-redirects: 1.16.1
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-arm64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-x64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-freebsd-ia32': '-'

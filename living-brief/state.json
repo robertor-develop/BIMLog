@@ -9,6 +9,7 @@
       "artifacts/api-server/src/lib/edt-engine-build325.behavior.ts",
       "artifacts/api-server/src/lib/edt-engine-plan-projection.ts",
       "artifacts/api-server/src/lib/edt-engine-source-service.ts",
+      "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
       "artifacts/api-server/src/lib/job-intake-service.ts",
       "artifacts/api-server/src/lib/job-intake.behavior.ts",
       "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
@@ -19,6 +20,8 @@
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/impact-declarations.json",
+      "pnpm-lock.yaml",
+      "pnpm-workspace.yaml",
       "scripts/test-page-assistant-panel-workspace.mjs"
     ],
     "affectedDocuments": [
@@ -141,7 +144,7 @@
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
       "sha256": "bb0158df1393d45dcac9835a09bdb8c52bf451515f79d874a72d88e793763fa2",
-      "sourceChangedAt": "2026-10-22T17:27:32.146Z",
+      "sourceChangedAt": "2026-10-22T18:40:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "97f3bd4caeb112532e6137259cfdfba45236b8f1",
       "semanticReviewedThroughCommit": "97f3bd4caeb112532e6137259cfdfba45236b8f1",
