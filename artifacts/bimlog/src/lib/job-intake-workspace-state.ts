@@ -76,6 +76,11 @@ const recoveryKey = (projectId: number) => `bimlog:job-intake-recovery:${project
 const activeStageKey = (projectId: number) => `bimlog:job-intake-active-stage:${projectId}`;
 const activeItemKey = (projectId: number) => `bimlog:job-intake-active-item:${projectId}`;
 const setupModeKey = (projectId: number) => `bimlog:job-intake-setup-mode:${projectId}`;
+export const jobIntakeSavedSignalKey = (projectId: number) => `bimlog:job-intake-saved:${projectId}`;
+
+export function signalJobIntakeSaved(projectId: number, revision: number) {
+  try { window.localStorage.setItem(jobIntakeSavedSignalKey(projectId), JSON.stringify({ revision, savedAt: Date.now() })); } catch { /* server save remains authoritative */ }
+}
 
 export type JobIntakeRecovery<T = any> = {
   revision: number;

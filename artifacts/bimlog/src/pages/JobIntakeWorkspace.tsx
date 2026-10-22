@@ -60,6 +60,8 @@ import {
   resolveJobIntakeRecovery,
   jobIntakeIsActivated,
   jobIntakeIsCanonicalReadOnly,
+  jobIntakeSavedSignalKey,
+  signalJobIntakeSaved,
   type JobIntakeStage,
 } from "@/lib/job-intake-workspace-state";
 import {
@@ -403,6 +405,7 @@ export function JobIntakeWorkspace() {
               }
               lastSavedRef.current = JSON.stringify(result.data);
               clearMatchingJobIntakeRecovery(projectId, next);
+              signalJobIntakeSaved(projectId, result.revision);
               lastResult = result;
               setIntake(result);
               if (JSON.stringify(dataRef.current) === JSON.stringify(next)) {
@@ -503,6 +506,14 @@ export function JobIntakeWorkspace() {
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [saveState]);
+  useEffect(() => {
+    const synchronize = (event: StorageEvent) => {
+      if (event.key !== jobIntakeSavedSignalKey(projectId) || saveState !== "saved") return;
+      void load();
+    };
+    window.addEventListener("storage", synchronize);
+    return () => window.removeEventListener("storage", synchronize);
+  }, [load, projectId, saveState]);
 
   const change = (section: string, field: string, value: unknown) =>
     setData((old: any) => ({
