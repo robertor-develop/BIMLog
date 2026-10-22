@@ -7,14 +7,18 @@ export const ASSISTANT_WIDTH_STEP = 20;
 export const ASSISTANT_FULLSCREEN_BREAKPOINT = 760;
 export const ASSISTANT_WORKSPACE_MIN = 320;
 
+function reportAssistantStorageFailure(operation: string, error: unknown) {
+  console.warn(`[BIMLog assistant] Browser storage ${operation} failed; continuing without persistence.`, error);
+}
+
 export function assistantBrowserStorage(kind: "localStorage" | "sessionStorage"): Storage | null {
   try { return typeof window === "undefined" ? null : window[kind]; }
-  catch { return null; }
+  catch (error) { reportAssistantStorageFailure(`access (${kind})`, error); return null; }
 }
 
 export function safeAssistantSession(storage: () => Pick<Storage, "getItem" | "setItem" | "removeItem"> | null = () => assistantBrowserStorage("sessionStorage")) {
   return {
-    getItem(key: string): string | null { try { return storage()?.getItem(key) ?? null; } catch { return null; } },
+    getItem(key: string): string | null { try { return storage()?.getItem(key) ?? null; } catch (error) { reportAssistantStorageFailure(`read (${key})`, error); return null; } },
     setItem(key: string, value: string) { try { storage()?.setItem(key, value); } catch { /* In-memory state remains usable. */ } },
     removeItem(key: string) { try { storage()?.removeItem(key); } catch { /* Persistence is optional. */ } },
   };
