@@ -109,6 +109,7 @@ class RequestError extends Error {
     message: string,
     readonly status: number,
     readonly code?: string,
+    readonly contractId?: string,
   ) {
     super(message);
   }
@@ -881,6 +882,7 @@ export function JobOperationsWorkspace() {
             tt("The request failed.", "La solicitud falló."),
           response.status,
           payload?.code || payload?.error?.code,
+          typeof payload?.contractId === "string" ? payload.contractId : undefined,
         );
       return payload;
     },

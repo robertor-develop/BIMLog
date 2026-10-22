@@ -8,7 +8,7 @@ export type EdtTransactionClient = {
 export type EdtTransactionHost = { connect(): Promise<EdtTransactionClient> };
 
 export class EdtEngineConflict extends Error {
-  constructor(public readonly code: string, message: string) { super(message); }
+  constructor(public readonly code: string, message: string, public readonly details?: Readonly<Record<string, string>>) { super(message); }
 }
 
 function canonical(value: unknown): string {
