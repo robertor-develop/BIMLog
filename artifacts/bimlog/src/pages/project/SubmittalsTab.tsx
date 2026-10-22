@@ -1013,7 +1013,7 @@ function RegisterView({ projectId, canWrite, lang, onCreatePackage }: { projectI
     reader.onload = async (evt) => {
       const data = evt.target?.result;
       if (!(data instanceof ArrayBuffer)) return;
-      const XLSX = await import("xlsx");
+      const XLSX = await import("xlsx/dist/xlsx.mini.min.js") as typeof import("xlsx");
       const spreadsheet = canonicalSpreadsheetInput(data, file.name, "array", {});
       const wb = XLSX.read(spreadsheet.data, spreadsheet.options);
       const ws = wb.Sheets[wb.SheetNames[0]];

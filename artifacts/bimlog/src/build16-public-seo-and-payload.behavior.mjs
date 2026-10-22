@@ -14,6 +14,6 @@ assert.match(metadata, /og:description/, "Open Graph description is managed per 
 assert.match(app, /<PublicRouteMetadata \/>/, "route metadata is mounted inside the router");
 assert.doesNotMatch(metadata, /ratingValue|reviewCount|userCount|customerCount/, "no invented structured social proof");
 assert.doesNotMatch(submittals, /^import \* as XLSX from "xlsx";/m, "spreadsheet parser is not eager in the Submittals route");
-assert.match(submittals, /const XLSX = await import\("xlsx"\);/, "spreadsheet parser loads only when import is invoked");
+assert.match(submittals, /const XLSX = await import\("xlsx\/dist\/xlsx\.mini\.min\.js"\)/, "the read-only mini spreadsheet parser loads only when import is invoked");
 
 console.log("SUMMARY 12/12 PASS");
