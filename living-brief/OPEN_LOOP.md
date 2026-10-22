@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Outcome remediation Block 7 — Builds 31–35 — 2026-10-22
+
+- [x] B31 make the Excel-range action read the clipboard and accept localized two-column separators with a keyboard fallback.
+- [x] B32 refresh another open Intake tab after a saved revision while preserving any unsaved local draft.
+- [x] B33 absorb bounded activation revision drift before presenting a real conflict.
+- [x] B34 carry the exact canonical contract identity into EDT mismatch repair.
+- [x] B35 replace internal approval-role wording with a clear authorized-user action.
+- [ ] Pass the exact-head gate and push Builds 31–35 once. Keep this block unpublished until Builds 36–40 complete the ten-build interval.
+
 ## Full-GA remediation Block 5 — 2026-10-21
 
 - [x] Bind the last published source, package identity, and authenticated desktop production route.
