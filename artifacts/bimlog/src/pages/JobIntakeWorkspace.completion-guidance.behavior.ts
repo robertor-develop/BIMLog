@@ -9,6 +9,6 @@ assert.match(source, /What remains for this section/);
 assert.match(source, /The contract fields are complete\. Confirm them in Review & Activate/);
 assert.match(source, /The delivery fields are complete\. Confirm the delivery workflow in Review & Activate/);
 assert.match(source, /openFinalReview/);
-assert.match(source, /preserveActiveStage\(projectId, "review"\)/);
+assert.match(source, /preserveJobIntakeActiveStage\(projectId, "review"\)/);
 
 console.log(JSON.stringify({ status: "PASS", build: 6, checks: ["contract-inline-missing", "delivery-inline-missing", "final-confirmation-navigation"] }));

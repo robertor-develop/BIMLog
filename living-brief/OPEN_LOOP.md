@@ -8,7 +8,8 @@
 - [x] Verify recovery, rollback, retry, upload, autosave, provider, and deployment recovery behavior.
 - [x] Preserve all 16 protected custody records without claiming recovered originals or mutating customer rows or storage objects.
 - [x] Keep temporary-project and sample purge execution disabled pending independently verified exact ownership and complete lifecycle evidence.
-- [ ] Complete the next five-build block, then publish the ten-build interval and run full authenticated desktop/mobile Chrome smoke.
+- [x] Complete the next five-build block with permanent acceptance for Headquarters eligibility, APU/rate propagation, delivery guidance, and activation-to-Operations package distribution.
+- [ ] Push and publish the resulting ten-build interval, verify exact live identity, and run full authenticated desktop/mobile Chrome smoke.
 - [ ] Recover and independently checksum the protected originals before claiming final GA readiness.
 - [ ] Configure and verify the approved Stripe and SendGrid production values before enabling paid commercial sales.
 

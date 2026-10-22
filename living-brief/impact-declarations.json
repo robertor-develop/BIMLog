@@ -73305,6 +73305,94 @@
         "scripts/test-page-assistant-panel-workspace.mjs"
       ],
       "reviewedChangeSha256": "c369c37a74398293d359f63aa3c63736bd66d21d104925f41b1f2d3f7104d2d9"
+    },
+    {
+      "taskId": "outcome-remediation-block06-20261022",
+      "reviewedThroughCommit": "97f3bd4caeb112532e6137259cfdfba45236b8f1",
+      "reviewedAt": "2026-10-22T14:55:00-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority."
+        }
+      ],
+      "reason": "Outcome remediation Block 6 binds the accepted Headquarters eligibility, APU unit-rate propagation, delivery guidance, and activation work-package behavior to permanent gates, and corrects one stale acceptance assertion without changing its runtime authority.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/edt-engine-build325.behavior.ts",
+        "artifacts/api-server/src/lib/edt-engine-plan-projection.ts",
+        "artifacts/api-server/src/lib/edt-engine-source-service.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.completion-guidance.behavior.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml",
+        "scripts/test-page-assistant-panel-workspace.mjs"
+      ],
+      "reviewedChangeSha256": "7dc16a16c2ee6cd81d7690f17cd6bdaf5efa582db414f110c335dd763404a6e5"
     }
   ]
 }

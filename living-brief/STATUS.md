@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Outcome remediation Block 6 — Builds 26–30 candidate — 2026-10-22
+
+Build 26 verifies exact branch/upstream continuity as release infrastructure and receives no feature-completion credit. Builds 27–30 bind four necessary product outcomes to permanent acceptance: retired or inactive projects cannot drive live Headquarters recommendations; a sole compatible APU supplies its quantity-normalized Contract Item unit rate without overwriting an explicit selection; a published delivery workflow hydrates one editable submittal strategy and milestone summary while preserving reviewed project text; and activation preserves exact hours while linking the configured packages plus PRE, COO, FOR, ASB and PROD phase packages. The aggregate gate passes against an isolated real PostgreSQL fixture. One stale completion-guidance assertion was corrected to follow the shared `preserveJobIntakeActiveStage` authority. This reaches the ten-build push/publication boundary; exact-head release validation, push, controlled publication, exact live identity, and authenticated desktop/mobile Chrome smoke remain required before live acceptance.
+
 ## Outcome-first constructor correction acknowledgment — 2026-10-21
 
 BIMLog MAIN read the authorized `Outcome-first constructor correction — 2026-10-21` in the coordination Living Brief at the safe boundary after Full-GA remediation Block 5. It first applies to Full-GA remediation Block 6, Builds 26–30. Feature-completion credit in that block requires an actual necessary runtime or visible delta recorded before commit, exact-candidate journey/reference evidence where applicable, and independent acceptance; verification-only work is labeled infrastructure. IMPLEMENTED, PUSHED, PUBLISHED and ACCEPTED remain distinct, and the existing five-build push / ten-build publication cadence continues without a new stop gate.
