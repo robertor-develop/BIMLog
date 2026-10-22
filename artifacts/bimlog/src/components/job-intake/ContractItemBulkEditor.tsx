@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { compatibleApuVersions, type IntakeApuVersion } from "../../lib/job-intake-apu-default";
 import { ArrowUp, ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
@@ -112,7 +112,7 @@ export function parseContractItemPaste(source: string) {
     .replace(/\r\n?/g, "\n")
     .split("\n")
     .map((line, index) => {
-      const cells = line.split("\t");
+      const cells = line.includes("\t") ? line.split("\t") : line.split(/[;,]/);
       return {
         sourceRow: index + 1,
         name: String(cells[0] ?? "").trim(),
@@ -124,6 +124,7 @@ export function parseContractItemPaste(source: string) {
 
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
+  const pasteTarget = useRef<HTMLTextAreaElement>(null);
   const eligibleSnapshots = props.snapshots.filter(snapshot => snapshot.currency === props.currency && (!snapshot.status || snapshot.status === "approved"));
   const eligibleApuVersions = compatibleApuVersions(props.apuVersions, props.currency);
   const update = (index: number, patch: Record<string, unknown>) =>
@@ -142,9 +143,7 @@ export function ContractItemBulkEditor(props: Props) {
     }
     props.setItems((items) => [...items, newItem(props)]);
   };
-  const paste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    event.preventDefault();
-    const source = event.clipboardData.getData("text/plain");
+  const appendPastedItems = (source: string) => {
     const parsed = parseContractItemPaste(source);
     const invalid = parsed.filter(
       (row) => !row.name || !validQuantity(row.quantity),
@@ -193,6 +192,22 @@ export function ContractItemBulkEditor(props: Props) {
         `Se agregaron ${parsed.length} Partidas de Contrato pegadas.`,
       ),
     );
+  };
+  const paste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    event.preventDefault();
+    appendPastedItems(event.clipboardData.getData("text/plain"));
+  };
+  const readClipboardRange = async () => {
+    try {
+      const source = await navigator.clipboard.readText();
+      appendPastedItems(source);
+    } catch {
+      pasteTarget.current?.focus();
+      props.onNotice(props.tt(
+        "Clipboard access is blocked. Press Ctrl+V in the focused paste box.",
+        "El acceso al portapapeles está bloqueado. Presione Ctrl+V en el cuadro enfocado.",
+      ));
+    }
   };
   const applyBulkQuantity = () => {
     if (!validQuantity(bulkQuantity)) {
@@ -258,9 +273,9 @@ export function ContractItemBulkEditor(props: Props) {
         </span>
       </div>
       <div className="ji-bulk-actions">
-        <label className="ji-paste">
+        <div className="ji-paste">
           <ClipboardPaste size={16} />
-          <span>
+          <button type="button" onClick={readClipboardRange}>
             {props.tt("Paste Excel range", "Pegar rango de Excel")}
             <small>
               {props.tt(
@@ -268,8 +283,9 @@ export function ContractItemBulkEditor(props: Props) {
                 "Nombre en columna 1, Cantidad en columna 2",
               )}
             </small>
-          </span>
+          </button>
           <textarea
+            ref={pasteTarget}
             aria-label={props.tt(
               "Paste Contract Item Name and Quantity columns",
               "Pegue columnas de Nombre y Cantidad de Partidas",
@@ -282,7 +298,7 @@ export function ContractItemBulkEditor(props: Props) {
               "Haga clic aquí y pegue dos columnas de Excel",
             )}
           />
-        </label>
+        </div>
         <label>
           {props.tt("Set every Quantity", "Establecer todas las Cantidades")}
           <input
