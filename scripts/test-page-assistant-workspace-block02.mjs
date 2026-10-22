@@ -5,11 +5,12 @@ const panel=readFileSync("artifacts/bimlog/src/components/layout/PageAssistant.t
 const css=readFileSync("artifacts/bimlog/src/index.css","utf8");
 for(const contract of [
   "assistantWidthFromPointer", "fitAssistantWidthToViewport", "resetPanelWidth", "toggleDock", "toggleCollapsed",
-  'className="page-assistant-coming-soon"', 'title={tt("Coming soon","Próximamente")}',
+  'onClick={()=>input.current?.focus()}',
   'data-dock={dock}', 'data-collapsed={collapsed}', 'role="separator"', 'aria-live="polite"'
 ]) assert.ok(panel.includes(contract),`missing Block 2 workspace contract: ${contract}`);
 assert.doesNotMatch(panel,/onClick=\{\(\)=>\{setActiveTool\("feedback"\);submitFeedback\(false\);\}\}/);
 assert.doesNotMatch(panel,/onClick=\{\(\)=>submitFeedback\(false\)\}/);
+assert.doesNotMatch(panel,/Submit feedback|Enviar comentarios|Request a fix|Solicitar una corrección|page-assistant-coming-soon/);
 assert.match(css,/@media\(max-width:760px\).*body\.bimlog-assistant-docked/s);
 assert.match(css,/@media\(max-width:480px\)/);
 assert.match(css,/bimlog-workspace-split/);
