@@ -25,6 +25,12 @@
       "package.json",
       "pnpm-lock.yaml",
       "pnpm-workspace.yaml",
+      "scripts/test-outcome-remediation-block06.mjs",
+      "scripts/test-outcome-remediation-build026-release-continuity.mjs",
+      "scripts/test-outcome-remediation-build027-headquarters-eligibility.mjs",
+      "scripts/test-outcome-remediation-build028-apu-rate.mjs",
+      "scripts/test-outcome-remediation-build029-delivery-guidance.mjs",
+      "scripts/test-outcome-remediation-build030-operations-packages.mjs",
       "scripts/test-page-assistant-panel-workspace.mjs"
     ],
     "affectedDocuments": [

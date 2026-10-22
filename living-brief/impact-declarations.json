@@ -73390,9 +73390,15 @@
         "package.json",
         "pnpm-lock.yaml",
         "pnpm-workspace.yaml",
+        "scripts/test-outcome-remediation-block06.mjs",
+        "scripts/test-outcome-remediation-build026-release-continuity.mjs",
+        "scripts/test-outcome-remediation-build027-headquarters-eligibility.mjs",
+        "scripts/test-outcome-remediation-build028-apu-rate.mjs",
+        "scripts/test-outcome-remediation-build029-delivery-guidance.mjs",
+        "scripts/test-outcome-remediation-build030-operations-packages.mjs",
         "scripts/test-page-assistant-panel-workspace.mjs"
       ],
-      "reviewedChangeSha256": "7dc16a16c2ee6cd81d7690f17cd6bdaf5efa582db414f110c335dd763404a6e5"
+      "reviewedChangeSha256": "f5403f8afcb4378aea0a12500ed2a0990f34c665d6a9ac200e33e46d00503124"
     }
   ]
 }
