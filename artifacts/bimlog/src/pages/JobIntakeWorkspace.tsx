@@ -841,17 +841,22 @@ export function JobIntakeWorkspace() {
         }),
       });
       let result: any;
-      try {
-        result = await requestActivation(activationConfirmation);
-      } catch (cause) {
-        if (!(cause instanceof JobIntakeRequestError) || !["JOB_INTAKE_CONFIRMATION_STALE", "JOB_INTAKE_STALE"].includes(cause.code)) throw cause;
-        const refreshed = await load();
-        const currentConfirmation = refreshed?.activationConfirmation;
-        if (!currentConfirmation?.ready || currentConfirmation.revision !== refreshed.revision ||
-          currentConfirmation.fingerprint !== refreshed.completion?.fingerprint)
-          throw cause;
-        result = await requestActivation(currentConfirmation);
+      let confirmation = activationConfirmation;
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        try {
+          result = await requestActivation(confirmation);
+          break;
+        } catch (cause) {
+          if (!(cause instanceof JobIntakeRequestError) || !["JOB_INTAKE_CONFIRMATION_STALE", "JOB_INTAKE_STALE"].includes(cause.code) || attempt === 2) throw cause;
+          const refreshed = await load();
+          const currentConfirmation = refreshed?.activationConfirmation;
+          if (!currentConfirmation?.ready || currentConfirmation.revision !== refreshed.revision ||
+            currentConfirmation.fingerprint !== refreshed.completion?.fingerprint)
+            throw cause;
+          confirmation = currentConfirmation;
+        }
       }
+      if (!result) throw new Error(tt("Activation did not return a result.", "La activación no devolvió un resultado."));
       const createdContracts = Array.isArray(result.contractIds)
         ? result.contractIds.length
         : result.contractId
