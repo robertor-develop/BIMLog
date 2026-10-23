@@ -196,7 +196,7 @@ export function parseContractItemPaste(source: string) {
     .map(({ text: line, sourceRow }) => {
       const delimiter = detectContractItemDelimiter(line);
       const { cells, malformedQuote } = parseDelimitedContractItemRow(line, delimiter);
-      const rawQuantity = String(cells[1] ?? "").trim();
+      const rawQuantity = String(cells[1] ?? "").replace(/^\uFEFF/, "").trim();
       const localizedQuantity = normalizeLocalizedQuantity(rawQuantity);
       return {
         sourceRow,
