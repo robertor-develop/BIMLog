@@ -8,6 +8,7 @@ import {
   mergePastedContractItems,
   pastedContractItemCount,
   normalizeLocalizedQuantity,
+  findCompatibleDefaultApu,
   parseContractItemPaste,
   selectSavedApuVersion,
 } from "./ContractItemBulkEditor";
@@ -116,6 +117,8 @@ assert.deepEqual(
   },
 );
 assert.deepEqual(selectSavedApuVersion([], ""), { apuPlanVersion: null });
+assert.equal(findCompatibleDefaultApu([{ version: 3, sellingPrice: "37.99", currency: "USD" }], 4), null);
+assert.equal(findCompatibleDefaultApu([{ version: 3, sellingPrice: "37.99", currency: "USD" }], 3)?.version, 3);
 
 const item = {
   id: "CI-1",

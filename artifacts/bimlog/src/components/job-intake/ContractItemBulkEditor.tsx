@@ -180,6 +180,15 @@ export function applyDefaultApuToPastedItems<T extends Record<string, any>>(
   return selected ? connectContractItemsToApu(items, selected) : items;
 }
 
+export function findCompatibleDefaultApu(
+  versions: IntakeApuVersion[],
+  defaultVersion: number | null,
+) {
+  return defaultVersion == null
+    ? null
+    : versions.find((version) => version.version === defaultVersion) ?? null;
+}
+
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
   const [pasteText, setPasteText] = useState("");
@@ -311,8 +320,18 @@ export function ContractItemBulkEditor(props: Props) {
       );
       return;
     }
+    const selected = findCompatibleDefaultApu(eligibleApuVersions, props.defaultApuVersion);
+    if (!selected) {
+      props.onError(
+        props.tt(
+          "The saved APU version is unavailable or incompatible with this Intake currency. Select an available version before connecting all items.",
+          "La versión APU guardada no está disponible o no es compatible con la moneda de este Ingreso. Seleccione una versión disponible antes de conectar todas las partidas.",
+        ),
+      );
+      return;
+    }
     props.setItems((items) =>
-      connectContractItemsToApu(items, eligibleApuVersions.find(version => version.version === props.defaultApuVersion) || { version: props.defaultApuVersion as number, currency: props.currency }),
+      connectContractItemsToApu(items, selected),
     );
     props.onNotice(
       props.tt(
