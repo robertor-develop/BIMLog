@@ -162,6 +162,7 @@ assert.match(emptyStateMarkup, /Approved budget link \(optional\)/);
 assert.match(emptyStateMarkup, /No approved budget snapshots are available yet/);
 assert.match(emptyStateMarkup, /Open Project Budget/);
 assert.match(emptyStateMarkup, /Click here, then paste two Excel columns/);
+assert.match(emptyStateMarkup, /Paste Excel range/);
 assert.match(emptyStateMarkup, /Add pasted rows/);
 assert.match(emptyStateMarkup, /disabled=""/);
 assert.match(emptyStateMarkup, /value=""/);

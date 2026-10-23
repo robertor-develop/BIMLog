@@ -260,6 +260,14 @@ export function ContractItemBulkEditor(props: Props) {
   const readClipboardRange = async () => {
     try {
       const source = await navigator.clipboard.readText();
+      if (!source.trim()) {
+        pasteTarget.current?.focus();
+        props.onNotice(props.tt(
+          "The clipboard has no text. Paste the two Excel columns in the focused box.",
+          "El portapapeles no contiene texto. Pegue las dos columnas de Excel en el cuadro enfocado.",
+        ));
+        return;
+      }
       appendPastedItems(source);
     } catch {
       pasteTarget.current?.focus();
