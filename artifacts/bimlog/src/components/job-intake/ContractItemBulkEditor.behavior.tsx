@@ -17,6 +17,7 @@ import {
   parseDelimitedContractItemRow,
   splitDelimitedContractItemRecords,
   detectContractItemDelimiter,
+  normalizePastedContractItemName,
 } from "./ContractItemBulkEditor";
 
 const range = Array.from(
@@ -93,11 +94,12 @@ assert.deepEqual(splitDelimitedContractItemRecords('"Door\nFrame"\t2\nWall\t3'),
   { text: "Wall\t3", sourceRow: 3 },
 ]);
 assert.deepEqual(parseContractItemPaste('"Door\nFrame"\t2\nWall\t3'), [
-  { sourceRow: 1, name: "Door\nFrame", quantity: "2" },
+  { sourceRow: 1, name: "Door Frame", quantity: "2" },
   { sourceRow: 3, name: "Wall", quantity: "3" },
 ]);
+assert.equal(normalizePastedContractItemName("  Door\n\tFrame\u00a0 "), "Door Frame");
 assert.deepEqual(parseContractItemPaste('"Unclosed\t2'), [
-  { sourceRow: 1, name: "Unclosed\t2", quantity: "", malformedQuote: true },
+  { sourceRow: 1, name: "Unclosed 2", quantity: "", malformedQuote: true },
 ]);
 assert.deepEqual(parseContractItemPaste("=HYPERLINK(\"https://example.invalid\")\t1"), [
   { sourceRow: 1, name: "=HYPERLINK(\"https://example.invalid\")", quantity: "1", unsafeFormula: true },

@@ -114,6 +114,10 @@ export function normalizeLocalizedQuantity(value: unknown) {
     .replace(/^(\d{1,3}(?:,\d{3})+)\.(\d{1,6})$/, (_, whole, fraction) => `${whole.replace(/,/g, "")}.${fraction}`);
 }
 
+export function normalizePastedContractItemName(value: unknown) {
+  return String(value ?? "").replace(/^\uFEFF/, "").replace(/[\s\u00a0\u202f]+/g, " ").trim();
+}
+
 export function parseDelimitedContractItemRow(line: string, delimiter: string) {
   const cells: string[] = [];
   let cell = "";
@@ -200,7 +204,7 @@ export function parseContractItemPaste(source: string) {
       const localizedQuantity = normalizeLocalizedQuantity(rawQuantity);
       return {
         sourceRow,
-        name: String(cells[0] ?? "").replace(/^\uFEFF/, "").trim(),
+        name: normalizePastedContractItemName(cells[0]),
         quantity: delimiter === "," ? localizedQuantity : localizedQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
         ...(cells.slice(2).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
         ...(/^[=+\-@]/.test(String(cells[0] ?? "").replace(/^\uFEFF/, "").trim()) ? { unsafeFormula: true } : {}),
