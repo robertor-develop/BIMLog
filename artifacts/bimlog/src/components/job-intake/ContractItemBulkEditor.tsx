@@ -121,10 +121,10 @@ export function parseContractItemPaste(source: string) {
         .replace(/^(\d{1,3}(?:,\d{3})+)\.(\d{1,6})$/, (_, whole, fraction) => `${whole.replace(/,/g, "")}.${fraction}`);
       return {
         sourceRow: index + 1,
-        name: String(cells[0] ?? "").trim(),
+        name: String(cells[0] ?? "").replace(/^\uFEFF/, "").trim(),
         quantity: delimiter === "," ? localizedQuantity : localizedQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
         ...(cells.slice(2).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
-        ...(/^[=+\-@]/.test(String(cells[0] ?? "").trim()) ? { unsafeFormula: true } : {}),
+        ...(/^[=+\-@]/.test(String(cells[0] ?? "").replace(/^\uFEFF/, "").trim()) ? { unsafeFormula: true } : {}),
       };
     })
     .filter((row) => row.name || row.quantity);

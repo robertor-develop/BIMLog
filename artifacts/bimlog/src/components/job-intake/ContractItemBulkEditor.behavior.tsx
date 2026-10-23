@@ -48,6 +48,9 @@ assert.deepEqual(parseContractItemPaste("Partida de Contrato\tCant.\nMuro\t4"), 
 assert.deepEqual(parseContractItemPaste("Item\tQty\nDoor\t2"), [
   { sourceRow: 2, name: "Door", quantity: "2" },
 ]);
+assert.deepEqual(parseContractItemPaste("\uFEFFName\tQuantity\nDoor\t2"), [
+  { sourceRow: 2, name: "Door", quantity: "2" },
+]);
 assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
   { sourceRow: 1, name: "Muro", quantity: "4", extraColumns: true },
 ]);
