@@ -133,6 +133,19 @@ export function parseContractItemPaste(source: string) {
   return rows;
 }
 
+export function mergePastedContractItems<T extends Record<string, any>>(existing: T[], pasted: T[]) {
+  const starter = existing.length === 1 && existing[0];
+  const pristineStarter = Boolean(
+    starter &&
+    !String(starter.name ?? "").trim() &&
+    !String(starter.description ?? "").trim() &&
+    String(starter.quantity ?? "1") === "1" &&
+    String(starter.plannedHours ?? "1") === "1" &&
+    !starter.provenance,
+  );
+  return pristineStarter ? pasted : [...existing, ...pasted];
+}
+
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
   const pasteTarget = useRef<HTMLTextAreaElement>(null);
@@ -187,16 +200,13 @@ export function ContractItemBulkEditor(props: Props) {
       );
       return;
     }
-    props.setItems((items) => [
-      ...items,
-      ...parsed.map((row) => ({
+    props.setItems((items) => mergePastedContractItems(items, parsed.map((row) => ({
         ...newItem(props),
         name: row.name,
         quantity: row.quantity,
         plannedHours: row.quantity,
         provenance: { source: "clipboard", sourceRow: row.sourceRow },
-      })),
-    ]);
+      }))));
     props.onNotice(
       props.tt(
         `${parsed.length} pasted Contract Items added.`,
