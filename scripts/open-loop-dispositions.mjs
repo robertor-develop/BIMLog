@@ -31,6 +31,7 @@ const historicalPublicationPattern = /\bP(?:1[3-9]|2\d|3[0-2])\b|pushed.not.publ
 const providerEvidencePattern = /publish|deploy|Replit|provider|migration|restore|schema preview|production artifact|release gate|push the exact|synchroniz/i;
 const fieldEvidencePattern = /field acceptance|customer acceptance|actual account|real account|real project|real clash|real model|real-browser|authenticated production|Lorena|Ruben|Navisworks|production QA account|live Chrome|live browser/i;
 const knownClosedCheckpointPattern = /Build 100 release|Build 115 head|Builds 116[–-]120|Build 120 exact|Build 160:|Builds 166[–-]170|Build 170|Build 070 release|Builds 111[–-]115|Builds 106[–-]110/i;
+const futureRoadmapPattern = /\bfuture\b|\broadmap\b|\blater\b|\beventually\b|\bdefer(?:red)?\b|\bpost[- ]GA\b|when (?:available|approved|requested)|if (?:requested|needed)/i;
 
 function productOwner(heading, statement) {
   const value = `${heading} ${statement}`;
@@ -98,7 +99,19 @@ for (let index = 0; index < lines.length; index += 1) {
         ? { owner: "Release engineering", route: null, module: "docs/deployment" }
         : { owner: "Historical evidence", route: null, module: "living-brief/OPEN_LOOP.md" };
 
-  items.push({ id, sourceLine: index + 1, heading, statement, classification, workClass, ownership, evidence, currentAuthority: isCurrentAuthority });
+  const dispositionCategory = classification === "SUPERSEDED"
+    ? "SUPERSEDED_HISTORY"
+    : classification === "CLOSED_WITH_EVIDENCE"
+      ? "CLOSED_WITH_EVIDENCE"
+      : classification === "ACCEPTED_LIMITATION"
+        ? "ACCEPTED_LIMITATION"
+        : workClass === "FIELD_EVIDENCE" || residualAcceptancePattern.test(statement)
+          ? "EXTERNAL_OWNER_INPUT"
+          : futureRoadmapPattern.test(`${heading} ${statement}`)
+            ? "VALID_FUTURE_ROADMAP"
+            : "ACTIVE_DEFECT";
+
+  items.push({ id, sourceLine: index + 1, heading, statement, classification, dispositionCategory, workClass, ownership, evidence, currentAuthority: isCurrentAuthority });
 }
 
 const normalized = new Map();
@@ -109,6 +122,7 @@ for (const item of items) {
     const canonicalId = normalized.get(key);
     duplicateGroups.push({ canonicalId, duplicateId: item.id });
     item.classification = "SUPERSEDED";
+    item.dispositionCategory = "SUPERSEDED_HISTORY";
     item.workClass = "STALE_CONTRADICTION";
     item.ownership = { owner: "Historical evidence", route: null, module: "living-brief/OPEN_LOOP.md" };
     item.evidence = [`canonical-open-loop:${canonicalId}`, `duplicate-source:${item.id}`];
@@ -126,13 +140,17 @@ const counts = Object.fromEntries(
     items.filter((item) => item.classification === key).length,
   ]),
 );
+const allowedDispositionCategories = ["ACTIVE_DEFECT", "VALID_FUTURE_ROADMAP", "EXTERNAL_OWNER_INPUT", "ACCEPTED_LIMITATION", "SUPERSEDED_HISTORY", "CLOSED_WITH_EVIDENCE"];
+const dispositionCounts = Object.fromEntries(allowedDispositionCategories.map((key) => [key, items.filter((item) => item.dispositionCategory === key).length]));
 const result = {
-  schemaVersion: 2,
+  schemaVersion: 3,
   generatedFrom: "living-brief/OPEN_LOOP.md",
   sourceSha256: crypto.createHash("sha256").update(source).digest("hex"),
   itemCount: items.length,
   counts,
+  dispositionCounts,
   allowedClassifications: ["ACTIVE", "SUPERSEDED", "ACCEPTED_LIMITATION", "CLOSED_WITH_EVIDENCE"],
+  allowedDispositionCategories,
   allowedWorkClasses: ["PRODUCT_WORK", "FIELD_EVIDENCE", "PROVIDER_EVIDENCE", "STALE_CONTRADICTION"],
   currentAuthority: {
     marker: currentAuthorityMarker,
@@ -155,9 +173,11 @@ if (process.argv.includes("--write")) {
   if (items.some((item) => !item.classification || item.evidence.length === 0)) {
     throw new Error("Every unchecked open-loop item requires a disposition and evidence");
   }
+  if (items.some((item) => !allowedDispositionCategories.includes(item.dispositionCategory)))
+    throw new Error("Every unchecked open-loop item requires one six-way release disposition");
   if (items.some((item) => !result.allowedWorkClasses.includes(item.workClass) || !item.ownership?.owner || !item.ownership?.module))
     throw new Error("Every unchecked open-loop item requires a governed work class and owner binding");
   if (duplicateStatements.length) throw new Error(`Duplicate unchecked open-loop statements: ${JSON.stringify(duplicateStatements)}`);
   validateCurrentOpenLoopAuthority(result);
-  console.log(JSON.stringify({ status: "PASS", itemCount: items.length, counts }));
+  console.log(JSON.stringify({ status: "PASS", itemCount: items.length, counts, dispositionCounts }));
 }
