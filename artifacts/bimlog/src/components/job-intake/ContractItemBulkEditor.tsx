@@ -169,10 +169,25 @@ export function splitDelimitedContractItemRecords(source: string) {
   return records;
 }
 
+export function detectContractItemDelimiter(record: string) {
+  const counts = new Map([["\t", 0], [";", 0], [",", 0]]);
+  let quoted = false;
+  for (let index = 0; index < record.length; index += 1) {
+    const character = record[index];
+    if (character === '"') {
+      if (quoted && record[index + 1] === '"') index += 1;
+      else quoted = !quoted;
+    } else if (!quoted && counts.has(character)) {
+      counts.set(character, (counts.get(character) ?? 0) + 1);
+    }
+  }
+  return (["\t", ";", ","] as const).find((delimiter) => (counts.get(delimiter) ?? 0) > 0) ?? ",";
+}
+
 export function parseContractItemPaste(source: string) {
   const rows = splitDelimitedContractItemRecords(source)
     .map(({ text: line, sourceRow }) => {
-      const delimiter = line.includes("\t") ? "\t" : line.includes(";") ? ";" : ",";
+      const delimiter = detectContractItemDelimiter(line);
       const { cells, malformedQuote } = parseDelimitedContractItemRow(line, delimiter);
       const rawQuantity = String(cells[1] ?? "").trim();
       const localizedQuantity = normalizeLocalizedQuantity(rawQuantity);

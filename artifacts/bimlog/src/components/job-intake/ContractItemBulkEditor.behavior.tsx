@@ -16,6 +16,7 @@ import {
   buildPastedContractItem,
   parseDelimitedContractItemRow,
   splitDelimitedContractItemRecords,
+  detectContractItemDelimiter,
 } from "./ContractItemBulkEditor";
 
 const range = Array.from(
@@ -67,6 +68,10 @@ assert.deepEqual(parseDelimitedContractItemRow('"Door, Frame",2', ','), {
 });
 assert.deepEqual(parseContractItemPaste('"Door, Frame",2'), [
   { sourceRow: 1, name: "Door, Frame", quantity: "2" },
+]);
+assert.equal(detectContractItemDelimiter('"Door; Frame"\t2'), "\t");
+assert.deepEqual(parseContractItemPaste('"Door; Frame"\t2'), [
+  { sourceRow: 1, name: "Door; Frame", quantity: "2" },
 ]);
 assert.deepEqual(parseContractItemPaste('"Muro; interior";1,5'), [
   { sourceRow: 1, name: "Muro; interior", quantity: "1.5" },
