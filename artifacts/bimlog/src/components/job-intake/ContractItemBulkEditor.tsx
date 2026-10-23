@@ -161,6 +161,11 @@ export function mergePastedContractItems<T extends Record<string, any>>(existing
   return pristineStarter ? pasted : [...existing, ...pasted];
 }
 
+export function pastedContractItemCount(existing: Array<Record<string, any>>, pastedCount: number) {
+  const placeholder = Array.from({ length: pastedCount }, () => ({}));
+  return mergePastedContractItems(existing, placeholder).length;
+}
+
 export function applyDefaultApuToPastedItems<T extends Record<string, any>>(
   items: T[],
   defaultVersion: number | null,
@@ -216,7 +221,7 @@ export function ContractItemBulkEditor(props: Props) {
       );
       return;
     }
-    if (props.items.length + parsed.length > MAX_ITEMS) {
+    if (pastedContractItemCount(props.items, parsed.length) > MAX_ITEMS) {
       props.onError(
         props.tt(
           "Pasting these rows would exceed the 500-item Intake limit.",

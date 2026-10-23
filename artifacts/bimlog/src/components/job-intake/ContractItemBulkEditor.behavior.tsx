@@ -6,6 +6,7 @@ import {
   ContractItemBulkEditor,
   applyDefaultApuToPastedItems,
   mergePastedContractItems,
+  pastedContractItemCount,
   parseContractItemPaste,
   selectSavedApuVersion,
 } from "./ContractItemBulkEditor";
@@ -65,6 +66,14 @@ assert.equal(
   mergePastedContractItems<Record<string, any>>([{ id: "CI-existing", name: "Door", quantity: "1", plannedHours: "1" }], [pastedItem]).length,
   2,
 );
+assert.equal(
+  pastedContractItemCount(
+    [{ id: "CI-starter", name: "", description: "", quantity: "1", plannedHours: "1", provenance: null }],
+    500,
+  ),
+  500,
+);
+assert.equal(pastedContractItemCount([{ id: "CI-existing", name: "Door", quantity: "1", plannedHours: "1" }], 500), 501);
 assert.deepEqual(
   applyDefaultApuToPastedItems(
     [{ name: "Muro", quantity: "4", billingHourlyRate: "0", unit: "Hours" }],
