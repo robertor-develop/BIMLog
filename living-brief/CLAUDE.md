@@ -897,3 +897,7 @@ Run `pnpm run generate:route-interconnection-graph` only when intentionally refr
 # Project-retirement verification note — 2026-10-06
 
 Project archival must retain the row-lock concurrency contract and schema-derived preservation count. Do not restore an `updated_at` equality predicate based on a JavaScript Date round trip; verify preview freshness after acquiring the project row lock. Hard deletion remains disabled.
+
+## Lorena final closure acceptance — 2026-10-23
+
+Builds 61–65 close only when the complete Lorena matrix has exact deployed identity plus authenticated Chrome proof. Source or database tests alone cannot establish publication, UI persistence, responsive behavior, clean console/network operation or independent Viva acceptance. Any live failure remains active repair work and must be fixed and retested before closure.

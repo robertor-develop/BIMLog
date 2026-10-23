@@ -6117,3 +6117,11 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] Preserve the row-lock concurrency correction from authoritative `main` while retaining the current schema-derived preservation inventory of 189 dependent tables.
 - [x] Keep hard deletion disabled and protected-project mutation denial unchanged.
 - [ ] Re-run the exact-head complete release gate after authoritative-ref reconciliation, then publish and live-verify the full Lorena workflow.
+
+## Lorena final closure Builds 61–65 — 2026-10-23
+
+- [x] Bind every reported Lorena defect to permanent source and real-database verification, including saved APU rate application, Excel import, first activation, PRE/COO/FOR/ASB allocation, workflow persistence, governance guidance, canonical contract/EDT consumption and downstream document lifecycles.
+- [ ] Push the exact clean candidate to the release branch, `main` and `master` through normal non-force updates after the complete gate passes.
+- [ ] Publish that exact SHA through Replit and verify health, readiness, assets and rollback predecessor.
+- [ ] Replace every pending live matrix entry with authenticated Chrome evidence or an exact external blocker, including controlled save/reopen, reload, two-tab, responsive and clean console/network proof.
+- [ ] Obtain independent Viva acceptance; constructor evidence alone cannot close the block.

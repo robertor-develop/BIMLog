@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "fd0cc58255210d7f242e5401cd22382004c12516ad148780af1dae5b23a91386",
-  "itemCount": 445,
+  "sourceSha256": "583419b0cf4e67d1ed48143f64a967e0f5970886eb9e19609fc95e5ede2e8d8f",
+  "itemCount": 450,
   "counts": {
-    "ACTIVE": 400,
+    "ACTIVE": 405,
     "SUPERSEDED": 33,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -8095,6 +8095,96 @@
       "evidence": [
         "OPEN_LOOP.md:6111",
         "2026-10-21 — Full-GA remediation Block 4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "349bf523ad59b5e3",
+      "sourceLine": 6119,
+      "heading": "Project-retirement concurrency correction — integrated 2026-10-23",
+      "statement": "Re-run the exact-head complete release gate after authoritative-ref reconciliation, then publish and live-verify the full Lorena workflow.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6119",
+        "Project-retirement concurrency correction — integrated 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "a0c074906c0aaee6",
+      "sourceLine": 6124,
+      "heading": "Lorena final closure Builds 61–65 — 2026-10-23",
+      "statement": "Push the exact clean candidate to the release branch, `main` and `master` through normal non-force updates after the complete gate passes.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6124",
+        "Lorena final closure Builds 61–65 — 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "cd277b5948b11b06",
+      "sourceLine": 6125,
+      "heading": "Lorena final closure Builds 61–65 — 2026-10-23",
+      "statement": "Publish that exact SHA through Replit and verify health, readiness, assets and rollback predecessor.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6125",
+        "Lorena final closure Builds 61–65 — 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "99bf392630fe7137",
+      "sourceLine": 6126,
+      "heading": "Lorena final closure Builds 61–65 — 2026-10-23",
+      "statement": "Replace every pending live matrix entry with authenticated Chrome evidence or an exact external blocker, including controlled save/reopen, reload, two-tab, responsive and clean console/network proof.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6126",
+        "Lorena final closure Builds 61–65 — 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "19bba4ce1d008fea",
+      "sourceLine": 6127,
+      "heading": "Lorena final closure Builds 61–65 — 2026-10-23",
+      "statement": "Obtain independent Viva acceptance; constructor evidence alone cannot close the block.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6127",
+        "Lorena final closure Builds 61–65 — 2026-10-23"
       ],
       "currentAuthority": false
     }

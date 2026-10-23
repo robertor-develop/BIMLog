@@ -4657,3 +4657,7 @@ Builds 16–20 add a fail-closed production sample-purge operator without execut
 # Project-retirement concurrency correction — integrated 2026-10-23
 
 The authoritative `main` row-lock correction is integrated with the current 189-table preservation inventory. Retirement validates preview freshness after locking the project row, avoids lossy JavaScript/PostgreSQL timestamp equality in the archive update, retains protected-project denial and keeps hard deletion disabled. Exact-head validation and the complete Lorena production acceptance remain required.
+
+## Lorena final closure Builds 61–65 — 2026-10-23
+
+The complete Lorena acceptance matrix is bound to source and real-database gates for Intake/Excel import, APU rate assignment, delivery workflow, governance guidance, EDT/WBS, activation, Operations hour packages, RFIs, Submittals, files, transmittals, reports, Agent behavior and responsive layout. Source and database checks do not substitute for deployed acceptance. Builds 64–65 remain the exact-identity publication and authenticated Chrome save/reopen, reload, two-tab, responsive, console/network and independent Viva acceptance boundary.
