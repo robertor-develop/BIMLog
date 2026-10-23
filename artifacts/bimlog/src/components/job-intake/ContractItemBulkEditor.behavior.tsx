@@ -41,6 +41,12 @@ assert.deepEqual(parseContractItemPaste("Excavation\t1.234,5\nBackfill\t2\u202f5
 assert.deepEqual(parseContractItemPaste("Nombre de la Partida\tCantidad\nMuro\t4"), [
   { sourceRow: 2, name: "Muro", quantity: "4" },
 ]);
+assert.deepEqual(parseContractItemPaste("Partida de Contrato\tCant.\nMuro\t4"), [
+  { sourceRow: 2, name: "Muro", quantity: "4" },
+]);
+assert.deepEqual(parseContractItemPaste("Item\tQty\nDoor\t2"), [
+  { sourceRow: 2, name: "Door", quantity: "2" },
+]);
 assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
   { sourceRow: 1, name: "Muro", quantity: "4", extraColumns: true },
 ]);

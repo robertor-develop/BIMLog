@@ -130,8 +130,18 @@ export function parseContractItemPaste(source: string) {
   if (rows.length > 0) {
     const firstName = rows[0].name.toLocaleLowerCase().replace(/[^a-záéíóúñ]+/g, " ").trim();
     const firstQuantity = rows[0].quantity.toLocaleLowerCase().replace(/[^a-záéíóúñ]+/g, " ").trim();
-    const nameHeader = ["name", "contract item name", "nombre", "nombre de la partida"].includes(firstName);
-    const quantityHeader = ["quantity", "cantidad"].includes(firstQuantity);
+    const nameHeader = [
+      "name",
+      "item",
+      "contract item",
+      "contract item name",
+      "nombre",
+      "partida",
+      "partida de contrato",
+      "nombre de la partida",
+      "nombre de la partida de contrato",
+    ].includes(firstName);
+    const quantityHeader = ["quantity", "qty", "cantidad", "cant"].includes(firstQuantity);
     if (nameHeader && quantityHeader) return rows.slice(1);
   }
   return rows;
