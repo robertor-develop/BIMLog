@@ -1,10 +1,10 @@
 import { db } from "@workspace/db";
 import { adminActionsLogTable, filesTable, projectMembersTable, projectsTable, usersTable } from "@workspace/db/schema";
-import { and, count, eq, inArray } from "drizzle-orm";
+import { and, count, eq, inArray, sql } from "drizzle-orm";
 import { collectProjectRetirementInventory, PROJECT_RETIREMENT_INVENTORY_VERSION, PROJECT_RETIREMENT_OWNERSHIP, totalProjectRetirementRecords } from "./project-retirement-inventory";
 import { gaProtectedProjectById, isGaProtectedProjectId } from "./ga-protected-projects";
 
-export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 187;
+export const COMPLETE_PROJECT_DEPENDENT_TABLE_COUNT = 189;
 
 export class ProjectRetirementError extends Error {
   constructor(public readonly code: string, public readonly status: number, message: string) {
@@ -73,7 +73,12 @@ export async function previewProjectRetirement(actor: Actor, projectId: number, 
 export async function retireProject(actor: Actor, projectId: number, adminRoles: string[], input: { confirmation?: unknown; expectedUpdatedAt?: unknown }) {
   await rejectProtectedProjectMutation(actor, projectId, "retire_project");
   return db.transaction(async (tx) => {
-    const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1).for("update");
+    // Lock the row before reading it so the verified preview identity remains
+    // stable through the archive update. PostgreSQL can retain more timestamp
+    // precision than JavaScript Date/ISO, so an equality predicate on the
+    // round-tripped timestamp can reject an otherwise unchanged project.
+    await tx.execute(sql`SELECT id FROM projects WHERE id = ${projectId} FOR UPDATE`);
+    const [project] = await tx.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
     if (!project) throw new ProjectRetirementError("PROJECT_NOT_FOUND", 404, "Project not found.");
     const email = await requireAuthority(tx, actor, project, adminRoles);
     if (input.confirmation !== project.code)

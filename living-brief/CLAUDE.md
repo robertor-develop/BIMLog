@@ -893,3 +893,7 @@ Run `pnpm run generate:route-interconnection-graph` only when intentionally refr
 - History requires current tenant/project membership; former members are denied. Retained customer output is reproducible from immutable baseline fingerprints.
 - `test:consolidation-block09` is permanent through the existing Block 8 pre-push chain. This Platform/API block changes no schema, customer data, Lens Next Native or installers and is pushed without publication until C050.
 - The Block 9 state seal must be generated only after the structural platform inventory reflects all five accepted source units; the final narrative and seal cover the same exact candidate boundary.
+
+# Project-retirement verification note — 2026-10-06
+
+Project archival must retain the row-lock concurrency contract and schema-derived preservation count. Do not restore an `updated_at` equality predicate based on a JavaScript Date round trip; verify preview freshness after acquiring the project row lock. Hard deletion remains disabled.

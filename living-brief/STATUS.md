@@ -4653,3 +4653,7 @@ Post-implementation reconciliation binds this description to implementation comm
 ## 2026-10-21 — Full-GA remediation Block 4
 
 Builds 16–20 add a fail-closed production sample-purge operator without executing it. The operator binds fourteen previously identified sample projects and the four protected projects to exact database IDs and codes, discovers project-dependent rows from the live foreign-key graph, hashes the complete dry-run manifest, and requires a serializable transaction plus the exact manifest hash and operation authorization before execution. It verifies the protected project dependency digest before commit, refuses incomplete or cyclic scope, records exact row receipts, and retains object-storage identities for separately governed cleanup. Permanent build-specific and aggregate gates pass with API TypeScript. No project, dependency, storage object, audit record, or production data was mutated during this block.
+
+# Project-retirement concurrency correction — integrated 2026-10-23
+
+The authoritative `main` row-lock correction is integrated with the current 189-table preservation inventory. Retirement validates preview freshness after locking the project row, avoids lossy JavaScript/PostgreSQL timestamp equality in the archive update, retains protected-project denial and keeps hard deletion disabled. Exact-head validation and the complete Lorena production acceptance remain required.

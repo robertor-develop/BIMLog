@@ -6111,3 +6111,9 @@ The implementation-unit reconciliation is bound to source commit `22318d77`; the
 - [ ] Push this five-build block once. Keep it unpublished until the next five-build block reaches the ten-build boundary.
 
 No purge was executed and the protected projects, sample projects and temporary Gauntlet project remain unchanged.
+
+# Project-retirement concurrency correction — integrated 2026-10-23
+
+- [x] Preserve the row-lock concurrency correction from authoritative `main` while retaining the current schema-derived preservation inventory of 189 dependent tables.
+- [x] Keep hard deletion disabled and protected-project mutation denial unchanged.
+- [ ] Re-run the exact-head complete release gate after authoritative-ref reconciliation, then publish and live-verify the full Lorena workflow.
