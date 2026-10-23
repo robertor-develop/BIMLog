@@ -1,8 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Outcome remediation Block 12 — Builds 56–60 candidate — 2026-10-23
+
+The final five Contract Item import repairs preserve real Excel record structure without accepting ambiguous input. Quoted multiline cells retain physical source-row identity; delimiter selection ignores punctuation inside quotes; malformed content after a closing quote fails closed; quantity byte-order marks are removed before exact decimal validation; and hidden line-break or Unicode whitespace in pasted names becomes stable visible spacing. Focused behavior and frontend TypeScript pass through implementation commit `695da556`. This completes the Builds 51–60 publication interval; exact-head validation, push, publication, exact live identity, and authenticated Chrome remain required.
+
 ## Outcome remediation Block 11 — Builds 51–55 candidate — 2026-10-23
 
-Five additional Contract Item repairs preserve pricing and field-work intent. Quantity edits now recompute a saved APU rate only when that rate remains APU-derived, including the bulk quantity action, while manual rates stay unchanged. Two-column paste no longer treats sales quantity as planned labor hours. Quoted Excel cells preserve embedded delimiters and escaped quotes, malformed quotes fail closed, and a successful direct clipboard import clears stale fallback text. Focused behavior and frontend TypeScript pass through implementation commit `e6e940fa`; exact-head validation and one push remain required. This is five unpublished builds, so no publication is due until Builds 56–60.
+Five additional Contract Item repairs preserve pricing and field-work intent. Quantity edits now recompute a saved APU rate only when that rate remains APU-derived, including the bulk quantity action, while manual rates stay unchanged. Two-column paste no longer treats sales quantity as planned labor hours. Quoted Excel cells preserve embedded delimiters and escaped quotes, malformed quotes fail closed, and a successful direct clipboard import clears stale fallback text. Focused behavior and frontend TypeScript pass through implementation commit `e6e940fa`; exact-head validation passed and the block was pushed at `ee0268f2c29852ff1f251983a82ae8d896b49494`. It remains unpublished until Builds 56–60 complete the interval.
 
 ## Outcome remediation Block 10 — Builds 46–50 published — 2026-10-23
 

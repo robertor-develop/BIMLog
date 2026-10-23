@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Outcome remediation Block 12 — Builds 56–60 — 2026-10-23
+
+- [x] B56 preserve quoted multiline Excel cells and their physical source-row identity.
+- [x] B57 detect the two-column delimiter outside quoted item text.
+- [x] B58 reject non-whitespace content after a closing quote instead of silently changing a name.
+- [x] B59 strip a spreadsheet byte-order mark from the Quantity cell before exact decimal validation.
+- [x] B60 normalize hidden line-break and Unicode whitespace in pasted Contract Item names.
+- [ ] Pass the exact-head gate, push Builds 56–60 once, publish accumulated Builds 51–60, verify exact live identity, and run full authenticated Chrome smoke.
+
 ## Outcome remediation Block 11 — Builds 51–55 — 2026-10-23
 
 - [x] B51 recompute a quantity-derived saved-APU unit rate when one Contract Item quantity changes, while preserving a manual rate.
@@ -7,7 +16,7 @@
 - [x] B53 keep pasted sales quantity separate from planned labor hours instead of silently copying one into the other.
 - [x] B54 parse quoted Excel cells, embedded delimiters, escaped quotes, and malformed quote boundaries without weakening formula rejection.
 - [x] B55 clear stale manual fallback text after a successful direct clipboard import so it cannot be added twice accidentally.
-- [ ] Pass the exact-head gate and push Builds 51–55 once. Keep this block unpublished until Builds 56–60 complete the ten-build interval.
+- [x] Pass the exact-head gate and push Builds 51–55 once at `ee0268f2c29852ff1f251983a82ae8d896b49494`. Keep this block unpublished until Builds 56–60 complete the ten-build interval.
 
 ## Outcome remediation Block 10 — Builds 46–50 — 2026-10-23
 
