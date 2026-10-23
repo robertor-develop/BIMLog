@@ -6125,3 +6125,11 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [ ] Publish that exact SHA through Replit and verify health, readiness, assets and rollback predecessor.
 - [ ] Replace every pending live matrix entry with authenticated Chrome evidence or an exact external blocker, including controlled save/reopen, reload, two-tab, responsive and clean console/network proof.
 - [ ] Obtain independent Viva acceptance; constructor evidence alone cannot close the block.
+
+## Lorena final closure Builds 66–70 — 2026-10-23
+
+- [x] Record authenticated production observations for all ten requested Lorena outcomes in the final acceptance matrix, with source/database evidence identified separately from live observations.
+- [ ] Complete the exact-head release gate for the reconciled evidence commit.
+- [ ] Push the exact clean candidate normally to the release branch, `main` and `master`.
+- [ ] Publish the exact SHA through Replit and run the required post-publication authenticated Chrome smoke, including deployed identity, responsive widths and clean console/network checks.
+- [ ] Obtain an independent Viva verdict against the exact published SHA and retained evidence.

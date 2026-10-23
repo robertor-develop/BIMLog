@@ -4661,3 +4661,7 @@ The authoritative `main` row-lock correction is integrated with the current 189-
 ## Lorena final closure Builds 61–65 — 2026-10-23
 
 The complete Lorena acceptance matrix is bound to source and real-database gates for Intake/Excel import, APU rate assignment, delivery workflow, governance guidance, EDT/WBS, activation, Operations hour packages, RFIs, Submittals, files, transmittals, reports, Agent behavior and responsive layout. Source and database checks do not substitute for deployed acceptance. Builds 64–65 remain the exact-identity publication and authenticated Chrome save/reopen, reload, two-tab, responsive, console/network and independent Viva acceptance boundary.
+
+## Lorena final closure Builds 66–70 — 2026-10-23
+
+The authenticated production acceptance record now covers the ten requested outcomes: controlled Excel import persistence, saved APU rate assignment, delivery-workflow content, canonical Contract/EDT visibility, first activation, PRE/COO/FOR/ASB work-package allocation, RFI persistence, Submittal-to-RFI selection, Agent availability and responsive layout. The release evidence is recorded in `evidence/outcome-remediation-20261023/LORENA_FINAL_ACCEPTANCE.md`. Exact-head gate completion, normal push, exact-SHA Replit publication, post-publication Chrome smoke and independent Viva acceptance remain required before the closure is final.
