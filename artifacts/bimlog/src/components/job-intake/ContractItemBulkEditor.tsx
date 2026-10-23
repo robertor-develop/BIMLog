@@ -124,6 +124,7 @@ export function parseContractItemPaste(source: string) {
         name: String(cells[0] ?? "").trim(),
         quantity: delimiter === "," ? localizedQuantity : localizedQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
         ...(cells.slice(2).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
+        ...(/^[=+\-@]/.test(String(cells[0] ?? "").trim()) ? { unsafeFormula: true } : {}),
       };
     })
     .filter((row) => row.name || row.quantity);
@@ -194,7 +195,7 @@ export function ContractItemBulkEditor(props: Props) {
   const appendPastedItems = (source: string) => {
     const parsed = parseContractItemPaste(source);
     const invalid = parsed.filter(
-      (row) => !row.name || !validQuantity(row.quantity) || row.extraColumns,
+      (row) => !row.name || !validQuantity(row.quantity) || row.extraColumns || row.unsafeFormula,
     );
     if (!parsed.length || invalid.length) {
       const invalidRows = invalid

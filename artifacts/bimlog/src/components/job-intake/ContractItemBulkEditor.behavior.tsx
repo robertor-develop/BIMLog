@@ -50,6 +50,9 @@ assert.deepEqual(parseContractItemPaste("Item\tQty\nDoor\t2"), [
 assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
   { sourceRow: 1, name: "Muro", quantity: "4", extraColumns: true },
 ]);
+assert.deepEqual(parseContractItemPaste("=HYPERLINK(\"https://example.invalid\")\t1"), [
+  { sourceRow: 1, name: "=HYPERLINK(\"https://example.invalid\")", quantity: "1", unsafeFormula: true },
+]);
 const pastedItem: Record<string, any> = { id: "CI-pasted", name: "Muro", quantity: "4", plannedHours: "4", provenance: { source: "clipboard" } };
 assert.deepEqual(
   mergePastedContractItems<Record<string, any>>(
