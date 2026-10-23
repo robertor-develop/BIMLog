@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Outcome remediation Block 9 — Builds 41–45 — 2026-10-22
+
+- [x] B41 normalize grouped pasted quantities across decimal-comma, narrow-space, and decimal-point Excel formats.
+- [x] B42 recognize common English and Spanish Contract Item header abbreviations without consuming a real data row.
+- [x] B43 reject spreadsheet-formula item names before they enter durable Intake data or later exports.
+- [x] B44 count replacement of the pristine starter row correctly so an exact 500-row paste remains valid.
+- [x] B45 provide an explicit bilingual Add pasted rows action for browsers where direct clipboard reading is unavailable.
+- [ ] Pass the exact-head gate and push Builds 41–45 once. Keep the block unpublished until Builds 46–50 complete the ten-build interval.
+
 ## Outcome remediation Block 8 — Builds 36–40 — 2026-10-22
 
 - [x] B36 preserve localized decimal-comma quantities when a two-column Excel range uses tab or semicolon delimiters.
@@ -7,7 +16,7 @@
 - [x] B38 reject populated third-or-later columns instead of silently discarding pasted values.
 - [x] B39 replace only a pristine blank starter Contract Item so a successful paste does not leave Intake incomplete.
 - [x] B40 apply the selected saved APU through the same exact quantity-normalized rate and provenance path for every pasted row.
-- [ ] Pass the exact-head gate, push Builds 36–40 once, publish accumulated Builds 31–40, verify exact live identity, and run full authenticated Chrome smoke.
+- [x] Pass the exact-head gate, push Builds 36–40 once, publish accumulated Builds 31–40, verify exact live identity, and run full authenticated Chrome smoke at exact source `1e7f537e39cb59b2c2a1a0fc4d9cdc8a984ac4cd`.
 
 ## Outcome remediation Block 7 — Builds 31–35 — 2026-10-22
 

@@ -6,7 +6,7 @@ const editor = read("artifacts/bimlog/src/components/job-intake/ContractItemBulk
 const behavior = read("artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx");
 
 assert.match(editor, /line\.includes\("\\t"\) \? "\\t" : line\.includes\(";"\) \? ";" : ","/);
-assert.match(editor, /rawQuantity\.replace\(\/\^\(\\d\+\),\(\\d\{1,6\}\)\$\//);
+assert.match(editor, /localizedQuantity\.replace\(\/\^\(\\d\+\),\(\\d\{1,6\}\)\$\//);
 assert.match(editor, /nameHeader && quantityHeader/);
 assert.match(editor, /extraColumns: true/);
 assert.match(editor, /pristineStarter \? pasted : \[\.\.\.existing, \.\.\.pasted\]/);

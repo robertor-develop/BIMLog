@@ -1,8 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
-## Outcome remediation Block 8 — Builds 36–40 candidate — 2026-10-22
+## Outcome remediation Block 9 — Builds 41–45 candidate — 2026-10-22
 
-Five runtime repairs complete the next ten-build publication interval. Excel-range paste now preserves decimal-comma quantities under tab or semicolon delimiters, ignores one recognized bilingual Name/Quantity header while retaining real source row numbers, and rejects populated extra columns instead of silently losing data. A successful paste replaces only the untouched blank starter row, and every pasted Contract Item receives the selected saved APU's exact quantity-normalized unit rate and provenance through the same authority as an explicit selection. Focused behavior and frontend TypeScript pass through implementation commit `fe54a945`; exact-head release validation, push, controlled publication, exact live identity, and authenticated Chrome smoke remain required.
+Five Intake repairs make the Excel-range workflow resilient to real field workbooks and clipboard restrictions. Grouped localized quantities normalize without losing precision; common English and Spanish headers are ignored while source row identity is retained; formula-bearing item names are rejected; replacement of the pristine starter row permits the full 500-row limit; and a visible bilingual action can apply text entered in the fallback paste area without clipboard API access. Focused behavior and frontend TypeScript pass through implementation commit `7d2c3a43`; exact-head release validation and one push remain required. This is five unpublished builds, so no publication is due until Builds 46–50.
+
+## Outcome remediation Block 8 — Builds 36–40 published — 2026-10-22
+
+Five runtime repairs completed the ten-build publication interval. Excel-range paste preserves decimal-comma quantities under tab or semicolon delimiters, ignores one recognized bilingual Name/Quantity header while retaining real source row numbers, and rejects populated extra columns instead of silently losing data. A successful paste replaces only the untouched blank starter row, and every pasted Contract Item receives the selected saved APU's exact quantity-normalized unit rate and provenance through the same authority as an explicit selection. Exact-head validation passed, source `1e7f537e39cb59b2c2a1a0fc4d9cdc8a984ac4cd` was pushed and published as deployment `a34f876f-539a-49d6-bc40-d6281bb9d28b`, live health matched the source and package identities, and authenticated Chrome passed Dashboard, Cost & Value, Intake, Operations, and reload-route smoke.
 
 ## Outcome remediation Block 7 — Builds 31–35 candidate — 2026-10-22
 
