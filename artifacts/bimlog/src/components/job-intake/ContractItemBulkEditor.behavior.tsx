@@ -35,6 +35,9 @@ assert.deepEqual(parseContractItemPaste("Muro;1,5\nPuerta;2,25"), [
 assert.deepEqual(parseContractItemPaste("Nombre de la Partida\tCantidad\nMuro\t4"), [
   { sourceRow: 2, name: "Muro", quantity: "4" },
 ]);
+assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
+  { sourceRow: 1, name: "Muro", quantity: "4", extraColumns: true },
+]);
 assert.deepEqual(
   selectSavedApuVersion(
     [

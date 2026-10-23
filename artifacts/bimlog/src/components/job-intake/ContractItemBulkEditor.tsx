@@ -119,6 +119,7 @@ export function parseContractItemPaste(source: string) {
         sourceRow: index + 1,
         name: String(cells[0] ?? "").trim(),
         quantity: delimiter === "," ? rawQuantity : rawQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
+        ...(cells.slice(2).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
       };
     })
     .filter((row) => row.name || row.quantity);
@@ -156,7 +157,7 @@ export function ContractItemBulkEditor(props: Props) {
   const appendPastedItems = (source: string) => {
     const parsed = parseContractItemPaste(source);
     const invalid = parsed.filter(
-      (row) => !row.name || !validQuantity(row.quantity),
+      (row) => !row.name || !validQuantity(row.quantity) || row.extraColumns,
     );
     if (!parsed.length || invalid.length) {
       const invalidRows = invalid
@@ -171,8 +172,8 @@ export function ContractItemBulkEditor(props: Props) {
         : "";
       props.onError(
         props.tt(
-          `Paste two Excel columns: Contract Item Name and a positive Quantity. ${invalid.length || 1} row(s) need correction.`,
-          `Pegue dos columnas de Excel: Nombre de la Partida y una Cantidad positiva. ${invalid.length || 1} fila(s) requieren corrección.`,
+          `Paste exactly two Excel columns: Contract Item Name and a positive Quantity. ${invalid.length || 1} row(s) need correction.`,
+          `Pegue exactamente dos columnas de Excel: Nombre de la Partida y una Cantidad positiva. ${invalid.length || 1} fila(s) requieren corrección.`,
         ) + rowDetail,
       );
       return;
