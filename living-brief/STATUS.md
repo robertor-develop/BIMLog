@@ -4665,3 +4665,9 @@ The complete Lorena acceptance matrix is bound to source and real-database gates
 ## Lorena final closure Builds 66–70 — 2026-10-23
 
 The authenticated production acceptance record now covers the ten requested outcomes: controlled Excel import persistence, saved APU rate assignment, delivery-workflow content, canonical Contract/EDT visibility, first activation, PRE/COO/FOR/ASB work-package allocation, RFI persistence, Submittal-to-RFI selection, Agent availability and responsive layout. The release evidence is recorded in `evidence/outcome-remediation-20261023/LORENA_FINAL_ACCEPTANCE.md`. Exact-head gate completion, normal push, exact-SHA Replit publication, post-publication Chrome smoke and independent Viva acceptance remain required before the closure is final.
+## Viva whole-platform closure Block 1 candidate — 2026-10-23
+
+Builds 001–005 reconcile all 454 open-loop records into six explicit release dispositions, repair deterministic recovery-database provisioning, reduce the platform audit to P0=0/P1=0/P2=0, bind an exact-source release manifest contract, and add one executable Block 1 closure gate. The accepted live production identity remains `e64c21a04c65ac9b60344379489d31d7668f8e41`; this block is pushed after exact-head acceptance and is not published until the 10-build boundary after Block 2.
+
+The authorized live registry audit subsequently disclosed GHSA-27r3-jxmh-p828 through Express and GHSA-q7qp-rjg7-q26m through Multer. Block 1 now pins patched `body-parser` 2.4.0 and `multer` 2.5.0, binds the dependency-provenance checker to both integrity records, and requires the production audit to return no known vulnerabilities before push.
+

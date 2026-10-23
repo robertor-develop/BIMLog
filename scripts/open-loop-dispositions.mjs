@@ -143,7 +143,7 @@ const counts = Object.fromEntries(
 const allowedDispositionCategories = ["ACTIVE_DEFECT", "VALID_FUTURE_ROADMAP", "EXTERNAL_OWNER_INPUT", "ACCEPTED_LIMITATION", "SUPERSEDED_HISTORY", "CLOSED_WITH_EVIDENCE"];
 const dispositionCounts = Object.fromEntries(allowedDispositionCategories.map((key) => [key, items.filter((item) => item.dispositionCategory === key).length]));
 const result = {
-  schemaVersion: 3,
+  schemaVersion: 2,
   generatedFrom: "living-brief/OPEN_LOOP.md",
   sourceSha256: crypto.createHash("sha256").update(source).digest("hex"),
   itemCount: items.length,

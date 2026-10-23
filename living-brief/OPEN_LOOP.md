@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Viva whole-platform closure Block 1 — Builds 001–005 — 2026-10-23
+
+- [x] Classify all 454 historical entries through the six-way disposition register without erasing source history.
+- [x] Make the authenticated recovery fixture deterministic and verify all recovery HTTP scenarios.
+- [x] Reduce the enforced platform audit to P0=0, P1=0, and P2=0; patch `body-parser` to 2.4.0 for GHSA-27r3-jxmh-p828 and `multer` to 2.5.0 for GHSA-q7qp-rjg7-q26m; bind both integrity records in the provenance gate.
+- [x] Bind the exact-source release manifest and unified Block 1 closure gate.
+- [ ] Push the accepted five-build block. Publish only after Block 2 / Build 010 completes the ten-build interval.
+
 ## Outcome remediation Block 12 — Builds 56–60 — 2026-10-23
 
 - [x] B56 preserve quoted multiline Excel cells and their physical source-row identity.
