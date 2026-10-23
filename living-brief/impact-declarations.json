@@ -73677,6 +73677,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a7ed47719275e799951c73ba595de06e1ac8f08561aedd3e013c00f304bd4030"
+    },
+    {
+      "taskId": "outcome-remediation-block11-20261023",
+      "reviewedThroughCommit": "e6e940faf4f61a1088f6a5766183f1b256fa78f9",
+      "reviewedAt": "2026-10-23T01:45:00-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority."
+        }
+      ],
+      "reason": "Outcome remediation Block 11 keeps quantity-derived saved-APU rates correct after individual and bulk quantity changes, preserves manual rates, separates pasted sales quantity from planned labor hours, accepts safely quoted Excel cells, and removes stale fallback text after successful clipboard import. It changes no schema, authorization, customer data, Native code, installer, payment, email, or external-provider authority.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "b51ad2b8e6a195edf7121ed494d4d04d63b3f5849eda83e3ac1ea2defc3c2c64"
     }
   ]
 }

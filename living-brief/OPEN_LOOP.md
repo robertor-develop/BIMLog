@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Outcome remediation Block 11 — Builds 51–55 — 2026-10-23
+
+- [x] B51 recompute a quantity-derived saved-APU unit rate when one Contract Item quantity changes, while preserving a manual rate.
+- [x] B52 apply the same saved-APU repricing contract to the bulk quantity action.
+- [x] B53 keep pasted sales quantity separate from planned labor hours instead of silently copying one into the other.
+- [x] B54 parse quoted Excel cells, embedded delimiters, escaped quotes, and malformed quote boundaries without weakening formula rejection.
+- [x] B55 clear stale manual fallback text after a successful direct clipboard import so it cannot be added twice accidentally.
+- [ ] Pass the exact-head gate and push Builds 51–55 once. Keep this block unpublished until Builds 56–60 complete the ten-build interval.
+
 ## Outcome remediation Block 10 — Builds 46–50 — 2026-10-23
 
 - [x] B46 strip a spreadsheet byte-order mark before recognizing a header or Contract Item name.
@@ -7,7 +16,7 @@
 - [x] B48 preserve invalid pasted text in the fallback editor so the user can correct and retry it.
 - [x] B49 focus the manual fallback with bilingual guidance when the clipboard API succeeds but returns no text.
 - [x] B50 refuse Connect all when the saved default APU is unavailable or currency-incompatible instead of fabricating a binding.
-- [ ] Pass the exact-head gate, push Builds 46–50 once, publish accumulated Builds 41–50, verify exact live identity, and run full authenticated Chrome smoke.
+- [x] Pass the exact-head gate, push Builds 46–50 once, publish accumulated Builds 41–50, verify exact live identity, and run full authenticated Chrome smoke at exact source `1b4a2803240a4c50f79c06b5f873ef9c14f2ebeb`.
 
 ## Outcome remediation Block 9 — Builds 41–45 — 2026-10-22
 

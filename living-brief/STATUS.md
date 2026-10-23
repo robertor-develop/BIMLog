@@ -1,8 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
-## Outcome remediation Block 10 — Builds 46–50 candidate — 2026-10-23
+## Outcome remediation Block 11 — Builds 51–55 candidate — 2026-10-23
 
-Five additional Intake repairs complete the next ten-build publication interval. Excel byte-order marks no longer break header recognition; localized grouped values work in the bulk-quantity action; invalid fallback text remains available for correction; an empty clipboard response focuses the visible manual path; and Connect all fails closed when the saved APU default is no longer compatible or available. Focused behavior and frontend TypeScript pass through implementation commit `3e3b3836`; exact-head validation, one push, controlled publication, exact live identity, and authenticated Chrome smoke remain required.
+Five additional Contract Item repairs preserve pricing and field-work intent. Quantity edits now recompute a saved APU rate only when that rate remains APU-derived, including the bulk quantity action, while manual rates stay unchanged. Two-column paste no longer treats sales quantity as planned labor hours. Quoted Excel cells preserve embedded delimiters and escaped quotes, malformed quotes fail closed, and a successful direct clipboard import clears stale fallback text. Focused behavior and frontend TypeScript pass through implementation commit `e6e940fa`; exact-head validation and one push remain required. This is five unpublished builds, so no publication is due until Builds 56–60.
+
+## Outcome remediation Block 10 — Builds 46–50 published — 2026-10-23
+
+Five additional Intake repairs completed the ten-build publication interval. Excel byte-order marks no longer break header recognition; localized grouped values work in the bulk-quantity action; invalid fallback text remains available for correction; an empty clipboard response focuses the visible manual path; and Connect all fails closed when the saved APU default is no longer compatible or available. Exact-head validation passed, source `1b4a2803240a4c50f79c06b5f873ef9c14f2ebeb` was pushed and published, live health matched the source and package identities, and authenticated Chrome passed Headquarters, Cost & Value, Contract Items, Operations, and direct-route reload smoke.
 
 ## Outcome remediation Block 9 — Builds 41–45 candidate — 2026-10-22
 
