@@ -40,16 +40,16 @@ assert.deepEqual(parseContractItemPaste("Nombre de la Partida\tCantidad\nMuro\t4
 assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
   { sourceRow: 1, name: "Muro", quantity: "4", extraColumns: true },
 ]);
-const pastedItem = { id: "CI-pasted", name: "Muro", quantity: "4", plannedHours: "4", provenance: { source: "clipboard" } };
+const pastedItem: Record<string, any> = { id: "CI-pasted", name: "Muro", quantity: "4", plannedHours: "4", provenance: { source: "clipboard" } };
 assert.deepEqual(
-  mergePastedContractItems(
+  mergePastedContractItems<Record<string, any>>(
     [{ id: "CI-starter", name: "", description: "", quantity: "1", plannedHours: "1", provenance: null }],
     [pastedItem],
   ),
   [pastedItem],
 );
 assert.equal(
-  mergePastedContractItems([{ id: "CI-existing", name: "Door", quantity: "1", plannedHours: "1" }], [pastedItem]).length,
+  mergePastedContractItems<Record<string, any>>([{ id: "CI-existing", name: "Door", quantity: "1", plannedHours: "1" }], [pastedItem]).length,
   2,
 );
 assert.deepEqual(
