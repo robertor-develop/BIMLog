@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Outcome remediation Block 10 — Builds 46–50 — 2026-10-23
+
+- [x] B46 strip a spreadsheet byte-order mark before recognizing a header or Contract Item name.
+- [x] B47 normalize localized grouped quantities in the bulk-quantity action through the same exact decimal contract as pasted rows.
+- [x] B48 preserve invalid pasted text in the fallback editor so the user can correct and retry it.
+- [x] B49 focus the manual fallback with bilingual guidance when the clipboard API succeeds but returns no text.
+- [x] B50 refuse Connect all when the saved default APU is unavailable or currency-incompatible instead of fabricating a binding.
+- [ ] Pass the exact-head gate, push Builds 46–50 once, publish accumulated Builds 41–50, verify exact live identity, and run full authenticated Chrome smoke.
+
 ## Outcome remediation Block 9 — Builds 41–45 — 2026-10-22
 
 - [x] B41 normalize grouped pasted quantities across decimal-comma, narrow-space, and decimal-point Excel formats.
@@ -7,7 +16,7 @@
 - [x] B43 reject spreadsheet-formula item names before they enter durable Intake data or later exports.
 - [x] B44 count replacement of the pristine starter row correctly so an exact 500-row paste remains valid.
 - [x] B45 provide an explicit bilingual Add pasted rows action for browsers where direct clipboard reading is unavailable.
-- [ ] Pass the exact-head gate and push Builds 41–45 once. Keep the block unpublished until Builds 46–50 complete the ten-build interval.
+- [x] Pass the exact-head gate and push Builds 41–45 once at `0797c4407a5bd0c6e84751ab81e1e915f7584c46`. Keep the block unpublished until Builds 46–50 complete the ten-build interval.
 
 ## Outcome remediation Block 8 — Builds 36–40 — 2026-10-22
 

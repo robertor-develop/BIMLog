@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Outcome remediation Block 10 — Builds 46–50 candidate — 2026-10-23
+
+Five additional Intake repairs complete the next ten-build publication interval. Excel byte-order marks no longer break header recognition; localized grouped values work in the bulk-quantity action; invalid fallback text remains available for correction; an empty clipboard response focuses the visible manual path; and Connect all fails closed when the saved APU default is no longer compatible or available. Focused behavior and frontend TypeScript pass through implementation commit `3e3b3836`; exact-head validation, one push, controlled publication, exact live identity, and authenticated Chrome smoke remain required.
+
 ## Outcome remediation Block 9 — Builds 41–45 candidate — 2026-10-22
 
 Five Intake repairs make the Excel-range workflow resilient to real field workbooks and clipboard restrictions. Grouped localized quantities normalize without losing precision; common English and Spanish headers are ignored while source row identity is retained; formula-bearing item names are rejected; replacement of the pristine starter row permits the full 500-row limit; and a visible bilingual action can apply text entered in the fallback paste area without clipboard API access. Focused behavior and frontend TypeScript pass through implementation commit `7d2c3a43`; exact-head release validation and one push remain required. This is five unpublished builds, so no publication is due until Builds 46–50.

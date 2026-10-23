@@ -160,6 +160,7 @@
     "test:outcome-remediation-block07": "node scripts/test-outcome-remediation-block07.mjs",
     "test:outcome-remediation-block08": "node scripts/test-outcome-remediation-block08.mjs",
     "test:outcome-remediation-block09": "node scripts/test-outcome-remediation-block09.mjs",
+    "test:outcome-remediation-block10": "node scripts/test-outcome-remediation-block10.mjs",
     "check:authenticated-release-acceptance": "node scripts/check-authenticated-release-acceptance.mjs",
     "test:authenticated-release-acceptance": "node scripts/test-authenticated-release-acceptance.mjs",
     "check:checkout-readiness": "node scripts/check-checkout-readiness.mjs",
