@@ -7,6 +7,7 @@ import {
   applyDefaultApuToPastedItems,
   mergePastedContractItems,
   pastedContractItemCount,
+  normalizeLocalizedQuantity,
   parseContractItemPaste,
   selectSavedApuVersion,
 } from "./ContractItemBulkEditor";
@@ -39,6 +40,7 @@ assert.deepEqual(parseContractItemPaste("Excavation\t1.234,5\nBackfill\t2\u202f5
   { sourceRow: 1, name: "Excavation", quantity: "1234.5" },
   { sourceRow: 2, name: "Backfill", quantity: "2500.25" },
 ]);
+assert.equal(normalizeLocalizedQuantity("2\u202f500,25").replace(/^(\d+),(\d{1,6})$/, "$1.$2"), "2500.25");
 assert.deepEqual(parseContractItemPaste("Nombre de la Partida\tCantidad\nMuro\t4"), [
   { sourceRow: 2, name: "Muro", quantity: "4" },
 ]);

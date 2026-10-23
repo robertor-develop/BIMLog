@@ -107,6 +107,13 @@ function validQuantity(value: string) {
   return parsed != null && parsed > 0n;
 }
 
+export function normalizeLocalizedQuantity(value: unknown) {
+  return String(value ?? "").trim()
+    .replace(/[\u00a0\u202f ]/g, "")
+    .replace(/^(\d{1,3}(?:\.\d{3})+),(\d{1,6})$/, (_, whole, fraction) => `${whole.replace(/\./g, "")}.${fraction}`)
+    .replace(/^(\d{1,3}(?:,\d{3})+)\.(\d{1,6})$/, (_, whole, fraction) => `${whole.replace(/,/g, "")}.${fraction}`);
+}
+
 export function parseContractItemPaste(source: string) {
   const rows = source
     .replace(/\r\n?/g, "\n")
@@ -115,10 +122,7 @@ export function parseContractItemPaste(source: string) {
       const delimiter = line.includes("\t") ? "\t" : line.includes(";") ? ";" : ",";
       const cells = line.split(delimiter);
       const rawQuantity = String(cells[1] ?? "").trim();
-      const localizedQuantity = rawQuantity
-        .replace(/[\u00a0\u202f ]/g, "")
-        .replace(/^(\d{1,3}(?:\.\d{3})+),(\d{1,6})$/, (_, whole, fraction) => `${whole.replace(/\./g, "")}.${fraction}`)
-        .replace(/^(\d{1,3}(?:,\d{3})+)\.(\d{1,6})$/, (_, whole, fraction) => `${whole.replace(/,/g, "")}.${fraction}`);
+      const localizedQuantity = normalizeLocalizedQuantity(rawQuantity);
       return {
         sourceRow: index + 1,
         name: String(cells[0] ?? "").replace(/^\uFEFF/, "").trim(),
@@ -268,7 +272,8 @@ export function ContractItemBulkEditor(props: Props) {
     if (pasteText.trim()) setPasteText("");
   };
   const applyBulkQuantity = () => {
-    if (!validQuantity(bulkQuantity)) {
+    const normalizedQuantity = normalizeLocalizedQuantity(bulkQuantity).replace(/^(\d+),(\d{1,6})$/, "$1.$2");
+    if (!validQuantity(normalizedQuantity)) {
       props.onError(
         props.tt(
           "Enter a positive bulk Quantity.",
@@ -278,7 +283,7 @@ export function ContractItemBulkEditor(props: Props) {
       return;
     }
     props.setItems((items) =>
-      items.map((item) => ({ ...item, quantity: bulkQuantity })),
+      items.map((item) => ({ ...item, quantity: normalizedQuantity })),
     );
     props.onNotice(
       props.tt(
