@@ -146,6 +146,16 @@ export function mergePastedContractItems<T extends Record<string, any>>(existing
   return pristineStarter ? pasted : [...existing, ...pasted];
 }
 
+export function applyDefaultApuToPastedItems<T extends Record<string, any>>(
+  items: T[],
+  defaultVersion: number | null,
+  versions: IntakeApuVersion[],
+) {
+  if (defaultVersion == null) return items;
+  const selected = versions.find((version) => version.version === defaultVersion);
+  return selected ? connectContractItemsToApu(items, selected) : items;
+}
+
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
   const pasteTarget = useRef<HTMLTextAreaElement>(null);
@@ -200,13 +210,14 @@ export function ContractItemBulkEditor(props: Props) {
       );
       return;
     }
-    props.setItems((items) => mergePastedContractItems(items, parsed.map((row) => ({
+    const pastedItems = applyDefaultApuToPastedItems(parsed.map((row) => ({
         ...newItem(props),
         name: row.name,
         quantity: row.quantity,
         plannedHours: row.quantity,
         provenance: { source: "clipboard", sourceRow: row.sourceRow },
-      }))));
+      })), props.defaultApuVersion, eligibleApuVersions);
+    props.setItems((items) => mergePastedContractItems(items, pastedItems));
     props.onNotice(
       props.tt(
         `${parsed.length} pasted Contract Items added.`,

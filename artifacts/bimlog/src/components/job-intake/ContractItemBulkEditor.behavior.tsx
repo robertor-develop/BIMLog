@@ -4,6 +4,7 @@ import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   ContractItemBulkEditor,
+  applyDefaultApuToPastedItems,
   mergePastedContractItems,
   parseContractItemPaste,
   selectSavedApuVersion,
@@ -50,6 +51,21 @@ assert.deepEqual(
 assert.equal(
   mergePastedContractItems([{ id: "CI-existing", name: "Door", quantity: "1", plannedHours: "1" }], [pastedItem]).length,
   2,
+);
+assert.deepEqual(
+  applyDefaultApuToPastedItems(
+    [{ name: "Muro", quantity: "4", billingHourlyRate: "0", unit: "Hours" }],
+    7,
+    [{ version: 7, name: "APU publicado", sellingPrice: "100", currency: "USD" }],
+  )[0],
+  {
+    name: "Muro", quantity: "4", billingHourlyRate: "25", unit: "Hours", apuPlanVersion: 7,
+    rateSource: {
+      kind: "saved_apu_rate", sourceId: "apu-plan-v7", sourceLabel: "APU publicado", unitRate: "25",
+      unit: "Hours", currency: "USD", apuPlanVersion: 7, apuFingerprint: null,
+      planSellingPrice: "100", rateCalculation: "plan_total_divided_by_contract_quantity",
+    },
+  },
 );
 assert.deepEqual(
   selectSavedApuVersion(
