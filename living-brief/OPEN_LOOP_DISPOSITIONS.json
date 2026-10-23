@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "583419b0cf4e67d1ed48143f64a967e0f5970886eb9e19609fc95e5ede2e8d8f",
-  "itemCount": 450,
+  "sourceSha256": "bcaa4568ed6c6a3505ee36bbb63f8cb34e59a4e58559d632c644a2fb5359c5a6",
+  "itemCount": 454,
   "counts": {
-    "ACTIVE": 405,
+    "ACTIVE": 409,
     "SUPERSEDED": 33,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -8185,6 +8185,78 @@
       "evidence": [
         "OPEN_LOOP.md:6127",
         "Lorena final closure Builds 61–65 — 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7e9b73dc67b50f7b",
+      "sourceLine": 6132,
+      "heading": "Lorena final closure Builds 66–70 — 2026-10-23",
+      "statement": "Complete the exact-head release gate for the reconciled evidence commit.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6132",
+        "Lorena final closure Builds 66–70 — 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ce1ff04610b86dfb",
+      "sourceLine": 6133,
+      "heading": "Lorena final closure Builds 66–70 — 2026-10-23",
+      "statement": "Push the exact clean candidate normally to the release branch, `main` and `master`.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6133",
+        "Lorena final closure Builds 66–70 — 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "8099c49e691bf441",
+      "sourceLine": 6134,
+      "heading": "Lorena final closure Builds 66–70 — 2026-10-23",
+      "statement": "Publish the exact SHA through Replit and run the required post-publication authenticated Chrome smoke, including deployed identity, responsive widths and clean console/network checks.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6134",
+        "Lorena final closure Builds 66–70 — 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5655ee9cbafe1564",
+      "sourceLine": 6135,
+      "heading": "Lorena final closure Builds 66–70 — 2026-10-23",
+      "statement": "Obtain an independent Viva verdict against the exact published SHA and retained evidence.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6135",
+        "Lorena final closure Builds 66–70 — 2026-10-23"
       ],
       "currentAuthority": false
     }

@@ -901,3 +901,5 @@ Project archival must retain the row-lock concurrency contract and schema-derive
 ## Lorena final closure acceptance — 2026-10-23
 
 Builds 61–65 close only when the complete Lorena matrix has exact deployed identity plus authenticated Chrome proof. Source or database tests alone cannot establish publication, UI persistence, responsive behavior, clean console/network operation or independent Viva acceptance. Any live failure remains active repair work and must be fixed and retested before closure.
+
+Builds 66–70 retain the same closure boundary. The controlled production observations in `evidence/outcome-remediation-20261023/LORENA_FINAL_ACCEPTANCE.md` must be bound to the exact pushed and published SHA, followed by a fresh authenticated Chrome smoke and an independent Viva verdict. A failed exact-head gate, deployed-identity mismatch, live regression, or independent rejection keeps the block open until repaired and repeated.

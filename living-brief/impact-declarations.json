@@ -73827,9 +73827,9 @@
       "reviewedChangeSha256": "c7601220f1483d5dc8f0158648b1b7dc82aa5360635dfa89642e32661bafd8aa"
     },
     {
-      "taskId": "lorena-final-closure-builds61-65-20261023",
-      "reviewedThroughCommit": "d0b3853b5641afb813690661d1143eac2d0d7584",
-      "reviewedAt": "2026-10-23T12:37:39.821Z",
+      "taskId": "lorena-final-closure-builds66-70-20261023",
+      "reviewedThroughCommit": "f0ff094ebff87f324ec942846128c5440a4bdff2",
+      "reviewedAt": "2026-10-23T18:00:00.000Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -73897,7 +73897,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "08edd9f56f60ce02c33fc8980e3f1c82326be1c1dbd1fda6c3dd1183591e629f"
+      "reviewedChangeSha256": "e37a3681bf946917f9669fea7b4b0bd84a76d868f28af7211d2a02d112f44aa3"
     }
   ]
 }
