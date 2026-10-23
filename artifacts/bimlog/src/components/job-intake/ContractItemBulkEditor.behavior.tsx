@@ -13,6 +13,7 @@ import {
   selectSavedApuVersion,
   updateContractItemQuantity,
   updateAllContractItemQuantities,
+  buildPastedContractItem,
 } from "./ContractItemBulkEditor";
 
 const range = Array.from(
@@ -62,6 +63,13 @@ assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
 assert.deepEqual(parseContractItemPaste("=HYPERLINK(\"https://example.invalid\")\t1"), [
   { sourceRow: 1, name: "=HYPERLINK(\"https://example.invalid\")", quantity: "1", unsafeFormula: true },
 ]);
+const separatedPastedItem = buildPastedContractItem(
+  { defaultRate: "0", defaultApuVersion: null, defaultWorkflow: "generic", defaultContractId: "PRIMARY" },
+  { name: "Door", quantity: "24", sourceRow: 7 },
+);
+assert.equal(separatedPastedItem.quantity, "24");
+assert.equal(separatedPastedItem.plannedHours, "1");
+assert.deepEqual(separatedPastedItem.provenance, { source: "clipboard", sourceRow: 7 });
 const pastedItem: Record<string, any> = { id: "CI-pasted", name: "Muro", quantity: "4", plannedHours: "4", provenance: { source: "clipboard" } };
 assert.deepEqual(
   mergePastedContractItems<Record<string, any>>(

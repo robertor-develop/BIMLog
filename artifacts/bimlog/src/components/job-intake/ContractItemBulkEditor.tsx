@@ -189,6 +189,18 @@ export function findCompatibleDefaultApu(
     : versions.find((version) => version.version === defaultVersion) ?? null;
 }
 
+export function buildPastedContractItem(
+  props: Pick<Props, "defaultRate" | "defaultApuVersion" | "defaultWorkflow" | "defaultContractId">,
+  row: { name: string; quantity: string; sourceRow: number },
+) {
+  return {
+    ...newItem(props),
+    name: row.name,
+    quantity: row.quantity,
+    provenance: { source: "clipboard", sourceRow: row.sourceRow },
+  };
+}
+
 export function updateContractItemQuantity<T extends Record<string, any>>(
   item: T,
   quantity: string,
@@ -263,13 +275,11 @@ export function ContractItemBulkEditor(props: Props) {
       );
       return false;
     }
-    const pastedItems = applyDefaultApuToPastedItems(parsed.map((row) => ({
-        ...newItem(props),
-        name: row.name,
-        quantity: row.quantity,
-        plannedHours: row.quantity,
-        provenance: { source: "clipboard", sourceRow: row.sourceRow },
-      })), props.defaultApuVersion, eligibleApuVersions);
+    const pastedItems = applyDefaultApuToPastedItems(
+      parsed.map((row) => buildPastedContractItem(props, row)),
+      props.defaultApuVersion,
+      eligibleApuVersions,
+    );
     props.setItems((items) => mergePastedContractItems(items, pastedItems));
     props.onNotice(
       props.tt(
