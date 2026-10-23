@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## Outcome remediation Block 8 — Builds 36–40 candidate — 2026-10-22
+
+Five runtime repairs complete the next ten-build publication interval. Excel-range paste now preserves decimal-comma quantities under tab or semicolon delimiters, ignores one recognized bilingual Name/Quantity header while retaining real source row numbers, and rejects populated extra columns instead of silently losing data. A successful paste replaces only the untouched blank starter row, and every pasted Contract Item receives the selected saved APU's exact quantity-normalized unit rate and provenance through the same authority as an explicit selection. Focused behavior and frontend TypeScript pass through implementation commit `fe54a945`; exact-head release validation, push, controlled publication, exact live identity, and authenticated Chrome smoke remain required.
+
 ## Outcome remediation Block 7 — Builds 31–35 candidate — 2026-10-22
 
 Five runtime repairs close the remaining deferred Lorena/Viva workflow outcomes. The visible Excel-range action now reads the clipboard directly, accepts tab- and locale-separated two-column ranges, and falls back to an explicitly focused paste box when browser permission is unavailable. Saved Intake revisions notify other open tabs without overwriting unsaved work. Activation absorbs bounded concurrent revision movement before showing a real conflict. EDT contract-source mismatches carry the exact canonical contract identity into the repair link. Operations guidance describes the needed cost-approval authority in user language without exposing an internal role code as though it named a person. This is the first five-build half of the next publication interval and is push-only after the exact-head gate.

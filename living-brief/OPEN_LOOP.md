@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Outcome remediation Block 8 — Builds 36–40 — 2026-10-22
+
+- [x] B36 preserve localized decimal-comma quantities when a two-column Excel range uses tab or semicolon delimiters.
+- [x] B37 accept a recognized English or Spanish Name/Quantity header without losing original Excel row numbers.
+- [x] B38 reject populated third-or-later columns instead of silently discarding pasted values.
+- [x] B39 replace only a pristine blank starter Contract Item so a successful paste does not leave Intake incomplete.
+- [x] B40 apply the selected saved APU through the same exact quantity-normalized rate and provenance path for every pasted row.
+- [ ] Pass the exact-head gate, push Builds 36–40 once, publish accumulated Builds 31–40, verify exact live identity, and run full authenticated Chrome smoke.
+
 ## Outcome remediation Block 7 — Builds 31–35 — 2026-10-22
 
 - [x] B31 make the Excel-range action read the clipboard and accept localized two-column separators with a keyboard fallback.
@@ -7,7 +16,7 @@
 - [x] B33 absorb bounded activation revision drift before presenting a real conflict.
 - [x] B34 carry the exact canonical contract identity into EDT mismatch repair.
 - [x] B35 replace internal approval-role wording with a clear authorized-user action.
-- [ ] Pass the exact-head gate and push Builds 31–35 once. Keep this block unpublished until Builds 36–40 complete the ten-build interval.
+- [x] Pass the exact-head gate and push Builds 31–35 once. Keep this block unpublished until Builds 36–40 complete the ten-build interval.
 
 ## Full-GA remediation Block 5 — 2026-10-21
 
