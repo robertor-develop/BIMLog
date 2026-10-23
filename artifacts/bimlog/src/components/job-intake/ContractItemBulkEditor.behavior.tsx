@@ -66,6 +66,12 @@ assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
 assert.deepEqual(parseDelimitedContractItemRow('"Door, Frame",2', ','), {
   cells: ["Door, Frame", "2"], malformedQuote: false,
 });
+assert.deepEqual(parseDelimitedContractItemRow('"Door"x,2', ','), {
+  cells: ["Doorx", "2"], malformedQuote: true,
+});
+assert.deepEqual(parseContractItemPaste('"Door"x,2'), [
+  { sourceRow: 1, name: "Doorx", quantity: "2", malformedQuote: true },
+]);
 assert.deepEqual(parseContractItemPaste('"Door, Frame",2'), [
   { sourceRow: 1, name: "Door, Frame", quantity: "2" },
 ]);

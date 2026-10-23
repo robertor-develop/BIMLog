@@ -118,24 +118,31 @@ export function parseDelimitedContractItemRow(line: string, delimiter: string) {
   const cells: string[] = [];
   let cell = "";
   let quoted = false;
+  let closedQuote = false;
+  let malformedQuoteBoundary = false;
   for (let index = 0; index < line.length; index += 1) {
     const character = line[index];
     if (character === '"') {
       if (quoted && line[index + 1] === '"') {
         cell += '"';
         index += 1;
-      } else if (quoted) quoted = false;
+      } else if (quoted) {
+        quoted = false;
+        closedQuote = true;
+      }
       else if (cell.length === 0) quoted = true;
       else cell += '"';
     } else if (character === delimiter && !quoted) {
       cells.push(cell);
       cell = "";
+      closedQuote = false;
     } else {
+      if (closedQuote && !/\s/.test(character)) malformedQuoteBoundary = true;
       cell += character;
     }
   }
   cells.push(cell);
-  return { cells, malformedQuote: quoted };
+  return { cells, malformedQuote: quoted || malformedQuoteBoundary };
 }
 
 export function splitDelimitedContractItemRecords(source: string) {
