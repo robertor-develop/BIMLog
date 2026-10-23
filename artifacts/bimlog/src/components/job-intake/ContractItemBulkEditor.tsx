@@ -112,11 +112,13 @@ export function parseContractItemPaste(source: string) {
     .replace(/\r\n?/g, "\n")
     .split("\n")
     .map((line, index) => {
-      const cells = line.includes("\t") ? line.split("\t") : line.split(/[;,]/);
+      const delimiter = line.includes("\t") ? "\t" : line.includes(";") ? ";" : ",";
+      const cells = line.split(delimiter);
+      const rawQuantity = String(cells[1] ?? "").trim();
       return {
         sourceRow: index + 1,
         name: String(cells[0] ?? "").trim(),
-        quantity: String(cells[1] ?? "").trim(),
+        quantity: delimiter === "," ? rawQuantity : rawQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
       };
     })
     .filter((row) => row.name || row.quantity);

@@ -28,6 +28,10 @@ assert.deepEqual(parseContractItemPaste("Door\t2\n\nFrame\t3.5\n"), [
   { sourceRow: 1, name: "Door", quantity: "2" },
   { sourceRow: 3, name: "Frame", quantity: "3.5" },
 ]);
+assert.deepEqual(parseContractItemPaste("Muro;1,5\nPuerta;2,25"), [
+  { sourceRow: 1, name: "Muro", quantity: "1.5" },
+  { sourceRow: 2, name: "Puerta", quantity: "2.25" },
+]);
 assert.deepEqual(
   selectSavedApuVersion(
     [
