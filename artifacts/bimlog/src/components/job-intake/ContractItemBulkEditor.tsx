@@ -108,7 +108,7 @@ function validQuantity(value: string) {
 }
 
 export function parseContractItemPaste(source: string) {
-  return source
+  const rows = source
     .replace(/\r\n?/g, "\n")
     .split("\n")
     .map((line, index) => {
@@ -122,6 +122,14 @@ export function parseContractItemPaste(source: string) {
       };
     })
     .filter((row) => row.name || row.quantity);
+  if (rows.length > 0) {
+    const firstName = rows[0].name.toLocaleLowerCase().replace(/[^a-záéíóúñ]+/g, " ").trim();
+    const firstQuantity = rows[0].quantity.toLocaleLowerCase().replace(/[^a-záéíóúñ]+/g, " ").trim();
+    const nameHeader = ["name", "contract item name", "nombre", "nombre de la partida"].includes(firstName);
+    const quantityHeader = ["quantity", "cantidad"].includes(firstQuantity);
+    if (nameHeader && quantityHeader) return rows.slice(1);
+  }
+  return rows;
 }
 
 export function ContractItemBulkEditor(props: Props) {
