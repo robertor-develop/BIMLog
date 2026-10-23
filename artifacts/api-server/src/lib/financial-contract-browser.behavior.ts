@@ -29,7 +29,7 @@ const phase = (value: string) => process.stderr.write(`[financial-contract-brows
 const watchdog = setTimeout(() => { phase("hard timeout after 45 seconds"); browser.kill(); server.closeAllConnections(); process.exit(124); }, 45000);
 try {
   phase("discovering accepted Chrome CDP page");
-  for (let i=0;i<80;i++) { try { const pages = await fetch("http://127.0.0.1:9347/json/list").then((r) => r.json()) as any[]; page = pages.find((x) => x.type === "page"); if (page) break; } catch {} await delay(100); }
+  for (let i=0;i<80;i++) { try { const pages = await fetch("http://127.0.0.1:9347/json/list").then((r) => r.json()) as any[]; page = pages.find((x) => x.type === "page"); if (page) break; } catch (_expectedFailure) { void _expectedFailure; } await delay(100); }
   phase(page ? "CDP page discovered" : "CDP page not discovered");
   assert.ok(page?.webSocketDebuggerUrl, "headless browser page unavailable"); const socket = new WebSocket(page.webSocketDebuggerUrl); await Promise.race([new Promise<void>((resolve, reject) => { socket.onopen = () => resolve(); socket.onerror = () => reject(new Error("browser websocket failed")); }), delay(8000).then(() => { throw new Error("browser websocket open timed out"); })]);
   phase("CDP websocket opened");

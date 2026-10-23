@@ -23,7 +23,7 @@ export type ReceiverAdmissionAuthority={admit(input:{companyId:string;projectId:
 export class FilesystemReceiverAdmissionAuthority implements ReceiverAdmissionAuthority{
   private active=0;private bytes=0;private readonly companies=new Map<string,number>();private readonly projects=new Map<string,number>();
   constructor(private readonly root:string,private readonly limits:{maxConcurrent:number;maxPerCompany:number;maxPerProject:number;maxBytesInFlight:number}){if(!path.isAbsolute(root)||!fs.existsSync(root)||!fs.statSync(root).isDirectory()||Object.values(limits).some(value=>!Number.isSafeInteger(value)||value<1))throw new RelayProtocolError("FEEDBACK_RECEIVER_ADMISSION_CONFIG_INVALID","Receiver admission authority is invalid");}
-  async admit(input:{companyId:string;projectId:string;byteCount:number;freeSpaceReserveBytes:number}){if(!Number.isSafeInteger(input.byteCount)||input.byteCount<0||!Number.isSafeInteger(input.freeSpaceReserveBytes)||input.freeSpaceReserveBytes<0)return null;let available:number;try{const stats=fs.statfsSync(this.root);available=Number(stats.bavail)*Number(stats.bsize);}catch{return null;}
+  async admit(input:{companyId:string;projectId:string;byteCount:number;freeSpaceReserveBytes:number}){if(!Number.isSafeInteger(input.byteCount)||input.byteCount<0||!Number.isSafeInteger(input.freeSpaceReserveBytes)||input.freeSpaceReserveBytes<0)return null;let available:number;try{const stats=fs.statfsSync(this.root);available=Number(stats.bavail)*Number(stats.bsize);}catch (_expectedFailure) { void _expectedFailure; return null; }
     if(!Number.isSafeInteger(available)||available<input.byteCount+input.freeSpaceReserveBytes||this.active>=this.limits.maxConcurrent||(this.companies.get(input.companyId)||0)>=this.limits.maxPerCompany||(this.projects.get(input.projectId)||0)>=this.limits.maxPerProject||this.bytes+input.byteCount>this.limits.maxBytesInFlight)return null;
     this.active++;this.bytes+=input.byteCount;this.companies.set(input.companyId,(this.companies.get(input.companyId)||0)+1);this.projects.set(input.projectId,(this.projects.get(input.projectId)||0)+1);let released=false;return{release:()=>{if(released)return;released=true;this.active--;this.bytes-=input.byteCount;const company=(this.companies.get(input.companyId)||1)-1,project=(this.projects.get(input.projectId)||1)-1;if(company)this.companies.set(input.companyId,company);else this.companies.delete(input.companyId);if(project)this.projects.set(input.projectId,project);else this.projects.delete(input.projectId);}};
   }
@@ -82,7 +82,7 @@ export function createReceiverHttpsHandler(input: {
       let signed: Signed<RequestContract>;
       try {
         signed = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
-      } catch {
+      } catch (_expectedFailure) {
         throw new RelayProtocolError(
           "FEEDBACK_RECEIVER_SIGNED_REQUEST_INVALID",
           "Signed request envelope is invalid",

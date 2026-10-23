@@ -80,6 +80,6 @@ async function main() {
 
 main().catch(async (error) => {
   console.error(JSON.stringify({ suite: "ai-control-plane-authenticated-http", passed: results.filter(r => r.pass).length, failed: error instanceof Error ? error.message : String(error), results }, null, 2));
-  await pool.end().catch(() => undefined);
+  await pool.end().catch((cleanupError) => { console.error("AI control-plane evidence pool cleanup failed", cleanupError); });
   process.exitCode = 1;
 });

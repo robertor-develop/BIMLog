@@ -132,7 +132,7 @@ export async function resetLivingBriefGateCredential(input: LivingBriefGateReset
     await client.query("COMMIT");
     return { version: nextVersion };
   } catch (error) {
-    await client.query("ROLLBACK").catch(() => undefined);
+    await client.query("ROLLBACK").catch((rollbackError) => { console.error("Living Brief gate rollback failed", rollbackError); });
     throw error;
   } finally {
     client.release();

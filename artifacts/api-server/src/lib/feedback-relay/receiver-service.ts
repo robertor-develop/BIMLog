@@ -190,7 +190,7 @@ function operatingSystemBootId(){
       const value=execFileSync("powershell.exe",["-NoProfile","-NonInteractive","-Command","(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o')"],{encoding:"utf8",windowsHide:true,timeout:10_000}).trim();
       const parsed=new Date(value);if(Number.isNaN(parsed.getTime()))throw new Error("invalid boot time");
       return sha256(`windows\n${os.hostname().toLowerCase()}\n${parsed.toISOString()}`);
-    }catch{return fail("FEEDBACK_RECEIVER_BOOT_ID_UNAVAILABLE","Stable Windows boot identity is unavailable");}
+    }catch (_expectedFailure) {return fail("FEEDBACK_RECEIVER_BOOT_ID_UNAVAILABLE","Stable Windows boot identity is unavailable");}
   }
   return fail("FEEDBACK_RECEIVER_BOOT_ID_UNAVAILABLE","Stable OS boot identity is unavailable");
 }
@@ -227,7 +227,7 @@ function processIsAlive(pid: number) {
     return true;
   }
 }
-function processMatchesOwner(owner:LockOwnerV2){if(process.platform!=="win32")return processIsAlive(owner.pid);try{const value=execFileSync("powershell.exe",["-NoProfile","-NonInteractive","-Command",`$p=Get-CimInstance Win32_Process -Filter 'ProcessId=${owner.pid}' -ErrorAction SilentlyContinue;if($p){$p.CreationDate.ToUniversalTime().ToString('o')}`],{encoding:"utf8",windowsHide:true,timeout:10_000}).trim();if(!value)return false;const actual=new Date(value).getTime(),expected=new Date(owner.processStartedAt).getTime();return Number.isFinite(actual)&&Math.abs(actual-expected)<2_000;}catch{return true;}}
+function processMatchesOwner(owner:LockOwnerV2){if(process.platform!=="win32")return processIsAlive(owner.pid);try{const value=execFileSync("powershell.exe",["-NoProfile","-NonInteractive","-Command",`$p=Get-CimInstance Win32_Process -Filter 'ProcessId=${owner.pid}' -ErrorAction SilentlyContinue;if($p){$p.CreationDate.ToUniversalTime().ToString('o')}`],{encoding:"utf8",windowsHide:true,timeout:10_000}).trim();if(!value)return false;const actual=new Date(value).getTime(),expected=new Date(owner.processStartedAt).getTime();return Number.isFinite(actual)&&Math.abs(actual-expected)<2_000;}catch (_expectedFailure) {return true;}}
 function ownerIsProvablyDead(owner: LockOwnerV2, now = new Date()) {
   if (owner.osBootId !== OS_BOOT_ID) return true;
   if(owner.pid===process.pid)return owner.instanceId!==PROCESS_INSTANCE_ID||owner.processStartedAt!==PROCESS_STARTED_AT;
@@ -236,7 +236,7 @@ function ownerIsProvablyDead(owner: LockOwnerV2, now = new Date()) {
   // A foreign live PID cannot be taken over without an external process-start proof.
   return false;
 }
-function ownerlessLockExpired(lock:string,now=Date.now(),graceMs=1_000){try{return now-fs.statSync(lock).mtimeMs>=graceMs;}catch{return false;}}
+function ownerlessLockExpired(lock:string,now=Date.now(),graceMs=1_000){try{return now-fs.statSync(lock).mtimeMs>=graceMs;}catch (_expectedFailure) {return false;}}
 async function fencedDirectoryLock<T>(root:string,lock:string,identity:string,work:(lease:{assertCurrent():void;fence:string})=>T|Promise<T>):Promise<T>{
   const ownerPath=path.join(lock,"owner.json"),leaseMs=5_000;
   for(let attempt=0;attempt<1_000;attempt++){
@@ -244,11 +244,11 @@ async function fencedDirectoryLock<T>(root:string,lock:string,identity:string,wo
       fs.mkdirSync(lock);const acquiredAt=new Date(),fence=sha256(`${identity}\n${randomUUID()}\n${acquiredAt.toISOString()}`);
       const makeOwner=():LockOwnerV2=>({version:2,instanceId:PROCESS_INSTANCE_ID,pid:process.pid,processStartedAt:PROCESS_STARTED_AT,osBootId:OS_BOOT_ID,fence,acquiredAt:acquiredAt.toISOString(),heartbeatAt:new Date().toISOString(),leaseUntil:new Date(Date.now()+leaseMs).toISOString()});
       atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));let lost=false;
-      const assertCurrent=()=>{if(lost)fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+      const assertCurrent=()=>{if(lost)fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch (_expectedFailure) { void _expectedFailure; }
         if(!current||current.fence!==fence||new Date(current.leaseUntil).getTime()<Date.now()){lost=true;fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");}};
-      const heartbeat=setInterval(()=>{try{assertCurrent();atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));}catch{lost=true;}},Math.floor(leaseMs/3));heartbeat.unref();
-      try{assertCurrent();return await work({assertCurrent,fence});}finally{clearInterval(heartbeat);let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
-    }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+      const heartbeat=setInterval(()=>{try{assertCurrent();atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));}catch (_expectedFailure) {lost=true;}},Math.floor(leaseMs/3));heartbeat.unref();
+      try{assertCurrent();return await work({assertCurrent,fence});}finally{clearInterval(heartbeat);let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch (_expectedFailure) { void _expectedFailure; }if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
+    }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch (_expectedFailure) { void _expectedFailure; }
       if((!owner&&ownerlessLockExpired(lock,Date.now(),10_000))||(owner&&ownerIsProvablyDead(owner))){const quarantine=`${lock}.stale-${randomUUID()}`;try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch(renameError){if((renameError as NodeJS.ErrnoException).code!=="ENOENT")await new Promise(resolve=>setTimeout(resolve,2));}}
       else await new Promise(resolve=>setTimeout(resolve,2));
     }
@@ -583,9 +583,9 @@ export class FeedbackReceiverCustodyService {
         atomicWrite(lock, ownerPath, Buffer.from(JSON.stringify(makeOwner()), "utf8"));
         let lost=false;
         const assertCurrent=()=>{if(lost)fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");let current:LockOwnerV2|null=null;
-          try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+          try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch (_expectedFailure) { void _expectedFailure; }
           if(!current||current.fence!==fence||new Date(current.leaseUntil).getTime()<Date.now()){lost=true;fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");}};
-        const heartbeat=setInterval(()=>{try{assertCurrent();atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));}catch{lost=true;}},Math.floor(leaseMs/3));
+        const heartbeat=setInterval(()=>{try{assertCurrent();atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));}catch (_expectedFailure) {lost=true;}},Math.floor(leaseMs/3));
         heartbeat.unref();
         try {
           assertCurrent();return await work({assertCurrent,fence});
@@ -597,7 +597,7 @@ export class FeedbackReceiverCustodyService {
       } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
         let owner:LockOwnerV2|null=null;
-        try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+        try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch (_expectedFailure) { void _expectedFailure; }
         if((!owner&&ownerlessLockExpired(lock,Date.now(),10_000))||(owner&&ownerIsProvablyDead(owner))){
           const quarantine=`${lock}.stale-${randomUUID()}`;
           try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch(renameError){if((renameError as NodeJS.ErrnoException).code!=="ENOENT")await new Promise(resolve=>setTimeout(resolve,2));}
@@ -834,7 +834,7 @@ export class FeedbackReceiverCustodyService {
       const target = path.join(staging, entry);
       assertNoLinks(this.root, target);
       if(!fs.lstatSync(target).isFile()||entry.endsWith(".owner.json"))continue;
-      const ownerPath=`${target}.owner.json`;let owner:LockOwnerV2|null=null;try{if(fs.existsSync(ownerPath))owner=parseLockOwner(readJson<unknown>(this.root,ownerPath));}catch{}
+      const ownerPath=`${target}.owner.json`;let owner:LockOwnerV2|null=null;try{if(fs.existsSync(ownerPath))owner=parseLockOwner(readJson<unknown>(this.root,ownerPath));}catch (_expectedFailure) { void _expectedFailure; }
       if((!owner&&ownerlessLockExpired(target))||(owner&&ownerIsProvablyDead(owner))){fs.unlinkSync(target);if(fs.existsSync(ownerPath))fs.unlinkSync(ownerPath);syncDirectory(staging);removedStages++;}
     }
     const locks = path.join(this.system, "locks");
@@ -845,7 +845,7 @@ export class FeedbackReceiverCustodyService {
       if (!fs.lstatSync(target).isDirectory())
         fail("FEEDBACK_RECEIVER_LOCK_INVALID", "Receiver lock authority is not a directory");
       let owner:LockOwnerV2|null=null;
-      try { if(fs.existsSync(ownerPath))owner=parseLockOwner(readJson<unknown>(this.root,ownerPath)); } catch {}
+      try { if(fs.existsSync(ownerPath))owner=parseLockOwner(readJson<unknown>(this.root,ownerPath)); } catch (_expectedFailure) { void _expectedFailure; }
       if ((!owner&&ownerlessLockExpired(target))||(owner&&ownerIsProvablyDead(owner))) {
         const quarantine=`${target}.stale-${randomUUID()}`;
         fs.renameSync(target,quarantine);
@@ -872,10 +872,10 @@ export class FeedbackReceiverCustodyService {
         fs.mkdirSync(lock);const acquiredAt=new Date(),fence=sha256(`${identity}\n${randomUUID()}\n${acquiredAt.toISOString()}`);
         const owner:LockOwnerV2={version:2,instanceId:PROCESS_INSTANCE_ID,pid:process.pid,processStartedAt:PROCESS_STARTED_AT,osBootId:OS_BOOT_ID,fence,acquiredAt:acquiredAt.toISOString(),heartbeatAt:acquiredAt.toISOString(),leaseUntil:new Date(acquiredAt.getTime()+leaseMs).toISOString()};
         atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(owner),"utf8"));
-        const assertCurrent=()=>{let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+        const assertCurrent=()=>{let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch (_expectedFailure) { void _expectedFailure; }
           if(!current||current.fence!==fence||new Date(current.leaseUntil).getTime()<Date.now())fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");};
-        try{assertCurrent();return work({assertCurrent,fence});}finally{let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
-      }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+        try{assertCurrent();return work({assertCurrent,fence});}finally{let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch (_expectedFailure) { void _expectedFailure; }if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
+      }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch (_expectedFailure) { void _expectedFailure; }
         if((!owner&&ownerlessLockExpired(lock))||(owner&&ownerIsProvablyDead(owner))){
           const quarantine=`${lock}.stale-${randomUUID()}`;
           const recovered=cleanupWithOperationalEvidenceSync(() => {
@@ -1009,7 +1009,7 @@ export class FeedbackReceiverCustodyService {
         destinationId: this.authority.destinationId,
         rootFingerprintSha256: this.authority.rootFingerprintSha256,
       };
-    } catch {
+    } catch (_expectedFailure) {
       return {
         status: "unavailable" as const,
         destinationId: this.authority.destinationId,

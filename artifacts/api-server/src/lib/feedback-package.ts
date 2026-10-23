@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import AdmZip from "adm-zip";
-import PDFDocument from "pdfkit";
 import sharp from "sharp";
 import { AlignmentType, Document, ExternalHyperlink, Footer, HeadingLevel, ImageRun, PageNumber, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from "docx";
+import { createPdfDocument } from "./pdf-kit";
 import type ExcelJS from "exceljs";
 import { FEEDBACK_MAX_FILE_BYTES, FEEDBACK_RELEASE } from "./feedback-evidence-contract";
 import { FEEDBACK_CUSTOMER_EVENT_TYPES } from "./feedback-follow-up";
@@ -110,7 +110,7 @@ export async function buildFeedbackPackage(args: {
 
 async function createHumanPdf(manifest: Record<string, any>, evidence: Array<FeedbackPackageAsset & { downloadUrl: string | null }>, manifestSha256: string): Promise<Buffer> {
   return await new Promise((resolve, reject) => {
-    const chunks: Buffer[] = []; const doc = new PDFDocument({ size: "LETTER", margin: 50, bufferPages: true, info: { Title: `${manifest.feedback.stableId} Feedback Package`, Author: "BIMLog by IgniteSmart", Subject: `Feedback package ${manifest.feedback.stableId} - ${manifest.release}` } });
+    const chunks: Buffer[] = []; const doc = createPdfDocument({ size: "LETTER", margin: 50, bufferPages: true, info: { Title: `${manifest.feedback.stableId} Feedback Package`, Author: "BIMLog by IgniteSmart", Subject: `Feedback package ${manifest.feedback.stableId} - ${manifest.release}` } });
     doc.on("data", chunk => chunks.push(Buffer.from(chunk))); doc.on("error", reject); doc.on("end", () => resolve(Buffer.concat(chunks)));
     const field = (label: string, value: unknown) => { doc.font("Helvetica-Bold").fillColor("#173b63").text(`${label}: `, { continued: true }).font("Helvetica").fillColor("#111827").text(String(value ?? "—")); };
     doc.rect(0, 0, doc.page.width, 112).fill("#173b63"); doc.fillColor("#ffffff").fontSize(9).font("Helvetica-Bold").text("BIMLOG BY IGNITESMART", 50, 34); doc.fontSize(22).text("Feedback review package", 50, 53); doc.fontSize(10).font("Helvetica").text(`${manifest.feedback.stableId}  ·  ${manifest.release}`, 50, 84); doc.fillColor("#111827").y = 134;

@@ -66,7 +66,7 @@ const TRANSITIONS: Record<string, Set<string>> = {
 const asId = (value: unknown) => { const n = Number(value); return Number.isInteger(n) && n > 0 ? n : null; };
 const bounded = (value: unknown, max: number) => String(value ?? "").trim().slice(0, max);
 const csvCell = (value: unknown) => { const normalized = String(value ?? "").replace(/[\r\n]+/g, " "); const neutral = /^[\s]*[=+\-@]/.test(normalized) ? `'${normalized}` : normalized; return `"${neutral.replace(/"/g, '""')}"`; };
-const publicBaseUrl = () => { try { const url = new URL(process.env.BIMLOG_PUBLIC_URL || process.env.BIMLOG_URL || process.env.APP_URL || "https://bimlog.app"); if (url.protocol !== "https:" && process.env.NODE_ENV === "production") throw new Error("HTTPS required"); return url.origin; } catch { return "https://bimlog.app"; } };
+const publicBaseUrl = () => { try { const url = new URL(process.env.BIMLOG_PUBLIC_URL || process.env.BIMLOG_URL || process.env.APP_URL || "https://bimlog.app"); if (url.protocol !== "https:" && process.env.NODE_ENV === "production") throw new Error("HTTPS required"); return url.origin; } catch (_expectedFailure) { return "https://bimlog.app"; } };
 const packageSnapshotDto = (state: Record<string, unknown> | undefined) => state ? ({
   state: String(state.state || "unavailable"), sourceEventId: Number(state.sourceEventId) || null, release: String(state.release || FEEDBACK_RELEASE),
   generatedAt: typeof state.generatedAt === "string" ? state.generatedAt : null,
@@ -101,7 +101,7 @@ function normalizeRecipientIds(value:unknown){return Array.isArray(value)?value.
 function normalizeTelegramEvents(value:unknown):FeedbackTelegramEvent[]{if(!Array.isArray(value))return [];return value.flatMap(item=>{if(!item||typeof item!=="object")return [];const row=item as Record<string,unknown>,state=row.afterState;if(!state||typeof state!=="object"||Array.isArray(state))return [];const after=state as Record<string,unknown>;return [{id:Number(row.id)||0,snapshotEventId:Number(after.snapshotEventId)||0,recipientUserId:after.recipientUserId===null?null:Number(after.recipientUserId)||null,artifactKind:String(after.artifactKind||""),state:String(after.state||""),reasonCode:typeof after.reasonCode==="string"?after.reasonCode:null}];});}
 const sanitizedPageUrl = (value: unknown) => {
   try { const url = new URL(bounded(value, 2048), "http://bimlog.local"); return url.pathname.slice(0, 2048) || "/"; }
-  catch { return ""; }
+  catch (_expectedFailure) { return ""; }
 };
 type CustomerFeedbackRow = Pick<typeof feedbackItemsTable.$inferSelect, "id" | "stableId" | "projectId" | "feedbackType" | "priority" | "module" | "pageUrl" | "message" | "status" | "version" | "targetRelease" | "createdAt" | "updatedAt" | "resolvedAt">;
 const customerFeedbackDto = (row: CustomerFeedbackRow) => ({
@@ -120,7 +120,7 @@ const CUSTOMER_EVENT_TYPES = new Set(["created", "assets_added", "transcription_
 const customerTranscriptionReason = (row: typeof feedbackTranscriptionJobsTable.$inferSelect) => row.state === "blocked" && row.errorCode === "EXTERNAL_TRANSCRIPTION_NOT_ACTIVATED" ? "provider-unavailable" : null;
 const transcriptionDto = (row: typeof feedbackTranscriptionJobsTable.$inferSelect) => ({ id: row.id, assetId: row.assetId, state: row.state, result: row.result, reason: customerTranscriptionReason(row), reviewState: row.reviewState, createdAt: row.createdAt, completedAt: row.completedAt });
 const customerRelayReason = (state: string) => ({ queued: "awaiting-delivery", transferring: "delivery-in-progress", delivered: "delivery-received", "receipt-verified": "delivery-confirmed", "cleanup-pending": "cleanup-in-progress", "manual-review": "support-review", held: "on-hold", expired: "retention-ended" } as Record<string,string>)[state] ?? null;
-function boundedTransformation(value: unknown) { try { const source = typeof value === "string" ? JSON.parse(bounded(value, 2000)) as Record<string, unknown> : value as Record<string, unknown>; if (!source || typeof source !== "object" || Array.isArray(source)) return null; const allowed = ["sourceName", "sourceSha256", "originalWidth", "originalHeight", "capturedAt", "cropPercent", "cropPixels", "outputWidth", "outputHeight", "transformedAt"]; return Object.fromEntries(allowed.filter(key => key in source).map(key => [key, source[key]])); } catch { return null; } }
+function boundedTransformation(value: unknown) { try { const source = typeof value === "string" ? JSON.parse(bounded(value, 2000)) as Record<string, unknown> : value as Record<string, unknown>; if (!source || typeof source !== "object" || Array.isArray(source)) return null; const allowed = ["sourceName", "sourceSha256", "originalWidth", "originalHeight", "capturedAt", "cropPercent", "cropPixels", "outputWidth", "outputHeight", "transformedAt"]; return Object.fromEntries(allowed.filter(key => key in source).map(key => [key, source[key]])); } catch (_expectedFailure) { void _expectedFailure; return null; } }
 async function projectAuthorized(projectId: number | null, user: NonNullable<Express.Request["user"]>, companyId: number, reader: Pick<typeof db, "select"> = db) {
   if (!projectId) return true;
   const [project] = await reader.select({ id: projectsTable.id, companyId: usersTable.companyId }).from(projectsTable)
@@ -206,7 +206,7 @@ router.post("/feedback", authMiddleware, async (req, res) => {
       } catch (notificationError) {
         notificationState = "retry-required";
         console.error("[feedback] submission notification delivery deferred", notificationError instanceof Error ? notificationError.name : "unknown");
-        try { await db.insert(feedbackAuditEventsTable).values({ feedbackId: outcome.row.id, actorUserId: user.userId, eventType: "submission_notification_delivery_failed", afterState: { sourceEventId: outcome.acknowledgmentId, state: "retry-required" } }); } catch { /* canonical intake remains durable even if delivery logging is unavailable */ }
+        try { await db.insert(feedbackAuditEventsTable).values({ feedbackId: outcome.row.id, actorUserId: user.userId, eventType: "submission_notification_delivery_failed", afterState: { sourceEventId: outcome.acknowledgmentId, state: "retry-required" } }); } catch (_expectedFailure) { /* canonical intake remains durable even if delivery logging is unavailable */ }
       }
     }
     return res.status(outcome.status).json({ success: true, replayed: outcome.replayed, notificationState, receipt: { id: outcome.row.stableId, acknowledgedAt: outcome.row.createdAt, status: outcome.row.status, release: FEEDBACK_RELEASE }, feedback: customerFeedbackDto(outcome.row) });
@@ -244,7 +244,7 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
     const captureBundleId = bounded(req.body.captureBundleId, 80), captureRole = bounded(req.body.captureRole, 20);
     const screenshotBundle = origin === "browser-display-capture" && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(captureBundleId) && ["original", "marked"].includes(captureRole);
     if (origin === "browser-display-capture" && (!!captureBundleId !== !!captureRole || ((captureBundleId || captureRole) && !screenshotBundle))) return res.status(400).json({ code: "FEEDBACK_CAPTURE_BUNDLE_INVALID", error: "Screenshot bundle identity and role must be a UUID with role original or marked" });
-    const transformations = (() => { try { const parsed = JSON.parse(bounded(req.body.transformations, 12000)); return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Record<string, unknown> : {}; } catch { return {}; } })();
+    const transformations = (() => { try { const parsed = JSON.parse(bounded(req.body.transformations, 12000)); return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Record<string, unknown> : {}; } catch (_expectedFailure) { return {}; } })();
     const transformation = boundedTransformation(transformations[uploadKey] ?? null);
     const requestHash = createHash("sha256").update(JSON.stringify({ feedbackId: id, actorId: user.userId, kind, origin, consentId: bounded(req.body.consentId, 80) || null, captureBundleId: screenshotBundle ? captureBundleId : null, captureRole: screenshotBundle ? captureRole : null, sha256: inspected.sha256, transformation })).digest("hex");
     const scannerAdapter = localFixture(process.env.BIMLOG_FEEDBACK_SCANNER, "fixture-clean") ? "local-fixture" : "default-deny";
@@ -300,7 +300,7 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
   } catch (error) {
     const cleanupFailures = [];
     const userId = req.user?.userId, uploadKey = bounded(req.get("Idempotency-Key"), 120);
-    for (const item of stored) { try { const referenced = await db.transaction(async tx => { if (userId && uploadKey) await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`${userId}:${uploadKey}`}, 0))`); const [row] = await tx.select({ id: feedbackAssetsTable.id }).from(feedbackAssetsTable).where(eq(feedbackAssetsTable.storagePath, item)).limit(1); return !!row; }); if (!referenced) await storage.delete(item); } catch { cleanupFailures.push(item); } }
+    for (const item of stored) { try { const referenced = await db.transaction(async tx => { if (userId && uploadKey) await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`${userId}:${uploadKey}`}, 0))`); const [row] = await tx.select({ id: feedbackAssetsTable.id }).from(feedbackAssetsTable).where(eq(feedbackAssetsTable.storagePath, item)).limit(1); return !!row; }); if (!referenced) await storage.delete(item); } catch (_expectedFailure) { cleanupFailures.push(item); } }
     const known = error as Error & { status?: number; code?: string };
     if (cleanupFailures.length) return res.status(500).json({ code: "FEEDBACK_STORAGE_COMPENSATION_FAILED", error: "Upload failed and quarantined storage cleanup requires operator review" });
     return res.status(known.status || 500).json({ code: known.code || "FEEDBACK_UPLOAD_FAILED", error: known.status ? known.message : "Upload failed safely" });
@@ -465,7 +465,7 @@ router.get("/feedback/admin/:id/package.zip", authMiddleware, isSuperAdminMiddle
 });
 
 async function sendPackageSnapshot(res: Response, id: number, visibility: "customer" | "internal", format: "pdf" | "json" | "docx" | "xlsx", customerUser?: NonNullable<Express.Request["user"]>) {
-  let generated; try { generated = await packageSource(id, visibility, customerUser); } catch { return res.status(502).json({ code: "FEEDBACK_PACKAGE_CURRENT_BUILD_FAILED", error: "The current feedback report could not be generated safely" }); }
+  let generated; try { generated = await packageSource(id, visibility, customerUser); } catch (_expectedFailure) { return res.status(502).json({ code: "FEEDBACK_PACKAGE_CURRENT_BUILD_FAILED", error: "The current feedback report could not be generated safely" }); }
   if (!generated) return res.status(404).json({ code: "FEEDBACK_NOT_FOUND", error: "Feedback not found" });
   const bytes = format === "pdf" ? generated.pdf : format === "docx" ? generated.docx : format === "xlsx" ? generated.workbook : generated.manifest;
   const expectedSha256 = createHash("sha256").update(bytes).digest("hex");
@@ -483,7 +483,7 @@ router.get("/feedback/admin/:id/package-snapshot.xlsx", authMiddleware, isSuperA
 router.get("/feedback/admin/:id/assets/:assetId/download", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const id = asId(req.params.id), assetId = asId(req.params.assetId), reason = bounded(req.get("X-Export-Reason"), 500); if (!id || !assetId) return res.status(400).json({ code: "FEEDBACK_ASSET_INVALID", error: "Invalid asset" }); if (!reason) return res.status(400).json({ code: "FEEDBACK_EXPORT_REASON_REQUIRED", error: "An export reason is required" });
   const [asset] = await db.select().from(feedbackAssetsTable).where(and(eq(feedbackAssetsTable.id, assetId), eq(feedbackAssetsTable.feedbackId, id))).limit(1); if (!asset) return res.status(404).json({ code: "FEEDBACK_ASSET_NOT_FOUND", error: "Asset not found" }); if (asset.scanState !== "clean" || !asset.scannedAt) return res.status(423).json({ code: "FEEDBACK_ASSET_QUARANTINED", error: "This file remains quarantined" });
-  const boundedStorage=storage as typeof storage&{downloadBounded?:(key:string,maxBytes:number)=>Promise<Buffer>}; if(!boundedStorage.downloadBounded)return res.status(503).json({code:"FEEDBACK_BOUNDED_DOWNLOAD_UNAVAILABLE",error:"Safe bounded download is temporarily unavailable"}); let bytes:Buffer; try { bytes=await boundedStorage.downloadBounded(asset.storagePath,FEEDBACK_MAX_FILE_BYTES); } catch { return res.status(502).json({ code: "FEEDBACK_STORAGE_READ_FAILED", error: "Stored file could not be read safely" }); } if(bytes.byteLength!==asset.byteSize||bytes.byteLength>FEEDBACK_MAX_FILE_BYTES||createHash("sha256").update(bytes).digest("hex")!==asset.sha256)return res.status(409).json({code:"FEEDBACK_ASSET_INTEGRITY_FAILED",error:"Stored file integrity check failed"});
+  const boundedStorage=storage as typeof storage&{downloadBounded?:(key:string,maxBytes:number)=>Promise<Buffer>}; if(!boundedStorage.downloadBounded)return res.status(503).json({code:"FEEDBACK_BOUNDED_DOWNLOAD_UNAVAILABLE",error:"Safe bounded download is temporarily unavailable"}); let bytes:Buffer; try { bytes=await boundedStorage.downloadBounded(asset.storagePath,FEEDBACK_MAX_FILE_BYTES); } catch (_expectedFailure) { return res.status(502).json({ code: "FEEDBACK_STORAGE_READ_FAILED", error: "Stored file could not be read safely" }); } if(bytes.byteLength!==asset.byteSize||bytes.byteLength>FEEDBACK_MAX_FILE_BYTES||createHash("sha256").update(bytes).digest("hex")!==asset.sha256)return res.status(409).json({code:"FEEDBACK_ASSET_INTEGRITY_FAILED",error:"Stored file integrity check failed"});
   await db.insert(feedbackAuditEventsTable).values({ feedbackId:id,actorUserId:req.user!.userId,eventType:"admin_asset_exported",afterState:{assetId,sha256:asset.sha256,release:FEEDBACK_RELEASE},reason }); res.setHeader("Content-Type",asset.mediaType);res.setHeader("Content-Disposition",`attachment; filename*=UTF-8''${encodeURIComponent(asset.safeName)}`);res.setHeader("X-Content-Type-Options","nosniff");return res.send(bytes);
 });
 

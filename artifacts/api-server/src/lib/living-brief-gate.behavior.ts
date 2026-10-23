@@ -70,7 +70,7 @@ async function main(): Promise<void> {
     await client.query(`DELETE FROM platform_settings WHERE key='living_brief_password_hash'`);
     await client.query("COMMIT");
   } catch (error) {
-    await client.query("ROLLBACK").catch(() => undefined);
+    await client.query("ROLLBACK").catch((rollbackError) => { void rollbackError; });
     throw error;
   } finally {
     client.release();

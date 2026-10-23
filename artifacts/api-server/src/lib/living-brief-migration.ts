@@ -80,7 +80,7 @@ export async function ensureLivingBriefGateSchema(): Promise<void> {
     await ensureLivingBriefGateSchemaWithClient(client);
     await client.query("COMMIT");
   } catch (error) {
-    await client.query("ROLLBACK").catch(() => undefined);
+    await client.query("ROLLBACK").catch((rollbackError) => { console.error("Living Brief migration rollback failed", rollbackError); });
     throw error;
   } finally {
     client.release();

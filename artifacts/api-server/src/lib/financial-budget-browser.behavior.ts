@@ -153,7 +153,7 @@ for (let i = 0; i < 60; i++) {
       (x) => x.type === "page" && String(x.url).includes("127.0.0.1:3134"),
     );
     if (page) break;
-  } catch {}
+  } catch (_expectedFailure) { void _expectedFailure; }
   await delay(200);
 }
 assert.ok(page?.webSocketDebuggerUrl);

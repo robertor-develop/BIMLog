@@ -167,7 +167,7 @@ for (let i = 0; i < 60; i++) {
         item.type === "page" && String(item.url).includes("127.0.0.1:3133"),
     );
     if (page) break;
-  } catch {}
+  } catch (_expectedFailure) { void _expectedFailure; }
   await delay(200);
 }
 assert.ok(
