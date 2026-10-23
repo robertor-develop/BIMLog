@@ -331,7 +331,7 @@ export function ContractItemBulkEditor(props: Props) {
         ));
         return;
       }
-      appendPastedItems(source);
+      if (appendPastedItems(source)) setPasteText("");
     } catch {
       pasteTarget.current?.focus();
       props.onNotice(props.tt(
