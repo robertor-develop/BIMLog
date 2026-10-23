@@ -114,13 +114,37 @@ export function normalizeLocalizedQuantity(value: unknown) {
     .replace(/^(\d{1,3}(?:,\d{3})+)\.(\d{1,6})$/, (_, whole, fraction) => `${whole.replace(/,/g, "")}.${fraction}`);
 }
 
+export function parseDelimitedContractItemRow(line: string, delimiter: string) {
+  const cells: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+    if (character === '"') {
+      if (quoted && line[index + 1] === '"') {
+        cell += '"';
+        index += 1;
+      } else if (quoted) quoted = false;
+      else if (cell.length === 0) quoted = true;
+      else cell += '"';
+    } else if (character === delimiter && !quoted) {
+      cells.push(cell);
+      cell = "";
+    } else {
+      cell += character;
+    }
+  }
+  cells.push(cell);
+  return { cells, malformedQuote: quoted };
+}
+
 export function parseContractItemPaste(source: string) {
   const rows = source
     .replace(/\r\n?/g, "\n")
     .split("\n")
     .map((line, index) => {
       const delimiter = line.includes("\t") ? "\t" : line.includes(";") ? ";" : ",";
-      const cells = line.split(delimiter);
+      const { cells, malformedQuote } = parseDelimitedContractItemRow(line, delimiter);
       const rawQuantity = String(cells[1] ?? "").trim();
       const localizedQuantity = normalizeLocalizedQuantity(rawQuantity);
       return {
@@ -129,6 +153,7 @@ export function parseContractItemPaste(source: string) {
         quantity: delimiter === "," ? localizedQuantity : localizedQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
         ...(cells.slice(2).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
         ...(/^[=+\-@]/.test(String(cells[0] ?? "").replace(/^\uFEFF/, "").trim()) ? { unsafeFormula: true } : {}),
+        ...(malformedQuote ? { malformedQuote: true } : {}),
       };
     })
     .filter((row) => row.name || row.quantity);
@@ -245,7 +270,7 @@ export function ContractItemBulkEditor(props: Props) {
   const appendPastedItems = (source: string) => {
     const parsed = parseContractItemPaste(source);
     const invalid = parsed.filter(
-      (row) => !row.name || !validQuantity(row.quantity) || row.extraColumns || row.unsafeFormula,
+      (row) => !row.name || !validQuantity(row.quantity) || row.extraColumns || row.unsafeFormula || row.malformedQuote,
     );
     if (!parsed.length || invalid.length) {
       const invalidRows = invalid

@@ -14,6 +14,7 @@ import {
   updateContractItemQuantity,
   updateAllContractItemQuantities,
   buildPastedContractItem,
+  parseDelimitedContractItemRow,
 } from "./ContractItemBulkEditor";
 
 const range = Array.from(
@@ -59,6 +60,21 @@ assert.deepEqual(parseContractItemPaste("\uFEFFName\tQuantity\nDoor\t2"), [
 ]);
 assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
   { sourceRow: 1, name: "Muro", quantity: "4", extraColumns: true },
+]);
+assert.deepEqual(parseDelimitedContractItemRow('"Door, Frame",2', ','), {
+  cells: ["Door, Frame", "2"], malformedQuote: false,
+});
+assert.deepEqual(parseContractItemPaste('"Door, Frame",2'), [
+  { sourceRow: 1, name: "Door, Frame", quantity: "2" },
+]);
+assert.deepEqual(parseContractItemPaste('"Muro; interior";1,5'), [
+  { sourceRow: 1, name: "Muro; interior", quantity: "1.5" },
+]);
+assert.deepEqual(parseContractItemPaste('"Door ""A"""\t2'), [
+  { sourceRow: 1, name: 'Door "A"', quantity: "2" },
+]);
+assert.deepEqual(parseContractItemPaste('"Unclosed\t2'), [
+  { sourceRow: 1, name: "Unclosed\t2", quantity: "", malformedQuote: true },
 ]);
 assert.deepEqual(parseContractItemPaste("=HYPERLINK(\"https://example.invalid\")\t1"), [
   { sourceRow: 1, name: "=HYPERLINK(\"https://example.invalid\")", quantity: "1", unsafeFormula: true },
