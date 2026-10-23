@@ -164,6 +164,7 @@ assert.match(emptyStateMarkup, /Open Project Budget/);
 assert.match(emptyStateMarkup, /Click here, then paste two Excel columns/);
 assert.match(emptyStateMarkup, /Add pasted rows/);
 assert.match(emptyStateMarkup, /disabled=""/);
+assert.match(emptyStateMarkup, /value=""/);
 assert.doesNotMatch(emptyStateMarkup, /opacity:0/);
 assert.match(emptyStateMarkup, /Production allocation row 1/);
 assert.match(emptyStateMarkup, /Administration stays separate/);

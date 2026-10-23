@@ -224,7 +224,7 @@ export function ContractItemBulkEditor(props: Props) {
           `Pegue exactamente dos columnas de Excel: Nombre de la Partida y una Cantidad positiva. ${invalid.length || 1} fila(s) requieren corrección.`,
         ) + rowDetail,
       );
-      return;
+      return false;
     }
     if (pastedContractItemCount(props.items, parsed.length) > MAX_ITEMS) {
       props.onError(
@@ -233,7 +233,7 @@ export function ContractItemBulkEditor(props: Props) {
           "Pegar estas filas superaría el límite de 500 partidas del Ingreso.",
         ),
       );
-      return;
+      return false;
     }
     const pastedItems = applyDefaultApuToPastedItems(parsed.map((row) => ({
         ...newItem(props),
@@ -249,11 +249,13 @@ export function ContractItemBulkEditor(props: Props) {
         `Se agregaron ${parsed.length} Partidas de Contrato pegadas.`,
       ),
     );
+    return true;
   };
   const paste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
     event.preventDefault();
-    appendPastedItems(event.clipboardData.getData("text/plain"));
-    setPasteText("");
+    const source = event.clipboardData.getData("text/plain");
+    if (appendPastedItems(source)) setPasteText("");
+    else setPasteText(source);
   };
   const readClipboardRange = async () => {
     try {
@@ -268,8 +270,7 @@ export function ContractItemBulkEditor(props: Props) {
     }
   };
   const applyTypedRange = () => {
-    appendPastedItems(pasteText);
-    if (pasteText.trim()) setPasteText("");
+    if (appendPastedItems(pasteText)) setPasteText("");
   };
   const applyBulkQuantity = () => {
     const normalizedQuantity = normalizeLocalizedQuantity(bulkQuantity).replace(/^(\d+),(\d{1,6})$/, "$1.$2");
