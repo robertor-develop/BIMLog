@@ -15,6 +15,7 @@ import {
   updateAllContractItemQuantities,
   buildPastedContractItem,
   parseDelimitedContractItemRow,
+  splitDelimitedContractItemRecords,
 } from "./ContractItemBulkEditor";
 
 const range = Array.from(
@@ -72,6 +73,14 @@ assert.deepEqual(parseContractItemPaste('"Muro; interior";1,5'), [
 ]);
 assert.deepEqual(parseContractItemPaste('"Door ""A"""\t2'), [
   { sourceRow: 1, name: 'Door "A"', quantity: "2" },
+]);
+assert.deepEqual(splitDelimitedContractItemRecords('"Door\nFrame"\t2\nWall\t3'), [
+  { text: '"Door\nFrame"\t2', sourceRow: 1 },
+  { text: "Wall\t3", sourceRow: 3 },
+]);
+assert.deepEqual(parseContractItemPaste('"Door\nFrame"\t2\nWall\t3'), [
+  { sourceRow: 1, name: "Door\nFrame", quantity: "2" },
+  { sourceRow: 3, name: "Wall", quantity: "3" },
 ]);
 assert.deepEqual(parseContractItemPaste('"Unclosed\t2'), [
   { sourceRow: 1, name: "Unclosed\t2", quantity: "", malformedQuote: true },

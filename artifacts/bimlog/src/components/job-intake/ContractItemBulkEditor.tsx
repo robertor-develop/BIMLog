@@ -138,17 +138,46 @@ export function parseDelimitedContractItemRow(line: string, delimiter: string) {
   return { cells, malformedQuote: quoted };
 }
 
+export function splitDelimitedContractItemRecords(source: string) {
+  const records: Array<{ text: string; sourceRow: number }> = [];
+  let record = "";
+  let quoted = false;
+  let sourceRow = 1;
+  let recordSourceRow = 1;
+  const normalized = source.replace(/\r\n?/g, "\n");
+  for (let index = 0; index < normalized.length; index += 1) {
+    const character = normalized[index];
+    if (character === '"') {
+      if (quoted && normalized[index + 1] === '"') {
+        record += '""';
+        index += 1;
+      } else {
+        quoted = !quoted;
+        record += character;
+      }
+    } else if (character === "\n" && !quoted) {
+      records.push({ text: record, sourceRow: recordSourceRow });
+      record = "";
+      sourceRow += 1;
+      recordSourceRow = sourceRow;
+    } else {
+      record += character;
+      if (character === "\n") sourceRow += 1;
+    }
+  }
+  records.push({ text: record, sourceRow: recordSourceRow });
+  return records;
+}
+
 export function parseContractItemPaste(source: string) {
-  const rows = source
-    .replace(/\r\n?/g, "\n")
-    .split("\n")
-    .map((line, index) => {
+  const rows = splitDelimitedContractItemRecords(source)
+    .map(({ text: line, sourceRow }) => {
       const delimiter = line.includes("\t") ? "\t" : line.includes(";") ? ";" : ",";
       const { cells, malformedQuote } = parseDelimitedContractItemRow(line, delimiter);
       const rawQuantity = String(cells[1] ?? "").trim();
       const localizedQuantity = normalizeLocalizedQuantity(rawQuantity);
       return {
-        sourceRow: index + 1,
+        sourceRow,
         name: String(cells[0] ?? "").replace(/^\uFEFF/, "").trim(),
         quantity: delimiter === "," ? localizedQuantity : localizedQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
         ...(cells.slice(2).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
