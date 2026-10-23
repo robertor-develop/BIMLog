@@ -189,6 +189,17 @@ export function findCompatibleDefaultApu(
     : versions.find((version) => version.version === defaultVersion) ?? null;
 }
 
+export function updateContractItemQuantity<T extends Record<string, any>>(
+  item: T,
+  quantity: string,
+  versions: IntakeApuVersion[],
+) {
+  const updated = { ...item, quantity };
+  if (item.apuPlanVersion == null || item.rateSource?.kind !== "saved_apu_rate") return updated;
+  const selected = versions.find((version) => version.version === item.apuPlanVersion);
+  return selected ? connectContractItemsToApu([updated], selected)[0] : updated;
+}
+
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
   const [pasteText, setPasteText] = useState("");
@@ -522,7 +533,11 @@ export function ContractItemBulkEditor(props: Props) {
               inputMode="decimal"
               value={item.quantity ?? item.plannedHours}
               onChange={(event) =>
-                update(index, { quantity: event.target.value })
+                props.setItems((items) => items.map((candidate, candidateIndex) =>
+                  candidateIndex === index
+                    ? updateContractItemQuantity(candidate, event.target.value, eligibleApuVersions)
+                    : candidate,
+                ))
               }
               aria-label={props.tt(
                 `Quantity row ${index + 1}`,

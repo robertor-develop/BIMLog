@@ -11,6 +11,7 @@ import {
   findCompatibleDefaultApu,
   parseContractItemPaste,
   selectSavedApuVersion,
+  updateContractItemQuantity,
 } from "./ContractItemBulkEditor";
 
 const range = Array.from(
@@ -119,6 +120,16 @@ assert.deepEqual(
 assert.deepEqual(selectSavedApuVersion([], ""), { apuPlanVersion: null });
 assert.equal(findCompatibleDefaultApu([{ version: 3, sellingPrice: "37.99", currency: "USD" }], 4), null);
 assert.equal(findCompatibleDefaultApu([{ version: 3, sellingPrice: "37.99", currency: "USD" }], 3)?.version, 3);
+assert.equal(updateContractItemQuantity(
+  { quantity: "2", billingHourlyRate: "50", unit: "Hours", apuPlanVersion: 3, rateSource: { kind: "saved_apu_rate" } },
+  "4",
+  [{ version: 3, name: "Approved", sellingPrice: "100", currency: "USD" }],
+).billingHourlyRate, "25");
+assert.equal(updateContractItemQuantity(
+  { quantity: "2", billingHourlyRate: "50", unit: "Hours", apuPlanVersion: 3, rateSource: { kind: "manual_rate" } },
+  "4",
+  [{ version: 3, name: "Approved", sellingPrice: "100", currency: "USD" }],
+).billingHourlyRate, "50");
 
 const item = {
   id: "CI-1",
