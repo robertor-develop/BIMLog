@@ -12,6 +12,7 @@ import {
   parseContractItemPaste,
   selectSavedApuVersion,
   updateContractItemQuantity,
+  updateAllContractItemQuantities,
 } from "./ContractItemBulkEditor";
 
 const range = Array.from(
@@ -130,6 +131,13 @@ assert.equal(updateContractItemQuantity(
   "4",
   [{ version: 3, name: "Approved", sellingPrice: "100", currency: "USD" }],
 ).billingHourlyRate, "50");
+assert.deepEqual(updateAllContractItemQuantities([
+  { id: "linked", quantity: "2", billingHourlyRate: "50", unit: "Hours", apuPlanVersion: 3, rateSource: { kind: "saved_apu_rate" } },
+  { id: "manual", quantity: "2", billingHourlyRate: "70", unit: "Hours", apuPlanVersion: 3, rateSource: { kind: "manual_rate" } },
+], "5", [{ version: 3, name: "Approved", sellingPrice: "100", currency: "USD" }]).map(({ quantity, billingHourlyRate }) => ({ quantity, billingHourlyRate })), [
+  { quantity: "5", billingHourlyRate: "20" },
+  { quantity: "5", billingHourlyRate: "70" },
+]);
 
 const item = {
   id: "CI-1",

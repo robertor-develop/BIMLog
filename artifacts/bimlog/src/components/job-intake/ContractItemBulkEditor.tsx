@@ -200,6 +200,14 @@ export function updateContractItemQuantity<T extends Record<string, any>>(
   return selected ? connectContractItemsToApu([updated], selected)[0] : updated;
 }
 
+export function updateAllContractItemQuantities<T extends Record<string, any>>(
+  items: T[],
+  quantity: string,
+  versions: IntakeApuVersion[],
+) {
+  return items.map((item) => updateContractItemQuantity(item, quantity, versions));
+}
+
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
   const [pasteText, setPasteText] = useState("");
@@ -311,9 +319,7 @@ export function ContractItemBulkEditor(props: Props) {
       );
       return;
     }
-    props.setItems((items) =>
-      items.map((item) => ({ ...item, quantity: normalizedQuantity })),
-    );
+    props.setItems((items) => updateAllContractItemQuantities(items, normalizedQuantity, eligibleApuVersions));
     props.onNotice(
       props.tt(
         "Quantity updated for every Contract Item.",
