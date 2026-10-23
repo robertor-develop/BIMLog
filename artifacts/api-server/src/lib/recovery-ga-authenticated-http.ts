@@ -161,7 +161,9 @@ try {
     checks.files = { summary: 200, states: summary.body.counts, legacyDownload: 409, outsider: 403 };
   }
 } finally {
-  await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  const closed = new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  server.closeAllConnections?.();
+  await closed;
   await pool.end();
 }
 console.log(JSON.stringify({ suite: "recovery-ga-authenticated-http", scenario, database: { host: "127.0.0.1", port: 55449, disposable: true }, checks }, null, 2));

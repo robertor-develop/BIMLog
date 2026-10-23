@@ -13,4 +13,7 @@ const source = fs.readFileSync(new URL("./workflow-database-fixture.mjs", import
 assert.match(source, /finally\s*\{[\s\S]*mode === '--run'[\s\S]*await drop\(\)/);
 assert.match(source, /CREATE DATABASE/);
 assert.match(source, /DROP DATABASE IF EXISTS/);
+assert.match(source, /ensureDisposablePostgres/);
+assert.match(source, /WORKFLOW_FIXTURE_SERVER=STARTED/);
+assert.match(source, /WORKFLOW_FIXTURE_SERVER=STOPPED/);
 console.log(`WORKFLOW_DATABASE_FIXTURE=PASS names=${workflowFixtureNames.length} create_run_remove=bounded loopback=55449`);
