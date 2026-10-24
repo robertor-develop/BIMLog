@@ -35,4 +35,11 @@ assert.match(matrix, /Viva independent acceptance is separate/);
 assert.doesNotMatch(matrix, /\| PASS \|/);
 assert.doesNotMatch(matrix, /\|\s*(?:ACCEPTED|INDEPENDENTLY_ACCEPTED|CUSTOMER_ACCEPTED)\s*\|/i);
 assert.match(matrix, /AWAITING_INDEPENDENT_REVIEW/);
+const ledger = JSON.parse(fs.readFileSync("evidence/outcome-remediation-20261023/lorena-final-evidence-ledger.json", "utf8"));
+assert.equal(ledger.schemaVersion, 1);
+assert.equal(ledger.claims.length, 10);
+for (const claim of ledger.claims) {
+  for (const field of ["id", "projectId", "projectCode", "route", "role", "locale", "viewport", "consoleResult", "networkResult", "observedAt", "artifactRefs", "state"])
+    assert.ok(Object.hasOwn(claim, field), `${claim.id ?? "unknown"} missing ${field}`);
+}
 console.log(`Lorena final closure inventory: PASS (${requiredScripts.length} executable suites; live acceptance remains explicit)`);

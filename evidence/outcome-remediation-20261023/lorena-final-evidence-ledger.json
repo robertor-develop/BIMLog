@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "program": "BIMLog final closure",
+  "candidate": {
+    "sourceCommit": "0db73bda9e709577d9d8aa9af79940573aabeb95",
+    "deployedCommit": "0db73bda9e709577d9d8aa9af79940573aabeb95",
+    "packageIdentity": "v1.05.N18-P37",
+    "schemaIdentity": null
+  },
+  "claims": [
+    {"id":"job-intake","projectId":68,"projectCode":"QA-LOR-FINAL-1023","route":"/projects/68/intake","role":null,"locale":null,"viewport":null,"consoleResult":null,"networkResult":null,"observedAt":null,"artifactRefs":[],"state":"OBSERVED_HISTORICAL_AWAITING_EXACT_CANDIDATE_REPLAY"},
+    {"id":"apu-cost-value","projectId":60,"projectCode":null,"route":"/projects/60/intake","role":null,"locale":null,"viewport":null,"consoleResult":null,"networkResult":null,"observedAt":null,"artifactRefs":[],"state":"OBSERVED_HISTORICAL_AWAITING_EXACT_CANDIDATE_REPLAY"},
+    {"id":"delivery-workflow","projectId":60,"projectCode":null,"route":"/projects/60/intake","role":null,"locale":null,"viewport":null,"consoleResult":null,"networkResult":null,"observedAt":null,"artifactRefs":[],"state":"OBSERVED_HISTORICAL_AWAITING_EXACT_CANDIDATE_REPLAY"},
+    {"id":"edt-wbs","projectId":60,"projectCode":null,"route":"/projects/60/operations","role":null,"locale":null,"viewport":null,"consoleResult":null,"networkResult":null,"observedAt":null,"artifactRefs":[],"state":"OBSERVED_HISTORICAL_AWAITING_EXACT_CANDIDATE_REPLAY"},
+    {"id":"activation-operations","projectId":60,"projectCode":null,"route":"/projects/60/operations","role":null,"locale":null,"viewport":null,"consoleResult":null,"networkResult":null,"observedAt":null,"artifactRefs":[],"state":"OBSERVED_HISTORICAL_AWAITING_EXACT_CANDIDATE_REPLAY"},
+    {"id":"rfis","projectId":68,"projectCode":"QA-LOR-FINAL-1023","route":"/projects/68/rfis","role":null,"locale":null,"viewport":null,"consoleResult":null,"networkResult":null,"observedAt":null,"artifactRefs":[],"state":"OBSERVED_HISTORICAL_AWAITING_EXACT_CANDIDATE_REPLAY"},
+    {"id":"submittals","projectId":68,"projectCode":"QA-LOR-FINAL-1023","route":"/projects/68/submittals","role":null,"locale":null,"viewport":null,"consoleResult":null,"networkResult":null,"observedAt":null,"artifactRefs":[],"state":"OBSERVED_HISTORICAL_AWAITING_EXACT_CANDIDATE_REPLAY"},
+    {"id":"files-transmittals-reports","projectId":68,"projectCode":"QA-LOR-FINAL-1023","route":"/projects/68/files","role":null,"locale":null,"viewport":null,"consoleResult":null,"networkResult":null,"observedAt":null,"artifactRefs":[],"state":"OBSERVED_HISTORICAL_AWAITING_EXACT_CANDIDATE_REPLAY"},
+    {"id":"bimlog-agent","projectId":60,"projectCode":null,"route":"/projects/60/operations","role":"authenticated project member","locale":"en","viewport":"390x844","consoleResult":"PASS_NO_WARNINGS_OR_ERRORS","networkResult":"PASS","observedAt":"2026-10-23","artifactRefs":["evidence/block06-final-live-smoke-20261023.png"],"state":"OBSERVED_EXACT_CANDIDATE_AWAITING_INDEPENDENT_REVIEW"},
+    {"id":"ux-responsive-accessibility","projectId":60,"projectCode":null,"route":"/projects/60/intake","role":"authenticated project member","locale":"en","viewport":"390x844","consoleResult":"PASS_NO_WARNINGS_OR_ERRORS","networkResult":"PASS","observedAt":"2026-10-23","artifactRefs":["evidence/block06-final-live-smoke-20261023.png"],"state":"OBSERVED_EXACT_CANDIDATE_AWAITING_INDEPENDENT_REVIEW"}
+  ]
+}
