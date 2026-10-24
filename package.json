@@ -11,6 +11,7 @@
   "license": "MIT",
   "scripts": {
     "test:viva-block06-build026": "node scripts/test-viva-block06-build026-role-authority.mjs",
+    "test:viva-block06-build027": "node scripts/test-viva-block06-build027-route-coverage.mjs",
     "test:viva-block05-build021": "node scripts/test-viva-block05-build021-file-custody.mjs",
     "test:viva-block05-build022": "node scripts/test-viva-block05-build022-transmittal-custody.mjs",
     "test:viva-block05-build023": "node scripts/test-viva-block05-build023-drawing-lineage.mjs",
