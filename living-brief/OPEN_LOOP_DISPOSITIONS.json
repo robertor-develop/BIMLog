@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "5638ba649609f839a064827c31ef75d09924caf733d176f25ac8e83504bfc400",
+  "sourceSha256": "e51fed2581ac9333f7742cc8a4d498697b72cf30d4d1f2fbe79507c7a5becacc",
   "itemCount": 481,
   "counts": {
     "ACTIVE": 435,
@@ -9168,10 +9168,10 @@
       "currentAuthority": false
     },
     {
-      "id": "99c83335fa4c622e",
+      "id": "d0d53e74818571a6",
       "sourceLine": 6274,
       "heading": "Fixed GA closure Builds 71–75 — 2026-10-24",
-      "statement": "B72 pass the complete relevant source, database, security, isolation, TypeScript, governed build, Lorena, APU/Lens and release-integrity gates; repair any real failure within B72.",
+      "statement": "B72 pass the complete relevant source, database, security, isolation, TypeScript, governed build, Lorena, APU/Lens and release-integrity gates; the stale AI inventory is repaired and the complete clean rerun remains required before Build 73.",
       "classification": "ACTIVE",
       "dispositionCategory": "EXTERNAL_OWNER_INPUT",
       "workClass": "FIELD_EVIDENCE",

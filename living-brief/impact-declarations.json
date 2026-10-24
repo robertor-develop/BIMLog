@@ -75651,6 +75651,79 @@
         "package.json"
       ],
       "reviewedChangeSha256": "62ac3ed5e70eb2274f499a2d1fde5cc511211f626e86aef3d674ceb35fe347ae"
+    },
+    {
+      "taskId": "bimlog-fixed-ga-build72-20261024",
+      "reviewedThroughCommit": "c02e75d069215e149ad423cc5ff6827112094d85",
+      "reviewedAt": "2026-10-24T06:45:00.000-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_commit",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged."
+        }
+      ],
+      "reason": "Build 72 regenerates one stale AI entry-point source line after the complete gate detected drift; provider, acquisition authority, scope and runtime behavior are unchanged.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7d92fb9bd04ef9641aacdead0690364199409587eddb822a605403df47d1c622"
     }
   ]
 }

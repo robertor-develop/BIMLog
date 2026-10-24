@@ -4756,3 +4756,7 @@ Builds 66–70 bind the existing Coordination Hub implementation to permanent nu
 
 Build 71 reconciles the published Builds 61–70 release branch against the fetched authoritative Git lineage. Base `2a2ab55b0e2ef7ff35ddeac5176f7c6b8d8a39ea` contains both observed `origin/main` and `origin/master` histories, remains identical to its release-branch upstream, and preserves the existing working tree and evidence. A permanent gate binds the base tree, release label, binary version, package manifest, lockfile, release contract and complete schema-source digest. Main/master integration is reserved for Build 73; no force update, publication, provider action, database mutation or customer-data change occurs in Build 71.
 
+## Fixed GA closure Build 72 — gate repair candidate — 2026-10-24
+
+The complete exact-candidate gate passed its real PostgreSQL Intake, APU, workflow, governance, RFI, invitation, company-isolation, commercial, UX, consolidation, dependency-provenance and production vulnerability-audit stages before correctly rejecting one stale source line in the governed 45-entry AI entry-point inventory. Build 72 regenerates that inventory from current source; only `main04-agent-transport.ts` moved from line 42 to line 58, while its Anthropic provider, governed acquisition path and authenticated project scope remain unchanged. This is a deterministic gate repair, not a runtime AI change. The complete gate must pass on the repaired clean candidate before Build 73.
+

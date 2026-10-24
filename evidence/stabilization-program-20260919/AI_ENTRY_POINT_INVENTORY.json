@@ -50,7 +50,7 @@
     },
     {
       "file": "artifacts/api-server/src/lib/main04-agent-transport.ts",
-      "line": 42,
+      "line": 58,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
