@@ -1,0 +1,10 @@
+{
+  "program": "Viva whole-platform closure",
+  "block": 4,
+  "builds": [16, 17, 18, 19, 20],
+  "scope": ["commercial catalog", "commercial readiness", "Stripe checkout/webhook/portal", "support cases", "SendGrid verification"],
+  "acceptanceCommand": "pnpm run test:viva-block04-closure",
+  "publicationCadence": "publish after build 20 and complete authenticated Chrome smoke",
+  "externalConfiguration": ["BIMLOG_STRIPE_PRICE_IDS", "BIMLOG_COMMERCIAL_MODE", "STRIPE_SECRET_KEY", "BIMLOG_APP_ORIGIN", "STRIPE_WEBHOOK_SECRET", "STRIPE_PORTAL_CONFIGURATION_ID", "SENDGRID_API_KEY", "BIMLOG_SUPPORT_FROM_EMAIL", "BIMLOG_SUPPORT_INBOX_EMAIL"],
+  "customerMutation": false
+}

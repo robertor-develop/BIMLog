@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-23 — Viva closure Block 4 commercial publication candidate
+
+Builds 16–20 bind executable acceptance for the commercial catalog, nine-key fail-closed launch readiness, Stripe checkout/webhook/portal behavior, company-scoped customer support cases, and SendGrid account/sender verification. Implemented flows pass with synthetic provider transports and redact secrets. Real commercial activation remains dependent only on the nine named production configuration values. This Build 20 checkpoint requires push, exact-source publication and full authenticated Chrome smoke; no customer data was mutated while preparing it.
+
 ## 2026-10-23 — Viva closure Block 3 Lens Next and Pulse candidate
 
 Builds 11–15 align the deterministic Lens Next Navisworks 2021 and 2025 packages with release P37, bind the complete Lens Next Platform acceptance suite, preserve the Headquarters operational pulse refresh and movement model, and verify model-binding, digest, publishing and native-release boundaries together. Both native packages reproduced the same hash on two builds. Installation and affected-model field acceptance remain separate; no customer data was mutated. This five-build checkpoint is push-only, with publication and authenticated Chrome smoke due after Build 20.

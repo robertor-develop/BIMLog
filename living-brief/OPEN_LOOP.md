@@ -1,5 +1,10 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Viva closure Block 4 publication boundary — 2026-10-23
+
+- [ ] Push and publish the exact Build 20 commercial candidate, confirm immutable live identity, and pass full authenticated visible-Chrome smoke.
+- [ ] Commercial activation remains externally dependent on the nine named Stripe, origin and SendGrid configuration values; keep unavailable functions explicit until those values are configured and live provider verification passes.
+
 ## Viva closure Block 3 push boundary — 2026-10-23
 
 - [ ] Push the exact Build 15 Lens Next and Pulse candidate. Do not publish until the Build 20 boundary.
