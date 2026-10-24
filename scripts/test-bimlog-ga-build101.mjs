@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import { execFileSync } from "node:child_process";
+
+const receipt = JSON.parse(fs.readFileSync("evidence/ga-final-closure-20261024/build101-live-release-receipt.json", "utf8"));
+const git = (...args) => execFileSync("git", args, { encoding: "utf8" }).trim();
+assert.equal(receipt.schemaVersion, "bimlog-ga-build101-live-release-receipt-v1");
+assert.equal(receipt.publishedSourceCommit, "8eba359b98c7817be697033c340af676afbdfce4");
+assert.doesNotThrow(() => git("merge-base", "--is-ancestor", receipt.publishedSourceCommit, "HEAD"));
+assert.equal(receipt.health.status, "ok");
+assert.equal(receipt.health.identityBound, true);
+assert.match(receipt.packageId, new RegExp(`^bimlog-${receipt.publishedSourceCommit.slice(0, 16)}-`));
+assert.match(receipt.assetManifestSha256, /^[0-9a-f]{64}$/);
+assert.match(receipt.identityFingerprint, /^[0-9a-f]{64}$/);
+assert.deepEqual(receipt.controlledProject, { id: 68, code: "QA-LOR-FINAL-1023" });
+assert.equal(receipt.authenticatedChrome.routeCount, 11);
+assert.equal(receipt.authenticatedChrome.consoleWarningsOrErrors, 0);
+for (const key of ["hardReload", "secondTab", "mobile390x844", "tablet820x1180"]) assert.equal(receipt.authenticatedChrome[key], "pass");
+assert.equal(receipt.evidenceState, "CONSTRUCTOR_OBSERVED_AWAITING_INDEPENDENT_REVIEW");
+console.log("BIMLog GA Build 101: PASS exact Build 100 deployed identity and authenticated Chrome receipt");
