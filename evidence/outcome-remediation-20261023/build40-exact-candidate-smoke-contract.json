@@ -1,0 +1,30 @@
+{
+  "build": 40,
+  "projectId": 68,
+  "projectCode": "QA-LOR-FINAL-1023",
+  "requiredRoutes": [
+    "/projects/68/intake",
+    "/projects/68/operations",
+    "/projects/68/rfis",
+    "/projects/68/submittals",
+    "/projects/68/files"
+  ],
+  "requiredAssertions": [
+    "exact published commit and package identity",
+    "one immutable APU version linked to all 10 Contract Items",
+    "quantity-normalized unit rates persist after hard reload",
+    "workflow strategy and milestones generated from the selected immutable version",
+    "PRE COO FOR ASB hours use verified workflow allocation",
+    "single activation succeeds without refresh and retry is idempotent",
+    "canonical contract and EDT lineage remain visible in Job Operations",
+    "same project is complete in a second authenticated tab",
+    "authenticated route smoke has no console errors"
+  ],
+  "evidencePolicy": {
+    "sameProjectRequired": true,
+    "exactCandidateRequired": true,
+    "hardReloadRequired": true,
+    "secondAuthenticatedTabRequired": true,
+    "mixedProjectEvidenceRejected": true
+  }
+}
