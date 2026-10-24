@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "bimlog-ga-build73-ref-integration-v1",
+  "build": 73,
+  "verifiedCandidate": {
+    "commit": "977dae2943ac3e779ab85ec49675ad5ea9fd88ec",
+    "tree": "50334998fc22af3d1833dbc98ff48581c99ca4f1",
+    "localReleaseReceiptSha256": "a00b6d056a38c02e54a223ed0ebab0a8c1f704a1d189832e3b73e90c4c746a97"
+  },
+  "observedRemoteTrackingRefs": {
+    "origin/main": "0db73bda9e709577d9d8aa9af79940573aabeb95",
+    "origin/master": "e64c21a04c65ac9b60344379489d31d7668f8e41",
+    "origin/codex/bimlog-template-gap-block01-20260923": "2a2ab55b0e2ef7ff35ddeac5176f7c6b8d8a39ea"
+  },
+  "integration": {
+    "strategy": "normal-fast-forward-only",
+    "forcePushAllowed": false,
+    "pushBoundary": "after-build75-block-gate",
+    "publicationBoundary": "after-build80-second-block-gate",
+    "allObservedRefsAreAncestorsOfCandidate": true
+  },
+  "state": "INTEGRATION_READY_NOT_PUSHED"
+}
