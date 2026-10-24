@@ -1,0 +1,33 @@
+{
+  "build": 50,
+  "blocks": [3, 4],
+  "buildRange": [41, 50],
+  "controlledProjectId": 68,
+  "controlledProjectCode": "QA-LOR-FINAL-1023",
+  "requiredRoutes": [
+    "/projects/68/intake",
+    "/projects/68/operations",
+    "/projects/68/rfis",
+    "/projects/68/submittals",
+    "/projects/68/files",
+    "/projects/68/change-orders",
+    "/projects/68/meetings"
+  ],
+  "requiredAssertions": [
+    "exact pushed commit is checked out and built in Replit",
+    "publication reports success for the exact candidate",
+    "authenticated controlled-project routes load without authorization failure",
+    "Change Orders exposes governed current-view controls",
+    "Meetings exposes meeting and action workflow controls",
+    "Intake generated workflow guidance remains persisted",
+    "browser console and failed network request review are clean",
+    "fresh authenticated tab independently loads the controlled project"
+  ],
+  "evidencePolicy": {
+    "exactCandidateRequired": true,
+    "hardReloadRequired": true,
+    "freshAuthenticatedTabRequired": true,
+    "historicalEvidenceRejected": true,
+    "customerDataMutationRequired": false
+  }
+}
