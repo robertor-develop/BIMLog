@@ -47,6 +47,8 @@
     "test:bimlog-final-build52": "node artifacts/api-server/src/lib/post-p17-build52-schedule-sources-lifecycle.behavior.mjs",
     "test:bimlog-final-build53": "node artifacts/api-server/src/lib/post-p17-build53-schedule-views-rollover-reports.behavior.mjs",
     "test:bimlog-final-build54": "node artifacts/api-server/src/lib/post-p17-build54-schedule-workflow-ui.behavior.mjs",
+    "test:bimlog-final-build55": "node scripts/test-bimlog-final-build55.mjs",
+    "test:bimlog-final-closure-block05": "pnpm run test:bimlog-final-build51 && pnpm run test:bimlog-final-build52 && pnpm run test:bimlog-final-build53 && pnpm run test:bimlog-final-build54 && pnpm run test:bimlog-final-build55",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",

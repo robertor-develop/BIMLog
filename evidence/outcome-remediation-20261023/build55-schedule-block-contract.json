@@ -1,0 +1,20 @@
+{
+  "build": 55,
+  "scope": "Schedule",
+  "publicationDueAtBuild": 60,
+  "requiredBuilds": [51, 52, 53, 54],
+  "requiredPublicationChecks": [
+    "exact published commit and package identity",
+    "authenticated Schedule route loads for controlled project 68",
+    "Board Calendar and List views remain available",
+    "search bucket assignee date type and row-state filters remain scoped",
+    "Print PDF Add Date and source lifecycle controls remain governed",
+    "browser console and failed network request review are clean"
+  ],
+  "evidencePolicy": {
+    "exactCandidateRequired": true,
+    "authenticatedChromeRequired": true,
+    "historicalScreenshotsDoNotSatisfyPublication": true,
+    "customerDataMutationRequired": false
+  }
+}
