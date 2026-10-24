@@ -76020,6 +76020,75 @@
         "package.json"
       ],
       "reviewedChangeSha256": "50be72076be302213d506377b3d7fb44506aa00f1c52a4e0d449e0e25c9a5d15"
+    },
+    {
+      "taskId": "bimlog-fixed-ga-build90-release-repair-20261024",
+      "reviewedThroughCommit": "fba3f5afb239b1cab93988f03cf45d0682f04e89",
+      "reviewedAt": "2026-10-24T12:20:35.280Z",
+      "status": "local_candidate",
+      "captureTiming": "post_commit_release_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged."
+        }
+      ],
+      "reason": "Build 90 release repair refreshes Living Brief impact paths against the exact committed publication candidate after the production build correctly rejected the pre-commit state seal; runtime behavior and release scope are unchanged.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
