@@ -1,11 +1,11 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "73108b237c4bc2a5a016b50439ee5a98e11f6ac32def2a0d92420e81e04bd872",
-  "itemCount": 480,
+  "sourceSha256": "1200a718e0067d0372153f3d8ec31abdaeb3e202edcd59220b565cb214857d42",
+  "itemCount": 481,
   "counts": {
     "ACTIVE": 433,
-    "SUPERSEDED": 35,
+    "SUPERSEDED": 36,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
@@ -14,7 +14,7 @@
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 35,
+    "SUPERSEDED_HISTORY": 36,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -9221,6 +9221,25 @@
       "evidence": [
         "OPEN_LOOP.md:6296",
         "Fixed GA closure Builds 81–85 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1c567899251db650",
+      "sourceLine": 6305,
+      "heading": "Fixed GA closure Builds 86–90 — 2026-10-24",
+      "statement": "Push and publish the exact B81–B90 candidate, bind deployed identity and pass full authenticated Chrome smoke.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
       ],
       "currentAuthority": false
     }

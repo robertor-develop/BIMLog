@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "bimlog-ga-build90-publication-contract-v1",
+  "build": 90,
+  "range": [81, 90],
+  "commits": {
+    "81": "4d7e8bde0d87bfe9843d6ebe4f4a740abac02ae1",
+    "82": "c46412ff3b7f3427664ea6a24568ee9d4f7046fc",
+    "83": "f00050f5c6c1f8667a535ad4574b53e9985aacc7",
+    "84": "6424f347d330fb172c716275749ecd46688b720d",
+    "85": "d95747b91e887c08f417944d44b05e041620f9a2",
+    "86": "38bd5c046628b5d09cd1454ce93c38f9f56644f5",
+    "87": "8840325c24ee594cf8fc65079ab8ad20eaf10b4e",
+    "88": "7ebccc13808d6dc480b1c1ebf270bb8dec8b0951",
+    "89": "c8bafb8a7531b46765473a5e8107956fa40fa05c"
+  },
+  "controlledProject": { "id": 68, "code": "QA-LOR-FINAL-1023" },
+  "requiredRoutes": [
+    "/projects/68/intake",
+    "/projects/68/operations",
+    "/projects/68/coordination",
+    "/projects/68/rfis",
+    "/projects/68/submittals",
+    "/projects/68/files",
+    "/projects/68/transmittals",
+    "/projects/68/change-orders",
+    "/projects/68/meetings",
+    "/projects/68/schedule",
+    "/projects/68/clash-reports"
+  ],
+  "requiredAcceptance": [
+    "exact pushed commit equals Replit checkout and deployed health identity",
+    "publication reports success",
+    "authenticated controlled-project route matrix loads",
+    "hard reload and second authenticated tab preserve project session",
+    "desktop, tablet and exact 390 pixel layouts remain usable",
+    "browser console and visible application errors remain clean"
+  ],
+  "cadence": { "push": true, "publish": true, "authenticatedChrome": true, "unpublishedBuildCount": 10 },
+  "acceptance": { "implemented": true, "tested": true, "pushed": false, "published": false, "liveVerified": false, "independentlyAccepted": false }
+}

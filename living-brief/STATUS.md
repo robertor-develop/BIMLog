@@ -4772,3 +4772,7 @@ Five independently committed gates cover Excel intake, immutable APU auto-rate a
 
 Five independently committed gates cover RFI and Submittal lifecycle isolation, Files and transmittal custody, governed reporting, BIMLog Agent transport and authenticated correlation, and responsive/accessibility behavior. The aggregate B81–B85 source behavior gate passes. This is the first five-build block after the B71–B80 publication and is push-only; publication and full authenticated Chrome acceptance remain due after B90.
 
+## Fixed GA closure Builds 86–90 — release acceptance candidate — 2026-10-24
+
+Five independently committed gates cover authorization and database safety, failure recovery, fail-closed temporary-project cleanup, isolated production packaging and the exact eleven-route authenticated publication contract. Together with Builds 81–85 this reaches the ten-build publication boundary. The aggregate source gate must pass before one normal push, exact Replit publication, deployed-identity binding and full authenticated Chrome acceptance.
+

@@ -6295,3 +6295,12 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] B85 prove responsive/accessibility behavior and seal the exact five-build block.
 - [ ] Push the exact B81–B85 candidate. Keep it unpublished until B86–B90 completes the ten-build publication interval.
 
+# Fixed GA closure Builds 86–90 — 2026-10-24
+
+- [x] B86 prove authorization isolation, tracked-secret protection and database safety.
+- [x] B87 prove bounded failure recovery, rollback observability and stale-deployment recovery.
+- [x] B88 prove temporary-project cleanup remains fail-closed while protected-project invariants hold.
+- [x] B89 prove the isolated production artifact and Agent release-integrity contract.
+- [x] B90 bind the exact B81–B90 publication, project route, reload, second-tab, responsive and console acceptance contract.
+- [ ] Push and publish the exact B81–B90 candidate, bind deployed identity and pass full authenticated Chrome smoke.
+

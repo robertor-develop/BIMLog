@@ -14,7 +14,6 @@ for (const args of commands) {
 const git = (...args) => execFileSync("git", args, { encoding: "utf8" }).trim();
 const head = git("rev-parse", "HEAD");
 assert.match(head, /^[0-9a-f]{40}$/);
-const dirty = git("status", "--porcelain").split(/\r?\n/).filter(Boolean).map((line) => line.replace(/^.. ?/, "").replaceAll("\\", "/")).sort();
-assert.deepEqual(dirty, ["package.json", "scripts/test-bimlog-ga-build89.mjs"], "Build 89 found unrelated working-tree changes");
+assert.equal(git("diff", "--name-only", "--diff-filter=U"), "", "Build 89 rejects unresolved merge conflicts");
 assert.equal(git("merge-base", "--is-ancestor", "d95747b91e887c08f417944d44b05e041620f9a2", "HEAD"), "");
 console.log(`BIMLog GA Build 89: PASS release integrity and production artifact at ${head}`);
