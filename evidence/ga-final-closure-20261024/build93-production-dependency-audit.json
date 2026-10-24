@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "bimlog-ga-build93-production-dependency-audit-v1",
+  "registry": "https://registry.npmjs.org",
+  "scope": "production",
+  "auditLevel": "high",
+  "observedAt": "2026-10-24T13:20:00-04:00",
+  "vulnerabilities": {
+    "info": 0,
+    "low": 0,
+    "moderate": 0,
+    "high": 0,
+    "critical": 0
+  },
+  "dependencies": 388,
+  "optionalDependencies": 47,
+  "totalDependencies": 435,
+  "exitCode": 0,
+  "secretsIncluded": false
+}
