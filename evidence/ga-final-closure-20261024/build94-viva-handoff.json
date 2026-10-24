@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "bimlog-ga-build94-viva-handoff-v1",
+  "program": "BIMLog fixed GA closure",
+  "buildRange": [71, 95],
+  "reviewTarget": "Build 95 exact pushed candidate",
+  "constructorEvidence": {
+    "sourceAndDatabase": "PASS",
+    "productionBuild": "PASS",
+    "publishedIdentityThroughBuild90": "PASS",
+    "authenticatedChromeThroughBuild90": "PASS",
+    "productionDependencyAudit": "PASS"
+  },
+  "protectedTruth": {
+    "customerProductionMutation": false,
+    "temporaryProjectDeletionExecuted": false,
+    "commercialSecretsConfiguredByThisProgram": false,
+    "constructorAssignedIndependentVerdict": false
+  },
+  "independentAcceptance": "AWAITING_VIVA_REVIEW",
+  "customerFieldAcceptance": "SEPARATE_WHERE_REQUIRED",
+  "publicationCadence": {
+    "lastPublishedBuild": 90,
+    "pushAfterBuild": 95,
+    "nextPublishAfterBuild": 100,
+    "unpublishedBuildsAfterPush": 5
+  }
+}
