@@ -4723,3 +4723,5 @@ Implementation commit `80a5b8cd01f7c00099e770d84d5c24180191abfb` is the reconcil
 
 The second live proof populated and reloaded all twenty generated fields, then exposed continuous autosave because the server normalizer omitted the per-Contract-Item strategy, milestone and generated-provenance fields. The canonical Intake contract now validates and preserves those five bounded fields, so server round trips retain both visible guidance and its safe replacement provenance.
 
+Implementation commit `9b9aa2b85e4a4a4efe9ab7e381e9d8ea86dd32b4` is the reconciled server-persistence repair unit.
+

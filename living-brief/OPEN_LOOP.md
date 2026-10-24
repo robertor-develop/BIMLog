@@ -6209,4 +6209,5 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] Reproduce and repair the options-before-items runtime ordering case exposed by the first corrective publication.
 - [x] Reconcile the runtime-ordering repair at `80a5b8cd01f7c00099e770d84d5c24180191abfb` before rebuilding the exact candidate.
 - [x] Preserve per-Contract-Item strategy, milestones and generated provenance through canonical server normalization; focused contract behavior and API TypeScript pass.
+- [x] Reconcile the server-persistence repair at `9b9aa2b85e4a4a4efe9ab7e381e9d8ea86dd32b4` before the clean release build.
 
