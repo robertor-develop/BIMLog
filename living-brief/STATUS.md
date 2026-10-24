@@ -4715,3 +4715,5 @@ Builds 36–40 use controlled project 68 (`QA-LOR-FINAL-1023`) for one continuou
 
 The first authenticated post-publication smoke found the saved immutable Delivery Workflow version present while its generated strategy and milestone fields remained blank. The correction now hydrates saved workflow guidance again when the delivery-options payload reaches the rendered Intake component, covering the runtime data-arrival boundary as well as the initial workspace load. The update preserves reviewed project text through the existing generated-provenance rules. Focused acceptance, TypeScript and the complete release build must pass before the corrective push and republication; live acceptance remains pending until a hard reload proves generated text and persistence.
 
+Implementation commit `ae61bb6f4ce3f9eb5b307e99572e5299c6e15d6d` is the reconciled correction unit; later state-seal changes carry evidence metadata only.
+
