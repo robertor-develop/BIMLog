@@ -1,0 +1,20 @@
+{
+  "build": 60,
+  "scope": "Clash Reports",
+  "publicationDueAtBuild": 60,
+  "requiredBuilds": [56, 57, 58, 59],
+  "requiredPublicationChecks": [
+    "exact published commit and package identity",
+    "authenticated Clash Reports route loads for controlled project 68",
+    "active Clash lists exclude soft-deleted records",
+    "report links and project isolation remain governed",
+    "report creation import rerank PDF and deletion controls remain available",
+    "browser console and failed network request review are clean"
+  ],
+  "evidencePolicy": {
+    "exactCandidateRequired": true,
+    "authenticatedChromeRequired": true,
+    "historicalScreenshotsDoNotSatisfyPublication": true,
+    "customerDataMutationRequired": false
+  }
+}
