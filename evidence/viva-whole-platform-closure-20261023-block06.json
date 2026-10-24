@@ -1,0 +1,17 @@
+{
+  "program": "Viva whole-platform closure",
+  "block": 6,
+  "builds": [26, 27, 28, 29, 30],
+  "scope": [
+    "role isolation and negative authorization",
+    "authenticated route and project-surface coverage",
+    "project intake, retirement and lifecycle closure",
+    "responsive manual release acceptance contract",
+    "whole-program final release acceptance"
+  ],
+  "acceptanceCommand": "pnpm run test:viva-block06-closure",
+  "publicationCadence": "push and publish after build 30; complete authenticated Chrome smoke",
+  "publicationDue": true,
+  "unpublishedBuildsBeforePublication": 10,
+  "customerMutation": false
+}

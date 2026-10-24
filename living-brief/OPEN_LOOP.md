@@ -1,8 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Viva closure Block 6 publication boundary — 2026-10-23
+
+- [ ] Push and publish the exact Build 30 final candidate after the full production gate passes.
+- [ ] Confirm immutable live source/package identity and complete the authenticated desktop, mobile, reload, Agent, and console-error Chrome smoke.
+- [ ] Preserve the nine named commercial production configuration values as the only commercial activation dependency until live provider verification passes.
+
 ## Viva closure Block 5 push boundary — 2026-10-23
 
-- [ ] Push the exact Build 25 artifact and document custody candidate. Keep five unpublished builds until Build 30.
+- [x] Push the exact Build 25 artifact and document custody candidate at `d6f9491879be49a050751400b9b00dfe454a085b`.
 - [ ] At Build 30, publish the exact ten-build candidate and run the full authenticated visible-Chrome smoke against its immutable live identity.
 
 ## Viva closure Block 4 publication boundary — 2026-10-23

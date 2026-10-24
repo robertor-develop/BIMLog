@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-23 — Viva closure Block 6 final publication candidate
+
+Builds 26–30 bind role isolation and negative authorization, the authenticated route matrix, project intake and retirement lifecycle closure, responsive manual release acceptance, and the final whole-program gate. This completes the six-block, 30-build Viva closure program without customer-data mutation. The exact Build 30 checkpoint requires push, publication, immutable live-identity verification, and full authenticated visible-Chrome smoke before production acceptance is complete.
+
 ## 2026-10-23 — Viva closure Block 5 artifact and document custody candidate
 
 Builds 21–25 bind executable acceptance for portable file custody and versioning, controlled transmittal delivery, project-scoped drawing and record lineage, and evidence-backed deterministic handover packages. The tests preserve authorization, compensation, retained-delivery truth, immutable revision identity, and fixture safety without mutating customer data. This five-build checkpoint is push-only; publication and full authenticated Chrome smoke are due after Build 30.
