@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "source": {
+    "commit": "977dae2943ac3e779ab85ec49675ad5ea9fd88ec",
+    "tree": "50334998fc22af3d1833dbc98ff48581c99ca4f1"
+  },
+  "commandCount": 9,
+  "exactlyOnce": true,
+  "receiptSha256": "a00b6d056a38c02e54a223ed0ebab0a8c1f704a1d189832e3b73e90c4c746a97"
+}

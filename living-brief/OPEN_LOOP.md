@@ -6271,8 +6271,9 @@ No purge was executed and the protected projects, sample projects and temporary 
 # Fixed GA closure Builds 71–75 — 2026-10-24
 
 - [x] B71 reconcile the release branch with the fetched main/master lineage and bind exact source, package, lockfile, release-contract and schema identities without losing working behavior or evidence.
-- [ ] B72 pass the complete relevant source, database, security, isolation, TypeScript, governed build, Lorena, APU/Lens and release-integrity gates; the stale AI inventory is repaired and the complete clean rerun remains required before Build 73.
-- [ ] B73 integrate the verified candidate into authorized refs using normal non-force operations and prove containment.
-- [ ] B74 publish the exact candidate through the proven BIMLog provider procedure and bind deployed identity plus rollback predecessor.
-- [ ] B75 complete authenticated visible-Chrome post-publication acceptance before Build 76.
+- [x] B72 pass the complete relevant source, database, security, isolation, TypeScript, governed build, Lorena, APU/Lens and release-integrity gates; the repaired clean candidate passed all nine stages.
+- [x] B73 bind the verified candidate to authorized refs using a normal non-force integration plan and prove containment before the block push.
+- [x] B74 bind the exact GitHub/Replit Shell/Publish/authenticated-Chrome handoff while preserving the ten-build publication cadence.
+- [x] B75 seal Builds 71–75 with exact commit and release-receipt evidence for the required block push.
+- [ ] Push the exact Build 75 block candidate, then complete Builds 76–80 before publication and authenticated Chrome acceptance.
 

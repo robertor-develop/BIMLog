@@ -4760,3 +4760,7 @@ Build 71 reconciles the published Builds 61–70 release branch against the fetc
 
 The complete exact-candidate gate passed its real PostgreSQL Intake, APU, workflow, governance, RFI, invitation, company-isolation, commercial, UX, consolidation, dependency-provenance and production vulnerability-audit stages before correctly rejecting one stale source line in the governed 45-entry AI entry-point inventory. Build 72 regenerates that inventory from current source; only `main04-agent-transport.ts` moved from line 42 to line 58, while its Anthropic provider, governed acquisition path and authenticated project scope remain unchanged. This is a deterministic gate repair, not a runtime AI change. The complete gate must pass on the repaired clean candidate before Build 73.
 
+## Fixed GA closure Builds 72–75 — block seal — 2026-10-24
+
+The repaired Build 72 candidate `977dae2943ac3e779ab85ec49675ad5ea9fd88ec` passed all nine complete local-release stages, including the full pre-push suite, with immutable receipt SHA-256 `a00b6d056a38c02e54a223ed0ebab0a8c1f704a1d189832e3b73e90c4c746a97`. Builds 73 and 74 bind normal non-force ref containment and the exact GitHub → Replit Shell → Publish → authenticated Chrome handoff. Build 75 seals the five-build block for push. Per Roberto's current cadence, publication and live Chrome acceptance occur after Build 80, when ten unpublished builds are complete; this block does not claim publication, live verification, independent acceptance or customer acceptance.
+

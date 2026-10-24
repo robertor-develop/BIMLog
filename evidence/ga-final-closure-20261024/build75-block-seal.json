@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "bimlog-ga-build75-block-seal-v1",
+  "build": 75,
+  "range": [71, 75],
+  "commits": {
+    "71": "c02e75d069215e149ad423cc5ff6827112094d85",
+    "72": "977dae2943ac3e779ab85ec49675ad5ea9fd88ec",
+    "73": "a161e9637d80e4ba63afe3d6c522bf1db388edb8",
+    "74": "a99b403cdc4d4a4eff2c17673243ce6e7e5b5d43"
+  },
+  "releaseGate": {
+    "build72Status": "PASS",
+    "commandCount": 9,
+    "receiptSha256": "a00b6d056a38c02e54a223ed0ebab0a8c1f704a1d189832e3b73e90c4c746a97"
+  },
+  "cadence": {
+    "pushAfterThisBuild": true,
+    "publishAfterBuild": 80,
+    "authenticatedChromeAfterPublication": true,
+    "unpublishedBuildCountAfterSeal": 5
+  },
+  "acceptance": {
+    "implemented": true,
+    "tested": true,
+    "pushed": false,
+    "published": false,
+    "liveVerified": false,
+    "independentlyAccepted": false
+  }
+}

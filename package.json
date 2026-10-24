@@ -72,6 +72,8 @@
     "test:bimlog-ga-build71": "node scripts/test-bimlog-ga-build71.mjs",
     "test:bimlog-ga-build73": "node scripts/test-bimlog-ga-build73.mjs",
     "test:bimlog-ga-build74": "node scripts/test-bimlog-ga-build74.mjs",
+    "test:bimlog-ga-build75": "node scripts/test-bimlog-ga-build75.mjs",
+    "test:bimlog-ga-block71-75": "pnpm run test:bimlog-ga-build73 && pnpm run test:bimlog-ga-build74 && pnpm run test:bimlog-ga-build75 && pnpm run check:living-brief",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
