@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { askBimlogMain04, BIMLOG_MAIN04_THREAD_ID } from "./main04-agent-transport";
+import { answerBimlogMain04, askBimlogMain04, BIMLOG_MAIN04_THREAD_ID } from "./main04-agent-transport";
 
 const context = { route: "/projects/63/intake", page: "Job Intake", section: "Contract setup", language: "en" as const, focusedControl: "Counterparty", controls: ["Counterparty"], pageText: ["Needs info"], history: [] };
 let captured: any;
@@ -8,6 +8,10 @@ const goodFetch: typeof fetch = async (_url, init) => {
   captured = JSON.parse(String(init?.body));
   return new Response(JSON.stringify({ threadId: BIMLOG_MAIN04_THREAD_ID, requestId: captured.requestId, answer }), { status: 200, headers: { "content-type": "application/json" } });
 };
+const directRequestId = "11111111-1111-4111-8111-111111111111";
+const directResult = await answerBimlogMain04({ requestId: directRequestId, conversationId: "22222222-2222-4222-8222-222222222222", question: "What page is this?", context, userId: 7, companyId: 9, projectId: 63 }, { fetch: goodFetch, environment: { BIMLOG_MAIN04_BRIDGE_URL: "https://connector.example.test/bimlog", BIMLOG_MAIN04_BRIDGE_TOKEN: "secret" } });
+assert.equal(captured.requestId, directRequestId, "the page assistant must preserve its reserved request identity through MAIN 04");
+assert.equal(directResult.answer, answer, "the page assistant must use the configured dedicated-agent bridge answer");
 const result = await askBimlogMain04({ question: "What exactly is missing?", context, userId: 7, projectId: 63 }, { fetch: goodFetch, environment: { BIMLOG_MAIN04_BRIDGE_URL: "https://connector.example.test/bimlog", BIMLOG_MAIN04_BRIDGE_TOKEN: "secret" } });
 assert.equal(captured.question, "What exactly is missing?", "the user's exact question must reach MAIN 04.00");
 assert.equal(captured.destinationThreadId, BIMLOG_MAIN04_THREAD_ID);

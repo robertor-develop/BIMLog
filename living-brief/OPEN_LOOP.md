@@ -1,5 +1,9 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Build 30 Agent smoke repair — 2026-10-23
+
+- [ ] Push and republish the MAIN 04 routing repair, then repeat the exact live identity check and authenticated Agent response smoke before resuming the remaining route matrix.
+
 ## Viva closure Block 6 publication boundary — 2026-10-23
 
 - [ ] Push and publish the exact Build 30 final candidate after the full production gate passes.

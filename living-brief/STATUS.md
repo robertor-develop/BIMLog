@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-23 — Build 30 live-smoke Agent routing repair
+
+The Build 30 authenticated smoke proved the page assistant could reserve a question while leaving it pending because the production worker bypassed the configured MAIN 04 bridge and called the provider directly without a bounded request timeout. The repair restores the configured dedicated-agent bridge with exact request correlation and polling, retains the direct provider only as a bounded fallback, and adds executable coverage for the routed answer.
+
 ## 2026-10-23 — Viva closure Block 6 final publication candidate
 
 Builds 26–30 bind role isolation and negative authorization, the authenticated route matrix, project intake and retirement lifecycle closure, responsive manual release acceptance, and the final whole-program gate. This completes the six-block, 30-build Viva closure program without customer-data mutation. The exact Build 30 checkpoint requires push, publication, immutable live-identity verification, and full authenticated visible-Chrome smoke before production acceptance is complete.
