@@ -1,0 +1,31 @@
+{
+  "build": 45,
+  "scope": "Change Orders",
+  "publicationDueAtBuild": 50,
+  "requiredBuilds": [41, 42, 43, 44],
+  "requiredSuites": [
+    "post-p17-build41-change-order-identity-scope.behavior.mjs",
+    "post-p17-build42-change-order-lifecycle-financial.behavior.mjs",
+    "post-p17-build43-change-order-links-import.behavior.mjs",
+    "post-p17-build44-change-order-workflow-ui.behavior.mjs"
+  ],
+  "requiredPublicationChecks": [
+    "exact published commit and package identity",
+    "authenticated Change Orders route loads for the controlled project",
+    "search status and sort controls preserve current-project scope",
+    "create import report and lifecycle actions remain permission governed",
+    "linked RFI and Submittal identities remain project isolated",
+    "browser console and failed network request review are clean"
+  ],
+  "protectedRegressions": [
+    "test:lorena-p1-release-block02",
+    "pnpm --filter @workspace/api-server run test:block14-lens-next-acceptance",
+    "build"
+  ],
+  "evidencePolicy": {
+    "exactCandidateRequired": true,
+    "authenticatedChromeRequired": true,
+    "historicalScreenshotsDoNotSatisfyPublication": true,
+    "customerDataMutationRequired": false
+  }
+}
