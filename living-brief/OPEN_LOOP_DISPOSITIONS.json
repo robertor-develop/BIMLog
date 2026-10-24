@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "1200a718e0067d0372153f3d8ec31abdaeb3e202edcd59220b565cb214857d42",
-  "itemCount": 481,
+  "sourceSha256": "3ff2aa7ad89d9c4d306046c635b57c976fe43ff8bd9bdbf4d126af1fe73b6910",
+  "itemCount": 483,
   "counts": {
-    "ACTIVE": 433,
+    "ACTIVE": 435,
     "SUPERSEDED": 36,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 341,
+    "ACTIVE_DEFECT": 343,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -9240,6 +9240,44 @@
       "evidence": [
         "living-brief/STATUS.md current authority",
         "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d6b0aa8028068bdd",
+      "sourceLine": 6314,
+      "heading": "Fixed GA closure Builds 91–95 — 2026-10-24",
+      "statement": "Push the exact B91–B95 candidate. Keep it unpublished until Build 100 under the established ten-build cadence.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6314",
+        "Fixed GA closure Builds 91–95 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0c62acab49be8767",
+      "sourceLine": 6315,
+      "heading": "Fixed GA closure Builds 91–95 — 2026-10-24",
+      "statement": "Obtain independent Viva review against the exact pushed Build 95 candidate; constructor evidence cannot assign the verdict.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6315",
+        "Fixed GA closure Builds 91–95 — 2026-10-24"
       ],
       "currentAuthority": false
     }
