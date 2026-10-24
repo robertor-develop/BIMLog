@@ -4719,3 +4719,5 @@ Implementation commit `ae61bb6f4ce3f9eb5b307e99572e5299c6e15d6d` is the reconcil
 
 The first correction publication proved the selection function itself but exposed a second runtime ordering case: workflow options could arrive before the saved Contract Items, so an options-only effect had no later trigger. The rendered hydration now observes both immutable option identity and saved item arrival, and only writes when at least one item changes.
 
+Implementation commit `80a5b8cd01f7c00099e770d84d5c24180191abfb` is the reconciled runtime-ordering repair unit.
+

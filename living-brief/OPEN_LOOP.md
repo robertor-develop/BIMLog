@@ -6207,4 +6207,5 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [ ] Pass the complete release gate, push the correction, republish the exact candidate, and prove generated guidance plus hard-reload persistence in authenticated Chrome.
 - [x] Reconcile the correction source unit at `ae61bb6f4ce3f9eb5b307e99572e5299c6e15d6d` before the state seal.
 - [x] Reproduce and repair the options-before-items runtime ordering case exposed by the first corrective publication.
+- [x] Reconcile the runtime-ordering repair at `80a5b8cd01f7c00099e770d84d5c24180191abfb` before rebuilding the exact candidate.
 
