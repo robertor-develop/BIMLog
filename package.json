@@ -27,6 +27,7 @@
     "test:bimlog-final-build36": "node scripts/test-bimlog-final-build36.mjs",
     "test:bimlog-final-build37": "node scripts/test-bimlog-final-build37.mjs",
     "test:bimlog-final-build38": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/bimlog/src/lib/job-intake-delivery-defaults.behavior.ts && pnpm --filter @workspace/bimlog run typecheck",
+    "test:bimlog-final-build39": "node scripts/test-bimlog-final-build39.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
