@@ -6174,3 +6174,9 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [ ] Push the exact clean candidate normally to the release branch, `main` and `master`.
 - [ ] Publish the exact SHA through Replit and run the required post-publication authenticated Chrome smoke, including deployed identity, responsive widths and clean console/network checks.
 - [ ] Obtain an independent Viva verdict against the exact published SHA and retained evidence.
+
+## 2026-10-23 — Block 6 live Agent transport repair
+
+- [x] Capture the authenticated production failure as `MAIN04_TRANSPORT_FAILED_502` rather than accepting a synthetic-only Agent gate.
+- [x] Fall back from an unavailable configured MAIN 04 bridge to the bounded direct provider path without changing the reserved request or tenant scope.
+- [ ] Pass the complete exact-head gate, push the corrective release commit, republish that exact SHA and obtain a fresh authenticated Agent answer before resuming the remaining Chrome smoke.

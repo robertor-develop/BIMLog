@@ -4699,3 +4699,7 @@ Builds 001–005 reconcile all 454 open-loop records into six explicit release d
 
 The authorized live registry audit subsequently disclosed GHSA-27r3-jxmh-p828 through Express and GHSA-q7qp-rjg7-q26m through Multer. Block 1 now pins patched `body-parser` 2.4.0 and `multer` 2.5.0, binds the dependency-provenance checker to both integrity records, and requires the production audit to return no known vulnerabilities before push.
 
+## 2026-10-23 — Block 6 live Agent transport repair
+
+The exact Block 6 candidate published successfully, but the authenticated production Agent smoke exposed `MAIN04_TRANSPORT_FAILED_502` from the configured MAIN 04 bridge. The page assistant now records that bridge failure and falls back to its existing bounded direct provider path, preserving the reserved request identity, tenant scope, 30-second deadline and zero retry policy. Focused transport behavior and API TypeScript pass; the full release gate, push, exact-SHA republication and a fresh authenticated question/answer remain required.
+

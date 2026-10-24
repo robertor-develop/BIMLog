@@ -74788,8 +74788,8 @@
     },
     {
       "taskId": "viva-whole-platform-closure-block06-20261023",
-      "reviewedThroughCommit": "1224af03d8f1dde3cad5dcbb2afd429ac318c898",
-      "reviewedAt": "2026-10-24T03:07:59.681Z",
+      "reviewedThroughCommit": "91710ef2897ab1df3d81c06475cd09d5ccf9a601",
+      "reviewedAt": "2026-10-24T03:39:00.000Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -74851,14 +74851,13 @@
       ],
       "reason": "Viva whole-platform closure Block 6 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/main04-agent-transport.behavior.ts",
         "artifacts/api-server/src/lib/main04-agent-transport.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b92461da4f01c56c3a93cf8025ae6ff4ab211506f21c707dd4217b9f2a94d4d8"
+      "reviewedChangeSha256": "0eff912b9ffd6fd79756e19a2e0c563b5b90f29d803d8f98b31c8dd97f5863f8"
     }
   ]
 }

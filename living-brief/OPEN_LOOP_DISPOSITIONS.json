@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "b63faaac56a2eefbfaabb0e90afde8d4fdf6f5ccf281419c372ce561e98f5bf1",
-  "itemCount": 465,
+  "sourceSha256": "6fa788764ce274193fc91fc7c533914369e3c9cd278f0f87c5d257021880237a",
+  "itemCount": 466,
   "counts": {
-    "ACTIVE": 419,
+    "ACTIVE": 420,
     "SUPERSEDED": 34,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 327,
+    "ACTIVE_DEFECT": 328,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -8936,6 +8936,25 @@
       "evidence": [
         "OPEN_LOOP.md:6176",
         "Lorena final closure Builds 66–70 — 2026-10-23"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "48e172b0e214b227",
+      "sourceLine": 6182,
+      "heading": "2026-10-23 — Block 6 live Agent transport repair",
+      "statement": "Pass the complete exact-head gate, push the corrective release commit, republish that exact SHA and obtain a fresh authenticated Agent answer before resuming the remaining Chrome smoke.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6182",
+        "2026-10-23 — Block 6 live Agent transport repair"
       ],
       "currentAuthority": false
     }

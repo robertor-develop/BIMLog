@@ -31,15 +31,19 @@ function parseDedicatedAnswer(raw: string, controls: string[]) {
 export async function answerBimlogMain04(input: { requestId: string; conversationId: string; question: string; context: Main04QuestionContext; userId: number; companyId: number; projectId: number | null }, dependencies: { fetch?: typeof fetch; environment?: NodeJS.ProcessEnv } = {}) {
   const environment = dependencies.environment ?? process.env;
   if (environment.BIMLOG_MAIN04_BRIDGE_URL?.trim() && environment.BIMLOG_MAIN04_BRIDGE_TOKEN?.trim()) {
-    let result = await dispatchBimlogMain04(input, dependencies);
-    const deadline = Date.now() + 190_000;
-    while (!result.answer) {
-      if (Date.now() >= deadline) throw new Error("MAIN04_TRANSPORT_TIMEOUT");
-      await new Promise(resolve => setTimeout(resolve, 1_000));
-      result = await readBimlogMain04(input.requestId, dependencies);
-      if (["FAILED", "ERROR"].includes(result.state.toUpperCase())) throw new Error("MAIN04_TRANSPORT_FAILED");
+    try {
+      let result = await dispatchBimlogMain04(input, dependencies);
+      const deadline = Date.now() + 190_000;
+      while (!result.answer) {
+        if (Date.now() >= deadline) throw new Error("MAIN04_TRANSPORT_TIMEOUT");
+        await new Promise(resolve => setTimeout(resolve, 1_000));
+        result = await readBimlogMain04(input.requestId, dependencies);
+        if (["FAILED", "ERROR"].includes(result.state.toUpperCase())) throw new Error("MAIN04_TRANSPORT_FAILED");
+      }
+      return { answer: result.answer, requestId: input.requestId, answerDigest: createHash("sha256").update(result.answer, "utf8").digest("hex"), threadId: BIMLOG_MAIN04_THREAD_ID };
+    } catch (error) {
+      console.warn(JSON.stringify({ event: "main04_bridge_fallback", requestId: input.requestId, code: String(error instanceof Error ? error.message : "MAIN04_TRANSPORT_FAILED").slice(0, 120) }));
     }
-    return { answer: result.answer, requestId: input.requestId, answerDigest: createHash("sha256").update(result.answer, "utf8").digest("hex"), threadId: BIMLOG_MAIN04_THREAD_ID };
   }
   const agent = resolveBimlogDedicatedAgent();
   const { getAnthropicClientForUser } = await import("./ai-usage");
