@@ -56,6 +56,12 @@ const data = normalizeJobIntakeData({
       projectCostNodeId: "cost-node-1",
       unit: "Hours",
       deliverableType: "SHOP_DRAWING",
+      deliveryWorkflowVersionId: "workflow-v3",
+      submittalStrategy: "Prepare drawing → Internal QA → Submit",
+      milestoneSummary: "Preliminary → For Record",
+      deliveryWorkflowDerivedFromVersionId: "workflow-v3",
+      deliveryWorkflowGeneratedStrategy: "Prepare drawing → Internal QA → Submit",
+      deliveryWorkflowGeneratedMilestones: "Preliminary → For Record",
       workPackages: [{ id: "WP-1", title: "Level 1", dimensionType: "floor", dimensionValue: "Level 1", classification: { disciplineId: "trade-1", disciplineCode: "BIM", disciplineName: "BIM" } }],
     },
   ],
@@ -130,6 +136,11 @@ assert.equal(
   "5531.4",
   "billing hourly rate must be the exact commercial joining factor",
 );
+assert.equal(data.scopeItems[0]?.submittalStrategy, "Prepare drawing → Internal QA → Submit");
+assert.equal(data.scopeItems[0]?.milestoneSummary, "Preliminary → For Record");
+assert.equal(data.scopeItems[0]?.deliveryWorkflowDerivedFromVersionId, "workflow-v3");
+assert.equal(data.scopeItems[0]?.deliveryWorkflowGeneratedStrategy, data.scopeItems[0]?.submittalStrategy);
+assert.equal(data.scopeItems[0]?.deliveryWorkflowGeneratedMilestones, data.scopeItems[0]?.milestoneSummary);
 assert.equal(
   data.team.assignments[0]?.plannedLaborCost,
   "3825",

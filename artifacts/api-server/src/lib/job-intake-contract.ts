@@ -548,6 +548,11 @@ export function normalizeJobIntakeData(raw: unknown) {
         return type;
       })(),
       deliveryWorkflowVersionId: optionalText(item.deliveryWorkflowVersionId,`scopeItems[${index}].deliveryWorkflowVersionId`,100),
+      submittalStrategy: optionalText(item.submittalStrategy, `scopeItems[${index}].submittalStrategy`, 4000),
+      milestoneSummary: optionalText(item.milestoneSummary, `scopeItems[${index}].milestoneSummary`, 4000),
+      deliveryWorkflowDerivedFromVersionId: optionalText(item.deliveryWorkflowDerivedFromVersionId, `scopeItems[${index}].deliveryWorkflowDerivedFromVersionId`, 100),
+      deliveryWorkflowGeneratedStrategy: optionalText(item.deliveryWorkflowGeneratedStrategy, `scopeItems[${index}].deliveryWorkflowGeneratedStrategy`, 4000),
+      deliveryWorkflowGeneratedMilestones: optionalText(item.deliveryWorkflowGeneratedMilestones, `scopeItems[${index}].deliveryWorkflowGeneratedMilestones`, 4000),
       contractId:
         optionalText(item.contractId, `scopeItems[${index}].contractId`, 100) ||
         primaryContract.id,

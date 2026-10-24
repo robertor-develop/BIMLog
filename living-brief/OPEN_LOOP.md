@@ -6208,4 +6208,5 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] Reconcile the correction source unit at `ae61bb6f4ce3f9eb5b307e99572e5299c6e15d6d` before the state seal.
 - [x] Reproduce and repair the options-before-items runtime ordering case exposed by the first corrective publication.
 - [x] Reconcile the runtime-ordering repair at `80a5b8cd01f7c00099e770d84d5c24180191abfb` before rebuilding the exact candidate.
+- [x] Preserve per-Contract-Item strategy, milestones and generated provenance through canonical server normalization; focused contract behavior and API TypeScript pass.
 

@@ -4721,3 +4721,5 @@ The first correction publication proved the selection function itself but expose
 
 Implementation commit `80a5b8cd01f7c00099e770d84d5c24180191abfb` is the reconciled runtime-ordering repair unit.
 
+The second live proof populated and reloaded all twenty generated fields, then exposed continuous autosave because the server normalizer omitted the per-Contract-Item strategy, milestone and generated-provenance fields. The canonical Intake contract now validates and preserves those five bounded fields, so server round trips retain both visible guidance and its safe replacement provenance.
+
