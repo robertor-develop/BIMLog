@@ -80,6 +80,7 @@
     "test:bimlog-ga-build79": "node scripts/test-bimlog-ga-build79.mjs",
     "test:bimlog-ga-build80": "node scripts/test-bimlog-ga-build80.mjs",
     "test:bimlog-ga-block76-80": "pnpm run test:bimlog-ga-build76 && pnpm run test:bimlog-ga-build77 && pnpm run test:bimlog-ga-build78 && pnpm run test:bimlog-ga-build79 && pnpm run test:bimlog-ga-build80",
+    "test:bimlog-ga-build81": "node scripts/test-bimlog-ga-build81.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
