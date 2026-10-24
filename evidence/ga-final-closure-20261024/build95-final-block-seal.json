@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "bimlog-ga-build95-final-block-seal-v1",
+  "range": [91, 95],
+  "programRange": [71, 95],
+  "commits": {
+    "91": "0444e8be6e7af4902a760715eeb8e9ba087a0941",
+    "92": "d1d635270af471372fad1f7537a6450cd243ef9c",
+    "93": "f35d6e44a42ffc0b0c618190539631548d60e5ba",
+    "94": "2366eb8508d7c4494c061264993ae988ebdbbfbd"
+  },
+  "lineageAnchors": {
+    "71": "c02e75d069215e149ad423cc5ff6827112094d85",
+    "75": "af2804ccc036c02106a6e98431281ff2c202d46c",
+    "80": "04271268830d6dc75cddbe73197bcd8ddd2533b8",
+    "85": "d95747b91e887c08f417944d44b05e041620f9a2",
+    "90PublishedSuccessor": "4bbea9330b27ab418db4ef6c6d24a23aeda89a6a"
+  },
+  "criteria": [
+    "exact_published_identity",
+    "complete_regression_aggregation",
+    "production_dependency_audit",
+    "independent_viva_handoff",
+    "exact_25_build_lineage"
+  ],
+  "cadence": {
+    "pushAfterThisBuild": true,
+    "publishAfterBuild": 100,
+    "unpublishedBuildCountAfterPush": 5,
+    "authenticatedChromeDue": false
+  },
+  "acceptance": {
+    "implemented": true,
+    "tested": true,
+    "pushed": false,
+    "publishedThroughBuild90": true,
+    "liveVerifiedThroughBuild90": true,
+    "independentlyAccepted": false
+  }
+}

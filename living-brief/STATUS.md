@@ -4776,3 +4776,7 @@ Five independently committed gates cover RFI and Submittal lifecycle isolation, 
 
 Five independently committed gates cover authorization and database safety, failure recovery, fail-closed temporary-project cleanup, isolated production packaging and the exact eleven-route authenticated publication contract. Together with Builds 81–85 this reaches the ten-build publication boundary. The aggregate source gate must pass before one normal push, exact Replit publication, deployed-identity binding and full authenticated Chrome acceptance.
 
+# Fixed GA closure Builds 91–95 — local candidate 2026-10-24
+
+Builds 91–95 bind the exact successfully published Build 90 identity and authenticated Chrome evidence, aggregate the complete Builds 76–91 regression chain, record the authorized production dependency audit, preserve the independent Viva boundary, and seal the exact 25-build lineage. The block is locally implemented and tested. It is not pushed until the block push completes, is not independently accepted, and adds five unpublished builds after the Build 90 publication.
+

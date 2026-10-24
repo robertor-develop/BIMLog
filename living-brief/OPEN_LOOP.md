@@ -6304,3 +6304,13 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] B90 bind the exact B81–B90 publication, project route, reload, second-tab, responsive and console acceptance contract.
 - [ ] Push and publish the exact B81–B90 candidate, bind deployed identity and pass full authenticated Chrome smoke.
 
+# Fixed GA closure Builds 91–95 — 2026-10-24
+
+- [x] B91 bind the exact Build 90 deployed source, package, asset manifest, identity fingerprint and authenticated Chrome result without self-assigning independent acceptance.
+- [x] B92 pass one continuous aggregate regression across the Lorena workflow, downstream modules, Agent, security, recovery, cleanup and release integrity.
+- [x] B93 complete the authorized production dependency audit against the official npm registry with zero reported vulnerabilities.
+- [x] B94 preserve constructor, independent Viva and customer-field acceptance as separate states in the final review handoff.
+- [x] B95 seal the exact Builds 71–95 lineage and the final five-build push cadence.
+- [ ] Push the exact B91–B95 candidate. Keep it unpublished until Build 100 under the established ten-build cadence.
+- [ ] Obtain independent Viva review against the exact pushed Build 95 candidate; constructor evidence cannot assign the verdict.
+

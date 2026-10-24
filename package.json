@@ -96,6 +96,8 @@
     "test:bimlog-ga-build92": "node scripts/test-bimlog-ga-build92.mjs",
     "test:bimlog-ga-build93": "node scripts/test-bimlog-ga-build93.mjs",
     "test:bimlog-ga-build94": "node scripts/test-bimlog-ga-build94.mjs",
+    "test:bimlog-ga-build95": "node scripts/test-bimlog-ga-build95.mjs",
+    "test:bimlog-ga-block91-95": "pnpm run test:bimlog-ga-build91 && pnpm run test:bimlog-ga-build92 && pnpm run test:bimlog-ga-build93 && pnpm run test:bimlog-ga-build94 && pnpm run test:bimlog-ga-build95",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
