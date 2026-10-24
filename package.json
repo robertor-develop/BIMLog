@@ -57,6 +57,7 @@
     "test:bimlog-final-closure-block06": "pnpm run test:bimlog-final-build56 && pnpm run test:bimlog-final-build57 && pnpm run test:bimlog-final-build58 && pnpm run test:bimlog-final-build59 && pnpm run test:bimlog-final-build60",
     "test:bimlog-final-publication-builds51-60": "pnpm run test:bimlog-final-closure-block05 && pnpm run test:bimlog-final-closure-block06",
     "test:bimlog-final-build61": "node artifacts/api-server/src/lib/post-p17-build61-files-identity-scope.behavior.mjs",
+    "test:bimlog-final-build62": "node artifacts/api-server/src/lib/post-p17-build62-files-upload-storage.behavior.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
