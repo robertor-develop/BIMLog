@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3ff2aa7ad89d9c4d306046c635b57c976fe43ff8bd9bdbf4d126af1fe73b6910",
-  "itemCount": 483,
+  "sourceSha256": "04e2690a6d5ccbe1047bf517bc149ddd079fc4ce1b0de85e00979f8065f19b6d",
+  "itemCount": 485,
   "counts": {
-    "ACTIVE": 435,
-    "SUPERSEDED": 36,
+    "ACTIVE": 436,
+    "SUPERSEDED": 37,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 343,
+    "ACTIVE_DEFECT": 344,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 36,
+    "SUPERSEDED_HISTORY": 37,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -9278,6 +9278,44 @@
       "evidence": [
         "OPEN_LOOP.md:6315",
         "Fixed GA closure Builds 91–95 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "54f81f2a709fc78f",
+      "sourceLine": 6324,
+      "heading": "Fixed GA closure Builds 96–100 — 2026-10-24",
+      "statement": "Push and publish the exact Builds 91–100 candidate, bind deployed identity and pass full authenticated Chrome smoke.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "e8fd678969db212c",
+      "sourceLine": 6325,
+      "heading": "Fixed GA closure Builds 96–100 — 2026-10-24",
+      "statement": "Obtain independent Viva review against the exact published Build 100 candidate; constructor evidence cannot assign the verdict.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6325",
+        "Fixed GA closure Builds 96–100 — 2026-10-24"
       ],
       "currentAuthority": false
     }
