@@ -44,6 +44,7 @@
     "test:bimlog-final-closure-block04": "pnpm run test:bimlog-final-build46 && pnpm run test:bimlog-final-build47 && pnpm run test:bimlog-final-build48 && pnpm run test:bimlog-final-build49 && pnpm run test:bimlog-final-build50",
     "test:bimlog-final-publication-builds41-50": "pnpm run test:bimlog-final-closure-block03 && pnpm run test:bimlog-final-closure-block04",
     "test:bimlog-final-build51": "node artifacts/api-server/src/lib/post-p17-build51-schedule-identity-scope.behavior.mjs",
+    "test:bimlog-final-build52": "node artifacts/api-server/src/lib/post-p17-build52-schedule-sources-lifecycle.behavior.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
