@@ -33,4 +33,6 @@ for (const criterion of ["Job Intake", "APU and Cost & Value", "Delivery workflo
   assert.match(matrix, new RegExp(criterion.replace(/[&/]/g, "."), "i"), `criterion absent: ${criterion}`);
 assert.match(matrix, /Viva independent acceptance is separate/);
 assert.doesNotMatch(matrix, /\| PASS \|/);
+assert.doesNotMatch(matrix, /\|\s*(?:ACCEPTED|INDEPENDENTLY_ACCEPTED|CUSTOMER_ACCEPTED)\s*\|/i);
+assert.match(matrix, /AWAITING_INDEPENDENT_REVIEW/);
 console.log(`Lorena final closure inventory: PASS (${requiredScripts.length} executable suites; live acceptance remains explicit)`);
