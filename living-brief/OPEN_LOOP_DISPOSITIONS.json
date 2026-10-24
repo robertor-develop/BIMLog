@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4520e1a4ffe60c5cb26d1649e2809ea5eaed66b89d8cc856460979c13902ac0c",
-  "itemCount": 471,
+  "sourceSha256": "401e9bfd8c851294a98ea834172b22765d228f14221e079dbb64681d90f7f641",
+  "itemCount": 472,
   "counts": {
-    "ACTIVE": 425,
+    "ACTIVE": 426,
     "SUPERSEDED": 34,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 333,
+    "ACTIVE_DEFECT": 334,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -9050,6 +9050,25 @@
       "evidence": [
         "OPEN_LOOP.md:6207",
         "2026-10-24 — Block 2 post-publication workflow hydration correction"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "d1f96fdff1868112",
+      "sourceLine": 6221,
+      "heading": "BIMLog final 100% closure — Block 3 — 2026-10-24",
+      "statement": "Complete Builds 46–50, push the second block, publish the resulting ten-build candidate and run authenticated Chrome smoke including the controlled Change Orders route.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6221",
+        "BIMLog final 100% closure — Block 3 — 2026-10-24"
       ],
       "currentAuthority": false
     }

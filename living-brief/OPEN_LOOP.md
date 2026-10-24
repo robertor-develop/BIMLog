@@ -6211,3 +6211,12 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] Preserve per-Contract-Item strategy, milestones and generated provenance through canonical server normalization; focused contract behavior and API TypeScript pass.
 - [x] Reconcile the server-persistence repair at `9b9aa2b85e4a4a4efe9ab7e381e9d8ea86dd32b4` before the clean release build.
 
+# BIMLog final 100% closure — Block 3 — 2026-10-24
+
+- [x] B41 bind Change Order membership, permission, record and current-project identity checks.
+- [x] B42 bind draft, approval, rejection, financial, schedule, activity and soft-delete lifecycle checks.
+- [x] B43 bind RFI/Submittal link isolation, authorized bounded import and deterministic duplicate identity checks.
+- [x] B44 bind current-view controls, governed PDF scope, actionable lifecycle UI and diagnostic-control exclusion.
+- [x] B45 seal the complete Change Orders block, protected APU/Lens regressions and exact-candidate publication contract.
+- [ ] Complete Builds 46–50, push the second block, publish the resulting ten-build candidate and run authenticated Chrome smoke including the controlled Change Orders route.
+

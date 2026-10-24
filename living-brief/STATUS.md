@@ -4725,3 +4725,7 @@ The second live proof populated and reloaded all twenty generated fields, then e
 
 Implementation commit `9b9aa2b85e4a4a4efe9ab7e381e9d8ea86dd32b4` is the reconciled server-persistence repair unit.
 
+## BIMLog final 100% closure — Block 3 — 2026-10-24
+
+Builds 41–45 bind the existing Change Orders implementation to permanent numbered release gates. The block proves project membership and write isolation, deterministic draft/submit/approve/reject lifecycle behavior, separate contract-value and schedule impacts, auditable soft deletion, project-scoped RFI/Submittal links, bounded authorized import, governed current-view and individual PDF controls, and state-appropriate UI actions. The four production behavior suites pass 38 assertions, the protected Lorena APU gate passes, and the complete Lens Next acceptance suite passes. Build 45 records the exact authenticated production checks due at Build 50; historical screenshots cannot satisfy that publication gate. This five-build block is pushed together and remains unpublished until Builds 46–50 reach the required ten-build boundary.
+
