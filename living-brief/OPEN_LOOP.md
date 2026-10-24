@@ -1,5 +1,10 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Viva closure Block 2 release boundary — 2026-10-23
+
+- [ ] Push the exact Build 10 connector candidate, publish it through the existing Replit deployment, and complete authenticated Chrome smoke against that exact source.
+- [ ] Run real SharePoint and Procore provider round trips only when an approved connected tenant/account and safe disposable project are available. Until then the UI and evidence must retain explicit setup, approval, or untested states.
+
 ## Viva whole-platform closure Block 1 — Builds 001–005 — 2026-10-23
 
 - [x] Classify all 454 historical entries through the six-way disposition register without erasing source history.

@@ -1,0 +1,10 @@
+{
+  "program": "Viva whole-platform closure",
+  "block": 2,
+  "builds": [6, 7, 8, 9, 10],
+  "scope": ["SharePoint", "Folder Wizard", "Procore", "Outlook", "Google Drive", "Dropbox", "open formats"],
+  "acceptanceCommand": "pnpm run test:viva-block02-closure",
+  "publicationCadence": "publish after build 10",
+  "providerBoundary": "Actual provider round trips require an approved connected account; unconfigured providers remain explicitly setup_required, approval_required, or untested.",
+  "customerMutation": false
+}

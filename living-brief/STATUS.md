@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-23 — Viva closure Block 2 connector candidate
+
+Builds 6–10 bind executable acceptance for SharePoint enrollment and health, immutable Folder Wizard custody and confirmed publication, Procore import/OAuth boundaries, and the governed Outlook/Google Drive/Dropbox/open-format availability matrix. Local connector contracts pass. Actual provider round trips remain explicitly external when an approved connected account is absent; this candidate does not claim provider delivery or mutate customer data. Publication and authenticated Chrome acceptance follow the Build 10 push.
+
 ## Outcome remediation Block 12 — Builds 56–60 candidate — 2026-10-23
 
 The final five Contract Item import repairs preserve real Excel record structure without accepting ambiguous input. Quoted multiline cells retain physical source-row identity; delimiter selection ignores punctuation inside quotes; malformed content after a closing quote fails closed; quantity byte-order marks are removed before exact decimal validation; and hidden line-break or Unicode whitespace in pasted names becomes stable visible spacing. Focused behavior and frontend TypeScript pass through implementation commit `695da556`. This completes the Builds 51–60 publication interval; exact-head validation, push, publication, exact live identity, and authenticated Chrome remain required.
