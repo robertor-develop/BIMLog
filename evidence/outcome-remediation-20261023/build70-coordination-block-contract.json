@@ -1,0 +1,20 @@
+{
+  "build": 70,
+  "scope": "Coordination Hub",
+  "publicationDueAtBuild": 70,
+  "requiredBuilds": [66, 67, 68, 69],
+  "requiredPublicationChecks": [
+    "exact published commit and package identity",
+    "authenticated Coordination Hub route loads for controlled project 68",
+    "project and tenant identity remain bound across intake and synchronization",
+    "linked RFI Submittal Transmittal Change Order Meeting Schedule File Clash and Lens identities remain project isolated",
+    "live coordination workflow controls remain customer safe and available",
+    "browser console and failed network request review are clean"
+  ],
+  "evidencePolicy": {
+    "exactCandidateRequired": true,
+    "authenticatedChromeRequired": true,
+    "historicalScreenshotsDoNotSatisfyPublication": true,
+    "customerDataMutationRequired": false
+  }
+}
