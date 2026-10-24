@@ -247,6 +247,7 @@
     "test:viva-block03-build014": "node scripts/test-viva-block03-build014-lens-integrity.mjs",
     "test:viva-block03-closure": "node scripts/test-viva-block03-closure.mjs",
     "test:viva-block04-build016": "node scripts/test-viva-block04-build016-commercial-catalog.mjs",
+    "test:viva-block04-build017": "node scripts/test-viva-block04-build017-commercial-readiness.mjs",
     "test:folder-wizard-publish-block05": "node scripts/test-folder-wizard-publish-block05.mjs",
     "test:folder-wizard-publish-block06": "node scripts/test-folder-wizard-publish-block06.mjs",
     "test:folder-wizard-publish-postgres": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/folder-wizard-publish-postgres.behavior.ts",
