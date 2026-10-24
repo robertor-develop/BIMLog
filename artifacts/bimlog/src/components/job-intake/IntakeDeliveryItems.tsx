@@ -22,8 +22,10 @@ export function IntakeDeliveryItems(props: Props) {
  useEffect(() => { if (props.bimtechEligible) props.setItems(items => applyShopDrawingPreset(items, true)); }, [props.bimtechEligible, props.items]);
  useEffect(() => {
    if (!(props.deliveryWorkflowOptions?.length)) return;
-   props.setItems(items => hydrateSelectedDeliveryWorkflowGuidance(items, props.deliveryWorkflowOptions ?? []));
- }, [props.deliveryWorkflowOptions]);
+   const hydrated = hydrateSelectedDeliveryWorkflowGuidance(props.items, props.deliveryWorkflowOptions);
+   if (hydrated.some((item, index) => item !== props.items[index]))
+     props.setItems(() => hydrated);
+ }, [props.deliveryWorkflowOptions, props.items]);
  return <div><p>{props.tt("Choose a delivery type and a published workflow for each scope item. Saved choices are retained until you explicitly replace them. Add buildings, floors or zones below; employees can be assigned later.", "Elija un tipo de entrega y un flujo publicado por partida. Las selecciones guardadas se conservan hasta reemplazarlas expresamente. Agregue edificios, pisos o zonas abajo; el personal se puede asignar después.")}</p>
  {props.bimtechEligible && <p role="status">{props.tt("BIMtech preset: new unclassified scope leads with Shop drawing. You can change each deliverable.", "Preajuste BIMtech: el alcance nuevo sin clasificar inicia con Plano de taller. Puede cambiar cada entregable.")}</p>}
  {props.items.length === 0 && <p role="status">{props.tt("Add a scope item in step 3 before configuring its delivery.", "Agregue una partida en el paso 3 antes de configurar su entrega.")}</p>}

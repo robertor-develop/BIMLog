@@ -4717,3 +4717,5 @@ The first authenticated post-publication smoke found the saved immutable Deliver
 
 Implementation commit `ae61bb6f4ce3f9eb5b307e99572e5299c6e15d6d` is the reconciled correction unit; later state-seal changes carry evidence metadata only.
 
+The first correction publication proved the selection function itself but exposed a second runtime ordering case: workflow options could arrive before the saved Contract Items, so an options-only effect had no later trigger. The rendered hydration now observes both immutable option identity and saved item arrival, and only writes when at least one item changes.
+

@@ -16,5 +16,6 @@ assert.deepEqual(contract.evidencePolicy, {
 const source = fs.readFileSync("artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx", "utf8");
 assert.match(source, /hydrateSelectedDeliveryWorkflowGuidance\(loadedData\.scopeItems, deliveryChoices\.options\)/);
 const deliveryItems = fs.readFileSync("artifacts/bimlog/src/components/job-intake/IntakeDeliveryItems.tsx", "utf8");
-assert.match(deliveryItems, /props\.setItems\(items => hydrateSelectedDeliveryWorkflowGuidance\(items, props\.deliveryWorkflowOptions \?\? \[\]\)\)/);
+assert.match(deliveryItems, /hydrateSelectedDeliveryWorkflowGuidance\(props\.items, props\.deliveryWorkflowOptions\)/);
+assert.match(deliveryItems, /\[props\.deliveryWorkflowOptions, props\.items\]/);
 console.log("BIMLog final closure Build 40: PASS exact-candidate authenticated smoke contract");

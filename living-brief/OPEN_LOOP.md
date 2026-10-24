@@ -6206,4 +6206,5 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] Hydrate saved workflow guidance when the rendered delivery component receives the published workflow options, preserving genuine user-reviewed text.
 - [ ] Pass the complete release gate, push the correction, republish the exact candidate, and prove generated guidance plus hard-reload persistence in authenticated Chrome.
 - [x] Reconcile the correction source unit at `ae61bb6f4ce3f9eb5b307e99572e5299c6e15d6d` before the state seal.
+- [x] Reproduce and repair the options-before-items runtime ordering case exposed by the first corrective publication.
 
