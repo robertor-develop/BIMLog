@@ -6258,3 +6258,13 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] B65 seal the Files block and Build 70 authenticated publication contract.
 - [ ] Complete Builds 66–70, push the second block, publish the resulting ten-build candidate and run authenticated Chrome smoke including Files.
 
+
+# BIMLog final 100% closure — Block 8 — 2026-10-24
+
+- [x] B66 bind Coordination Hub project, tenant and authority identity checks.
+- [x] B67 bind synchronization lifecycle and deterministic source-state checks.
+- [x] B68 bind the closed linked-record type set and cross-project isolation checks.
+- [x] B69 bind the authenticated live Coordination workflow surface checks.
+- [x] B70 seal Builds 61–70 into one exact-candidate publication and authenticated Chrome contract.
+- [ ] Push the exact Builds 66–70 candidate, publish it through Replit, verify exact deployed identity and complete authenticated Chrome smoke before Build 71.
+

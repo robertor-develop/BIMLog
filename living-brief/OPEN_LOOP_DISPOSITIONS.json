@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "8ba0ed54df2ab95b6a29f00b79cfb1319a69076ca9554487e1200e6bede98c95",
-  "itemCount": 476,
+  "sourceSha256": "a5e380f04a1a02d48f8aa69559eef986cc1cc2b703be0ecb2ba724eb57a1820b",
+  "itemCount": 477,
   "counts": {
-    "ACTIVE": 430,
+    "ACTIVE": 431,
     "SUPERSEDED": 34,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 338,
+    "ACTIVE_DEFECT": 339,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -9145,6 +9145,25 @@
       "evidence": [
         "OPEN_LOOP.md:6259",
         "BIMLog final 100% closure — Block 7 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3d6ff595c248ad8d",
+      "sourceLine": 6269,
+      "heading": "BIMLog final 100% closure — Block 8 — 2026-10-24",
+      "statement": "Push the exact Builds 66–70 candidate, publish it through Replit, verify exact deployed identity and complete authenticated Chrome smoke before Build 71.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6269",
+        "BIMLog final 100% closure — Block 8 — 2026-10-24"
       ],
       "currentAuthority": false
     }
