@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "bimlog-ga-build74-publication-handoff-v1",
+  "build": 74,
+  "provider": "Replit",
+  "route": ["GitHub", "Replit Shell", "Replit Publish", "Authenticated Chrome"],
+  "sourcePolicy": {
+    "exactPushedCommitRequired": true,
+    "cleanReplitCheckoutRequired": true,
+    "replitAgentAllowed": false,
+    "forcePushAllowed": false
+  },
+  "databasePolicy": {
+    "developmentDataCopy": "OFF_REQUIRED",
+    "schemaPreviewRequired": true,
+    "restoreReceiptRequiredWhenApplicable": true
+  },
+  "identityPolicy": {
+    "sourceCommitRequired": true,
+    "sourceTreeRequired": true,
+    "deploymentIdRequired": true,
+    "publicationReceiptRequired": true,
+    "rollbackPredecessorRequired": true
+  },
+  "cadence": {
+    "pushAfterBuild": 75,
+    "publishAfterBuild": 80,
+    "maximumUnpublishedBuilds": 10
+  },
+  "state": "READY_FOR_BLOCK75_SEAL_NOT_PUBLISHED"
+}
