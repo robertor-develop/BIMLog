@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "bimlog-ga-build98-exact-head-release-contract-v1",
+  "candidateRange": [91, 100],
+  "requiredLocalGates": [
+    "test:bimlog-ga-block91-95",
+    "test:bimlog-ga-build96",
+    "test:bimlog-ga-build97",
+    "check:living-brief",
+    "build"
+  ],
+  "releaseRequirements": {
+    "workingTreeClean": true,
+    "normalPushOnly": true,
+    "replitBuildAtExactPushedHead": true,
+    "publishOnlyAfterSuccessfulReplitBuild": true,
+    "productionIdentityMustEqualCandidate": true,
+    "rollbackPredecessorMustBeRetained": true
+  },
+  "protectedTruth": {
+    "customerProjectMutationRequired": false,
+    "externalCredentialsRequiredForReleaseBuild": false,
+    "constructorMayAssignIndependentAcceptance": false
+  }
+}
