@@ -8,6 +8,7 @@ import { OperationsReturnBanner } from "@/components/layout/OperationsReturnBann
 import { isBimtechDeliveryCompany } from "@/lib/shop-drawing-delivery";
 import { intakeResumeTarget, parseIntakeResume, withIntakeReturn } from "@/lib/return-context";
 import { intakeReadinessLabel } from "@/lib/intake-readiness-presentation";
+import { hydrateSelectedDeliveryWorkflowGuidance } from "@/lib/job-intake-delivery-defaults";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation, useRoute } from "wouter";
 import {
@@ -226,6 +227,11 @@ export function JobIntakeWorkspace() {
         : null;
       if (soleApu && Array.isArray(loadedData?.scopeItems)) {
         const scopeItems = applySoleApuToUnboundItems(loadedData.scopeItems, availableApuVersions, loadedData.identity.currency);
+        if (scopeItems.some((item, index) => item !== loadedData.scopeItems[index]))
+          loadedData = { ...loadedData, scopeItems };
+      }
+      if (Array.isArray(loadedData?.scopeItems) && Array.isArray(deliveryChoices?.options)) {
+        const scopeItems = hydrateSelectedDeliveryWorkflowGuidance(loadedData.scopeItems, deliveryChoices.options);
         if (scopeItems.some((item, index) => item !== loadedData.scopeItems[index]))
           loadedData = { ...loadedData, scopeItems };
       }

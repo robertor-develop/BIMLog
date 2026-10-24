@@ -77,3 +77,17 @@ export function selectPublishedDeliveryWorkflow(current: any, option: { versionI
     deliveryWorkflowGeneratedMilestones: milestones,
   };
 }
+
+export function hydrateSelectedDeliveryWorkflowGuidance(
+  items: any[],
+  options: Array<{ versionId: string; definition: WorkflowDefinition }>,
+) {
+  const byVersion = new Map(options.map(option => [option.versionId, option]));
+  return items.map(item => {
+    const versionId = String(item?.deliveryWorkflowVersionId ?? "").trim();
+    const option = byVersion.get(versionId);
+    if (!option) return item;
+    const hydrated = selectPublishedDeliveryWorkflow(item, option);
+    return JSON.stringify(hydrated) === JSON.stringify(item) ? item : hydrated;
+  });
+}

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { deliveryWorkflowDefaults, selectDeliveryWorkflow, selectPublishedDeliveryWorkflow } from "./job-intake-delivery-defaults";
+import { deliveryWorkflowDefaults, hydrateSelectedDeliveryWorkflowGuidance, selectDeliveryWorkflow, selectPublishedDeliveryWorkflow } from "./job-intake-delivery-defaults";
 
 const selected = selectDeliveryWorkflow({ workflowTemplate: "bim-submittal", submittalStrategy: "", milestoneSummary: "" }, "coordination-delivery");
 assert.equal(selected.submittalStrategy, deliveryWorkflowDefaults["coordination-delivery"].submittalStrategy);
@@ -34,4 +34,21 @@ assert.equal(changedVersion.milestoneSummary, "My reviewed milestone");
 const clearedCustom = selectPublishedDeliveryWorkflow(changedVersion, null);
 assert.equal(clearedCustom.submittalStrategy, "My reviewed strategy");
 assert.equal(clearedCustom.milestoneSummary, "My reviewed milestone");
+const hydrationOption = { versionId: "wf-v9", definition: { phases: [
+  { name: "PRE", tasks: [{ name: "Prepare" }] },
+  { name: "COO", tasks: [{ name: "Coordinate" }] },
+  { name: "FOR", tasks: [{ name: "Issue" }] },
+  { name: "ASB", tasks: [{ name: "Archive" }] },
+] } };
+const [hydrated, preserved, unavailable] = hydrateSelectedDeliveryWorkflowGuidance([
+  { id: "missing-guidance", deliveryWorkflowVersionId: "wf-v9", submittalStrategy: "", milestoneSummary: "" },
+  { id: "custom-guidance", deliveryWorkflowVersionId: "wf-v9", submittalStrategy: "Customer review", milestoneSummary: "Customer gate" },
+  { id: "retired-version", deliveryWorkflowVersionId: "wf-retired", submittalStrategy: "", milestoneSummary: "" },
+], [hydrationOption]);
+assert.equal(hydrated.submittalStrategy, "Prepare → Coordinate → Issue → Archive");
+assert.equal(hydrated.milestoneSummary, "PRE → COO → FOR → ASB");
+assert.equal(hydrated.deliveryWorkflowDerivedFromVersionId, "wf-v9");
+assert.equal(preserved.submittalStrategy, "Customer review");
+assert.equal(preserved.milestoneSummary, "Customer gate");
+assert.equal(unavailable.deliveryWorkflowDerivedFromVersionId, undefined);
 console.log("job-intake-delivery-defaults.behavior: PASS");
