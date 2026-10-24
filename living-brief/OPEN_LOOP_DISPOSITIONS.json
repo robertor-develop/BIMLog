@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "441cfbd3436b7fe71c25ea7a0307aaa7764c575f8286c155f7b6702487f06286",
-  "itemCount": 475,
+  "sourceSha256": "8ba0ed54df2ab95b6a29f00b79cfb1319a69076ca9554487e1200e6bede98c95",
+  "itemCount": 476,
   "counts": {
-    "ACTIVE": 429,
+    "ACTIVE": 430,
     "SUPERSEDED": 34,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 337,
+    "ACTIVE_DEFECT": 338,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -9126,6 +9126,25 @@
       "evidence": [
         "OPEN_LOOP.md:6249",
         "BIMLog final 100% closure — Block 6 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "03a319ef6b6ddd9b",
+      "sourceLine": 6259,
+      "heading": "BIMLog final 100% closure — Block 7 — 2026-10-24",
+      "statement": "Complete Builds 66–70, push the second block, publish the resulting ten-build candidate and run authenticated Chrome smoke including Files.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6259",
+        "BIMLog final 100% closure — Block 7 — 2026-10-24"
       ],
       "currentAuthority": false
     }
