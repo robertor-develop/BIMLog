@@ -75728,7 +75728,7 @@
     {
       "taskId": "bimlog-fixed-ga-build75-20261024",
       "reviewedThroughCommit": "a99b403cdc4d4a4eff2c17673243ce6e7e5b5d43",
-      "reviewedAt": "2026-10-24T07:29:54.1172490-04:00",
+      "reviewedAt": "2026-10-24T07:29:54.117249-04:00",
       "status": "local_candidate",
       "captureTiming": "pre_commit",
       "authorities": [
@@ -75800,6 +75800,80 @@
         "scripts/test-bimlog-ga-build75.mjs"
       ],
       "reviewedChangeSha256": "8d90e916827ddc69b3e096da049c86d729f7fa880acaa221b6ee681b6d935f01"
+    },
+    {
+      "taskId": "bimlog-fixed-ga-build80-20261024",
+      "reviewedThroughCommit": "5cb5e0ac393a10ba123ef2993d1eaa8218aa3045",
+      "reviewedAt": "2026-10-24T07:36:25.5646908-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_commit",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance."
+        }
+      ],
+      "reason": "Builds 76-80 add permanent behavior gates for the complete Lorena intake-to-EDT lifecycle and record the ten-build publication boundary without claiming live or independent acceptance.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-bimlog-ga-build80.mjs"
+      ],
+      "reviewedChangeSha256": "c19381ba84e3e8ffc8f0eb7e9e8191ff09fc472ccb5770b4bde6716b9aeb824d"
     }
   ]
 }

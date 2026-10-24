@@ -6277,3 +6277,12 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] B75 seal Builds 71–75 with exact commit and release-receipt evidence for the required block push.
 - [ ] Push the exact Build 75 block candidate, then complete Builds 76–80 before publication and authenticated Chrome acceptance.
 
+# Fixed GA closure Builds 76–80 — 2026-10-24
+
+- [x] B76 prove Excel intake parsing, quantities, validation, duplicate safety, save and reopen behavior.
+- [x] B77 prove immutable APU auto-binding, exact unit-rate derivation and contractual/plan/labor separation.
+- [x] B78 prove workflow strategy and milestone generation, edit preservation, clear/reselect and reload behavior.
+- [x] B79 prove activation replay, PRE/COO/FOR/ASB allocation, resource budget and governed authority guidance.
+- [x] B80 prove canonical contract consumption, EDT/WBS hierarchy, work packages, tasks and reload continuity.
+- [ ] Push and publish the exact B71–B80 candidate, bind deployed identity, and pass full authenticated Chrome smoke before B81.
+

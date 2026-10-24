@@ -4764,3 +4764,7 @@ The complete exact-candidate gate passed its real PostgreSQL Intake, APU, workfl
 
 The repaired Build 72 candidate `977dae2943ac3e779ab85ec49675ad5ea9fd88ec` passed all nine complete local-release stages, including the full pre-push suite, with immutable receipt SHA-256 `a00b6d056a38c02e54a223ed0ebab0a8c1f704a1d189832e3b73e90c4c746a97`. Builds 73 and 74 bind normal non-force ref containment and the exact GitHub → Replit Shell → Publish → authenticated Chrome handoff. Build 75 seals the five-build block for push. Per Roberto's current cadence, publication and live Chrome acceptance occur after Build 80, when ten unpublished builds are complete; this block does not claim publication, live verification, independent acceptance or customer acceptance.
 
+## Fixed GA closure Builds 76–80 — Lorena lifecycle candidate — 2026-10-24
+
+Five independently committed gates cover Excel intake, immutable APU auto-rate assignment, workflow-generated strategy and milestones, activation replay with verified PRE/COO/FOR/ASB hours, governed budget behavior, canonical contract consumption, EDT/WBS hierarchy, work packages, tasks and reload continuity. The aggregate B76–B80 source behavior gate passes. This is the ten-build publication boundary with B71–B75; push, exact Replit publication, deployed-identity binding and authenticated Chrome acceptance remain required before B81.
+
