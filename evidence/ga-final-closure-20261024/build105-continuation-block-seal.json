@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "bimlog-ga-build105-continuation-block-seal-v1",
+  "range": [101, 105],
+  "commits": {
+    "101": "17c4f137a762ff4287d39ec442a62c50e52823ab",
+    "102": "47c12cab9fef256a19ca4b3d04c4efb12bfd8b3e",
+    "103": "b230d6e912b53807f58df596c5fc3a79ee504871",
+    "104": "1efc7a6a311aed28b47dbb190aca947c84df1fd9"
+  },
+  "lineageAnchors": {
+    "publishedBuild100": "8eba359b98c7817be697033c340af676afbdfce4",
+    "historicalPushTestRepair": "36323349f3e0d57fd25b4d1716e481576812e984"
+  },
+  "criteria": [
+    "exact_live_build100_identity",
+    "published_baseline_regression",
+    "isolated_production_artifact",
+    "independent_viva_handoff",
+    "exact_five_build_lineage"
+  ],
+  "cadence": {
+    "pushAfterThisBuild": true,
+    "publishAfterBuild": 110,
+    "unpublishedBuildCountAfterPush": 5,
+    "authenticatedChromeDue": false
+  },
+  "acceptance": {
+    "implemented": true,
+    "tested": true,
+    "pushed": false,
+    "publishedThroughBuild100": true,
+    "liveVerifiedThroughBuild100": true,
+    "independentlyAccepted": false
+  }
+}

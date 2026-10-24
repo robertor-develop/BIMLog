@@ -4786,3 +4786,9 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - The block requires one normal push, an exact-commit Replit production build, publication only after that build passes, exact deployed identity, retained rollback predecessor, and authenticated Chrome verification across 11 controlled-project routes plus hard reload, second tab, 390x844, 820x1180 and clean console checks.
 - Constructor evidence remains distinct from independent Viva and customer-field acceptance. No customer project mutation, cleanup, commercial-secret configuration, or independent verdict is claimed by these builds.
 
+# Fixed GA continuation Builds 101–105 — 2026-10-24
+
+- Build 101 records the exact published Build 100 identity and authenticated production Chrome result at source `8eba359b98c7817be697033c340af676afbdfce4`; Build 102 repeats the continuous published-baseline regression and corrects the historical Build 96 test so a later authorized remote advance preserves, rather than invalidates, the earlier push proof.
+- Build 103 passes the isolated production artifact with healthy API/readiness probes, all 11 packaged Living Brief documents and fail-closed invalid storage authority. Build 104 preserves independent Viva and customer-field acceptance as external states. Build 105 seals the exact five-build lineage.
+- This block is due for one normal push after Build 105 and remains unpublished until Build 110 completes the next ten-build publication boundary. Authenticated production Chrome smoke remains bound to the published Build 100 baseline until that publication.
+

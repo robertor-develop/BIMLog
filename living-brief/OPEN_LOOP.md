@@ -6324,3 +6324,13 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [ ] Push and publish the exact Builds 91–100 candidate, bind deployed identity and pass full authenticated Chrome smoke.
 - [ ] Obtain independent Viva review against the exact published Build 100 candidate; constructor evidence cannot assign the verdict.
 
+# Fixed GA continuation Builds 101–105 — 2026-10-24
+
+- [x] B101 bind the exact Build 100 deployed source, health identity and authenticated Chrome acceptance receipt.
+- [x] B102 pass the continuous published-baseline regression through Build 101 and repair the historical Build 96 remote-advance invariant exposed by that gate.
+- [x] B103 prove the isolated production artifact, packaged Living Brief, API/readiness health and fail-closed storage authority.
+- [x] B104 preserve constructor, independent Viva and customer-field acceptance as separate states in the continuation handoff.
+- [x] B105 seal the exact Builds 101–105 lineage and first five-build cadence of the new ten-build interval.
+- [ ] Push the exact B101–B105 candidate. Keep it unpublished until Build 110 under the established ten-build cadence.
+- [ ] Obtain independent Viva review against the exact pushed Build 105 candidate; constructor evidence cannot assign the verdict.
+
