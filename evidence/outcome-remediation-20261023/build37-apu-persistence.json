@@ -1,0 +1,22 @@
+{
+  "build": 37,
+  "observedAt": "2026-10-24",
+  "projectId": 68,
+  "projectCode": "QA-LOR-FINAL-1023",
+  "apu": {
+    "version": 1,
+    "name": "BIM services standard",
+    "currency": "USD",
+    "planSellingPrice": "600.00",
+    "linkedContractItems": 10,
+    "quantityPattern": [2, 3, 2, 3, 2, 3, 2, 3, 2, 3],
+    "unitRatePattern": [300, 200, 300, 200, 300, 200, 300, 200, 300, 200],
+    "contractValuePattern": [600, 600, 600, 600, 600, 600, 600, 600, 600, 600]
+  },
+  "proof": {
+    "automaticApplicationNotice": "The only compatible saved APU version (v1) was applied to unbound Contract Items.",
+    "hardReloadSelections": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    "separatesPlanTotalFromUnitRate": true,
+    "verification": "AUTHENTICATED_CHROME_HARD_RELOAD_PASS"
+  }
+}

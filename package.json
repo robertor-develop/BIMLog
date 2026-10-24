@@ -25,6 +25,7 @@
     "test:lorena-evidence-integrity": "node scripts/test-lorena-evidence-integrity.mjs",
     "test:bimlog-final-closure-block01": "node scripts/test-lorena-final-closure-block13.mjs && node scripts/test-lorena-evidence-integrity.mjs && node scripts/test-bimlog-final-closure-block01.mjs",
     "test:bimlog-final-build36": "node scripts/test-bimlog-final-build36.mjs",
+    "test:bimlog-final-build37": "node scripts/test-bimlog-final-build37.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
