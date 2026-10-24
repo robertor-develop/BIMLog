@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "bimlog-ga-build96-pushed-candidate-v1",
+  "branch": "codex/bimlog-template-gap-block01-20260923",
+  "pushedCommit": "003a4a6afd09c81b920382c88e6fdbe855ce46bf",
+  "buildRange": [91, 95],
+  "workingTreeClean": true,
+  "publicationState": "HELD_FOR_BUILD_100",
+  "unpublishedBuildCount": 5
+}
