@@ -6268,3 +6268,11 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] B70 seal Builds 61–70 into one exact-candidate publication and authenticated Chrome contract.
 - [ ] Push the exact Builds 66–70 candidate, publish it through Replit, verify exact deployed identity and complete authenticated Chrome smoke before Build 71.
 
+# Fixed GA closure Builds 71–75 — 2026-10-24
+
+- [x] B71 reconcile the release branch with the fetched main/master lineage and bind exact source, package, lockfile, release-contract and schema identities without losing working behavior or evidence.
+- [ ] B72 pass the complete relevant source, database, security, isolation, TypeScript, governed build, Lorena, APU/Lens and release-integrity gates; repair any real failure within B72.
+- [ ] B73 integrate the verified candidate into authorized refs using normal non-force operations and prove containment.
+- [ ] B74 publish the exact candidate through the proven BIMLog provider procedure and bind deployed identity plus rollback predecessor.
+- [ ] B75 complete authenticated visible-Chrome post-publication acceptance before Build 76.
+

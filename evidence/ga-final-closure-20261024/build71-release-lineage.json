@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "bimlog-ga-build71-release-lineage-v1",
+  "build": 71,
+  "reconciledBase": {
+    "branch": "codex/bimlog-template-gap-block01-20260923",
+    "commit": "2a2ab55b0e2ef7ff35ddeac5176f7c6b8d8a39ea",
+    "tree": "d81738c3f7de7e76646cbd446ad6f7ee87724d1e"
+  },
+  "authoritativeRefs": {
+    "main": "0db73bda9e709577d9d8aa9af79940573aabeb95",
+    "master": "e64c21a04c65ac9b60344379489d31d7668f8e41"
+  },
+  "identities": {
+    "releaseLabel": "v1.05.N18-P37",
+    "binaryVersion": "1.5.18.37",
+    "packageJsonSha256": "01b9085f10eee52fb2074f1216286238896bc013fa3a8b76a88ae3d15fb3daf6",
+    "lockfileSha256": "2798df8561d2555df153bb9e2cb53ca1862368ffeed35e31d94604bcc7e76f46",
+    "releaseContractSha256": "529d763f640fac6fd9eca3f3d0608b3b0fffc9d536d9fac6f1f038f4dd8316cb",
+    "schemaSourceSha256": "c50f727acb0ce407c6792dc3a0c3624524f47b8f6b44079fa99f23ef3e366978"
+  },
+  "integrationPolicy": {
+    "forcePushAllowed": false,
+    "workingBehaviorPreserved": true,
+    "evidenceHistoryPreserved": true,
+    "mainIntegrationDeferredToBuild": 73,
+    "masterIntegrationDeferredToBuild": 73
+  },
+  "acceptanceState": "IMPLEMENTED_TESTED_NOT_PUSHED"
+}

@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "a5e380f04a1a02d48f8aa69559eef986cc1cc2b703be0ecb2ba724eb57a1820b",
-  "itemCount": 477,
+  "sourceSha256": "5638ba649609f839a064827c31ef75d09924caf733d176f25ac8e83504bfc400",
+  "itemCount": 481,
   "counts": {
-    "ACTIVE": 431,
+    "ACTIVE": 435,
     "SUPERSEDED": 34,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 339,
+    "ACTIVE_DEFECT": 342,
     "VALID_FUTURE_ROADMAP": 10,
-    "EXTERNAL_OWNER_INPUT": 82,
+    "EXTERNAL_OWNER_INPUT": 83,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 34,
     "CLOSED_WITH_EVIDENCE": 9
@@ -9164,6 +9164,82 @@
       "evidence": [
         "OPEN_LOOP.md:6269",
         "BIMLog final 100% closure — Block 8 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "99c83335fa4c622e",
+      "sourceLine": 6274,
+      "heading": "Fixed GA closure Builds 71–75 — 2026-10-24",
+      "statement": "B72 pass the complete relevant source, database, security, isolation, TypeScript, governed build, Lorena, APU/Lens and release-integrity gates; repair any real failure within B72.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6274",
+        "Fixed GA closure Builds 71–75 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3ba3c70b7d70c74c",
+      "sourceLine": 6275,
+      "heading": "Fixed GA closure Builds 71–75 — 2026-10-24",
+      "statement": "B73 integrate the verified candidate into authorized refs using normal non-force operations and prove containment.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6275",
+        "Fixed GA closure Builds 71–75 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f2aba1d96a68d7ba",
+      "sourceLine": 6276,
+      "heading": "Fixed GA closure Builds 71–75 — 2026-10-24",
+      "statement": "B74 publish the exact candidate through the proven BIMLog provider procedure and bind deployed identity plus rollback predecessor.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6276",
+        "Fixed GA closure Builds 71–75 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "06b9699dd947a593",
+      "sourceLine": 6277,
+      "heading": "Fixed GA closure Builds 71–75 — 2026-10-24",
+      "statement": "B75 complete authenticated visible-Chrome post-publication acceptance before Build 76.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6277",
+        "Fixed GA closure Builds 71–75 — 2026-10-24"
       ],
       "currentAuthority": false
     }

@@ -4752,3 +4752,7 @@ Builds 61–65 bind the existing Files implementation to permanent numbered rele
 
 Builds 66–70 bind the existing Coordination Hub implementation to permanent numbered release gates. The block proves project and tenant identity, synchronization lifecycle, closed linked-record types and project isolation, and the live customer workflow surface. The four production behavior suites pass 62 assertions after the linked-record gate was reconciled with the governed Schedule entity type. Build 70 joins Builds 61–70 into the required ten-build publication gate and requires exact-source Replit publication plus authenticated Chrome smoke across the prior routes, Files and Coordination Hub.
 
+## Fixed GA closure Build 71 — release lineage — 2026-10-24
+
+Build 71 reconciles the published Builds 61–70 release branch against the fetched authoritative Git lineage. Base `2a2ab55b0e2ef7ff35ddeac5176f7c6b8d8a39ea` contains both observed `origin/main` and `origin/master` histories, remains identical to its release-branch upstream, and preserves the existing working tree and evidence. A permanent gate binds the base tree, release label, binary version, package manifest, lockfile, release contract and complete schema-source digest. Main/master integration is reserved for Build 73; no force update, publication, provider action, database mutation or customer-data change occurs in Build 71.
+
