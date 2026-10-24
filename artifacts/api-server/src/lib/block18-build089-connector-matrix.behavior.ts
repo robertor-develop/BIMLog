@@ -7,7 +7,11 @@ assert.equal(connectorMatrixStatus({ provider: "dropbox", ...active }).state, "a
 assert.equal(connectorMatrixStatus({ provider: "google_drive", ...active, credentialState: "expired" }).state, "credential_expired");
 assert.equal(connectorMatrixStatus({ provider: "dropbox", ...active, credentialState: "revoked" }).state, "credential_revoked");
 assert.equal(connectorMatrixStatus({ provider: "sharepoint", ...active, approved: false }).state, "approval_required");
+assert.equal(connectorMatrixStatus({ provider: "outlook", ...active, approved: false }).state, "approval_required");
+assert.equal(connectorMatrixStatus({ provider: "outlook", ...active }).state, "available");
 assert.equal(connectorMatrixStatus({ provider: "google_drive", ...active, configured: false }).state, "setup_required");
+assert.equal(connectorMatrixStatus({ provider: "ifc_openbim", ...active }).state, "available");
+assert.equal(connectorMatrixStatus({ provider: "document_exchange", ...active }).state, "available");
 assert.equal(connectorMatrixStatus({ provider: "invented_provider", ...active }).state, "unsupported");
 const matrix = documentedConnectorMatrix([
   { provider: "dropbox", ...active },

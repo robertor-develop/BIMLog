@@ -91,6 +91,7 @@ const PROVIDERS: readonly ProviderPolicy[] = [
     ["speckle", "Speckle"],
     ["microsoft_project", "Microsoft Project"],
     ["power_bi", "Power BI"],
+    ["outlook", "Microsoft Outlook"],
     ["onedrive", "OneDrive"],
     ["bluebeam", "Bluebeam"],
     ["smartsheet", "Smartsheet"],

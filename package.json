@@ -239,6 +239,7 @@
     "test:viva-block02-build006": "node scripts/test-viva-block02-build006-sharepoint.mjs",
     "test:viva-block02-build007": "node scripts/test-viva-block02-build007-folder-wizard.mjs",
     "test:viva-block02-build008": "node scripts/test-viva-block02-build008-procore.mjs",
+    "test:viva-block02-build009": "node scripts/test-viva-block02-build009-connector-matrix.mjs",
     "test:folder-wizard-publish-block05": "node scripts/test-folder-wizard-publish-block05.mjs",
     "test:folder-wizard-publish-block06": "node scripts/test-folder-wizard-publish-block06.mjs",
     "test:folder-wizard-publish-postgres": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/folder-wizard-publish-postgres.behavior.ts",
