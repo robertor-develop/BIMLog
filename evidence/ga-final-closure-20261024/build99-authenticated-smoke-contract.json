@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "bimlog-ga-build99-authenticated-smoke-contract-v1",
+  "deploymentUrl": "https://bimlog.app",
+  "controlledProject": { "id": 68, "code": "QA-LOR-FINAL-1023" },
+  "requiredRoutes": [
+    "intake",
+    "operations",
+    "coordination",
+    "rfis",
+    "submittals",
+    "files",
+    "transmittals",
+    "change-orders",
+    "meetings",
+    "schedule",
+    "clash-reports"
+  ],
+  "requiredChecks": {
+    "authenticatedProjectContext": true,
+    "agentAvailable": true,
+    "hardReload": true,
+    "secondAuthenticatedTab": true,
+    "mobile390x844": true,
+    "tablet820x1180": true,
+    "zeroVisibleAppErrors": true,
+    "zeroConsoleWarningsOrErrors": true,
+    "noCustomerDataMutation": true
+  },
+  "receiptStateBeforePublication": "PENDING_REAL_OBSERVATION"
+}
