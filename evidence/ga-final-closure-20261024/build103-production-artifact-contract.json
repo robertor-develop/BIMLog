@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "bimlog-ga-build103-production-artifact-contract-v1",
+  "publishedBaseline": "8eba359b98c7817be697033c340af676afbdfce4",
+  "requiredAssertions": {
+    "isolatedProductionArtifact": true,
+    "workspaceLinksResolved": true,
+    "apiRootHealthy": true,
+    "readinessHealthy": true,
+    "packagedLivingBriefDocuments": 11,
+    "feedbackStorageAuthorityFailClosed": true,
+    "productionMutations": 0
+  }
+}
