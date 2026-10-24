@@ -52,6 +52,7 @@
     "test:bimlog-final-build56": "node artifacts/api-server/src/lib/post-p17-build56-clash-reports-identity-scope.behavior.mjs",
     "test:bimlog-final-build57": "node artifacts/api-server/src/lib/post-p17-build57-clash-reports-lifecycle-sync.behavior.mjs",
     "test:bimlog-final-build58": "node artifacts/api-server/src/lib/post-p17-build58-clash-reports-links-reports.behavior.mjs",
+    "test:bimlog-final-build59": "node artifacts/api-server/src/lib/post-p17-build59-clash-reports-workflow-ui.behavior.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
