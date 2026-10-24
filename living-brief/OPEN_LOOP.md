@@ -6286,3 +6286,12 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] B80 prove canonical contract consumption, EDT/WBS hierarchy, work packages, tasks and reload continuity.
 - [ ] Push and publish the exact B71–B80 candidate, bind deployed identity, and pass full authenticated Chrome smoke before B81.
 
+# Fixed GA closure Builds 81–85 — 2026-10-24
+
+- [x] B81 prove the governed RFI lifecycle, project isolation and negative authorization matrix.
+- [x] B82 prove the governed Submittal lifecycle, RFI linkage, revision behavior and project isolation.
+- [x] B83 prove Files custody, transmittal delivery truth, immutable versions and governed report behavior.
+- [x] B84 prove BIMLog Agent transport, correlated answers, authenticated scope and workspace controls.
+- [x] B85 prove responsive/accessibility behavior and seal the exact five-build block.
+- [ ] Push the exact B81–B85 candidate. Keep it unpublished until B86–B90 completes the ten-build publication interval.
+

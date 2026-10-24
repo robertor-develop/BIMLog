@@ -4768,3 +4768,7 @@ The repaired Build 72 candidate `977dae2943ac3e779ab85ec49675ad5ea9fd88ec` passe
 
 Five independently committed gates cover Excel intake, immutable APU auto-rate assignment, workflow-generated strategy and milestones, activation replay with verified PRE/COO/FOR/ASB hours, governed budget behavior, canonical contract consumption, EDT/WBS hierarchy, work packages, tasks and reload continuity. The aggregate B76–B80 source behavior gate passes. This is the ten-build publication boundary with B71–B75; push, exact Replit publication, deployed-identity binding and authenticated Chrome acceptance remain required before B81.
 
+## Fixed GA closure Builds 81–85 — downstream project workflows — 2026-10-24
+
+Five independently committed gates cover RFI and Submittal lifecycle isolation, Files and transmittal custody, governed reporting, BIMLog Agent transport and authenticated correlation, and responsive/accessibility behavior. The aggregate B81–B85 source behavior gate passes. This is the first five-build block after the B71–B80 publication and is push-only; publication and full authenticated Chrome acceptance remain due after B90.
+

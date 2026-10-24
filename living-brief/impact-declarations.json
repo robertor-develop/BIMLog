@@ -75874,6 +75874,79 @@
         "scripts/test-bimlog-ga-build80.mjs"
       ],
       "reviewedChangeSha256": "c19381ba84e3e8ffc8f0eb7e9e8191ff09fc472ccb5770b4bde6716b9aeb824d"
+    },
+    {
+      "taskId": "bimlog-fixed-ga-build85-20261024",
+      "reviewedThroughCommit": "6424f347d330fb172c716275749ecd46688b720d",
+      "reviewedAt": "2026-10-24T11:58:19.228Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_commit",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance."
+        }
+      ],
+      "reason": "Builds 81-85 bind permanent behavior gates for the remaining Lorena downstream workflows and record the push-only five-build boundary without claiming publication, live or independent acceptance.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "09f3a141fad0c9298f8f20fbc26f6f817f43e643654d181f97374b413f66072f"
     }
   ]
 }

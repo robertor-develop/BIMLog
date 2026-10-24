@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "5904bb4ea050908cd4aec45861d40e522cb09d413ee51076ebd9397c919fcf57",
-  "itemCount": 479,
+  "sourceSha256": "73108b237c4bc2a5a016b50439ee5a98e11f6ac32def2a0d92420e81e04bd872",
+  "itemCount": 480,
   "counts": {
-    "ACTIVE": 432,
+    "ACTIVE": 433,
     "SUPERSEDED": 35,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 340,
+    "ACTIVE_DEFECT": 341,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -9202,6 +9202,25 @@
       "evidence": [
         "living-brief/STATUS.md current authority",
         "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f5bff9a88c63c48f",
+      "sourceLine": 6296,
+      "heading": "Fixed GA closure Builds 81–85 — 2026-10-24",
+      "statement": "Push the exact B81–B85 candidate. Keep it unpublished until B86–B90 completes the ten-build publication interval.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6296",
+        "Fixed GA closure Builds 81–85 — 2026-10-24"
       ],
       "currentAuthority": false
     }
