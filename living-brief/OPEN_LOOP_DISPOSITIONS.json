@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "6fa788764ce274193fc91fc7c533914369e3c9cd278f0f87c5d257021880237a",
-  "itemCount": 466,
+  "sourceSha256": "405a5586b42066aad8eb7d0563876dea7221c77cb80474c202b44c88f8939fbd",
+  "itemCount": 470,
   "counts": {
-    "ACTIVE": 420,
+    "ACTIVE": 424,
     "SUPERSEDED": 34,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 328,
+    "ACTIVE_DEFECT": 332,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -8955,6 +8955,82 @@
       "evidence": [
         "OPEN_LOOP.md:6182",
         "2026-10-23 — Block 6 live Agent transport repair"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "53d27391d5d90f94",
+      "sourceLine": 6189,
+      "heading": "BIMLog final 100% closure — Block 1 — 2026-10-24",
+      "statement": "Complete Builds 36–40 on one controlled project, push the ten-build interval, publish the exact candidate, and run authenticated Chrome smoke.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6189",
+        "BIMLog final 100% closure — Block 1 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "58aa3de77c6257a4",
+      "sourceLine": 6199,
+      "heading": "BIMLog final 100% closure — Block 2 — 2026-10-24",
+      "statement": "Repair the exact Replit production-build failure, push the metadata-only repair successor, and rebuild successfully.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6199",
+        "BIMLog final 100% closure — Block 2 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5d2782cf5cfb7da6",
+      "sourceLine": 6200,
+      "heading": "BIMLog final 100% closure — Block 2 — 2026-10-24",
+      "statement": "Publish that successful exact candidate, bind its deployed identity and rollback predecessor, then run the full authenticated Chrome smoke on project 68.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6200",
+        "BIMLog final 100% closure — Block 2 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "76c61b7302374d53",
+      "sourceLine": 6201,
+      "heading": "BIMLog final 100% closure — Block 2 — 2026-10-24",
+      "statement": "Obtain independent Viva review; local and constructor-authored evidence cannot assign the independent verdict.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6201",
+        "BIMLog final 100% closure — Block 2 — 2026-10-24"
       ],
       "currentAuthority": false
     }

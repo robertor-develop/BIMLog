@@ -6188,3 +6188,15 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] Keep the aggregate gate green for integrity behavior while final acceptance remains fail-closed.
 - [ ] Complete Builds 36–40 on one controlled project, push the ten-build interval, publish the exact candidate, and run authenticated Chrome smoke.
 
+# BIMLog final 100% closure — Block 2 — 2026-10-24
+
+- [x] B36 prove controlled project 68 contract identity and exact ten-row Excel-import persistence.
+- [x] B37 prove immutable APU v1 automatic application, exact 300/200 unit rates, 600 USD plan-total separation, save and hard reload.
+- [x] B38 repair blank saved-workflow strategy and milestone generation while preserving reviewed project text.
+- [x] B39 pass the real PostgreSQL canonical activation, idempotency, phase-hour, Work Package and task lifecycle.
+- [x] B40 seal the same-project exact-candidate hard-reload, second-tab and authenticated route-smoke contract.
+- [x] Push Builds 36–40 together at `207fb13adbe728ffb3df91a55498ffada1963591`.
+- [ ] Repair the exact Replit production-build failure, push the metadata-only repair successor, and rebuild successfully.
+- [ ] Publish that successful exact candidate, bind its deployed identity and rollback predecessor, then run the full authenticated Chrome smoke on project 68.
+- [ ] Obtain independent Viva review; local and constructor-authored evidence cannot assign the independent verdict.
+
