@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "405a5586b42066aad8eb7d0563876dea7221c77cb80474c202b44c88f8939fbd",
-  "itemCount": 470,
+  "sourceSha256": "673d14aa143fceba0e94ae4a98aa9dafa728528ebdc4207639106bca13f6eec7",
+  "itemCount": 471,
   "counts": {
-    "ACTIVE": 424,
+    "ACTIVE": 425,
     "SUPERSEDED": 34,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 332,
+    "ACTIVE_DEFECT": 333,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -9031,6 +9031,25 @@
       "evidence": [
         "OPEN_LOOP.md:6201",
         "BIMLog final 100% closure — Block 2 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "856bc41252f0da90",
+      "sourceLine": 6207,
+      "heading": "2026-10-24 — Block 2 post-publication workflow hydration correction",
+      "statement": "Pass the complete release gate, push the correction, republish the exact candidate, and prove generated guidance plus hard-reload persistence in authenticated Chrome.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6207",
+        "2026-10-24 — Block 2 post-publication workflow hydration correction"
       ],
       "currentAuthority": false
     }

@@ -6200,3 +6200,9 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [ ] Publish that successful exact candidate, bind its deployed identity and rollback predecessor, then run the full authenticated Chrome smoke on project 68.
 - [ ] Obtain independent Viva review; local and constructor-authored evidence cannot assign the independent verdict.
 
+## 2026-10-24 — Block 2 post-publication workflow hydration correction
+
+- [x] Capture the authenticated production failure: saved immutable workflow selected, generated strategy and milestones blank after hard reload.
+- [x] Hydrate saved workflow guidance when the rendered delivery component receives the published workflow options, preserving genuine user-reviewed text.
+- [ ] Pass the complete release gate, push the correction, republish the exact candidate, and prove generated guidance plus hard-reload persistence in authenticated Chrome.
+
