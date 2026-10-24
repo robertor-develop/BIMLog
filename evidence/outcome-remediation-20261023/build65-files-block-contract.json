@@ -1,0 +1,20 @@
+{
+  "build": 65,
+  "scope": "Files",
+  "publicationDueAtBuild": 70,
+  "requiredBuilds": [61, 62, 63, 64],
+  "requiredPublicationChecks": [
+    "exact published commit and package identity",
+    "authenticated Files route loads for controlled project 68",
+    "project-scoped search type status declaration uploader and date filters remain available",
+    "governed upload and safe download controls remain available",
+    "immutable version and CVR workflow controls remain available",
+    "browser console and failed network request review are clean"
+  ],
+  "evidencePolicy": {
+    "exactCandidateRequired": true,
+    "authenticatedChromeRequired": true,
+    "historicalScreenshotsDoNotSatisfyPublication": true,
+    "customerDataMutationRequired": false
+  }
+}
