@@ -89,6 +89,7 @@
     "test:bimlog-ga-build86": "node scripts/test-bimlog-ga-build86.mjs",
     "test:bimlog-ga-build87": "node scripts/test-bimlog-ga-build87.mjs",
     "test:bimlog-ga-build88": "node scripts/test-bimlog-ga-build88.mjs",
+    "test:bimlog-ga-build89": "node scripts/test-bimlog-ga-build89.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
