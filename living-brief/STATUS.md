@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-23 — Viva closure Block 3 Lens Next and Pulse candidate
+
+Builds 11–15 align the deterministic Lens Next Navisworks 2021 and 2025 packages with release P37, bind the complete Lens Next Platform acceptance suite, preserve the Headquarters operational pulse refresh and movement model, and verify model-binding, digest, publishing and native-release boundaries together. Both native packages reproduced the same hash on two builds. Installation and affected-model field acceptance remain separate; no customer data was mutated. This five-build checkpoint is push-only, with publication and authenticated Chrome smoke due after Build 20.
+
 ## 2026-10-23 — Viva closure Block 2 connector candidate
 
 Builds 6–10 bind executable acceptance for SharePoint enrollment and health, immutable Folder Wizard custody and confirmed publication, Procore import/OAuth boundaries, and the governed Outlook/Google Drive/Dropbox/open-format availability matrix. Local connector contracts pass. Actual provider round trips remain explicitly external when an approved connected account is absent; this candidate does not claim provider delivery or mutate customer data. Publication and authenticated Chrome acceptance follow the Build 10 push.

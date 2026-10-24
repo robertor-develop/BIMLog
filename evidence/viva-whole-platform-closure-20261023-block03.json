@@ -1,0 +1,10 @@
+{
+  "program": "Viva whole-platform closure",
+  "block": 3,
+  "builds": [11, 12, 13, 14, 15],
+  "scope": ["Lens Next Native 2021", "Lens Next Native 2025", "Lens Next Platform", "Headquarters operational pulse", "model and publication integrity"],
+  "acceptanceCommand": "pnpm run test:viva-block03-closure",
+  "publicationCadence": "push after build 15; publish after build 20",
+  "nativePackages": "P37 packages were built twice from immutable staged source with identical hashes; installation and affected-model field acceptance remain separate.",
+  "customerMutation": false
+}

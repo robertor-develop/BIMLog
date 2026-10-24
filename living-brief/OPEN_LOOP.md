@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Viva closure Block 3 push boundary — 2026-10-23
+
+- [ ] Push the exact Build 15 Lens Next and Pulse candidate. Do not publish until the Build 20 boundary.
+- [ ] At Build 20, publish the exact ten-build candidate and run the full authenticated visible-Chrome smoke against its immutable live identity.
+- [ ] Native package installation and real affected-model Navisworks acceptance remain required before claiming field acceptance; deterministic package builds do not replace that physical gate.
+
 ## Viva closure Block 2 release boundary — 2026-10-23
 
 - [ ] Push the exact Build 10 connector candidate, publish it through the existing Replit deployment, and complete authenticated Chrome smoke against that exact source.
