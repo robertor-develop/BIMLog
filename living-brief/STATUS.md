@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-24 — BIMLog final closure Block 1 acceptance-integrity candidate
+
+Builds 31–35 remove constructor self-acceptance from the Lorena closure matrix, separate source, live, independent and customer states, bind claim metadata in a machine-readable ledger, reject stale/mixed/fixture-only evidence, and keep final acceptance fail-closed. The block exposes the existing mixed-project lifecycle evidence and ten missing independent reviews instead of relabeling them PASS. This first five-build block is push-only; publication is due after Builds 36–40 complete one exact-candidate same-project lifecycle.
+
 ## 2026-10-23 — Build 30 live-smoke Agent routing repair
 
 The Build 30 authenticated smoke proved the page assistant could reserve a question while leaving it pending because the production worker bypassed the configured MAIN 04 bridge and called the provider directly without a bounded request timeout. The repair restores the configured dedicated-agent bridge with exact request correlation and polling, retains the direct provider only as a bounded fallback, and adds executable coverage for the routed answer.

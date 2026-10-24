@@ -6180,3 +6180,11 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [x] Capture the authenticated production failure as `MAIN04_TRANSPORT_FAILED_502` rather than accepting a synthetic-only Agent gate.
 - [x] Fall back from an unavailable configured MAIN 04 bridge to the bounded direct provider path without changing the reserved request or tenant scope.
 - [ ] Pass the complete exact-head gate, push the corrective release commit, republish that exact SHA and obtain a fresh authenticated Agent answer before resuming the remaining Chrome smoke.
+# BIMLog final 100% closure — Block 1 — 2026-10-24
+
+- [x] Prevent constructor-authored evidence from self-assigning PASS or independent/customer acceptance.
+- [x] Separate source/database, live, independent, and customer/field states for every Lorena criterion.
+- [x] Bind evidence metadata and reject stale, mixed-project, fixture-only, documentation-only, historical-only, and missing-artifact substitutions.
+- [x] Keep the aggregate gate green for integrity behavior while final acceptance remains fail-closed.
+- [ ] Complete Builds 36–40 on one controlled project, push the ten-build interval, publish the exact candidate, and run authenticated Chrome smoke.
+

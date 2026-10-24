@@ -13,7 +13,7 @@ export function validateLorenaEvidenceLedger(ledger, { candidateCommit, requireI
     ids.add(claim?.id);
     if (/FIXTURE|DOCUMENTATION_ONLY|HISTORICAL_ONLY/.test(claim?.state ?? "")) errors.push(`${claim.id}:NON_ACCEPTANCE_EVIDENCE`);
     if ((claim?.state ?? "").includes("HISTORICAL") && acceptedStates.has(claim?.state)) errors.push(`${claim.id}:HISTORICAL_ACCEPTANCE_CONFLICT`);
-    if ((claim?.state ?? "").includes("EXACT_CANDIDATE")) {
+    if ((claim?.state ?? "").startsWith("OBSERVED_EXACT_CANDIDATE")) {
       for (const key of ["route", "role", "locale", "viewport", "consoleResult", "networkResult", "observedAt"])
         if (claim[key] === null || claim[key] === "") errors.push(`${claim.id}:MISSING_${key.toUpperCase()}`);
       if (!Array.isArray(claim.artifactRefs) || claim.artifactRefs.length === 0) errors.push(`${claim.id}:MISSING_ARTIFACT`);

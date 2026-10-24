@@ -1,0 +1,17 @@
+{
+  "program": "BIMLog final 100% closure",
+  "block": 1,
+  "builds": [31, 32, 33, 34, 35],
+  "state": "IMPLEMENTED_TESTED_AWAITING_PUSH",
+  "candidateBase": "0db73bda9e709577d9d8aa9af79940573aabeb95",
+  "acceptanceCommand": "pnpm run test:bimlog-final-closure-block01",
+  "integrityOutcome": "PASS",
+  "finalAcceptanceOutcome": "FAIL_CLOSED",
+  "knownBlockers": [
+    "MIXED_PROJECT_LIFECYCLE_EVIDENCE",
+    "TEN_INDEPENDENT_REVIEWS_REQUIRED"
+  ],
+  "publicationDue": false,
+  "unpublishedBuildsAfterPush": 5,
+  "customerMutation": false
+}
