@@ -11,6 +11,7 @@
   "license": "MIT",
   "scripts": {
     "test:viva-block05-build021": "node scripts/test-viva-block05-build021-file-custody.mjs",
+    "test:viva-block05-build022": "node scripts/test-viva-block05-build022-transmittal-custody.mjs",
     "test:full-ga-remediation-block05": "node scripts/test-full-ga-remediation-build25-verdict.mjs",
     "test:lorena-final-closure-block13": "node scripts/test-lorena-final-closure-block13.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
