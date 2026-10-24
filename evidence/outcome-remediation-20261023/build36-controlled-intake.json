@@ -1,0 +1,20 @@
+{
+  "build": 36,
+  "observedAt": "2026-10-24",
+  "projectId": 68,
+  "projectCode": "QA-LOR-FINAL-1023",
+  "projectName": "FINAL LORENA CLOSURE 20261023",
+  "route": "/projects/68/intake?stage=scope&item=ji-scope&resume=prerequisite",
+  "contract": {
+    "title": "QA Lorena Final Base Contract",
+    "quotationNumber": "QA-LOR-Q-1023",
+    "currency": "USD"
+  },
+  "excelImport": {
+    "persistedRows": 10,
+    "names": ["QA PRE Package", "QA COO Package", "QA PRE Package", "QA COO Package", "QA PRE Package", "QA COO Package", "QA PRE Package", "QA COO Package", "QA PRE Package", "QA COO Package"],
+    "quantities": ["2", "3", "2", "3", "2", "3", "2", "3", "2", "3"],
+    "canonicalContractBindings": 10
+  },
+  "verification": "AUTHENTICATED_CHROME_HARD_RELOAD_PASS"
+}
