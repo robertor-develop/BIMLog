@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-23 — Viva closure Block 5 artifact and document custody candidate
+
+Builds 21–25 bind executable acceptance for portable file custody and versioning, controlled transmittal delivery, project-scoped drawing and record lineage, and evidence-backed deterministic handover packages. The tests preserve authorization, compensation, retained-delivery truth, immutable revision identity, and fixture safety without mutating customer data. This five-build checkpoint is push-only; publication and full authenticated Chrome smoke are due after Build 30.
+
 ## 2026-10-23 — Viva closure Block 4 commercial publication candidate
 
 Builds 16–20 bind executable acceptance for the commercial catalog, nine-key fail-closed launch readiness, Stripe checkout/webhook/portal behavior, company-scoped customer support cases, and SendGrid account/sender verification. Implemented flows pass with synthetic provider transports and redact secrets. Real commercial activation remains dependent only on the nine named production configuration values. This Build 20 checkpoint requires push, exact-source publication and full authenticated Chrome smoke; no customer data was mutated while preparing it.

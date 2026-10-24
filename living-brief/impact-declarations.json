@@ -74413,6 +74413,303 @@
         "scripts/test-viva-block04-closure.mjs"
       ],
       "reviewedChangeSha256": "d49d4cdf69caf4e86d93609769df7eb367136d1e289740fbd77cb75fd622bf49"
+    },
+    {
+      "taskId": "viva-whole-platform-closure-block05-20261023",
+      "reviewedThroughCommit": "deabacf14de2f65debb89c736ba3a3095397d848",
+      "reviewedAt": "2026-10-24T02:26:38.113Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        }
+      ],
+      "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "f48e7e8c645b5eba074cc5f9d1ad6b562809ce84a435b58911680c055409a0a5"
+    },
+    {
+      "taskId": "viva-whole-platform-closure-block05-20261023",
+      "reviewedThroughCommit": "37a1acfbabeff028f7357f34116c22eb8de9c5d0",
+      "reviewedAt": "2026-10-24T02:30:14.850Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        }
+      ],
+      "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "viva-whole-platform-closure-block05-20261023",
+      "reviewedThroughCommit": "ba90ed84fceb2c3523380a3814e23cb5cc2a4027",
+      "reviewedAt": "2026-10-24T02:31:03.621Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        }
+      ],
+      "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary.",
+      "reviewedChangedPaths": [
+        "evidence/viva-whole-platform-closure-20261023-block05.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "living-brief/state.json",
+        "package.json",
+        "scripts/test-viva-block05-build021-file-custody.mjs",
+        "scripts/test-viva-block05-build022-transmittal-custody.mjs",
+        "scripts/test-viva-block05-build023-drawing-lineage.mjs",
+        "scripts/test-viva-block05-build024-handover-evidence.mjs",
+        "scripts/test-viva-block05-closure.mjs"
+      ],
+      "reviewedChangeSha256": "0e899442b3a2d8486598898252c9f4d866cf3247829db7b6d2269f7f4837992c"
+    },
+    {
+      "taskId": "viva-whole-platform-closure-block05-20261023",
+      "reviewedThroughCommit": "deabacf14de2f65debb89c736ba3a3095397d848",
+      "reviewedAt": "2026-10-24T02:31:15.763Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary."
+        }
+      ],
+      "reason": "Viva whole-platform closure Block 5 semantically reviews the exact changed-path set, preserves the accepted live release, and records only locally proven outcomes pending the configured publication boundary.",
+      "reviewedChangedPaths": [
+        "evidence/viva-whole-platform-closure-20261023-block05.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-viva-block05-closure.mjs"
+      ],
+      "reviewedChangeSha256": "2fd7211deb976aaca73de03a3ceca3bfdf4ef1db0369f341e92ebb3eb305512d"
     }
   ]
 }

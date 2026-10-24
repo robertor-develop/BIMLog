@@ -1,0 +1,17 @@
+{
+  "program": "Viva whole-platform closure",
+  "block": 5,
+  "builds": [21, 22, 23, 24, 25],
+  "scope": [
+    "portable file custody and version lifecycle",
+    "controlled transmittal delivery",
+    "project-scoped drawing and record lineage",
+    "evidence-backed deterministic handover packages",
+    "artifact custody closure"
+  ],
+  "acceptanceCommand": "pnpm run test:viva-block05-closure",
+  "publicationCadence": "push after build 25; publish after build 30",
+  "publicationDue": false,
+  "unpublishedBuildsAfterPush": 5,
+  "customerMutation": false
+}

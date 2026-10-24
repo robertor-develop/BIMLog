@@ -1,19 +1,24 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Viva closure Block 5 push boundary — 2026-10-23
+
+- [ ] Push the exact Build 25 artifact and document custody candidate. Keep five unpublished builds until Build 30.
+- [ ] At Build 30, publish the exact ten-build candidate and run the full authenticated visible-Chrome smoke against its immutable live identity.
+
 ## Viva closure Block 4 publication boundary — 2026-10-23
 
-- [ ] Push and publish the exact Build 20 commercial candidate, confirm immutable live identity, and pass full authenticated visible-Chrome smoke.
+- [x] Push and publish the exact Build 20 commercial candidate, confirm immutable live identity, and pass full authenticated visible-Chrome smoke at `e9fdbcb35409ceb9ceb3f0bc6b61363367aff379`.
 - [ ] Commercial activation remains externally dependent on the nine named Stripe, origin and SendGrid configuration values; keep unavailable functions explicit until those values are configured and live provider verification passes.
 
 ## Viva closure Block 3 push boundary — 2026-10-23
 
-- [ ] Push the exact Build 15 Lens Next and Pulse candidate. Do not publish until the Build 20 boundary.
-- [ ] At Build 20, publish the exact ten-build candidate and run the full authenticated visible-Chrome smoke against its immutable live identity.
+- [x] Push the exact Build 15 Lens Next and Pulse candidate.
+- [x] At Build 20, publish the exact ten-build candidate and run the full authenticated visible-Chrome smoke against its immutable live identity.
 - [ ] Native package installation and real affected-model Navisworks acceptance remain required before claiming field acceptance; deterministic package builds do not replace that physical gate.
 
 ## Viva closure Block 2 release boundary — 2026-10-23
 
-- [ ] Push the exact Build 10 connector candidate, publish it through the existing Replit deployment, and complete authenticated Chrome smoke against that exact source.
+- [x] Push the exact Build 10 connector candidate, publish it through the existing Replit deployment, and complete authenticated Chrome smoke against that exact source.
 - [ ] Run real SharePoint and Procore provider round trips only when an approved connected tenant/account and safe disposable project are available. Until then the UI and evidence must retain explicit setup, approval, or untested states.
 - [ ] Repeat the release tail after refreshing the Build 10 changed-path digest; the prior run stopped on that bookkeeping check, not on a product test.
 - [ ] Push the Replit symbolic-ref repair, resynchronize the exact commit, repeat the production build, then publish and smoke only after it passes.
