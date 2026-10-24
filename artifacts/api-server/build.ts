@@ -165,7 +165,7 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
     const matchedRemote = selectUniqueRemoteTreeMatch(canonicalHead.tree, remoteHeads);
     acceptedBranch = git("for-each-ref", "--format=%(refname:strip=3)", "--points-at", matchedRemote.commit, "refs/remotes/origin")
       .split(/\r?\n/)
-      .filter(branch => branch && branch !== "HEAD")
+      .filter(branch => branch && branch.toUpperCase() !== "HEAD")
       .sort()[0];
     if (!acceptedBranch) throw new Error("Replit publication tree match has no accepted remote branch.");
   }

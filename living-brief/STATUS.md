@@ -6,6 +6,8 @@ Builds 6–10 bind executable acceptance for SharePoint enrollment and health, i
 
 The first complete release gate passed all application checks through the generated release segment and then detected stale changed-path reconciliation. The exact candidate is unchanged; this bookkeeping repair refreshes the reviewed path digest before the required rerun.
 
+Replit exact-source build exposed a case-folding defect in remote symbolic-ref exclusion: a lowercase `origin/head` candidate could be selected as a branch. Production assembly now excludes the symbolic HEAD ref case-insensitively, preserving unique tree matching for the real accepted branch.
+
 ## Outcome remediation Block 12 — Builds 56–60 candidate — 2026-10-23
 
 The final five Contract Item import repairs preserve real Excel record structure without accepting ambiguous input. Quoted multiline cells retain physical source-row identity; delimiter selection ignores punctuation inside quotes; malformed content after a closing quote fails closed; quantity byte-order marks are removed before exact decimal validation; and hidden line-break or Unicode whitespace in pasted names becomes stable visible spacing. Focused behavior and frontend TypeScript pass through implementation commit `695da556`. This completes the Builds 51–60 publication interval; exact-head validation, push, publication, exact live identity, and authenticated Chrome remain required.

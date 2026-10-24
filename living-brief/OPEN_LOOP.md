@@ -5,6 +5,7 @@
 - [ ] Push the exact Build 10 connector candidate, publish it through the existing Replit deployment, and complete authenticated Chrome smoke against that exact source.
 - [ ] Run real SharePoint and Procore provider round trips only when an approved connected tenant/account and safe disposable project are available. Until then the UI and evidence must retain explicit setup, approval, or untested states.
 - [ ] Repeat the release tail after refreshing the Build 10 changed-path digest; the prior run stopped on that bookkeeping check, not on a product test.
+- [ ] Push the Replit symbolic-ref repair, resynchronize the exact commit, repeat the production build, then publish and smoke only after it passes.
 
 ## Viva whole-platform closure Block 1 — Builds 001–005 — 2026-10-23
 
