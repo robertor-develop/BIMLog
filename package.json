@@ -36,6 +36,7 @@
     "test:bimlog-final-build44": "node artifacts/api-server/src/lib/post-p17-build44-change-order-workflow-ui.behavior.mjs",
     "test:bimlog-final-build45": "node scripts/test-bimlog-final-build45.mjs",
     "test:bimlog-final-closure-block03": "pnpm run test:bimlog-final-build41 && pnpm run test:bimlog-final-build42 && pnpm run test:bimlog-final-build43 && pnpm run test:bimlog-final-build44 && pnpm run test:bimlog-final-build45",
+    "test:bimlog-final-build46": "node artifacts/api-server/src/lib/post-p17-build46-meeting-identity-scope.behavior.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
