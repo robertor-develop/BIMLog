@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "04e2690a6d5ccbe1047bf517bc149ddd079fc4ce1b0de85e00979f8065f19b6d",
-  "itemCount": 485,
+  "sourceSha256": "77595171c60bdbe4e4a604d0c4f8e85105b469923539cd1c3bc5daf7881e616a",
+  "itemCount": 487,
   "counts": {
-    "ACTIVE": 436,
+    "ACTIVE": 438,
     "SUPERSEDED": 37,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 344,
+    "ACTIVE_DEFECT": 346,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 82,
     "ACCEPTED_LIMITATION": 3,
@@ -9316,6 +9316,44 @@
       "evidence": [
         "OPEN_LOOP.md:6325",
         "Fixed GA closure Builds 96–100 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6bca85bfcfef97b5",
+      "sourceLine": 6334,
+      "heading": "Fixed GA continuation Builds 101–105 — 2026-10-24",
+      "statement": "Push the exact B101–B105 candidate. Keep it unpublished until Build 110 under the established ten-build cadence.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6334",
+        "Fixed GA continuation Builds 101–105 — 2026-10-24"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2f945c7a88a30c5e",
+      "sourceLine": 6335,
+      "heading": "Fixed GA continuation Builds 101–105 — 2026-10-24",
+      "statement": "Obtain independent Viva review against the exact pushed Build 105 candidate; constructor evidence cannot assign the verdict.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6335",
+        "Fixed GA continuation Builds 101–105 — 2026-10-24"
       ],
       "currentAuthority": false
     }
