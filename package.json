@@ -62,6 +62,7 @@
     "test:bimlog-final-build64": "node artifacts/api-server/src/lib/post-p17-build64-files-workflow-ui-links.behavior.mjs",
     "test:bimlog-final-build65": "node scripts/test-bimlog-final-build65.mjs",
     "test:bimlog-final-closure-block07": "pnpm run test:bimlog-final-build61 && pnpm run test:bimlog-final-build62 && pnpm run test:bimlog-final-build63 && pnpm run test:bimlog-final-build64 && pnpm run test:bimlog-final-build65",
+    "test:bimlog-final-build66": "node artifacts/api-server/src/lib/post-p18-build66-coordination-identity-scope.behavior.mjs",
     "test:full-ga-remediation-block04": "node scripts/test-ga-production-purge-build20.mjs && pnpm --filter @workspace/api-server run typecheck",
     "test:edt-engine-block05": "node ./scripts/test-edt-engine-block05.mjs",
     "test:edt-engine-block06": "node ./scripts/test-edt-engine-block06.mjs",
