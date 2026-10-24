@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "bimlog-ga-build100-publication-block-seal-v1",
+  "range": [96, 100],
+  "publicationRange": [91, 100],
+  "commits": {
+    "96": "2f4ba2e635f755347da1729cf5f7b29acf95df2b",
+    "97": "566bf1057d3834ba7b0c0cbc775f9f3c8382fff6",
+    "98": "348dc0542e81260626b115084acbca45147fce22",
+    "99": "0b0f712a71f0462964903953df928f0ee7c0625d"
+  },
+  "criteria": [
+    "exact_pushed_build95_candidate",
+    "continuous_publication_regression",
+    "exact_head_release_contract",
+    "authenticated_chrome_smoke_contract",
+    "ten_build_publication_boundary"
+  ],
+  "cadence": {
+    "pushAfterThisBuild": true,
+    "publishAfterThisBuild": true,
+    "unpublishedBuildCount": 10,
+    "authenticatedChromeDue": true
+  },
+  "acceptanceBeforeExternalActions": {
+    "implemented": true,
+    "tested": true,
+    "pushed": false,
+    "published": false,
+    "liveVerified": false,
+    "independentlyAccepted": false
+  }
+}

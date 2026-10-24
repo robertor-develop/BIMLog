@@ -4780,3 +4780,9 @@ Five independently committed gates cover authorization and database safety, fail
 
 Builds 91–95 bind the exact successfully published Build 90 identity and authenticated Chrome evidence, aggregate the complete Builds 76–91 regression chain, record the authorized production dependency audit, preserve the independent Viva boundary, and seal the exact 25-build lineage. The block is locally implemented and tested. It is not pushed until the block push completes, is not independently accepted, and adds five unpublished builds after the Build 90 publication.
 
+# Fixed GA Builds 96–100 publication boundary — 2026-10-24
+
+- Builds 96–100 bind the already-pushed Build 95 source, repeat the continuous publication regression, define the exact-head release contract, define the authenticated production Chrome matrix, and seal the ten-build Builds 91–100 publication interval.
+- The block requires one normal push, an exact-commit Replit production build, publication only after that build passes, exact deployed identity, retained rollback predecessor, and authenticated Chrome verification across 11 controlled-project routes plus hard reload, second tab, 390x844, 820x1180 and clean console checks.
+- Constructor evidence remains distinct from independent Viva and customer-field acceptance. No customer project mutation, cleanup, commercial-secret configuration, or independent verdict is claimed by these builds.
+

@@ -6314,3 +6314,13 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [ ] Push the exact B91–B95 candidate. Keep it unpublished until Build 100 under the established ten-build cadence.
 - [ ] Obtain independent Viva review against the exact pushed Build 95 candidate; constructor evidence cannot assign the verdict.
 
+# Fixed GA closure Builds 96–100 — 2026-10-24
+
+- [x] B96 bind the exact pushed Build 95 candidate and prove the five-build publication hold.
+- [x] B97 pass the continuous Builds 91–96 regression without bypassing the existing full-suite aggregation.
+- [x] B98 bind the exact-head build, normal push, Replit build, publication identity and rollback requirements.
+- [x] B99 bind the full authenticated Chrome route, reload, second-tab, responsive, console and non-mutation acceptance contract.
+- [x] B100 seal Builds 96–100 and the complete Builds 91–100 publication interval.
+- [ ] Push and publish the exact Builds 91–100 candidate, bind deployed identity and pass full authenticated Chrome smoke.
+- [ ] Obtain independent Viva review against the exact published Build 100 candidate; constructor evidence cannot assign the verdict.
+
