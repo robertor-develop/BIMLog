@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "bimlog-ga-build91-live-release-receipt-v1",
+  "observedAt": "2026-10-24T13:00:00-04:00",
+  "deploymentUrl": "https://bimlog.app",
+  "deploymentId": "a34f876f-539a-49d6-bc40-d6281bb9d28b",
+  "publishedSourceCommit": "4bbea9330b27ab418db4ef6c6d24a23aeda89a6a",
+  "release": "v1.05.N18-P37",
+  "packageId": "bimlog-4bbea9330b27ab41-cf549c5448ba95a8",
+  "assetManifestSha256": "cf549c5448ba95a8a2e22626cd3db3bbb43a19e5c734641a06036f8fed22965c",
+  "identityFingerprint": "3b7170543f5d172969cbdd88a55e6784967b59ff18379752acc1cf698a380388",
+  "health": { "status": "ok", "identityBound": true },
+  "controlledProject": { "id": 68, "code": "QA-LOR-FINAL-1023" },
+  "authenticatedChrome": {
+    "routeCount": 11,
+    "hardReload": "pass",
+    "secondTab": "pass",
+    "mobile390x844": "pass",
+    "tablet820x1180": "pass",
+    "consoleWarningsOrErrors": 0
+  },
+  "evidenceState": "CONSTRUCTOR_OBSERVED_AWAITING_INDEPENDENT_REVIEW"
+}
