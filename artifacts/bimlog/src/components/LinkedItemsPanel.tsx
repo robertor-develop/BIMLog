@@ -190,7 +190,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
   const renderLink = (l: LinkRow) => {
     const o = otherSide(l);
     return (
-      <div key={l.id} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, padding: "6px 10px", background: "#EFF6FF", borderRadius: 6 }}>
+      <div key={l.id} data-assistant-context="true" style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, padding: "6px 10px", background: "#EFF6FF", borderRadius: 6 }}>
         <span style={{ fontSize: 11, fontWeight: 700, color: "#1D4ED8", textTransform: "uppercase" }}>{TYPE_LABELS[o.type as LinkType] || o.type}</span>
         <span style={{ fontSize: 11, color: "#374151", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 340 }}>{findLabel(o.type, o.id)}</span>
         {canWrite && (

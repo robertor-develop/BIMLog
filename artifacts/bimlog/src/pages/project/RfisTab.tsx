@@ -3614,7 +3614,7 @@ export function RfiCanonicalForm({
   return (
     <div className="rfi-canonical-form" style={{ maxWidth: 1180, margin: "0 auto" }}>
       <div style={{ background: "hsl(var(--background))", borderRadius: 12, border: "1px solid hsl(var(--border))", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <div style={{ padding: "16px 24px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start" }}>
+        <div data-assistant-context="true" style={{ padding: "16px 24px", borderBottom: "1px solid hsl(var(--border))", display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start" }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 800, color: "hsl(var(--primary))", textTransform: "uppercase", letterSpacing: "0.05em" }}>{recordStateLabel[recordState]}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginTop: 6 }}>
