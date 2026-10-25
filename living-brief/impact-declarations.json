@@ -76661,6 +76661,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5741d3d82c4244552879e0a7663cbb3e60e5951deb6ec66cda15854682e8923e"
+    },
+    {
+      "taskId": "bimlog-rfi-assistant-grounding-20261025",
+      "reviewedThroughCommit": "7ba782794bd06ba61a5f3d9c407bfbb628a748f7",
+      "reviewedAt": "2026-10-25T14:22:17-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair changes no product doctrine and only supplies already-visible RFI evidence to the dedicated agent."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded repair follows existing evidence-grounding and release requirements."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused coverage proves the RFI identity header and linked rows are explicitly included without broad page scraping."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changes; the repair restores truthful contextual guidance."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform inventory or architecture changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source or contract changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export design changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release status remains pending publication and authenticated live verification."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records the reproduced Ask BIMLog grounding failure, repair commit and remaining live gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva re-review remains pending."
+        }
+      ],
+      "reason": "Reconcile the bounded Ask BIMLog RFI identity-grounding repair found during authenticated final GA.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dae805c70f60e44a808c6f8f30bf54ae508655d127e5e7b4f1479af2c0fed63e"
     }
   ]
 }
