@@ -19,6 +19,8 @@ assert.match(source, /focusedControl/);
 assert.match(source, /slice\(0, 80\)/);
 assert.match(source, /data-assistant-highlight/);
 assert.match(submittalSource, /data-assistant-context="true"/);
+assert.match(submittalSource, /Primary related RFI[\s\S]*value=\{linkedRfiLabel\} assistantContext/);
+assert.match(submittalSource, /Title[\s\S]*value=\{submittal\.title\} assistantContext/);
 assert.match(linkedItemsSource, /key=\{l\.id\} data-assistant-context="true"/);
 assert.match(linkedItemsSource, /rfi: "RFI"/);
 assert.match(linkedItemsSource, /fetch\(`\$\{API\}\/projects\/\$\{projectId\}\/rfis`/);

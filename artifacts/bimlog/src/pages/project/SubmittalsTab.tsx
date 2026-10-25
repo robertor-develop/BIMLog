@@ -2501,8 +2501,8 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
     } finally { setAuditLoading(false); }
   };
 
-  const InfoRow = ({ label, value }: { label: string; value: string | null | undefined }) => (
-    <div style={{ display: "flex", gap: 8, padding: "5px 0", borderBottom: "1px solid #F3F4F6" }}>
+  const InfoRow = ({ label, value, assistantContext = false }: { label: string; value: string | null | undefined; assistantContext?: boolean }) => (
+    <div data-assistant-context={assistantContext ? "true" : undefined} style={{ display: "flex", gap: 8, padding: "5px 0", borderBottom: "1px solid #F3F4F6" }}>
       <span style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", width: 140, flexShrink: 0 }}>{label}</span>
       <span style={{ fontSize: 12, color: "#1E293B" }}>{value || "-"}</span>
     </div>
@@ -2829,15 +2829,15 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
 
       {/* Submittal details */}
       <PanelSection title={w("Submittal Information", "Información del Entregable", lang)} />
-      <InfoRow label={w("Number", "Número", lang)} value={submittal.number} />
-      <InfoRow label={w("Title", "Título", lang)} value={submittal.title} />
+      <InfoRow label={w("Number", "Número", lang)} value={submittal.number} assistantContext />
+      <InfoRow label={w("Title", "Título", lang)} value={submittal.title} assistantContext />
       <InfoRow label={w("Spec Section", "Sección de Especificación", lang)} value={submittal.specSection} />
       <InfoRow label={w("Category", "Categoría", lang)} value={CATEGORY_OPTIONS.find(o => o.value === (submittal.submittalCategory || submittal.submittalType))?.[lang === "es" ? "labelEs" : "label"] || submittal.submittalCategory} />
       <InfoRow label={w("Drawing No.", "Número de Plano", lang)} value={submittal.drawingNumber} />
       <InfoRow label={w("Drawing Title", "Título de Plano", lang)} value={submittal.drawingTitle} />
       <InfoRow label={w("Date Submitted", "Fecha de Envío", lang)} value={formatCalendarDate(submittal.dateSubmitted)} />
       <InfoRow label={w("Date Required", "Fecha Requerida", lang)} value={formatCalendarDate(submittal.dateRequired || submittal.dueDate)} />
-      <InfoRow label={w("Primary related RFI", "RFI relacionado principal", lang)} value={linkedRfiLabel} />
+      <InfoRow label={w("Primary related RFI", "RFI relacionado principal", lang)} value={linkedRfiLabel} assistantContext />
       {submittal.linkedRfiId && (
         <button
           onClick={() => window.location.href = `/projects/${projectId}/rfis?rfi=${submittal.linkedRfiId}`}
