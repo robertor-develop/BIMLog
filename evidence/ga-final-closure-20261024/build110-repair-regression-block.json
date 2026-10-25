@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "bimlog-ga-build110-repair-regression-block-v1",
+  "range": [106, 110],
+  "publishedBaseline": "691ca74b774ab48735736878c0bb81e99a04ce89",
+  "commits": {
+    "106": "e313d48a7338e7edc25c19ca849ae5458ac9c5f2",
+    "107": "b903bf3c3554a582d50a559b59a0c02eae7c7d9e",
+    "108": "d88c556ad1d1009b6e808c3f69b16ed3f9035bcb",
+    "109": "fb56af2089d15009f8c02ef9878d1f16e0cf0800"
+  },
+  "criteria": [
+    "workflow_phase_hour_allocation",
+    "rfi_access_parity",
+    "canonical_rfi_link_identity",
+    "assistant_relationship_grounding",
+    "aggregate_regression_and_clean_build"
+  ],
+  "cadence": {
+    "pushAfterThisBuild": true,
+    "publishAfterNextFiveBuilds": true,
+    "unpublishedBuildCountAfterPush": 5,
+    "authenticatedChromeDue": false
+  }
+}
