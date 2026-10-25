@@ -6,11 +6,15 @@
   "impact": {
     "baselineCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
     "changedPaths": [
-      "living-brief/impact-declarations.json"
+      "artifacts/api-server/src/lib/job-intake-contract.ts",
+      "artifacts/api-server/src/lib/job-intake.behavior.ts",
+      "living-brief/impact-declarations.json",
+      "scripts/test-bimlog-ga-build73.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -23,9 +27,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "claude",
@@ -35,9 +39,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "quality",
@@ -47,9 +51,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "vision",
@@ -59,9 +63,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "platform",
@@ -71,9 +75,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "plugin",
@@ -83,9 +87,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -95,9 +99,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "standards_register",
@@ -107,9 +111,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "status",
@@ -119,9 +123,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "open_loop",
@@ -131,9 +135,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     },
     {
       "key": "audit",
@@ -143,9 +147,9 @@
       "changeState": "accepted",
       "reconciledThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
       "semanticReviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
-      "semanticReviewTask": "bimlog-build105-compliance-audit-repair-20261024",
+      "semanticReviewTask": "bimlog-build71-105-definitive-closure-repair-20261025",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-24T14:25:01.153Z"
+      "semanticReviewedAt": "2026-10-25T09:55:00.000Z"
     }
   ]
 }

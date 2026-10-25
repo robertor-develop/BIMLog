@@ -76435,9 +76435,84 @@
       ],
       "reason": "The Build 105 compliance audit adds the already-passed Build 102 gate to the formal block aggregate; STATUS.md and OPEN_LOOP.md already describe Build 102 and the complete Builds 101-105 block, so no additional narrative semantic change is required.",
       "reviewedChangedPaths": [
-        "living-brief/impact-declarations.json"
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "living-brief/impact-declarations.json",
+        "scripts/test-bimlog-ga-build73.mjs"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "53d523146ef3b5f3f8e5dfdf9d64c89a41da9b81895db1448990d5a18fe98858"
+    },
+    {
+      "taskId": "bimlog-build71-105-definitive-closure-repair-20261025",
+      "reviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
+      "reviewedAt": "2026-10-25T09:55:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The closure repair aligns Intake readiness with the existing per-Contract-Item delivery model and makes the historical Build 73 receipt repeatable; it changes no product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair follows the existing Intake, evidence, release, and compatibility rules without changing execution authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair restores truthful readiness and adds behavior coverage; existing quality requirements remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changes; the repair removes a contradiction between the current UI and readiness calculation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform inventory or architecture changes; the existing per-item delivery fields remain authoritative."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source or contract changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export design changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release and live acceptance remain pending and are reported separately; no historical status is rewritten."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The reproduced closure defect is repaired locally but remains open until exact deployment and live acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence is preserved; only the repeatability assertion for a mutable remote-tracking ref is corrected."
+        }
+      ],
+      "reason": "Repair the reproduced Intake readiness mismatch by accepting complete per-Contract-Item strategy and milestone guidance while preserving legacy global strategy compatibility; add regression coverage and correct the historical Build 73 receipt so later authorized pushes do not invalidate its recorded observation.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "living-brief/impact-declarations.json",
+        "scripts/test-bimlog-ga-build73.mjs"
+      ],
+      "reviewedChangeSha256": "53d523146ef3b5f3f8e5dfdf9d64c89a41da9b81895db1448990d5a18fe98858"
     }
   ]
 }

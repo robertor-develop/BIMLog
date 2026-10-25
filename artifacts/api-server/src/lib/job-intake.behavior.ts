@@ -152,6 +152,31 @@ assert.equal(completion.totals.plannedHours, "180");
 assert.equal(completion.totals.unassignedHours, "0");
 assert.equal(completion.percent, 100);
 assert.equal(completion.ready, true);
+const perItemDeliveryCompletion = jobIntakeCompletion(
+  normalizeJobIntakeData({
+    ...data,
+    delivery: { workflowTemplate: "", submittalStrategy: "", milestoneSummary: "" },
+  }),
+  [],
+);
+assert.equal(
+  perItemDeliveryCompletion.missingItems.some((item) => item.code === "delivery"),
+  false,
+  "current per-Contract-Item delivery guidance must satisfy readiness without the retired global strategy field",
+);
+const missingPerItemMilestoneCompletion = jobIntakeCompletion(
+  normalizeJobIntakeData({
+    ...data,
+    delivery: { workflowTemplate: "", submittalStrategy: "", milestoneSummary: "" },
+    scopeItems: [{ ...data.scopeItems[0], milestoneSummary: "" }],
+  }),
+  [],
+);
+assert.equal(
+  missingPerItemMilestoneCompletion.missingItems.some((item) => item.code === "delivery"),
+  true,
+  "each Contract Item must retain both its strategy and milestones before activation",
+);
 assert.match(completion.fingerprint, /^[a-f0-9]{64}$/);
 assert.doesNotThrow(() => assertJobIntakeActivationConfirmation(completion, completion.fingerprint));
 assert.throws(

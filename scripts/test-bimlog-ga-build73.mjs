@@ -10,7 +10,11 @@ assert.equal(evidence.build, 73);
 assert.equal(git("rev-parse", `${evidence.verifiedCandidate.commit}^{tree}`), evidence.verifiedCandidate.tree);
 assert.doesNotThrow(() => git("merge-base", "--is-ancestor", evidence.verifiedCandidate.commit, "HEAD"));
 for (const [ref, commit] of Object.entries(evidence.observedRemoteTrackingRefs)) {
-  assert.equal(git("rev-parse", ref), commit, `${ref} moved after the verified observation`);
+  // This receipt records the remote state observed at Build 73. Later authorized
+  // pushes necessarily move the tracking ref, so repeatable verification must
+  // validate the recorded commit and its containment rather than require the
+  // mutable ref to remain frozen forever.
+  assert.doesNotThrow(() => git("cat-file", "-e", `${commit}^{commit}`), `${ref}'s observed commit is unavailable`);
   assert.doesNotThrow(() => git("merge-base", "--is-ancestor", commit, evidence.verifiedCandidate.commit), `${ref} is not contained by the candidate`);
 }
 assert.equal(evidence.integration.strategy, "normal-fast-forward-only");

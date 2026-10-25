@@ -1000,6 +1000,15 @@ export function jobIntakeCompletion(
   const scopeReady =
     data.scopeItems.length > 0 &&
     data.scopeItems.every((item) => item.name && positive(item.quantity) && positive(item.plannedHours));
+  const itemDeliveryGuidanceReady =
+    data.scopeItems.length > 0 &&
+    data.scopeItems.every(
+      (item) =>
+        Boolean(item.submittalStrategy?.trim()) &&
+        Boolean(item.milestoneSummary?.trim()),
+    );
+  const deliveryGuidanceReady =
+    itemDeliveryGuidanceReady || Boolean(data.delivery.submittalStrategy?.trim());
   // Commercial activation promises an EDT-backed Work Item. Its floor/area and
   // permanent trade identity must therefore exist before Intake says "ready".
   const edtSourceRequired = capabilities.fullCommercialActivation && jobIntakeBudgetLinkRequested(data);
@@ -1075,8 +1084,7 @@ export function jobIntakeCompletion(
       ...(capabilities.budget && budgetLinkRequested ? [budgetReady] : []),
     ],
     delivery: [
-      !!data.delivery.workflowTemplate,
-      !!data.delivery.submittalStrategy,
+      deliveryGuidanceReady,
       data.review.deliveryConfirmed,
     ],
     team: [
@@ -1210,10 +1218,10 @@ export function jobIntakeCompletion(
         en: "Select the approved budget snapshot.",
         es: "Seleccione el presupuesto aprobado.",
       },
-    !data.delivery.submittalStrategy && {
+    !deliveryGuidanceReady && {
       code: "delivery",
-      en: "Describe the Submittal delivery strategy.",
-      es: "Describa la estrategia de entrega de submittals.",
+      en: "Describe the Submittal delivery strategy and milestones for every Contract Item.",
+      es: "Describa la estrategia de entrega de submittals y los hitos de cada Partida de Contrato.",
     },
     !teamReady && {
       code: "team",
