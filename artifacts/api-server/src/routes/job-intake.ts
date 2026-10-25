@@ -35,6 +35,8 @@ const errorEs: Record<string, string> = {
     "El alcance, la entrega y las horas operativas no pueden cambiar después de activar; solamente puede completar datos comerciales recién habilitados.",
   JOB_INTAKE_NOT_READY:
     "Complete todos los requisitos visibles antes de activar el trabajo.",
+  JOB_INTAKE_WORKFLOW_ALLOCATION_REQUIRED:
+    "El flujo seleccionado necesita una asignación económica APU verificada para distribuir las horas entre sus fases antes de activar.",
   JOB_INTAKE_CONFIRMATION_STALE:
     "El ingreso guardado cambió después de la confirmación. Recargue la preparación actual antes de activar.",
   JOB_INTAKE_DOCUMENT_REQUIRED:

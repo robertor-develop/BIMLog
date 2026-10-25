@@ -36,7 +36,7 @@ import { applyIntakePolicyDefaults, normalizeIntakePolicy } from "./job-intake-p
 import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
-import { allocateWorkflowPhaseHours } from "./workflow-phase-hours";
+import { requireWorkflowPhaseHours } from "./workflow-phase-hours";
 import { previewGovernedWorkflowAllocation } from "./delivery-workflow-allocation-source";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
 import { rollbackWithOperationalEvidence } from "./operational-failure";
@@ -1099,7 +1099,11 @@ async function createCoreActivationWithClient(
       client, companyId: input.companyId, sourceVersionId: economic.sourceVersionId,
       proposal: economic.proposal, workflowPhases,
     }) : undefined;
-    const phaseHours = allocateWorkflowPhaseHours(item.plannedHours, workflowPhases, allocation?.rows);
+    const phaseHours = requireWorkflowPhaseHours(
+      item.plannedHours,
+      workflowPhases,
+      allocation?.rows,
+    );
     const needsScopeDeliveryTask =
       item.workPackages.length === 0 ||
       input.data.team.assignments.some(
