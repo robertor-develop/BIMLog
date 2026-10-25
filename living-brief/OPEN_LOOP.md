@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## GA publication Builds 111–115 — 2026-10-25
+
+- [x] B111 bind the exact pushed Build 110 lineage and rerun the complete prior-block regression.
+- [x] B112 verify current API and frontend TypeScript integrity through the repository-local Windows runner.
+- [x] B113 verify the deterministic production artifact, packaged runtime, readiness and storage-authority failure boundary.
+- [x] B114 bind the exact ten-build publication plan and protected no-customer-mutation/no-Native-change boundaries.
+- [x] B115 aggregate the second five-build block and seal the ten-build publication candidate.
+- [ ] Pass the exact-head production gate, push and publish once through the existing Replit workspace, verify immutable live identity, and complete authenticated Chrome smoke.
+
 ## GA repair regression Builds 106–110 — 2026-10-25
 
 - [x] B106 permanently regress published workflow-hour allocation across PRE, COORD, FR and AB phases.

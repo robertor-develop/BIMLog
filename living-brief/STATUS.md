@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-25 — GA publication Builds 111–115 candidate
+
+Builds 111–115 bind the exact pushed Builds 106–110 lineage, repeat its full focused regression, verify current API/frontend type integrity, prove the deterministic production artifact and fail-closed storage boundary, and seal the exact ten-build publication plan. The candidate changes no Native/installer path and authorizes no customer-data mutation. Exact-head full build, push, Replit publication, immutable live identity and authenticated Chrome remain the release gates.
+
 ## 2026-10-25 — GA repair regression Builds 106–110 candidate
 
 Builds 106–110 convert the latest production repairs into permanent focused regression coverage: verified PRE/COORD/FR/AB workflow-hour allocation, RFI Super Administrator access parity with ordinary-member project isolation, canonical linked-RFI identity on Submittals, and exact page-assistant grounding for the Submittal and linked RFI. The aggregate gate preserves the current published source `691ca74b774ab48735736878c0bb81e99a04ce89` as its baseline. This block is push-only and remains unpublished until the next five builds complete the ten-build interval.

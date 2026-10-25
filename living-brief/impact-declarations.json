@@ -76946,6 +76946,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "cc65327d9c8dfbfe34d0f36bb0254d0f5f3d59a3ec11d6bafc22a1d494fdb44d"
+    },
+    {
+      "taskId": "bimlog-ga-publication-block111-115-20261025",
+      "reviewedThroughCommit": "e77b77aa138e3936eada0562ac2c071ef762540d",
+      "reviewedAt": "2026-10-25T17:36:47-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical records, human authority, and truthful release evidence."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses the proven exact-source build and publication procedure."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Binds focused regression, type integrity, artifact proof, publication plan, and post-publication smoke."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production architecture change; only release acceptance scripts and evidence are added."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or installer path changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or compliance claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact ten-build publication candidate and remaining live gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Builds 111-115 and the due push/publication/smoke boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva review remains separate from constructor release evidence."
+        }
+      ],
+      "reason": "Reconcile the second five-build release block and exact ten-build publication boundary.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5fb04f41ff2c4bea62b28ec5b9fd40bf716122a5e7ce2e8096bf7050696576b0"
     }
   ]
 }
