@@ -76874,6 +76874,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "666e880088b03abf5206305e25223b7497c19d7fb814750ae7a43b5987f4a0af"
+    },
+    {
+      "taskId": "bimlog-ga-repair-regression-block106-110-20261025",
+      "reviewedThroughCommit": "0b408c30b4c38d9d47409f390aa21e4e40e141a7",
+      "reviewedAt": "2026-10-25T17:01:52-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical records, human authority, and truthful evidence."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Adds bounded permanent regressions for already released repairs."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused executable gates cover workflow allocation, RFI access, canonical links, and assistant grounding."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime architecture or inventory change beyond test scripts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact five-build push-only candidate and publication cadence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Builds 106-110 and the required push-only boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva review remains separate."
+        }
+      ],
+      "reason": "Reconcile the bounded five-build permanent regression block for the latest live production repairs.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cc65327d9c8dfbfe34d0f36bb0254d0f5f3d59a3ec11d6bafc22a1d494fdb44d"
     }
   ]
 }

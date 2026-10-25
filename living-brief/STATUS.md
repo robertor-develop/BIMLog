@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-25 — GA repair regression Builds 106–110 candidate
+
+Builds 106–110 convert the latest production repairs into permanent focused regression coverage: verified PRE/COORD/FR/AB workflow-hour allocation, RFI Super Administrator access parity with ordinary-member project isolation, canonical linked-RFI identity on Submittals, and exact page-assistant grounding for the Submittal and linked RFI. The aggregate gate preserves the current published source `691ca74b774ab48735736878c0bb81e99a04ce89` as its baseline. This block is push-only and remains unpublished until the next five builds complete the ten-build interval.
+
 ## 2026-10-24 — BIMLog final closure Block 1 acceptance-integrity candidate
 
 Builds 31–35 remove constructor self-acceptance from the Lorena closure matrix, separate source, live, independent and customer states, bind claim metadata in a machine-readable ledger, reject stale/mixed/fixture-only evidence, and keep final acceptance fail-closed. The block exposes the existing mixed-project lifecycle evidence and ten missing independent reviews instead of relabeling them PASS. This first five-build block is push-only; publication is due after Builds 36–40 complete one exact-candidate same-project lifecycle.

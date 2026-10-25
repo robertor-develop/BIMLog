@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## GA repair regression Builds 106–110 — 2026-10-25
+
+- [x] B106 permanently regress published workflow-hour allocation across PRE, COORD, FR and AB phases.
+- [x] B107 permanently regress Super Administrator RFI access parity while preserving project isolation for ordinary members.
+- [x] B108 bind canonical linked-RFI identity on Submittal relationships.
+- [x] B109 bind exact Submittal and linked-RFI context into the page assistant.
+- [x] B110 aggregate the five focused gates and preserve the five-build push / ten-build publication cadence.
+- [ ] Push the exact five-build block after the repaired full production gate passes. Keep it unpublished until the next five-build block completes the ten-build interval.
+
 ## Build 30 Agent smoke repair — 2026-10-23
 
 - [ ] Push and republish the MAIN 04 routing repair, then repeat the exact live identity check and authenticated Agent response smoke before resuming the remaining route matrix.
