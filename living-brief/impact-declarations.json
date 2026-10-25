@@ -24700,7 +24700,7 @@
         {
           "key": "vision",
           "result": "reviewed_no_semantic_change",
-          "reason": "No product-direction change."
+          "reason": "No product direction changes; the repair preserves the existing linked-record workflow."
         },
         {
           "key": "platform",
@@ -76732,6 +76732,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "dae805c70f60e44a808c6f8f30bf54ae508655d127e5e7b4f1479af2c0fed63e"
+    },
+    {
+      "taskId": "bimlog-bidirectional-rfi-submittal-identity-20261025",
+      "reviewedThroughCommit": "9efb35850ff7d4ae2a9b73fc8a3d9e4bfa47ef8e",
+      "reviewedAt": "2026-10-25T15:25:11-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical records and exposes their existing relationship truth."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded relationship-label and page-grounding repair."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused tests cover canonical RFI labels and both grounded record surfaces."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform inventory or architecture changes; existing project APIs are reused."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, or integration contract changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, export, or report design system changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata, registry, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Publication and live verification remain pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the canonical bidirectional identity repair and remaining live gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva re-review remains pending."
+        }
+      ],
+      "reason": "Reconcile the bounded canonical RFI identity and Submittal grounding repair found in live Block 1 acceptance.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f1bd859fa3736f6ac8467b1271016f58791383a75f0dd0d3de6e646f3abebf33"
     }
   ]
 }

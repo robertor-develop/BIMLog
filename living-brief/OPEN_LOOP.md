@@ -6361,6 +6361,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Preserve the primary Submittal-to-RFI relation and attach the reciprocal RFI-to-Submittal linked record across a hard reopen.
 - [x] Reproduce and repair the notification-context authorization mismatch that rejected a globally authorized Super Administrator after the route guard had granted project access (`0e976a6673e010623bc0ebeb40ca9f1f1a7450bd`).
 - [x] Repair the live Ask BIMLog grounding gap so the canonical RFI identity and linked-document rows are supplied as explicit page evidence (`7ba782794bd06ba61a5f3d9c407bfbb628a748f7`).
+- [x] Replace internal RFI database IDs on the Submittal surface with canonical RFI number/title evidence and expose the Submittal header to Ask BIMLog (`9efb35850`).
 - [ ] Publish the exact repair, prove the false notification error is absent in the authenticated live RFI detail, and finish export, Ask BIMLog, responsive and clean-console evidence.
 - [ ] Obtain independent Viva re-review; customer-field acceptance remains separate.
 
