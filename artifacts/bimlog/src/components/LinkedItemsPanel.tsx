@@ -14,10 +14,11 @@ export function requireSuccessfulTargetLists(responses: readonly TargetListRespo
   }
 }
 
-type LinkType = "clash" | "submittal" | "transmittal" | "change_order" | "meeting" | "file";
+type LinkType = "clash" | "rfi" | "submittal" | "transmittal" | "change_order" | "meeting" | "file";
 
 const TYPE_LABELS: Record<LinkType, string> = {
   clash: "Clash",
+  rfi: "RFI",
   submittal: "Submittal",
   transmittal: "Transmittal",
   change_order: "Change Order",
@@ -33,6 +34,7 @@ const DOC_TYPES: LinkType[] = ["submittal", "transmittal", "change_order", "meet
 // stays put; come back and link it from the picker).
 const CREATE_ROUTES: Record<LinkType, string> = {
   clash: "clash-reports",
+  rfi: "rfis",
   submittal: "submittals",
   transmittal: "transmittals",
   change_order: "change-orders",
@@ -56,7 +58,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
   const headers = { Authorization: `Bearer ${token}` };
   const [links, setLinks] = useState<LinkRow[]>([]);
   const [items, setItems] = useState<Record<LinkType, { id: number; label: string }[]>>({
-    clash: [], submittal: [], transmittal: [], change_order: [], meeting: [], file: [],
+    clash: [], rfi: [], submittal: [], transmittal: [], change_order: [], meeting: [], file: [],
   });
   const [selType, setSelType] = useState<LinkType>("submittal");
   const [selId, setSelId] = useState("");
@@ -76,7 +78,8 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
   const loadItems = async () => {
     setItemsLoading(true);
     try {
-      const [subRes, transRes, coRes, meetRes, fileRes, reportRes] = await Promise.all([
+      const [rfiRes, subRes, transRes, coRes, meetRes, fileRes, reportRes] = await Promise.all([
+        fetch(`${API}/projects/${projectId}/rfis`, { headers }),
         fetch(`${API}/projects/${projectId}/submittals`, { headers }),
         fetch(`${API}/projects/${projectId}/transmittals`, { headers }),
         fetch(`${API}/projects/${projectId}/change-orders`, { headers }),
@@ -84,7 +87,8 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
         fetch(`${API}/projects/${projectId}/files`, { headers }),
         fetch(`${API}/projects/${projectId}/clash-reports`, { headers }),
       ]);
-      requireSuccessfulTargetLists([subRes, transRes, coRes, meetRes, fileRes, reportRes]);
+      requireSuccessfulTargetLists([rfiRes, subRes, transRes, coRes, meetRes, fileRes, reportRes]);
+      const rfisRaw = rfiRes.ok ? await rfiRes.json() : [];
       const submittalsRaw = subRes.ok ? await subRes.json() : [];
       const transRaw = transRes.ok ? await transRes.json() : [];
       const coRaw = coRes.ok ? await coRes.json() : [];
@@ -94,6 +98,8 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
 
       const submittals = (Array.isArray(submittalsRaw) ? submittalsRaw : submittalsRaw.submittals ?? [])
         .map((s: any) => ({ id: s.id, label: mkLabel(s, "Submittal") }));
+      const rfis = (Array.isArray(rfisRaw) ? rfisRaw : rfisRaw.rfis ?? [])
+        .map((s: any) => ({ id: s.id, label: mkLabel(s, "RFI") }));
       const transmittals = (Array.isArray(transRaw) ? transRaw : []).map((s: any) => ({ id: s.id, label: mkLabel(s, "Transmittal") }));
       const changeOrders = (Array.isArray(coRaw) ? coRaw : []).map((s: any) => ({ id: s.id, label: mkLabel(s, "CO") }));
       const meetings = (Array.isArray(meetRaw) ? meetRaw : []).map((s: any) => ({ id: s.id, label: mkLabel(s, "Meeting") }));
@@ -111,7 +117,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
       }));
       const clashes = clashArrays.flat();
 
-      setItems({ clash: clashes, submittal: submittals, transmittal: transmittals, change_order: changeOrders, meeting: meetings, file: files });
+      setItems({ clash: clashes, rfi: rfis, submittal: submittals, transmittal: transmittals, change_order: changeOrders, meeting: meetings, file: files });
       setFeedback(current => current?.tone === "error" ? null : current);
     } catch (e) {
       console.error("[LinkedItemsPanel.loadItems]", e);
@@ -181,6 +187,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
       : { tone: "error", message: `The new tab was blocked. Allow pop-ups, then try Create ${TYPE_LABELS[type]} again.` });
   };
 
+  const documentTypes = entityType === "rfi" ? DOC_TYPES : (["rfi", ...DOC_TYPES] as LinkType[]);
   const docOptions = items[selType].filter(o => !(selType === entityType && o.id === entityId));
   const clashOptions = items.clash;
 
@@ -216,7 +223,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
         <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
           <select value={selType} onChange={e => { setSelType(e.target.value as LinkType); setSelId(""); }}
             style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12 }}>
-            {DOC_TYPES.map(tp => <option key={tp} value={tp}>{TYPE_LABELS[tp]}</option>)}
+            {documentTypes.map(tp => <option key={tp} value={tp}>{TYPE_LABELS[tp]}</option>)}
           </select>
           <select value={selId} onChange={e => setSelId(e.target.value)}
             style={{ border: "1px solid #D1D5DB", borderRadius: 6, padding: "4px 8px", fontSize: 12, flex: 1, minWidth: 200 }}>

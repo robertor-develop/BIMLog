@@ -193,7 +193,7 @@ function SlidePanel({ open, onClose, children, title, width = 680 }: {
         background: "white", boxShadow: "-4px 0 32px rgba(0,0,0,0.18)",
         display: "flex", flexDirection: "column", overflow: "hidden",
       }}>
-        <div style={{
+        <div data-assistant-context="true" style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "14px 20px", borderBottom: "1px solid #E5E7EB",
           background: "#1E3A5F", color: "white",
@@ -2188,6 +2188,10 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
     }
   }, [respondOpen]);
   const bic = (submittal.ballInCourtHistory || []) as Array<{ party: string; setAt: string; setBy: string }>;
+  const linkedRfi = rfis.find(rfi => rfi.id === submittal.linkedRfiId);
+  const linkedRfiLabel = linkedRfi
+    ? `${linkedRfi.number}: ${linkedRfi.subject}`
+    : submittal.linkedRfiId ? `RFI #${submittal.linkedRfiId}` : null;
 
   // Log view event on open
   useEffect(() => {
@@ -2833,7 +2837,7 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
       <InfoRow label={w("Drawing Title", "Título de Plano", lang)} value={submittal.drawingTitle} />
       <InfoRow label={w("Date Submitted", "Fecha de Envío", lang)} value={formatCalendarDate(submittal.dateSubmitted)} />
       <InfoRow label={w("Date Required", "Fecha Requerida", lang)} value={formatCalendarDate(submittal.dateRequired || submittal.dueDate)} />
-      <InfoRow label={w("Primary related RFI", "RFI relacionado principal", lang)} value={submittal.linkedRfiId ? `RFI #${submittal.linkedRfiId}` : null} />
+      <InfoRow label={w("Primary related RFI", "RFI relacionado principal", lang)} value={linkedRfiLabel} />
       {submittal.linkedRfiId && (
         <button
           onClick={() => window.location.href = `/projects/${projectId}/rfis?rfi=${submittal.linkedRfiId}`}

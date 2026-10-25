@@ -3,6 +3,7 @@ import fs from "node:fs";
 
 const source = fs.readFileSync(new URL("./page-assistant-context.ts", import.meta.url), "utf8");
 const rfiSource = fs.readFileSync(new URL("../pages/project/RfisTab.tsx", import.meta.url), "utf8");
+const submittalSource = fs.readFileSync(new URL("../pages/project/SubmittalsTab.tsx", import.meta.url), "utf8");
 const linkedItemsSource = fs.readFileSync(new URL("../components/LinkedItemsPanel.tsx", import.meta.url), "utf8");
 assert.match(source, /input:not\(\[type=password\]\)/);
 assert.match(source, /selectedOptions\[0\]/);
@@ -17,6 +18,9 @@ assert.match(source, /language,/);
 assert.match(source, /focusedControl/);
 assert.match(source, /slice\(0, 80\)/);
 assert.match(source, /data-assistant-highlight/);
-assert.match(rfiSource, /data-assistant-context="true"[^>]*padding: "16px 24px"/);
+assert.match(submittalSource, /data-assistant-context="true"/);
 assert.match(linkedItemsSource, /key=\{l\.id\} data-assistant-context="true"/);
+assert.match(linkedItemsSource, /rfi: "RFI"/);
+assert.match(linkedItemsSource, /fetch\(`\$\{API\}\/projects\/\$\{projectId\}\/rfis`/);
+assert.match(rfiSource, /data-assistant-context="true"[^>]*padding: "16px 24px"/);
 console.log("PA126 page-aware minimum-context and exact-highlight contract: PASS");
