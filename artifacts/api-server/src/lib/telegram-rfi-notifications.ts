@@ -152,7 +152,10 @@ export async function scanRfiDueEvents(now = new Date()): Promise<number> {
 }
 
 async function requireRfiAccess(userId:number, projectId:number, rfiId:number) {
-  const access=await pool.query(`SELECT r.id FROM rfis r JOIN project_members pm ON pm.project_id=r.project_id AND pm.user_id=$1 AND pm.status='active' WHERE r.id=$3 AND r.project_id=$2`,[userId,projectId,rfiId]);
+  const access=await pool.query(`SELECT r.id FROM rfis r WHERE r.id=$3 AND r.project_id=$2 AND (
+    EXISTS (SELECT 1 FROM project_members pm WHERE pm.project_id=r.project_id AND pm.user_id=$1 AND pm.status='active')
+    OR EXISTS (SELECT 1 FROM users u WHERE u.id=$1 AND u.is_super_admin=true)
+  )`,[userId,projectId,rfiId]);
   if(!access.rowCount) throw new TelegramProductError(404,"RFI_NOT_FOUND","RFI not found or access is no longer available.");
 }
 

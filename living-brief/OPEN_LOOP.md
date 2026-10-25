@@ -6355,3 +6355,11 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Complete Living Brief integrity reconciliation for implementation commit `431abb17d51fd2a08f47fee95f11fa36ef24eefe`, normally integrate the reconciled repair into `main` and `master`, rebind production identity, and obtain independent Viva re-review.
 - [ ] Obtain Lorena/customer field acceptance separately; synthetic constructor and independent audit evidence cannot assign it.
 
+## Final live RFI/Submittal GA regression — 2026-10-25
+
+- [x] Create, edit, reopen and preserve controlled synthetic `RFI-0001` and `SUB-0001` in project 69.
+- [x] Preserve the primary Submittal-to-RFI relation and attach the reciprocal RFI-to-Submittal linked record across a hard reopen.
+- [x] Reproduce and repair the notification-context authorization mismatch that rejected a globally authorized Super Administrator after the route guard had granted project access.
+- [ ] Publish the exact repair, prove the false notification error is absent in the authenticated live RFI detail, and finish export, Ask BIMLog, responsive and clean-console evidence.
+- [ ] Obtain independent Viva re-review; customer-field acceptance remains separate.
+
