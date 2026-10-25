@@ -12,6 +12,7 @@
   "scripts": {
     "test:bimlog-ga-build106": "node scripts/test-bimlog-ga-build106.mjs",
     "test:bimlog-ga-build107": "node scripts/test-bimlog-ga-build107.mjs",
+    "test:bimlog-ga-build108": "node scripts/test-bimlog-ga-build108.mjs",
     "test:viva-block06-build026": "node scripts/test-viva-block06-build026-role-authority.mjs",
     "test:viva-block06-build027": "node scripts/test-viva-block06-build027-route-coverage.mjs",
     "test:viva-block06-build028": "node scripts/test-viva-block06-build028-lifecycle-closure.mjs",
