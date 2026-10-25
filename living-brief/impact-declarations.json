@@ -69137,8 +69137,8 @@
       "taskId": "ga-recovery-block04-financial-insight-acceptance",
       "reviewedThroughCommit": "8e9dfe4c0c913572583f0554dacef47a61ac3b01",
       "reviewedAt": "2026-10-16T05:46:40.713Z",
-      "status": "local_candidate",
-      "captureTiming": "pre_release_reconciliation",
+      "status": "release_reconciliation",
+      "captureTiming": "pre_release_reconciliation_after_independent_fail",
       "authorities": [
         {
           "key": "ecosystem_doctrine",
@@ -76444,7 +76444,7 @@
     },
     {
       "taskId": "bimlog-build71-105-definitive-closure-repair-20261025",
-      "reviewedThroughCommit": "50b1cf4939ea7712e3cafe8c82969dcfea7b8ac7",
+      "reviewedThroughCommit": "f394970b776e84becb0ff493d6bbc6f521d19f63",
       "reviewedAt": "2026-10-25T09:55:00.000Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
@@ -76491,28 +76491,32 @@
         },
         {
           "key": "status",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Release and live acceptance remain pending and are reported separately; no historical status is rewritten."
+          "result": "updated",
+          "reason": "STATUS now records the exact October 25 deployed proof, the streamed aggregate repair, the required official-ref integration, and the remaining live four-phase and independent-acceptance boundary."
         },
         {
           "key": "open_loop",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The reproduced closure defect is repaired locally but remains open until exact deployment and live acceptance."
+          "result": "updated",
+          "reason": "OPEN_LOOP now supersedes stale cadence rows without deleting history and lists the exact remaining release, four-phase, Viva, and customer gates."
         },
         {
           "key": "audit",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Historical evidence is preserved; only the repeatability assertion for a mutable remote-tracking ref is corrected."
+          "result": "updated",
+          "reason": "AUDIT now records the independent FAIL, exact passing live evidence, the buffered-runner diagnosis, official-ref requirement, and the limits of route-read and phase evidence."
         }
       ],
-      "reason": "Repair the reproduced Intake readiness mismatch by accepting complete per-Contract-Item strategy and milestone guidance while preserving legacy global strategy compatibility; add regression coverage and correct the historical Build 73 receipt so later authorized pushes do not invalidate its recorded observation.",
+      "reason": "Repair the reproduced Intake readiness mismatch, make the long nested release aggregate visibly progressive and independently repeatable, and reconcile current deployment, branch, audit, and remaining acceptance truth without adding Builds 106+ or rewriting historical checkpoints.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/job-intake-contract.ts",
-        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "scripts/test-bimlog-ga-build73.mjs"
+        "scripts/test-bimlog-ga-build102.mjs",
+        "scripts/test-bimlog-ga-build92.mjs",
+        "scripts/test-bimlog-ga-build97.mjs"
       ],
-      "reviewedChangeSha256": "53d523146ef3b5f3f8e5dfdf9d64c89a41da9b81895db1448990d5a18fe98858"
+      "reviewedChangeSha256": "a51624eeea0894011fc0d752a427996daaf4e743a81e0c78e3ce0a1236ea073e"
     }
   ]
 }

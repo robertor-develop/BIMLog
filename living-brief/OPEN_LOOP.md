@@ -6334,3 +6334,16 @@ No purge was executed and the protected projects, sample projects and temporary 
 - [ ] Push the exact B101–B105 candidate. Keep it unpublished until Build 110 under the established ten-build cadence.
 - [ ] Obtain independent Viva review against the exact pushed Build 105 candidate; constructor evidence cannot assign the verdict.
 
+# Builds 71–105 current closure reconciliation — 2026-10-25
+
+The unchecked cadence/publication rows above are historical checkpoint truth. Roberto's later explicit instruction to publish the last block superseded the Build 110 hold without authorizing Builds 106–110. Current disposition:
+
+- [x] Preserve the completed Builds 71–105 denominator; create no Build 106+ records for this closure.
+- [x] Repair the per-Contract-Item Delivery workflow readiness mismatch while retaining legacy global-strategy compatibility.
+- [x] Make the Build 92/97/102 aggregate visibly progressive and independently repeatable without skipping any nested gate.
+- [x] Run authenticated route-read smoke across the eleven controlled-project routes and preserve `NOT_CONFIGURED` truth for internal-cost policy and the floor-hour baseline.
+- [ ] Fast-forward the exact final closure candidate normally to the release branch, `main`, and `master`; run the governed Replit build, publish once, and bind production health to that exact source.
+- [ ] Obtain authenticated visible-Chrome PRE/COO/FOR/ASB evidence from an authorized synthetic dataset; current live project 68 visibly proves PRE/COO labels and Delivery-phase packages only.
+- [ ] Obtain independent Viva acceptance of the exact final deployed candidate. The October 25 verdict on `f394970b776e84becb0ff493d6bbc6f521d19f63` remains `FAIL — NOT YET GA` until the enumerated gates are independently closed.
+- [ ] Obtain Lorena/customer field acceptance separately; neither constructor nor Viva evidence can assign it.
+
