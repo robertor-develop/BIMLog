@@ -76589,6 +76589,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "443427c631350c77befb1d69d1e32a00f6eeb9c3a7fb1e6867fb82b6cccd3dae"
+    },
+    {
+      "taskId": "bimlog-rfi-notification-access-parity-20261025",
+      "reviewedThroughCommit": "0e976a6673e010623bc0ebeb40ca9f1f1a7450bd",
+      "reviewedAt": "2026-10-25T13:59:00-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair preserves the existing authorized-user access model and changes no product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live defect repair follows the existing fail-closed release and evidence requirements."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair removes a false error for an already-authorized user while preserving isolation, identity binding and focused regression coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changes; the repair restores consistent behavior in the governed RFI workflow."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform inventory or architecture changes; one existing authorization query is aligned with the route guard."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source or contract changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design or export format changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release status remains pending publication and live verification of this bounded repair."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP records the reproduced RFI notification-context defect, the bounded repair, and the remaining live and independent acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No independent audit finding is rewritten; Viva re-review remains pending."
+        }
+      ],
+      "reason": "Reconcile the bounded RFI notification access-parity repair discovered during final authenticated RFI/Submittal GA regression.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5741d3d82c4244552879e0a7663cbb3e60e5951deb6ec66cda15854682e8923e"
     }
   ]
 }

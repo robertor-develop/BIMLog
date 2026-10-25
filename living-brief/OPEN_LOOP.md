@@ -6359,7 +6359,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 
 - [x] Create, edit, reopen and preserve controlled synthetic `RFI-0001` and `SUB-0001` in project 69.
 - [x] Preserve the primary Submittal-to-RFI relation and attach the reciprocal RFI-to-Submittal linked record across a hard reopen.
-- [x] Reproduce and repair the notification-context authorization mismatch that rejected a globally authorized Super Administrator after the route guard had granted project access.
+- [x] Reproduce and repair the notification-context authorization mismatch that rejected a globally authorized Super Administrator after the route guard had granted project access (`0e976a6673e010623bc0ebeb40ca9f1f1a7450bd`).
 - [ ] Publish the exact repair, prove the false notification error is absent in the authenticated live RFI detail, and finish export, Ask BIMLog, responsive and clean-console evidence.
 - [ ] Obtain independent Viva re-review; customer-field acceptance remains separate.
 
