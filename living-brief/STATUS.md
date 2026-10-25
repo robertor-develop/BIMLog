@@ -4801,3 +4801,10 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - The accepted release contract requires the release branch, `main`, and `master` to contain the exact candidate by normal non-force updates. That integration and exact-source Replit publication remain release actions for this reconciliation and must be verified against `/api/v1/healthz` before independent re-review.
 - Automated PRE/COO/FOR/ASB allocation coverage passes. The presently activated synthetic dataset visibly contains PRE and COO scope labels with Delivery-phase packages; live four-phase evidence is therefore not claimed by this status. Independent Viva and Lorena/customer field acceptance remain separate external decisions.
 
+## Four-phase activation production repair — 2026-10-25
+
+- Implementation commit `431abb17d51fd2a08f47fee95f11fa36ef24eefe` replaces an activation-time internal error with the existing controlled `JOB_INTAKE_WORKFLOW_ALLOCATION_REQUIRED` response when a selected workflow lacks a verified economic allocation; no partial activation is reported.
+- The exact repair passed focused behavior coverage, strict API TypeScript, deterministic production-runtime assembly and governed Replit publication. Authenticated Chrome then proved the complete authorized synthetic lifecycle on project 69 (`QA-4PH-1025`).
+- A published immutable APU and independently published workflow v2 supplied the exact PRE 45%, COO 35%, FOR 15%, ASB 5% allocation. Activation produced four Work Packages and four tasks from 40 planned hours: PRE 18h, COO 14h, FOR 6h and ASB 2h. A hard reload preserved every package and hour value, and the browser console remained clean.
+- Independent Viva review closed the product-behavior blocker and assessed the candidate at 98%. The only remaining release closure is Living Brief integrity plus normal non-force integration of the exact repaired source into `main` and `master`, followed by production-identity rebinding and independent re-review. This reconciliation adds no Build 106+ work and changes no customer data.
+

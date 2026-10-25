@@ -6347,3 +6347,11 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Obtain independent Viva acceptance of the exact final deployed candidate. The October 25 verdict on `f394970b776e84becb0ff493d6bbc6f521d19f63` remains `FAIL — NOT YET GA` until the enumerated gates are independently closed.
 - [ ] Obtain Lorena/customer field acceptance separately; neither constructor nor Viva evidence can assign it.
 
+## Four-phase activation repair disposition — 2026-10-25
+
+- [x] Replace the reproduced activation HTTP 500 with the controlled verified-allocation error while preserving fail-closed activation semantics.
+- [x] Publish the exact repair and prove an authorized synthetic 40-hour lifecycle produces PRE 18h, COO 14h, FOR 6h and ASB 2h across four Work Packages and four tasks.
+- [x] Hard reload the live Operations route and prove all four phase allocations persist with a clean browser console.
+- [ ] Complete Living Brief integrity reconciliation for implementation commit `431abb17d51fd2a08f47fee95f11fa36ef24eefe`, normally integrate the reconciled repair into `main` and `master`, rebind production identity, and obtain independent Viva re-review.
+- [ ] Obtain Lorena/customer field acceptance separately; synthetic constructor and independent audit evidence cannot assign it.
+

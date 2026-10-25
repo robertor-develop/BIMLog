@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "683c4f055224dd3e6c2985812ea3819b4c2ce5fe5efda73b2e4288557da1870c",
-  "itemCount": 491,
+  "sourceSha256": "8530cdf40f195016c30a67375d9608e13fb3da516d18c426e4ef239777d0a7c6",
+  "itemCount": 493,
   "counts": {
-    "ACTIVE": 441,
+    "ACTIVE": 443,
     "SUPERSEDED": 38,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 348,
+    "ACTIVE_DEFECT": 349,
     "VALID_FUTURE_ROADMAP": 10,
-    "EXTERNAL_OWNER_INPUT": 83,
+    "EXTERNAL_OWNER_INPUT": 84,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 38,
     "CLOSED_WITH_EVIDENCE": 9
@@ -9430,6 +9430,44 @@
       "evidence": [
         "OPEN_LOOP.md:6348",
         "Builds 71–105 current closure reconciliation — 2026-10-25"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2c255e4a6ef57e12",
+      "sourceLine": 6355,
+      "heading": "Four-phase activation repair disposition — 2026-10-25",
+      "statement": "Complete Living Brief integrity reconciliation for implementation commit `431abb17d51fd2a08f47fee95f11fa36ef24eefe`, normally integrate the reconciled repair into `main` and `master`, rebind production identity, and obtain independent Viva re-review.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6355",
+        "Four-phase activation repair disposition — 2026-10-25"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f1972c4505a78de0",
+      "sourceLine": 6356,
+      "heading": "Four-phase activation repair disposition — 2026-10-25",
+      "statement": "Obtain Lorena/customer field acceptance separately; synthetic constructor and independent audit evidence cannot assign it.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6356",
+        "Four-phase activation repair disposition — 2026-10-25"
       ],
       "currentAuthority": false
     }
