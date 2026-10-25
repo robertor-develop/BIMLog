@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "bimlog-ga-build114-ten-build-publication-plan-v1",
+  "publishedBaseline": "691ca74b774ab48735736878c0bb81e99a04ce89",
+  "firstBlockHead": "bfdd51f8a5e7da8cfe8a427f838b261adfe640be",
+  "secondBlockCommits": {
+    "111": "eea7dcaadd4b496670d48e1ce8f8d8b0f7e5499d",
+    "112": "0c16768fbe025aa9ca48d24d08c0f81b098199f8",
+    "113": "51a16c20ea1a946eece6472477f4f2ed72ae4b61"
+  },
+  "releaseActions": [
+    "complete_build_115_gate",
+    "push_exact_candidate",
+    "synchronize_existing_replit_workspace",
+    "build_in_replit_shell",
+    "publish_once",
+    "verify_live_identity",
+    "run_authenticated_chrome_smoke"
+  ],
+  "nativeOrInstallerChanged": false,
+  "customerDataMutationAuthorized": false
+}
