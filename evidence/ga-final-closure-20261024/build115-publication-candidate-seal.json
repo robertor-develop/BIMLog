@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "bimlog-ga-build115-publication-candidate-seal-v1",
+  "range": [111, 115],
+  "priorBlockRange": [106, 110],
+  "commits": {
+    "111": "eea7dcaadd4b496670d48e1ce8f8d8b0f7e5499d",
+    "112": "0c16768fbe025aa9ca48d24d08c0f81b098199f8",
+    "113": "51a16c20ea1a946eece6472477f4f2ed72ae4b61",
+    "114": "ade89a70f2cc8b703b561982a852778c92a35486"
+  },
+  "acceptance": {
+    "priorBlockRegression": "PASS",
+    "apiAndFrontendTypecheck": "PASS",
+    "productionArtifact": "PASS",
+    "publicationPlan": "PASS",
+    "fullProductionGate": "PENDING_EXACT_HEAD"
+  },
+  "cadence": {
+    "totalUnpublishedBuilds": 10,
+    "pushDue": true,
+    "publicationDue": true,
+    "authenticatedChromeDueAfterPublication": true
+  }
+}

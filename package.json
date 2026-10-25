@@ -20,6 +20,8 @@
     "test:bimlog-ga-build112": "node scripts/test-bimlog-ga-build112.mjs",
     "test:bimlog-ga-build113": "node scripts/test-bimlog-ga-build113.mjs",
     "test:bimlog-ga-build114": "node scripts/test-bimlog-ga-build114.mjs",
+    "test:bimlog-ga-build115": "node scripts/test-bimlog-ga-build115.mjs",
+    "test:bimlog-ga-publication-block111-115": "node scripts/test-bimlog-ga-build115.mjs",
     "test:viva-block06-build026": "node scripts/test-viva-block06-build026-role-authority.mjs",
     "test:viva-block06-build027": "node scripts/test-viva-block06-build027-route-coverage.mjs",
     "test:viva-block06-build028": "node scripts/test-viva-block06-build028-lifecycle-closure.mjs",
