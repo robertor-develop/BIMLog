@@ -76803,6 +76803,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f1bd859fa3736f6ac8467b1271016f58791383a75f0dd0d3de6e646f3abebf33"
+    },
+    {
+      "taskId": "bimlog-submittal-rfi-assistant-grounding-20261025",
+      "reviewedThroughCommit": "8eb236ed2153554de7efd83ed4c69a8a8211c0f3",
+      "reviewedAt": "2026-10-25T16:29:32-04:00",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical project records while exposing their existing relationship truth to the page assistant."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded Submittal page-evidence repair within the existing authenticated workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused behavior and TypeScript checks cover the exact Submittal and linked-RFI evidence contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction change; this repair makes the existing assistant behavior truthful."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform inventory or architecture changes; the existing page-context collector is reused."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, or integration contract changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, export, or report design system changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata, registry, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Publication and repeated authenticated live canary remain pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the exact Ask BIMLog title-grounding repair and remaining live verification gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva re-review remains pending after constructor verification."
+        }
+      ],
+      "reason": "Reconcile the bounded Ask BIMLog Submittal and linked-RFI title grounding repair exposed by the published canary.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "666e880088b03abf5206305e25223b7497c19d7fb814750ae7a43b5987f4a0af"
     }
   ]
 }

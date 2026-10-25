@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "dae13ae3b4e524dee4eb96306fc43572ff042ebaef99373c87a23de999cec2b8",
+  "sourceSha256": "f95ef5541b8af4f72337308e46377c7a2a9a69bec2b1a06ba2205af8b0e90c9b",
   "itemCount": 495,
   "counts": {
     "ACTIVE": 445,
@@ -9473,7 +9473,7 @@
     },
     {
       "id": "77ab303fcfa65d80",
-      "sourceLine": 6365,
+      "sourceLine": 6366,
       "heading": "Final live RFI/Submittal GA regression — 2026-10-25",
       "statement": "Publish the exact repair, prove the false notification error is absent in the authenticated live RFI detail, and finish export, Ask BIMLog, responsive and clean-console evidence.",
       "classification": "ACTIVE",
@@ -9485,14 +9485,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6365",
+        "OPEN_LOOP.md:6366",
         "Final live RFI/Submittal GA regression — 2026-10-25"
       ],
       "currentAuthority": false
     },
     {
       "id": "acff298f7539115b",
-      "sourceLine": 6366,
+      "sourceLine": 6367,
       "heading": "Final live RFI/Submittal GA regression — 2026-10-25",
       "statement": "Obtain independent Viva re-review; customer-field acceptance remains separate.",
       "classification": "ACTIVE",
@@ -9504,7 +9504,7 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:6366",
+        "OPEN_LOOP.md:6367",
         "Final live RFI/Submittal GA regression — 2026-10-25"
       ],
       "currentAuthority": false
