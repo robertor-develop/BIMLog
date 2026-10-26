@@ -77383,8 +77383,8 @@
     },
     {
       "taskId": "definitive-terminal-ga-build006-20261026",
-      "reviewedThroughCommit": "2b7c090bff9b874d2d80eb9469892bc3ce4cb54a",
-      "reviewedAt": "2026-10-26T10:54:16-04:00",
+      "reviewedThroughCommit": "2e158cbbe08f4e33edc28a617c740244cee2d19c",
+      "reviewedAt": "2026-10-26T11:14:33-04:00",
       "status": "local_candidate",
       "captureTiming": "post_implementation_pre_release_reconciliation",
       "authorities": [
@@ -77411,7 +77411,7 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "Aligns the internal-cost read projection with the existing project-scope super-admin override."
+          "reason": "Aligns internal-cost, EDT authority and Time Review projections with the existing project-scope super-admin override."
         },
         {
           "key": "plugin",
@@ -77444,15 +77444,14 @@
           "reason": "Independent Viva acceptance remains separate from constructor evidence."
         }
       ],
-      "reason": "Reconcile definitive terminal GA Build 6 activation and authorized Operations projection repair.",
+      "reason": "Reconcile definitive terminal GA Build 6 activation and authorized Operations, EDT and Time Review projection repairs.",
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "1408f16eb15b7ab40ebeebfca6e04ebe52563163e69a46f420b8a5f57f72d008"
+      "reviewedChangeSha256": "f094e913e1ab613bea7f381a836b81a8f6e5f7449a93328ce106e6b253b7eb57"
     }
   ]
 }
