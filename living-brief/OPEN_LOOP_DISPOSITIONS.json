@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "71d3438a0880c636685b50ed04f747ae52ce1a5007078d2d7b87150dd7757066",
+  "sourceSha256": "cf050103b20ae9101107a2c6f134f2c76e694be4cac244efc2143f5c1ecb5bef",
   "itemCount": 506,
   "counts": {
     "ACTIVE": 453,
@@ -9667,7 +9667,7 @@
     },
     {
       "id": "34c21be8928dbd93",
-      "sourceLine": 6407,
+      "sourceLine": 6408,
       "heading": "Definitive terminal GA program — Build 3",
       "statement": "On controlled project `70`, select the exact saved APU for the controlled Build 2 Contract Item; verify the resulting unit rate/value, save, reopen, refresh, back/forward and authenticate again without changing the stable Contract Item ID or another row.",
       "classification": "ACTIVE",
@@ -9679,14 +9679,14 @@
         "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6407",
+        "OPEN_LOOP.md:6408",
         "Definitive terminal GA program — Build 3"
       ],
       "currentAuthority": false
     },
     {
       "id": "534f2cb959884d17",
-      "sourceLine": 6408,
+      "sourceLine": 6409,
       "heading": "Definitive terminal GA program — Build 3",
       "statement": "Prove wrong-role/tenant isolation through the existing automated gates and live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.",
       "classification": "SUPERSEDED",
@@ -9705,7 +9705,7 @@
     },
     {
       "id": "5911b4d25bcb944b",
-      "sourceLine": 6409,
+      "sourceLine": 6410,
       "heading": "Definitive terminal GA program — Build 3",
       "statement": "Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 4.",
       "classification": "ACTIVE",
@@ -9717,7 +9717,7 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6409",
+        "OPEN_LOOP.md:6410",
         "Definitive terminal GA program — Build 3"
       ],
       "currentAuthority": false

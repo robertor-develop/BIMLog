@@ -77167,7 +77167,7 @@
     },
     {
       "taskId": "definitive-terminal-ga-build003-20261026",
-      "reviewedThroughCommit": "63ae09f1508fd0efb7cc3f57bed468cd641c8b7d",
+      "reviewedThroughCommit": "807595ac6a9b594c1d21e0320a089f9528320558",
       "reviewedAt": "2026-10-26T08:15:00-04:00",
       "status": "local_candidate",
       "captureTiming": "post_implementation_pre_release_reconciliation",
@@ -77230,14 +77230,12 @@
       ],
       "reason": "Reconcile definitive terminal GA Build 3 saved APU selection and exact Contract Item unit-rate authority.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/job-intake-apu-history.behavior.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "package.json"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "480d2058db9743d61237eb393df4d373583bc159975ce3bf800f019e2a67bc00"
+      "reviewedChangeSha256": "e8c263ef925cf0aa1c7ce2ae9206d504237b9c38797412561f159234cb3ba247"
     }
   ]
 }
