@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "6f699eaef68e5e3758feaaf4d1ab311fdb04a1ca3207784cfe1a1c94e1928bb2",
+  "sourceSha256": "2b1b5f265528cac3bc7892749691a90fec71c22070868633e2e2e6148eb894a1",
   "itemCount": 518,
   "counts": {
-    "ACTIVE": 463,
-    "SUPERSEDED": 43,
+    "ACTIVE": 464,
+    "SUPERSEDED": 42,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 368,
+    "ACTIVE_DEFECT": 369,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 85,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 43,
+    "SUPERSEDED_HISTORY": 42,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -9894,48 +9894,10 @@
       "currentAuthority": false
     },
     {
-      "id": "4375c4453d219846",
-      "sourceLine": 6444,
-      "heading": "Definitive terminal GA program — Build 7",
-      "statement": "Capture the live task ID/version and unassigned state, assign the exact project-scoped `Roberto Test 1` member through Operations, and prove exactly one task changes with no priced resource assignment or Intake mutation.",
-      "classification": "ACTIVE",
-      "dispositionCategory": "ACTIVE_DEFECT",
-      "workClass": "PRODUCT_WORK",
-      "ownership": {
-        "owner": "Job Intake",
-        "route": "/projects/:id/intake",
-        "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:6444",
-        "Definitive terminal GA program — Build 7"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "a660d6a2e8b203b7",
-      "sourceLine": 6445,
-      "heading": "Definitive terminal GA program — Build 7",
-      "statement": "Push and publish the exact Build 7 candidate, verify source/package/schema identity, then repeat reload, back/forward, logout/login, direct reentry, assigned/unassigned queues, 390x844 responsive behavior and clean-console checks.",
-      "classification": "SUPERSEDED",
-      "dispositionCategory": "SUPERSEDED_HISTORY",
-      "workClass": "STALE_CONTRADICTION",
-      "ownership": {
-        "owner": "Historical evidence",
-        "route": null,
-        "module": "living-brief/OPEN_LOOP.md"
-      },
-      "evidence": [
-        "living-brief/STATUS.md current authority",
-        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "05d93511f54baa20",
-      "sourceLine": 6446,
-      "heading": "Definitive terminal GA program — Build 7",
-      "statement": "Obtain independent Viva acceptance of the exact deployed Build 7 candidate before Build 8.",
+      "id": "cfb2075a0df8cb70",
+      "sourceLine": 6454,
+      "heading": "Definitive terminal GA program — Build 8",
+      "statement": "Commit and push the exact candidate, publish it, verify source/package/schema identity, and record exactly one controlled `GA B8 CONTROLLED TIME 20261026` entry through authenticated Chrome.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
       "workClass": "PROVIDER_EVIDENCE",
@@ -9945,8 +9907,46 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6446",
-        "Definitive terminal GA program — Build 7"
+        "OPEN_LOOP.md:6454",
+        "Definitive terminal GA program — Build 8"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "9851bf1533cbfa2b",
+      "sourceLine": 6455,
+      "heading": "Definitive terminal GA program — Build 8",
+      "statement": "Prove one persisted entry and one event, `0.25h` recorded / `0.75h` unused arithmetic, reload and navigation persistence, truthful Time Review ineligibility, unchanged demand/pricing/cost/Intake state, responsive behavior and clean console.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Job Intake",
+        "route": "/projects/:id/intake",
+        "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6455",
+        "Definitive terminal GA program — Build 8"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "232b09364593cc60",
+      "sourceLine": 6456,
+      "heading": "Definitive terminal GA program — Build 8",
+      "statement": "Obtain independent Viva acceptance of exact deployed Build 8 before Build 9.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6456",
+        "Definitive terminal GA program — Build 8"
       ],
       "currentAuthority": false
     }

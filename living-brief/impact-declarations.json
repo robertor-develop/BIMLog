@@ -77525,6 +77525,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "179b79839ae7abe68ed9287a073d2303a2031fc8c83c56c6ae8297af79b5e527"
+    },
+    {
+      "taskId": "definitive-terminal-ga-build008-20261026",
+      "reviewedThroughCommit": "37b925740f850c89732b7b566f4665a5c9562b9c",
+      "reviewedAt": "2026-10-26T13:11:13-04:00",
+      "status": "local_candidate",
+      "captureTiming": "post_implementation_pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves project, task, assignment, Intake and financial authority boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses the proven exact-source release and authenticated production acceptance procedure."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds focused UUID custody, idempotency, conflict, authority, isolation, bounded-hour and truthful Time Review coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction, customer scope or portfolio boundary changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Binds time-entry idempotency to the complete immutable request identity and rejects conflicting UUID reuse atomically."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, installer or packaged-plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards edition, metadata or compliance assertion changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 7 acceptance, Build 8 custody scope and the repaired conflicting-replay defect."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Defines Build 8 release, production entry, persistence, truthful denial and independent acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva acceptance remains separate from constructor evidence."
+        }
+      ],
+      "reason": "Reconcile definitive terminal GA Build 8 actual-hour custody and truthful unpriced Time Review gating.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cc5b3a15df63e89f8653cc84869db46c3e6956279e6b128112df45f2732d0fac"
     }
   ]
 }

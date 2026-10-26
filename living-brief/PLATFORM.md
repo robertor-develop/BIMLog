@@ -1015,6 +1015,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-work-package-reload.behavior.ts
 - artifacts/api-server/src/lib/job-intake.behavior.ts
 - artifacts/api-server/src/lib/job-operation-task-update-contract.ts
+- artifacts/api-server/src/lib/job-operation-time-idempotency-contract.ts
 - artifacts/api-server/src/lib/job-operations-id.ts
 - artifacts/api-server/src/lib/job-operations-service.ts
 - artifacts/api-server/src/lib/job-operations.behavior.ts
@@ -1377,6 +1378,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/telegram-rfi-notifications.ts
 - artifacts/api-server/src/lib/terminal-ga-build006-operations-authority.behavior.ts
 - artifacts/api-server/src/lib/terminal-ga-build007-task-assignment.behavior.ts
+- artifacts/api-server/src/lib/terminal-ga-build008-time-custody.behavior.ts
 - artifacts/api-server/src/lib/trade-file-collection.behavior.ts
 - artifacts/api-server/src/lib/trade-file-collection.ts
 - artifacts/api-server/src/lib/trade-file-submission-review.behavior.ts

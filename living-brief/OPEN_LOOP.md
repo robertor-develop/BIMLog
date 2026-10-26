@@ -6450,6 +6450,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Define the bounded journey as one `0.25h` controlled time entry on the existing direct, unpriced Delivery-task assignee, preserving task/package/work-item identity, status, progress, planned hours, dates, predecessors, demand, Intake and every financial authority.
 - [x] Repair time-entry UUID custody so an exact replay is idempotent while any conflicting project/task/assignment/user/date/hours/note/creator binding fails atomically; retain active-membership, self/manager authority, bounded-hour validation and truthful unpriced Time Review denial.
 - [x] Add the focused executable Build 8 gate covering stable identity, exact replay, conflict rejection, role and tenant/project isolation, range/date safety and zero financial/Intake mutation.
+- [x] Freeze implementation commit `37b925740f850c89732b7b566f4665a5c9562b9c` as the Build 8 reconciliation baseline.
 - [ ] Commit and push the exact candidate, publish it, verify source/package/schema identity, and record exactly one controlled `GA B8 CONTROLLED TIME 20261026` entry through authenticated Chrome.
 - [ ] Prove one persisted entry and one event, `0.25h` recorded / `0.75h` unused arithmetic, reload and navigation persistence, truthful Time Review ineligibility, unchanged demand/pricing/cost/Intake state, responsive behavior and clean console.
 - [ ] Obtain independent Viva acceptance of exact deployed Build 8 before Build 9.
