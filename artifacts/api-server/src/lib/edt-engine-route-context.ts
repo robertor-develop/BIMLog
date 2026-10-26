@@ -67,7 +67,7 @@ export async function resolveEdtRouteActor(req: Request, projectId: number): Pro
   if (!row || Number(row.company_id) !== Number(req.user.companyId)) {
     throw new EdtEngineConflict("USER_COMPANY_MISMATCH", "Authenticated company identity is stale or invalid.");
   }
-  if (row.project_company_id === null || Number(row.project_company_id) !== Number(row.company_id)) {
+  if (row.project_company_id === null || (!row.is_super_admin && Number(row.project_company_id) !== Number(row.company_id))) {
     throw new EdtEngineConflict("PROJECT_COMPANY_MISMATCH", "Project is missing or outside the authenticated company.");
   }
   const role = edtRoleFromCurrentAuthority({
@@ -80,7 +80,10 @@ export async function resolveEdtRouteActor(req: Request, projectId: number): Pro
   return Object.freeze({
     grants: permissionsForDefaultRole(role),
     actorUserId: Number(row.id),
-    actorCompanyId: Number(row.company_id),
+    // Global Super Administrators operate in the authoritative project-company
+    // context after the explicit project guard above. Ordinary users remain
+    // bound to their authenticated home company.
+    actorCompanyId: row.is_super_admin ? Number(row.project_company_id) : Number(row.company_id),
     actorProjectIds: [projectId],
     eligibleRole: role,
   });
