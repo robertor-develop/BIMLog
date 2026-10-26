@@ -6441,7 +6441,16 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Accept Build 6 progression on exact deployed source `b72c91a775f9685e9e91912a2af9ccf2a71f76ca` with independent Viva PASS; accepted journeys are 6/20.
 - [x] Define the bounded journey as one direct, unpriced assignee and optional empty start/due dates on the existing project `70` Delivery task, preserving task/package/work-item IDs, status, progress, planned hours, Intake demand, APU/billing authority and activated-source fingerprint.
 - [x] Bind exact active project-member identity, manager-only reassignment and scheduling, project/tenant isolation, expected-version rejection, date ordering and idempotent repeated-save behavior in the focused Build 7 gate. Implementation commit: `f7250b717`.
-- [ ] Capture the live task ID/version and unassigned state, assign the exact project-scoped `Roberto Test 1` member through Operations, and prove exactly one task changes with no priced resource assignment or Intake mutation.
-- [ ] Push and publish the exact Build 7 candidate, verify source/package/schema identity, then repeat reload, back/forward, logout/login, direct reentry, assigned/unassigned queues, 390x844 responsive behavior and clean-console checks.
-- [ ] Obtain independent Viva acceptance of the exact deployed Build 7 candidate before Build 8.
+- [x] Capture the live task ID/version and unassigned state, assign the exact project-scoped `Roberto Test 1` member through Operations, and prove exactly one task changes with no priced resource assignment or Intake mutation.
+- [x] Push and publish exact source `a8549e7b68d48d66af2e6ff0a894f23f6df0d83a`, verify source/package/schema identity, then repeat reload, back/forward, logout/login, direct reentry, assigned/unassigned queues, 390x844 responsive behavior and clean-console checks.
+- [x] Obtain independent Viva PASS for exact deployed Build 7; accepted journeys are 7/20 and Build 8 is permitted.
+
+## Definitive terminal GA program — Build 8
+
+- [x] Define the bounded journey as one `0.25h` controlled time entry on the existing direct, unpriced Delivery-task assignee, preserving task/package/work-item identity, status, progress, planned hours, dates, predecessors, demand, Intake and every financial authority.
+- [x] Repair time-entry UUID custody so an exact replay is idempotent while any conflicting project/task/assignment/user/date/hours/note/creator binding fails atomically; retain active-membership, self/manager authority, bounded-hour validation and truthful unpriced Time Review denial.
+- [x] Add the focused executable Build 8 gate covering stable identity, exact replay, conflict rejection, role and tenant/project isolation, range/date safety and zero financial/Intake mutation.
+- [ ] Commit and push the exact candidate, publish it, verify source/package/schema identity, and record exactly one controlled `GA B8 CONTROLLED TIME 20261026` entry through authenticated Chrome.
+- [ ] Prove one persisted entry and one event, `0.25h` recorded / `0.75h` unused arithmetic, reload and navigation persistence, truthful Time Review ineligibility, unchanged demand/pricing/cost/Intake state, responsive behavior and clean console.
+- [ ] Obtain independent Viva acceptance of exact deployed Build 8 before Build 9.
 

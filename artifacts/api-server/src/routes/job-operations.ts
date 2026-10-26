@@ -157,7 +157,8 @@ router.patch("/projects/:projectId/operations/assignments/:assignmentId", run(as
   res.json(await reassignJobOperationResource({ actorUserId: req.user.userId, projectId: req.params.projectId, assignmentId: req.params.assignmentId, expectedVersion: req.body?.expectedVersion, userId: req.body?.userId, reason: req.body?.reason }));
 }));
 router.post("/projects/:projectId/operations/time", run(async (req, res) => {
-  res.status(201).json(await addJobOperationTime({ actorUserId: req.user.userId, projectId: req.params.projectId, entryId: req.body?.entryId, taskId: req.body?.taskId, assignmentId: req.body?.assignmentId, workDate: req.body?.workDate, hours: req.body?.hours, note: req.body?.note }));
+  const result = await addJobOperationTime({ actorUserId: req.user.userId, projectId: req.params.projectId, entryId: req.body?.entryId, taskId: req.body?.taskId, assignmentId: req.body?.assignmentId, workDate: req.body?.workDate, hours: req.body?.hours, note: req.body?.note });
+  res.status(result.idempotent ? 200 : 201).json(result);
 }));
 router.post("/projects/:projectId/operations/deliverables", run(async (req, res) => {
   res.status(201).json(await linkJobOperationDeliverable({ actorUserId: req.user.userId, projectId: req.params.projectId, linkId: req.body?.linkId, taskId: req.body?.taskId, fileId: req.body?.fileId, deliverableType: req.body?.deliverableType, note: req.body?.note }));

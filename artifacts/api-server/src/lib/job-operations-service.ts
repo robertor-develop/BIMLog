@@ -5,6 +5,7 @@ import { effectiveCommercialAccessForUser } from "./commercial-entitlement";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
 import { waitForTeamResourcePlanningMigration } from "./team-resource-planning-migration";
 import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contract";
+import { isExactJobOperationTimeReplay } from "./job-operation-time-idempotency-contract";
 import { canonicalJobOperationId } from "./job-operations-id";
 import { reconcileResourceDemand, splitResourcePlan } from "./resource-demand-contract";
 import { getInternalCostGovernance, resolveApprovedMemberInternalCost, waitForInternalCostGovernanceMigration } from "./internal-cost-governance";
@@ -732,13 +733,37 @@ export async function addJobOperationTime(input: { actorUserId: number; projectI
     }
     const userId = Number(assignment?.user_id ?? control.task.assignee_user_id ?? input.actorUserId);
     if (!control.access.canManage && userId !== input.actorUserId) throw new FinancialControlError(403, "JOB_OPERATIONS_TIME_DENIED", "Team members may only record their own time.");
-    const existing = (await client.query(`SELECT id FROM job_activation_time_entries WHERE id=$1`, [entryId])).rows[0];
-    if (!existing) {
+    const existing = (await client.query(`SELECT id,project_id "projectId",task_id "taskId",assignment_id "assignmentId",user_id "userId",work_date::text "workDate",hours::text,note,created_by_id "createdById" FROM job_activation_time_entries WHERE id=$1 FOR UPDATE`, [entryId])).rows[0];
+    if (existing) {
+      const exactReplay = isExactJobOperationTimeReplay({
+        projectId: Number(existing.projectId),
+        taskId: existing.taskId,
+        assignmentId: existing.assignmentId ?? null,
+        userId: Number(existing.userId),
+        workDate: existing.workDate,
+        hours: existing.hours,
+        note: existing.note ?? "",
+        createdById: Number(existing.createdById),
+      }, {
+        projectId,
+        taskId,
+        assignmentId,
+        userId,
+        workDate,
+        hours,
+        note,
+        createdById: input.actorUserId,
+      });
+      if (!exactReplay) throw new FinancialControlError(409, "JOB_OPERATIONS_TIME_ID_CONFLICT", "This time-entry ID is already bound to different recorded time. Use a new entry ID.");
+      await client.query("COMMIT");
+      return { id: entryId, idempotent: true };
+    }
+    {
       await client.query(`INSERT INTO job_activation_time_entries(id,intake_id,project_id,work_item_id,task_id,assignment_id,user_id,work_date,hours,note,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`, [entryId, control.task.intake_id, projectId, control.task.work_item_id, taskId, assignmentId, userId, workDate, hours, note, input.actorUserId]);
       await refreshFloorHourCostForWorkItem(client,{actorUserId:input.actorUserId,projectId,workItemId:control.task.work_item_id,reason:"Time entry recorded"});
       await event(client, { projectId, actorUserId: input.actorUserId, eventType: "time_recorded", workItemId: control.task.work_item_id, taskId, assignmentId, evidence: { entryId, userId, workDate, hours } });
     }
-    await client.query("COMMIT"); return { id: entryId, idempotent: Boolean(existing) };
+    await client.query("COMMIT"); return { id: entryId, idempotent: false };
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 

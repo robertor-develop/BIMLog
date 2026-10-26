@@ -259,6 +259,7 @@
     "test:live-journey-build006": "node scripts/test-live-journey-build006-shell.mjs",
     "test:live-journey-build007": "node scripts/test-live-journey-build007-project.mjs",
     "test:ga-terminal-build007": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/terminal-ga-build007-task-assignment.behavior.ts",
+    "test:ga-terminal-build008": "node artifacts/api-server/node_modules/tsx/dist/cli.mjs artifacts/api-server/src/lib/terminal-ga-build008-time-custody.behavior.ts",
     "test:live-journey-build008": "node scripts/test-live-journey-build008-procore-browse.mjs",
     "test:live-journey-build009": "node scripts/test-live-journey-build009-procore-rfi.mjs",
     "test:live-journey-build010": "node scripts/test-live-journey-build010-agent.mjs",
