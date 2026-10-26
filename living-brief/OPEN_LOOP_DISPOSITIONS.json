@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bb2afc0b751c0384a2f133c591695cd572fd713a07854f139f600d2c591b6cec",
+  "sourceSha256": "b6129736dd9194dd2b143974b22586206078438887e8b31723576e1943491b2d",
   "itemCount": 522,
   "counts": {
     "ACTIVE": 467,
@@ -9971,7 +9971,7 @@
     },
     {
       "id": "7c0329960668c50c",
-      "sourceLine": 6479,
+      "sourceLine": 6480,
       "heading": "Lorena Job Intake production repair — 2026-10-26",
       "statement": "Complete Living Brief integrity and exact production build, then commit, push and publish the exact repair.",
       "classification": "SUPERSEDED",
@@ -9990,7 +9990,7 @@
     },
     {
       "id": "5ffd334b01630889",
-      "sourceLine": 6480,
+      "sourceLine": 6481,
       "heading": "Lorena Job Intake production repair — 2026-10-26",
       "statement": "Prove all repaired journeys in authenticated production Chrome with save, reload and activation/Operations persistence evidence; obtain independent acceptance separately.",
       "classification": "ACTIVE",
@@ -10002,14 +10002,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:6480",
+        "OPEN_LOOP.md:6481",
         "Lorena Job Intake production repair — 2026-10-26"
       ],
       "currentAuthority": false
     },
     {
       "id": "7cf74e361044dacc",
-      "sourceLine": 6481,
+      "sourceLine": 6482,
       "heading": "Lorena Job Intake production repair — 2026-10-26",
       "statement": "Treat Lorena's proposed Trade/Service contract-item taxonomy, contract-level bulk import and summarized contract navigation as the next product change; use company catalogs and configurable Service-to-phase templates rather than hardcoded free text.",
       "classification": "ACTIVE",
@@ -10021,7 +10021,7 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:6481",
+        "OPEN_LOOP.md:6482",
         "Lorena Job Intake production repair — 2026-10-26"
       ],
       "currentAuthority": false

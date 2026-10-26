@@ -6476,6 +6476,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Persist a unique applicable workflow automatically and provide a bulk apply-to-compatible-items action.
 - [x] Expose applied company-library APU versions to Job Intake through Cost and Value plan history.
 - [x] Preserve conserved workflow-phase allocation so generated Operations packages do not duplicate total Contract Item hours.
+- [x] Freeze the implementation at exact commit `2f84e03248b04473b37c88e27b6a83f8bc1f6135` before deterministic production assembly.
 - [ ] Complete Living Brief integrity and exact production build, then commit, push and publish the exact repair.
 - [ ] Prove all repaired journeys in authenticated production Chrome with save, reload and activation/Operations persistence evidence; obtain independent acceptance separately.
 - [ ] Treat Lorena's proposed Trade/Service contract-item taxonomy, contract-level bulk import and summarized contract navigation as the next product change; use company catalogs and configurable Service-to-phase templates rather than hardcoded free text.

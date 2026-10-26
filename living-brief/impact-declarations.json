@@ -77886,7 +77886,7 @@
     },
     {
       "taskId": "lorena-job-intake-production-repair-20261026",
-      "reviewedThroughCommit": "ac9a680cf7343341a83c4d0dd5853b0315717c10",
+      "reviewedThroughCommit": "2f84e03248b04473b37c88e27b6a83f8bc1f6135",
       "reviewedAt": "2026-10-26T21:20:00.000Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
@@ -77949,22 +77949,12 @@
       ],
       "reason": "Reconcile the urgent Lorena Job Intake repair for quantity authority, APU availability, workflow automation, readiness, and conserved phase hours.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/cost-value-plan-service.ts",
-        "artifacts/api-server/src/lib/job-intake-contract.ts",
-        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
-        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
-        "artifacts/bimlog/src/components/job-intake/IntakeDeliveryItems.tsx",
-        "artifacts/bimlog/src/components/job-intake/QuickJobIntake.tsx",
-        "artifacts/bimlog/src/lib/job-intake-delivery-defaults.behavior.ts",
-        "artifacts/bimlog/src/lib/job-intake-delivery-defaults.ts",
-        "artifacts/bimlog/src/pages/job-operations-governance-guidance.behavior.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "f2378a79946b6c292ae86b4bdae65441be7b5d85955f7115a20235d6aa5ac44a"
+      "reviewedChangeSha256": "ab1efcbaa430308669b253426929a2aaf87a7748ada7cbea3c12cb132d205e28"
     }
   ]
 }

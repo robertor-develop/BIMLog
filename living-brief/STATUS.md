@@ -4893,4 +4893,5 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - Applied company-library APU versions are exposed through the Cost and Value plan history so the saved version and derived unit rate can be selected in Job Intake instead of appearing as an empty selector.
 - Existing activation hour-allocation authority remains conserved through `requireWorkflowPhaseHours`: generated phase packages divide the Contract Item Quantity rather than duplicating the full amount per deliverable.
 - Focused Lorena regression, phase-hour preview, bulk-editor, workflow-default, P1 release, both-package TypeScript and mojibake gates pass locally. Living Brief integrity, exact production build, push, publication and authenticated production proof remain release gates.
+- The exact implementation commit is `2f84e03248b04473b37c88e27b6a83f8bc1f6135`; release metadata is rebound to that immutable source before production assembly.
 
