@@ -77811,6 +77811,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3bffb9588af933807f342537a6b591d5da67d9b7cc189c129fba525d47012857"
+    },
+    {
+      "taskId": "terminal-ga-build009-live-governance-repair-20261026",
+      "reviewedThroughCommit": "ca86526c5602ac316230d0d73e44af7db146fd9e",
+      "reviewedAt": "2026-10-26T19:44:13.508Z",
+      "status": "local_candidate",
+      "captureTiming": "post_live_defect_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded governance repair does not change cross-product ownership or doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Repository, provider, publication and acceptance boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds atomic maker-checker enforcement and deterministic effective-date normalization exposed by live Build 9 verification."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair preserves the approved governed-cost product intent."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new route, table, package or integration boundary is introduced."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens or Navisworks behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior or visual system changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or citation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the genuine live defects and bounded corrective candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the repair while keeping Build 9 publication, live proof and Viva acceptance open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva acceptance remains pending for the corrected exact deployed candidate."
+        }
+      ],
+      "reason": "Reconcile the Build 9 live-discovered internal-cost effective-date and maker-checker repair.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/internal-cost-governance.ts",
+        "artifacts/api-server/src/lib/terminal-ga-build009-priced-staffing.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "94f655928edd59dfaccbececbd38594a6d1bbece3ac5dcf5981ee8f8f4c95bf3"
     }
   ]
 }

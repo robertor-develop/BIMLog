@@ -85,6 +85,14 @@ function effectiveDate(value: unknown) {
   return date;
 }
 function reason(value: unknown) { const text = String(value ?? "").trim(); if (text.length < 10 || text.length > 1000) throw new FinancialControlError(400, "INTERNAL_COST_REASON_INVALID", "Reason must contain 10 to 1000 characters."); return text; }
+function canonicalDateOnly(value: unknown) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString().slice(0, 10);
+  const text = String(value ?? "");
+  const iso = text.match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  if (iso) return iso;
+  const parsed = new Date(text);
+  return Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString().slice(0, 10);
+}
 async function actor(client: Queryable, actorUserId: number, companyId: number) {
   const row = (await client.query(`SELECT id,company_id "companyId",is_super_admin "isCeo" FROM users WHERE id=$1`, [actorUserId])).rows[0];
   // A database-backed global Super Administrator is already allowed to enter a
@@ -126,6 +134,9 @@ export async function decideInternalCostVersion(input: { actorUserId: number; co
     if (!authority.isCeo) throw new FinancialControlError(403, "INTERNAL_COST_CEO_APPROVAL_REQUIRED", "Only the company CEO authority may approve or reject internal-cost versions.");
     const outcome = String(input.outcome); if (!['approved','rejected'].includes(outcome)) throw new FinancialControlError(400, "INTERNAL_COST_DECISION_INVALID", "Decision must be approved or rejected.");
     const table = input.kind === "policy" ? "company_internal_cost_policy_versions" : "member_internal_cost_profile_versions";
+    const pending = (await client.query(`SELECT proposed_by_id "proposedById" FROM ${table} WHERE id=$1 AND company_id=$2 AND status='proposed' FOR UPDATE`, [String(input.versionId), input.companyId])).rows[0];
+    if (!pending) throw new FinancialControlError(409, "INTERNAL_COST_VERSION_NOT_PENDING", "Internal-cost version is missing or no longer pending.");
+    if (outcome === 'approved' && Number(pending.proposedById) === input.actorUserId) throw new FinancialControlError(409, "INTERNAL_COST_MAKER_CHECKER_REQUIRED", "A different authorized user must approve this internal-cost version.");
     const row = (await client.query(`UPDATE ${table} SET status=$4,approved_by_id=$3,decided_at=now(),reason=reason || E'\\nDecision: ' || $5 WHERE id=$1 AND company_id=$2 AND status='proposed' RETURNING id,version,status,proposed_by_id "proposedById",approved_by_id "approvedById",decided_at "decidedAt",effective_from "effectiveFrom"`, [String(input.versionId), input.companyId, input.actorUserId, outcome, reason(input.reason)])).rows[0];
     if (!row) throw new FinancialControlError(409, "INTERNAL_COST_VERSION_NOT_PENDING", "Internal-cost version is missing or no longer pending.");
     await client.query("COMMIT"); return row;
@@ -137,5 +148,5 @@ export async function getInternalCostGovernance(input: { actorUserId: number; co
   if (!input.includeSensitive) return { visible: false, canPropose: false, canApprove: false, activePolicy: null, pendingPolicies: [], memberProfiles: [] };
   const policies = (await client.query(`SELECT id,version,role_rates "roleRates",effective_from "effectiveFrom",status,proposed_by_id "proposedById",approved_by_id "approvedById",proposed_at "proposedAt",decided_at "decidedAt" FROM company_internal_cost_policy_versions WHERE company_id=$1 ORDER BY version DESC LIMIT 25`, [input.companyId])).rows;
   const profiles = (await client.query(`SELECT DISTINCT ON(p.user_id) p.id,p.user_id "userId",u.full_name "memberName",p.version,p.policy_version_id "policyVersionId",p.cost_role "costRole",p.hourly_rate::text "hourlyRate",p.effective_from "effectiveFrom",p.effective_to "effectiveTo",p.status,p.proposed_by_id "proposedById",p.approved_by_id "approvedById",p.decided_at "decidedAt" FROM member_internal_cost_profile_versions p JOIN users u ON u.id=p.user_id WHERE p.company_id=$1 ORDER BY p.user_id,p.version DESC`, [input.companyId])).rows;
-  return { visible: true, canPropose: true, canApprove: authority.isCeo === true, activePolicy: policies.find((row:any)=>row.status==='approved' && String(row.effectiveFrom).slice(0,10)<=new Date().toISOString().slice(0,10)) ?? null, pendingPolicies: policies.filter((row:any)=>row.status==='proposed'), memberProfiles: profiles };
+  return { visible: true, canPropose: true, canApprove: authority.isCeo === true, activePolicy: policies.find((row:any)=>row.status==='approved' && canonicalDateOnly(row.effectiveFrom)<=new Date().toISOString().slice(0,10)) ?? null, pendingPolicies: policies.filter((row:any)=>row.status==='proposed'), memberProfiles: profiles };
 }
