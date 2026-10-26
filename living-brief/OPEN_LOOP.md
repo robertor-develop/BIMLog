@@ -6392,3 +6392,11 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Obtain independent acceptance for Build 1. Build 2 is not permitted until this item passes.
 - [ ] Reconcile and publish implementation commit `d84a569d3070462d609e499b4e0febfde9a918e5` with its exact final evidence commit.
 
+## Definitive terminal GA program — Build 2
+
+- [x] Define the bounded journey: `/projects/:projectId/intake` Contract setup and Contract Items, followed by canonical `/projects/:projectId/financial/contracts?contractId=...` reopen links; authorized project administrators and explicitly disclosed global-super-admin override only.
+- [x] Bind stable contract-profile IDs, stable Contract Item IDs, exact profile-to-line references, duplicate rejection, incomplete existing-contract rejection, activation lineage and canonical reopen navigation in one executable gate.
+- [ ] On controlled project `70`, create `GA B2 CANONICAL CONTRACT 20261026` with negotiated identifiers and one controlled Contract Item; save, reopen, refresh, back/forward and authenticate again without creating a duplicate or changing either stable ID.
+- [ ] Prove wrong-role/tenant isolation through the existing automated gates and live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.
+- [ ] Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 3.
+
