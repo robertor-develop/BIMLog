@@ -10,6 +10,7 @@ import { reconcileResourceDemand, splitResourcePlan } from "./resource-demand-co
 import { getInternalCostGovernance, resolveApprovedMemberInternalCost, waitForInternalCostGovernanceMigration } from "./internal-cost-governance";
 import { protectInternalCostAssignment } from "./internal-cost-contract";
 import { getFloorHourCostGovernance, refreshFloorHourCostForWorkItem } from "./floor-hour-cost-governance";
+import { isTaskUpdateNoop } from "./job-operation-task-update-contract";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
@@ -661,6 +662,7 @@ export async function updateJobOperationTask(input: { actorUserId: number; proje
   try {
     await client.query("BEGIN");
     const control = await taskAccess(client, input.actorUserId, projectId, taskId);
+    if (Number(control.task.version) !== expectedVersion) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This task changed in another session. Reload before saving.");
     if (!control.canControl) throw new FinancialControlError(403, "JOB_OPERATIONS_TASK_CONTROL_DENIED", "Only the project leader or assigned team members may update this task.");
     const schedulingChanged = startDate !== (control.task.start_date ? String(control.task.start_date).slice(0, 10) : null) || dueDate !== (control.task.due_date ? String(control.task.due_date).slice(0, 10) : null) || JSON.stringify(predecessorTaskIds.sort()) !== JSON.stringify([...(control.task.predecessor_task_ids ?? [])].sort());
     if (schedulingChanged && !control.access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_SCHEDULE_DENIED", "Only the project leader may change task dates or dependencies.");
@@ -671,6 +673,10 @@ export async function updateJobOperationTask(input: { actorUserId: number; proje
       if (Number(valid) !== predecessorTaskIds.length) throw new FinancialControlError(400, "JOB_OPERATIONS_DEPENDENCIES_INVALID", "Every predecessor must belong to this project.");
       const cycle = (await client.query(`WITH RECURSIVE successors(id) AS (SELECT id FROM job_activation_tasks WHERE $1=ANY(predecessor_task_ids) UNION SELECT t.id FROM job_activation_tasks t JOIN successors s ON s.id=ANY(t.predecessor_task_ids)) SELECT 1 FROM successors WHERE id=ANY($2::text[]) LIMIT 1`, [taskId, predecessorTaskIds])).rows[0];
       if (cycle) throw new FinancialControlError(409, "JOB_OPERATIONS_DEPENDENCY_CYCLE", "Task dependencies cannot create a cycle.");
+    }
+    if (isTaskUpdateNoop(control.task, { status, progressPercent: progress, assigneeUserId, startDate, dueDate, predecessorTaskIds })) {
+      await client.query("COMMIT");
+      return { id: taskId, version: expectedVersion, status, progressPercent: progress, assigneeUserId, startDate, dueDate, predecessorTaskIds, idempotent: true };
     }
     const updated = (await client.query(`UPDATE job_activation_tasks SET status=$3,progress_percent=$4,assignee_user_id=$5,start_date=$6,due_date=$7,predecessor_task_ids=$8::text[],version=version+1,updated_at=now() WHERE id=$1 AND version=$2 RETURNING id,work_item_id,version`, [taskId, expectedVersion, status, progress, assigneeUserId, startDate, dueDate, predecessorTaskIds])).rows[0];
     if (!updated) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This task changed in another session. Reload before saving.");
