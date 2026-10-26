@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ccce63eeb7a49e4661a596c6bac0233f0f2893c98a0e39e012cbee0fdb36f9a8",
-  "itemCount": 509,
+  "sourceSha256": "e52b091338f1adb18a4aac3696f18c57bf251d8d506e68fbfa39658bd8281740",
+  "itemCount": 512,
   "counts": {
-    "ACTIVE": 456,
+    "ACTIVE": 459,
     "SUPERSEDED": 41,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 361,
+    "ACTIVE_DEFECT": 364,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 85,
     "ACCEPTED_LIMITATION": 3,
@@ -9776,6 +9776,63 @@
       "evidence": [
         "OPEN_LOOP.md:6419",
         "Definitive terminal GA program — Build 4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "87033e0181066876",
+      "sourceLine": 6426,
+      "heading": "Definitive terminal GA program — Build 5",
+      "statement": "On controlled project `70`, create `GA B5 BIM COORDINATOR 20261026` for `GA B2 CONTRACT LINE 20261026`, save, reopen, refresh, back/forward and authenticate again without generating a named assignment.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6426",
+        "Definitive terminal GA program — Build 5"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ae6699bd6f9e06a2",
+      "sourceLine": 6427,
+      "heading": "Definitive terminal GA program — Build 5",
+      "statement": "Prove wrong-role and tenant isolation through the existing automated gates and the live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6427",
+        "Definitive terminal GA program — Build 5"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6e21a8a7a7916d34",
+      "sourceLine": 6428,
+      "heading": "Definitive terminal GA program — Build 5",
+      "statement": "Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 6.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6428",
+        "Definitive terminal GA program — Build 5"
       ],
       "currentAuthority": false
     }

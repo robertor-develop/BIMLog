@@ -77308,6 +77308,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e07e4038ad2f59309c07b571bf9e6a9e9067d5bce00d81356109144b28c9a209"
+    },
+    {
+      "taskId": "definitive-terminal-ga-build005-20261026",
+      "reviewedThroughCommit": "80d561fa111cabf29f4003f655993593e5592e82",
+      "reviewedAt": "2026-10-26T10:10:00-04:00",
+      "status": "local_candidate",
+      "captureTiming": "post_implementation_pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical Contract Item authority and separates planned roles from named employees."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses the proven single-build exact-source release procedure."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds focused role-plan, accessible-control, persistence and normalization evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Intake persistence and server normalization authorities are reused."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, package or installer path changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet or export behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata, edition or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records accepted Build 4 identity and exact bounded Build 5 journey."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Defines Build 5 acceptance rows and blocks Build 6 until exact acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent acceptance remains separate from constructor evidence."
+        }
+      ],
+      "reason": "Reconcile definitive terminal GA Build 5 optional Resource budget and exact Contract Item authority.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d5e713b17148c4c95b81f847cb82b999f9ca7f88b2998aa582ab18aac2b5c409"
     }
   ]
 }

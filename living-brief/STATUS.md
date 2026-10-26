@@ -4845,3 +4845,10 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - The executable Build 4 gate binds compatible selection, unavailable-version disclosure, immutable generated-guidance provenance, reviewed-text preservation, phase-hour preview and reload-visible workflow identity. It does not import activation or Operations scope from later builds.
 - Reconciliation baseline: implementation commit `47d607b28908130cfefbaa0945df995764dec95d`; focused Build 4 and both package TypeScript checks pass. Exact clean production assembly, push, publication, authenticated production repetition and independent acceptance remain separate gates.
 
+## Definitive terminal GA Build 5 — Resource budget authority — 2026-10-26
+
+- Build 4 is independently accepted on exact deployed source `7e9928536e74d3e040e0b289b0c9c78c8f73ce4f`; accepted journeys are 4/20 and Build 5 is permitted.
+- Build 5 owns the controlled Resource budget journey on project `70`: create a role-only plan for `GA B2 CONTRACT LINE 20261026`, preserve its exact Contract Item authority, location, resource quantity and planned hours, save, reopen and hard-reload without inventing an employee assignment.
+- The implementation gives every repeated role-plan control a stable, localized accessible name and the executable Build 5 gate binds the existing optional-empty state, staffing-pending semantics, Contract Item linkage, resource-demand normalization, exact planned-cost behavior and persistence boundary.
+- Production BEFORE state is `v1.05.N18-P37` at source `7e9928536e74d3e040e0b289b0c9c78c8f73ce4f`: the Resource budget is empty and explicitly optional. Exact clean production assembly, push, publication, authenticated production repetition and independent acceptance remain separate gates.
+

@@ -6418,3 +6418,12 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Prove wrong-role/tenant isolation through existing automated gates and the live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.
 - [ ] Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 5.
 
+## Definitive terminal GA program — Build 5
+
+- [x] Accept Build 4 progression on exact deployed source `7e9928536e74d3e040e0b289b0c9c78c8f73ce4f` with independent Viva PASS.
+- [x] Define the bounded journey: `/projects/:projectId/intake` Resource budget role plan for the controlled Contract Item, with no named employee required, followed by save, reopen, reload and reentry.
+- [x] Bind optional empty-state activation, exact Contract Item targeting, resource quantity, planned hours, computed internal-cost behavior, staffing-pending semantics and uniquely accessible repeated controls in one executable gate.
+- [ ] On controlled project `70`, create `GA B5 BIM COORDINATOR 20261026` for `GA B2 CONTRACT LINE 20261026`, save, reopen, refresh, back/forward and authenticate again without generating a named assignment.
+- [ ] Prove wrong-role and tenant isolation through the existing automated gates and the live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.
+- [ ] Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 6.
+
