@@ -4823,3 +4823,10 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - Exact-source push, Replit publication, post-publication live repetition and independent acceptance remain required before Build 2 is permitted.
 - Reconciliation baseline: implementation commit `d84a569d3070462d609e499b4e0febfde9a918e5`; this candidate does not authorize Build 2 before terminal acceptance.
 
+## Definitive terminal GA Build 2 — canonical contract authority — 2026-10-26
+
+- Build 1 is independently accepted on exact deployed source `ee9b4de1c6e1952fe71316b15c60b965b8f99b3e`; accepted journeys are 1/20 and Build 2 is permitted.
+- Build 2 owns the controlled Job Intake Contract setup and Contract Items journey on project `70`: one canonical contract profile, stable line IDs, exact profile-to-line linkage, duplicate and invalid-link rejection, saved-state persistence and canonical contract reopen navigation.
+- The executable Build 2 gate reuses the existing normalization, activation-lineage, existing-contract reconciliation and bulk-editor behavior suites. No historical feature named “Build 2” and no Build 3 APU-rate scope is imported.
+- Production BEFORE state is `v1.05.N18-P37` at source `ee9b4de1c6e1952fe71316b15c60b965b8f99b3e`: Job identity is complete, Contract setup and Contract Items need information, and no controlled Build 2 contract values have been entered.
+
