@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "test:ga-terminal-build003": "node scripts/test-ga-terminal-build003.mjs",
     "test:ga-terminal-build002": "node scripts/test-ga-terminal-build002.mjs",
     "test:ga-terminal-build001": "node scripts/test-ga-terminal-build001.mjs",
     "test:bimlog-ga-build106": "node scripts/test-bimlog-ga-build106.mjs",

@@ -12,7 +12,7 @@ assert.match(service, /INSERT INTO generic_cost_value_plan_versions/);
 assert.doesNotMatch(service, /UPDATE generic_cost_value_plan_versions/);
 assert.match(page, /Saved APU version \(optional\)/);
 assert.match(page, /immutable version\(s\) available/);
-assert.match(page, /Selecting one binds the Contract Item to that exact version/);
-assert.match(page, /props\.apuVersions\.map/);
+assert.match(page, /Selecting a version preserves its unit rate and other items/);
+assert.match(page, /eligibleApuVersions\.map/);
 
 console.log(JSON.stringify({ status: "PASS", build: 8, checks: ["append-only-version-save", "history-retrieval", "current-identifiable", "visible-immutable-history"] }));

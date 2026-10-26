@@ -4830,3 +4830,11 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - The executable Build 2 gate reuses the existing normalization, activation-lineage, existing-contract reconciliation and bulk-editor behavior suites. No historical feature named “Build 2” and no Build 3 APU-rate scope is imported.
 - Production BEFORE state is `v1.05.N18-P37` at source `ee9b4de1c6e1952fe71316b15c60b965b8f99b3e`: Job identity is complete, Contract setup and Contract Items need information, and no controlled Build 2 contract values have been entered.
 
+## Definitive terminal GA Build 3 — saved APU and unit-rate authority — 2026-10-26
+
+- Build 2 is accepted for progression on exact deployed source `63ae09f1508fd0efb7cc3f57bed468cd641c8b7d`; accepted journeys are 2/20 and Build 3 is permitted.
+- Build 3 owns the controlled Contract Item saved-APU journey on project `70`: list only compatible current-project versions, select one exact immutable version, derive the unit rate from its published unit rate or quantity-normalized plan total, preserve the APU fingerprint/rate provenance, save, reopen and hard-reload without changing another Contract Item.
+- The executable Build 3 gate binds the existing selection, sole-compatible autobind, incompatible-version disclosure, exact decimal pricing, server-side currency/version/rate-source rejection and reload-visible binding behavior. It does not import Delivery workflow or activation scope from later builds.
+- Production BEFORE state is `v1.05.N18-P37` at source `63ae09f1508fd0efb7cc3f57bed468cd641c8b7d`: the controlled Build 2 contract and item persist, while the Build 3 saved-APU selection and resulting unit-rate persistence journey remains to be repeated after this exact candidate is published.
+- Reconciliation baseline: implementation commit `807595ac6a9b594c1d21e0320a089f9528320558`; focused Build 3, both package TypeScript checks, mojibake, database safety and Living Brief integrity pass. Exact clean production assembly, push, publication, authenticated production repetition and independent acceptance remain separate gates.
+
