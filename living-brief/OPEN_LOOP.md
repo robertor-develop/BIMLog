@@ -6390,4 +6390,5 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Add the bounded Build 1 identity/company/contact persistence regression gate.
 - [ ] Push and publish the exact Build 1 candidate, repeat the authenticated visible-Chrome journey and bind deployed identity.
 - [ ] Obtain independent acceptance for Build 1. Build 2 is not permitted until this item passes.
+- [ ] Reconcile and publish implementation commit `d84a569d3070462d609e499b4e0febfde9a918e5` with its exact final evidence commit.
 

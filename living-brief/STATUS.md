@@ -4821,4 +4821,5 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - A controlled production baseline on project `70` (`QA-B1-1025`) created the authoritative client company `GA BUILD 1 CLIENT 20261025` and contact, edited the Job Intake name and location, saved, hard-reloaded and restored the exact project code, company, contact and edited values.
 - The new Build 1 gate binds canonical project prefill, authoritative company/contact selection, autosave, saved-state signaling and reload-safe browser draft behavior. No product defect was reproduced in this journey; the implementation change is permanent regression coverage.
 - Exact-source push, Replit publication, post-publication live repetition and independent acceptance remain required before Build 2 is permitted.
+- Reconciliation baseline: implementation commit `d84a569d3070462d609e499b4e0febfde9a918e5`; this candidate does not authorize Build 2 before terminal acceptance.
 

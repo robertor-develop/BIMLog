@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "00aa87864b5e2b78e1bc0881dd018f01dd056e98c402e06c40e4ae14843a5486",
-  "itemCount": 497,
+  "sourceSha256": "5cde695e096c8fe1d5521493eb87809507bdc742a4efe83c8af24387958753aa",
+  "itemCount": 500,
   "counts": {
-    "ACTIVE": 446,
-    "SUPERSEDED": 39,
+    "ACTIVE": 448,
+    "SUPERSEDED": 40,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 351,
+    "ACTIVE_DEFECT": 353,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 85,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 39,
+    "SUPERSEDED_HISTORY": 40,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -9544,6 +9544,63 @@
       "evidence": [
         "OPEN_LOOP.md:6385",
         "Final live RFI/Submittal GA regression — 2026-10-25"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "93bcca3af6e9b815",
+      "sourceLine": 6391,
+      "heading": "Definitive terminal GA program — Build 1",
+      "statement": "Push and publish the exact Build 1 candidate, repeat the authenticated visible-Chrome journey and bind deployed identity.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "bb4afc1691bfe641",
+      "sourceLine": 6392,
+      "heading": "Definitive terminal GA program — Build 1",
+      "statement": "Obtain independent acceptance for Build 1. Build 2 is not permitted until this item passes.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6392",
+        "Definitive terminal GA program — Build 1"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "e1f13a092d632cc0",
+      "sourceLine": 6393,
+      "heading": "Definitive terminal GA program — Build 1",
+      "statement": "Reconcile and publish implementation commit `d84a569d3070462d609e499b4e0febfde9a918e5` with its exact final evidence commit.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6393",
+        "Definitive terminal GA program — Build 1"
       ],
       "currentAuthority": false
     }
