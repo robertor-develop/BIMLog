@@ -6409,3 +6409,12 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Prove wrong-role/tenant isolation through the existing automated gates and live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.
 - [ ] Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 4.
 
+## Definitive terminal GA program — Build 4
+
+- [x] Accept Build 3 progression on exact deployed source `606b87ef062c9d12ee9d6b08c2a5fbb126871cdd` after correcting the stale release binding and receiving independent Viva PASS.
+- [x] Define the bounded journey: `/projects/:projectId/intake` Delivery workflow selection for the controlled Contract Item, generated Submittal strategy and milestone/distribution guidance, save/reopen/reload, and preservation of immutable workflow identity and reviewed project text.
+- [x] Bind compatible selection, unavailable saved-version disclosure, generated-guidance provenance, phase-hour preview and reload persistence in one executable gate.
+- [ ] On controlled project `70`, select the exact saved workflow for `GA B2 CONTRACT LINE 20261026`; verify generated strategy and milestones appear once, save, reopen, refresh and authenticate again without replacing reviewed text.
+- [ ] Prove wrong-role/tenant isolation through existing automated gates and the live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.
+- [ ] Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 5.
+

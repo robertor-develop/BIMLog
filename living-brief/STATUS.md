@@ -4838,3 +4838,10 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - Production BEFORE state is `v1.05.N18-P37` at source `63ae09f1508fd0efb7cc3f57bed468cd641c8b7d`: the controlled Build 2 contract and item persist, while the Build 3 saved-APU selection and resulting unit-rate persistence journey remains to be repeated after this exact candidate is published.
 - Reconciliation baseline: implementation commit `807595ac6a9b594c1d21e0320a089f9528320558`; focused Build 3, both package TypeScript checks, mojibake, database safety and Living Brief integrity pass. Exact clean production assembly, push, publication, authenticated production repetition and independent acceptance remain separate gates.
 
+## Definitive terminal GA Build 4 — Delivery workflow authority — 2026-10-26
+
+- Build 3 is independently accepted on exact deployed source `606b87ef062c9d12ee9d6b08c2a5fbb126871cdd`; accepted journeys are 3/20 and Build 4 is permitted.
+- Build 4 owns the controlled Delivery workflow journey on project `70`: choose the exact compatible immutable workflow version for the controlled Contract Item, preserve its saved identity, hydrate generated Submittal strategy and milestone/distribution guidance, save, reopen and hard-reload without duplicating the guidance fields or replacing reviewed project text.
+- The executable Build 4 gate binds compatible selection, unavailable-version disclosure, immutable generated-guidance provenance, reviewed-text preservation, phase-hour preview and reload-visible workflow identity. It does not import activation or Operations scope from later builds.
+- Reconciliation baseline: implementation commit `47d607b28908130cfefbaa0945df995764dec95d`; focused Build 4 and both package TypeScript checks pass. Exact clean production assembly, push, publication, authenticated production repetition and independent acceptance remain separate gates.
+
