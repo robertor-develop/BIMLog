@@ -77383,8 +77383,8 @@
     },
     {
       "taskId": "definitive-terminal-ga-build006-20261026",
-      "reviewedThroughCommit": "2e158cbbe08f4e33edc28a617c740244cee2d19c",
-      "reviewedAt": "2026-10-26T11:14:33-04:00",
+      "reviewedThroughCommit": "e9d7092d6f982799851a57f146c26acc82763f93",
+      "reviewedAt": "2026-10-26T11:41:00-04:00",
       "status": "local_candidate",
       "captureTiming": "post_implementation_pre_release_reconciliation",
       "authorities": [
@@ -77411,7 +77411,7 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "Aligns internal-cost, EDT authority and Time Review projections with the existing project-scope super-admin override."
+          "reason": "Aligns internal-cost, EDT route context, Operations Director assignment and Time Review projections with the existing project-scope global-admin override."
         },
         {
           "key": "plugin",
@@ -77431,7 +77431,7 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records Build 5 acceptance, Build 6 activation truth and the reproduced Operations defect."
+          "reason": "Records Build 5 acceptance, Build 6 activation truth and all three reproduced Operations authority defects."
         },
         {
           "key": "open_loop",
@@ -77444,14 +77444,14 @@
           "reason": "Independent Viva acceptance remains separate from constructor evidence."
         }
       ],
-      "reason": "Reconcile definitive terminal GA Build 6 activation and authorized Operations, EDT and Time Review projection repairs.",
+      "reason": "Reconcile definitive terminal GA Build 6 activation and authorized Operations, EDT assignment and Time Review projection repairs.",
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "f094e913e1ab613bea7f381a836b81a8f6e5f7449a93328ce106e6b253b7eb57"
+      "reviewedChangeSha256": "c317cc1589ef97cfa5ec511ecb35f19f7aefdc1050a1a48c5b98b60081058a0e"
     }
   ]
 }
