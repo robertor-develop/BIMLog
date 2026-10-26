@@ -12,7 +12,7 @@ let activeGrant: string | null = null;
 const history: string[] = [];
 const host: EdtTransactionHost = { async connect() { return {
   async query<Row>(sql: string) {
-    const rows: unknown[] = sql.includes("FROM users WHERE id=$1 AND company_id=$2 AND is_super_admin=true")
+    const rows: unknown[] = sql.includes("FROM users WHERE id=$1 AND is_super_admin=true")
       ? admin ? [{ id: 1 }] : []
       : sql.includes("FROM users u JOIN project_members") ? member ? [{ id: 2 }] : []
       : sql.includes("FROM edt_operations_director_grants g") ? activeGrant ? [{ id: activeGrant }] : []

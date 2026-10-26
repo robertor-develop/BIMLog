@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 const governance = readFileSync(new URL("./internal-cost-governance.ts", import.meta.url), "utf8");
 const operations = readFileSync(new URL("./job-operations-service.ts", import.meta.url), "utf8");
 const edtRouteContext = readFileSync(new URL("./edt-engine-route-context.ts", import.meta.url), "utf8");
+const edtDirector = readFileSync(new URL("./edt-engine-operations-director.ts", import.meta.url), "utf8");
+const edtRoutes = readFileSync(new URL("../routes/edt-engine.ts", import.meta.url), "utf8");
 
 assert.match(
   governance,
@@ -24,6 +26,16 @@ assert.match(
   edtRouteContext,
   /!row\.is_super_admin\s*&&\s*Number\(row\.project_company_id\)\s*!==\s*Number\(row\.company_id\)/,
   "ordinary EDT actors must remain tenant-bound while a global administrator may inspect an authorized foreign-company project",
+);
+assert.match(
+  edtDirector,
+  /\$3::boolean OR company_id=\$2/,
+  "Operations Director administration must accept only an explicitly database-backed global administrator outside the project company",
+);
+assert.match(
+  edtRoutes,
+  /isGlobalSuperAdmin:\s*actor\.isGlobalSuperAdmin/,
+  "the EDT route must propagate the database-backed global-administrator proof to assignment reads and writes",
 );
 assert.match(
   edtRouteContext,

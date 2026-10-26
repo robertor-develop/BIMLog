@@ -47,6 +47,7 @@ router.get("/projects/:projectId/edt-engine/operations-director-grants", authMid
     const actor = await resolveEdtRouteActor(req, projectId);
     const assignments = await listEdtOperationsDirectorAssignments({
       actorUserId: actor.actorUserId, actorCompanyId: actor.actorCompanyId, projectId,
+      isGlobalSuperAdmin: actor.isGlobalSuperAdmin,
     });
     res.json({ projectId, assignments });
   } catch (error) { sendEdtRouteError(res, error); }
@@ -63,7 +64,7 @@ router.post("/projects/:projectId/edt-engine/operations-director-grants", authMi
     const result = await changeEdtOperationsDirectorGrant({
       actorUserId: actor.actorUserId, actorCompanyId: actor.actorCompanyId, projectId,
       targetUserId: requiredInteger(body, "targetUserId"), action,
-      reason: requiredText(body, "reason"),
+      reason: requiredText(body, "reason"), isGlobalSuperAdmin: actor.isGlobalSuperAdmin,
     });
     res.status(result.idempotent ? 200 : action === "grant" ? 201 : 200).json(result);
   } catch (error) { sendEdtRouteError(res, error); }

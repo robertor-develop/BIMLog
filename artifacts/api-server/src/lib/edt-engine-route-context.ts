@@ -13,6 +13,7 @@ export type EdtRouteActor = Readonly<{
   actorCompanyId: number;
   actorProjectIds: number[];
   eligibleRole: EdtDefaultRoleProfile;
+  isGlobalSuperAdmin: boolean;
 }>;
 
 const projectRoleProfiles: Readonly<Record<string, EdtDefaultRoleProfile>> = Object.freeze({
@@ -86,6 +87,7 @@ export async function resolveEdtRouteActor(req: Request, projectId: number): Pro
     actorCompanyId: row.is_super_admin ? Number(row.project_company_id) : Number(row.company_id),
     actorProjectIds: [projectId],
     eligibleRole: role,
+    isGlobalSuperAdmin: row.is_super_admin,
   });
 }
 

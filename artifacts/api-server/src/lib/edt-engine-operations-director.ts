@@ -4,12 +4,12 @@ import { EdtEngineConflict, withEdtTransaction, type EdtTransactionHost } from "
 export type EdtDirectorGrantAction = "grant" | "revoke";
 
 export async function listEdtOperationsDirectorAssignments(input: {
-  actorUserId: number; actorCompanyId: number; projectId: number;
+  actorUserId: number; actorCompanyId: number; projectId: number; isGlobalSuperAdmin?: boolean;
 }, host?: EdtTransactionHost) {
   return withEdtTransaction(async client => {
     const administrator = (await client.query<{ id: number }>(
-      "SELECT id FROM users WHERE id=$1 AND company_id=$2 AND is_super_admin=true",
-      [input.actorUserId, input.actorCompanyId])).rows[0];
+      "SELECT id FROM users WHERE id=$1 AND is_super_admin=true AND ($3::boolean OR company_id=$2)",
+      [input.actorUserId, input.actorCompanyId, input.isGlobalSuperAdmin === true])).rows[0];
     if (!administrator) throw new EdtEngineConflict("EDT_DIRECTOR_ADMIN_REQUIRED", "A current company Super Administrator must view Operations Director assignments.");
     const project = (await client.query<{ id: number }>(
       `SELECT p.id FROM projects p JOIN users owner ON owner.id=p.created_by_id
@@ -40,7 +40,7 @@ function boundedReason(value: string): string {
 /** A separate, current Super Administrator assigns this narrow EDT approval role to an active same-company project member. */
 export async function changeEdtOperationsDirectorGrant(input: {
   actorUserId: number; actorCompanyId: number; projectId: number; targetUserId: number;
-  action: EdtDirectorGrantAction; reason: string;
+  action: EdtDirectorGrantAction; reason: string; isGlobalSuperAdmin?: boolean;
 }, host?: EdtTransactionHost) {
   const reason = boundedReason(input.reason);
   if (!Number.isSafeInteger(input.projectId) || input.projectId < 1 ||
@@ -51,8 +51,8 @@ export async function changeEdtOperationsDirectorGrant(input: {
   return withEdtTransaction(async client => {
     await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`edt-director:${input.projectId}:${input.targetUserId}`]);
     const actor = (await client.query<{ id: number }>(
-      "SELECT id FROM users WHERE id=$1 AND company_id=$2 AND is_super_admin=true FOR SHARE",
-      [input.actorUserId, input.actorCompanyId])).rows[0];
+      "SELECT id FROM users WHERE id=$1 AND is_super_admin=true AND ($3::boolean OR company_id=$2) FOR SHARE",
+      [input.actorUserId, input.actorCompanyId, input.isGlobalSuperAdmin === true])).rows[0];
     if (!actor) throw new EdtEngineConflict("EDT_DIRECTOR_ADMIN_REQUIRED", "A current company Super Administrator must manage Operations Director authority.");
     const target = (await client.query<{ id: number }>(
       `SELECT u.id FROM users u JOIN project_members pm ON pm.user_id=u.id AND pm.project_id=$3 AND pm.status='active'
