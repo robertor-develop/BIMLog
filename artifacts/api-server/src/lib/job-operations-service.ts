@@ -717,7 +717,9 @@ export async function addJobOperationTime(input: { actorUserId: number; projectI
   await waitForJobIntakeMigration();
   const projectId = positiveInt(input.projectId, "projectId"), entryId = id(input.entryId, "entryId"), taskId = id(input.taskId, "taskId");
   let assignmentId = input.assignmentId ? id(input.assignmentId, "assignmentId") : null;
-  const workDate = String(input.workDate ?? ""); if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate) || Number.isNaN(Date.parse(`${workDate}T00:00:00Z`))) throw new FinancialControlError(400, "JOB_OPERATIONS_DATE_INVALID", "Work date is invalid.");
+  const workDate = String(input.workDate ?? ""), parsedWorkDate = new Date(`${workDate}T00:00:00.000Z`), today = new Date().toISOString().slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate) || Number.isNaN(parsedWorkDate.getTime()) || parsedWorkDate.toISOString().slice(0, 10) !== workDate || workDate > today)
+    throw new FinancialControlError(400, "JOB_OPERATIONS_DATE_INVALID", "Work date must be a real calendar date and cannot be in the future.");
   const hours = workHours(input.hours), note = text(input.note, 500, "note"), client = await pool.connect();
   try {
     await client.query("BEGIN");
