@@ -109,7 +109,7 @@ const separatedPastedItem = buildPastedContractItem(
   { name: "Door", quantity: "24", sourceRow: 7 },
 );
 assert.equal(separatedPastedItem.quantity, "24");
-assert.equal(separatedPastedItem.plannedHours, "1");
+assert.equal(separatedPastedItem.plannedHours, "24");
 assert.deepEqual(separatedPastedItem.provenance, { source: "clipboard", sourceRow: 7 });
 const pastedItem: Record<string, any> = { id: "CI-pasted", name: "Muro", quantity: "4", plannedHours: "4", provenance: { source: "clipboard" } };
 assert.deepEqual(

@@ -1083,6 +1083,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/living-brief-runtime.behavior.ts
 - artifacts/api-server/src/lib/living-brief-source.ts
 - artifacts/api-server/src/lib/lorena-allocation-correction-integration.behavior.ts
+- artifacts/api-server/src/lib/lorena-intake-20261026.behavior.ts
 - artifacts/api-server/src/lib/main04-agent-transport.behavior.ts
 - artifacts/api-server/src/lib/main04-agent-transport.ts
 - artifacts/api-server/src/lib/master-catalog-authority.behavior.ts

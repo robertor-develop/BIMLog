@@ -47,6 +47,7 @@ export function selectDeliveryWorkflow(current: any, workflowTemplate: string) {
 }
 
 type WorkflowDefinition = {
+  deliverableTypes?: string[];
   phases: Array<{ name: string; tasks: Array<{ name?: string }> }>;
 };
 
@@ -80,12 +81,17 @@ export function selectPublishedDeliveryWorkflow(current: any, option: { versionI
 
 export function hydrateSelectedDeliveryWorkflowGuidance(
   items: any[],
-  options: Array<{ versionId: string; definition: WorkflowDefinition }>,
+  options: Array<{ versionId: string; source?: string; definition: WorkflowDefinition }>,
 ) {
   const byVersion = new Map(options.map(option => [option.versionId, option]));
   return items.map(item => {
     const versionId = String(item?.deliveryWorkflowVersionId ?? "").trim();
-    const option = byVersion.get(versionId);
+    const type = String(item?.deliverableType ?? "GENERAL");
+    const matches = options.filter(option => (option.definition.deliverableTypes ?? []).includes(type));
+    const company = matches.filter(option => option.source === "company");
+    const defaults = matches.filter(option => option.source === "bimlog");
+    const automatic = company.length === 1 ? company[0] : company.length === 0 && defaults.length === 1 ? defaults[0] : undefined;
+    const option = versionId ? byVersion.get(versionId) : automatic;
     if (!option) return item;
     const hydrated = selectPublishedDeliveryWorkflow(item, option);
     return JSON.stringify(hydrated) === JSON.stringify(item) ? item : hydrated;

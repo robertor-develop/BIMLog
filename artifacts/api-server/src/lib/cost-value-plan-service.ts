@@ -194,7 +194,24 @@ export async function getCostValuePlan(actorUserId: number, projectId: number) {
   await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.view", operation: "read" });
   const project = (await pool.query(`SELECT id,name,code FROM projects WHERE id=$1`, [projectId])).rows[0];
   if (!project) throw new CostValuePlanError(404, "PROJECT_NOT_FOUND", "Project not found.");
-  const versions = (await pool.query(`SELECT version,content,evaluation,content_fingerprint,created_at FROM generic_cost_value_plan_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 100`, [projectId])).rows;
+  let versions = (await pool.query(`SELECT version,content,evaluation,content_fingerprint,created_at FROM generic_cost_value_plan_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 100`, [projectId])).rows;
+  // Applying an immutable company-library APU creates the governed project APU
+  // lineage. Expose that lineage to Intake even when the user has not opened
+  // and re-saved the calculator; otherwise the successful library application
+  // misleadingly leaves the Contract Item selector empty.
+  if (!versions.length) {
+    versions = (await pool.query(`SELECT p.version,
+      jsonb_build_object('name',t.name,'currency',p.currency,'sellingPrice',COALESCE(SUM(l.rounded_amount),0)::text,
+        'source','company_apu_library','templateVersionId',p.template_version_id) content,
+      jsonb_build_object('source','company_apu_library','templateFingerprint',p.template_fingerprint) evaluation,
+      p.content_fingerprint,p.applied_at created_at
+      FROM generic_project_apu_versions p
+      JOIN generic_apu_template_versions t ON t.id=p.template_version_id
+      LEFT JOIN generic_project_apu_lines l ON l.project_apu_version_id=p.id
+      WHERE p.project_id=$1 AND p.status='calculated'
+      GROUP BY p.id,p.version,p.currency,p.content_fingerprint,p.applied_at,p.template_version_id,p.template_fingerprint,t.name
+      ORDER BY p.version DESC LIMIT 100`, [projectId])).rows;
+  }
   const latest = versions[0] ?? null;
   const serializeVersion = (row: any) => ({
     ...row.content,

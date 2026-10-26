@@ -51,4 +51,9 @@ assert.equal(hydrated.deliveryWorkflowDerivedFromVersionId, "wf-v9");
 assert.equal(preserved.submittalStrategy, "Customer review");
 assert.equal(preserved.milestoneSummary, "Customer gate");
 assert.equal(unavailable.deliveryWorkflowDerivedFromVersionId, undefined);
+const [automatic] = hydrateSelectedDeliveryWorkflowGuidance([
+  { id: "automatic", deliverableType: "SHOP_DRAWING", deliveryWorkflowVersionId: "", submittalStrategy: "", milestoneSummary: "" },
+], [{ ...hydrationOption, source: "bimlog", definition: { ...hydrationOption.definition, deliverableTypes: ["SHOP_DRAWING"] } }]);
+assert.equal(automatic.deliveryWorkflowVersionId, "wf-v9");
+assert.equal(automatic.submittalStrategy, "Prepare → Coordinate → Issue → Archive");
 console.log("job-intake-delivery-defaults.behavior: PASS");

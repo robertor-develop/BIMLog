@@ -424,11 +424,11 @@ export function normalizeJobIntakeData(raw: unknown) {
   const scopeItemIds = new Set<string>();
   const normalizedItems = scopeItems.map((rawItem: any, index: number) => {
     const item = rawItem && typeof rawItem === "object" ? rawItem : {};
-    const plannedHours = exact(
-      item.plannedHours,
-      `scopeItems[${index}].plannedHours`,
-    );
     const quantity = exact(item.quantity ?? item.plannedHours, `scopeItems[${index}].quantity`);
+    // Quantity is the canonical work amount. Preserve the legacy field in the
+    // stored contract for compatibility, but derive it instead of accepting a
+    // second contradictory user value.
+    const plannedHours = quantity;
     const billingHourlyRate = exact(
       item.billingHourlyRate,
       `scopeItems[${index}].billingHourlyRate`,
@@ -1000,15 +1000,9 @@ export function jobIntakeCompletion(
   const scopeReady =
     data.scopeItems.length > 0 &&
     data.scopeItems.every((item) => item.name && positive(item.quantity) && positive(item.plannedHours));
-  const itemDeliveryGuidanceReady =
-    data.scopeItems.length > 0 &&
-    data.scopeItems.every(
-      (item) =>
-        Boolean(item.submittalStrategy?.trim()) &&
-        Boolean(item.milestoneSummary?.trim()),
-    );
-  const deliveryGuidanceReady =
-    itemDeliveryGuidanceReady || Boolean(data.delivery.submittalStrategy?.trim());
+  // Strategy/milestone prose was removed from the approved Intake UX. Delivery
+  // readiness is governed by the selected immutable workflow, not hidden prose.
+  const deliveryGuidanceReady = data.scopeItems.length > 0;
   // Commercial activation promises an EDT-backed Work Item. Its floor/area and
   // permanent trade identity must therefore exist before Intake says "ready".
   const edtSourceRequired = capabilities.fullCommercialActivation && jobIntakeBudgetLinkRequested(data);
@@ -1160,8 +1154,8 @@ export function jobIntakeCompletion(
     },
     !scopeReady && {
       code: "scope",
-      en: "Give each scope item a name, positive quantity and positive planned labor hours.",
-      es: "Complete cada partida con nombre, cantidad positiva y horas de trabajo previstas positivas.",
+      en: "Give each Contract Item a name and positive Quantity.",
+      es: "Complete cada Partida de Contrato con nombre y Cantidad positiva.",
     },
     !edtSourceReady && {
       code: "edt_source",
@@ -1218,11 +1212,6 @@ export function jobIntakeCompletion(
         en: "Select the approved budget snapshot.",
         es: "Seleccione el presupuesto aprobado.",
       },
-    !deliveryGuidanceReady && {
-      code: "delivery",
-      en: "Describe the Submittal delivery strategy and milestones for every Contract Item.",
-      es: "Describa la estrategia de entrega de submittals y los hitos de cada Partida de Contrato.",
-    },
     !teamReady && {
       code: "team",
       en: "Complete each resource plan row with a role, scope item and planned hours, or remove it.",

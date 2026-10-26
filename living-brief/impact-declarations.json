@@ -77883,6 +77883,88 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "110569a60b6346cb99ce59ceeb94d016c58aaf96226fde56c2f50728fda38cee"
+    },
+    {
+      "taskId": "lorena-job-intake-production-repair-20261026",
+      "reviewedThroughCommit": "ac9a680cf7343341a83c4d0dd5853b0315717c10",
+      "reviewedAt": "2026-10-26T21:20:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair preserves product ownership, tenant isolation, and the approved BIMLog lifecycle."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Repository, provider, publication, and acceptance boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The repair removes duplicate data entry, conserves operational hours, and strengthens workflow automation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair advances the existing spreadsheet-simple Job Intake direction without changing product scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new route, table, package, provider, or integration boundary is introduced."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, Lens, Pulse, or Mirror behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report generation, branding, export, or report layout behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, citation, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the bounded Lorena repair, passed local gates, and remaining production release evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks publication, authenticated proof, independent acceptance, and the separate Trade and Service enhancement."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent acceptance remains pending until the exact candidate is deployed and live verified."
+        }
+      ],
+      "reason": "Reconcile the urgent Lorena Job Intake repair for quantity authority, APU availability, workflow automation, readiness, and conserved phase hours.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/cost-value-plan-service.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/job-intake/IntakeDeliveryItems.tsx",
+        "artifacts/bimlog/src/components/job-intake/QuickJobIntake.tsx",
+        "artifacts/bimlog/src/lib/job-intake-delivery-defaults.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-delivery-defaults.ts",
+        "artifacts/bimlog/src/pages/job-operations-governance-guidance.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f2378a79946b6c292ae86b4bdae65441be7b5d85955f7115a20235d6aa5ac44a"
     }
   ]
 }

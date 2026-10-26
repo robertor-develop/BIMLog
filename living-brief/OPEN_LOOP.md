@@ -6469,3 +6469,14 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Prove one assignment, one binding, exact `1.00h / 0.25h / 47.00h`, `10.00 / 2.50` internal-cost arithmetic, unchanged customer/APU value, and Time Review eligibility without submission.
 - [ ] Obtain independent Viva acceptance before Build 10; do not advance while any Build 9 gate is failed or untested.
 
+## Lorena Job Intake production repair — 2026-10-26
+
+- [x] Remove the duplicate editable Labor hours control and derive compatibility `plannedHours` from Contract Item Quantity.
+- [x] Remove hidden Submittal-strategy and milestone prose from Delivery readiness requirements.
+- [x] Persist a unique applicable workflow automatically and provide a bulk apply-to-compatible-items action.
+- [x] Expose applied company-library APU versions to Job Intake through Cost and Value plan history.
+- [x] Preserve conserved workflow-phase allocation so generated Operations packages do not duplicate total Contract Item hours.
+- [ ] Complete Living Brief integrity and exact production build, then commit, push and publish the exact repair.
+- [ ] Prove all repaired journeys in authenticated production Chrome with save, reload and activation/Operations persistence evidence; obtain independent acceptance separately.
+- [ ] Treat Lorena's proposed Trade/Service contract-item taxonomy, contract-level bulk import and summarized contract navigation as the next product change; use company catalogs and configurable Service-to-phase templates rather than hardcoded free text.
+

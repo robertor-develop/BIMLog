@@ -277,6 +277,7 @@ export function buildPastedContractItem(
     ...newItem(props),
     name: row.name,
     quantity: row.quantity,
+    plannedHours: row.quantity,
     provenance: { source: "clipboard", sourceRow: row.sourceRow },
   };
 }
@@ -286,7 +287,10 @@ export function updateContractItemQuantity<T extends Record<string, any>>(
   quantity: string,
   versions: IntakeApuVersion[],
 ) {
-  const updated = { ...item, quantity };
+  // Contract Items use one authoritative quantity.  For hourly work that same
+  // value is the operational-hours baseline; keeping a second editable field
+  // created contradictory totals in Intake and Operations.
+  const updated = { ...item, quantity, plannedHours: quantity };
   if (item.apuPlanVersion == null || item.rateSource?.kind !== "saved_apu_rate") return updated;
   const selected = versions.find((version) => version.version === item.apuPlanVersion);
   return selected ? connectContractItemsToApu([updated], selected)[0] : updated;
@@ -461,8 +465,8 @@ export function ContractItemBulkEditor(props: Props) {
           </strong>
           <p>
             {props.tt(
-              "Quantity × unit rate gives contract value. Planned labor hours are a separate estimate. Changing quantity never changes hours.",
-              "Cantidad × tarifa unitaria produce el valor contractual. Las horas de trabajo son una estimación separada. Cambiar cantidad nunca cambia las horas.",
+              "Quantity is the single work quantity and operational-hours baseline. Quantity × unit rate gives contract value.",
+              "Cantidad es el único valor de trabajo y la base de horas operativas. Cantidad × tarifa unitaria produce el valor contractual.",
             )}
           </p>
         </div>
@@ -595,7 +599,7 @@ export function ContractItemBulkEditor(props: Props) {
           {props.tt("Contract Item Name", "Nombre de la Partida de Contrato")}
         </span>
         <span>{props.tt("Quantity", "Cantidad")}</span>
-        <span>{props.tt("Unit", "Unidad")}</span><span>{props.tt("Labor hours", "Horas de trabajo")}</span><span>{props.tt("Order", "Orden")}</span><span>{props.tt("Actions", "Acciones")}</span>
+        <span>{props.tt("Unit", "Unidad")}</span><span>{props.tt("Order", "Orden")}</span><span>{props.tt("Actions", "Acciones")}</span>
       </div>
       {props.items.length === 0 && (
         <div className="ji-bulk-empty">
@@ -654,7 +658,6 @@ export function ContractItemBulkEditor(props: Props) {
                   }
                 />
               </label>
-          <label>{props.tt("Planned labor hours", "Horas de trabajo previstas")}<input inputMode="decimal" aria-label={props.tt(`Planned labor hours row ${index + 1}`, `Horas de trabajo fila ${index + 1}`)} value={item.plannedHours} onChange={event => update(index, { plannedHours: event.target.value })}/></label>
           <div className="ji-actions"><button type="button" disabled={index === 0} aria-label={props.tt(`Move row ${index + 1} up`, `Subir fila ${index + 1}`)} onClick={() => props.setItems(rows => { const next = [...rows]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })}><ArrowUp size={14}/></button></div>
           <button
             className="danger"
@@ -669,7 +672,7 @@ export function ContractItemBulkEditor(props: Props) {
           >
             <Trash2 size={14} />
           </button>
-          {props.capabilities.costValuePlanner && <output className="ji-advanced" aria-label={props.tt(`Price calculation row ${index + 1}`, `Cálculo del precio fila ${index + 1}`)}>{item.quantity ?? item.plannedHours} {item.unit} × {item.billingHourlyRate || "0"} {props.currency}/{item.unit} = {exactProduct(item.quantity ?? item.plannedHours, item.billingHourlyRate)} {props.currency}<small style={{display:"block"}}>{props.tt("Contract value uses quantity, not labor hours. Values retain up to six decimal places; saved APU plan totals are separate.", "El valor contractual usa cantidad, no horas de trabajo. Los valores conservan hasta seis decimales; los totales del plan APU son independientes.")}</small></output>}
+          {props.capabilities.costValuePlanner && <output className="ji-advanced" aria-label={props.tt(`Price calculation row ${index + 1}`, `Cálculo del precio fila ${index + 1}`)}>{item.quantity ?? item.plannedHours} {item.unit} × {item.billingHourlyRate || "0"} {props.currency}/{item.unit} = {exactProduct(item.quantity ?? item.plannedHours, item.billingHourlyRate)} {props.currency}<small style={{display:"block"}}>{props.tt("Quantity is also the operational-hours baseline. Values retain up to six decimal places; saved APU plan totals are separate.", "Cantidad también es la base de horas operativas. Los valores conservan hasta seis decimales; los totales del plan APU son independientes.")}</small></output>}
           {contractItemRateExplanation(item.rateSource, item.quantity ?? item.plannedHours, props.tt("en", "es") === "es") && <output className="ji-advanced" aria-label={props.tt(`APU rate source row ${index + 1}`, `Origen de tarifa APU fila ${index + 1}`)}>{contractItemRateExplanation(item.rateSource, item.quantity ?? item.plannedHours, props.tt("en", "es") === "es")}</output>}
           <details className="ji-advanced">
             <summary>
@@ -945,4 +948,4 @@ export function ContractItemBulkEditor(props: Props) {
   );
 }
 
-const bulkCss = `.ji-bulk{margin-top:14px}.ji-bulk-tools{display:flex;justify-content:space-between;gap:12px;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px}.ji-bulk-tools p{margin:4px 0 0;font-size:12px}.ji-bulk-tools>span{font-weight:800;color:#1d4ed8}.ji-bulk-actions{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin:12px 0}.ji-bulk-actions>label{min-width:180px}.ji-paste{display:grid!important;grid-template-columns:20px minmax(210px,1fr)!important;align-items:center;min-width:300px;padding:8px 10px;border:1px dashed #2563eb;border-radius:8px;color:#1d4ed8!important}.ji-paste:focus-within{outline:3px solid #93c5fd;outline-offset:2px}.ji-paste small{display:block;font-weight:400}.ji-paste textarea{grid-column:1/-1;width:100%;min-height:54px;margin-top:8px;padding:8px;border:1px solid #94a3b8;border-radius:6px;background:#fff;color:#0f172a;cursor:text;resize:vertical}.ji-paste textarea+button{grid-column:2}.ji-bulk-budget{max-width:520px;margin-bottom:12px}.ji-prerequisite-note,.ji-apu-history-note{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px;padding:10px;border-left:3px solid #2563eb;background:#f8fafc;color:#334155;font-size:12px}.ji-prerequisite-note>div,.ji-apu-history-note>span{min-width:0}.ji-prerequisite-note strong,.ji-prerequisite-note span{display:block}.ji-prerequisite-note button,.ji-apu-history-note button{flex:0 0 auto}.ji-apu-empty-row{display:grid;gap:5px;padding:9px 10px;border:1px dashed #94a3b8;border-radius:8px;background:#f8fafc;color:#475569;font-size:12px}.ji-bulk-head,.ji-bulk-row{display:grid;grid-template-columns:32px minmax(160px,1fr) minmax(80px,110px) minmax(70px,95px) minmax(85px,120px) 44px 44px;gap:8px;align-items:center}.ji-bulk-head{padding:7px 10px;background:#e2e8f0;border-radius:8px 8px 0 0;font-size:11px;font-weight:800;color:#475569}.ji-bulk-row{padding:8px 10px;border:1px solid #e2e8f0;border-top:0;background:#fff}.ji-bulk-row label{min-width:0}.ji-bulk-number{font-variant-numeric:tabular-nums;color:#64748b}.ji-mobile-label{display:none}.ji-advanced{grid-column:2/-1}.ji-advanced summary{cursor:pointer;color:#1d4ed8;font-size:12px;font-weight:700;padding:5px 0}.ji-advanced .ji-grid{margin-top:8px}.ji-apu-binding-status{align-self:end;padding:9px 10px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#1e3a5f;font-size:12px;font-weight:700}.ji-provenance{font-size:11px;margin:8px 0 0}.ji-bulk-empty{padding:24px;border:1px dashed #94a3b8;border-radius:8px;text-align:center;color:#64748b}@media(max-width:600px){.ji-bulk-tools{display:block}.ji-bulk-tools>span{display:block;margin-top:8px}.ji-bulk-actions>*{width:100%}.ji-prerequisite-note,.ji-apu-history-note{align-items:flex-start;flex-direction:column}.ji-bulk-head{display:none}.ji-bulk-row{grid-template-columns:32px minmax(0,1fr);padding:12px 8px;border-top:1px solid #e2e8f0;margin-top:8px;border-radius:8px}.ji-bulk-row>label,.ji-bulk-row>button,.ji-bulk-row>.ji-actions{grid-column:2}.ji-mobile-label{display:block}.ji-advanced{grid-column:1/-1}.ji-paste{min-width:0}}`;
+const bulkCss = `.ji-bulk{margin-top:14px}.ji-bulk-tools{display:flex;justify-content:space-between;gap:12px;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px}.ji-bulk-tools p{margin:4px 0 0;font-size:12px}.ji-bulk-tools>span{font-weight:800;color:#1d4ed8}.ji-bulk-actions{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin:12px 0}.ji-bulk-actions>label{min-width:180px}.ji-paste{display:grid!important;grid-template-columns:20px minmax(210px,1fr)!important;align-items:center;min-width:300px;padding:8px 10px;border:1px dashed #2563eb;border-radius:8px;color:#1d4ed8!important}.ji-paste:focus-within{outline:3px solid #93c5fd;outline-offset:2px}.ji-paste small{display:block;font-weight:400}.ji-paste textarea{grid-column:1/-1;width:100%;min-height:54px;margin-top:8px;padding:8px;border:1px solid #94a3b8;border-radius:6px;background:#fff;color:#0f172a;cursor:text;resize:vertical}.ji-paste textarea+button{grid-column:2}.ji-bulk-budget{max-width:520px;margin-bottom:12px}.ji-prerequisite-note,.ji-apu-history-note{display:flex;gap:10px;align-items:center;justify-content:space-between;margin:0 0 12px;padding:10px;border-left:3px solid #2563eb;background:#f8fafc;color:#334155;font-size:12px}.ji-prerequisite-note>div,.ji-apu-history-note>span{min-width:0}.ji-prerequisite-note strong,.ji-prerequisite-note span{display:block}.ji-prerequisite-note button,.ji-apu-history-note button{flex:0 0 auto}.ji-apu-empty-row{display:grid;gap:5px;padding:9px 10px;border:1px dashed #94a3b8;border-radius:8px;background:#f8fafc;color:#475569;font-size:12px}.ji-bulk-head,.ji-bulk-row{display:grid;grid-template-columns:32px minmax(160px,1fr) minmax(80px,110px) minmax(70px,95px) 44px 44px;gap:8px;align-items:center}.ji-bulk-head{padding:7px 10px;background:#e2e8f0;border-radius:8px 8px 0 0;font-size:11px;font-weight:800;color:#475569}.ji-bulk-row{padding:8px 10px;border:1px solid #e2e8f0;border-top:0;background:#fff}.ji-bulk-row label{min-width:0}.ji-bulk-number{font-variant-numeric:tabular-nums;color:#64748b}.ji-mobile-label{display:none}.ji-advanced{grid-column:2/-1}.ji-advanced summary{cursor:pointer;color:#1d4ed8;font-size:12px;font-weight:700;padding:5px 0}.ji-advanced .ji-grid{margin-top:8px}.ji-apu-binding-status{align-self:end;padding:9px 10px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#1e3a5f;font-size:12px;font-weight:700}.ji-provenance{font-size:11px;margin:8px 0 0}.ji-bulk-empty{padding:24px;border:1px dashed #94a3b8;border-radius:8px;text-align:center;color:#64748b}@media(max-width:600px){.ji-bulk-tools{display:block}.ji-bulk-tools>span{display:block;margin-top:8px}.ji-bulk-actions>*{width:100%}.ji-prerequisite-note,.ji-apu-history-note{align-items:flex-start;flex-direction:column}.ji-bulk-head{display:none}.ji-bulk-row{grid-template-columns:32px minmax(0,1fr);padding:12px 8px;border-top:1px solid #e2e8f0;margin-top:8px;border-radius:8px}.ji-bulk-row>label,.ji-bulk-row>button,.ji-bulk-row>.ji-actions{grid-column:2}.ji-mobile-label{display:block}.ji-advanced{grid-column:1/-1}.ji-paste{min-width:0}}`;

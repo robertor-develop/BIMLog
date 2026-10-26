@@ -44,7 +44,7 @@ export function QuickJobIntake(props: Props) {
   const ready = useMemo(
     () => [
       Boolean(value(data.identity?.jobName) && value(data.identity?.jobCode)),
-      Boolean(value(data.identity?.clientCompany) && value(firstItem.name) && Number(firstItem.plannedHours) > 0),
+      Boolean(value(data.identity?.clientCompany) && value(firstItem.name) && Number(firstItem.quantity ?? firstItem.plannedHours) > 0),
       Boolean(value(data.identity?.jobName) && value(data.identity?.clientCompany) && value(firstItem.name)),
     ],
     [data.identity, firstItem],
@@ -124,7 +124,7 @@ export function QuickJobIntake(props: Props) {
             <label>{tt("Customer contact — optional now", "Contacto del cliente — opcional ahora")}<select disabled={!data.identity?.clientCompanyId} value={data.identity?.primaryContactId || ""} onChange={(event) => { const contact=contacts.find((item)=>String(item.id)===event.target.value); patchIdentity({ primaryContactId: contact ? Number(contact.id) : null, primaryContact: contact?.fullName || "" }); }}><option value="">{tt("Select later", "Seleccionar después")}</option>{contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.fullName}{contact.email ? ` — ${contact.email}` : ""}</option>)}</select></label>
             <ProjectContactCreator request={request} projectId={projectId} companyId={data.identity?.clientCompanyId} companyName={data.identity?.clientCompany} onCreated={onContactCreated} tt={tt} />
             <label>{tt("First Contract Item — required", "Primera Partida de Contrato — obligatoria")}<input value={firstItem.name || ""} onChange={(event) => patchFirstItem({ name: event.target.value, description: event.target.value })} /></label>
-            <label>{tt("Quantity / planned hours — required", "Cantidad / horas planificadas — obligatoria")}<input inputMode="decimal" value={firstItem.plannedHours || ""} onChange={(event) => patchFirstItem({ plannedHours: event.target.value })} /></label>
+            <label>{tt("Quantity — required", "Cantidad — obligatoria")}<input inputMode="decimal" value={firstItem.quantity ?? firstItem.plannedHours ?? ""} onChange={(event) => patchFirstItem({ quantity: event.target.value, plannedHours: event.target.value })} /></label>
           </div>
           <ProjectCompanyCreator request={request} projectId={projectId} onCreated={onCompanyCreated} tt={tt} />
         </>}
@@ -133,7 +133,7 @@ export function QuickJobIntake(props: Props) {
           <div className="ji-quick-summary">
             <div><span>{tt("Job", "Trabajo")}</span><strong>{data.identity?.jobName || "—"} · {data.identity?.jobCode || "—"}</strong></div>
             <div><span>{tt("Customer", "Cliente")}</span><strong>{data.identity?.clientCompany || "—"}{data.identity?.primaryContact ? ` · ${data.identity.primaryContact}` : ""}</strong></div>
-            <div><span>{tt("First item", "Primera partida")}</span><strong>{firstItem.name || "—"} · {firstItem.plannedHours || "0"} {firstItem.unit || "Hours"}</strong></div>
+            <div><span>{tt("First item", "Primera partida")}</span><strong>{firstItem.name || "—"} · {firstItem.quantity ?? firstItem.plannedHours ?? "0"} {firstItem.unit || "Hours"}</strong></div>
           </div>
           <p>{tt("BIMLog autosaves this draft. Continue in Advanced setup when you are ready to add contracts, APUs, documents, delivery details, or team assignments.", "BIMLog guarda automáticamente este borrador. Continúe en Configuración avanzada cuando esté listo para agregar contratos, APUs, documentos, detalles de entrega o asignaciones del equipo.")}</p>
           <button className="primary" type="button" disabled={!ready.slice(0, 2).every(Boolean)} onClick={onAdvanced}>{tt("Continue to full setup", "Continuar a la configuración completa")}<ChevronRight size={16} /></button>

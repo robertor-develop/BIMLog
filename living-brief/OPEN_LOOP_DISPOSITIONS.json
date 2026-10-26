@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "dd8d3fde560cbe143e0106f8033860138358b0e2ccaf7d8f185464ea3ae9154b",
-  "itemCount": 519,
+  "sourceSha256": "bb2afc0b751c0384a2f133c591695cd572fd713a07854f139f600d2c591b6cec",
+  "itemCount": 522,
   "counts": {
-    "ACTIVE": 465,
-    "SUPERSEDED": 42,
+    "ACTIVE": 467,
+    "SUPERSEDED": 43,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
     "ACTIVE_DEFECT": 370,
     "VALID_FUTURE_ROADMAP": 10,
-    "EXTERNAL_OWNER_INPUT": 85,
+    "EXTERNAL_OWNER_INPUT": 87,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 42,
+    "SUPERSEDED_HISTORY": 43,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -9966,6 +9966,63 @@
       "evidence": [
         "OPEN_LOOP.md:6470",
         "Definitive terminal GA program — Build 9"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7c0329960668c50c",
+      "sourceLine": 6479,
+      "heading": "Lorena Job Intake production repair — 2026-10-26",
+      "statement": "Complete Living Brief integrity and exact production build, then commit, push and publish the exact repair.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5ffd334b01630889",
+      "sourceLine": 6480,
+      "heading": "Lorena Job Intake production repair — 2026-10-26",
+      "statement": "Prove all repaired journeys in authenticated production Chrome with save, reload and activation/Operations persistence evidence; obtain independent acceptance separately.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6480",
+        "Lorena Job Intake production repair — 2026-10-26"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7cf74e361044dacc",
+      "sourceLine": 6481,
+      "heading": "Lorena Job Intake production repair — 2026-10-26",
+      "statement": "Treat Lorena's proposed Trade/Service contract-item taxonomy, contract-level bulk import and summarized contract navigation as the next product change; use company catalogs and configurable Service-to-phase templates rather than hardcoded free text.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6481",
+        "Lorena Job Intake production repair — 2026-10-26"
       ],
       "currentAuthority": false
     }

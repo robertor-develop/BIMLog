@@ -4886,3 +4886,11 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - The corrected live candidate then exposed an authority dead end: the checker path required a second global Super Administrator although BIMLog has one canonical global Super Administrator. Internal-cost decisions now reuse BIMLog's immutable active company-scoped `financial_administrator` grants, with revocation and effective-date checks, while retaining global Super Administrator authority, tenant binding, and atomic maker/checker rejection. No label or project role grants this authority.
 - The authority correction implementation is fixed at `903b483721b864c09126a4e2a9c499a9a8c300fc`; deterministic Living Brief state is reconciled through that exact commit before republication.
 
+## Lorena Job Intake production repair — 2026-10-26
+
+- The urgent repair makes Contract Item Quantity the single authoritative work amount and operational-hours baseline; the legacy `plannedHours` payload remains compatibility data derived from Quantity and is no longer a second user-editable value.
+- Hidden Submittal-strategy and milestone prose no longer blocks Delivery completion or activation. A uniquely applicable saved workflow is selected automatically, and a selected workflow can be applied to all compatible Contract Items in one action.
+- Applied company-library APU versions are exposed through the Cost and Value plan history so the saved version and derived unit rate can be selected in Job Intake instead of appearing as an empty selector.
+- Existing activation hour-allocation authority remains conserved through `requireWorkflowPhaseHours`: generated phase packages divide the Contract Item Quantity rather than duplicating the full amount per deliverable.
+- Focused Lorena regression, phase-hour preview, bulk-editor, workflow-default, P1 release, both-package TypeScript and mojibake gates pass locally. Living Brief integrity, exact production build, push, publication and authenticated production proof remain release gates.
+
