@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 788,
+    "apiRoutes": 789,
     "frontendApiReferences": 315,
     "routeOwnedTables": 72
   },
@@ -5165,6 +5165,12 @@
     {
       "method": "PATCH",
       "path": "/projects/:projectId/operations/assignments/:assignmentId",
+      "owner": "artifacts/api-server/src/routes/job-operations.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/operations/priced-assignments",
       "owner": "artifacts/api-server/src/routes/job-operations.ts",
       "tables": []
     },

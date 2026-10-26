@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2b1b5f265528cac3bc7892749691a90fec71c22070868633e2e2e6148eb894a1",
-  "itemCount": 518,
+  "sourceSha256": "b8a7a3ef38c1bb3d7475ef26e758aef6520a9ad40198055ae018f2601488fcca",
+  "itemCount": 519,
   "counts": {
-    "ACTIVE": 464,
+    "ACTIVE": 465,
     "SUPERSEDED": 42,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 369,
+    "ACTIVE_DEFECT": 370,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 85,
     "ACCEPTED_LIMITATION": 3,
@@ -9894,10 +9894,10 @@
       "currentAuthority": false
     },
     {
-      "id": "cfb2075a0df8cb70",
-      "sourceLine": 6454,
-      "heading": "Definitive terminal GA program — Build 8",
-      "statement": "Commit and push the exact candidate, publish it, verify source/package/schema identity, and record exactly one controlled `GA B8 CONTROLLED TIME 20261026` entry through authenticated Chrome.",
+      "id": "3d483347e4133575",
+      "sourceLine": 6463,
+      "heading": "Definitive terminal GA program — Build 9",
+      "statement": "Run both package typechecks, Living Brief integrity and exact production build; commit and push the exact Build 9 candidate.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
       "workClass": "PROVIDER_EVIDENCE",
@@ -9907,46 +9907,65 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:6454",
-        "Definitive terminal GA program — Build 8"
+        "OPEN_LOOP.md:6463",
+        "Definitive terminal GA program — Build 9"
       ],
       "currentAuthority": false
     },
     {
-      "id": "9851bf1533cbfa2b",
-      "sourceLine": 6455,
-      "heading": "Definitive terminal GA program — Build 8",
-      "statement": "Prove one persisted entry and one event, `0.25h` recorded / `0.75h` unused arithmetic, reload and navigation persistence, truthful Time Review ineligibility, unchanged demand/pricing/cost/Intake state, responsive behavior and clean console.",
+      "id": "0fe782343401dbab",
+      "sourceLine": 6464,
+      "heading": "Definitive terminal GA program — Build 9",
+      "statement": "Publish exact Build 9, verify source/package/schema/runtime identity, then complete the visible authenticated governance, priced-assignment, time-binding, reload/navigation/relogin, responsive and clean-console journey.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6464",
+        "Definitive terminal GA program — Build 9"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3101d68093344714",
+      "sourceLine": 6465,
+      "heading": "Definitive terminal GA program — Build 9",
+      "statement": "Prove one assignment, one binding, exact `1.00h / 0.25h / 47.00h`, `10.00 / 2.50` internal-cost arithmetic, unchanged customer/APU value, and Time Review eligibility without submission.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
       "workClass": "PRODUCT_WORK",
       "ownership": {
-        "owner": "Job Intake",
-        "route": "/projects/:id/intake",
-        "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6455",
-        "Definitive terminal GA program — Build 8"
+        "OPEN_LOOP.md:6465",
+        "Definitive terminal GA program — Build 9"
       ],
       "currentAuthority": false
     },
     {
-      "id": "232b09364593cc60",
-      "sourceLine": 6456,
-      "heading": "Definitive terminal GA program — Build 8",
-      "statement": "Obtain independent Viva acceptance of exact deployed Build 8 before Build 9.",
+      "id": "5c153ee01aa8555d",
+      "sourceLine": 6466,
+      "heading": "Definitive terminal GA program — Build 9",
+      "statement": "Obtain independent Viva acceptance before Build 10; do not advance while any Build 9 gate is failed or untested.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
-      "workClass": "PROVIDER_EVIDENCE",
+      "workClass": "PRODUCT_WORK",
       "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6456",
-        "Definitive terminal GA program — Build 8"
+        "OPEN_LOOP.md:6466",
+        "Definitive terminal GA program — Build 9"
       ],
       "currentAuthority": false
     }

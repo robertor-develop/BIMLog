@@ -77667,6 +77667,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "terminal-ga-build009-priced-staffing-20261026",
+      "reviewedThroughCommit": "d5f9f60e8c99c9a464f22d8c208267ce4bbaa15f",
+      "reviewedAt": "2026-10-26T18:59:01.940Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 9 remains inside the authorized BIMLog terminal program and changes no cross-product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 9 preserves the established BIMLog provider, repository, release, and acceptance boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality gates remain authoritative; the focused Build 9 executable gate adds bounded priced-staffing evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The governed staffing and time-binding journey implements existing product intent without broadening product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 9 reuses existing Operations, internal-cost, activation-baseline and Time Review platform contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 9 does not change BIMLog Lens or Navisworks plugin behavior, packaging, or rollout authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 9 adds no report template or report-design-system semantic change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 9 introduces no new external standard, citation, or compliance interpretation."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 8 independent acceptance and the exact bounded Build 9 implementation and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Build 8 release gates and defines Build 9 implementation, production verification, and independent acceptance work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva acceptance remains separate and pending for the exact deployed Build 9 candidate."
+        }
+      ],
+      "reason": "Reconcile definitive terminal GA Build 9 governed priced staffing and existing-time authority binding.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "adcfd755d7ab50a8a755c3147c1a6de79c7180187616ec1ad92fc7badf5c3971"
     }
   ]
 }
