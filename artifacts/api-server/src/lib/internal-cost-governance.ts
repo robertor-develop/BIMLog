@@ -94,13 +94,19 @@ function canonicalDateOnly(value: unknown) {
   return Number.isNaN(parsed.getTime()) ? "" : parsed.toISOString().slice(0, 10);
 }
 async function actor(client: Queryable, actorUserId: number, companyId: number) {
-  const row = (await client.query(`SELECT id,company_id "companyId",is_super_admin "isCeo" FROM users WHERE id=$1`, [actorUserId])).rows[0];
+  const row = (await client.query(`SELECT u.id,u.company_id "companyId",u.is_super_admin "isGlobalSuperAdmin",
+    EXISTS(SELECT 1 FROM financial_authority_grants g
+      WHERE g.user_id=u.id AND g.company_id=$2 AND g.scope_type='company'
+        AND g.authority='financial_administrator' AND g.effective_from<=now()
+        AND (g.effective_to IS NULL OR g.effective_to>now())
+        AND NOT EXISTS(SELECT 1 FROM financial_authority_revocations r WHERE r.grant_id=g.id)) "isCompanyFinancialAdministrator"
+    FROM users u WHERE u.id=$1`, [actorUserId, companyId])).rows[0];
   // A database-backed global Super Administrator is already allowed to enter a
   // foreign-company project by the project scope guard. Keep the same authority
   // boundary here so the read-only Operations projection does not fail after
   // project access has been granted. Ordinary users remain tenant-bound.
-  if (!row || (!row.isCeo && Number(row.companyId) !== companyId)) throw new FinancialControlError(403, "INTERNAL_COST_COMPANY_DENIED", "Internal cost governance belongs to another company.");
-  return row;
+  if (!row || (!row.isGlobalSuperAdmin && Number(row.companyId) !== companyId)) throw new FinancialControlError(403, "INTERNAL_COST_COMPANY_DENIED", "Internal cost governance belongs to another company.");
+  return { ...row, isCeo: row.isGlobalSuperAdmin === true || (Number(row.companyId) === companyId && row.isCompanyFinancialAdministrator === true) };
 }
 
 export async function proposeInternalCostPolicy(input: { actorUserId: number; companyId: number; drafterRate: unknown; coordinatorRate: unknown; effectiveFrom: unknown; reason: unknown }, host: any = pool) {
@@ -131,7 +137,7 @@ export async function proposeMemberInternalCostProfile(input: { actorUserId: num
 export async function decideInternalCostVersion(input: { actorUserId: number; companyId: number; kind: "policy" | "profile"; versionId: unknown; outcome: unknown; reason: unknown }, host: any = pool) {
   await waitForInternalCostGovernanceMigration(); const client = typeof host.connect === "function" ? await host.connect() : host;
   try { await client.query("BEGIN"); const authority = await actor(client, input.actorUserId, input.companyId);
-    if (!authority.isCeo) throw new FinancialControlError(403, "INTERNAL_COST_CEO_APPROVAL_REQUIRED", "Only the company CEO authority may approve or reject internal-cost versions.");
+    if (!authority.isCeo) throw new FinancialControlError(403, "INTERNAL_COST_CEO_APPROVAL_REQUIRED", "Only a global Super Administrator or an active company financial administrator may approve or reject internal-cost versions.");
     const outcome = String(input.outcome); if (!['approved','rejected'].includes(outcome)) throw new FinancialControlError(400, "INTERNAL_COST_DECISION_INVALID", "Decision must be approved or rejected.");
     const table = input.kind === "policy" ? "company_internal_cost_policy_versions" : "member_internal_cost_profile_versions";
     const pending = (await client.query(`SELECT proposed_by_id "proposedById" FROM ${table} WHERE id=$1 AND company_id=$2 AND status='proposed' FOR UPDATE`, [String(input.versionId), input.companyId])).rows[0];

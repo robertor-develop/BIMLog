@@ -29,4 +29,8 @@ assert.match(service,/protectInternalCostAssignment\(sourceRow, showBudget\)/);
 assert.match(governance,/INTERNAL_COST_MAKER_CHECKER_REQUIRED/);
 assert.match(governance,/Number\(pending\.proposedById\) === input\.actorUserId/);
 assert.match(governance,/canonicalDateOnly\(row\.effectiveFrom\)/);
+assert.match(governance,/financial_authority_grants/);
+assert.match(governance,/authority='financial_administrator'/);
+assert.match(governance,/financial_authority_revocations/);
+assert.match(governance,/row\.isGlobalSuperAdmin === true \|\| \(Number\(row\.companyId\) === companyId && row\.isCompanyFinancialAdministrator === true\)/);
 console.log("Terminal GA Build 9 governed priced staffing contract: PASS");
