@@ -87,7 +87,11 @@ function effectiveDate(value: unknown) {
 function reason(value: unknown) { const text = String(value ?? "").trim(); if (text.length < 10 || text.length > 1000) throw new FinancialControlError(400, "INTERNAL_COST_REASON_INVALID", "Reason must contain 10 to 1000 characters."); return text; }
 async function actor(client: Queryable, actorUserId: number, companyId: number) {
   const row = (await client.query(`SELECT id,company_id "companyId",is_super_admin "isCeo" FROM users WHERE id=$1`, [actorUserId])).rows[0];
-  if (!row || Number(row.companyId) !== companyId) throw new FinancialControlError(403, "INTERNAL_COST_COMPANY_DENIED", "Internal cost governance belongs to another company.");
+  // A database-backed global Super Administrator is already allowed to enter a
+  // foreign-company project by the project scope guard. Keep the same authority
+  // boundary here so the read-only Operations projection does not fail after
+  // project access has been granted. Ordinary users remain tenant-bound.
+  if (!row || (!row.isCeo && Number(row.companyId) !== companyId)) throw new FinancialControlError(403, "INTERNAL_COST_COMPANY_DENIED", "Internal cost governance belongs to another company.");
   return row;
 }
 
