@@ -6460,6 +6460,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Define the bounded journey as one governed priced assignment for the existing task/user/demand slice and one guarded binding of the existing `0.25h` entry, with no time submission or decision.
 - [x] Add server-resolved approved cost authority, active-member/task/demand validation, idempotent assignment identity, conflict/stale/range rejection, protected-rate redaction and exact demand/cost arithmetic gates.
 - [x] Add a fail-closed controlled legacy-baseline materialization path derived only from the immutable activated Intake when all canonical Contract Item/APU/value inputs are present and no baseline exists.
+- [x] Reconcile deterministic platform, route, disposition, impact and state artifacts at `07053d55899e5c32217a7d9689a7a04e24455160` without changing runtime scope.
 - [ ] Run both package typechecks, Living Brief integrity and exact production build; commit and push the exact Build 9 candidate.
 - [ ] Publish exact Build 9, verify source/package/schema/runtime identity, then complete the visible authenticated governance, priced-assignment, time-binding, reload/navigation/relogin, responsive and clean-console journey.
 - [ ] Prove one assignment, one binding, exact `1.00h / 0.25h / 47.00h`, `10.00 / 2.50` internal-cost arithmetic, unchanged customer/APU value, and Time Review eligibility without submission.
