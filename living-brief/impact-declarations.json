@@ -77813,11 +77813,11 @@
       "reviewedChangeSha256": "3bffb9588af933807f342537a6b591d5da67d9b7cc189c129fba525d47012857"
     },
     {
-      "taskId": "terminal-ga-build009-live-governance-repair-20261026",
-      "reviewedThroughCommit": "ca86526c5602ac316230d0d73e44af7db146fd9e",
-      "reviewedAt": "2026-10-26T19:44:13.508Z",
+      "taskId": "terminal-ga-build009-independent-financial-approval-repair-20261026",
+      "reviewedThroughCommit": "903b483721b864c09126a4e2a9c499a9a8c300fc",
+      "reviewedAt": "2026-10-26T20:33:39.000Z",
       "status": "local_candidate",
-      "captureTiming": "post_live_defect_repair",
+      "captureTiming": "post_live_authority_defect_repair",
       "authorities": [
         {
           "key": "ecosystem_doctrine",
@@ -77832,17 +77832,17 @@
         {
           "key": "quality",
           "result": "updated",
-          "reason": "Adds atomic maker-checker enforcement and deterministic effective-date normalization exposed by live Build 9 verification."
+          "reason": "Preserves atomic maker-checker enforcement and adds existing immutable company financial-administrator authority with effective and revocation checks after the live checker dead end."
         },
         {
           "key": "vision",
           "result": "reviewed_no_semantic_change",
-          "reason": "The repair preserves the approved governed-cost product intent."
+          "reason": "The repair preserves the approved governed-cost product intent and makes its independent company checker path executable."
         },
         {
           "key": "platform",
           "result": "reviewed_no_semantic_change",
-          "reason": "No new route, table, package or integration boundary is introduced."
+          "reason": "No new route, table, package or integration boundary is introduced; the existing financial authority ledger is reused."
         },
         {
           "key": "plugin",
@@ -77862,12 +77862,12 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records the genuine live defects and bounded corrective candidate."
+          "reason": "Records the genuine live authority dead end and the bounded corrective candidate."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Records the repair while keeping Build 9 publication, live proof and Viva acceptance open."
+          "reason": "Records the authority repair while keeping Build 9 republication, live proof and Viva acceptance open."
         },
         {
           "key": "audit",
@@ -77875,16 +77875,14 @@
           "reason": "Independent Viva acceptance remains pending for the corrected exact deployed candidate."
         }
       ],
-      "reason": "Reconcile the Build 9 live-discovered internal-cost effective-date and maker-checker repair.",
+      "reason": "Reconcile the Build 9 live-discovered independent approval authority repair using existing immutable company financial grants.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/internal-cost-governance.ts",
-        "artifacts/api-server/src/lib/terminal-ga-build009-priced-staffing.behavior.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "94f655928edd59dfaccbececbd38594a6d1bbece3ac5dcf5981ee8f8f4c95bf3"
+      "reviewedChangeSha256": "110569a60b6346cb99ce59ceeb94d016c58aaf96226fde56c2f50728fda38cee"
     }
   ]
 }

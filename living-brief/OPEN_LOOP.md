@@ -6463,6 +6463,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Reconcile deterministic platform, route, disposition, impact and state artifacts at `07053d55899e5c32217a7d9689a7a04e24455160` without changing runtime scope.
 - [x] Repair the live-discovered effective-date normalization defect and add an atomic distinct-maker approval guard after the first published journey exposed both failures.
 - [x] Repair the second live-discovered authority dead end by allowing an existing active company-scoped `financial_administrator` grant, or the global Super Administrator, to perform the independent decision; retain company binding, effective/revocation checks and same-maker rejection.
+- [x] Bind the authority correction implementation to exact commit `903b483721b864c09126a4e2a9c499a9a8c300fc` and reconcile deterministic release state through that commit.
 - [ ] Run both package typechecks, Living Brief integrity and exact production build; commit and push the exact Build 9 candidate.
 - [ ] Publish exact Build 9, verify source/package/schema/runtime identity, then complete the visible authenticated governance, priced-assignment, time-binding, reload/navigation/relogin, responsive and clean-console journey.
 - [ ] Prove one assignment, one binding, exact `1.00h / 0.25h / 47.00h`, `10.00 / 2.50` internal-cost arithmetic, unchanged customer/APU value, and Time Review eligibility without submission.

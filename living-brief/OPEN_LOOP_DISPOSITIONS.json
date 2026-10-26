@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "9768d96afe555f5ed2637db175937bdd3a18c54546710b7f4fb1200828fa09f3",
+  "sourceSha256": "dd8d3fde560cbe143e0106f8033860138358b0e2ccaf7d8f185464ea3ae9154b",
   "itemCount": 519,
   "counts": {
     "ACTIVE": 465,
@@ -9895,28 +9895,9 @@
     },
     {
       "id": "3d483347e4133575",
-      "sourceLine": 6466,
-      "heading": "Definitive terminal GA program — Build 9",
-      "statement": "Run both package typechecks, Living Brief integrity and exact production build; commit and push the exact Build 9 candidate.",
-      "classification": "ACTIVE",
-      "dispositionCategory": "ACTIVE_DEFECT",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:6466",
-        "Definitive terminal GA program — Build 9"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "0fe782343401dbab",
       "sourceLine": 6467,
       "heading": "Definitive terminal GA program — Build 9",
-      "statement": "Publish exact Build 9, verify source/package/schema/runtime identity, then complete the visible authenticated governance, priced-assignment, time-binding, reload/navigation/relogin, responsive and clean-console journey.",
+      "statement": "Run both package typechecks, Living Brief integrity and exact production build; commit and push the exact Build 9 candidate.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
       "workClass": "PROVIDER_EVIDENCE",
@@ -9932,8 +9913,27 @@
       "currentAuthority": false
     },
     {
-      "id": "3101d68093344714",
+      "id": "0fe782343401dbab",
       "sourceLine": 6468,
+      "heading": "Definitive terminal GA program — Build 9",
+      "statement": "Publish exact Build 9, verify source/package/schema/runtime identity, then complete the visible authenticated governance, priced-assignment, time-binding, reload/navigation/relogin, responsive and clean-console journey.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6468",
+        "Definitive terminal GA program — Build 9"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "3101d68093344714",
+      "sourceLine": 6469,
       "heading": "Definitive terminal GA program — Build 9",
       "statement": "Prove one assignment, one binding, exact `1.00h / 0.25h / 47.00h`, `10.00 / 2.50` internal-cost arithmetic, unchanged customer/APU value, and Time Review eligibility without submission.",
       "classification": "ACTIVE",
@@ -9945,14 +9945,14 @@
         "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6468",
+        "OPEN_LOOP.md:6469",
         "Definitive terminal GA program — Build 9"
       ],
       "currentAuthority": false
     },
     {
       "id": "5c153ee01aa8555d",
-      "sourceLine": 6469,
+      "sourceLine": 6470,
       "heading": "Definitive terminal GA program — Build 9",
       "statement": "Obtain independent Viva acceptance before Build 10; do not advance while any Build 9 gate is failed or untested.",
       "classification": "ACTIVE",
@@ -9964,7 +9964,7 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:6469",
+        "OPEN_LOOP.md:6470",
         "Definitive terminal GA program — Build 9"
       ],
       "currentAuthority": false
