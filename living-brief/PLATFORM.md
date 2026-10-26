@@ -1374,6 +1374,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/telegram-product.ts
 - artifacts/api-server/src/lib/telegram-rfi-notifications.behavior.ts
 - artifacts/api-server/src/lib/telegram-rfi-notifications.ts
+- artifacts/api-server/src/lib/terminal-ga-build006-operations-authority.behavior.ts
 - artifacts/api-server/src/lib/trade-file-collection.behavior.ts
 - artifacts/api-server/src/lib/trade-file-collection.ts
 - artifacts/api-server/src/lib/trade-file-submission-review.behavior.ts

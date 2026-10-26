@@ -6427,3 +6427,12 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Prove wrong-role and tenant isolation through the existing automated gates and the live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.
 - [ ] Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 6.
 
+## Definitive terminal GA program — Build 6
+
+- [x] Accept Build 5 progression on exact deployed source `aaeca67b9edfe658b0148b3de4d31fad6fd6e178` with independent Viva PASS.
+- [x] Activate controlled project `70` only after all final confirmations persist and verify the immutable selected workflow, work-item count, delivery-task count and absence of fabricated named assignments.
+- [x] Reproduce and repair the cross-company global-super-admin Operations projection failure while retaining fail-closed tenant isolation for ordinary users.
+- [ ] Push and publish the exact Build 6 candidate, verify deployed source/package/schema identity, and repeat Operations open, refresh, back/forward, logout/login and direct reentry in authenticated Chrome.
+- [ ] Verify the live work item, delivery task, resource demand, persistence, responsive behavior and clean console; do not claim PRE/COO/FOR/ASB for the selected one-phase workflow.
+- [ ] Obtain independent Viva acceptance of the exact deployed Build 6 candidate before Build 7.
+

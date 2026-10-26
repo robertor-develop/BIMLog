@@ -4852,3 +4852,10 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - The implementation gives every repeated role-plan control a stable, localized accessible name and the executable Build 5 gate binds the existing optional-empty state, staffing-pending semantics, Contract Item linkage, resource-demand normalization, exact planned-cost behavior and persistence boundary.
 - Production BEFORE state is `v1.05.N18-P37` at source `7e9928536e74d3e040e0b289b0c9c78c8f73ce4f`: the Resource budget is empty and explicitly optional. Exact clean production assembly, push, publication, authenticated production repetition and independent acceptance remain separate gates.
 
+## Definitive terminal GA Build 6 — activation and Operations authority — 2026-10-26
+
+- Build 5 is independently accepted on exact deployed source `aaeca67b9edfe658b0148b3de4d31fad6fd6e178`; accepted journeys are 5/20 and Build 6 is permitted.
+- The controlled project `70` reached 100% readiness, recorded all five final confirmations and activated exactly once. Activation created one work item and one delivery task from the selected immutable one-phase `BIMLog General · v1` workflow, preserved the role-only resource demand, and created no named assignment.
+- The first authenticated Operations open reproduced a real authority defect: project scope correctly admitted the database-backed global Super Administrator, but the internal-cost governance projection rejected the same actor because their home company differed from the project's authoritative company.
+- Implementation commit `2b7c090bff9b874d2d80eb9469892bc3ce4cb54a` aligns the read projection with the existing project-scope global override while preserving the company boundary for every ordinary user. The focused activation, phase-allocation, work-package, Operations and tenant-isolation gate plus both package TypeScript checks pass. Exact clean production assembly, push, publication, authenticated Operations repetition and independent acceptance remain required.
+

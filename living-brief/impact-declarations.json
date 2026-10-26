@@ -77380,6 +77380,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d5e713b17148c4c95b81f847cb82b999f9ca7f88b2998aa582ab18aac2b5c409"
+    },
+    {
+      "taskId": "definitive-terminal-ga-build006-20261026",
+      "reviewedThroughCommit": "2b7c090bff9b874d2d80eb9469892bc3ce4cb54a",
+      "reviewedAt": "2026-10-26T10:54:16-04:00",
+      "status": "local_candidate",
+      "captureTiming": "post_implementation_pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves authoritative project-company scope and explicit global administrator authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses the proven exact-source BIMLog release and authenticated acceptance procedure."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds focused activation, Operations, work-package and tenant-isolation regression evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction or portfolio-scope change is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Aligns the internal-cost read projection with the existing project-scope super-admin override."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, installer or packaged-plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet or export behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards edition, metadata or compliance assertion changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 5 acceptance, Build 6 activation truth and the reproduced Operations defect."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Defines exact Build 6 release, production repetition and independent acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent Viva acceptance remains separate from constructor evidence."
+        }
+      ],
+      "reason": "Reconcile definitive terminal GA Build 6 activation and authorized Operations projection repair.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1408f16eb15b7ab40ebeebfca6e04ebe52563163e69a46f420b8a5f57f72d008"
     }
   ]
 }

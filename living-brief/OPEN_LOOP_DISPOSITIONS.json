@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "e52b091338f1adb18a4aac3696f18c57bf251d8d506e68fbfa39658bd8281740",
-  "itemCount": 512,
+  "sourceSha256": "873de6f08fc8221e84873ae6ec57450f5c147035db903c0b19ca4c179c8f373a",
+  "itemCount": 515,
   "counts": {
-    "ACTIVE": 459,
-    "SUPERSEDED": 41,
+    "ACTIVE": 461,
+    "SUPERSEDED": 42,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 364,
+    "ACTIVE_DEFECT": 366,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 85,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 41,
+    "SUPERSEDED_HISTORY": 42,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -9833,6 +9833,63 @@
       "evidence": [
         "OPEN_LOOP.md:6428",
         "Definitive terminal GA program — Build 5"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f6e015372fd9e9cd",
+      "sourceLine": 6435,
+      "heading": "Definitive terminal GA program — Build 6",
+      "statement": "Push and publish the exact Build 6 candidate, verify deployed source/package/schema identity, and repeat Operations open, refresh, back/forward, logout/login and direct reentry in authenticated Chrome.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "ad75dd21efc71d17",
+      "sourceLine": 6436,
+      "heading": "Definitive terminal GA program — Build 6",
+      "statement": "Verify the live work item, delivery task, resource demand, persistence, responsive behavior and clean console; do not claim PRE/COO/FOR/ASB for the selected one-phase workflow.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Headquarters",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/pages/Dashboard.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6436",
+        "Definitive terminal GA program — Build 6"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "88525842054c9caa",
+      "sourceLine": 6437,
+      "heading": "Definitive terminal GA program — Build 6",
+      "statement": "Obtain independent Viva acceptance of the exact deployed Build 6 candidate before Build 7.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6437",
+        "Definitive terminal GA program — Build 6"
       ],
       "currentAuthority": false
     }
