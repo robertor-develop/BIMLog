@@ -1,0 +1,28 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { isExactPricedAssignmentReplay, pricedStaffingArithmetic } from "./job-operation-priced-assignment-contract";
+
+const exact = { userId:19, role:"GA B5 BIM COORDINATOR 20261026", plannedHours:"1.000000", demandId:"d82e3d35-d261-424e-93a9-f816a55ce5a1" };
+assert.equal(isExactPricedAssignmentReplay(exact,{...exact,plannedHours:"1"}),true);
+for (const conflict of [{...exact,userId:20},{...exact,role:"Other"},{...exact,plannedHours:"2"},{...exact,demandId:"other"}]) assert.equal(isExactPricedAssignmentReplay(exact,conflict),false);
+assert.deepEqual(pricedStaffingArithmetic({baselineHours:48,plannedHours:1,recordedHours:.25,internalHourlyRate:10}),{assignedHours:1,actualHours:.25,remainingHours:47,plannedInternalCost:10,actualInternalCost:2.5});
+assert.throws(()=>pricedStaffingArithmetic({baselineHours:48,plannedHours:49,recordedHours:.25,internalHourlyRate:10}),/PRICED_STAFFING_ARITHMETIC_INVALID/);
+assert.throws(()=>pricedStaffingArithmetic({baselineHours:48,plannedHours:1,recordedHours:2,internalHourlyRate:10}),/PRICED_STAFFING_ARITHMETIC_INVALID/);
+
+const root=path.resolve(import.meta.dirname,"../../../..");
+const service=fs.readFileSync(path.join(root,"artifacts/api-server/src/lib/job-operations-service.ts"),"utf8");
+const route=fs.readFileSync(path.join(root,"artifacts/api-server/src/routes/job-operations.ts"),"utf8");
+const ui=fs.readFileSync(path.join(root,"artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx"),"utf8");
+for(const proof of ["resolveApprovedMemberInternalCost","internal_cost_profile_version_id","internal_cost_policy_version_id","activated_budget_mapping_materialized","time_assignment_bound","JOB_OPERATIONS_PRICED_ASSIGNMENT_ID_CONFLICT","JOB_OPERATIONS_PRICED_HOURS_EXCEEDED","customerBillingRateChanged:false","optimistic_version=optimistic_version+1"]) assert.match(service,new RegExp(proof.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")));
+assert.match(service,/project_members pm[\s\S]*pm\.status='active'/);
+assert.match(service,/project_id=\$2 FOR UPDATE OF t,w/);
+assert.match(service,/existingExecution \|\| !scopeItem \|\| !contract/);
+assert.match(service,/UPDATE job_activation_time_entries SET assignment_id=\$2,optimistic_version=optimistic_version\+1 WHERE id=\$1 AND assignment_id IS NULL/);
+assert.doesNotMatch(route,/internalHourlyRate|billingHourlyRate|budgetAccountId|currency|amount/);
+assert.match(route,/operations\/priced-assignments/);
+assert.match(ui,/Bind governed priced staffing/);
+assert.match(ui,/approved member rate is resolved by the server/i);
+assert.match(ui,/existing time remains unsubmitted/i);
+assert.match(service,/protectInternalCostAssignment\(sourceRow, showBudget\)/);
+console.log("Terminal GA Build 9 governed priced staffing contract: PASS");

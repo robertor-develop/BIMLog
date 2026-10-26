@@ -15,6 +15,7 @@ import {
   createJobBudgetBaseline,
   createJobBudgetVarianceReview,
   createJobOperationPackage,
+  createJobOperationPricedAssignment,
   getJobOperations,
   linkJobOperationDocumentConnection,
   linkJobOperationDeliverable,
@@ -155,6 +156,10 @@ router.patch("/projects/:projectId/operations/tasks/:taskId", run(async (req, re
 }));
 router.patch("/projects/:projectId/operations/assignments/:assignmentId", run(async (req, res) => {
   res.json(await reassignJobOperationResource({ actorUserId: req.user.userId, projectId: req.params.projectId, assignmentId: req.params.assignmentId, expectedVersion: req.body?.expectedVersion, userId: req.body?.userId, reason: req.body?.reason }));
+}));
+router.post("/projects/:projectId/operations/priced-assignments", run(async (req, res) => {
+  const result = await createJobOperationPricedAssignment({ actorUserId:req.user.userId, projectId:req.params.projectId, assignmentId:req.body?.assignmentId, demandId:req.body?.demandId, taskId:req.body?.taskId, expectedTaskVersion:req.body?.expectedTaskVersion, userId:req.body?.userId, plannedHours:req.body?.plannedHours, entryId:req.body?.entryId });
+  res.status(result.idempotent ? 200 : 201).json(result);
 }));
 router.post("/projects/:projectId/operations/time", run(async (req, res) => {
   const result = await addJobOperationTime({ actorUserId: req.user.userId, projectId: req.params.projectId, entryId: req.body?.entryId, taskId: req.body?.taskId, assignmentId: req.body?.assignmentId, workDate: req.body?.workDate, hours: req.body?.hours, note: req.body?.note });

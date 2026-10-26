@@ -12,6 +12,8 @@ import { getInternalCostGovernance, resolveApprovedMemberInternalCost, waitForIn
 import { protectInternalCostAssignment } from "./internal-cost-contract";
 import { getFloorHourCostGovernance, refreshFloorHourCostForWorkItem } from "./floor-hour-cost-governance";
 import { isTaskUpdateNoop } from "./job-operation-task-update-contract";
+import { buildActivatedCommercialBaseline, persistActivatedCommercialBaselineWithClient } from "./job-activation-commercial-baseline";
+import { isExactPricedAssignmentReplay } from "./job-operation-priced-assignment-contract";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
@@ -710,6 +712,77 @@ export async function reassignJobOperationResource(input: { actorUserId: number;
     await client.query(`UPDATE job_activation_tasks SET assignee_user_id=$2,version=version+1,updated_at=now() WHERE id=$1`, [updated.task_id, userId]);
     await event(client, { projectId, actorUserId: input.actorUserId, eventType: "resource_reassigned", workItemId: updated.work_item_id, taskId: updated.task_id, assignmentId, evidence: { originalUserId: before.userId, originalPersonName: before.personName, newUserId: userId, newPersonName: member.full_name || member.email, completedHours: before.completedHours, remainingTransferredHours: remainingHours, approvedInternalRateApplied: approvedCost.hourlyRate, internalCostProfileVersionId: approvedCost.profileVersionId, internalCostPolicyVersionId: approvedCost.policyVersionId, internalCostEffectiveDate: approvedCost.effectiveDate, customerBillingRateChanged: false, reason, version: updated.version } });
     await client.query("COMMIT"); return { id: assignmentId, userId, personName: member.full_name || member.email, internalHourlyRate: updated.internalHourlyRate, billingHourlyRate: updated.billingHourlyRate, version: Number(updated.version) };
+  } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
+}
+
+export async function createJobOperationPricedAssignment(input: { actorUserId: number; projectId: unknown; assignmentId: unknown; demandId: unknown; taskId: unknown; expectedTaskVersion: unknown; userId: unknown; plannedHours: unknown; entryId?: unknown }) {
+  await Promise.all([waitForJobIntakeMigration(), waitForTeamResourcePlanningMigration(), waitForInternalCostGovernanceMigration()]);
+  const projectId = positiveInt(input.projectId, "projectId"), assignmentId = id(input.assignmentId, "assignmentId"), demandId = id(input.demandId, "demandId"), taskId = id(input.taskId, "taskId"), expectedTaskVersion = positiveInt(input.expectedTaskVersion, "expectedTaskVersion"), userId = positiveInt(input.userId, "userId"), plannedHours = workHours(input.plannedHours), entryId = input.entryId ? id(input.entryId, "entryId") : null;
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`bimlog:priced-assignment:${projectId}:${taskId}`]);
+    const access = await scope(input.actorUserId, projectId, client);
+    if (!access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_PRICED_ASSIGNMENT_DENIED", "Only authorized project governance may create priced assignments.");
+    const task = (await client.query(`SELECT t.*,w.project_id,w.intake_id,w.stable_scope_item_id,w.billing_hourly_rate,w.planned_billable_value,w.project_cost_node_id,w.budget_snapshot_line_id,w.contract_id,w.contract_version_id
+      FROM job_activation_tasks t JOIN job_activation_work_items w ON w.id=t.work_item_id WHERE t.id=$1 AND w.project_id=$2 FOR UPDATE OF t,w`, [taskId, projectId])).rows[0];
+    if (!task) throw new FinancialControlError(404, "JOB_OPERATIONS_TASK_NOT_FOUND", "Task not found.");
+    if (Number(task.version) !== expectedTaskVersion) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This task changed in another session. Reload before assigning priced work.");
+    if (Number(task.assignee_user_id) !== userId) throw new FinancialControlError(409, "JOB_OPERATIONS_PRICED_ASSIGNEE_MISMATCH", "The priced assignment must use the task's current direct assignee.");
+    const member = (await client.query(`SELECT u.full_name,u.email FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.user_id=$2 AND pm.status='active'`, [projectId, userId])).rows[0];
+    if (!member) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNEE_INVALID", "The assignee must be an active project member.");
+    const intake = (await client.query(`SELECT id,revision,status,data FROM job_intakes WHERE id=$1 AND project_id=$2 FOR SHARE`, [task.intake_id, projectId])).rows[0];
+    if (!intake || intake.status !== "activated") throw new FinancialControlError(409, "JOB_OPERATIONS_ACTIVATED_INTAKE_REQUIRED", "Priced work requires an activated Job Intake source.");
+    const demand = splitResourcePlan(intake.data?.team?.assignments ?? []).demands.find((row) => row.id === demandId);
+    if (!demand || demand.scopeItemId !== task.stable_scope_item_id) throw new FinancialControlError(400, "JOB_OPERATIONS_DEMAND_INVALID", "The staffing demand must belong to this task's activated Contract Item.");
+    const currentAssignments = (await client.query(`SELECT id,source_assignment_id "sourceAssignmentId",user_id "userId",role,planned_hours::text "plannedHours",internal_hourly_rate::text "internalHourlyRate",internal_cost_profile_version_id "profileVersionId",internal_cost_policy_version_id "policyVersionId",version FROM job_activation_resource_assignments WHERE task_id=$1 ORDER BY id FOR UPDATE`, [taskId])).rows;
+    const exactExisting = currentAssignments.find((row) => row.id === assignmentId);
+    if (exactExisting) {
+      const exact = isExactPricedAssignmentReplay({ userId:Number(exactExisting.userId), role:exactExisting.role, plannedHours:exactExisting.plannedHours, demandId:String(exactExisting.sourceAssignmentId).replace(/^operations-priced:/, "") }, { userId, role:demand.role, plannedHours, demandId });
+      const entry = entryId ? (await client.query(`SELECT assignment_id FROM job_activation_time_entries WHERE id=$1 AND project_id=$2`, [entryId, projectId])).rows[0] : null;
+      if (!exact || (entryId && entry?.assignment_id !== assignmentId)) throw new FinancialControlError(409, "JOB_OPERATIONS_PRICED_ASSIGNMENT_ID_CONFLICT", "This assignment ID is already bound to different staffing authority.");
+      await client.query("COMMIT");
+      return { id: assignmentId, entryId, idempotent: true, version: Number(exactExisting.version), internalHourlyRate: exactExisting.internalHourlyRate, internalCostProfileVersionId: exactExisting.profileVersionId, internalCostPolicyVersionId: exactExisting.policyVersionId };
+    }
+    if (currentAssignments.length) throw new FinancialControlError(409, "JOB_OPERATIONS_PRICED_ASSIGNMENT_CONFLICT", "This controlled task already has a priced assignment. Reload before continuing.");
+    const allWorkItems = (await client.query(`SELECT id,stable_scope_item_id "stableScopeItemId" FROM job_activation_work_items WHERE intake_id=$1`, [task.intake_id])).rows;
+    const allAssignments = (await client.query(`SELECT id,work_item_id "workItemId",planned_hours "plannedHours" FROM job_activation_resource_assignments WHERE intake_id=$1`, [task.intake_id])).rows;
+    const allEntries = (await client.query(`SELECT assignment_id "assignmentId",hours FROM job_activation_time_entries WHERE intake_id=$1`, [task.intake_id])).rows;
+    const remaining = reconcileResourceDemand({ demands:[demand], workItems:allWorkItems, assignments:allAssignments, timeEntries:allEntries })[0]?.remainingHours ?? 0;
+    if (Number(plannedHours) > Number(task.planned_hours) || Number(plannedHours) > remaining) throw new FinancialControlError(409, "JOB_OPERATIONS_PRICED_HOURS_EXCEEDED", "Priced hours cannot exceed the task or remaining activated staffing demand.");
+    const effectiveDate = entryId ? String((await client.query(`SELECT work_date::text FROM job_activation_time_entries WHERE id=$1 AND project_id=$2`, [entryId, projectId])).rows[0]?.work_date ?? new Date().toISOString().slice(0,10)) : new Date().toISOString().slice(0,10);
+    const approvedCost = await resolveApprovedMemberInternalCost({ companyId: access.companyId, userId, effectiveDate }, client);
+    if (approvedCost.state === "unresolved") throw new FinancialControlError(409, approvedCost.code, "The selected member has no approved internal-cost profile effective for this work date.");
+
+    let projectCostNodeId = task.project_cost_node_id, budgetSnapshotLineId = task.budget_snapshot_line_id, contractId = task.contract_id, contractVersionId = task.contract_version_id;
+    if (!projectCostNodeId || !contractVersionId) {
+      const existingExecution = (await client.query(`SELECT 1 FROM job_activation_execution_baselines WHERE intake_id=$1`, [task.intake_id])).rows[0];
+      const scopeItem = (intake.data?.scopeItems ?? []).find((row:any) => row.id === task.stable_scope_item_id);
+      const contract = (intake.data?.commercial?.contracts ?? []).find((row:any) => row.id === scopeItem?.contractId);
+      if (existingExecution || !scopeItem || !contract) throw new FinancialControlError(409, "JOB_OPERATIONS_ACTIVATED_BUDGET_REQUIRED", "The activated Contract Item budget mapping is missing and cannot be inferred safely.");
+      projectCostNodeId = scopeItem.projectCostNodeId || `intake-scope:${scopeItem.id}`;
+      budgetSnapshotLineId = scopeItem.budgetSnapshotLineId || `intake-line:${scopeItem.id}`;
+      contractId = contract.existingContractId || `intake-contract:${task.intake_id}:${contract.id}`;
+      contractVersionId = contract.existingContractVersionId || `${contractId}:r${intake.revision}`;
+      const baseline = buildActivatedCommercialBaseline({ intakeId:task.intake_id, projectId, currency:intake.data?.identity?.currency || "USD", contracts:[{ profileId:contract.id, contractId, contractVersionId, contractNumber:contract.contractNumber || contract.quotationNumber || contract.id, currency:intake.data?.identity?.currency || "USD", items:[{ stableLineId:scopeItem.id, displayName:scopeItem.name, projectCostNodeId, budgetSnapshotLineId, quantity:String(scopeItem.quantity), unit:String(scopeItem.unit), unitRate:String(scopeItem.billingHourlyRate), contractValue:String(scopeItem.contractValue), apuPlanVersion:scopeItem.apuPlanVersion ?? null, rateSource:scopeItem.rateSource ?? null, workflowTemplate:scopeItem.workflowTemplate }] }], workflowInstances:1, workItems:allWorkItems.length, tasks:1, resourceAssignments:0 });
+      await persistActivatedCommercialBaselineWithClient(client, baseline, input.actorUserId);
+      await client.query(`UPDATE job_activation_work_items SET project_cost_node_id=$2,budget_snapshot_line_id=$3,contract_id=$4,contract_version_id=$5 WHERE id=$1 AND project_id=$6`, [task.work_item_id, projectCostNodeId, budgetSnapshotLineId, contractId, contractVersionId, projectId]);
+      await event(client, { projectId, actorUserId:input.actorUserId, eventType:"activated_budget_mapping_materialized", workItemId:task.work_item_id, taskId, evidence:{ source:"immutable_activated_intake", intakeRevision:Number(intake.revision), contractId, contractVersionId, projectCostNodeId, budgetSnapshotLineId, customerRateChanged:false } });
+    }
+    const inserted = (await client.query(`INSERT INTO job_activation_resource_assignments(id,intake_id,work_item_id,task_id,source_assignment_id,user_id,person_name,role,employment_type,planned_hours,internal_hourly_rate,billing_hourly_rate,planned_internal_cost,planned_billable_value,created_by_id,internal_cost_profile_version_id,internal_cost_policy_version_id,internal_cost_effective_date)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,'employee',$9,$10,$11,$9::numeric*$10::numeric,$9::numeric*$11::numeric,$12,$13,$14,$15::date) RETURNING version`, [assignmentId, task.intake_id, task.work_item_id, taskId, `operations-priced:${demandId}`, userId, member.full_name || member.email, demand.role, plannedHours, approvedCost.hourlyRate, task.billing_hourly_rate, input.actorUserId, approvedCost.profileVersionId, approvedCost.policyVersionId, approvedCost.effectiveDate])).rows[0];
+    let entryVersion: number | null = null;
+    if (entryId) {
+      const entry = (await client.query(`SELECT id,task_id,user_id,assignment_id,status,optimistic_version,work_date::text,hours::text,note,created_by_id,created_at FROM job_activation_time_entries WHERE id=$1 AND project_id=$2 FOR UPDATE`, [entryId, projectId])).rows[0];
+      if (!entry || entry.task_id !== taskId || Number(entry.user_id) !== userId) throw new FinancialControlError(400, "JOB_OPERATIONS_TIME_BINDING_INVALID", "The time entry must belong to this task and member.");
+      if (entry.assignment_id && entry.assignment_id !== assignmentId) throw new FinancialControlError(409, "JOB_OPERATIONS_TIME_ALREADY_PRICED", "The time entry is already bound to another priced assignment.");
+      const updated = (await client.query(`UPDATE job_activation_time_entries SET assignment_id=$2,optimistic_version=optimistic_version+1 WHERE id=$1 AND assignment_id IS NULL RETURNING optimistic_version`, [entryId, assignmentId])).rows[0];
+      entryVersion = Number(updated?.optimistic_version ?? entry.optimistic_version);
+      await event(client, { projectId, actorUserId:input.actorUserId, eventType:"time_assignment_bound", workItemId:task.work_item_id, taskId, assignmentId, evidence:{ entryId, userId, preservedHours:entry.hours, preservedWorkDate:entry.work_date, preservedCreatedById:Number(entry.created_by_id), fromAssignmentId:null, toAssignmentId:assignmentId, entryVersion } });
+    }
+    await event(client, { projectId, actorUserId:input.actorUserId, eventType:"resource_assigned", workItemId:task.work_item_id, taskId, assignmentId, evidence:{ demandId, role:demand.role, locationLabel:demand.locationLabel, userId, plannedHours, internalRateResolvedServerSide:true, internalCostProfileVersionId:approvedCost.profileVersionId, internalCostPolicyVersionId:approvedCost.policyVersionId, internalCostEffectiveDate:approvedCost.effectiveDate, customerBillingRateChanged:false, contractVersionId, projectCostNodeId } });
+    await client.query("COMMIT");
+    return { id:assignmentId, entryId, entryVersion, version:Number(inserted.version), idempotent:false, internalHourlyRate:approvedCost.hourlyRate, internalCostProfileVersionId:approvedCost.profileVersionId, internalCostPolicyVersionId:approvedCost.policyVersionId, contractVersionId, projectCostNodeId };
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 

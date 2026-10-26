@@ -6451,7 +6451,17 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Repair time-entry UUID custody so an exact replay is idempotent while any conflicting project/task/assignment/user/date/hours/note/creator binding fails atomically; retain active-membership, self/manager authority, bounded-hour validation and truthful unpriced Time Review denial.
 - [x] Add the focused executable Build 8 gate covering stable identity, exact replay, conflict rejection, role and tenant/project isolation, range/date safety and zero financial/Intake mutation.
 - [x] Freeze implementation commit `37b925740f850c89732b7b566f4665a5c9562b9c` as the Build 8 reconciliation baseline.
-- [ ] Commit and push the exact candidate, publish it, verify source/package/schema identity, and record exactly one controlled `GA B8 CONTROLLED TIME 20261026` entry through authenticated Chrome.
-- [ ] Prove one persisted entry and one event, `0.25h` recorded / `0.75h` unused arithmetic, reload and navigation persistence, truthful Time Review ineligibility, unchanged demand/pricing/cost/Intake state, responsive behavior and clean console.
-- [ ] Obtain independent Viva acceptance of exact deployed Build 8 before Build 9.
+- [x] Commit and push the exact candidate, publish it, verify source/package/schema identity, and record exactly one controlled `GA B8 CONTROLLED TIME 20261026` entry through authenticated Chrome.
+- [x] Prove one persisted entry and one event, `0.25h` recorded / `0.75h` unused arithmetic, reload and navigation persistence, truthful Time Review ineligibility, unchanged demand/pricing/cost/Intake state, responsive behavior and clean console.
+- [x] Obtain independent Viva acceptance of exact deployed Build 8 before Build 9; exact accepted source is `aba9d898a6fea6ded741dfc7500464f282e49f5a` and accepted journeys are 8/20.
+
+## Definitive terminal GA program — Build 9
+
+- [x] Define the bounded journey as one governed priced assignment for the existing task/user/demand slice and one guarded binding of the existing `0.25h` entry, with no time submission or decision.
+- [x] Add server-resolved approved cost authority, active-member/task/demand validation, idempotent assignment identity, conflict/stale/range rejection, protected-rate redaction and exact demand/cost arithmetic gates.
+- [x] Add a fail-closed controlled legacy-baseline materialization path derived only from the immutable activated Intake when all canonical Contract Item/APU/value inputs are present and no baseline exists.
+- [ ] Run both package typechecks, Living Brief integrity and exact production build; commit and push the exact Build 9 candidate.
+- [ ] Publish exact Build 9, verify source/package/schema/runtime identity, then complete the visible authenticated governance, priced-assignment, time-binding, reload/navigation/relogin, responsive and clean-console journey.
+- [ ] Prove one assignment, one binding, exact `1.00h / 0.25h / 47.00h`, `10.00 / 2.50` internal-cost arithmetic, unchanged customer/APU value, and Time Review eligibility without submission.
+- [ ] Obtain independent Viva acceptance before Build 10; do not advance while any Build 9 gate is failed or untested.
 
