@@ -10,7 +10,8 @@
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
-      "package.json"
+      "package.json",
+      "scripts/test-ga-terminal-build002.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",

@@ -77160,9 +77160,10 @@
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-ga-terminal-build002.mjs"
       ],
-      "reviewedChangeSha256": "c3b035ea36f2afe8da3a6259989acf9dc68fad34d3837b7570df9e36ca117b76"
+      "reviewedChangeSha256": "52b84c8f901d356394c2f5dce40c27526b7a9a8140b3c840c1e904d63b201c84"
     }
   ]
 }
