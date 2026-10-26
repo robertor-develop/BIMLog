@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "ba4744dbab0fdde44ceeae4739bef5763b983b6ff13567fabbc601229e902355",
-  "itemCount": 503,
+  "sourceSha256": "71d3438a0880c636685b50ed04f747ae52ce1a5007078d2d7b87150dd7757066",
+  "itemCount": 506,
   "counts": {
-    "ACTIVE": 451,
-    "SUPERSEDED": 40,
+    "ACTIVE": 453,
+    "SUPERSEDED": 41,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 356,
+    "ACTIVE_DEFECT": 358,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 85,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 40,
+    "SUPERSEDED_HISTORY": 41,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -92,6 +92,10 @@
     {
       "canonicalId": "5b374606f8726bca",
       "duplicateId": "c8f39eca660f5589"
+    },
+    {
+      "canonicalId": "361980482179a0aa",
+      "duplicateId": "534f2cb959884d17"
     }
   ],
   "items": [
@@ -9658,6 +9662,63 @@
       "evidence": [
         "OPEN_LOOP.md:6401",
         "Definitive terminal GA program — Build 2"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "34c21be8928dbd93",
+      "sourceLine": 6407,
+      "heading": "Definitive terminal GA program — Build 3",
+      "statement": "On controlled project `70`, select the exact saved APU for the controlled Build 2 Contract Item; verify the resulting unit rate/value, save, reopen, refresh, back/forward and authenticate again without changing the stable Contract Item ID or another row.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Commercial",
+        "route": "/projects/:id/financial/apu",
+        "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6407",
+        "Definitive terminal GA program — Build 3"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "534f2cb959884d17",
+      "sourceLine": 6408,
+      "heading": "Definitive terminal GA program — Build 3",
+      "statement": "Prove wrong-role/tenant isolation through the existing automated gates and live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "canonical-open-loop:361980482179a0aa",
+        "duplicate-source:534f2cb959884d17"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5911b4d25bcb944b",
+      "sourceLine": 6409,
+      "heading": "Definitive terminal GA program — Build 3",
+      "statement": "Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 4.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6409",
+        "Definitive terminal GA program — Build 3"
       ],
       "currentAuthority": false
     }

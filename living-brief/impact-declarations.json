@@ -77164,6 +77164,80 @@
         "scripts/test-ga-terminal-build002.mjs"
       ],
       "reviewedChangeSha256": "52b84c8f901d356394c2f5dce40c27526b7a9a8140b3c840c1e904d63b201c84"
+    },
+    {
+      "taskId": "definitive-terminal-ga-build003-20261026",
+      "reviewedThroughCommit": "63ae09f1508fd0efb7cc3f57bed468cd641c8b7d",
+      "reviewedAt": "2026-10-26T08:15:00-04:00",
+      "status": "local_candidate",
+      "captureTiming": "post_implementation_pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves canonical project, contract, APU and Contract Item authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses the proven one-build exact-source release procedure."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds focused selection, pricing, provenance, mismatch and reload regression evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change is introduced by this regression binding."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime architecture change; existing APU and Intake authorities are reused."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, package or installer path changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet or export behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata, edition or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records accepted Build 2 identity and the exact bounded Build 3 journey."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Defines Build 3 acceptance rows and blocks Build 4 until exact acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent acceptance remains separate from constructor regression evidence."
+        }
+      ],
+      "reason": "Reconcile definitive terminal GA Build 3 saved APU selection and exact Contract Item unit-rate authority.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/job-intake-apu-history.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "480d2058db9743d61237eb393df4d373583bc159975ce3bf800f019e2a67bc00"
     }
   ]
 }

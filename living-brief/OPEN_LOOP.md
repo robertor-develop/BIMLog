@@ -6400,3 +6400,11 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Prove wrong-role/tenant isolation through the existing automated gates and live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.
 - [ ] Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 3.
 
+## Definitive terminal GA program — Build 3
+
+- [x] Define the bounded journey: `/projects/:projectId/intake` Contract Item saved-APU selector and unit-rate authority, followed by save/reopen/reload on the same controlled project and contract; authorized project administrators and explicitly disclosed global-super-admin override only.
+- [x] Bind compatible-version filtering, explicit and sole-compatible selection, exact published or quantity-normalized unit rate, immutable version/fingerprint provenance, unavailable-version disclosure, server-side mismatch rejection and reload persistence in one executable gate.
+- [ ] On controlled project `70`, select the exact saved APU for the controlled Build 2 Contract Item; verify the resulting unit rate/value, save, reopen, refresh, back/forward and authenticate again without changing the stable Contract Item ID or another row.
+- [ ] Prove wrong-role/tenant isolation through the existing automated gates and live role context available to the controlled account; do not fabricate a denial from the authorized global-super-admin override.
+- [ ] Run focused and complete release gates, push, publish the exact commit, verify runtime identity, repeat the production journey, and obtain independent Viva acceptance before Build 4.
+
