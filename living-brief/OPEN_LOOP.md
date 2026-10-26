@@ -6436,3 +6436,12 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Verify the live work item, delivery task, resource demand, persistence, responsive behavior and clean console; do not claim PRE/COO/FOR/ASB for the selected one-phase workflow.
 - [ ] Obtain independent Viva acceptance of the exact deployed Build 6 candidate before Build 7.
 
+## Definitive terminal GA program — Build 7
+
+- [x] Accept Build 6 progression on exact deployed source `b72c91a775f9685e9e91912a2af9ccf2a71f76ca` with independent Viva PASS; accepted journeys are 6/20.
+- [x] Define the bounded journey as one direct, unpriced assignee and optional empty start/due dates on the existing project `70` Delivery task, preserving task/package/work-item IDs, status, progress, planned hours, Intake demand, APU/billing authority and activated-source fingerprint.
+- [x] Bind exact active project-member identity, manager-only reassignment and scheduling, project/tenant isolation, expected-version rejection, date ordering and idempotent repeated-save behavior in the focused Build 7 gate. Implementation commit: `f7250b717`.
+- [ ] Capture the live task ID/version and unassigned state, assign the exact project-scoped `Roberto Test 1` member through Operations, and prove exactly one task changes with no priced resource assignment or Intake mutation.
+- [ ] Push and publish the exact Build 7 candidate, verify source/package/schema identity, then repeat reload, back/forward, logout/login, direct reentry, assigned/unassigned queues, 390x844 responsive behavior and clean-console checks.
+- [ ] Obtain independent Viva acceptance of the exact deployed Build 7 candidate before Build 8.
+
