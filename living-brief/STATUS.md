@@ -4816,3 +4816,9 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - A published immutable APU and independently published workflow v2 supplied the exact PRE 45%, COO 35%, FOR 15%, ASB 5% allocation. Activation produced four Work Packages and four tasks from 40 planned hours: PRE 18h, COO 14h, FOR 6h and ASB 2h. A hard reload preserved every package and hour value, and the browser console remained clean.
 - Independent Viva review closed the product-behavior blocker and assessed the candidate at 98%. The only remaining release closure is Living Brief integrity plus normal non-force integration of the exact repaired source into `main` and `master`, followed by production-identity rebinding and independent re-review. This reconciliation adds no Build 106+ work and changes no customer data.
 
+## Definitive terminal GA Build 1 — Job Intake identity — 2026-10-25
+
+- A controlled production baseline on project `70` (`QA-B1-1025`) created the authoritative client company `GA BUILD 1 CLIENT 20261025` and contact, edited the Job Intake name and location, saved, hard-reloaded and restored the exact project code, company, contact and edited values.
+- The new Build 1 gate binds canonical project prefill, authoritative company/contact selection, autosave, saved-state signaling and reload-safe browser draft behavior. No product defect was reproduced in this journey; the implementation change is permanent regression coverage.
+- Exact-source push, Replit publication, post-publication live repetition and independent acceptance remain required before Build 2 is permitted.
+

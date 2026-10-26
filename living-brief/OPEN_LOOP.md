@@ -6384,3 +6384,10 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Publish the exact repair, prove the false notification error is absent in the authenticated live RFI detail, and finish export, Ask BIMLog, responsive and clean-console evidence.
 - [ ] Obtain independent Viva re-review; customer-field acceptance remains separate.
 
+## Definitive terminal GA program — Build 1
+
+- [x] Capture the controlled production baseline for project/company identity create, edit, save and hard-reload on project `70`.
+- [x] Add the bounded Build 1 identity/company/contact persistence regression gate.
+- [ ] Push and publish the exact Build 1 candidate, repeat the authenticated visible-Chrome journey and bind deployed identity.
+- [ ] Obtain independent acceptance for Build 1. Build 2 is not permitted until this item passes.
+
