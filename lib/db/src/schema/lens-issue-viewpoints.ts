@@ -1,4 +1,4 @@
-import { boolean, index, integer, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, check, index, integer, pgTable, text, timestamp, unique, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { lensViewpointsTable } from "./lens-viewpoints";
 import { usersTable } from "./users";
@@ -29,6 +29,7 @@ export const lensIssueViewpointsTable = pgTable("lens_issue_viewpoints", {
   idempotencyUnique: uniqueIndex("lens_issue_viewpoints_idempotency_uq").on(table.issueId, table.idempotencyKey),
   issueGuidActiveUnique: uniqueIndex("lens_issue_viewpoints_issue_guid_active_uq").on(table.issueId, table.navisworksGuid).where(sql`navisworks_guid IS NOT NULL AND lifecycle_status='active'`),
   issueOrderIndex: index("lens_issue_viewpoints_order_idx").on(table.issueId, table.lifecycleStatus, table.displayOrder, table.id),
+  archiveCheck: check("lens_issue_viewpoints_archive_chk", sql`(${table.lifecycleStatus}='archived')=(${table.archivedAt} IS NOT NULL)`),
 }));
 
 export const lensIssueViewpointRevisionsTable = pgTable("lens_issue_viewpoint_revisions", {
@@ -49,8 +50,12 @@ export const lensIssueViewpointRevisionsTable = pgTable("lens_issue_viewpoint_re
   reason: text("reason"),
   occurredAt: timestamp("occurred_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
-  revisionUnique: uniqueIndex("lens_issue_viewpoint_revisions_number_uq").on(table.issueViewpointId, table.revisionNumber),
-  historyIndex: index("lens_issue_viewpoint_revisions_history_idx").on(table.issueViewpointId, table.revisionNumber),
+  revisionNumberCheck: check("lens_issue_viewpoint_revisions_revision_number_check", sql`${table.revisionNumber} > 0`),
+  actionCheck: check("lens_issue_viewpoint_revisions_action_check", sql`${table.action} IN ('captured','renamed','reordered','made_primary','archived','restored','opened')`),
+  displayOrderCheck: check("lens_issue_viewpoint_revisions_display_order_check", sql`${table.displayOrder} >= 0`),
+  lifecycleStatusCheck: check("lens_issue_viewpoint_revisions_lifecycle_status_check", sql`${table.lifecycleStatus} IN ('active','archived')`),
+  revisionUnique: unique("lens_issue_viewpoint_revisions_number_uq").on(table.issueViewpointId, table.revisionNumber),
+  historyIndex: index("lens_issue_viewpoint_revisions_history_idx").on(table.issueViewpointId, table.revisionNumber.desc()),
 }));
 
 export type LensIssueViewpoint = typeof lensIssueViewpointsTable.$inferSelect;

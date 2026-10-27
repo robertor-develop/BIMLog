@@ -24,6 +24,11 @@ CREATE TABLE IF NOT EXISTS lens_issue_viewpoints (
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT lens_issue_viewpoints_archive_chk CHECK ((lifecycle_status='archived')=(archived_at IS NOT NULL))
 );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoints_archive_chk' AND conrelid='lens_issue_viewpoints'::regclass) THEN
+    ALTER TABLE lens_issue_viewpoints ADD CONSTRAINT lens_issue_viewpoints_archive_chk CHECK ((lifecycle_status='archived')=(archived_at IS NOT NULL));
+  END IF;
+END $$;
 CREATE UNIQUE INDEX IF NOT EXISTS lens_issue_viewpoints_primary_active_uq
   ON lens_issue_viewpoints(issue_id) WHERE is_primary AND lifecycle_status='active';
 CREATE UNIQUE INDEX IF NOT EXISTS lens_issue_viewpoints_issue_guid_active_uq
@@ -50,6 +55,27 @@ CREATE TABLE IF NOT EXISTS lens_issue_viewpoint_revisions (
   occurred_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT lens_issue_viewpoint_revisions_number_uq UNIQUE(issue_viewpoint_id,revision_number)
 );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoint_revisions_revision_number_check' AND conrelid='lens_issue_viewpoint_revisions'::regclass) THEN
+    ALTER TABLE lens_issue_viewpoint_revisions ADD CONSTRAINT lens_issue_viewpoint_revisions_revision_number_check CHECK (revision_number > 0);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoint_revisions_action_check' AND conrelid='lens_issue_viewpoint_revisions'::regclass) THEN
+    ALTER TABLE lens_issue_viewpoint_revisions ADD CONSTRAINT lens_issue_viewpoint_revisions_action_check CHECK (action IN ('captured','renamed','reordered','made_primary','archived','restored','opened'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoint_revisions_display_order_check' AND conrelid='lens_issue_viewpoint_revisions'::regclass) THEN
+    ALTER TABLE lens_issue_viewpoint_revisions ADD CONSTRAINT lens_issue_viewpoint_revisions_display_order_check CHECK (display_order >= 0);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoint_revisions_lifecycle_status_check' AND conrelid='lens_issue_viewpoint_revisions'::regclass) THEN
+    ALTER TABLE lens_issue_viewpoint_revisions ADD CONSTRAINT lens_issue_viewpoint_revisions_lifecycle_status_check CHECK (lifecycle_status IN ('active','archived'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoint_revisions_number_uq' AND conrelid='lens_issue_viewpoint_revisions'::regclass) THEN
+    IF to_regclass('lens_issue_viewpoint_revisions_number_uq') IS NOT NULL THEN
+      ALTER TABLE lens_issue_viewpoint_revisions ADD CONSTRAINT lens_issue_viewpoint_revisions_number_uq UNIQUE USING INDEX lens_issue_viewpoint_revisions_number_uq;
+    ELSE
+      ALTER TABLE lens_issue_viewpoint_revisions ADD CONSTRAINT lens_issue_viewpoint_revisions_number_uq UNIQUE(issue_viewpoint_id,revision_number);
+    END IF;
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS lens_issue_viewpoint_revisions_history_idx
   ON lens_issue_viewpoint_revisions(issue_viewpoint_id,revision_number DESC);
 
