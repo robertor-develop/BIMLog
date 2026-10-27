@@ -202,6 +202,17 @@ const item = {
   assumptions: "",
   exclusions: "",
   description: "",
+  classification: {
+    disciplineId: "discipline-plumbing",
+    disciplineCode: "PLUMBING",
+    disciplineName: "Plumbing",
+    serviceId: "service-shop",
+    serviceCode: "SHOP",
+    serviceName: "Shop Drawings",
+    phaseId: "",
+    phaseCode: "",
+    phaseName: "",
+  },
 };
 const emptyStateMarkup = renderToStaticMarkup(
   <ContractItemBulkEditor
@@ -240,6 +251,10 @@ assert.match(emptyStateMarkup, /value=""/);
 assert.doesNotMatch(emptyStateMarkup, /opacity:0/);
 assert.match(emptyStateMarkup, /Production allocation row 1/);
 assert.match(emptyStateMarkup, /Administration stays separate/);
+assert.match(emptyStateMarkup, /Trade row 1/);
+assert.match(emptyStateMarkup, /Service row 1/);
+assert.match(emptyStateMarkup, /Plumbing · saved/);
+assert.match(emptyStateMarkup, /Shop Drawings · saved/);
 assert.doesNotMatch(emptyStateMarkup, /Select saved APU version/);
 assert.doesNotMatch(emptyStateMarkup, /Select version/);
 

@@ -144,16 +144,22 @@ async function validateRelationshipAuthority(data: JobIntakeData, projectId: num
   const companyId = data.identity.clientCompanyId;
   const governed = (await client.query(`SELECT 1 FROM company_master_catalog_policies WHERE company_id=$1 AND mode='approved_only' LIMIT 1`, [projectCompanyId])).rows.length > 0;
   const previousClassifications = new Map<string, JobIntakeData["classification"]>([["project", previousData.classification]]);
-  for (const item of previousData.scopeItems) for (const workPackage of item.workPackages) {
+  for (const item of previousData.scopeItems) {
+    previousClassifications.set(`item:${item.id}`, item.classification);
+    for (const workPackage of item.workPackages) {
     previousClassifications.set(`package:${workPackage.id}`, workPackage.classification);
     for (const task of workPackage.tasks) previousClassifications.set(`task:${task.id}`, task.classification);
+    }
   }
   const classificationScopes = [
     ["project", data.classification],
-    ...data.scopeItems.flatMap((item) => item.workPackages.flatMap((workPackage: JobIntakeData["scopeItems"][number]["workPackages"][number]) => [
+    ...data.scopeItems.flatMap((item) => [
+      [`item:${item.id}`, item.classification] as const,
+      ...item.workPackages.flatMap((workPackage: JobIntakeData["scopeItems"][number]["workPackages"][number]) => [
       [`package:${workPackage.id}`, workPackage.classification] as const,
       ...workPackage.tasks.map((task: JobIntakeData["scopeItems"][number]["workPackages"][number]["tasks"][number]) => [`task:${task.id}`, task.classification] as const),
-    ])),
+      ]),
+    ]),
   ] as const;
   for (const [scopeName, classification] of classificationScopes) {
     for (const [kind, id, table] of [

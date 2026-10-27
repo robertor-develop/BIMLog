@@ -508,6 +508,7 @@ export function normalizeJobIntakeData(raw: unknown) {
           1_000_000n,
       ),
       unit: optionalText(item.unit, `scopeItems[${index}].unit`, 40) || "Hours",
+      classification: classificationSnapshot(item.classification),
       apuPlanVersion: optionalId(
         item.apuPlanVersion,
         `scopeItems[${index}].apuPlanVersion`,

@@ -4899,3 +4899,11 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - Focused Lorena regression, phase-hour preview, bulk-editor, workflow-default, P1 release, both-package TypeScript and mojibake gates pass locally. Living Brief integrity, exact production build, push, publication and authenticated production proof remain release gates.
 - The exact implementation commit is `2f84e03248b04473b37c88e27b6a83f8bc1f6135`; release metadata is rebound to that immutable source before production assembly.
 
+## Lorena recommendations Build 1 — Contract Item Trade and Service — 2026-10-26
+
+- The Contract Items editor now exposes governed Trade and Service selectors on every row, backed by the existing company master catalogs rather than free-text values or hardcoded trades.
+- Each row persists the selected stable catalog IDs together with historical code/name snapshots, including save/reopen/refresh compatibility and explicit display of a previously saved entry that is no longer offered by the active catalog.
+- New rows inherit the project Trade snapshot but require an explicit Service selection. Item-level catalog authority is validated on save with the same approved-only, company and project-boundary rules already used by project, package and task classifications.
+- No database migration is required because Job Intake scope is stored in the governed normalized JSON document. Existing Contract Items without item-level classification remain compatible and are not silently rewritten.
+- Focused UI/persistence, master-catalog authority, access-route authority, the complete Job Intake suite and both package TypeScript checks pass locally. Exact clean production assembly, commit/push/publication, authenticated production persistence proof and independent acceptance remain release gates.
+

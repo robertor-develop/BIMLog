@@ -2310,6 +2310,9 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
                 <ContractItemBulkEditor
+                  projectId={projectId}
+                  request={api}
+                  defaultClassification={data.classification}
                   readOnlyNavigation={canonicalReadOnly ? {
                     budgetHref: withIntakeReturn(`/projects/${projectId}/financial/budget`, projectId, "scope"),
                     apuHref: withIntakeReturn(`/projects/${projectId}/financial/apu`, projectId, "scope"),

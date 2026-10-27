@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { compatibleApuVersions, type IntakeApuVersion } from "../../lib/job-intake-apu-default";
 import { ArrowUp, ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
@@ -9,6 +9,9 @@ import { changeContractItemRate, contractItemRateExplanation, manualContractRate
 type Translate = (en: string, es: string) => string;
 
 type Props = {
+  projectId?: number;
+  request?: (path: string) => Promise<any>;
+  defaultClassification?: Record<string, any>;
   showDeliveryControls?: boolean;
   items: any[];
   setItems: (updater: (items: any[]) => any[]) => void;
@@ -59,6 +62,7 @@ function newItem(
     | "defaultApuVersion"
     | "defaultWorkflow"
     | "defaultContractId"
+    | "defaultClassification"
   >,
 ) {
   return {
@@ -80,6 +84,17 @@ function newItem(
     assumptions: "",
     exclusions: "",
     provenance: null,
+    classification: {
+      disciplineId: props.defaultClassification?.disciplineId ?? "",
+      disciplineCode: props.defaultClassification?.disciplineCode ?? "",
+      disciplineName: props.defaultClassification?.disciplineName ?? "",
+      serviceId: "",
+      serviceCode: "",
+      serviceName: "",
+      phaseId: "",
+      phaseCode: "",
+      phaseName: "",
+    },
   };
 }
 
@@ -308,6 +323,23 @@ export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
   const [pasteText, setPasteText] = useState("");
   const pasteTarget = useRef<HTMLTextAreaElement>(null);
+  const [catalogs, setCatalogs] = useState<Record<"disciplines" | "services", any[]>>({ disciplines: [], services: [] });
+  const [catalogError, setCatalogError] = useState("");
+  useEffect(() => {
+    if (!props.request || !props.projectId) return;
+    let active = true;
+    Promise.all((["disciplines", "services"] as const).map(async (kind) => [kind, (await props.request!(`/master-catalogs/${kind}?projectId=${props.projectId}`)).entries ?? []] as const))
+      .then((entries) => {
+        if (active) {
+          setCatalogs(Object.fromEntries(entries) as Record<"disciplines" | "services", any[]>);
+          setCatalogError("");
+        }
+      })
+      .catch(() => {
+        if (active) setCatalogError(props.tt("Trade and Service catalogs could not be loaded. Refresh and retry before saving.", "No se pudieron cargar los catálogos de Trade y Service. Actualice y vuelva a intentar antes de guardar."));
+      });
+    return () => { active = false; };
+  }, [props.projectId, props.request, props.tt]);
   const eligibleSnapshots = props.snapshots.filter(snapshot => snapshot.currency === props.currency && (!snapshot.status || snapshot.status === "approved"));
   const eligibleApuVersions = compatibleApuVersions(props.apuVersions, props.currency);
   const update = (index: number, patch: Record<string, unknown>) =>
@@ -454,7 +486,7 @@ export function ContractItemBulkEditor(props: Props) {
 
   return (
     <div className="ji-bulk">
-      <style>{bulkCss}</style>
+      <style>{`${bulkCss}.ji-item-classification{grid-column:2/-1;display:grid;grid-template-columns:repeat(2,minmax(180px,1fr));gap:8px;padding:8px;border:1px solid #dbeafe;border-radius:8px;background:#f8fafc}.ji-item-classification>small{grid-column:1/-1;color:#b91c1c}@media(max-width:600px){.ji-item-classification{grid-column:1/-1;grid-template-columns:1fr}}`}</style>
       <div className="ji-bulk-tools">
         <div>
           <strong>
@@ -658,6 +690,39 @@ export function ContractItemBulkEditor(props: Props) {
                   }
                 />
               </label>
+          <div className="ji-item-classification">
+            <label>
+              {props.tt("Trade", "Trade")}
+              <select
+                value={item.classification?.disciplineId ?? ""}
+                aria-label={props.tt(`Trade row ${index + 1}`, `Trade fila ${index + 1}`)}
+                onChange={(event) => {
+                  const entry = catalogs.disciplines.find((candidate) => String(candidate.id) === event.target.value);
+                  update(index, { classification: { ...(item.classification ?? {}), disciplineId: entry?.id ?? "", disciplineCode: entry?.code ?? "", disciplineName: entry?.name ?? "" } });
+                }}
+              >
+                <option value="">{props.tt("Select Trade", "Seleccione Trade")}</option>
+                {item.classification?.disciplineId && !catalogs.disciplines.some((entry) => String(entry.id) === String(item.classification.disciplineId)) && <option value={item.classification.disciplineId}>{item.classification.disciplineName || item.classification.disciplineCode || item.classification.disciplineId} · {props.tt("saved", "guardado")}</option>}
+                {catalogs.disciplines.map((entry) => <option key={entry.id} value={entry.id}>{entry.code} — {entry.name}</option>)}
+              </select>
+            </label>
+            <label>
+              {props.tt("Service", "Service")}
+              <select
+                value={item.classification?.serviceId ?? ""}
+                aria-label={props.tt(`Service row ${index + 1}`, `Service fila ${index + 1}`)}
+                onChange={(event) => {
+                  const entry = catalogs.services.find((candidate) => String(candidate.id) === event.target.value);
+                  update(index, { classification: { ...(item.classification ?? {}), serviceId: entry?.id ?? "", serviceCode: entry?.code ?? "", serviceName: entry?.name ?? "" } });
+                }}
+              >
+                <option value="">{props.tt("Select Service", "Seleccione Service")}</option>
+                {item.classification?.serviceId && !catalogs.services.some((entry) => String(entry.id) === String(item.classification.serviceId)) && <option value={item.classification.serviceId}>{item.classification.serviceName || item.classification.serviceCode || item.classification.serviceId} · {props.tt("saved", "guardado")}</option>}
+                {catalogs.services.map((entry) => <option key={entry.id} value={entry.id}>{entry.code} — {entry.name}</option>)}
+              </select>
+            </label>
+            {catalogError && <small role="alert">{catalogError}</small>}
+          </div>
           <div className="ji-actions"><button type="button" disabled={index === 0} aria-label={props.tt(`Move row ${index + 1} up`, `Subir fila ${index + 1}`)} onClick={() => props.setItems(rows => { const next = [...rows]; [next[index - 1], next[index]] = [next[index], next[index - 1]]; return next; })}><ArrowUp size={14}/></button></div>
           <button
             className="danger"

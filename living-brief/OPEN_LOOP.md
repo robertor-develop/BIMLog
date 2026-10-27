@@ -6487,3 +6487,14 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Prove all repaired journeys in authenticated production Chrome with save, reload and activation/Operations persistence evidence; obtain independent acceptance separately.
 - [ ] Treat Lorena's proposed Trade/Service contract-item taxonomy, contract-level bulk import and summarized contract navigation as the next product change; use company catalogs and configurable Service-to-phase templates rather than hardcoded free text.
 
+## Lorena recommendations — Build 1 of 5: Contract Item Trade and Service
+
+- [x] Add Trade and Service controls to every Contract Item using the authoritative company discipline and service catalogs.
+- [x] Persist stable catalog IDs and historical labels through normalization, save, reopen and refresh without changing existing Contract Item identity or commercial values.
+- [x] Extend approved-only authority validation to each Contract Item classification while preserving tenant/project isolation and legacy unclassified rows.
+- [x] Repair stale repository gates that still required retired strategy/milestone prose or obsolete quantity guidance; preserve the centralized route-denial authority check.
+- [x] Pass focused UI/persistence, master-catalog authority, access-route authority, complete Job Intake behavior and both package TypeScript gates.
+- [ ] Commit and run the exact clean production build; push and publish that exact source.
+- [ ] Prove Trade and Service save/reopen/refresh/back-forward/logout-login behavior in the existing authenticated production Chrome tab on a uniquely named controlled draft only.
+- [ ] Prove catalog error/empty behavior, responsive presentation and foreign-company/wrong-role denial; obtain independent acceptance before Build 2.
+

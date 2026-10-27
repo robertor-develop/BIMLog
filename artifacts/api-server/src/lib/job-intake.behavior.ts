@@ -164,7 +164,7 @@ assert.equal(
   false,
   "current per-Contract-Item delivery guidance must satisfy readiness without the retired global strategy field",
 );
-const missingPerItemMilestoneCompletion = jobIntakeCompletion(
+const optionalPerItemMilestoneCompletion = jobIntakeCompletion(
   normalizeJobIntakeData({
     ...data,
     delivery: { workflowTemplate: "", submittalStrategy: "", milestoneSummary: "" },
@@ -173,9 +173,9 @@ const missingPerItemMilestoneCompletion = jobIntakeCompletion(
   [],
 );
 assert.equal(
-  missingPerItemMilestoneCompletion.missingItems.some((item) => item.code === "delivery"),
-  true,
-  "each Contract Item must retain both its strategy and milestones before activation",
+  optionalPerItemMilestoneCompletion.missingItems.some((item) => item.code === "delivery"),
+  false,
+  "retired per-item strategy and milestone text must not block activation after a governed workflow is selected",
 );
 assert.match(completion.fingerprint, /^[a-f0-9]{64}$/);
 assert.doesNotThrow(() => assertJobIntakeActivationConfirmation(completion, completion.fingerprint));
@@ -462,7 +462,7 @@ assert.match(contract, /internalHourlyRate/);
 assert.match(app, /startJobIntakeMigration\(\)/);
 assert.match(app, /await waitForJobIntakeMigration\(\)/);
 assert.match(ui, /Core included/);
-assert.match(ui, /La cantidad y la unidad describen lo que vende/);
+assert.match(ui, /La cantidad es el único monto de trabajo y la base de horas operativas/);
 assert.match(read("../../../bimlog/src/components/job-intake/GenericResourcePlan.tsx"), /budgetEnabled/);
 assert.match(ui, /Cómputo de cantidades/);
 assert.match(ui, /Aún falta/);
