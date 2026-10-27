@@ -6504,9 +6504,9 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Accept Build 1 on exact deployed source `1f68d8306ed119727d99d3070ceec4ef62556284` with independent Viva PASS.
 - [x] Accept both two-column Submittal/Quantity and four-column Submittal/Quantity/Trade/Service spreadsheet ranges with deterministic header, delimiter, decimal and formula safety.
 - [x] Require an explicit bulk-load contract and assign its exact ID to every accepted row without per-row repetition.
-- [x] Resolve optional Trade and Service only through approved company catalog code, name or alias; reject unknown or extra values before adding any partial rows.
+- [x] Resolve Trade and Service only through approved company catalog code, name or alias; accept exactly two columns or four complete columns and reject one, three, more than four, or partially blank four-column shapes before adding any partial rows.
 - [x] Pass focused bulk-loader and complete Job Intake regression including both package TypeScript checks.
-- [x] Freeze the Build 2 implementation boundary at `1e899d5703d2c42c32861d6ef08aa2d5dee92ce3` before deterministic state reconciliation.
+- [x] Record Viva's first-candidate FAIL and repair its real atomic-shape defect at exact commit `3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581` with required negative and preservation coverage.
 - [ ] Reconcile deterministic Living Brief state, pass the exact full production build, commit and push the exact candidate.
 - [ ] Publish the exact pushed candidate and prove controlled four-column load, contract assignment, save, reload, navigation/reentry, responsive behavior and clean console in authenticated production Chrome.
 - [ ] Obtain independent Viva acceptance of the exact deployed Build 2 candidate before Build 3.

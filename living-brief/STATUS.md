@@ -4913,7 +4913,7 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - Build 1 is independently accepted on exact deployed source `1f68d8306ed119727d99d3070ceec4ef62556284`; Build 2 is permitted.
 - The bulk Contract Item loader now accepts Lorena's Submittal, Quantity, Trade and Service spreadsheet shape while retaining the existing two-column compatibility path.
 - The user selects one explicit contract profile before loading. Every accepted row receives that exact contract ID; the loader does not require repetitive per-row contract selection and does not infer a contract from free text.
-- Trade and Service values resolve only to approved catalog code, name or alias. Unknown values, malformed rows, formula-like names, non-positive quantities and fifth-column data fail visibly before any row is added.
-- Focused bulk-loader behavior, complete Job Intake behavior and both package TypeScript checks pass. Living Brief state reconciliation and the exact production build are being repeated before commit, push, publication and authenticated production proof.
-- Implementation is fixed at `1e899d5703d2c42c32861d6ef08aa2d5dee92ce3`; this narrative reconciliation follows that exact unit and does not expand runtime scope.
+- Trade and Service values resolve only to approved catalog code, name or alias. Unknown values, malformed rows, formula-like names, non-positive quantities, one- or three-column rows, partially blank four-column rows and fifth-column data fail visibly before any row is added.
+- Viva rejected the first deployed candidate after proving that a valid-Trade three-column row and incomplete four-column rows could bypass the visible two-or-four-column promise. Repair `3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581` makes shape validation atomic and adds the required negative and no-partial-addition regressions.
+- Focused bulk-loader behavior, complete Job Intake behavior and both package TypeScript checks pass on the repair. Deterministic reconciliation, full production assembly, push, republication, authenticated production proof and repeat independent acceptance remain required.
 
