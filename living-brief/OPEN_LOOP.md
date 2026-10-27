@@ -7,6 +7,7 @@
 - [x] Apply the binding only to new or still-unbound Contract Items, deriving the compatible deliverable type, tasks, phase guidance and hour preview while preserving explicit selections and reviewed project text.
 - [x] Enforce company/service/workflow isolation, active-Service and published-version authority, and optimistic binding revisions; expose clear bilingual configuration and empty guidance.
 - [x] Pass the focused 10-check behavior contract and both package TypeScript checks at implementation commit `79fd838d6ce8efc82ada82551207b879d6d33be4`.
+- [x] Declare the additive Service binding table in the authoritative Drizzle schema at repair `ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a`; database safety passes with all 266 startup tables reconciled.
 - [ ] Reconcile generated Living Brief state, run the exact clean production build, push and publish the exact candidate, then pass authenticated desktop/responsive Chrome and independent Viva acceptance before Build 5.
 
 ## Lorena recommendations Build 3 — 2026-10-27
