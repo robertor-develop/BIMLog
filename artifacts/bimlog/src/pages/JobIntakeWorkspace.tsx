@@ -2267,8 +2267,8 @@ export function JobIntakeWorkspace() {
                 <div className="ji-rate">
                   <strong>
                     {tt(
-                      "Quantity and unit describe what you sell. Planned labor hours describe the work needed to deliver it.",
-                      "La cantidad y la unidad describen lo que vende. Las horas previstas describen el trabajo necesario para entregarlo.",
+                      "Quantity is the single work amount and operational-hours baseline; unit describes how that work is sold.",
+                      "La cantidad es el único monto de trabajo y la base de horas operativas; la unidad describe cómo se vende ese trabajo.",
                     )}
                   </strong>
                   {capabilities.costValuePlanner

@@ -2,10 +2,12 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "2f84e03248b04473b37c88e27b6a83f8bc1f6135",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "b93598865484c3cb00144e832b02c49533d3c92aae5ebfedaaa45433375c7d8e",
+  "bundleSha256": "dda6aca3bb95f902dbc72e3618e93dbe605bb48f3b4c2050e18f7c2603901912",
   "impact": {
     "baselineCommit": "2f84e03248b04473b37c88e27b6a83f8bc1f6135",
     "changedPaths": [
+      "artifacts/api-server/src/lib/lorena-intake-20261026.behavior.ts",
+      "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
@@ -14,6 +16,7 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -117,8 +120,8 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "acb99afe28cc996d5a17d736b3e18c70a68f93b616be695b5300fbb7735a6f26",
-      "sourceChangedAt": "2026-10-26T21:20:00.000Z",
+      "sha256": "93b23e7988d91e9fc401de11d61c39c3fd6dc1ba20cc5c62c268f30216a58e90",
+      "sourceChangedAt": "2026-10-27T00:25:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "2f84e03248b04473b37c88e27b6a83f8bc1f6135",
       "semanticReviewedThroughCommit": "2f84e03248b04473b37c88e27b6a83f8bc1f6135",
@@ -129,8 +132,8 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "b6129736dd9194dd2b143974b22586206078438887e8b31723576e1943491b2d",
-      "sourceChangedAt": "2026-10-26T21:20:00.000Z",
+      "sha256": "dfa1f8a2494325483f2c54b53a06c3fc5e3a8a8002c3e14d6332e4a0f6464f7b",
+      "sourceChangedAt": "2026-10-27T00:25:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "2f84e03248b04473b37c88e27b6a83f8bc1f6135",
       "semanticReviewedThroughCommit": "2f84e03248b04473b37c88e27b6a83f8bc1f6135",

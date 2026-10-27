@@ -5,12 +5,15 @@ const root = new URL("../../../", import.meta.url);
 const contract = readFileSync(new URL("api-server/src/lib/job-intake-contract.ts", root), "utf8");
 const editor = readFileSync(new URL("bimlog/src/components/job-intake/ContractItemBulkEditor.tsx", root), "utf8");
 const delivery = readFileSync(new URL("bimlog/src/components/job-intake/IntakeDeliveryItems.tsx", root), "utf8");
+const workspace = readFileSync(new URL("bimlog/src/pages/JobIntakeWorkspace.tsx", root), "utf8");
 const activation = readFileSync(new URL("api-server/src/lib/job-intake-service.ts", root), "utf8");
 const apu = readFileSync(new URL("api-server/src/lib/cost-value-plan-service.ts", root), "utf8");
 
 assert.match(contract, /const plannedHours = quantity;/, "server must derive operational hours from Quantity");
 assert.doesNotMatch(editor, /Planned labor hours row/, "Intake must not render a duplicate labor-hours field");
 assert.doesNotMatch(editor, /Horas de trabajo previstas/, "Spanish Intake must not render the removed field");
+assert.match(workspace, /Quantity is the single work amount and operational-hours baseline/, "Intake guidance must describe Quantity as authoritative");
+assert.doesNotMatch(workspace, /Planned labor hours describe the work needed to deliver it/, "Intake guidance cannot contradict the single-Quantity model");
 assert.doesNotMatch(delivery, /Submittal strategy/, "removed delivery prose must not be rendered");
 assert.doesNotMatch(delivery, /Milestones and distribution/, "removed milestone prose must not be rendered");
 assert.match(delivery, /Apply this workflow to every matching Contract Item/, "workflow selection needs a bulk propagation action");

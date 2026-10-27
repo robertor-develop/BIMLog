@@ -77949,12 +77949,14 @@
       ],
       "reason": "Reconcile the urgent Lorena Job Intake repair for quantity authority, APU availability, workflow automation, readiness, and conserved phase hours.",
       "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/lorena-intake-20261026.behavior.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "ab1efcbaa430308669b253426929a2aaf87a7748ada7cbea3c12cb132d205e28"
+      "reviewedChangeSha256": "ae7057adc57da9c2a0b03389df1b29c40f371bb0dee308f4c13d4dc12b559702"
     }
   ]
 }

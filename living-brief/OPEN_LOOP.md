@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lorena Intake live-copy correction — 2026-10-26
+
+- [x] Remove the stale live guidance that contradicted Quantity as the single operational-hours baseline.
+- [x] Add a focused regression that rejects the contradictory sentence and requires the corrected guidance.
+- [ ] Complete the full production build, push the exact repair, republish, and repeat authenticated production verification.
+
 ## GA publication Builds 111–115 — 2026-10-25
 
 - [x] B111 bind the exact pushed Build 110 lineage and rerun the complete prior-block regression.

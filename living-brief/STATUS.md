@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-26 — Lorena Intake live-copy correction candidate
+
+Authenticated production verification of the urgent Lorena Intake repair confirmed that the duplicate planned-hours control is removed and Quantity is the single operational-hours baseline, but exposed one stale explanatory sentence that still described planned labor hours as separate. The authoritative Intake copy and its focused behavior contract now state the single-Quantity model consistently in English and Spanish. No schema, customer data, authorization, integration, Native, installer, payment, or email boundary changes.
+
 ## 2026-10-25 — GA publication Builds 111–115 candidate
 
 Builds 111–115 bind the exact pushed Builds 106–110 lineage, repeat its full focused regression, verify current API/frontend type integrity, prove the deterministic production artifact and fail-closed storage boundary, and seal the exact ten-build publication plan. The candidate changes no Native/installer path and authorizes no customer-data mutation. Exact-head full build, push, Replit publication, immutable live identity and authenticated Chrome remain the release gates.
