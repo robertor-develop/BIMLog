@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const route = readFileSync(new URL("../routes/clash_reports.ts", import.meta.url), "utf8");
+const client = readFileSync(new URL("../../../bimlog/src/features/lens-next/lens-next-client.ts", import.meta.url), "utf8");
+const addStart = route.indexOf('router.post("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints"');
+const nextRoute = route.indexOf('router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state"', addStart);
+assert.ok(addStart > 0 && nextRoute > addStart);
+const addRoute = route.slice(addStart, nextRoute);
+assert.match(addRoute, /requirePermission\("admin", "write"\)/);
+assert.match(addRoute, /expectedMutationVersion/);
+assert.match(addRoute, /idempotency_key=\$2/);
+assert.match(addRoute, /lens_issue_stale_write/);
+assert.match(addRoute, /validatePersistedLensNextVisualState/);
+assert.match(addRoute, /capturedFingerprint !== modelFingerprint/);
+assert.match(addRoute, /lens_issue_viewpoint_revisions/);
+assert.match(addRoute, /lens_issue_viewpoint_added/);
+assert.match(client, /loadIssueViewpoints\(issue:/);
+assert.match(client, /addIssueViewpoint\(issue:/);
+assert.match(client, /lens-issue-viewpoints\.v1/);
+assert.match(client, /captureCurrentVisualState\(issue:/);
+console.log("Lens Build 007 Add Viewpoint API, client, and native capture bridge contract: PASS");

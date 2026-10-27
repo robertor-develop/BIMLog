@@ -4,6 +4,7 @@ export const LENS_ISSUE_VIEWPOINTS_SQL = String.raw`
 CREATE TABLE IF NOT EXISTS lens_issue_viewpoints (
   id text PRIMARY KEY,
   issue_id integer NOT NULL REFERENCES lens_viewpoints(id) ON DELETE CASCADE,
+  idempotency_key text NOT NULL,
   project_id integer NOT NULL,
   model_fingerprint text,
   name text NOT NULL,
@@ -53,17 +54,20 @@ CREATE INDEX IF NOT EXISTS lens_issue_viewpoint_revisions_history_idx
   ON lens_issue_viewpoint_revisions(issue_viewpoint_id,revision_number DESC);
 
 INSERT INTO lens_issue_viewpoints (
-  id,issue_id,project_id,name,viewpoint_type,display_order,is_primary,lifecycle_status,
+  id,issue_id,idempotency_key,project_id,name,viewpoint_type,display_order,is_primary,lifecycle_status,
   navisworks_guid,screenshot_url,visual_state_json,visual_state_digest,captured_at,created_at,updated_at
 )
 SELECT
-  'legacy-primary-' || issue.id::text,issue.id,issue.project_id,
+  'legacy-primary-' || issue.id::text,issue.id,'legacy-primary-' || issue.id::text,issue.project_id,
   COALESCE(NULLIF(issue.display_id,''),NULLIF(issue.viewpoint_id,''),'Primary viewpoint'),
   'coordination',0,true,'active',issue.navisworks_guid,issue.screenshot_url,
   issue.visual_state_json,issue.visual_state_digest,
   COALESCE(issue.captured_at,issue.created_at,now()),COALESCE(issue.created_at,now()),COALESCE(issue.updated_at,now())
 FROM lens_viewpoints issue
 WHERE NOT EXISTS (SELECT 1 FROM lens_issue_viewpoints existing WHERE existing.issue_id=issue.id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS lens_issue_viewpoints_idempotency_uq
+  ON lens_issue_viewpoints(issue_id,idempotency_key);
 
 INSERT INTO lens_issue_viewpoint_revisions (
   id,issue_viewpoint_id,revision_number,action,name,display_order,is_primary,lifecycle_status,

@@ -6,6 +6,7 @@ import { usersTable } from "./users";
 export const lensIssueViewpointsTable = pgTable("lens_issue_viewpoints", {
   id: text("id").primaryKey(),
   issueId: integer("issue_id").notNull().references(() => lensViewpointsTable.id, { onDelete: "cascade" }),
+  idempotencyKey: text("idempotency_key").notNull(),
   projectId: integer("project_id").notNull(),
   modelFingerprint: text("model_fingerprint"),
   name: text("name").notNull(),
@@ -25,6 +26,7 @@ export const lensIssueViewpointsTable = pgTable("lens_issue_viewpoints", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => ({
   primaryActiveUnique: uniqueIndex("lens_issue_viewpoints_primary_active_uq").on(table.issueId).where(sql`is_primary AND lifecycle_status='active'`),
+  idempotencyUnique: uniqueIndex("lens_issue_viewpoints_idempotency_uq").on(table.issueId, table.idempotencyKey),
   issueGuidActiveUnique: uniqueIndex("lens_issue_viewpoints_issue_guid_active_uq").on(table.issueId, table.navisworksGuid).where(sql`navisworks_guid IS NOT NULL AND lifecycle_status='active'`),
   issueOrderIndex: index("lens_issue_viewpoints_order_idx").on(table.issueId, table.lifecycleStatus, table.displayOrder, table.id),
 }));

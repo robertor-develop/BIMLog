@@ -1466,6 +1466,75 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
   }
 );
 
+router.get("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const issueId = Number(req.params.viewpointId);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0) {
+      res.status(400).json({ error: "lens_issue_viewpoint_identity_invalid" }); return;
+    }
+    const issue = await pool.query(`SELECT id FROM lens_viewpoints WHERE id=$1 AND project_id=$2`, [issueId, projectId]);
+    if (!issue.rowCount) { res.status(404).json({ error: "lens_issue_not_found" }); return; }
+    const viewpoints = await pool.query(`SELECT id,issue_id,project_id,model_fingerprint,name,viewpoint_type,display_order,is_primary,lifecycle_status,navisworks_guid,screenshot_url,visual_state_digest,captured_by_user_id,captured_at,renamed_at,archived_at,created_at,updated_at FROM lens_issue_viewpoints WHERE issue_id=$1 AND project_id=$2 ORDER BY CASE WHEN lifecycle_status='active' THEN 0 ELSE 1 END,display_order,id`, [issueId, projectId]);
+    res.json({ success: true, contractVersion: "lens-issue-viewpoints.v1", issueId, viewpoints: viewpoints.rows });
+  },
+);
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const issueId = Number(req.params.viewpointId);
+    const body = req.body ?? {};
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const viewpointType = typeof body.viewpointType === "string" ? body.viewpointType.trim() : "";
+    const modelFingerprint = typeof body.modelFingerprint === "string" ? body.modelFingerprint.trim().toLowerCase() : "";
+    const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
+    const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+    const visualStateJson = typeof body.visualStateJson === "string" ? body.visualStateJson.trim() : "";
+    const visualStateDigest = typeof body.visualStateDigest === "string" ? body.visualStateDigest.trim().toLowerCase() : "";
+    const expectedMutationVersion = Number(body.expectedMutationVersion);
+    if (body.contractVersion !== "lens-issue-viewpoints.v1" || !Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0) {
+      res.status(400).json({ error: "lens_issue_viewpoint_request_invalid" }); return;
+    }
+    if (name.length < 1 || name.length > 120 || !["coordination", "detail", "context", "verification"].includes(viewpointType) || modelFingerprint.length < 8 || modelFingerprint.length > 256 || idempotencyKey.length < 8 || idempotencyKey.length > 200 || reason.length < 5 || reason.length > 500) {
+      res.status(422).json({ error: "lens_issue_viewpoint_fields_invalid" }); return;
+    }
+    if (!Number.isSafeInteger(expectedMutationVersion) || expectedMutationVersion < 1 || !visualStateJson || Buffer.byteLength(visualStateJson, "utf8") > 4 * 1024 * 1024 || !/^[0-9a-f]{64}$/.test(visualStateDigest)) {
+      res.status(422).json({ error: "lens_issue_viewpoint_visual_state_invalid" }); return;
+    }
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const issueResult = await client.query(`SELECT id,viewpoint_id,lifecycle_status,revision_number,mutation_version FROM lens_viewpoints WHERE id=$1 AND project_id=$2 FOR UPDATE`, [issueId, projectId]);
+      const issue = issueResult.rows[0];
+      if (!issue || issue.lifecycle_status !== "active") { await client.query("ROLLBACK"); res.status(404).json({ error: "lens_issue_not_found" }); return; }
+      const replay = await client.query(`SELECT id,name,display_order,is_primary,lifecycle_status,visual_state_digest FROM lens_issue_viewpoints WHERE issue_id=$1 AND idempotency_key=$2`, [issueId, idempotencyKey]);
+      if (replay.rows[0]) { await client.query("COMMIT"); res.status(200).json({ success: true, created: false, replayed: true, viewpoint: replay.rows[0] }); return; }
+      if (Number(issue.mutation_version) !== expectedMutationVersion) { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_stale_write", currentMutationVersion: Number(issue.mutation_version) }); return; }
+      validatePersistedLensNextVisualState(visualStateJson, visualStateDigest, { projectId, serverId: issueId, viewpointId: String(issue.viewpoint_id), lifecycleStatus: String(issue.lifecycle_status), revisionNumber: Number(issue.revision_number) });
+      const parsedVisualState = JSON.parse(visualStateJson) as Record<string, unknown>;
+      const capturedFingerprint = String(parsedVisualState.ModelFingerprint ?? parsedVisualState.modelFingerprint ?? "").trim().toLowerCase();
+      if (capturedFingerprint !== modelFingerprint) { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_viewpoint_model_mismatch" }); return; }
+      const orderResult = await client.query(`SELECT COALESCE(MAX(display_order),-1)+1 AS next_order FROM lens_issue_viewpoints WHERE issue_id=$1 AND lifecycle_status='active'`, [issueId]);
+      const id = randomUUID();
+      const displayOrder = Number(orderResult.rows[0]?.next_order ?? 0);
+      await client.query(`INSERT INTO lens_issue_viewpoints(id,issue_id,idempotency_key,project_id,model_fingerprint,name,viewpoint_type,display_order,is_primary,lifecycle_status,visual_state_json,visual_state_digest,captured_by_user_id,captured_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'active',$9,$10,$11,now())`, [id, issueId, idempotencyKey, projectId, modelFingerprint, name, viewpointType, displayOrder, visualStateJson, visualStateDigest, req.user!.userId]);
+      await client.query(`INSERT INTO lens_issue_viewpoint_revisions(id,issue_viewpoint_id,revision_number,action,name,display_order,is_primary,lifecycle_status,model_fingerprint,visual_state_json,visual_state_digest,actor_user_id,reason) VALUES($1,$2,1,'captured',$3,$4,false,'active',$5,$6,$7,$8,$9)`, [`${id}-r1`, id, name, displayOrder, modelFingerprint, visualStateJson, visualStateDigest, req.user!.userId, reason]);
+      await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,details) VALUES($1,$2,$3,$4,'lens_issue_viewpoint_added','lens_viewpoint',$5,$6)`, [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, issueId, JSON.stringify({ issueViewpointId: id, name, viewpointType, displayOrder, reason, modelFingerprint, visualStateDigest })]);
+      await client.query("COMMIT");
+      res.status(201).json({ success: true, created: true, replayed: false, viewpoint: { id, issueId, projectId, modelFingerprint, name, viewpointType, displayOrder, isPrimary: false, lifecycleStatus: "active", visualStateDigest } });
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch { /* preserve original failure */ }
+      if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
+      throw error;
+    } finally { client.release(); }
+  },
+);
+
 router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
   authMiddleware,
   requirePermission("admin", "write"),

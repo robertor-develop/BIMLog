@@ -121,11 +121,29 @@ export interface LensNextApiClientOptions {
   fetchImpl?: FetchLike;
 }
 
+export type LensNextIssueViewpoint = Readonly<{
+  id: string;
+  issueId: number;
+  projectId: number;
+  modelFingerprint: string | null;
+  name: string;
+  viewpointType: "coordination" | "detail" | "context" | "verification";
+  displayOrder: number;
+  isPrimary: boolean;
+  lifecycleStatus: "active" | "archived";
+  navisworksGuid: string | null;
+  screenshotUrl: string | null;
+  visualStateDigest: string | null;
+  capturedAt: string;
+}>;
+
 export interface LensNextApiClient {
   resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId?: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
   loadReferenceData(projectId: number, signal?: AbortSignal): Promise<LensNextReferenceData>;
   editIssueFields(issue: LensNextIssue, fields: LensNextCreateDraft, reason: string, signal?: AbortSignal): Promise<number>;
+  loadIssueViewpoints(issue: LensNextIssue, signal?: AbortSignal): Promise<readonly LensNextIssueViewpoint[]>;
+  addIssueViewpoint(issue: LensNextIssue, input: { name: string; viewpointType: LensNextIssueViewpoint["viewpointType"]; modelFingerprint: string; visualStateJson: string; visualStateDigest: string; reason: string; idempotencyKey: string }, signal?: AbortSignal): Promise<LensNextIssueViewpoint>;
   loadHistory(
     identity: LensNextImmutableIssueIdentity,
     signal?: AbortSignal,
@@ -336,6 +354,29 @@ export function createLensNextApiClient(
       const mutationVersion = Number(edited?.mutationVersion);
       if (!Number.isSafeInteger(mutationVersion) || mutationVersion <= issue.mutationVersion) throw new Error("BIMLog governed Issue edit version did not advance");
       return mutationVersion;
+    },
+    async loadIssueViewpoints(issue: LensNextIssue, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await get(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/viewpoints`, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog Issue viewpoints response is invalid");
+      const body = raw as Record<string, unknown>;
+      if (body.success !== true || body.contractVersion !== "lens-issue-viewpoints.v1" || Number(body.issueId) !== identity.serverId || !Array.isArray(body.viewpoints)) throw new Error("BIMLog Issue viewpoints response is invalid");
+      return Object.freeze(body.viewpoints.map(rawViewpoint => {
+        const item = rawViewpoint as Record<string, unknown>;
+        const viewpointType = String(item.viewpoint_type ?? item.viewpointType);
+        const lifecycleStatus = String(item.lifecycle_status ?? item.lifecycleStatus);
+        const id = String(item.id ?? "");
+        if (!id || !["coordination", "detail", "context", "verification"].includes(viewpointType) || !["active", "archived"].includes(lifecycleStatus)) throw new Error("BIMLog Issue viewpoint item is invalid");
+        return Object.freeze({ id, issueId: Number(item.issue_id ?? item.issueId), projectId: Number(item.project_id ?? item.projectId), modelFingerprint: item.model_fingerprint == null && item.modelFingerprint == null ? null : String(item.model_fingerprint ?? item.modelFingerprint), name: String(item.name ?? ""), viewpointType: viewpointType as LensNextIssueViewpoint["viewpointType"], displayOrder: Number(item.display_order ?? item.displayOrder), isPrimary: item.is_primary === true || item.isPrimary === true, lifecycleStatus: lifecycleStatus as LensNextIssueViewpoint["lifecycleStatus"], navisworksGuid: item.navisworks_guid == null && item.navisworksGuid == null ? null : String(item.navisworks_guid ?? item.navisworksGuid), screenshotUrl: item.screenshot_url == null && item.screenshotUrl == null ? null : String(item.screenshot_url ?? item.screenshotUrl), visualStateDigest: item.visual_state_digest == null && item.visualStateDigest == null ? null : String(item.visual_state_digest ?? item.visualStateDigest), capturedAt: String(item.captured_at ?? item.capturedAt ?? "") });
+      }));
+    },
+    async addIssueViewpoint(issue: LensNextIssue, input, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await post(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/viewpoints`, { contractVersion: "lens-issue-viewpoints.v1", expectedMutationVersion: issue.mutationVersion, ...input }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw) || (raw as Record<string, unknown>).success !== true) throw new Error("BIMLog did not confirm the added Issue viewpoint");
+      const item = (raw as Record<string, unknown>).viewpoint as Record<string, unknown> | undefined;
+      if (!item || !String(item.id ?? "") || Number(item.issueId ?? identity.serverId) !== identity.serverId) throw new Error("BIMLog added Issue viewpoint receipt is invalid");
+      return Object.freeze({ id: String(item.id), issueId: identity.serverId, projectId: identity.projectId, modelFingerprint: String(item.modelFingerprint ?? input.modelFingerprint), name: String(item.name ?? input.name), viewpointType: String(item.viewpointType ?? input.viewpointType) as LensNextIssueViewpoint["viewpointType"], displayOrder: Number(item.displayOrder), isPrimary: item.isPrimary === true, lifecycleStatus: String(item.lifecycleStatus ?? "active") as LensNextIssueViewpoint["lifecycleStatus"], navisworksGuid: null, screenshotUrl: null, visualStateDigest: String(item.visualStateDigest ?? input.visualStateDigest), capturedAt: String(item.capturedAt ?? new Date().toISOString()) });
     },
     async loadHistory(
       identity: LensNextImmutableIssueIdentity,
