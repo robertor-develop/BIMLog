@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lorena recommendations Build 3 — 2026-10-27
+
+- [x] Add a bilingual `View Contract Items / Ver Partidas de Contrato` action to every accessible contract card.
+- [x] Add a dedicated project- and contract-scoped Contract Items route that verifies exact identity and never substitutes another contract.
+- [x] Present Submittal, Quantity, Trade, Service, rate, value, APU snapshot and workflow information in a responsive table while preserving existing contract controls.
+- [x] Cover route registration, bilingual discovery, exact identity, empty/error states and responsive behavior with a focused executable contract; pass frontend and API TypeScript checks.
+- [ ] Run the configured production-database contract isolation suite, complete the full production build, push and publish the exact candidate, then pass authenticated desktop/mobile Chrome and independent Viva acceptance before Build 4.
+
 ## Lorena Intake live-copy correction — 2026-10-26
 
 - [x] Remove the stale live guidance that contradicted Quantity as the single operational-hours baseline.

@@ -78175,6 +78175,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6ca6dbf29ead2e5c820e52a7f270a8822d9e624d589b9feb02f0ae0facab376c"
+    },
+    {
+      "taskId": "lorena-recommendations-build03-contract-items-navigation-20261027",
+      "reviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "reviewedAt": "2026-10-27T04:00:49.507Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 3 reorganizes existing contract-item presentation without changing ecosystem or product boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "The canonical behavior records the dedicated exact-contract Contract Items navigation and preservation requirements."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The dedicated table implements existing progressive-disclosure, responsive and fail-visible quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved Lorena recommendation improves navigation without changing BIMLog product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The browser route reuses the existing authorized financial-contract API and adds no schema or provider boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers and plugin behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, spreadsheet export or formal report presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Build 3 implementation candidate, passing local gates and remaining release evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks configured database tests, exact release, live Chrome verification and independent acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent acceptance remains pending until the exact candidate is deployed and verified live."
+        }
+      ],
+      "reason": "Lorena recommendations Build 3 adds a dedicated exact-contract Contract Items table while preserving the compact contract register and existing controls.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6731feba02f8a2ae0c8fe7ae95254598b9bac5e3d30fd1fed0181ce9e34db482"
     }
   ]
 }

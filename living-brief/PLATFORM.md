@@ -1539,6 +1539,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/FeedbackAdmin.behavior.tsx
 - artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx
+- artifacts/bimlog/src/pages/FinancialContractItemsWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialControlsSettings.tsx
 - artifacts/bimlog/src/pages/HelpCenter.tsx
@@ -1614,6 +1615,7 @@ It changes only when the code structure or curated architectural facts change.
 - /projects/:id/financial/history
 - /projects/:id/financial/snapshots/:snapshotId
 - /projects/:id/financial/contracts
+- /projects/:id/financial/contracts/:contractId/items
 - /projects/:id/financial/apu
 - /projects/:id/commercial/team-performance
 - /projects/:id/intake

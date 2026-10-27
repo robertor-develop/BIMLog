@@ -1,5 +1,9 @@
 # STATUS.md - Current Accepted Platform State
 
+## 2026-10-27 — Lorena recommendations Build 3 contract-item navigation candidate
+
+Build 3 keeps the Contracts & Commitments register compact and adds a dedicated, exact-project/exact-contract Partidas de Contrato page. Each contract card now exposes a bilingual navigation action; the destination verifies the requested contract identity, fails visibly without substituting another record, and presents the contract items in a responsive table with Trade, Service, Quantity × Rate, contractual value, saved APU snapshot and workflow access. Existing contract lifecycle, approval, access, export, amendment and payment controls remain unchanged. Focused behavior and both package TypeScript checks pass; the production-database HTTP suite remains reserved for the configured Replit environment because the local shell correctly refuses to start without `PROD_DATABASE_URL`.
+
 ## 2026-10-26 — Lorena Intake live-copy correction candidate
 
 Authenticated production verification of the urgent Lorena Intake repair confirmed that the duplicate planned-hours control is removed and Quantity is the single operational-hours baseline, but exposed one stale explanatory sentence that still described planned labor hours as separate. The authoritative Intake copy and its focused behavior contract now state the single-Quantity model consistently in English and Spanish. No schema, customer data, authorization, integration, Native, installer, payment, or email boundary changes.

@@ -1,14 +1,16 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
+  "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "c3ea9346da1292a4469fd37bcf1991ed9828479f81ea8090f9adfaf5f09716f8",
+  "bundleSha256": "05009b70e0d685c8b62f447c853d8cadfcd3a39f1346feafce2ffef236e8c460",
   "impact": {
-    "baselineCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
+    "baselineCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
     "changedPaths": [
+      "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
       "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -25,23 +27,23 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "c027af6a0b6c04ebeb26faadb94fbec67190f17757ba9fce67e50a74242084ba",
-      "sourceChangedAt": "2026-10-27T01:59:58.000Z",
+      "sha256": "f67b0ea6d368c7147864f28f61428dc4648390d1c26287c12e2eb67332315c1f",
+      "sourceChangedAt": "2026-10-27T04:00:49.507Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "quality",
@@ -49,11 +51,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "vision",
@@ -61,23 +63,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "fbda52e963437d887fe77349bf9a049bfb3d31178c48a983d5e63e009c26854d",
-      "sourceChangedAt": "2026-10-26T19:36:55-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "sha256": "f14105e008eadf9f48e12ae933d940c2d45c3bfceb7a20f4dd4115f97918aade",
+      "sourceChangedAt": "2026-10-27T04:00:49.507Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "plugin",
@@ -85,11 +87,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "report_design_system",
@@ -97,11 +99,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "standards_register",
@@ -109,35 +111,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "bc3447598cbacc33cc186fd7469534c2163e7adf5b3a5954b3a98744563b8e1c",
-      "sourceChangedAt": "2026-10-27T01:59:58.000Z",
+      "sha256": "bfaa4f7e0d4db0450889964ab3a95e9309396723e73ef8b75035fa674d47588e",
+      "sourceChangedAt": "2026-10-27T04:00:49.507Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "838b88dc31a83aa6efd9f97b484e177455761bbdd6d74c9cf1c4fe06f288332b",
-      "sourceChangedAt": "2026-10-27T01:59:58.000Z",
+      "sha256": "c48623e1af67b5e73671b18ba90c92a46182108236f85999fc6caeeff753008d",
+      "sourceChangedAt": "2026-10-27T04:00:49.507Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     },
     {
       "key": "audit",
@@ -145,11 +147,11 @@
       "sha256": "3e5f000271a18e6c9bf02d6e99f35693378522b4e0de25a5c4c63934c820290b",
       "sourceChangedAt": "2026-10-25T06:48:10-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewedThroughCommit": "3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581",
-      "semanticReviewTask": "lorena-recommendations-build02-atomic-shape-repair-20261026",
+      "reconciledThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewedThroughCommit": "98646010e98d472548f0bfd6266931b9e561a7a1",
+      "semanticReviewTask": "lorena-recommendations-build03-contract-items-navigation-20261027",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-27T01:59:58.000Z"
+      "semanticReviewedAt": "2026-10-27T04:00:49.507Z"
     }
   ]
 }
