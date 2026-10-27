@@ -6,6 +6,7 @@ import {
   type LensNextApiClient,
   type LensNextBridgeClient,
   type LensNextResponsibleCompanyOption,
+  type LensNextIssueViewpoint,
 } from "./lens-next-client";
 import {
   activeLensNextIssues,
@@ -135,6 +136,11 @@ export function LensNextPanel({
     null,
   );
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [issueViewpoints, setIssueViewpoints] = useState<readonly LensNextIssueViewpoint[]>([]);
+  const [issueViewpointsState, setIssueViewpointsState] = useState<"idle" | "loading" | "saving" | "error">("idle");
+  const [issueViewpointsMessage, setIssueViewpointsMessage] = useState<string | null>(null);
+  const [selectedIssueViewpointId, setSelectedIssueViewpointId] = useState<string | null>(null);
+  const [issueViewpointHistory, setIssueViewpointHistory] = useState<readonly Record<string, unknown>[] | "loading" | null>(null);
   const [linkedItems, setLinkedItems] = useState<LensNextLinksResult | "loading" | null>(null);
   const [linkedItemsError, setLinkedItemsError] = useState<string | null>(null);
   const [referenceAttachments, setReferenceAttachments] = useState<LensNextAttachmentsResult | "loading" | null>(null);
@@ -453,6 +459,49 @@ export function LensNextPanel({
       );
     }
   }, [apiClient, selectedIssue]);
+
+  const loadIssueViewpoints = useCallback(async (signal?: AbortSignal) => {
+    if (!apiClient || !selectedIssue) { setIssueViewpoints([]); setSelectedIssueViewpointId(null); setIssueViewpointsState("idle"); return; }
+    setIssueViewpointsState("loading"); setIssueViewpointsMessage(null);
+    try {
+      const loaded = await apiClient.loadIssueViewpoints(selectedIssue, signal);
+      setIssueViewpoints(loaded);
+      setSelectedIssueViewpointId(current => loaded.some(item => item.id === current) ? current : (loaded.find(item => item.isPrimary && item.lifecycleStatus === "active") ?? loaded.find(item => item.lifecycleStatus === "active") ?? loaded[0])?.id ?? null);
+      setIssueViewpointsState("idle");
+    } catch (error) { if (!signal?.aborted) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoints could not be loaded"); } }
+  }, [apiClient, selectedIssue]);
+  useEffect(() => { const controller = new AbortController(); void loadIssueViewpoints(controller.signal); return () => controller.abort(); }, [loadIssueViewpoints]);
+
+  const addIssueViewpoint = useCallback(async (name: string, viewpointType: LensNextIssueViewpoint["viewpointType"], reason: string) => {
+    if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || selectedIssue.identity.projectId !== bridgeContext.projectId) return;
+    setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
+    try {
+      const captured = await bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext);
+      const added = await apiClient.addIssueViewpoint(selectedIssue, { name, viewpointType, modelFingerprint: bridgeContext.modelFingerprint, visualStateJson: captured.visualStateJson, visualStateDigest: captured.visualStateDigest, reason, idempotencyKey: crypto.randomUUID() });
+      await loadIssueViewpoints(); setSelectedIssueViewpointId(added.id); setIssueViewpointsMessage("Viewpoint captured and added to this Issue.");
+    } catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint capture failed"); }
+  }, [apiClient, bridgeClient, bridgeContext, loadIssueViewpoints, selectedIssue]);
+
+  const updateIssueViewpoint = useCallback(async (issueViewpointId: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }) => {
+    if (!apiClient || !selectedIssue) return;
+    setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
+    try { await apiClient.updateIssueViewpoint(selectedIssue, issueViewpointId, input); await loadIssueViewpoints(); setIssueViewpointsMessage("Issue viewpoint updated."); }
+    catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoint update failed"); }
+  }, [apiClient, loadIssueViewpoints, selectedIssue]);
+
+  const openSelectedIssueViewpoint = useCallback(async () => {
+    if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || !selectedIssueViewpointId) return;
+    setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
+    try { const stored = await apiClient.loadIssueViewpointVisualState(selectedIssue, selectedIssueViewpointId); await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson, stored.visualStateDigest); setIssueViewpointsState("idle"); setIssueViewpointsMessage("Selected Issue viewpoint opened in Navisworks."); }
+    catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Selected Issue viewpoint could not be opened"); }
+  }, [apiClient, bridgeClient, bridgeContext, selectedIssue, selectedIssueViewpointId]);
+
+  const loadSelectedIssueViewpointHistory = useCallback(async () => {
+    if (!apiClient || !selectedIssue || !selectedIssueViewpointId) return;
+    setIssueViewpointHistory("loading");
+    try { setIssueViewpointHistory(await apiClient.loadIssueViewpointHistory(selectedIssue, selectedIssueViewpointId)); }
+    catch (error) { setIssueViewpointHistory(null); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint history could not be loaded"); }
+  }, [apiClient, selectedIssue, selectedIssueViewpointId]);
 
   const loadKnowledge=useCallback(async(signal?:AbortSignal)=>{
     if(!apiClient||!selectedIssue){setKnowledgeContext(null);setKnowledgeError(null);return;}
@@ -858,6 +907,16 @@ export function LensNextPanel({
       onCustomGroupByChange={(next) => { setCustomGroupBy(next); setViewPreset("custom"); }}
       selectedServerId={selectedServerId}
       selectedIssue={selectedIssue}
+      issueViewpoints={issueViewpoints}
+      issueViewpointsState={issueViewpointsState}
+      issueViewpointsMessage={issueViewpointsMessage}
+      selectedIssueViewpointId={selectedIssueViewpointId}
+      issueViewpointHistory={issueViewpointHistory}
+      onSelectIssueViewpoint={(id)=>{setSelectedIssueViewpointId(id);setIssueViewpointHistory(null);}}
+      onAddIssueViewpoint={(name,type,reason)=>void addIssueViewpoint(name,type,reason)}
+      onUpdateIssueViewpoint={(id,input)=>void updateIssueViewpoint(id,input)}
+      onOpenSelectedIssueViewpoint={()=>void openSelectedIssueViewpoint()}
+      onLoadSelectedIssueViewpointHistory={()=>void loadSelectedIssueViewpointHistory()}
       linkedItems={linkedItems}
       linkedItemsError={linkedItemsError}
       onLinkBimlogItem={(type, id) => void linkBimlogItem(type, id)}

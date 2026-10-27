@@ -36,7 +36,7 @@ import { lensNextCaptureKey, lensNextImageStatus, type LensNextImageLoad } from 
 import { useI18n } from "../../lib/i18n";
 import { lensNextPrerequisiteGuidance } from "./lens-next-prerequisite-guidance";
 import { lensNextLinkedItemHref } from "./lens-next-relationship-navigation";
-import type { LensNextResponsibleCompanyOption } from "./lens-next-client";
+import type { LensNextIssueViewpoint, LensNextResponsibleCompanyOption } from "./lens-next-client";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 const STATUS_LABELS_ES: Record<LensNextStatus, string> = {
@@ -370,6 +370,16 @@ export interface LensNextPanelViewProps {
   onCustomGroupByChange(next: readonly LensNextViewDimension[]): void;
   selectedServerId: number | null;
   selectedIssue: LensNextIssue | null;
+  issueViewpoints: readonly LensNextIssueViewpoint[];
+  issueViewpointsState: "idle" | "loading" | "saving" | "error";
+  issueViewpointsMessage: string | null;
+  selectedIssueViewpointId: string | null;
+  issueViewpointHistory: readonly Record<string, unknown>[] | "loading" | null;
+  onSelectIssueViewpoint(id: string): void;
+  onAddIssueViewpoint(name: string, viewpointType: LensNextIssueViewpoint["viewpointType"], reason: string): void;
+  onUpdateIssueViewpoint(id: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }): void;
+  onOpenSelectedIssueViewpoint(): void;
+  onLoadSelectedIssueViewpointHistory(): void;
   linkedItems: LensNextLinksResult | "loading" | null;
   linkedItemsError: string | null;
   onLinkBimlogItem(type: LensNextLinkedItemType, authoritativeId: number): void;
@@ -477,6 +487,7 @@ export function LensNextPanelView({
   onCustomGroupByChange,
   selectedServerId,
   selectedIssue,
+  issueViewpoints,issueViewpointsState,issueViewpointsMessage,selectedIssueViewpointId,issueViewpointHistory,onSelectIssueViewpoint,onAddIssueViewpoint,onUpdateIssueViewpoint,onOpenSelectedIssueViewpoint,onLoadSelectedIssueViewpointHistory,
   linkedItems,
   linkedItemsError,
   onLinkBimlogItem,
@@ -550,6 +561,9 @@ export function LensNextPanelView({
   const [createReviewReady, setCreateReviewReady] = React.useState(false);
   const [editDraft, setEditDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "COORDINATION", floor: "", priority: 3, openItems: "", status: "open" });
   const [editReason, setEditReason] = React.useState("");
+  const [newViewpointName, setNewViewpointName] = React.useState("");
+  const [newViewpointType, setNewViewpointType] = React.useState<LensNextIssueViewpoint["viewpointType"]>("coordination");
+  const [viewpointReason, setViewpointReason] = React.useState("");
   const [linkType, setLinkType] = React.useState<LensNextLinkedItemType>("rfi");
   const [linkTargetId, setLinkTargetId] = React.useState("");
   const [guideOpen, setGuideOpen] = React.useState(false);
@@ -1198,6 +1212,37 @@ export function LensNextPanelView({
               {tt("Link BIMLog item", "Vincular elemento BIMLog")}
             </button>
           </div>
+          <section className="lens-next__detail-panel lens-next__viewpoint-gallery" aria-label={tt("Issue viewpoints", "Puntos de vista de la incidencia", "Pontos de vista da ocorrência")}>
+            <header><h3>{tt("Issue viewpoints", "Puntos de vista de la incidencia", "Pontos de vista da ocorrência")}</h3><span>{issueViewpoints.filter(item=>item.lifecycleStatus==="active").length} {tt("active", "activos", "ativos")}</span></header>
+            {issueViewpointsState === "loading" && <p role="status">{tt("Loading viewpoints…", "Cargando puntos de vista…", "Carregando pontos de vista…")}</p>}
+            <div className="lens-next__viewpoint-cards">
+              {issueViewpoints.map((item,index) => {
+                const activeItems = issueViewpoints.filter(candidate=>candidate.lifecycleStatus==="active");
+                const activeIndex = activeItems.findIndex(candidate=>candidate.id===item.id);
+                const reorder = (offset:number) => { const ordered=activeItems.map(candidate=>candidate.id); const destination=activeIndex+offset; if(activeIndex<0||destination<0||destination>=ordered.length)return; [ordered[activeIndex],ordered[destination]]=[ordered[destination],ordered[activeIndex]]; onUpdateIssueViewpoint(item.id,{action:"reorder",orderedIds:ordered,reason:viewpointReason}); };
+                return <article key={item.id} data-selected={item.id===selectedIssueViewpointId} data-lifecycle={item.lifecycleStatus}>
+                  <button type="button" className="lens-next__viewpoint-card" onClick={()=>onSelectIssueViewpoint(item.id)}><strong>{item.name}</strong>{item.isPrimary&&<span>{tt("Primary", "Principal", "Principal")}</span>}<small>{item.viewpointType} · {item.lifecycleStatus} · {index+1}</small></button>
+                  {item.id===selectedIssueViewpointId&&item.lifecycleStatus==="active"&&<div className="lens-next__viewpoint-actions">
+                    <button type="button" disabled={issueViewpointsState==="saving"} onClick={onOpenSelectedIssueViewpoint}>{tt("Open selected viewpoint", "Abrir punto de vista seleccionado", "Abrir ponto de vista selecionado")}</button>
+                    <button type="button" disabled={activeIndex<=0||viewpointReason.trim().length<5} onClick={()=>reorder(-1)}>↑</button><button type="button" disabled={activeIndex<0||activeIndex>=activeItems.length-1||viewpointReason.trim().length<5} onClick={()=>reorder(1)}>↓</button>
+                    <button type="button" disabled={item.isPrimary||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"make_primary",reason:viewpointReason})}>{tt("Make primary", "Hacer principal", "Tornar principal")}</button>
+                    <button type="button" disabled={!newViewpointName.trim()||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"rename",name:newViewpointName.trim(),reason:viewpointReason})}>{tt("Rename", "Renombrar", "Renomear")}</button>
+                    <button type="button" disabled={item.isPrimary||activeItems.length<=1||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"archive",reason:viewpointReason})}>{tt("Archive", "Archivar", "Arquivar")}</button>
+                    <button type="button" onClick={onLoadSelectedIssueViewpointHistory}>{tt("Viewpoint history", "Historial del punto de vista", "Histórico do ponto de vista")}</button>
+                  </div>}
+                </article>;
+              })}
+            </div>
+            {issueViewpoints.length===0&&issueViewpointsState!=="loading"&&<p>{tt("No Issue viewpoints are available.", "No hay puntos de vista disponibles para la incidencia.", "Não há pontos de vista disponíveis para a ocorrência.")}</p>}
+            <div className="lens-next__filters">
+              <label className="lens-next__field"><span>{tt("Viewpoint name", "Nombre del punto de vista", "Nome do ponto de vista")}</span><input value={newViewpointName} maxLength={120} onChange={event=>setNewViewpointName(event.target.value)}/></label>
+              <label className="lens-next__field"><span>{tt("Type", "Tipo", "Tipo")}</span><select value={newViewpointType} onChange={event=>setNewViewpointType(event.target.value as LensNextIssueViewpoint["viewpointType"])}><option value="coordination">Coordination</option><option value="detail">Detail</option><option value="context">Context</option><option value="verification">Verification</option></select></label>
+              <label className="lens-next__field lens-next__field--wide"><span>{tt("Reason for viewpoint audit history", "Motivo para el historial de auditoría del punto de vista", "Motivo para o histórico de auditoria do ponto de vista")}</span><textarea minLength={5} value={viewpointReason} onChange={event=>setViewpointReason(event.target.value)}/></label>
+              <button type="button" disabled={!selectedIssue.publishingAllowed||issueViewpointsState==="saving"||newViewpointName.trim().length<1||viewpointReason.trim().length<5} onClick={()=>onAddIssueViewpoint(newViewpointName.trim(),newViewpointType,viewpointReason)}>{issueViewpointsState==="saving"?tt("Saving viewpoint…","Guardando punto de vista…","Salvando ponto de vista…"):tt("Add Viewpoint","Agregar punto de vista","Adicionar ponto de vista")}</button>
+            </div>
+            {issueViewpointsMessage&&<p role="status">{issueViewpointsMessage}</p>}
+            {issueViewpointHistory==="loading"?<p role="status">{tt("Loading viewpoint history…","Cargando historial del punto de vista…","Carregando histórico do ponto de vista…")}</p>:issueViewpointHistory&&<ol>{issueViewpointHistory.map((revision,index)=><li key={String(revision.id??index)}><strong>{String(revision.action??"")}</strong> · {String(revision.name??"")} · {String(revision.occurred_at??"")}</li>)}</ol>}
+          </section>
           <nav className="lens-next__detail-tabs" aria-label="Issue detail views">
             {(["overview", "knowledge", "resolution", "bimlog", "properties", "activity"] as const).map(view => (
               <button key={view} type="button" aria-pressed={detailView === view} onClick={() => { setDetailView(view); if (view === "activity" && !history && !historyError) onLoadHistory(); }}>

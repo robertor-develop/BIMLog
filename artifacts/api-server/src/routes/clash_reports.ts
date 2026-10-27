@@ -1535,6 +1535,87 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/vi
   },
 );
 
+router.patch("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const issueId = Number(req.params.viewpointId);
+    const issueViewpointId = String(req.params.issueViewpointId ?? "").trim();
+    const action = String(req.body?.action ?? "").trim();
+    const reason = String(req.body?.reason ?? "").trim();
+    const name = String(req.body?.name ?? "").trim();
+    const orderedIds = Array.isArray(req.body?.orderedIds) ? req.body.orderedIds.map((value: unknown) => String(value)) : [];
+    if (req.body?.contractVersion !== "lens-issue-viewpoints.v1" || !Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0 || !issueViewpointId || !["rename", "reorder", "make_primary", "archive"].includes(action) || reason.length < 5 || reason.length > 500) {
+      res.status(400).json({ error: "lens_issue_viewpoint_update_invalid" }); return;
+    }
+    if (action === "rename" && (name.length < 1 || name.length > 120)) { res.status(422).json({ error: "lens_issue_viewpoint_name_invalid" }); return; }
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const rowsResult = await client.query(`SELECT * FROM lens_issue_viewpoints WHERE issue_id=$1 AND project_id=$2 ORDER BY display_order,id FOR UPDATE`, [issueId, projectId]);
+      const rows = rowsResult.rows;
+      const target = rows.find(row => row.id === issueViewpointId);
+      if (!target) { await client.query("ROLLBACK"); res.status(404).json({ error: "lens_issue_viewpoint_not_found" }); return; }
+      if (target.lifecycle_status !== "active" && action !== "rename") { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_viewpoint_not_active" }); return; }
+      let affected = [target];
+      if (action === "rename") await client.query(`UPDATE lens_issue_viewpoints SET name=$1,renamed_at=now(),updated_at=now() WHERE id=$2`, [name, issueViewpointId]);
+      if (action === "make_primary") {
+        await client.query(`UPDATE lens_issue_viewpoints SET is_primary=false,updated_at=now() WHERE issue_id=$1 AND is_primary=true`, [issueId]);
+        await client.query(`UPDATE lens_issue_viewpoints SET is_primary=true,updated_at=now() WHERE id=$1`, [issueViewpointId]);
+      }
+      if (action === "archive") {
+        const active = rows.filter(row => row.lifecycle_status === "active");
+        if (active.length <= 1 || target.is_primary) { await client.query("ROLLBACK"); res.status(409).json({ error: target.is_primary ? "lens_issue_viewpoint_primary_archive_forbidden" : "lens_issue_viewpoint_last_archive_forbidden" }); return; }
+        await client.query(`UPDATE lens_issue_viewpoints SET lifecycle_status='archived',archived_at=now(),updated_at=now() WHERE id=$1`, [issueViewpointId]);
+      }
+      if (action === "reorder") {
+        const activeIds = rows.filter(row => row.lifecycle_status === "active").map(row => String(row.id)).sort();
+        if (orderedIds.length !== activeIds.length || [...orderedIds].sort().some((id, index) => id !== activeIds[index])) { await client.query("ROLLBACK"); res.status(422).json({ error: "lens_issue_viewpoint_order_invalid" }); return; }
+        affected = orderedIds.map(id => rows.find(row => row.id === id)!);
+        for (let index = 0; index < orderedIds.length; index += 1) await client.query(`UPDATE lens_issue_viewpoints SET display_order=$1,updated_at=now() WHERE id=$2`, [index, orderedIds[index]]);
+      }
+      for (const row of affected) {
+        const currentResult = await client.query(`SELECT * FROM lens_issue_viewpoints WHERE id=$1`, [row.id]);
+        const current = currentResult.rows[0];
+        const revisionResult = await client.query(`SELECT COALESCE(MAX(revision_number),0)+1 AS next_revision FROM lens_issue_viewpoint_revisions WHERE issue_viewpoint_id=$1`, [row.id]);
+        const revision = Number(revisionResult.rows[0].next_revision);
+        await client.query(`INSERT INTO lens_issue_viewpoint_revisions(id,issue_viewpoint_id,revision_number,action,name,display_order,is_primary,lifecycle_status,model_fingerprint,navisworks_guid,screenshot_url,visual_state_json,visual_state_digest,actor_user_id,reason) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`, [`${row.id}-r${revision}`, row.id, revision, action === "make_primary" ? "made_primary" : action === "archive" ? "archived" : action === "rename" ? "renamed" : "reordered", current.name, current.display_order, current.is_primary, current.lifecycle_status, current.model_fingerprint, current.navisworks_guid, current.screenshot_url, current.visual_state_json, current.visual_state_digest, req.user!.userId, reason]);
+      }
+      await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,details) VALUES($1,$2,$3,$4,$5,'lens_viewpoint',$6,$7)`, [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, `lens_issue_viewpoint_${action}`, issueId, JSON.stringify({ issueViewpointId, orderedIds: action === "reorder" ? orderedIds : undefined, name: action === "rename" ? name : undefined, reason })]);
+      await client.query("COMMIT");
+      res.json({ success: true, contractVersion: "lens-issue-viewpoints.v1", action });
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch { /* preserve original failure */ }
+      throw error;
+    } finally { client.release(); }
+  },
+);
+
+router.get("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId/visual-state",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), issueId = Number(req.params.viewpointId), issueViewpointId = String(req.params.issueViewpointId ?? "");
+    const result = await pool.query(`SELECT visual_state_json,visual_state_digest,model_fingerprint FROM lens_issue_viewpoints WHERE id=$1 AND issue_id=$2 AND project_id=$3`, [issueViewpointId, issueId, projectId]);
+    const row = result.rows[0];
+    if (!row?.visual_state_json || !row?.visual_state_digest) { res.status(404).json({ error: "lens_issue_viewpoint_visual_state_not_found" }); return; }
+    res.json({ success: true, visualStateJson: row.visual_state_json, visualStateDigest: row.visual_state_digest, modelFingerprint: row.model_fingerprint });
+  },
+);
+
+router.get("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId/history",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), issueId = Number(req.params.viewpointId), issueViewpointId = String(req.params.issueViewpointId ?? "");
+    const ownership = await pool.query(`SELECT id FROM lens_issue_viewpoints WHERE id=$1 AND issue_id=$2 AND project_id=$3`, [issueViewpointId, issueId, projectId]);
+    if (!ownership.rowCount) { res.status(404).json({ error: "lens_issue_viewpoint_not_found" }); return; }
+    const history = await pool.query(`SELECT id,revision_number,action,name,display_order,is_primary,lifecycle_status,actor_user_id,reason,occurred_at FROM lens_issue_viewpoint_revisions WHERE issue_viewpoint_id=$1 ORDER BY revision_number DESC`, [issueViewpointId]);
+    res.json({ success: true, contractVersion: "lens-issue-viewpoint-history.v1", issueViewpointId, revisions: history.rows });
+  },
+);
+
 router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
   authMiddleware,
   requirePermission("admin", "write"),
