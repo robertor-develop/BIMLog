@@ -1,12 +1,21 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lorena recommendations Build 4 — 2026-10-27
+
+- [x] Accept Build 3 on exact deployed source `117eb35456e0e73733eefff3f807009bf7e9e402` with independent Viva PASS.
+- [x] Let Company PMO bind an active governed Service to one exact published immutable Delivery Workflow version without hardcoded Service names or phases.
+- [x] Apply the binding only to new or still-unbound Contract Items, deriving the compatible deliverable type, tasks, phase guidance and hour preview while preserving explicit selections and reviewed project text.
+- [x] Enforce company/service/workflow isolation, active-Service and published-version authority, and optimistic binding revisions; expose clear bilingual configuration and empty guidance.
+- [x] Pass the focused 10-check behavior contract and both package TypeScript checks at implementation commit `79fd838d6ce8efc82ada82551207b879d6d33be4`.
+- [ ] Reconcile generated Living Brief state, run the exact clean production build, push and publish the exact candidate, then pass authenticated desktop/responsive Chrome and independent Viva acceptance before Build 5.
+
 ## Lorena recommendations Build 3 — 2026-10-27
 
 - [x] Add a bilingual `View Contract Items / Ver Partidas de Contrato` action to every accessible contract card.
 - [x] Add a dedicated project- and contract-scoped Contract Items route that verifies exact identity and never substitutes another contract.
 - [x] Present Submittal, Quantity, Trade, Service, rate, value, APU snapshot and workflow information in a responsive table while preserving existing contract controls.
 - [x] Cover route registration, bilingual discovery, exact identity, empty/error states and responsive behavior with a focused executable contract; pass frontend and API TypeScript checks.
-- [ ] Run the configured production-database contract isolation suite, complete the full production build, push and publish the exact candidate, then pass authenticated desktop/mobile Chrome and independent Viva acceptance before Build 4.
+- [x] Publish exact source `117eb35456e0e73733eefff3f807009bf7e9e402`, verify bound runtime identity, complete authenticated exact-contract, persistence, English/Spanish, invalid-contract and foreign-project checks with zero console errors, and obtain independent Viva PASS.
 
 ## Lorena Intake live-copy correction — 2026-10-26
 

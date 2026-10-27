@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 789,
+    "apiRoutes": 790,
     "frontendApiReferences": 316,
     "routeOwnedTables": 72
   },
@@ -2511,6 +2511,12 @@
     {
       "method": "GET",
       "path": "/company/master-catalogs/:kind",
+      "owner": "artifacts/api-server/src/routes/company-master-catalogs.ts",
+      "tables": []
+    },
+    {
+      "method": "PUT",
+      "path": "/company/master-catalogs/service/:id/delivery-workflow",
       "owner": "artifacts/api-server/src/routes/company-master-catalogs.ts",
       "tables": []
     },
