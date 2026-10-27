@@ -36,6 +36,7 @@ import { lensNextCaptureKey, lensNextImageStatus, type LensNextImageLoad } from 
 import { useI18n } from "../../lib/i18n";
 import { lensNextPrerequisiteGuidance } from "./lens-next-prerequisite-guidance";
 import { lensNextLinkedItemHref } from "./lens-next-relationship-navigation";
+import type { LensNextResponsibleCompanyOption } from "./lens-next-client";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 const STATUS_LABELS_ES: Record<LensNextStatus, string> = {
@@ -394,11 +395,15 @@ export interface LensNextPanelViewProps {
   createTrades: readonly string[];
   createFloors: readonly string[];
   createResponsibleCompanies: readonly string[];
+  responsibleCompanyOptions: readonly LensNextResponsibleCompanyOption[];
   createReportTypes: readonly string[];
   apiState: LensNextConnectionState;
   bridgeState: LensNextConnectionState;
   refreshState: LensNextRefreshState;
   apiError: string | null;
+  catalogState: "idle" | "loading" | "current" | "stale" | "error";
+  catalogError: string | null;
+  catalogSyncedAt: string | null;
   bridgeError: string | null;
   history: LensNextHistory | "loading" | null;
   historyError: string | null;
@@ -486,11 +491,15 @@ export function LensNextPanelView({
   createTrades,
   createFloors,
   createResponsibleCompanies,
+  responsibleCompanyOptions,
   createReportTypes,
   apiState,
   bridgeState,
   refreshState,
   apiError,
+  catalogState,
+  catalogError,
+  catalogSyncedAt,
   bridgeError,
   history,
   historyError,
@@ -659,6 +668,13 @@ export function LensNextPanelView({
           <small title={bridgeDisplayName ?? "No active Navisworks model"}>{bridgeDisplayName ?? "No active Navisworks model"}</small>
         </div>
         <div className="lens-next__header-actions">
+          <small role="status" title={catalogError ?? `${responsibleCompanyOptions.filter(option => option.assignable).length} assignable companies`} data-catalog-state={catalogState}>
+            {catalogState === "current" ? `Catalog current${catalogSyncedAt ? ` · ${formatTimestamp(catalogSyncedAt)}` : ""}`
+              : catalogState === "loading" ? "Catalog loading…"
+              : catalogState === "stale" ? "Catalog stale · refresh required"
+              : catalogState === "error" ? "Catalog unavailable · new assignments disabled"
+              : "Catalog not loaded"}
+          </small>
           <button ref={helpButtonRef} type="button" className="lens-next__help" onClick={() => setGuideOpen(true)}><HelpCircle aria-hidden="true" size={16} /> Help &amp; Guide</button>
           <button type="button" className="lens-next__refresh" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? "Refreshing…" : "Refresh"}</button>
         </div>
@@ -845,7 +861,7 @@ export function LensNextPanelView({
         <div className="lens-next__filters">
           <label className="lens-next__field"><span>Trade</span><select value={createDraft.trade} onChange={e => { setCreateDraft({ ...createDraft, trade: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select trade</option>{createTrades.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Floor</span><select value={createDraft.floor} onChange={e => { setCreateDraft({ ...createDraft, floor: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select floor</option>{createFloors.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
-          <label className="lens-next__field"><span>Responsible company</span><select value={createDraft.responsibleCompany} onChange={e => { setCreateDraft({ ...createDraft, responsibleCompany: e.target.value }); setCreateReviewReady(false); }}><option value="">Unassigned</option>{createResponsibleCompanies.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="lens-next__field"><span>Responsible company</span><select value={createDraft.responsibleCompany} disabled={catalogState !== "current"} onChange={e => { setCreateDraft({ ...createDraft, responsibleCompany: e.target.value }); setCreateReviewReady(false); }}><option value="">{catalogState === "current" ? "Unassigned" : "Refresh governed catalog"}</option>{createResponsibleCompanies.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Report type</span><select value={createDraft.reportType} onChange={e => { setCreateDraft({ ...createDraft, reportType: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select report type</option>{createReportTypes.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Priority</span><select value={createDraft.priority} onChange={e => { setCreateDraft({ ...createDraft, priority: Number(e.target.value) }); setCreateReviewReady(false); }}>{[1,2,3,4,5].map(p => <option key={p} value={p}>P{p}</option>)}</select></label>
           <label className="lens-next__field"><span>Status</span><select value={createDraft.status} onChange={e => { setCreateDraft({ ...createDraft, status: e.target.value as LensNextStatus }); setCreateReviewReady(false); }}>{LENS_NEXT_STATUSES.map(status => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}</select></label>
@@ -1027,10 +1043,11 @@ export function LensNextPanelView({
         <button type="button" className="lens-next__filter-results" onClick={() => { setCompactDetailOpen(false); activateWorkspace("viewpoints"); }}>{tt("View results", "Ver resultados")} ({filteredIssues.length})</button>
       </section>
 
-      {(apiError || bridgeError) && (
+      {(apiError || bridgeError || catalogError) && (
         <div className="lens-next__alerts" role="status" aria-live="polite">
           {apiError && <p>{apiError}</p>}
           {bridgeError && <p>{bridgeError}</p>}
+          {catalogError && <p>{catalogError}</p>}
         </div>
       )}
 

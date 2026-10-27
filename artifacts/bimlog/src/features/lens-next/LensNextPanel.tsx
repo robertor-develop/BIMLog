@@ -5,6 +5,7 @@ import {
   createLensNextBridgeClient,
   type LensNextApiClient,
   type LensNextBridgeClient,
+  type LensNextResponsibleCompanyOption,
 } from "./lens-next-client";
 import {
   activeLensNextIssues,
@@ -101,7 +102,12 @@ export function LensNextPanel({
   const [issues, setIssues] = useState<readonly LensNextIssue[]>([]);
   const [referenceFloors, setReferenceFloors] = useState<readonly string[]>([]);
   const [responsibleCompanies, setResponsibleCompanies] = useState<readonly string[]>([]);
+  const [responsibleCompanyOptions, setResponsibleCompanyOptions] = useState<readonly LensNextResponsibleCompanyOption[]>([]);
   const [customTrades, setCustomTrades] = useState<readonly string[]>([]);
+  const [catalogState, setCatalogState] = useState<"idle" | "loading" | "current" | "stale" | "error">("idle");
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [catalogSyncedAt, setCatalogSyncedAt] = useState<string | null>(null);
+  const [catalogExpiresAt, setCatalogExpiresAt] = useState<string | null>(null);
   const [selectedServerId, setSelectedServerId] = useState<number | null>(null);
   const [filters, setFilters] = useState<LensNextFilters>({
     ...LENS_NEXT_DEFAULT_FILTERS,
@@ -267,8 +273,8 @@ export function LensNextPanel({
     [issues, referenceFloors],
   );
   const createResponsibleCompanies = useMemo(
-    () => [...new Set([...responsibleCompanies, ...issues.map(issue => issue.responsibleCompany).filter((value): value is string => Boolean(value)), "Other"])].sort(),
-    [issues, responsibleCompanies],
+    () => [...new Set(responsibleCompanies)].sort(),
+    [responsibleCompanies],
   );
   const filterCompanies = useMemo(
     () => [...new Set(activeIssues.map(issue => issue.responsibleCompany?.trim()).filter((value): value is string => Boolean(value)))].sort(),
@@ -295,17 +301,31 @@ export function LensNextPanel({
       }
       if (mode === "initial") setApiState("connecting");
       setRefreshState("refreshing");
+      setCatalogState("loading");
       setApiError(null);
+      setCatalogError(null);
       try {
-        const [incoming, referenceData] = await Promise.all([
+        const [issuesResult, catalogResult] = await Promise.allSettled([
           apiClient.loadIssues(authorizedProjectId, signal),
           apiClient.loadReferenceData(authorizedProjectId, signal),
         ]);
         if (sequence !== refreshSequence.current || signal?.aborted) return;
+        if (issuesResult.status === "rejected") throw issuesResult.reason;
+        const incoming = issuesResult.value;
         setIssues((current) => reconcileLensNextRefresh(current, incoming));
-        setReferenceFloors(referenceData.floors);
-        setResponsibleCompanies(referenceData.responsibleCompanies);
-        setCustomTrades(referenceData.customTrades);
+        if (catalogResult.status === "fulfilled") {
+          const referenceData = catalogResult.value;
+          setReferenceFloors(referenceData.floors);
+          setResponsibleCompanies(referenceData.responsibleCompanies);
+          setResponsibleCompanyOptions(referenceData.responsibleCompanyOptions);
+          setCustomTrades(referenceData.customTrades);
+          setCatalogSyncedAt(referenceData.generatedAt);
+          setCatalogExpiresAt(referenceData.expiresAt);
+          setCatalogState(Date.parse(referenceData.expiresAt) > Date.now() ? "current" : "stale");
+        } else {
+          setCatalogState(current => current === "current" || current === "stale" ? "stale" : "error");
+          setCatalogError(catalogResult.reason instanceof Error ? catalogResult.reason.message : "Governed catalogs are unavailable");
+        }
         setSelectedServerId((current) =>
           current !== null &&
           incoming.some((issue) => issue.identity.serverId === current)
@@ -330,12 +350,28 @@ export function LensNextPanel({
   useEffect(() => {
     const controller = new AbortController();
     setIssues([]);
+    setReferenceFloors([]);
+    setResponsibleCompanies([]);
+    setResponsibleCompanyOptions([]);
+    setCustomTrades([]);
+    setCatalogState("loading");
+    setCatalogError(null);
+    setCatalogSyncedAt(null);
+    setCatalogExpiresAt(null);
     setSelectedServerId(null);
     setHistory(null);
     setHistoryError(null);
     void loadIssues("initial", controller.signal);
     return () => controller.abort();
   }, [loadIssues]);
+
+  useEffect(() => {
+    if (!catalogExpiresAt || catalogState !== "current") return;
+    const remaining = Date.parse(catalogExpiresAt) - Date.now();
+    if (remaining <= 0) { setCatalogState("stale"); return; }
+    const timer = window.setTimeout(() => setCatalogState("stale"), remaining);
+    return () => window.clearTimeout(timer);
+  }, [catalogExpiresAt, catalogState]);
 
   useEffect(() => {
     if (autoRefreshMs < 10_000 || authorizedProjectId === null || !apiClient)
@@ -836,11 +872,15 @@ export function LensNextPanel({
       createTrades={trades}
       createFloors={floors}
       createResponsibleCompanies={createResponsibleCompanies}
+      responsibleCompanyOptions={responsibleCompanyOptions}
       createReportTypes={LENS_NEXT_REPORT_TYPE_OPTIONS}
       apiState={apiState}
       bridgeState={bridgeState}
       refreshState={refreshState}
       apiError={apiError}
+      catalogState={catalogState}
+      catalogError={catalogError}
+      catalogSyncedAt={catalogSyncedAt}
       bridgeError={bridgeError}
       history={history}
       historyError={historyError}

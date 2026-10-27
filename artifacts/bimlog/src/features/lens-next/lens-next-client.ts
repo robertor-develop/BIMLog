@@ -9,7 +9,6 @@ import {
   assertLensNextProjectId,
   createLensNextOpenWorkingViewRequest,
 } from "./lens-next-model.ts";
-import { conventionCompanyCodes } from "@workspace/api-zod";
 import type {
   LensNextBridgeProjectContext,
   LensNextHistory,
@@ -125,7 +124,7 @@ export interface LensNextApiClientOptions {
 export interface LensNextApiClient {
   resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId?: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
-  loadReferenceData(projectId: number, signal?: AbortSignal): Promise<{ floors: string[]; responsibleCompanies: string[]; customTrades: string[] }>;
+  loadReferenceData(projectId: number, signal?: AbortSignal): Promise<LensNextReferenceData>;
   loadHistory(
     identity: LensNextImmutableIssueIdentity,
     signal?: AbortSignal,
@@ -153,6 +152,31 @@ export interface LensNextApiClient {
   loadLessonProposal(identity:LensNextImmutableIssueIdentity,signal?:AbortSignal):Promise<LensNextLessonProposal|null>;
   proposeLesson(identity:LensNextImmutableIssueIdentity,lesson:string,organizationalApplicability:string,signal?:AbortSignal):Promise<LensNextLessonProposal>;
 }
+
+export type LensNextResponsibleCompanyOption = {
+  id: number | null;
+  label: string;
+  historicalLabel: string;
+  active: boolean;
+  projectAuthorized: boolean;
+  assignable: boolean;
+  source: "project_directory" | "project_member" | "naming_convention" | "historical_issue";
+  unavailabilityReason: "inactive" | "not_project_authorized" | "historical_only" | null;
+};
+
+export type LensNextReferenceData = {
+  projectId: number;
+  contractVersion: "lens-issue-catalog.v1";
+  generatedAt: string;
+  expiresAt: string;
+  floors: string[];
+  responsibleCompanies: string[];
+  responsibleCompanyOptions: LensNextResponsibleCompanyOption[];
+  customTrades: string[];
+  missingValueGuidance: string;
+};
+
+export const LENS_NEXT_CATALOG_TTL_MS = 5 * 60 * 1000;
 
 export function createLensNextApiClient(
   options: LensNextApiClientOptions,
@@ -239,10 +263,8 @@ export function createLensNextApiClient(
     },
     async loadReferenceData(projectId: number, signal?: AbortSignal) {
       const exactProjectId = assertLensNextProjectId(projectId);
-      const [levelsRaw, membersRaw, conventionRaw, directoryRaw] = await Promise.all([
+      const [levelsRaw, directoryRaw] = await Promise.all([
         get(`/projects/${exactProjectId}/levels`, signal),
-        get(`/projects/${exactProjectId}/members`, signal),
-        get(`/projects/${exactProjectId}/conventions`, signal),
         get(`/projects/${exactProjectId}/clash-reports/lens-viewpoints/responsible-companies`, signal),
       ]);
       const levelsBody = levelsRaw && typeof levelsRaw === "object" && !Array.isArray(levelsRaw)
@@ -251,37 +273,44 @@ export function createLensNextApiClient(
       const floors = Array.isArray(levelsBody?.levels)
         ? levelsBody.levels.map(value => String(value).trim()).filter(Boolean)
         : [];
-      const memberCompanies = Array.isArray(membersRaw)
-        ? membersRaw
-            .map(member => member && typeof member === "object" ? String((member as Record<string, unknown>).userCompanyName ?? "").trim() : "")
-            .filter(Boolean)
-        : [];
-      const conventionBody = conventionRaw && typeof conventionRaw === "object" && !Array.isArray(conventionRaw)
-        ? conventionRaw as Record<string, unknown>
-        : null;
-      const conventionCompanies = Array.isArray(conventionBody?.companyAssignmentStatus)
-        ? conventionBody.companyAssignmentStatus
-            .map(company => company && typeof company === "object" ? String((company as Record<string, unknown>).companyName ?? "").trim() : "")
-            .filter(Boolean)
-        : [];
-      // Saved originator codes are project choices even before those companies
-      // have user accounts. Assignment status alone omits these new-project choices.
-      const conventionCodes = conventionCompanyCodes(conventionBody);
       const directoryBody = directoryRaw && typeof directoryRaw === "object" && !Array.isArray(directoryRaw)
         ? directoryRaw as Record<string, unknown> : null;
-      const directoryCompanies = Array.isArray(directoryBody?.companies)
-        ? directoryBody.companies.filter((value): value is string => typeof value === "string")
-            .map(value => value.trim()).filter(Boolean)
-        : [];
+      if (directoryBody?.contractVersion !== "lens-issue-catalog.v1" || Number(directoryBody.projectId) !== exactProjectId) {
+        throw new Error("BIMLog governed catalog contract is unavailable; existing values remain visible but new assignments are disabled.");
+      }
       const customTrades = Array.isArray(directoryBody?.trades)
         ? directoryBody.trades.filter((value): value is string => typeof value === "string")
             .map(value => value.trim()).filter(Boolean)
         : [];
-      const responsibleCompanies = [...memberCompanies, ...conventionCompanies, ...conventionCodes, ...directoryCompanies];
+      const companyOptions: LensNextResponsibleCompanyOption[] = Array.isArray(directoryBody.companyOptions)
+        ? directoryBody.companyOptions.flatMap(value => {
+            if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+            const item = value as Record<string, unknown>;
+            const label = String(item.label ?? "").trim();
+            const source = String(item.source ?? "") as LensNextResponsibleCompanyOption["source"];
+            const reason = item.unavailabilityReason == null ? null : String(item.unavailabilityReason) as LensNextResponsibleCompanyOption["unavailabilityReason"];
+            if (!label || !["project_directory", "project_member", "naming_convention", "historical_issue"].includes(source)) return [];
+            if (reason !== null && !["inactive", "not_project_authorized", "historical_only"].includes(reason)) return [];
+            const id = item.id == null ? null : Number(item.id);
+            if (id !== null && (!Number.isSafeInteger(id) || id <= 0)) return [];
+            return [{ id, label, historicalLabel: String(item.historicalLabel ?? label), active: item.active === true,
+              projectAuthorized: item.projectAuthorized === true, assignable: item.assignable === true, source, unavailabilityReason: reason }];
+          })
+        : [];
+      const responsibleCompanies = companyOptions.filter(option => option.assignable).map(option => option.label);
+      const generatedAt = String(directoryBody.generatedAt ?? "");
+      const generatedTime = Date.parse(generatedAt);
+      if (!Number.isFinite(generatedTime)) throw new Error("BIMLog governed catalog timestamp is invalid");
       return Object.freeze({
+        projectId: exactProjectId,
+        contractVersion: "lens-issue-catalog.v1" as const,
+        generatedAt,
+        expiresAt: new Date(generatedTime + LENS_NEXT_CATALOG_TTL_MS).toISOString(),
         floors: [...new Set(floors)].sort(),
         responsibleCompanies: [...new Set(responsibleCompanies)].sort(),
+        responsibleCompanyOptions: companyOptions,
         customTrades: [...new Set(customTrades)].sort(),
+        missingValueGuidance: String(directoryBody.missingValueGuidance ?? ""),
       });
     },
     async loadHistory(
