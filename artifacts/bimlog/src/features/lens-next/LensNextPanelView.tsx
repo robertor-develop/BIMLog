@@ -339,6 +339,9 @@ export interface LensNextPanelViewProps {
   createMessage: string | null;
   createdIssueServerId: number | null;
   onCreateIssue(draft: LensNextCreateDraft, reason: string): void;
+  editState: "idle" | "saving" | "success" | "error";
+  editMessage: string | null;
+  onEditIssue(draft: LensNextCreateDraft, reason: string): void;
   layoutEnabled: boolean;
   layoutState: "idle" | "running" | "success" | "error";
   layoutMessage: string | null;
@@ -443,6 +446,9 @@ export function LensNextPanelView({
   createMessage,
   createdIssueServerId,
   onCreateIssue,
+  editState,
+  editMessage,
+  onEditIssue,
   layoutEnabled,
   layoutState,
   layoutMessage,
@@ -528,6 +534,8 @@ export function LensNextPanelView({
   const [createDraft, setCreateDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "COORDINATION", floor: "", priority: 3, openItems: "", status: "open" });
   const [createReason, setCreateReason] = React.useState("");
   const [createReviewReady, setCreateReviewReady] = React.useState(false);
+  const [editDraft, setEditDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "COORDINATION", floor: "", priority: 3, openItems: "", status: "open" });
+  const [editReason, setEditReason] = React.useState("");
   const [linkType, setLinkType] = React.useState<LensNextLinkedItemType>("rfi");
   const [linkTargetId, setLinkTargetId] = React.useState("");
   const [guideOpen, setGuideOpen] = React.useState(false);
@@ -562,6 +570,13 @@ export function LensNextPanelView({
   const [workspaceLayout,setWorkspaceLayout]=React.useState(()=>readLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage));
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
+  React.useEffect(() => {
+    if (!selectedIssue) return;
+    setEditDraft({ trade: selectedIssue.trade ?? "", floor: selectedIssue.floor ?? "", responsibleCompany: selectedIssue.responsibleCompany ?? "",
+      reportType: selectedIssue.reportType ?? "COORDINATION", priority: selectedIssue.priority ?? 3, status: selectedIssue.status,
+      note: selectedIssue.note ?? "", openItems: selectedIssue.openItems ?? "" });
+    setEditReason("");
+  }, [selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
   React.useEffect(() => { setLinkType("rfi"); setLinkTargetId(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => setDetailView("overview"), [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
@@ -1165,6 +1180,22 @@ export function LensNextPanelView({
               <div><dt>{tt("Responsible company", "Empresa responsable")}</dt><dd>{selectedIssue.responsibleCompany || tt("Unassigned", "Sin asignar")}</dd></div>
             </dl>
             <p className="lens-next__data-boundary">{tt("Clash pair, surrounding geometry, grid and distance are unavailable for this BIMLog issue until an exact project/model-bound clash link is verified. This image is a capture, not interactive 3D.", "El par de interferencia, la geometría cercana, la retícula y la distancia no están disponibles para esta incidencia BIMLog hasta verificar un vínculo exacto con la interferencia del proyecto y modelo. Esta imagen es una captura, no un modelo 3D interactivo.")}</p>
+            <details className="lens-next__edit-issue">
+              <summary>{tt("Edit governed Issue fields", "Editar campos gobernados de la incidencia")}</summary>
+              {!selectedIssue.publishingAllowed ? <p>{tt("Your active project role does not allow Issue edits.", "Su rol activo en el proyecto no permite editar incidencias.")}</p> : <div className="lens-next__filters">
+                <label className="lens-next__field"><span>{tt("Trade", "Disciplina")}</span><select value={editDraft.trade} onChange={event => setEditDraft({...editDraft, trade:event.target.value})}>{createTrades.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Floor", "Piso")}</span><select value={editDraft.floor} onChange={event => setEditDraft({...editDraft, floor:event.target.value})}>{createFloors.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Responsible company", "Empresa responsable")}</span><select disabled={catalogState !== "current"} value={editDraft.responsibleCompany} onChange={event => setEditDraft({...editDraft, responsibleCompany:event.target.value})}><option value="">{tt("Unassigned", "Sin asignar")}</option>{editDraft.responsibleCompany && !createResponsibleCompanies.includes(editDraft.responsibleCompany) && <option value={editDraft.responsibleCompany}>{editDraft.responsibleCompany} · historical</option>}{createResponsibleCompanies.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Report type", "Tipo de informe")}</span><select value={editDraft.reportType} onChange={event => setEditDraft({...editDraft, reportType:event.target.value})}>{createReportTypes.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Priority", "Prioridad")}</span><select value={editDraft.priority} onChange={event => setEditDraft({...editDraft, priority:Number(event.target.value)})}>{[1,2,3,4,5].map(value=><option key={value} value={value}>P{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Status", "Estado")}</span><select value={editDraft.status} onChange={event => setEditDraft({...editDraft, status:event.target.value as LensNextStatus})}>{LENS_NEXT_STATUSES.map(value=><option key={value} value={value}>{STATUS_LABELS[value]}</option>)}</select></label>
+                <label className="lens-next__field lens-next__field--wide"><span>{tt("Instruction", "Instrucción")}</span><textarea value={editDraft.note} onChange={event => setEditDraft({...editDraft, note:event.target.value})}/></label>
+                <label className="lens-next__field lens-next__field--wide"><span>{tt("Open items / Equipment tag", "Pendientes / Etiqueta de equipo")}</span><textarea value={editDraft.openItems} onChange={event => setEditDraft({...editDraft, openItems:event.target.value})}/></label>
+                <label className="lens-next__field lens-next__field--wide"><span>{tt("Reason for audit history", "Motivo para el historial de auditoría")}</span><textarea required minLength={5} value={editReason} onChange={event=>setEditReason(event.target.value)}/></label>
+                <button type="button" disabled={editState === "saving" || editReason.trim().length < 5 || catalogState !== "current"} onClick={()=>onEditIssue(editDraft,editReason)}>{editState === "saving" ? tt("Saving…", "Guardando…") : tt("Save Issue changes", "Guardar cambios")}</button>
+                {editMessage && <p role="status">{editMessage}</p>}
+              </div>}
+            </details>
           </section>}
           {detailView === "knowledge" && selectedIssue && <LensNextKnowledgePanel context={knowledgeContext} error={knowledgeError} onRetry={onRetryKnowledge} onClassify={onClassifyKnowledge} activeIssueKey={`${selectedIssue.identity.serverId}:${selectedIssue.identity.revisionNumber}`} />}
           {detailView === "resolution" && selectedIssue && <LensNextResolutionPanel record={resolutionRecord} knowledge={knowledgeContext} evidence={resolutionEvidence} attachments={referenceAttachments} lessonProposal={lessonProposal} error={resolutionError} onRetry={onRetryResolution} onSave={onSaveResolution} onTransition={onTransitionResolution} onAddEvidence={onAddResolutionEvidence} onProposeLesson={onProposeLesson} activeIssueKey={`${selectedIssue.identity.serverId}:${selectedIssue.identity.revisionNumber}`} />}

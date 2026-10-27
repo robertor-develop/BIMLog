@@ -36,6 +36,7 @@ import { clashReportScopeWhere, clashScopeWhere } from "../lib/clash-report-prov
 import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../lib/clash-visual-package-truth";
 import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } from "../lib/company-directory-resolution";
 import { lensIssueFieldAuthorities, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
+import { assertCatalogLabel, assertLensIssueStatusTransition, normalizeGovernedLabel, LENS_ISSUE_BASE_TRADES, LENS_ISSUE_REPORT_TYPES } from "../lib/lens-issue-edit-policy";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -2415,6 +2416,81 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
       res.json({ success: true, viewpoint: { id: updated.id, status: updated.status, updatedAt: updated.updatedAt } });
     } catch (err) {
       res.status(500).json({ error: "lens_update_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// Governed Issue edit. This updates the current Issue state in place while the
+// immutable activity ledger records the complete before/after change. Camera
+// evidence and viewpoint revision/history are intentionally untouched.
+router.patch("/projects/:projectId/clash-reports/lens-next/issues/:id/fields",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), id = Number(req.params.id);
+    const body = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body as Record<string, unknown> : {};
+    const allowedKeys = new Set(["contractVersion", "mutationVersion", "reason", "fields"]);
+    if (body.contractVersion !== "lens-issue-edit.v1" || Object.keys(body).some(key => !allowedKeys.has(key))) {
+      res.status(400).json({ error: "lens_issue_edit_invalid", message: "The governed Issue edit contract is invalid." }); return;
+    }
+    const fields = body.fields && typeof body.fields === "object" && !Array.isArray(body.fields) ? body.fields as Record<string, unknown> : null;
+    const fieldKeys = new Set(["trade", "floor", "responsibleCompany", "reportType", "priority", "status", "instruction", "openItems"]);
+    if (!fields || Object.keys(fields).some(key => !fieldKeys.has(key))) {
+      res.status(400).json({ error: "lens_issue_fields_invalid", message: "Issue fields contain an unsupported value." }); return;
+    }
+    const mutationVersion = Number(body.mutationVersion), priority = Number(fields.priority);
+    const reason = String(body.reason ?? "").trim();
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(id) || id <= 0
+      || !Number.isSafeInteger(mutationVersion) || mutationVersion <= 0 || reason.length < 5 || reason.length > 1000
+      || !Number.isInteger(priority) || priority < 1 || priority > 5) {
+      res.status(400).json({ error: "lens_issue_edit_invalid", message: "Version, priority, and an audit reason of at least 5 characters are required." }); return;
+    }
+    try {
+      const trade = normalizeGovernedLabel(fields.trade, "trade", 80);
+      const floor = normalizeGovernedLabel(fields.floor, "floor", 120);
+      const reportType = assertCatalogLabel(normalizeGovernedLabel(fields.reportType, "reportType", 40), LENS_ISSUE_REPORT_TYPES, "reportType");
+      const status = normalizeGovernedLabel(fields.status, "status", 32);
+      const instruction = normalizeGovernedLabel(fields.instruction, "instruction", 4000);
+      const openItems = String(fields.openItems ?? "").trim().slice(0, 4000);
+      const responsibleRequested = String(fields.responsibleCompany ?? "").trim();
+      const [companyChoices, tradeRows, levelRows] = await Promise.all([
+        loadProjectCompanyChoices(projectId),
+        pool.query(`SELECT name FROM lens_project_trades WHERE project_id=$1`, [projectId]),
+        pool.query(`SELECT nf.allowed_values FROM naming_conventions nc JOIN naming_fields nf ON nf.convention_id=nc.id WHERE nc.project_id=$1 AND lower(nf.label)='level' LIMIT 1`, [projectId]),
+      ]);
+      const tradeChoices = [...LENS_ISSUE_BASE_TRADES, ...tradeRows.rows.map(row => String(row.name))];
+      const floorChoices = Array.isArray(levelRows.rows[0]?.allowed_values) ? levelRows.rows[0].allowed_values.map(String) : [];
+      const governedTrade = assertCatalogLabel(trade, tradeChoices, "trade");
+      const governedFloor = assertCatalogLabel(floor, floorChoices, "floor");
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const found = await client.query(`SELECT * FROM lens_viewpoints WHERE id=$1 AND project_id=$2 FOR UPDATE`, [id, projectId]);
+        const before = found.rows[0];
+        if (!before) { await client.query("ROLLBACK"); res.status(404).json({ error: "not_found", message: "Lens Issue not found." }); return; }
+        if (before.lifecycle_status !== "active") { await client.query("ROLLBACK"); res.status(409).json({ error: "not_active", message: "Only the active Issue revision can be edited." }); return; }
+        if (Number(before.mutation_version) !== mutationVersion) { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_version_conflict", message: "The Issue changed after editing began.", currentMutationVersion: Number(before.mutation_version) }); return; }
+        assertLensIssueStatusTransition(String(before.status), status);
+        const unchangedHistoricalCompany = responsibleRequested && String(before.responsible_company ?? "").localeCompare(responsibleRequested, "en-US", { sensitivity: "base" }) === 0;
+        const responsibleCompany = responsibleRequested ? (unchangedHistoricalCompany ? String(before.responsible_company) : assertCatalogLabel(responsibleRequested, companyChoices.companies, "responsibleCompany")) : null;
+        const updated = (await client.query(`UPDATE lens_viewpoints SET trade=$1,floor=$2,responsible_company=$3,report_type=$4,priority=$5,status=$6,note=$7,open_items=$8,mutation_version=mutation_version+1,updated_at=now() WHERE id=$9 AND project_id=$10 AND mutation_version=$11 RETURNING *`,
+          [governedTrade, governedFloor, responsibleCompany, reportType, priority, status, instruction, openItems || null, id, projectId, mutationVersion])).rows[0];
+        if (!updated) throw new Error("LENS_ISSUE_VERSION_CONFLICT");
+        const beforeFields = { trade: before.trade, floor: before.floor, responsibleCompany: before.responsible_company, reportType: before.report_type, priority: before.priority, status: before.status, instruction: before.note, openItems: before.open_items };
+        const afterFields = { trade: updated.trade, floor: updated.floor, responsibleCompany: updated.responsible_company, reportType: updated.report_type, priority: updated.priority, status: updated.status, instruction: updated.note, openItems: updated.open_items };
+        await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,file_name_before,file_name_after,details) VALUES($1,$2,$3,$4,'lens_issue_fields_updated','lens_issue',$5,$6,$7,$8)`,
+          [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, id, JSON.stringify(beforeFields), JSON.stringify(afterFields), JSON.stringify({ reason, sourceApplication: "Lens Next", issueId: id, projectId })]);
+        if (before.status !== updated.status) await client.query(`INSERT INTO lens_viewpoint_events(project_id,viewpoint_id,event_type,from_status,to_status,changed_by_id) VALUES($1,$2,'status_changed',$3,$4,$5)`, [projectId, id, before.status, updated.status, req.user!.userId]);
+        await client.query("COMMIT");
+        res.json({ success: true, contractVersion: "lens-issue-edit.v1", issue: { serverId: id, mutationVersion: Number(updated.mutation_version), fields: afterFields }, audit: { reason, sourceApplication: "Lens Next" } });
+      } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.startsWith("LENS_ISSUE_STATUS_TRANSITION_INVALID")) { res.status(409).json({ error: "invalid_status_transition", message: "That status transition is not permitted." }); return; }
+      if (message.startsWith("LENS_ISSUE_CATALOG_VALUE_FORBIDDEN")) { res.status(422).json({ error: "catalog_value_forbidden", message: "A governed field value is not authorized for this project. Refresh catalogs and try again." }); return; }
+      if (message.startsWith("LENS_ISSUE_FIELD_INVALID")) { res.status(400).json({ error: "lens_issue_field_invalid", message: "A required Issue field is invalid." }); return; }
+      if (message === "LENS_ISSUE_VERSION_CONFLICT") { res.status(409).json({ error: "lens_issue_version_conflict", message: "The Issue changed after editing began." }); return; }
+      res.status(500).json({ error: "lens_issue_edit_failed", message: "The governed Issue edit did not commit." });
     }
   }
 );

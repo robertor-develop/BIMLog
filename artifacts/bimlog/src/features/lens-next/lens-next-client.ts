@@ -125,6 +125,7 @@ export interface LensNextApiClient {
   resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId?: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
   loadReferenceData(projectId: number, signal?: AbortSignal): Promise<LensNextReferenceData>;
+  editIssueFields(issue: LensNextIssue, fields: LensNextCreateDraft, reason: string, signal?: AbortSignal): Promise<number>;
   loadHistory(
     identity: LensNextImmutableIssueIdentity,
     signal?: AbortSignal,
@@ -200,6 +201,14 @@ export function createLensNextApiClient(
       body: JSON.stringify(body), signal,
     });
     return jsonBody(response, "BIMLog controlled publish");
+  };
+  const patch = async (path: string, body: unknown, signal?: AbortSignal): Promise<unknown> => {
+    const response = await fetchImpl(`${base}${path}`, {
+      method: "PATCH", credentials: "same-origin",
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify(body), signal,
+    });
+    return jsonBody(response, "BIMLog governed Issue edit");
   };
   const remove = async (path: string, signal?: AbortSignal): Promise<unknown> => {
     const response = await fetchImpl(`${base}${path}`, { method: "DELETE", credentials: "same-origin", headers: { Accept: "application/json", Authorization: `Bearer ${token}` }, signal });
@@ -312,6 +321,21 @@ export function createLensNextApiClient(
         customTrades: [...new Set(customTrades)].sort(),
         missingValueGuidance: String(directoryBody.missingValueGuidance ?? ""),
       });
+    },
+    async editIssueFields(issue: LensNextIssue, fields: LensNextCreateDraft, reason: string, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await patch(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/fields`, {
+        contractVersion: "lens-issue-edit.v1", mutationVersion: issue.mutationVersion, reason,
+        fields: { trade: fields.trade, floor: fields.floor, responsibleCompany: fields.responsibleCompany,
+          reportType: fields.reportType, priority: fields.priority, status: fields.status,
+          instruction: fields.note, openItems: fields.openItems },
+      }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw) || (raw as Record<string, unknown>).success !== true
+        || (raw as Record<string, unknown>).contractVersion !== "lens-issue-edit.v1") throw new Error("BIMLog governed Issue edit receipt is invalid");
+      const edited = (raw as Record<string, unknown>).issue as Record<string, unknown> | undefined;
+      const mutationVersion = Number(edited?.mutationVersion);
+      if (!Number.isSafeInteger(mutationVersion) || mutationVersion <= issue.mutationVersion) throw new Error("BIMLog governed Issue edit version did not advance");
+      return mutationVersion;
     },
     async loadHistory(
       identity: LensNextImmutableIssueIdentity,

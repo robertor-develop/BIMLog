@@ -147,6 +147,8 @@ export function LensNextPanel({
   const [localUploadMessage, setLocalUploadMessage] = useState<string | null>(null);
   const [createState, setCreateState] = useState<"idle" | "capturing" | "creating" | "success" | "error">("idle");
   const [createMessage, setCreateMessage] = useState<string | null>(null);
+  const [editState, setEditState] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [editMessage, setEditMessage] = useState<string | null>(null);
   const [createdIssueServerId, setCreatedIssueServerId] = useState<number | null>(null);
   const [layoutState, setLayoutState] = useState<"idle" | "running" | "success" | "error">("idle");
   const [layoutMessage, setLayoutMessage] = useState<string | null>(null);
@@ -660,6 +662,18 @@ export function LensNextPanel({
     }
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
 
+  const editIssue = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
+    if (!apiClient || !selectedIssue) return;
+    setEditState("saving"); setEditMessage(null);
+    try {
+      await apiClient.editIssueFields(selectedIssue, draft, reason);
+      await loadIssues("refresh");
+      setEditState("success"); setEditMessage("Issue fields saved in BIMLog with immutable audit history.");
+    } catch (error) {
+      setEditState("error"); setEditMessage(error instanceof Error ? error.message : "Governed Issue edit failed");
+    }
+  }, [apiClient, loadIssues, selectedIssue]);
+
   const materializeMyView = useCallback(async () => {
     if (!bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId || !viewSettings) return;
     const dimensions = viewSettings.groupBy;
@@ -810,6 +824,9 @@ export function LensNextPanel({
       createMessage={createMessage}
       createdIssueServerId={createdIssueServerId}
       onCreateIssue={(draft, reason) => void createIssue(draft, reason)}
+      editState={editState}
+      editMessage={editMessage}
+      onEditIssue={(draft, reason) => void editIssue(draft, reason)}
       layoutEnabled={bridgeState === "connected" && bridgeContext?.projectId === authorizedProjectId}
       layoutState={layoutState}
       layoutMessage={layoutMessage}
