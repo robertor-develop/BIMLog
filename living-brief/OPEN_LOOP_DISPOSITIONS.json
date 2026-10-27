@@ -1,20 +1,20 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "dfa1f8a2494325483f2c54b53a06c3fc5e3a8a8002c3e14d6332e4a0f6464f7b",
-  "itemCount": 523,
+  "sourceSha256": "3cf93d75aa8323526ccbda2c9d31976d3b14f96d31654aec84bd1e6dbd849809",
+  "itemCount": 526,
   "counts": {
-    "ACTIVE": 468,
-    "SUPERSEDED": 43,
+    "ACTIVE": 470,
+    "SUPERSEDED": 44,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 370,
+    "ACTIVE_DEFECT": 371,
     "VALID_FUTURE_ROADMAP": 10,
-    "EXTERNAL_OWNER_INPUT": 88,
+    "EXTERNAL_OWNER_INPUT": 89,
     "ACCEPTED_LIMITATION": 3,
-    "SUPERSEDED_HISTORY": 43,
+    "SUPERSEDED_HISTORY": 44,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "allowedClassifications": [
@@ -10042,6 +10042,63 @@
       "evidence": [
         "OPEN_LOOP.md:6488",
         "Lorena Job Intake production repair — 2026-10-26"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "6f3a3a9da365c74d",
+      "sourceLine": 6498,
+      "heading": "Lorena recommendations — Build 1 of 5: Contract Item Trade and Service",
+      "statement": "Commit and run the exact clean production build; push and publish that exact source.",
+      "classification": "SUPERSEDED",
+      "dispositionCategory": "SUPERSEDED_HISTORY",
+      "workClass": "STALE_CONTRADICTION",
+      "ownership": {
+        "owner": "Historical evidence",
+        "route": null,
+        "module": "living-brief/OPEN_LOOP.md"
+      },
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "74af6f27b1b92b86",
+      "sourceLine": 6499,
+      "heading": "Lorena recommendations — Build 1 of 5: Contract Item Trade and Service",
+      "statement": "Prove Trade and Service save/reopen/refresh/back-forward/logout-login behavior in the existing authenticated production Chrome tab on a uniquely named controlled draft only.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6499",
+        "Lorena recommendations — Build 1 of 5: Contract Item Trade and Service"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "46e92b44aaa5cdc5",
+      "sourceLine": 6500,
+      "heading": "Lorena recommendations — Build 1 of 5: Contract Item Trade and Service",
+      "statement": "Prove catalog error/empty behavior, responsive presentation and foreign-company/wrong-role denial; obtain independent acceptance before Build 2.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6500",
+        "Lorena recommendations — Build 1 of 5: Contract Item Trade and Service"
       ],
       "currentAuthority": false
     }

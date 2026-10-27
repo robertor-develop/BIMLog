@@ -6494,6 +6494,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Extend approved-only authority validation to each Contract Item classification while preserving tenant/project isolation and legacy unclassified rows.
 - [x] Repair stale repository gates that still required retired strategy/milestone prose or obsolete quantity guidance; preserve the centralized route-denial authority check.
 - [x] Pass focused UI/persistence, master-catalog authority, access-route authority, complete Job Intake behavior and both package TypeScript gates.
+- [x] Freeze the exact implementation baseline at `46e32b62db1e03470583f92075db892b4816215c` before deterministic release-state reconciliation.
 - [ ] Commit and run the exact clean production build; push and publish that exact source.
 - [ ] Prove Trade and Service save/reopen/refresh/back-forward/logout-login behavior in the existing authenticated production Chrome tab on a uniquely named controlled draft only.
 - [ ] Prove catalog error/empty behavior, responsive presentation and foreign-company/wrong-role denial; obtain independent acceptance before Build 2.

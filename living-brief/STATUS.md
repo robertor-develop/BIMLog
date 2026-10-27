@@ -4906,4 +4906,5 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - New rows inherit the project Trade snapshot but require an explicit Service selection. Item-level catalog authority is validated on save with the same approved-only, company and project-boundary rules already used by project, package and task classifications.
 - No database migration is required because Job Intake scope is stored in the governed normalized JSON document. Existing Contract Items without item-level classification remain compatible and are not silently rewritten.
 - Focused UI/persistence, master-catalog authority, access-route authority, the complete Job Intake suite and both package TypeScript checks pass locally. Exact clean production assembly, commit/push/publication, authenticated production persistence proof and independent acceptance remain release gates.
+- The immutable Build 1 implementation baseline is `46e32b62db1e03470583f92075db892b4816215c`; deterministic release metadata is reconciled from that exact source before production assembly.
 
