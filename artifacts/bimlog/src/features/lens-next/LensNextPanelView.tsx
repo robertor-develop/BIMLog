@@ -897,8 +897,27 @@ export function LensNextPanelView({
       </details>
 
       <details ref={settingsSectionRef} className="lens-next__view-settings" aria-label="Personal issue view">
-        <summary>My view settings</summary>
+        <summary>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias")}</summary>
         <div className="lens-next__view-settings-content">
+          <section className="lens-next__catalog-settings" aria-label={tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias")}>
+            <h3>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias")}</h3>
+            <dl className="lens-next__overview-facts">
+              <div><dt>{tt("Active BIMLog project", "Proyecto BIMLog activo")}</dt><dd>{activeProject?.name ?? tt("Not selected", "No seleccionado")}</dd></div>
+              <div><dt>{tt("Active model", "Modelo activo")}</dt><dd>{bridgeDisplayName ?? tt("Unavailable", "No disponible")}</dd></div>
+              <div><dt>{tt("Last catalog synchronization", "Última sincronización de catálogos")}</dt><dd>{catalogSyncedAt ? formatTimestamp(catalogSyncedAt) : tt("Never", "Nunca")}</dd></div>
+              <div><dt>{tt("Catalog health", "Estado de catálogos")}</dt><dd data-catalog-state={catalogState}>{catalogState}</dd></div>
+              <div><dt>{tt("Scope", "Alcance")}</dt><dd>{tt("Current authorized project only", "Solo el proyecto autorizado actual")}</dd></div>
+            </dl>
+            {catalogError && <p role="alert">{catalogError}</p>}
+            <button type="button" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? tt("Refreshing catalogs…", "Actualizando catálogos…") : tt("Refresh Issue data and catalogs", "Actualizar incidencias y catálogos")}</button>
+            <details><summary>{tt("Trades", "Disciplinas")} ({createTrades.length})</summary><ul>{createTrades.map(value=><li key={value}>{value}</li>)}</ul></details>
+            <details><summary>{tt("Floors / Levels", "Pisos / Niveles")} ({createFloors.length})</summary><ul>{createFloors.map(value=><li key={value}>{value}</li>)}</ul></details>
+            <details><summary>{tt("Responsible Companies", "Empresas responsables")} ({responsibleCompanyOptions.length})</summary><ul>{responsibleCompanyOptions.map(option=><li key={`${option.id ?? "historical"}:${option.label}`}><strong>{option.label}</strong> — {option.assignable ? tt("active and assignable", "activa y asignable") : option.unavailabilityReason === "inactive" ? tt("inactive", "inactiva") : tt("historical only; not authorized for new assignment", "solo histórica; no autorizada para nueva asignación")}</li>)}</ul></details>
+            <details><summary>{tt("Report Types", "Tipos de informe")} ({createReportTypes.length})</summary><ul>{createReportTypes.map(value=><li key={value}>{value}</li>)}</ul></details>
+            {selectedProjectId !== null && <p><a href={`/projects/${selectedProjectId}/directory`} target="_blank" rel="noreferrer">{tt("Manage project companies in BIMLog", "Administrar empresas del proyecto en BIMLog")}</a> · {tt("Return here and refresh after an authorized change.", "Regrese aquí y actualice después de un cambio autorizado.")}</p>}
+          </section>
+          <hr />
+          <h3>{tt("My view settings", "Configuración de mi vista")}</h3>
           <label className="lens-next__field lens-next__field--wide">
             <span>My view</span>
             <select
