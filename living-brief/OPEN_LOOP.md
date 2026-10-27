@@ -5,7 +5,7 @@
 - [x] Inspect the exact deployed Build 4 journey and identify a real remaining product defect instead of inventing an unapproved feature.
 - [x] Preserve governed Contract Item Discipline and Service on every future workflow-generated phase task and package while retaining the exact immutable workflow Phase.
 - [x] Recover missing Discipline and Service for already-activated history from the exact same Intake's immutable scope snapshot without mutating historical rows or crossing project/intake scope.
-- [x] Bind the future-write and historical-read paths with a focused eight-check regression and pass existing classification propagation, activation, full-lifecycle, Lorena Block 4, and API/frontend TypeScript gates.
+- [x] Bind the future-write and historical-read paths at `c39d6783b00be2e9e4ae373caf8840397f17d5ee` with a focused eight-check regression and pass existing classification propagation, activation, full-lifecycle, Lorena Block 4, and API/frontend TypeScript gates.
 - [ ] Run the exact clean production gate, push and publish the exact candidate, verify immutable runtime identity, then pass authenticated desktop, responsive, reload, clean-reentry, bilingual, console/network and complete read-only audit gates.
 
 ## Lorena recommendations Build 4 — 2026-10-27

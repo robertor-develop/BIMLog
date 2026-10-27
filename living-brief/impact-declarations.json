@@ -78603,7 +78603,7 @@
     },
     {
       "taskId": "lorena-build5-classification-continuity-20261027",
-      "reviewedThroughCommit": "def0992abb925804779008aa14528cdbdd451386",
+      "reviewedThroughCommit": "c39d6783b00be2e9e4ae373caf8840397f17d5ee",
       "reviewedAt": "2026-10-27T17:00:00.000Z",
       "status": "release_candidate",
       "captureTiming": "pre_release_reconciliation",
@@ -78666,20 +78666,12 @@
       ],
       "reason": "Authenticated production inspection proved a classification-continuity defect after workflow activation. Build 5 preserves governed Discipline and Service for future phase rows and recovers missing historical display/filter values only from the same immutable Intake scope item.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/package.json",
-        "artifacts/api-server/scripts/generate-platform-md.ts",
-        "artifacts/api-server/src/lib/job-intake-service.ts",
-        "artifacts/api-server/src/lib/job-operations-service.ts",
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
-        "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "scripts/update-living-brief-state.mjs"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "f0c60a4d824cc7beb2d54cf953d6b666c001273d29dbe8cfa4135668e6e7f4cb"
+      "reviewedChangeSha256": "9b81da580a4a9d532110627afeeba36cab20bbafcad4557f654cbe854b5ff0aa"
     }
   ]
 }
