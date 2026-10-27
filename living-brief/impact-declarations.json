@@ -78389,11 +78389,9 @@
       ],
       "reason": "Builds 001-010 add governed Lens field catalogs and editing plus additive multi-viewpoint Issue authority, gallery controls, separate viewpoint history, and export compatibility.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
-        "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "4ca6c89f2d2ea98b69804ccdb3a202318a5ecb18f08fa2b526b944d37c8e5f4f"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
