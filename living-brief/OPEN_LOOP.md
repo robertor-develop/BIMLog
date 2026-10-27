@@ -6551,3 +6551,10 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Publish the exact pushed candidate and prove controlled four-column load, contract assignment, save, reload, navigation/reentry, responsive behavior and clean console in authenticated production Chrome.
 - [ ] Obtain independent Viva acceptance of the exact deployed Build 2 candidate before Build 3.
 
+## Priority identity block I001–I005 verification
+
+- [x] Re-run the I002–I005 database, concurrency, reconciliation, HTTP authorization and project-entrypoint gates against the disposable PostgreSQL fixture.
+- [x] Restore I005 test-fixture parity with current authentication middleware at `73b31aeab158dfaad57dcacb3cec367e3ece4664` without changing runtime behavior.
+- [ ] Pass the complete repository build and block regression, verify a clean authorized diff, push without force, and prove local/remote identity.
+- [ ] Verify the existing production company/project bindings read-only before any mutation, then complete authenticated Ruben/Lorena access, refresh, reopen and clean-reentry acceptance without repeating the historical reconciliation blindly.
+

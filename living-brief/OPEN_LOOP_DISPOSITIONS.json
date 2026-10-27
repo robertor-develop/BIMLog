@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "528c06aafb32c2b3b5ec7bda970c61ff3ca5a8fcd72fafecd2800f142bce3d61",
-  "itemCount": 533,
+  "sourceSha256": "c0774679e07955feab117748b34a261e537eae9534bd9d7be6f2e7d2762d6528",
+  "itemCount": 535,
   "counts": {
-    "ACTIVE": 476,
+    "ACTIVE": 478,
     "SUPERSEDED": 45,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 376,
+    "ACTIVE_DEFECT": 377,
     "VALID_FUTURE_ROADMAP": 10,
-    "EXTERNAL_OWNER_INPUT": 90,
+    "EXTERNAL_OWNER_INPUT": 91,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 45,
     "CLOSED_WITH_EVIDENCE": 9
@@ -10232,6 +10232,44 @@
       "evidence": [
         "OPEN_LOOP.md:6552",
         "Lorena recommendations — Build 2 of 5: contract-scoped bulk Submittal load"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2c186193e927ef2f",
+      "sourceLine": 6558,
+      "heading": "Priority identity block I001–I005 verification",
+      "statement": "Pass the complete repository build and block regression, verify a clean authorized diff, push without force, and prove local/remote identity.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6558",
+        "Priority identity block I001–I005 verification"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "5d6e7a7a7758501a",
+      "sourceLine": 6559,
+      "heading": "Priority identity block I001–I005 verification",
+      "statement": "Verify the existing production company/project bindings read-only before any mutation, then complete authenticated Ruben/Lorena access, refresh, reopen and clean-reentry acceptance without repeating the historical reconciliation blindly.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6559",
+        "Priority identity block I001–I005 verification"
       ],
       "currentAuthority": false
     }

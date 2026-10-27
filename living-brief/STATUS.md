@@ -4937,3 +4937,9 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - Viva rejected the first deployed candidate after proving that a valid-Trade three-column row and incomplete four-column rows could bypass the visible two-or-four-column promise. Repair `3c45b7cecc4c6ee6c0b60a613d9bf567c1bce581` makes shape validation atomic and adds the required negative and no-partial-addition regressions.
 - Focused bulk-loader behavior, complete Job Intake behavior and both package TypeScript checks pass on the repair. Deterministic reconciliation, full production assembly, push, republication, authenticated production proof and repeat independent acceptance remain required.
 
+## Priority identity block I001–I005 verification — 2026-10-27
+
+- The existing I001–I005 implementation commits remain the authoritative product changes. Current verification reproduced I002 alias/cycle protection, I003 bounded append-only reconciliation, I004 normalized concurrent-company isolation, and I005 stale-session/project authorization behavior against the disposable PostgreSQL fixture.
+- The I005 HTTP fixture had drifted behind current authentication middleware because its temporary `users` table omitted the required `password_hash` column. Commit `73b31aeab158dfaad57dcacb3cec367e3ece4664` restores fixture parity only; it does not alter production runtime behavior or authorize a second production reconciliation.
+- All five focused behaviors, API and UI TypeScript checks, database safety, mojibake/localization and release-identity gates must pass together before the block is pushed. Production identity/project access remains subject to read-only verification of the existing reconciled state and authenticated Chrome acceptance.
+

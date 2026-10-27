@@ -78750,6 +78750,78 @@
         "scripts/test-recovery-ga-block04.mjs"
       ],
       "reviewedChangeSha256": "4e4163bfc68b1afb8e8400e920b8b78ba14ca8781899653af07cbaa37f68be10"
+    },
+    {
+      "taskId": "priority-identity-block-i001-i005-verification-20261027",
+      "reviewedThroughCommit": "73b31aeab158dfaad57dcacb3cec367e3ece4664",
+      "reviewedAt": "2026-10-27T19:30:00.000Z",
+      "status": "release_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing ecosystem doctrine remains applicable without semantic change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing operating and ownership authority remains applicable without semantic change."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality authority records restored I005 fixture parity and the complete identity-block regression requirement."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision or business-rule change is introduced by the test-fixture correction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production platform and runtime behavior are unchanged; only the executable HTTP fixture now matches current authentication schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or plugin boundary changes in this verification block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout or export-design authority changes in this verification block."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No naming, schema-standard, or external standards decision changes in this verification block."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status distinguishes the historical I001–I005 product commits from the current test-only I005 fixture correction and remaining live gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop tracks complete regression, push identity, and read-only/live production acceptance without authorizing duplicate reconciliation."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing identity audit evidence remains authoritative; the present correction changes no production finding."
+        }
+      ],
+      "reason": "The I005 HTTP fixture omitted the password_hash column now selected by authentication middleware. The correction restores executable authorization coverage without changing production behavior or repeating reconciled production writes.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ddc4ffa2870d0a916cf2327bc54aa209605eb965c2544a29912b70018060e787"
     }
   ]
 }
