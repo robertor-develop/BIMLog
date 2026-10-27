@@ -32,6 +32,7 @@ export * from "./coordination_intake_events";
 export * from "./company_profiles";
 export * from "./clash_reports";
 export * from "./lens-viewpoints";
+export * from "./lens-issue-viewpoints";
 export * from "./lens-viewpoint-reports";
 export * from "./lens-viewpoint-sequence-counters";
 export * from "./lens-project-trades";
