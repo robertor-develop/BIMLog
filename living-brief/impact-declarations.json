@@ -78253,8 +78253,8 @@
     },
     {
       "taskId": "lorena-recommendations-build04-service-workflow-20261027",
-      "reviewedThroughCommit": "79fd838d6ce8efc82ada82551207b879d6d33be4",
-      "reviewedAt": "2026-10-27T04:45:32.000Z",
+      "reviewedThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
+      "reviewedAt": "2026-10-27T04:52:32.000Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
@@ -78314,16 +78314,11 @@
           "reason": "Independent acceptance remains pending until the exact deployed candidate is verified."
         }
       ],
-      "reason": "Lorena recommendations Build 4 adds a governed Service-to-published-workflow mapping and safe automatic Intake selection without hardcoded service names or rewriting saved work.",
+      "reason": "Lorena recommendations Build 4 adds a governed Service-to-published-workflow mapping and safe automatic Intake selection without hardcoded service names or rewriting saved work; the reviewed repair declares the additive binding table in the authoritative Drizzle schema so startup migration and schema safety remain reconciled.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
-        "living-brief/CLAUDE.md",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "debcb8a74789e2a2d1440cd7d47650a533f69b7ca161016a5d9f27da51331d1c"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
