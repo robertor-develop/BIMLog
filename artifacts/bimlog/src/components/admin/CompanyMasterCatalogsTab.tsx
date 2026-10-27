@@ -4,7 +4,8 @@ import { COMPANY_CATALOG_GUIDANCE, filterCompanyCatalogEntries, summarizeCompany
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Kind = "client" | "discipline" | "service" | "phase";
-type Entry = { id: string; code: string; name: string; aliases: string[]; state: "active" | "inactive" | "retired"; version: number; canonicalCompanyId?: number | null };
+type Entry = { id: string; code: string; name: string; aliases: string[]; state: "active" | "inactive" | "retired"; version: number; canonicalCompanyId?: number | null; deliveryWorkflowVersionId?: string | null; deliveryWorkflowBindingVersion?: number | null };
+type WorkflowOption = { versionId: string; name: string; version: number; source: "company" | "bimlog"; definition: { phases: Array<{ name: string }> } };
 type Usage = { intakeCount: number; taskCount: number; workPackageCount: number; totalCount: number };
 type PolicyMode = "approved_only" | "defaults_allowed";
 type Capability = { companyId: number; canManage: boolean; isSuperAdmin: boolean; mode: PolicyMode; policyVersion: number | null };
@@ -24,6 +25,7 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   const [search, setSearch] = useState("");
   const [stateFilter, setStateFilter] = useState<CompanyCatalogEntryState | "all">("all");
   const [usage, setUsage] = useState<Record<string, Usage | "loading" | "error">>({});
+  const [workflowOptions, setWorkflowOptions] = useState<WorkflowOption[]>([]);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -54,10 +56,14 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   }, [token]);
   const load = useCallback(async () => {
     const cap = await request("/company/master-catalogs/capabilities") as Capability;
-    const rows = await Promise.all(kinds.map(async kind => [kind, (await request(`/company/master-catalogs/${kind}?includeInactive=true`)).entries ?? []] as const));
+    const [rows, workflowBody] = await Promise.all([
+      Promise.all(kinds.map(async kind => [kind, (await request(`/company/master-catalogs/${kind}?includeInactive=true`)).entries ?? []] as const)),
+      request("/company/delivery-workflows/options"),
+    ]);
     setCapability(cap);
     setPolicyDraft(cap.mode);
     setEntries(Object.fromEntries(rows) as Record<Kind, Entry[]>);
+    setWorkflowOptions((workflowBody.options ?? []).filter((option: WorkflowOption) => option.source === "company"));
     setLoadError("");
   }, [request]);
   useEffect(() => {
@@ -128,6 +134,15 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
     }
   }
 
+  async function saveServiceWorkflow(entry: Entry, workflowVersionId: string) {
+    setBusy(true); setMessage("");
+    try {
+      await request(`/company/master-catalogs/service/${entry.id}/delivery-workflow`, { method: "PUT", body: JSON.stringify({ workflowVersionId, expectedVersion: entry.deliveryWorkflowBindingVersion ?? null }) });
+      await load();
+      setMessage(t("Service workflow saved. New Contract Items using this Service will receive the exact published workflow and its phases automatically.", "Flujo del servicio guardado. Las nuevas Partidas que usen este Servicio recibirán automáticamente el flujo publicado exacto y sus fases."));
+    } catch (error) { setMessage(explainRequestError(error)); } finally { setBusy(false); }
+  }
+
   const ready = capability !== null && !loading && !loadError;
   const visibleEntries = useMemo(() => filterCompanyCatalogEntries(entries[selectedKind], search, stateFilter), [entries, search, selectedKind, stateFilter]);
   const selectedDraftIssue = validateCompanyCatalogDraft(drafts[selectedKind]);
@@ -183,6 +198,13 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
             </>}
             </span>
           </div>
+          {kind === "service" && <label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Automatic Delivery Workflow", "Flujo de Entrega automático")}
+            <select aria-label={t(`Automatic workflow for ${entry.name}`, `Flujo automático para ${entry.name}`)} value={entry.deliveryWorkflowVersionId ?? ""} disabled={!capability?.canManage || busy || entry.state !== "active"} onChange={event => void saveServiceWorkflow(entry, event.target.value)}>
+              <option value="" disabled>{workflowOptions.length ? t("Select a published company workflow", "Seleccione un flujo publicado de la empresa") : t("Publish a company workflow first", "Publique primero un flujo de la empresa")}</option>
+              {workflowOptions.map(option => <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.definition.phases.map(phase => phase.name).join(" → ")}</option>)}
+            </select>
+            <small>{entry.deliveryWorkflowVersionId ? t("Used automatically only for new or still-unbound Contract Items; saved choices and reviewed text are preserved.", "Se usa automáticamente solo en Partidas nuevas o aún sin vínculo; se conservan las selecciones guardadas y el texto revisado.") : t("No automatic workflow is configured for this Service.", "No hay un flujo automático configurado para este Servicio.")}</small>
+          </label>}
           {entryUsage === "error" && <p role="alert">{t("Usage could not be loaded. Retry.", "No se pudo cargar el uso. Vuelva a intentar.")}</p>}
           {typeof entryUsage === "object" && <p role="status" style={{ margin: 0, padding: 8, background: "#f8fafc", borderRadius: 6 }}>
             {t("Used in", "Usado en")}: {entryUsage.intakeCount} {t("intakes", "ingresos")}, {entryUsage.taskCount} {t("tasks", "tareas")}, {entryUsage.workPackageCount} {t("work packages", "paquetes de trabajo")} · {entryUsage.totalCount} {t("total references", "referencias totales")}

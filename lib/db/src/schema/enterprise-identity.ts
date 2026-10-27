@@ -339,6 +339,36 @@ export const companyMasterCatalogEntriesTable = pgTable("company_master_catalog_
   check("company_master_catalog_retired_chk", sql`(${t.state}='retired')=(${t.retiredAt} IS NOT NULL)`),
 ]);
 
+export const companyServiceDeliveryWorkflowBindingsTable = pgTable(
+  "company_service_delivery_workflow_bindings",
+  {
+    serviceEntryId: text("service_entry_id")
+      .primaryKey()
+      .references(() => companyMasterCatalogEntriesTable.id),
+    companyId: integer("company_id")
+      .notNull()
+      .references(() => companiesTable.id),
+    workflowVersionId: text("workflow_version_id").notNull(),
+    version: integer("version").notNull().default(1),
+    updatedById: integer("updated_by_id")
+      .notNull()
+      .references(() => usersTable.id),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("company_service_workflow_company_idx").on(
+      t.companyId,
+      t.workflowVersionId,
+    ),
+    check("company_service_workflow_version_check", sql`${t.version}>0`),
+  ],
+);
+
 export const companyTradeRelationshipsTable = pgTable(
   "company_trade_relationships",
   {

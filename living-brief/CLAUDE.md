@@ -824,6 +824,7 @@ capture to decision to report to audit trail.
 - Never use database field names in UI or reports.
 
 ## Current product direction
+- A governed Contract Item Service may point to one exact published company Delivery Workflow version. The binding is company-scoped and optimistic-versioned; automatic selection applies only to new or still-unbound items and must preserve explicit workflow choices and reviewed project text. Its additive startup migration must remain declared in the authoritative Drizzle schema and pass database-source reconciliation before release; the exact schema-reconciled candidate is the only candidate eligible for publication.
 - BIMLog must become easier than a spreadsheet plus a folder full of PDFs, while keeping BIM,
   Navisworks, reporting, and AI coordination intelligence connected.
 - Submittals should feel like one integrated module with views: Submittals, Register, Tracking

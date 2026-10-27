@@ -40,6 +40,17 @@ CREATE UNIQUE INDEX IF NOT EXISTS company_delivery_workflow_one_open_version_uq
   ON company_delivery_workflow_versions(template_id) WHERE state IN ('draft','approved');
 CREATE UNIQUE INDEX IF NOT EXISTS company_delivery_workflow_one_published_version_uq
   ON company_delivery_workflow_versions(template_id) WHERE state='published';
+CREATE TABLE IF NOT EXISTS company_service_delivery_workflow_bindings (
+  service_entry_id text PRIMARY KEY REFERENCES company_master_catalog_entries(id),
+  company_id integer NOT NULL REFERENCES companies(id),
+  workflow_version_id text NOT NULL REFERENCES company_delivery_workflow_versions(id),
+  version integer NOT NULL DEFAULT 1 CHECK (version>0),
+  updated_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS company_service_workflow_company_idx
+  ON company_service_delivery_workflow_bindings(company_id,workflow_version_id);
 CREATE TABLE IF NOT EXISTS company_delivery_workflow_events (
   id text PRIMARY KEY,
   company_id integer NOT NULL REFERENCES companies(id),

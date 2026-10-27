@@ -78250,6 +78250,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6731feba02f8a2ae0c8fe7ae95254598b9bac5e3d30fd1fed0181ce9e34db482"
+    },
+    {
+      "taskId": "lorena-recommendations-build04-service-workflow-20261027",
+      "reviewedThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
+      "reviewedAt": "2026-10-27T04:52:32.000Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 4 reuses existing company catalogs and immutable Delivery Workflow authority without changing ecosystem boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the company-scoped Service-to-workflow binding and preservation rules."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows existing fail-visible, bilingual, responsive and historical-preservation requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved Lorena automation recommendation remains within the existing BIMLog vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Generated platform inventory will record the additive binding table and existing routes; no provider boundary changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers and plugin behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal report or export contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 3 acceptance, Build 4 behavior, exact implementation commit and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks exact build, release, live journey and independent acceptance before Build 5."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent acceptance remains pending until the exact deployed candidate is verified."
+        }
+      ],
+      "reason": "Lorena recommendations Build 4 adds a governed Service-to-published-workflow mapping and safe automatic Intake selection without hardcoded service names or rewriting saved work; the reviewed repair declares the additive binding table in the authoritative Drizzle schema so startup migration and schema safety remain reconciled.",
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cb79f842e68c9809a9ddcd9fc0a89f3f20cc735605b6284440a2e0e4e1767b44"
     }
   ]
 }
