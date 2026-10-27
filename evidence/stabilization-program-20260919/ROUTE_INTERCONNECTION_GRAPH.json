@@ -6,7 +6,7 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 790,
+    "apiRoutes": 796,
     "frontendApiReferences": 316,
     "routeOwnedTables": 72
   },
@@ -1785,6 +1785,76 @@
       ]
     },
     {
+      "method": "GET",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId/visual-state",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId/history",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "filesTable"
+      ]
+    },
+    {
       "method": "POST",
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
@@ -1913,6 +1983,20 @@
     {
       "method": "PATCH",
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:id",
+      "owner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "tables": [
+        "clashReportsTable",
+        "clashesTable",
+        "lensViewpointsTable",
+        "lensViewpointReportsTable",
+        "lensViewpointEventsTable",
+        "lensViewpointSequenceCountersTable",
+        "filesTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/projects/:projectId/clash-reports/lens-next/issues/:id/fields",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
         "clashReportsTable",

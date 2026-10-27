@@ -1061,6 +1061,14 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/launch-smtp-probe.behavior.ts
 - artifacts/api-server/src/lib/launch-smtp-probe.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
+- artifacts/api-server/src/lib/lens-issue-edit-policy.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-edit-policy.ts
+- artifacts/api-server/src/lib/lens-issue-field-authority.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-field-authority.ts
+- artifacts/api-server/src/lib/lens-issue-viewpoint-compatibility.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-viewpoints-api.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-viewpoints-migration.behavior.ts
+- artifacts/api-server/src/lib/lens-issue-viewpoints-migration.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.behavior.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.ts
 - artifacts/api-server/src/lib/lens-next-create.behavior.ts
@@ -1482,6 +1490,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/job-intakes.ts
 - lib/db/src/schema/launch-configuration.ts
 - lib/db/src/schema/lens-imports.ts
+- lib/db/src/schema/lens-issue-viewpoints.ts
 - lib/db/src/schema/lens-next-model-bindings.ts
 - lib/db/src/schema/lens-next-publishing.ts
 - lib/db/src/schema/lens-project-trades.ts
