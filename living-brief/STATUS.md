@@ -4908,3 +4908,11 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - Focused UI/persistence, master-catalog authority, access-route authority, the complete Job Intake suite and both package TypeScript checks pass locally. Exact clean production assembly, commit/push/publication, authenticated production persistence proof and independent acceptance remain release gates.
 - The immutable Build 1 implementation baseline is `46e32b62db1e03470583f92075db892b4816215c`; deterministic release metadata is reconciled from that exact source before production assembly.
 
+## Lorena recommendations Build 2 — contract-scoped bulk Submittal load — 2026-10-26
+
+- Build 1 is independently accepted on exact deployed source `1f68d8306ed119727d99d3070ceec4ef62556284`; Build 2 is permitted.
+- The bulk Contract Item loader now accepts Lorena's Submittal, Quantity, Trade and Service spreadsheet shape while retaining the existing two-column compatibility path.
+- The user selects one explicit contract profile before loading. Every accepted row receives that exact contract ID; the loader does not require repetitive per-row contract selection and does not infer a contract from free text.
+- Trade and Service values resolve only to approved catalog code, name or alias. Unknown values, malformed rows, formula-like names, non-positive quantities and fifth-column data fail visibly before any row is added.
+- Focused bulk-loader behavior, complete Job Intake behavior and both package TypeScript checks pass. Living Brief state reconciliation and the exact production build are being repeated before commit, push, publication and authenticated production proof.
+

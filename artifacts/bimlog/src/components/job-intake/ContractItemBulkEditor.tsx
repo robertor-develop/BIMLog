@@ -221,7 +221,9 @@ export function parseContractItemPaste(source: string) {
         sourceRow,
         name: normalizePastedContractItemName(cells[0]),
         quantity: delimiter === "," ? localizedQuantity : localizedQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
-        ...(cells.slice(2).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
+        ...(cells[2] !== undefined ? { trade: normalizePastedContractItemName(cells[2]) } : {}),
+        ...(cells[3] !== undefined ? { service: normalizePastedContractItemName(cells[3]) } : {}),
+        ...(cells.slice(4).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
         ...(/^[=+\-@]/.test(String(cells[0] ?? "").replace(/^\uFEFF/, "").trim()) ? { unsafeFormula: true } : {}),
         ...(malformedQuote ? { malformedQuote: true } : {}),
       };
@@ -235,6 +237,7 @@ export function parseContractItemPaste(source: string) {
       "item",
       "contract item",
       "contract item name",
+      "submittal",
       "nombre",
       "partida",
       "partida de contrato",
@@ -285,15 +288,34 @@ export function findCompatibleDefaultApu(
 }
 
 export function buildPastedContractItem(
-  props: Pick<Props, "defaultRate" | "defaultApuVersion" | "defaultWorkflow" | "defaultContractId">,
-  row: { name: string; quantity: string; sourceRow: number },
+  props: Pick<Props, "defaultRate" | "defaultApuVersion" | "defaultWorkflow" | "defaultContractId" | "defaultClassification">,
+  row: { name: string; quantity: string; sourceRow: number; trade?: string; service?: string },
+  catalogs?: Record<"disciplines" | "services", any[]>,
 ) {
+  const match = (entries: any[] = [], value = "") => {
+    const key = value.trim().toLocaleLowerCase();
+    return entries.find((entry) => [entry.code, entry.name, ...(entry.aliases ?? [])]
+      .some((candidate) => String(candidate ?? "").trim().toLocaleLowerCase() === key));
+  };
+  const trade = match(catalogs?.disciplines, row.trade);
+  const service = match(catalogs?.services, row.service);
   return {
     ...newItem(props),
     name: row.name,
     quantity: row.quantity,
     plannedHours: row.quantity,
     provenance: { source: "clipboard", sourceRow: row.sourceRow },
+    classification: {
+      disciplineId: trade?.id ?? props.defaultClassification?.disciplineId ?? "",
+      disciplineCode: trade?.code ?? props.defaultClassification?.disciplineCode ?? "",
+      disciplineName: trade?.name ?? props.defaultClassification?.disciplineName ?? "",
+      serviceId: service?.id ?? "",
+      serviceCode: service?.code ?? "",
+      serviceName: service?.name ?? "",
+      phaseId: "",
+      phaseCode: "",
+      phaseName: "",
+    },
   };
 }
 
@@ -322,6 +344,7 @@ export function updateAllContractItemQuantities<T extends Record<string, any>>(
 export function ContractItemBulkEditor(props: Props) {
   const [bulkQuantity, setBulkQuantity] = useState("");
   const [pasteText, setPasteText] = useState("");
+  const [pasteContractId, setPasteContractId] = useState(props.defaultContractId);
   const pasteTarget = useRef<HTMLTextAreaElement>(null);
   const [catalogs, setCatalogs] = useState<Record<"disciplines" | "services", any[]>>({ disciplines: [], services: [] });
   const [catalogError, setCatalogError] = useState("");
@@ -360,8 +383,11 @@ export function ContractItemBulkEditor(props: Props) {
   };
   const appendPastedItems = (source: string) => {
     const parsed = parseContractItemPaste(source);
+    const catalogMatch = (entries: any[], value?: string) => !value || entries.some((entry) =>
+      [entry.code, entry.name, ...(entry.aliases ?? [])].some((candidate) => String(candidate ?? "").trim().toLocaleLowerCase() === value.trim().toLocaleLowerCase()));
     const invalid = parsed.filter(
-      (row) => !row.name || !validQuantity(row.quantity) || row.extraColumns || row.unsafeFormula || row.malformedQuote,
+      (row) => !row.name || !validQuantity(row.quantity) || row.extraColumns || row.unsafeFormula || row.malformedQuote ||
+        !catalogMatch(catalogs.disciplines, row.trade) || !catalogMatch(catalogs.services, row.service),
     );
     if (!parsed.length || invalid.length) {
       const invalidRows = invalid
@@ -376,8 +402,8 @@ export function ContractItemBulkEditor(props: Props) {
         : "";
       props.onError(
         props.tt(
-          `Paste exactly two Excel columns: Contract Item Name and a positive Quantity. ${invalid.length || 1} row(s) need correction.`,
-          `Pegue exactamente dos columnas de Excel: Nombre de la Partida y una Cantidad positiva. ${invalid.length || 1} fila(s) requieren corrección.`,
+          `Paste two or four Excel columns: Submittal, positive Quantity, and optional approved Trade and Service. ${invalid.length || 1} row(s) need correction.`,
+          `Pegue dos o cuatro columnas de Excel: Submittal, Cantidad positiva y Trade y Service aprobados opcionales. ${invalid.length || 1} fila(s) requieren corrección.`,
         ) + rowDetail,
       );
       return false;
@@ -392,15 +418,15 @@ export function ContractItemBulkEditor(props: Props) {
       return false;
     }
     const pastedItems = applyDefaultApuToPastedItems(
-      parsed.map((row) => buildPastedContractItem(props, row)),
+      parsed.map((row) => buildPastedContractItem({ ...props, defaultContractId: pasteContractId }, row, catalogs)),
       props.defaultApuVersion,
       eligibleApuVersions,
     );
     props.setItems((items) => mergePastedContractItems(items, pastedItems));
     props.onNotice(
       props.tt(
-        `${parsed.length} pasted Contract Items added.`,
-        `Se agregaron ${parsed.length} Partidas de Contrato pegadas.`,
+        `${parsed.length} pasted submittals added to ${props.contracts.find((contract) => contract.id === pasteContractId)?.contractNumber || pasteContractId}.`,
+        `Se agregaron ${parsed.length} submittals pegados a ${props.contracts.find((contract) => contract.id === pasteContractId)?.contractNumber || pasteContractId}.`,
       ),
     );
     return true;
@@ -510,26 +536,32 @@ export function ContractItemBulkEditor(props: Props) {
         <div className="ji-paste">
           <ClipboardPaste size={16} />
           <button type="button" onClick={readClipboardRange}>
-            {props.tt("Paste Excel range", "Pegar rango de Excel")}
+            {props.tt("Load submittals for contract", "Cargar submittals del contrato")}
             <small>
               {props.tt(
-                "Name in column 1, Quantity in column 2",
-                "Nombre en columna 1, Cantidad en columna 2",
+                "Submittal, Quantity, Trade, Service",
+                "Submittal, Cantidad, Trade, Service",
               )}
             </small>
           </button>
+          <label>
+            {props.tt("Assign every pasted row to", "Asignar todas las filas pegadas a")}
+            <select aria-label={props.tt("Bulk-load contract", "Contrato para carga masiva")} value={pasteContractId} onChange={(event) => setPasteContractId(event.target.value)}>
+              {props.contracts.map((contract) => <option key={contract.id} value={contract.id}>{contract.contractNumber || contract.title || contract.id}</option>)}
+            </select>
+          </label>
           <textarea
             ref={pasteTarget}
             aria-label={props.tt(
-              "Paste Contract Item Name and Quantity columns",
-              "Pegue columnas de Nombre y Cantidad de Partidas",
+              "Paste Submittal, Quantity, Trade, and Service columns",
+              "Pegue columnas de Submittal, Cantidad, Trade y Service",
             )}
             onPaste={paste}
             value={pasteText}
             onChange={(event) => setPasteText(event.target.value)}
             placeholder={props.tt(
-              "Click here, then paste two Excel columns",
-              "Haga clic aquí y pegue dos columnas de Excel",
+              "Click here, then paste two or four Excel columns",
+              "Haga clic aquí y pegue dos o cuatro columnas de Excel",
             )}
           />
           <button type="button" onClick={applyTypedRange} disabled={!pasteText.trim()}>

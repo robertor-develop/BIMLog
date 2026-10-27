@@ -903,3 +903,9 @@ Project archival must retain the row-lock concurrency contract and schema-derive
 Builds 61–65 close only when the complete Lorena matrix has exact deployed identity plus authenticated Chrome proof. Source or database tests alone cannot establish publication, UI persistence, responsive behavior, clean console/network operation or independent Viva acceptance. Any live failure remains active repair work and must be fixed and retested before closure.
 
 Builds 66–70 retain the same closure boundary. The controlled production observations in `evidence/outcome-remediation-20261023/LORENA_FINAL_ACCEPTANCE.md` must be bound to the exact pushed and published SHA, followed by a fresh authenticated Chrome smoke and an independent Viva verdict. A failed exact-head gate, deployed-identity mismatch, live regression, or independent rejection keeps the block open until repaired and repeated.
+
+## Lorena recommendations terminal program — 2026-10-26
+
+- Build 1 PASS: Contract Items persist governed Trade and Service stable IDs plus historical labels. Exact deployed candidate `1f68d8306ed119727d99d3070ceec4ef62556284` passed authenticated production reload on controlled project `QA-LTS-1026` and independent Viva acceptance.
+- Build 2 scope: the Contract Item bulk loader accepts the spreadsheet columns Submittal, Quantity, Trade and Service, validates Trade and Service against the project company's approved catalogs, and assigns every pasted row to one explicitly selected contract profile. The selected contract is never inferred from row text, and unknown catalog values fail visibly without adding partial rows.
+- Two-column Submittal/Quantity paste remains compatible. Quantity remains the only work amount and operational-hours baseline. Four-column paste does not create received Submittal packages or approvals; it creates the contract-scoped Contract Items that later drive the existing controlled delivery workflow.

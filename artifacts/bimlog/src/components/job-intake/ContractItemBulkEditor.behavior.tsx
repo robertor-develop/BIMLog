@@ -65,7 +65,13 @@ assert.deepEqual(parseContractItemPaste("Door\t\uFEFF2"), [
   { sourceRow: 1, name: "Door", quantity: "2" },
 ]);
 assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
-  { sourceRow: 1, name: "Muro", quantity: "4", extraColumns: true },
+  { sourceRow: 1, name: "Muro", quantity: "4", trade: "USD" },
+]);
+assert.deepEqual(parseContractItemPaste("SUBMITTAL\tCANTIDAD\tTRADE\tSERVICE\nUNDERGROUND_PB_SH\t8\tPLUMBING\tSHOP"), [
+  { sourceRow: 2, name: "UNDERGROUND_PB_SH", quantity: "8", trade: "PLUMBING", service: "SHOP" },
+]);
+assert.deepEqual(parseContractItemPaste("Muro\t4\tPLUMBING\tSHOP\tEXTRA"), [
+  { sourceRow: 1, name: "Muro", quantity: "4", trade: "PLUMBING", service: "SHOP", extraColumns: true },
 ]);
 assert.deepEqual(parseDelimitedContractItemRow('"Door, Frame",2', ','), {
   cells: ["Door, Frame", "2"], malformedQuote: false,
@@ -105,11 +111,15 @@ assert.deepEqual(parseContractItemPaste("=HYPERLINK(\"https://example.invalid\")
   { sourceRow: 1, name: "=HYPERLINK(\"https://example.invalid\")", quantity: "1", unsafeFormula: true },
 ]);
 const separatedPastedItem = buildPastedContractItem(
-  { defaultRate: "0", defaultApuVersion: null, defaultWorkflow: "generic", defaultContractId: "PRIMARY" },
-  { name: "Door", quantity: "24", sourceRow: 7 },
+  { defaultRate: "0", defaultApuVersion: null, defaultWorkflow: "generic", defaultContractId: "CONTRACT-007", defaultClassification: {} },
+  { name: "Door", quantity: "24", sourceRow: 7, trade: "PLUMBING", service: "SHOP" },
+  { disciplines: [{ id: "d1", code: "PLUMBING", name: "Plumbing" }], services: [{ id: "s1", code: "SHOP", name: "Shop Drawings" }] },
 );
 assert.equal(separatedPastedItem.quantity, "24");
 assert.equal(separatedPastedItem.plannedHours, "24");
+assert.equal(separatedPastedItem.contractId, "CONTRACT-007");
+assert.equal(separatedPastedItem.classification.disciplineId, "d1");
+assert.equal(separatedPastedItem.classification.serviceId, "s1");
 assert.deepEqual(separatedPastedItem.provenance, { source: "clipboard", sourceRow: 7 });
 const pastedItem: Record<string, any> = { id: "CI-pasted", name: "Muro", quantity: "4", plannedHours: "4", provenance: { source: "clipboard" } };
 assert.deepEqual(
@@ -243,8 +253,10 @@ assert.match(emptyStateMarkup, /Open Cost &amp; Value Planner/);
 assert.match(emptyStateMarkup, /Approved budget link \(optional\)/);
 assert.match(emptyStateMarkup, /No approved budget snapshots are available yet/);
 assert.match(emptyStateMarkup, /Open Project Budget/);
-assert.match(emptyStateMarkup, /Click here, then paste two Excel columns/);
-assert.match(emptyStateMarkup, /Paste Excel range/);
+assert.match(emptyStateMarkup, /Click here, then paste two or four Excel columns/);
+assert.match(emptyStateMarkup, /Load submittals for contract/);
+assert.match(emptyStateMarkup, /Bulk-load contract/);
+assert.match(emptyStateMarkup, /Submittal, Quantity, Trade, Service/);
 assert.match(emptyStateMarkup, /Add pasted rows/);
 assert.match(emptyStateMarkup, /disabled=""/);
 assert.match(emptyStateMarkup, /value=""/);

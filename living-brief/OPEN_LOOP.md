@@ -6499,3 +6499,14 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Prove Trade and Service save/reopen/refresh/back-forward/logout-login behavior in the existing authenticated production Chrome tab on a uniquely named controlled draft only.
 - [ ] Prove catalog error/empty behavior, responsive presentation and foreign-company/wrong-role denial; obtain independent acceptance before Build 2.
 
+## Lorena recommendations — Build 2 of 5: contract-scoped bulk Submittal load
+
+- [x] Accept Build 1 on exact deployed source `1f68d8306ed119727d99d3070ceec4ef62556284` with independent Viva PASS.
+- [x] Accept both two-column Submittal/Quantity and four-column Submittal/Quantity/Trade/Service spreadsheet ranges with deterministic header, delimiter, decimal and formula safety.
+- [x] Require an explicit bulk-load contract and assign its exact ID to every accepted row without per-row repetition.
+- [x] Resolve optional Trade and Service only through approved company catalog code, name or alias; reject unknown or extra values before adding any partial rows.
+- [x] Pass focused bulk-loader and complete Job Intake regression including both package TypeScript checks.
+- [ ] Reconcile deterministic Living Brief state, pass the exact full production build, commit and push the exact candidate.
+- [ ] Publish the exact pushed candidate and prove controlled four-column load, contract assignment, save, reload, navigation/reentry, responsive behavior and clean console in authenticated production Chrome.
+- [ ] Obtain independent Viva acceptance of the exact deployed Build 2 candidate before Build 3.
+

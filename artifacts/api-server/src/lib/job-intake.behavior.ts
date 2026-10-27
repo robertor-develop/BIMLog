@@ -551,7 +551,9 @@ assert.equal(completion.readinessSummary.work.assignedHours, completion.totals.a
 assert.equal(completion.readinessSummary.work.assignmentCoveragePercent, 100);
 assert.equal(typeof completion.readinessSummary.optionalItemsRemaining, "number");
 assert.equal(completion.readinessSummary.financial.applicable, true);
-assert.match(bulkEditor, /Paste Excel range/);
+assert.match(bulkEditor, /Load submittals for contract/);
+assert.match(bulkEditor, /Bulk-load contract/);
+assert.match(bulkEditor, /Submittal, Quantity, Trade, Service/);
 assert.match(bulkEditor, /Check row\(s\):/);
 assert.match(bulkEditor, /Advanced overrides for row/);
 assert.match(bulkEditor, /Contract profile row/);
