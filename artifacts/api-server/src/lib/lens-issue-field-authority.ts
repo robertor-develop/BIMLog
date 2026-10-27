@@ -29,6 +29,17 @@ export type LensResponsibleCompanyOption = {
   unavailabilityReason: "inactive" | "not_project_authorized" | "historical_only" | null;
 };
 
+export function lensResponsibleCompanyAvailability(input: {
+  directoryCompanyRetiredAt: Date | null | undefined;
+  canonicalCompanyRetiredAt: Date | null | undefined;
+  resolvesToCanonicalCompany: boolean;
+}) {
+  const active = input.resolvesToCanonicalCompany
+    ? input.canonicalCompanyRetiredAt == null
+    : input.directoryCompanyRetiredAt == null;
+  return { active, assignable: active, unavailabilityReason: active ? null : "inactive" as const };
+}
+
 export function uniqueLensResponsibleCompanyOptions(values: readonly LensResponsibleCompanyOption[]): LensResponsibleCompanyOption[] {
   const byIdentity = new Map<string, LensResponsibleCompanyOption>();
   for (const value of values) {

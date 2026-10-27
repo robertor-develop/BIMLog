@@ -35,7 +35,7 @@ import {
 import { clashReportScopeWhere, clashScopeWhere } from "../lib/clash-report-provenance";
 import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../lib/clash-visual-package-truth";
 import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } from "../lib/company-directory-resolution";
-import { lensIssueFieldAuthorities, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
+import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
 import { assertCatalogLabel, assertLensIssueStatusTransition, normalizeGovernedLabel, LENS_ISSUE_BASE_TRADES, LENS_ISSUE_REPORT_TYPES } from "../lib/lens-issue-edit-policy";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
@@ -2174,6 +2174,11 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
         retiredIntoCompanyId: companiesTable.retiredIntoCompanyId, retiredAt: companiesTable.retiredAt }).from(companiesTable)
         .where(inArray(companiesTable.id, ids)) : [];
       const byId = new Map(companyRows.map((row) => [row.id, row]));
+      const canonicalIds = [...new Set(companyRows.map((row) => row.retiredIntoCompanyId).filter((id): id is number => Number.isInteger(id)))];
+      const canonicalRows = canonicalIds.length ? await db.select({ id: companiesTable.id, name: companiesTable.name,
+        retiredIntoCompanyId: companiesTable.retiredIntoCompanyId, retiredAt: companiesTable.retiredAt }).from(companiesTable)
+        .where(inArray(companiesTable.id, canonicalIds)) : [];
+      const canonicalById = new Map(canonicalRows.map((row) => [row.id, row]));
       const candidates: CompanyDirectoryCandidate[] = companyRows.map((row) => ({
         companyId: row.id,
         canonicalCompanyId: row.retiredIntoCompanyId ?? row.id,
@@ -2197,17 +2202,23 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
             companyName: canonical[0].name, source: "company" });
         }
         const resolved = resolveLensCompanyDirectoryReference({ companyId: row.companyId, companyName: v, candidates });
+        const canonicalCompany = resolved.canonicalCompanyId == null ? null : canonicalById.get(resolved.canonicalCompanyId) ?? byId.get(resolved.canonicalCompanyId);
+        const availability = lensResponsibleCompanyAvailability({
+          directoryCompanyRetiredAt: company?.retiredAt,
+          canonicalCompanyRetiredAt: canonicalCompany?.retiredAt,
+          resolvesToCanonicalCompany: company?.retiredIntoCompanyId != null && canonicalCompany != null,
+        });
         names.add(resolved.displayName);
         references.push(resolved);
         options.push({
           id: resolved.canonicalCompanyId,
           label: resolved.displayName,
           historicalLabel: resolved.historicalValue,
-          active: company?.retiredAt == null,
+          active: availability.active,
           projectAuthorized: true,
-          assignable: company?.retiredAt == null,
+          assignable: availability.assignable,
           source: "project_directory",
-          unavailabilityReason: company?.retiredAt == null ? null : "inactive",
+          unavailabilityReason: availability.unavailabilityReason,
         });
       }
       for (const row of lensRows) {

@@ -1,11 +1,22 @@
 import assert from "node:assert/strict";
-import { lensIssueFieldAuthorities, uniqueLensResponsibleCompanyOptions } from "./lens-issue-field-authority";
+import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, uniqueLensResponsibleCompanyOptions } from "./lens-issue-field-authority";
 
 assert.deepEqual(lensIssueFieldAuthorities.map(row => row.field), [
   "trade", "floor", "responsibleCompany", "reportType", "priority", "status", "instruction", "openItems", "auditReason",
 ]);
 assert.equal(lensIssueFieldAuthorities.find(row => row.field === "responsibleCompany")?.scope, "project");
 assert.equal(lensIssueFieldAuthorities.find(row => row.field === "status")?.writePermission, "workflow_transition");
+
+assert.deepEqual(lensResponsibleCompanyAvailability({
+  directoryCompanyRetiredAt: new Date("2026-10-27T20:00:00.000Z"),
+  canonicalCompanyRetiredAt: null,
+  resolvesToCanonicalCompany: true,
+}), { active: true, assignable: true, unavailabilityReason: null });
+assert.deepEqual(lensResponsibleCompanyAvailability({
+  directoryCompanyRetiredAt: new Date("2026-10-27T20:00:00.000Z"),
+  canonicalCompanyRetiredAt: new Date("2026-10-27T20:00:00.000Z"),
+  resolvesToCanonicalCompany: true,
+}), { active: false, assignable: false, unavailabilityReason: "inactive" });
 
 const options = uniqueLensResponsibleCompanyOptions([
   { id: 7, label: " Mainline   Pools ", historicalLabel: "Mainline Pools", active: true, projectAuthorized: true, assignable: true, source: "project_directory", unavailabilityReason: null },
