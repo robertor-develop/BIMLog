@@ -35,6 +35,7 @@ import {
 import { clashReportScopeWhere, clashScopeWhere } from "../lib/clash-report-provenance";
 import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../lib/clash-visual-package-truth";
 import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } from "../lib/company-directory-resolution";
+import { lensIssueFieldAuthorities, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -2010,7 +2011,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
       ]);
       const ids = [...new Set(directoryRows.map((row) => row.companyId).filter((id): id is number => Number.isInteger(id)))];
       const companyRows = ids.length ? await db.select({ id: companiesTable.id, name: companiesTable.name,
-        retiredIntoCompanyId: companiesTable.retiredIntoCompanyId }).from(companiesTable)
+        retiredIntoCompanyId: companiesTable.retiredIntoCompanyId, retiredAt: companiesTable.retiredAt }).from(companiesTable)
         .where(inArray(companiesTable.id, ids)) : [];
       const byId = new Map(companyRows.map((row) => [row.id, row]));
       const candidates: CompanyDirectoryCandidate[] = companyRows.map((row) => ({
@@ -2019,8 +2020,10 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
         companyName: row.name,
         source: row.retiredIntoCompanyId == null ? "company" : "directory_alias",
       }));
-      const names = new Set<string>((await loadProjectCompanyChoices(projectId)).companies);
+      const projectChoices = await loadProjectCompanyChoices(projectId);
+      const names = new Set<string>(projectChoices.companies);
       const references: ReturnType<typeof resolveLensCompanyDirectoryReference>[] = [];
+      const options: LensResponsibleCompanyOption[] = [];
       for (const row of directoryRows) {
         const v = row.companyName?.trim();
         if (!v) continue;
@@ -2036,16 +2039,42 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
         const resolved = resolveLensCompanyDirectoryReference({ companyId: row.companyId, companyName: v, candidates });
         names.add(resolved.displayName);
         references.push(resolved);
+        options.push({
+          id: resolved.canonicalCompanyId,
+          label: resolved.displayName,
+          historicalLabel: resolved.historicalValue,
+          active: company?.retiredAt == null,
+          projectAuthorized: true,
+          assignable: company?.retiredAt == null,
+          source: "project_directory",
+          unavailabilityReason: company?.retiredAt == null ? null : "inactive",
+        });
       }
       for (const row of lensRows) {
         const v = row.responsibleCompany?.trim();
-        if (v) names.add(v);
+        if (!v) continue;
+        names.add(v);
+        if (!options.some(option => option.label.toLocaleLowerCase("en-US") === v.toLocaleLowerCase("en-US"))) {
+          options.push({ id: null, label: v, historicalLabel: v, active: false, projectAuthorized: false,
+            assignable: false, source: "historical_issue", unavailabilityReason: "historical_only" });
+        }
       }
       const customTradeRows = await pool.query(
         `SELECT name FROM lens_project_trades WHERE project_id=$1 ORDER BY lower(name), id`,
         [projectId],
       );
-      res.json({ success: true, companies: Array.from(names).sort((a, b) => a.localeCompare(b)), references,
+      for (const name of projectChoices.companies) {
+        if (!options.some(option => option.label.toLocaleLowerCase("en-US") === name.toLocaleLowerCase("en-US"))) {
+          options.push({ id: null, label: name, historicalLabel: name, active: true, projectAuthorized: true,
+            assignable: true, source: projectChoices.conventionCodes.includes(name) ? "naming_convention" : "project_member", unavailabilityReason: null });
+        }
+      }
+      res.setHeader("Cache-Control", "private, no-store");
+      res.json({ success: true, contractVersion: "lens-issue-catalog.v1", projectId,
+        authority: lensIssueFieldAuthorities, generatedAt: new Date().toISOString(),
+        companies: Array.from(names).sort((a, b) => a.localeCompare(b)),
+        companyOptions: uniqueLensResponsibleCompanyOptions(options), references,
+        missingValueGuidance: "A company must exist in the active BIMLog authority and be authorized for this project before it can be assigned.",
         trades: customTradeRows.rows.map((row) => String(row.name)) });
     } catch (err) {
       res.status(500).json({ error: "responsible_companies_failed", message: err instanceof Error ? err.message : String(err) });
