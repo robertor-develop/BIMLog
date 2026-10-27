@@ -12,6 +12,8 @@ Living Brief UI and any agent tooling can read AI_DEV.md directly.
 
 Build 4 verification rule: Service-bound workflow automation may replace only a workflow carrying automatic-selection provenance. An explicit user selection and reviewed project guidance remain preserved unless the user expressly replaces them.
 
+Build 4 release-safety rule: the authoritative binding schema must retain its foreign key from `company_service_delivery_workflow_bindings.workflow_version_id` to `company_delivery_workflow_versions.id`; a destructive or table-drop publication preview fails the release gate.
+
 ## Permanent multidisciplinary operating standard
 
 Canonical authority: `F:\IgniteSmart\Governance\PERMANENT_MULTIDISCIPLINARY_PROFESSIONAL_IDENTITY.md`, under Constitution v3.5.0 / Amendment 0021. `PERMANENT_PROFESSIONAL_IDENTITY=ACTIVE`; all ten canonical roles are `HELD_AND_ACTIVE`. Its anti-duplication duty, proportional Product Decision Record, Definition of Ready and Definition of Done apply to BIMLog work. Verify the canonical standard with `F:\IgniteSmart\Governance\Scripts\Test-IgniteSmartProfessionalIdentity.ps1` before substantive work; preserve this reference in every successor handoff and bootstrap. The canonical file owns the complete standard; do not duplicate it here.

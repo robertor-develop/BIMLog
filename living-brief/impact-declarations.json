@@ -78253,7 +78253,7 @@
     },
     {
       "taskId": "lorena-recommendations-build04-service-workflow-20261027",
-      "reviewedThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
+      "reviewedThroughCommit": "aa8b250373ef602d930dc1a5386bb9f109324974",
       "reviewedAt": "2026-10-27T04:52:32.000Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
@@ -78314,17 +78314,15 @@
           "reason": "Independent acceptance remains pending until the exact deployed candidate is verified."
         }
       ],
-      "reason": "Lorena recommendations Build 4 adds a governed Service-to-published-workflow mapping and safe automatic Intake selection without hardcoded service names or rewriting saved work; the reviewed repair declares the additive binding table in the authoritative Drizzle schema so startup migration and schema safety remain reconciled.",
+      "reason": "Lorena recommendations Build 4 adds a governed Service-to-published-workflow mapping and safe automatic Intake selection without hardcoded service names or rewriting saved work; the reviewed repair reconciles the binding table and its required workflow-version foreign key with the production startup migration so a safe publication preview preserves the table and its data.",
       "reviewedChangedPaths": [
-        "artifacts/bimlog/src/lib/job-intake-delivery-defaults.ts",
-        "artifacts/bimlog/src/lorena-service-workflow-default.behavior.ts",
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d0ae018fec72cb9ab0c71c287e18f1fa2a0bba5f75420851091fe732fffd1734"
+      "reviewedChangeSha256": "5316627fa5ed1692d47ea560e6a4d56bdf7852cbc774d26715663888e1058f9b"
     }
   ]
 }
