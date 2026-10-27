@@ -2,13 +2,11 @@ import { Globe } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 /**
- * Small EN/ES/PT language toggle. In the sidebar it uses the same footprint
+ * Small EN/ES language toggle. In the sidebar it uses the same footprint
  * as the Guide button; the floating style remains available for standalone pages.
  */
 export function LangToggle({ floating = false, compact = false }: { floating?: boolean; compact?: boolean }) {
   const { language, setLanguage } = useI18n();
-  const nextLanguage = language === "en" ? "es" : language === "es" ? "pt" : "en";
-  const nextLanguageName = nextLanguage === "en" ? "English" : nextLanguage === "es" ? "Español" : "Português";
 
   const baseStyle: React.CSSProperties = {
     width: floating ? undefined : "100%",
@@ -36,9 +34,9 @@ export function LangToggle({ floating = false, compact = false }: { floating?: b
     <button
       type="button"
       className={floating ? undefined : "sidebar-utility-button"}
-      aria-label={`Switch language to ${nextLanguageName}`}
-      title={nextLanguageName}
-      onClick={() => setLanguage(nextLanguage)}
+      aria-label={language === "en" ? "Switch language to Spanish" : "Cambiar idioma a inglés"}
+      title={language === "en" ? "Español" : "English"}
+      onClick={() => setLanguage(language === "en" ? "es" : "en")}
       style={floating ? { ...baseStyle, ...floatStyle } : undefined}
     >
       <Globe style={{ width: 13, height: 13 }} />

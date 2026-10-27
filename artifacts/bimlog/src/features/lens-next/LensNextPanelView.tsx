@@ -528,7 +528,18 @@ export function LensNextPanelView({
   publishMessage,
   onPublishAction,
 }: LensNextPanelViewProps) {
-  const { language, tt } = useI18n();
+  const { language } = useI18n();
+  const [lensLanguage, setLensLanguage] = React.useState<"en" | "es" | "pt">(() => {
+    try {
+      const saved = window.localStorage.getItem("bimlog-lens-language");
+      return saved === "pt" || saved === "es" ? saved : language;
+    } catch { return language; }
+  });
+  const tt = React.useCallback((en: string, es: string, pt?: string) => lensLanguage === "es" ? es : lensLanguage === "pt" ? (pt ?? en) : en, [lensLanguage]);
+  const selectLensLanguage = (next: "en" | "es" | "pt") => {
+    setLensLanguage(next);
+    try { window.localStorage.setItem("bimlog-lens-language", next); } catch { /* local preference is optional */ }
+  };
   const [publishKind, setPublishKind] = React.useState<LensNextPublishAction["type"]>("status");
   const [publishStatus, setPublishStatus] = React.useState<LensNextStatus>("follow_up");
   const [publishText, setPublishText] = React.useState("");
@@ -904,6 +915,7 @@ export function LensNextPanelView({
         <div className="lens-next__view-settings-content">
           <section className="lens-next__catalog-settings" aria-label={tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias", "Campos e catálogos de ocorrências")}>
             <h3>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias", "Campos e catálogos de ocorrências")}</h3>
+            <label>{tt("Lens language", "Idioma de Lens", "Idioma do Lens")} <select value={lensLanguage} onChange={event => selectLensLanguage(event.target.value as "en" | "es" | "pt")}><option value="en">English</option><option value="es">Español</option><option value="pt">Português</option></select></label>
             <dl className="lens-next__overview-facts">
               <div><dt>{tt("Active BIMLog project", "Proyecto BIMLog activo", "Projeto BIMLog ativo")}</dt><dd>{activeProject?.name ?? tt("Not selected", "No seleccionado", "Não selecionado")}</dd></div>
               <div><dt>{tt("Active model", "Modelo activo", "Modelo ativo")}</dt><dd>{bridgeDisplayName ?? tt("Unavailable", "No disponible", "Indisponível")}</dd></div>

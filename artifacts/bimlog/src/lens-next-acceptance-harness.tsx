@@ -116,7 +116,7 @@ function Harness() {
   return <div className="lens-next-acceptance-shell">
     <div className="lens-next-acceptance-toolbar">
       <strong>Test-only acceptance fixture · real LensNextPanelView</strong>
-      <button type="button" onClick={() => setLanguage(language === "en" ? "es" : language === "es" ? "pt" : "en")}>Language: {language.toUpperCase()}</button>
+      <button type="button" onClick={() => setLanguage(language === "en" ? "es" : "en")}>Language: {language.toUpperCase()}</button>
     </div>
     <main className="lens-next-workspace lens-next-workspace--embedded"><LensNextPanelView {...props} /></main>
   </div>;

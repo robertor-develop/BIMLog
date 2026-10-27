@@ -2,9 +2,9 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import en from './i18n/en.json';
 import es from './i18n/es.json';
 
-export type Language = 'en' | 'es' | 'pt';
+export type Language = 'en' | 'es';
 
-const translations: Record<Language, Record<string, string>> = { en, es, pt: {} };
+const translations: Record<Language, Record<string, string>> = { en, es };
 
 type TranslationKey = keyof typeof en;
 
@@ -26,7 +26,7 @@ function readInitialLang(): Language {
   if (typeof window === 'undefined') return 'en';
   try {
     const saved = window.localStorage.getItem(LS_KEY);
-    if (saved === 'en' || saved === 'es' || saved === 'pt') return saved;
+    if (saved === 'en' || saved === 'es') return saved;
   } catch { /* localStorage may be unavailable */ }
   return 'en';
 }
@@ -46,7 +46,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const synchronize = (event: StorageEvent) => {
-      if (event.key === LS_KEY && (event.newValue === 'en' || event.newValue === 'es' || event.newValue === 'pt')) setLangState(event.newValue);
+      if (event.key === LS_KEY && (event.newValue === 'en' || event.newValue === 'es')) setLangState(event.newValue);
     };
     window.addEventListener('storage', synchronize);
     return () => window.removeEventListener('storage', synchronize);
@@ -56,7 +56,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     return translations[lang][key] || translations['en'][key] || key;
   };
 
-  const tt = (enStr: string, esStr: string, ptStr?: string) => (lang === 'es' ? esStr : lang === 'pt' ? (ptStr ?? enStr) : enStr);
+  const tt = (enStr: string, esStr: string, _ptStr?: string) => (lang === 'es' ? esStr : enStr);
 
   return (
     <I18nContext.Provider value={{ lang, setLang, language: lang, setLanguage: setLang, t, tt }}>
