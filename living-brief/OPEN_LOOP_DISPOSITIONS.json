@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "c0774679e07955feab117748b34a261e537eae9534bd9d7be6f2e7d2762d6528",
-  "itemCount": 535,
+  "sourceSha256": "e845dc92d0c9f2c0fb4efa36910cc53d8f2a03667a8eebc0c6e1714f18cf7227",
+  "itemCount": 534,
   "counts": {
-    "ACTIVE": 478,
+    "ACTIVE": 477,
     "SUPERSEDED": 45,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 377,
+    "ACTIVE_DEFECT": 376,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 91,
     "ACCEPTED_LIMITATION": 3,
@@ -10236,29 +10236,10 @@
       "currentAuthority": false
     },
     {
-      "id": "2c186193e927ef2f",
-      "sourceLine": 6558,
+      "id": "6a70da260bca8e1c",
+      "sourceLine": 6560,
       "heading": "Priority identity block I001–I005 verification",
-      "statement": "Pass the complete repository build and block regression, verify a clean authorized diff, push without force, and prove local/remote identity.",
-      "classification": "ACTIVE",
-      "dispositionCategory": "ACTIVE_DEFECT",
-      "workClass": "PRODUCT_WORK",
-      "ownership": {
-        "owner": "Platform",
-        "route": "/dashboard",
-        "module": "artifacts/bimlog/src/App.tsx"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:6558",
-        "Priority identity block I001–I005 verification"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "5d6e7a7a7758501a",
-      "sourceLine": 6559,
-      "heading": "Priority identity block I001–I005 verification",
-      "statement": "Verify the existing production company/project bindings read-only before any mutation, then complete authenticated Ruben/Lorena access, refresh, reopen and clean-reentry acceptance without repeating the historical reconciliation blindly.",
+      "statement": "Complete actual Rubén and Lorena authenticated access, refresh, reopen and clean-reentry acceptance. The visible Chrome profile exposes only the synthetic Roberto Test 1 credential; do not reset credentials, fabricate a token or impersonate either user.",
       "classification": "ACTIVE",
       "dispositionCategory": "EXTERNAL_OWNER_INPUT",
       "workClass": "FIELD_EVIDENCE",
@@ -10268,7 +10249,7 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:6559",
+        "OPEN_LOOP.md:6560",
         "Priority identity block I001–I005 verification"
       ],
       "currentAuthority": false

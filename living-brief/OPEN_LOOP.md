@@ -6555,6 +6555,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 
 - [x] Re-run the I002–I005 database, concurrency, reconciliation, HTTP authorization and project-entrypoint gates against the disposable PostgreSQL fixture.
 - [x] Restore I005 test-fixture parity with current authentication middleware at `73b31aeab158dfaad57dcacb3cec367e3ece4664` without changing runtime behavior.
-- [ ] Pass the complete repository build and block regression, verify a clean authorized diff, push without force, and prove local/remote identity.
-- [ ] Verify the existing production company/project bindings read-only before any mutation, then complete authenticated Ruben/Lorena access, refresh, reopen and clean-reentry acceptance without repeating the historical reconciliation blindly.
+- [x] Pass the complete repository build and block regression, verify a clean authorized diff, push without force, and prove local/remote identity at `1110d27cad21323bc918f4e559757d1478e90090`.
+- [x] Verify production authority read-only, dry-run and apply the exact nine-project append-only company31 correction, retire company35 into31, preserve company38 and all historical rows, memberships and roles, then verify the resulting database state.
+- [ ] Complete actual Rubén and Lorena authenticated access, refresh, reopen and clean-reentry acceptance. The visible Chrome profile exposes only the synthetic Roberto Test 1 credential; do not reset credentials, fabricate a token or impersonate either user.
 
