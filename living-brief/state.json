@@ -2,10 +2,14 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "782c1f85b3c2766ed2f396e3607b903d9a454a806561b0a183367e1c012bc367",
+  "bundleSha256": "45155386b31c623b378fcaa0148851f85695114c58d77f0409b94e2668a77e42",
   "impact": {
     "baselineCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
     "changedPaths": [
+      "living-brief/CLAUDE.md",
+      "living-brief/OPEN_LOOP.md",
+      "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
@@ -30,9 +34,9 @@
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "4f376326ebe288bcbfc3131fbe500e23afb121da529c1117ed82cab91059accd",
-      "sourceChangedAt": "2026-10-27T00:47:41-04:00",
-      "changeState": "accepted",
+      "sha256": "7535a3247942dfacc199df16ba93eeb046646202ef477b84dfadc07d8cfff297",
+      "sourceChangedAt": "2026-10-27T04:52:32.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
       "semanticReviewedThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
       "semanticReviewTask": "lorena-recommendations-build04-service-workflow-20261027",
@@ -114,9 +118,9 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "766ccaafa339ad6d67f8deae92addb147a0d9d59ccefce7731f368868dbe5cf4",
-      "sourceChangedAt": "2026-10-27T00:47:41-04:00",
-      "changeState": "accepted",
+      "sha256": "ee37c5dca32a33645e0ecf79bcb08b5de72d80e81687998b29e99d1bcd0ae308",
+      "sourceChangedAt": "2026-10-27T04:52:32.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
       "semanticReviewedThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
       "semanticReviewTask": "lorena-recommendations-build04-service-workflow-20261027",
@@ -126,9 +130,9 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "d78dee19292b8d9a69222f7e93fe42e32f500e0445140dbe004f12455a958fcb",
-      "sourceChangedAt": "2026-10-27T00:47:41-04:00",
-      "changeState": "accepted",
+      "sha256": "00e4956b2b323c88ab649ec6fb04dd6c3f6bdb47aa2d9e1015553908e7b437d4",
+      "sourceChangedAt": "2026-10-27T04:52:32.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
       "semanticReviewedThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
       "semanticReviewTask": "lorena-recommendations-build04-service-workflow-20261027",
