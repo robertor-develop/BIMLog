@@ -78316,13 +78316,15 @@
       ],
       "reason": "Lorena recommendations Build 4 adds a governed Service-to-published-workflow mapping and safe automatic Intake selection without hardcoded service names or rewriting saved work; the reviewed repair declares the additive binding table in the authoritative Drizzle schema so startup migration and schema safety remain reconciled.",
       "reviewedChangedPaths": [
+        "artifacts/bimlog/src/lib/job-intake-delivery-defaults.ts",
+        "artifacts/bimlog/src/lorena-service-workflow-default.behavior.ts",
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "cb79f842e68c9809a9ddcd9fc0a89f3f20cc735605b6284440a2e0e4e1767b44"
+      "reviewedChangeSha256": "d0ae018fec72cb9ab0c71c287e18f1fa2a0bba5f75420851091fe732fffd1734"
     }
   ]
 }

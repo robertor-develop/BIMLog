@@ -22,6 +22,21 @@ assert.equal(applied.deliveryWorkflowVersionId, workflow.versionId);
 assert.equal(applied.deliverableType, "SHOP_DRAWING");
 assert.equal(applied.submittalStrategy, "Prepare → Coordinate → Issue for record → As-built");
 assert.equal(applied.milestoneSummary, "PRE → COO → FOR → ASB");
+assert.equal(applied.deliveryWorkflowSelectionSource, "automatic");
+
+const earlierAutomatic = {
+  ...unbound,
+  deliveryWorkflowVersionId: "workflow-general-v2",
+  deliveryWorkflowSelectionSource: "automatic",
+  deliveryWorkflowDerivedFromVersionId: "workflow-general-v2",
+  deliveryWorkflowGeneratedStrategy: "Generic task",
+  deliveryWorkflowGeneratedMilestones: "General",
+  submittalStrategy: "Generic task",
+  milestoneSummary: "General",
+};
+const rebound = hydrateSelectedDeliveryWorkflowGuidance([earlierAutomatic], [workflow])[0]!;
+assert.equal(rebound.deliveryWorkflowVersionId, workflow.versionId);
+assert.equal(rebound.deliverableType, "SHOP_DRAWING");
 
 const reviewed = { ...unbound, submittalStrategy: "Customer-reviewed strategy", milestoneSummary: "Reviewed milestones" };
 const preserved = hydrateSelectedDeliveryWorkflowGuidance([reviewed], [workflow])[0]!;
@@ -30,6 +45,8 @@ assert.equal(preserved.milestoneSummary, reviewed.milestoneSummary);
 
 const explicitlyBound = { ...unbound, deliveryWorkflowVersionId: "workflow-existing", submittalStrategy: "Existing", milestoneSummary: "Existing" };
 assert.deepEqual(hydrateSelectedDeliveryWorkflowGuidance([explicitlyBound], [workflow])[0], explicitlyBound);
+const explicitAvailable = hydrateSelectedDeliveryWorkflowGuidance([{ ...unbound, deliveryWorkflowVersionId: workflow.versionId }], [workflow])[0]!;
+assert.equal(explicitAvailable.deliveryWorkflowSelectionSource, "explicit");
 
 const ambiguous = hydrateSelectedDeliveryWorkflowGuidance([unbound], [workflow, { ...workflow, versionId: "workflow-shop-v5" }])[0]!;
 assert.equal(ambiguous.deliveryWorkflowVersionId, "");
@@ -46,4 +63,4 @@ assert.match(route, /kind='service' AND state='active'/);
 assert.match(route, /t\.company_id=\$2 AND v\.state='published'/);
 assert.match(route, /SERVICE_WORKFLOW_BINDING_STALE/);
 assert.match(selection, /binding\.company_id=t\.company_id/);
-console.log("Lorena service workflow default behavior passed: 10 checks");
+console.log("Lorena service workflow default behavior passed: 14 checks");
