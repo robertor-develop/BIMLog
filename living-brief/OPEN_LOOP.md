@@ -6506,6 +6506,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Require an explicit bulk-load contract and assign its exact ID to every accepted row without per-row repetition.
 - [x] Resolve optional Trade and Service only through approved company catalog code, name or alias; reject unknown or extra values before adding any partial rows.
 - [x] Pass focused bulk-loader and complete Job Intake regression including both package TypeScript checks.
+- [x] Freeze the Build 2 implementation boundary at `1e899d5703d2c42c32861d6ef08aa2d5dee92ce3` before deterministic state reconciliation.
 - [ ] Reconcile deterministic Living Brief state, pass the exact full production build, commit and push the exact candidate.
 - [ ] Publish the exact pushed candidate and prove controlled four-column load, contract assignment, save, reload, navigation/reentry, responsive behavior and clean console in authenticated production Chrome.
 - [ ] Obtain independent Viva acceptance of the exact deployed Build 2 candidate before Build 3.

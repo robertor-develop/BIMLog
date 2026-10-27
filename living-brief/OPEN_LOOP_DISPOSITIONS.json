@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "3cf93d75aa8323526ccbda2c9d31976d3b14f96d31654aec84bd1e6dbd849809",
-  "itemCount": 526,
+  "sourceSha256": "cbe1b38d5f37c5a84da6a6dd8b86cabcd62b7e546f65c5608a4b3d6fa4e67921",
+  "itemCount": 529,
   "counts": {
-    "ACTIVE": 470,
+    "ACTIVE": 473,
     "SUPERSEDED": 44,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 371,
+    "ACTIVE_DEFECT": 373,
     "VALID_FUTURE_ROADMAP": 10,
-    "EXTERNAL_OWNER_INPUT": 89,
+    "EXTERNAL_OWNER_INPUT": 90,
     "ACCEPTED_LIMITATION": 3,
     "SUPERSEDED_HISTORY": 44,
     "CLOSED_WITH_EVIDENCE": 9
@@ -10099,6 +10099,63 @@
       "evidence": [
         "OPEN_LOOP.md:6500",
         "Lorena recommendations — Build 1 of 5: Contract Item Trade and Service"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "a66f602e3c510267",
+      "sourceLine": 6510,
+      "heading": "Lorena recommendations — Build 2 of 5: contract-scoped bulk Submittal load",
+      "statement": "Reconcile deterministic Living Brief state, pass the exact full production build, commit and push the exact candidate.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6510",
+        "Lorena recommendations — Build 2 of 5: contract-scoped bulk Submittal load"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0bd0fef9dd529a72",
+      "sourceLine": 6511,
+      "heading": "Lorena recommendations — Build 2 of 5: contract-scoped bulk Submittal load",
+      "statement": "Publish the exact pushed candidate and prove controlled four-column load, contract assignment, save, reload, navigation/reentry, responsive behavior and clean console in authenticated production Chrome.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6511",
+        "Lorena recommendations — Build 2 of 5: contract-scoped bulk Submittal load"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "f3a45355bafba5d1",
+      "sourceLine": 6512,
+      "heading": "Lorena recommendations — Build 2 of 5: contract-scoped bulk Submittal load",
+      "statement": "Obtain independent Viva acceptance of the exact deployed Build 2 candidate before Build 3.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6512",
+        "Lorena recommendations — Build 2 of 5: contract-scoped bulk Submittal load"
       ],
       "currentAuthority": false
     }

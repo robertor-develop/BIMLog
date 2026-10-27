@@ -4915,4 +4915,5 @@ Builds 91–95 bind the exact successfully published Build 90 identity and authe
 - The user selects one explicit contract profile before loading. Every accepted row receives that exact contract ID; the loader does not require repetitive per-row contract selection and does not infer a contract from free text.
 - Trade and Service values resolve only to approved catalog code, name or alias. Unknown values, malformed rows, formula-like names, non-positive quantities and fifth-column data fail visibly before any row is added.
 - Focused bulk-loader behavior, complete Job Intake behavior and both package TypeScript checks pass. Living Brief state reconciliation and the exact production build are being repeated before commit, push, publication and authenticated production proof.
+- Implementation is fixed at `1e899d5703d2c42c32861d6ef08aa2d5dee92ce3`; this narrative reconciliation follows that exact unit and does not expand runtime scope.
 
