@@ -40,6 +40,10 @@ export function lensResponsibleCompanyAvailability(input: {
   return { active, assignable: active, unavailabilityReason: active ? null : "inactive" as const };
 }
 
+export function lensSameProjectHistoricalCompanyAvailability() {
+  return { active: true, projectAuthorized: true, assignable: true, unavailabilityReason: null } as const;
+}
+
 export function uniqueLensResponsibleCompanyOptions(values: readonly LensResponsibleCompanyOption[]): LensResponsibleCompanyOption[] {
   const byIdentity = new Map<string, LensResponsibleCompanyOption>();
   for (const value of values) {

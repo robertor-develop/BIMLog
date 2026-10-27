@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, uniqueLensResponsibleCompanyOptions } from "./lens-issue-field-authority";
+import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, lensSameProjectHistoricalCompanyAvailability, uniqueLensResponsibleCompanyOptions } from "./lens-issue-field-authority";
 
 assert.deepEqual(lensIssueFieldAuthorities.map(row => row.field), [
   "trade", "floor", "responsibleCompany", "reportType", "priority", "status", "instruction", "openItems", "auditReason",
@@ -17,6 +17,12 @@ assert.deepEqual(lensResponsibleCompanyAvailability({
   canonicalCompanyRetiredAt: new Date("2026-10-27T20:00:00.000Z"),
   resolvesToCanonicalCompany: true,
 }), { active: false, assignable: false, unavailabilityReason: "inactive" });
+assert.deepEqual(lensSameProjectHistoricalCompanyAvailability(), {
+  active: true,
+  projectAuthorized: true,
+  assignable: true,
+  unavailabilityReason: null,
+});
 
 const options = uniqueLensResponsibleCompanyOptions([
   { id: 7, label: " Mainline   Pools ", historicalLabel: "Mainline Pools", active: true, projectAuthorized: true, assignable: true, source: "project_directory", unavailabilityReason: null },

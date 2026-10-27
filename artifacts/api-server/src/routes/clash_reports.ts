@@ -35,7 +35,7 @@ import {
 import { clashReportScopeWhere, clashScopeWhere } from "../lib/clash-report-provenance";
 import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../lib/clash-visual-package-truth";
 import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } from "../lib/company-directory-resolution";
-import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
+import { lensIssueFieldAuthorities, lensResponsibleCompanyAvailability, lensSameProjectHistoricalCompanyAvailability, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
 import { assertCatalogLabel, assertLensIssueStatusTransition, normalizeGovernedLabel, LENS_ISSUE_BASE_TRADES, LENS_ISSUE_REPORT_TYPES } from "../lib/lens-issue-edit-policy";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
@@ -2226,8 +2226,8 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
         if (!v) continue;
         names.add(v);
         if (!options.some(option => option.label.toLocaleLowerCase("en-US") === v.toLocaleLowerCase("en-US"))) {
-          options.push({ id: null, label: v, historicalLabel: v, active: false, projectAuthorized: false,
-            assignable: false, source: "historical_issue", unavailabilityReason: "historical_only" });
+          options.push({ id: null, label: v, historicalLabel: v,
+            ...lensSameProjectHistoricalCompanyAvailability(), source: "historical_issue" });
         }
       }
       const customTradeRows = await pool.query(
