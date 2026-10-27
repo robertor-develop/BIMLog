@@ -78462,6 +78462,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "844b2ac69afd0d1c7b821e5c56bcd4fbee2ec494a688f72698ee159adbccac30"
+    },
+    {
+      "taskId": "lens-viewpoint-schema-safe-publish-20261027",
+      "reviewedThroughCommit": "c9f7668210b004a355fa71557ce1853721df5ec8",
+      "reviewedAt": "2026-10-27T15:47:00.000Z",
+      "status": "release_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing ecosystem_doctrine authority remains applicable without semantic change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing claude authority remains applicable without semantic change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality authority remains applicable without semantic change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing vision authority remains applicable without semantic change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform inventory and database authority now represent the non-destructive idempotent Lens viewpoint constraints and production-matching history index."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing plugin authority remains applicable without semantic change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing report_design_system authority remains applicable without semantic change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing standards_register authority remains applicable without semantic change."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing status authority remains applicable without semantic change."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing open_loop authority remains applicable without semantic change."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing audit authority remains applicable without semantic change."
+        }
+      ],
+      "reason": "The release repair makes Lens viewpoint schema startup idempotent for pre-existing tables, preserves all existing viewpoint history data, and aligns declared constraints and index ordering with production.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
