@@ -14,6 +14,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { financialContractsTable } from "./financial-contracts";
+import { companyDeliveryWorkflowVersionsTable } from "./delivery-workflows";
 import { projectsTable } from "./projects";
 import { companiesTable, usersTable } from "./users";
 
@@ -348,7 +349,9 @@ export const companyServiceDeliveryWorkflowBindingsTable = pgTable(
     companyId: integer("company_id")
       .notNull()
       .references(() => companiesTable.id),
-    workflowVersionId: text("workflow_version_id").notNull(),
+    workflowVersionId: text("workflow_version_id")
+      .notNull()
+      .references(() => companyDeliveryWorkflowVersionsTable.id),
     version: integer("version").notNull().default(1),
     updatedById: integer("updated_by_id")
       .notNull()
