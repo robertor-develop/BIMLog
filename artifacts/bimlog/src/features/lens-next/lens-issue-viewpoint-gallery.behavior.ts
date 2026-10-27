@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 
 const panel = readFileSync(new URL("./LensNextPanel.tsx", import.meta.url), "utf8");
 const view = readFileSync(new URL("./LensNextPanelView.tsx", import.meta.url), "utf8");
-const route = readFileSync(new URL("../../../api-server/src/routes/clash_reports.ts", import.meta.url), "utf8");
+const route = readFileSync(new URL("../../../../api-server/src/routes/clash_reports.ts", import.meta.url), "utf8");
 for (const action of ["rename", "reorder", "make_primary", "archive"]) assert.ok(route.includes(`action === "${action}"`) || route.includes(`"${action}"`));
 assert.match(route, /lens_issue_viewpoint_primary_archive_forbidden/);
 assert.match(route, /lens_issue_viewpoint_last_archive_forbidden/);
