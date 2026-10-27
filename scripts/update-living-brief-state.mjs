@@ -43,11 +43,21 @@ if (!semanticReview || semanticReview.reviewedThroughCommit !== reconciledThroug
 const authorityReviews = new Map(semanticReview.authorities.map((entry) => [entry.key, entry]));
 // The API build regenerates this inventory. Freeze its final content before
 // hashing the Living Brief, otherwise a new source file invalidates the bundle.
-execFileSync(process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "pnpm",
-  process.platform === "win32"
-    ? ["/d", "/s", "/c", "pnpm --filter @workspace/api-server run generate:platform"]
-    : ["--filter", "@workspace/api-server", "run", "generate:platform"],
-  { cwd: root, stdio: "inherit", windowsHide: true });
+try {
+  execFileSync(process.platform === "win32" ? (process.env.ComSpec ?? "cmd.exe") : "pnpm",
+    process.platform === "win32"
+      ? ["/d", "/s", "/c", "pnpm --filter @workspace/api-server run generate:platform"]
+      : ["--filter", "@workspace/api-server", "run", "generate:platform"],
+    { cwd: root, stdio: "inherit", windowsHide: true });
+} catch {
+  // Platform generation has no package-manager work to perform. Keep Living
+  // Brief reconciliation available when pnpm's local store index is locked or
+  // unavailable by invoking the already-installed repository runtime directly.
+  execFileSync(process.execPath, [
+    "artifacts/api-server/node_modules/tsx/dist/cli.mjs",
+    "artifacts/api-server/scripts/generate-platform-md.ts",
+  ], { cwd: root, stdio: "inherit", windowsHide: true });
+}
 // Keep the second source-derived inventory in the same pre-hash refresh path.
 // The release test still compares it exactly against source; never relax that gate.
 execFileSync(process.execPath, ["scripts/route-interconnection-graph.mjs", "--output",

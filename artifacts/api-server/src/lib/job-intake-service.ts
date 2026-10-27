@@ -1118,23 +1118,25 @@ async function createCoreActivationWithClient(
       );
     let actualTaskId: string | null = null;
     for (const [phaseIndex, phase] of phaseHours.entries()) {
-      const phaseTask = (await client.query(`INSERT INTO job_activation_tasks(id,work_item_id,task_key,name_en,name_es,sequence,status,planned_hours,created_by_id,phase_id,phase_code,phase_name)
-        VALUES($1,$2,$3,$4,$4,$5,'not_started',$6,$7,$8,$9,$10)
-        ON CONFLICT(work_item_id,task_key) DO UPDATE SET planned_hours=EXCLUDED.planned_hours,phase_id=EXCLUDED.phase_id,phase_code=EXCLUDED.phase_code,phase_name=EXCLUDED.phase_name RETURNING id`,
-        [uuid(),actualWorkItemId,`workflow-phase:${phase.code}`,phase.name,phaseIndex+1,phase.plannedHours,input.actorUserId,phase.id,phase.code,phase.name])).rows[0];
+      const phaseTask = (await client.query(`INSERT INTO job_activation_tasks(id,work_item_id,task_key,name_en,name_es,sequence,status,planned_hours,created_by_id,discipline_id,discipline_code,discipline_name,service_id,service_code,service_name,phase_id,phase_code,phase_name)
+        VALUES($1,$2,$3,$4,$4,$5,'not_started',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+        ON CONFLICT(work_item_id,task_key) DO UPDATE SET planned_hours=EXCLUDED.planned_hours,discipline_id=EXCLUDED.discipline_id,discipline_code=EXCLUDED.discipline_code,discipline_name=EXCLUDED.discipline_name,service_id=EXCLUDED.service_id,service_code=EXCLUDED.service_code,service_name=EXCLUDED.service_name,phase_id=EXCLUDED.phase_id,phase_code=EXCLUDED.phase_code,phase_name=EXCLUDED.phase_name RETURNING id`,
+        [uuid(),actualWorkItemId,`workflow-phase:${phase.code}`,phase.name,phaseIndex+1,phase.plannedHours,input.actorUserId,item.classification.disciplineId||null,item.classification.disciplineCode||null,item.classification.disciplineName||null,item.classification.serviceId||null,item.classification.serviceCode||null,item.classification.serviceName||null,phase.id,phase.code,phase.name])).rows[0];
       if (!actualTaskId) actualTaskId = phaseTask.id;
       const phasePackageCode = `${item.id}-${phase.code}`.replace(/[^A-Za-z0-9_-]/g, "-").slice(0, 120);
       const phasePackage = (await client.query(`INSERT INTO job_activation_work_packages(
           id,intake_id,project_id,work_item_id,package_code,title,description,package_type,status,created_by_id,
-          phase_id,phase_code,phase_name)
-        VALUES($1,$2,$3,$4,$5,$6,$7,'deliverable','draft',$8,$9,$10,$11)
+          discipline_id,discipline_code,discipline_name,service_id,service_code,service_name,phase_id,phase_code,phase_name)
+        VALUES($1,$2,$3,$4,$5,$6,$7,'deliverable','draft',$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
         ON CONFLICT(project_id,package_code) DO UPDATE SET
-          title=EXCLUDED.title,description=EXCLUDED.description,phase_id=EXCLUDED.phase_id,
+          title=EXCLUDED.title,description=EXCLUDED.description,discipline_id=EXCLUDED.discipline_id,
+          discipline_code=EXCLUDED.discipline_code,discipline_name=EXCLUDED.discipline_name,
+          service_id=EXCLUDED.service_id,service_code=EXCLUDED.service_code,service_name=EXCLUDED.service_name,phase_id=EXCLUDED.phase_id,
           phase_code=EXCLUDED.phase_code,phase_name=EXCLUDED.phase_name,updated_at=now()
         RETURNING id`, [
           uuid(), input.intakeId, input.projectId, actualWorkItemId, phasePackageCode,
           `${phase.code} — ${phase.name}`, `Verified workflow allocation: ${phase.plannedHours} hours`,
-          input.actorUserId, phase.id, phase.code, phase.name,
+          input.actorUserId,item.classification.disciplineId||null,item.classification.disciplineCode||null,item.classification.disciplineName||null,item.classification.serviceId||null,item.classification.serviceCode||null,item.classification.serviceName||null,phase.id,phase.code,phase.name,
         ])).rows[0];
       await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id)
         VALUES($1,$2,$3) ON CONFLICT(package_id,task_id) DO NOTHING`, [phasePackage.id,phaseTask.id,input.actorUserId]);

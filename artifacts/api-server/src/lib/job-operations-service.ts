@@ -417,6 +417,26 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     pool.query(`SELECT e.id,e.event_type "eventType",e.work_item_id "workItemId",e.task_id "taskId",e.assignment_id "assignmentId",e.package_id "packageId",e.actor_user_id "actorUserId",u.full_name "actorName",e.evidence,e.created_at "createdAt" FROM job_activation_operation_events e JOIN users u ON u.id=e.actor_user_id WHERE e.project_id=$1 ORDER BY e.created_at DESC,e.id DESC LIMIT 100`, [projectId]),
   ]);
   const authoritativeIntake = intakeData.rows[0]?.data ?? {};
+  const scopeClassificationByWorkItemId = new Map(
+    workItems.rows.map((row) => {
+      const scopeItem = (authoritativeIntake.scopeItems ?? []).find(
+        (item: any) => item.id === row.stableScopeItemId,
+      );
+      return [row.id, scopeItem?.classification ?? {}] as const;
+    }),
+  );
+  const withScopeClassification = (row: any) => {
+    const fallback = scopeClassificationByWorkItemId.get(row.workItemId) ?? {};
+    return {
+      ...row,
+      disciplineId: row.disciplineId || fallback.disciplineId || null,
+      disciplineCode: row.disciplineCode || fallback.disciplineCode || null,
+      disciplineName: row.disciplineName || fallback.disciplineName || null,
+      serviceId: row.serviceId || fallback.serviceId || null,
+      serviceCode: row.serviceCode || fallback.serviceCode || null,
+      serviceName: row.serviceName || fallback.serviceName || null,
+    };
+  };
   const resourceDemands = splitResourcePlan(authoritativeIntake.team?.assignments ?? []).demands;
   const identity = {
     projectId,
@@ -466,10 +486,12 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     plannedBillableValue: showPlanner ? row.plannedBillableValue : null,
   }); });
   const resourceReconciliation = reconcileResourceDemand({ demands:resourceDemands, workItems:workItems.rows, assignments:assignments.rows, timeEntries:timeEntries.rows });
-  const safeTasks = tasks.rows.map((row) => ({
+  const safeTasks = tasks.rows.map((sourceRow) => {
+    const row = withScopeClassification(sourceRow);
+    return ({
     ...row,
     canControl: access.canManage || Number(row.assigneeUserId) === input.actorUserId || assignments.rows.some((assignment) => assignment.taskId === row.id && Number(assignment.userId) === input.actorUserId),
-  }));
+  }); });
   const safeDeliverables = deliverables.rows.map((row) => ({
     ...row,
     canRemove: access.canManage || Number(row.linkedById) === input.actorUserId,
@@ -481,7 +503,10 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     plannedBillableValue: showPlanner ? totals.rows[0].plannedBillableValue : null,
     earnedBillableValue: showPlanner ? totals.rows[0].earnedBillableValue : null,
   };
-  const safePackages = packages.rows.map((row) => ({ ...row, canControl: access.canManage || Number(row.responsibleUserId) === input.actorUserId }));
+  const safePackages = packages.rows.map((sourceRow) => {
+    const row = withScopeClassification(sourceRow);
+    return { ...row, canControl: access.canManage || Number(row.responsibleUserId) === input.actorUserId };
+  });
   const financialAuthority = {
     mode: "canonical-references",
     mutableCopiesAllowed: false,

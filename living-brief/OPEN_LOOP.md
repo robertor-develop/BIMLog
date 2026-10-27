@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lorena recommendations Build 5 — 2026-10-27
+
+- [x] Inspect the exact deployed Build 4 journey and identify a real remaining product defect instead of inventing an unapproved feature.
+- [x] Preserve governed Contract Item Discipline and Service on every future workflow-generated phase task and package while retaining the exact immutable workflow Phase.
+- [x] Recover missing Discipline and Service for already-activated history from the exact same Intake's immutable scope snapshot without mutating historical rows or crossing project/intake scope.
+- [x] Bind the future-write and historical-read paths with a focused eight-check regression and pass existing classification propagation, activation, full-lifecycle, Lorena Block 4, and API/frontend TypeScript gates.
+- [ ] Run the exact clean production gate, push and publish the exact candidate, verify immutable runtime identity, then pass authenticated desktop, responsive, reload, clean-reentry, bilingual, console/network and complete read-only audit gates.
+
 ## Lorena recommendations Build 4 — 2026-10-27
 
 - [x] Accept Build 3 on exact deployed source `117eb35456e0e73733eefff3f807009bf7e9e402` with independent Viva PASS.
@@ -11,7 +19,7 @@
 - [x] Declare the additive Service binding table in the authoritative Drizzle schema at repair `ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a`; database safety passes with all 266 startup tables reconciled.
 - [x] Restore the production binding table's required foreign key to `company_delivery_workflow_versions(id)` in the authoritative schema and bind that invariant in the focused regression before retrying publication.
 - [x] Fix the release-safety implementation at `aa8b250373ef602d930dc1a5386bb9f109324974`; retain publication and live acceptance as open gates.
-- [ ] Reconcile generated Living Brief state, run the exact clean production build, push and publish the exact candidate, then pass authenticated desktop/responsive Chrome and independent Viva acceptance before Build 5.
+- [x] Publish production source `def0992abb925804779008aa14528cdbdd451386` as release `v1.05.N18-P37`; verify exact identity plus authenticated 4-item/16-package/22-hour persistence, bilingual rendering and zero console errors before Build 5.
 
 ## Lorena recommendations Build 3 — 2026-10-27
 

@@ -134,6 +134,7 @@ ${bullets(pageFiles)}
 ${appRoutes()}
 
 ## Curated interconnections and gotchas (maintained in the generator)
+- Workflow-generated activation tasks and packages persist the Contract Item's governed Discipline and Service together with the exact generated Phase. For pre-repair history, Operations may fill only missing Discipline/Service response fields from the same immutable Intake scope item; stored row values win, Phase never falls back, and no historical row is rewritten.
 - All API routes are served under the /api/v1 prefix. res.redirect in route files MUST
   include /api/v1 or it 404s.
 - Replit monorepo deployment promotion probes GET /api. After the synchronous durable-storage
