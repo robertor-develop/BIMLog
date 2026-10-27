@@ -18,6 +18,7 @@ import {
   splitDelimitedContractItemRecords,
   detectContractItemDelimiter,
   normalizePastedContractItemName,
+  invalidPastedContractItemRows,
 } from "./ContractItemBulkEditor";
 
 const range = Array.from(
@@ -65,14 +66,42 @@ assert.deepEqual(parseContractItemPaste("Door\t\uFEFF2"), [
   { sourceRow: 1, name: "Door", quantity: "2" },
 ]);
 assert.deepEqual(parseContractItemPaste("Muro\t4\tUSD"), [
-  { sourceRow: 1, name: "Muro", quantity: "4", trade: "USD" },
+  { sourceRow: 1, name: "Muro", quantity: "4", trade: "USD", invalidShape: true },
 ]);
 assert.deepEqual(parseContractItemPaste("SUBMITTAL\tCANTIDAD\tTRADE\tSERVICE\nUNDERGROUND_PB_SH\t8\tPLUMBING\tSHOP"), [
   { sourceRow: 2, name: "UNDERGROUND_PB_SH", quantity: "8", trade: "PLUMBING", service: "SHOP" },
 ]);
 assert.deepEqual(parseContractItemPaste("Muro\t4\tPLUMBING\tSHOP\tEXTRA"), [
-  { sourceRow: 1, name: "Muro", quantity: "4", trade: "PLUMBING", service: "SHOP", extraColumns: true },
+  { sourceRow: 1, name: "Muro", quantity: "4", trade: "PLUMBING", service: "SHOP", invalidShape: true, extraColumns: true },
 ]);
+const governedCatalogs = {
+  disciplines: [{ id: "d1", code: "PLUMBING", name: "Plumbing", aliases: [] }],
+  services: [{ id: "s1", code: "SHOP", name: "Shop Drawings", aliases: [] }],
+};
+assert.deepEqual(
+  invalidPastedContractItemRows(parseContractItemPaste("Door\t2\tPLUMBING"), governedCatalogs).map((row) => row.sourceRow),
+  [1],
+);
+assert.deepEqual(
+  invalidPastedContractItemRows(parseContractItemPaste("Door\t2\t\tSHOP"), governedCatalogs).map((row) => row.sourceRow),
+  [1],
+);
+assert.deepEqual(
+  invalidPastedContractItemRows(parseContractItemPaste("Door\t2\tPLUMBING\t"), governedCatalogs).map((row) => row.sourceRow),
+  [1],
+);
+assert.equal(
+  invalidPastedContractItemRows(parseContractItemPaste("Door\t2\tPLUMBING\tSHOP"), governedCatalogs).length,
+  0,
+);
+const mixedValidAndInvalidRows = parseContractItemPaste("Door\t2\tPLUMBING\tSHOP\nFrame\t3\tPLUMBING");
+const preservedExistingItems: Record<string, any>[] = [{ id: "CI-existing", name: "Existing", quantity: "1" }];
+assert.deepEqual(
+  invalidPastedContractItemRows(mixedValidAndInvalidRows, governedCatalogs).length
+    ? preservedExistingItems
+    : mergePastedContractItems(preservedExistingItems, mixedValidAndInvalidRows),
+  preservedExistingItems,
+);
 assert.deepEqual(parseDelimitedContractItemRow('"Door, Frame",2', ','), {
   cells: ["Door, Frame", "2"], malformedQuote: false,
 });
@@ -105,7 +134,7 @@ assert.deepEqual(parseContractItemPaste('"Door\nFrame"\t2\nWall\t3'), [
 ]);
 assert.equal(normalizePastedContractItemName("  Door\n\tFrame\u00a0 "), "Door Frame");
 assert.deepEqual(parseContractItemPaste('"Unclosed\t2'), [
-  { sourceRow: 1, name: "Unclosed 2", quantity: "", malformedQuote: true },
+  { sourceRow: 1, name: "Unclosed 2", quantity: "", invalidShape: true, malformedQuote: true },
 ]);
 assert.deepEqual(parseContractItemPaste("=HYPERLINK(\"https://example.invalid\")\t1"), [
   { sourceRow: 1, name: "=HYPERLINK(\"https://example.invalid\")", quantity: "1", unsafeFormula: true },

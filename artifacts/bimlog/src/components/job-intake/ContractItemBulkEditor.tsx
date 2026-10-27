@@ -217,12 +217,15 @@ export function parseContractItemPaste(source: string) {
       const { cells, malformedQuote } = parseDelimitedContractItemRow(line, delimiter);
       const rawQuantity = String(cells[1] ?? "").replace(/^\uFEFF/, "").trim();
       const localizedQuantity = normalizeLocalizedQuantity(rawQuantity);
+      const trade = normalizePastedContractItemName(cells[2]);
+      const service = normalizePastedContractItemName(cells[3]);
       return {
         sourceRow,
         name: normalizePastedContractItemName(cells[0]),
         quantity: delimiter === "," ? localizedQuantity : localizedQuantity.replace(/^(\d+),(\d{1,6})$/, "$1.$2"),
-        ...(cells[2] !== undefined ? { trade: normalizePastedContractItemName(cells[2]) } : {}),
-        ...(cells[3] !== undefined ? { service: normalizePastedContractItemName(cells[3]) } : {}),
+        ...(cells[2] !== undefined ? { trade } : {}),
+        ...(cells[3] !== undefined ? { service } : {}),
+        ...(!(cells.length === 2 || (cells.length === 4 && trade && service)) ? { invalidShape: true } : {}),
         ...(cells.slice(4).some((cell) => String(cell).trim()) ? { extraColumns: true } : {}),
         ...(/^[=+\-@]/.test(String(cells[0] ?? "").replace(/^\uFEFF/, "").trim()) ? { unsafeFormula: true } : {}),
         ...(malformedQuote ? { malformedQuote: true } : {}),
@@ -248,6 +251,16 @@ export function parseContractItemPaste(source: string) {
     if (nameHeader && quantityHeader) return rows.slice(1);
   }
   return rows;
+}
+
+export function invalidPastedContractItemRows(
+  rows: ReturnType<typeof parseContractItemPaste>,
+  catalogs: Record<"disciplines" | "services", any[]>,
+) {
+  const catalogMatch = (entries: any[], value?: string) => !value || entries.some((entry) =>
+    [entry.code, entry.name, ...(entry.aliases ?? [])].some((candidate) => String(candidate ?? "").trim().toLocaleLowerCase() === value.trim().toLocaleLowerCase()));
+  return rows.filter((row) => !row.name || !validQuantity(row.quantity) || row.invalidShape || row.extraColumns || row.unsafeFormula || row.malformedQuote ||
+    !catalogMatch(catalogs.disciplines, row.trade) || !catalogMatch(catalogs.services, row.service));
 }
 
 export function mergePastedContractItems<T extends Record<string, any>>(existing: T[], pasted: T[]) {
@@ -383,12 +396,7 @@ export function ContractItemBulkEditor(props: Props) {
   };
   const appendPastedItems = (source: string) => {
     const parsed = parseContractItemPaste(source);
-    const catalogMatch = (entries: any[], value?: string) => !value || entries.some((entry) =>
-      [entry.code, entry.name, ...(entry.aliases ?? [])].some((candidate) => String(candidate ?? "").trim().toLocaleLowerCase() === value.trim().toLocaleLowerCase()));
-    const invalid = parsed.filter(
-      (row) => !row.name || !validQuantity(row.quantity) || row.extraColumns || row.unsafeFormula || row.malformedQuote ||
-        !catalogMatch(catalogs.disciplines, row.trade) || !catalogMatch(catalogs.services, row.service),
-    );
+    const invalid = invalidPastedContractItemRows(parsed, catalogs);
     if (!parsed.length || invalid.length) {
       const invalidRows = invalid
         .slice(0, 10)
