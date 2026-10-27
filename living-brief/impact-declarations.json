@@ -78327,7 +78327,7 @@
     {
       "taskId": "lens-governed-fields-multiview-build010-20261027",
       "reviewedThroughCommit": "93729b93331987082c461ec167885b9dbafbd93f",
-      "reviewedAt": "2026-10-27T14:05:00.000Z",
+      "reviewedAt": "2026-10-27T13:35:00.000Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
       "authorities": [
