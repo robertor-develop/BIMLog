@@ -78253,7 +78253,7 @@
     },
     {
       "taskId": "lorena-recommendations-build04-service-workflow-20261027",
-      "reviewedThroughCommit": "ccec31f6ccd84a04c4a3cddc09c32eef0c72e85a",
+      "reviewedThroughCommit": "aa8b250373ef602d930dc1a5386bb9f109324974",
       "reviewedAt": "2026-10-27T04:52:32.000Z",
       "status": "local_candidate",
       "captureTiming": "pre_release_reconciliation",
@@ -78314,7 +78314,7 @@
           "reason": "Independent acceptance remains pending until the exact deployed candidate is verified."
         }
       ],
-      "reason": "Lorena recommendations Build 4 adds a governed Service-to-published-workflow mapping and safe automatic Intake selection without hardcoded service names or rewriting saved work; the reviewed repair declares the additive binding table in the authoritative Drizzle schema so startup migration and schema safety remain reconciled.",
+      "reason": "Lorena recommendations Build 4 adds a governed Service-to-published-workflow mapping and safe automatic Intake selection without hardcoded service names or rewriting saved work; the reviewed repair reconciles the binding table and its required workflow-version foreign key with the production startup migration so a safe publication preview preserves the table and its data.",
       "reviewedChangedPaths": [
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
@@ -78322,7 +78322,76 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "cb79f842e68c9809a9ddcd9fc0a89f3f20cc735605b6284440a2e0e4e1767b44"
+      "reviewedChangeSha256": "5316627fa5ed1692d47ea560e6a4d56bdf7852cbc774d26715663888e1058f9b"
+    },
+    {
+      "taskId": "lens-governed-fields-multiview-build010-20261027",
+      "reviewedThroughCommit": "93729b93331987082c461ec167885b9dbafbd93f",
+      "reviewedAt": "2026-10-27T13:35:00.000Z",
+      "status": "local_candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The change remains within BIMLog Lens project coordination and does not alter portfolio boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing product operating rules already require scoped authorization, immutable Issue identity, audit history, and fail-visible behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows existing accessibility, responsive, localization, concurrency, and evidence requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Governed fields and multiple independent viewpoints advance the existing coordination vision without changing it."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated platform inventory records the additive lens_issue_viewpoints and revision tables plus scoped API routes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing authenticated Navisworks visual-state capture/apply bridge is reused; native binaries and installers are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Excel now lists all Issue viewpoints and XML V2 explicitly discloses its primary-only limitation."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release status remains a local candidate until exact deploy and real Navisworks acceptance complete."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The evidence file records remaining production migration, Chrome, and Navisworks acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Independent release acceptance remains required after exact deployment."
+        }
+      ],
+      "reason": "Builds 001-010 add governed Lens field catalogs and editing plus additive multi-viewpoint Issue authority, gallery controls, separate viewpoint history, and export compatibility.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }

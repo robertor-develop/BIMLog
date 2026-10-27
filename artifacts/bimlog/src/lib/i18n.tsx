@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import en from './i18n/en.json';
 import es from './i18n/es.json';
 
-type Language = 'en' | 'es';
+export type Language = 'en' | 'es';
 
 const translations: Record<Language, Record<string, string>> = { en, es };
 
@@ -14,8 +14,8 @@ type I18nContextType = {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: TranslationKey) => string;
-  /** Inline helper: returns es when language is es, else en. Use for ad-hoc strings without a key. */
-  tt: (en: string, es: string) => string;
+  /** Inline helper with an optional Portuguese value; untranslated Portuguese falls back to English. */
+  tt: (en: string, es: string, pt?: string) => string;
 };
 
 const I18nContext = createContext<I18nContextType | null>(null);
@@ -56,7 +56,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     return translations[lang][key] || translations['en'][key] || key;
   };
 
-  const tt = (enStr: string, esStr: string) => (lang === 'es' ? esStr : enStr);
+  const tt = (enStr: string, esStr: string, _ptStr?: string) => (lang === 'es' ? esStr : enStr);
 
   return (
     <I18nContext.Provider value={{ lang, setLang, language: lang, setLanguage: setLang, t, tt }}>

@@ -36,10 +36,14 @@ import { lensNextCaptureKey, lensNextImageStatus, type LensNextImageLoad } from 
 import { useI18n } from "../../lib/i18n";
 import { lensNextPrerequisiteGuidance } from "./lens-next-prerequisite-guidance";
 import { lensNextLinkedItemHref } from "./lens-next-relationship-navigation";
+import type { LensNextIssueViewpoint, LensNextResponsibleCompanyOption } from "./lens-next-client";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 const STATUS_LABELS_ES: Record<LensNextStatus, string> = {
   open: "Abierta", follow_up: "Seguimiento", waiting_design: "En espera de diseño", approved: "Aprobada", resolved: "Resuelta",
+};
+const STATUS_LABELS_PT: Record<LensNextStatus, string> = {
+  open: "Aberta", follow_up: "Acompanhamento", waiting_design: "Aguardando projeto", approved: "Aprovada", resolved: "Resolvida",
 };
 
 function formatTimestamp(value: string | null): string {
@@ -338,6 +342,9 @@ export interface LensNextPanelViewProps {
   createMessage: string | null;
   createdIssueServerId: number | null;
   onCreateIssue(draft: LensNextCreateDraft, reason: string): void;
+  editState: "idle" | "saving" | "success" | "error";
+  editMessage: string | null;
+  onEditIssue(draft: LensNextCreateDraft, reason: string): void;
   layoutEnabled: boolean;
   layoutState: "idle" | "running" | "success" | "error";
   layoutMessage: string | null;
@@ -363,6 +370,16 @@ export interface LensNextPanelViewProps {
   onCustomGroupByChange(next: readonly LensNextViewDimension[]): void;
   selectedServerId: number | null;
   selectedIssue: LensNextIssue | null;
+  issueViewpoints: readonly LensNextIssueViewpoint[];
+  issueViewpointsState: "idle" | "loading" | "saving" | "error";
+  issueViewpointsMessage: string | null;
+  selectedIssueViewpointId: string | null;
+  issueViewpointHistory: readonly Record<string, unknown>[] | "loading" | null;
+  onSelectIssueViewpoint(id: string): void;
+  onAddIssueViewpoint(name: string, viewpointType: LensNextIssueViewpoint["viewpointType"], reason: string): void;
+  onUpdateIssueViewpoint(id: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }): void;
+  onOpenSelectedIssueViewpoint(): void;
+  onLoadSelectedIssueViewpointHistory(): void;
   linkedItems: LensNextLinksResult | "loading" | null;
   linkedItemsError: string | null;
   onLinkBimlogItem(type: LensNextLinkedItemType, authoritativeId: number): void;
@@ -394,11 +411,15 @@ export interface LensNextPanelViewProps {
   createTrades: readonly string[];
   createFloors: readonly string[];
   createResponsibleCompanies: readonly string[];
+  responsibleCompanyOptions: readonly LensNextResponsibleCompanyOption[];
   createReportTypes: readonly string[];
   apiState: LensNextConnectionState;
   bridgeState: LensNextConnectionState;
   refreshState: LensNextRefreshState;
   apiError: string | null;
+  catalogState: "idle" | "loading" | "current" | "stale" | "error";
+  catalogError: string | null;
+  catalogSyncedAt: string | null;
   bridgeError: string | null;
   history: LensNextHistory | "loading" | null;
   historyError: string | null;
@@ -438,6 +459,9 @@ export function LensNextPanelView({
   createMessage,
   createdIssueServerId,
   onCreateIssue,
+  editState,
+  editMessage,
+  onEditIssue,
   layoutEnabled,
   layoutState,
   layoutMessage,
@@ -463,6 +487,7 @@ export function LensNextPanelView({
   onCustomGroupByChange,
   selectedServerId,
   selectedIssue,
+  issueViewpoints,issueViewpointsState,issueViewpointsMessage,selectedIssueViewpointId,issueViewpointHistory,onSelectIssueViewpoint,onAddIssueViewpoint,onUpdateIssueViewpoint,onOpenSelectedIssueViewpoint,onLoadSelectedIssueViewpointHistory,
   linkedItems,
   linkedItemsError,
   onLinkBimlogItem,
@@ -486,11 +511,15 @@ export function LensNextPanelView({
   createTrades,
   createFloors,
   createResponsibleCompanies,
+  responsibleCompanyOptions,
   createReportTypes,
   apiState,
   bridgeState,
   refreshState,
   apiError,
+  catalogState,
+  catalogError,
+  catalogSyncedAt,
   bridgeError,
   history,
   historyError,
@@ -510,7 +539,18 @@ export function LensNextPanelView({
   publishMessage,
   onPublishAction,
 }: LensNextPanelViewProps) {
-  const { language, tt } = useI18n();
+  const { language } = useI18n();
+  const [lensLanguage, setLensLanguage] = React.useState<"en" | "es" | "pt">(() => {
+    try {
+      const saved = window.localStorage.getItem("bimlog-lens-language");
+      return saved === "pt" || saved === "es" ? saved : language;
+    } catch { return language; }
+  });
+  const tt = React.useCallback((en: string, es: string, pt?: string) => lensLanguage === "es" ? es : lensLanguage === "pt" ? (pt ?? en) : en, [lensLanguage]);
+  const selectLensLanguage = (next: "en" | "es" | "pt") => {
+    setLensLanguage(next);
+    try { window.localStorage.setItem("bimlog-lens-language", next); } catch { /* local preference is optional */ }
+  };
   const [publishKind, setPublishKind] = React.useState<LensNextPublishAction["type"]>("status");
   const [publishStatus, setPublishStatus] = React.useState<LensNextStatus>("follow_up");
   const [publishText, setPublishText] = React.useState("");
@@ -519,6 +559,11 @@ export function LensNextPanelView({
   const [createDraft, setCreateDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "COORDINATION", floor: "", priority: 3, openItems: "", status: "open" });
   const [createReason, setCreateReason] = React.useState("");
   const [createReviewReady, setCreateReviewReady] = React.useState(false);
+  const [editDraft, setEditDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "COORDINATION", floor: "", priority: 3, openItems: "", status: "open" });
+  const [editReason, setEditReason] = React.useState("");
+  const [newViewpointName, setNewViewpointName] = React.useState("");
+  const [newViewpointType, setNewViewpointType] = React.useState<LensNextIssueViewpoint["viewpointType"]>("coordination");
+  const [viewpointReason, setViewpointReason] = React.useState("");
   const [linkType, setLinkType] = React.useState<LensNextLinkedItemType>("rfi");
   const [linkTargetId, setLinkTargetId] = React.useState("");
   const [guideOpen, setGuideOpen] = React.useState(false);
@@ -553,6 +598,13 @@ export function LensNextPanelView({
   const [workspaceLayout,setWorkspaceLayout]=React.useState(()=>readLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage));
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
+  React.useEffect(() => {
+    if (!selectedIssue) return;
+    setEditDraft({ trade: selectedIssue.trade ?? "", floor: selectedIssue.floor ?? "", responsibleCompany: selectedIssue.responsibleCompany ?? "",
+      reportType: selectedIssue.reportType ?? "COORDINATION", priority: selectedIssue.priority ?? 3, status: selectedIssue.status,
+      note: selectedIssue.note ?? "", openItems: selectedIssue.openItems ?? "" });
+    setEditReason("");
+  }, [selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
   React.useEffect(() => { setLinkType("rfi"); setLinkTargetId(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => setDetailView("overview"), [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
@@ -659,6 +711,13 @@ export function LensNextPanelView({
           <small title={bridgeDisplayName ?? "No active Navisworks model"}>{bridgeDisplayName ?? "No active Navisworks model"}</small>
         </div>
         <div className="lens-next__header-actions">
+          <small role="status" title={catalogError ?? `${responsibleCompanyOptions.filter(option => option.assignable).length} assignable companies`} data-catalog-state={catalogState}>
+            {catalogState === "current" ? `Catalog current${catalogSyncedAt ? ` · ${formatTimestamp(catalogSyncedAt)}` : ""}`
+              : catalogState === "loading" ? "Catalog loading…"
+              : catalogState === "stale" ? "Catalog stale · refresh required"
+              : catalogState === "error" ? "Catalog unavailable · new assignments disabled"
+              : "Catalog not loaded"}
+          </small>
           <button ref={helpButtonRef} type="button" className="lens-next__help" onClick={() => setGuideOpen(true)}><HelpCircle aria-hidden="true" size={16} /> Help &amp; Guide</button>
           <button type="button" className="lens-next__refresh" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? "Refreshing…" : "Refresh"}</button>
         </div>
@@ -705,7 +764,7 @@ export function LensNextPanelView({
         <details>
           <summary>{tt("Status and evidence", "Estado y evidencia")}</summary>
           <div className="lens-next__record-summary-detail">
-            {LENS_NEXT_STATUSES.map(status => <span key={status}>{tt(STATUS_LABELS[status], STATUS_LABELS_ES[status])}: {issueSummary.byStatus[status]}</span>)}
+            {LENS_NEXT_STATUSES.map(status => <span key={status}>{tt(STATUS_LABELS[status], STATUS_LABELS_ES[status], STATUS_LABELS_PT[status])}: {issueSummary.byStatus[status]}</span>)}
             <span>{tt("Visual package available", "Paquete visual disponible")}: {issueSummary.withVisualPackage}</span>
           </div>
           <small>{tt("Counts describe filtered BIMLog issue records, not the Navisworks clash inventory or current page. An image reference does not guarantee the image can load.", "Los conteos describen incidencias BIMLog filtradas, no el inventario de interferencias de Navisworks ni la página actual. Una referencia de imagen no garantiza que pueda cargarse.")}</small>
@@ -845,7 +904,7 @@ export function LensNextPanelView({
         <div className="lens-next__filters">
           <label className="lens-next__field"><span>Trade</span><select value={createDraft.trade} onChange={e => { setCreateDraft({ ...createDraft, trade: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select trade</option>{createTrades.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Floor</span><select value={createDraft.floor} onChange={e => { setCreateDraft({ ...createDraft, floor: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select floor</option>{createFloors.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
-          <label className="lens-next__field"><span>Responsible company</span><select value={createDraft.responsibleCompany} onChange={e => { setCreateDraft({ ...createDraft, responsibleCompany: e.target.value }); setCreateReviewReady(false); }}><option value="">Unassigned</option>{createResponsibleCompanies.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="lens-next__field"><span>Responsible company</span><select value={createDraft.responsibleCompany} disabled={catalogState !== "current"} onChange={e => { setCreateDraft({ ...createDraft, responsibleCompany: e.target.value }); setCreateReviewReady(false); }}><option value="">{catalogState === "current" ? "Unassigned" : "Refresh governed catalog"}</option>{createResponsibleCompanies.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Report type</span><select value={createDraft.reportType} onChange={e => { setCreateDraft({ ...createDraft, reportType: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select report type</option>{createReportTypes.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Priority</span><select value={createDraft.priority} onChange={e => { setCreateDraft({ ...createDraft, priority: Number(e.target.value) }); setCreateReviewReady(false); }}>{[1,2,3,4,5].map(p => <option key={p} value={p}>P{p}</option>)}</select></label>
           <label className="lens-next__field"><span>Status</span><select value={createDraft.status} onChange={e => { setCreateDraft({ ...createDraft, status: e.target.value as LensNextStatus }); setCreateReviewReady(false); }}>{LENS_NEXT_STATUSES.map(status => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}</select></label>
@@ -866,8 +925,28 @@ export function LensNextPanelView({
       </details>
 
       <details ref={settingsSectionRef} className="lens-next__view-settings" aria-label="Personal issue view">
-        <summary>My view settings</summary>
+        <summary>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias", "Campos e catálogos de ocorrências")}</summary>
         <div className="lens-next__view-settings-content">
+          <section className="lens-next__catalog-settings" aria-label={tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias", "Campos e catálogos de ocorrências")}>
+            <h3>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias", "Campos e catálogos de ocorrências")}</h3>
+            <label>{tt("Lens language", "Idioma de Lens", "Idioma do Lens")} <select value={lensLanguage} onChange={event => selectLensLanguage(event.target.value as "en" | "es" | "pt")}><option value="en">English</option><option value="es">Español</option><option value="pt">Português</option></select></label>
+            <dl className="lens-next__overview-facts">
+              <div><dt>{tt("Active BIMLog project", "Proyecto BIMLog activo", "Projeto BIMLog ativo")}</dt><dd>{activeProject?.name ?? tt("Not selected", "No seleccionado", "Não selecionado")}</dd></div>
+              <div><dt>{tt("Active model", "Modelo activo", "Modelo ativo")}</dt><dd>{bridgeDisplayName ?? tt("Unavailable", "No disponible", "Indisponível")}</dd></div>
+              <div><dt>{tt("Last catalog synchronization", "Última sincronización de catálogos", "Última sincronização dos catálogos")}</dt><dd>{catalogSyncedAt ? formatTimestamp(catalogSyncedAt) : tt("Never", "Nunca", "Nunca")}</dd></div>
+              <div><dt>{tt("Catalog health", "Estado de catálogos", "Estado dos catálogos")}</dt><dd data-catalog-state={catalogState}>{catalogState}</dd></div>
+              <div><dt>{tt("Scope", "Alcance", "Escopo")}</dt><dd>{tt("Current authorized project only", "Solo el proyecto autorizado actual", "Somente o projeto autorizado atual")}</dd></div>
+            </dl>
+            {catalogError && <p role="alert">{catalogError}</p>}
+            <button type="button" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? tt("Refreshing catalogs…", "Actualizando catálogos…", "Atualizando catálogos…") : tt("Refresh Issue data and catalogs", "Actualizar incidencias y catálogos", "Atualizar ocorrências e catálogos")}</button>
+            <details><summary>{tt("Trades", "Disciplinas", "Disciplinas")} ({createTrades.length})</summary><ul>{createTrades.map(value=><li key={value}>{value}</li>)}</ul></details>
+            <details><summary>{tt("Floors / Levels", "Pisos / Niveles", "Pavimentos / Níveis")} ({createFloors.length})</summary><ul>{createFloors.map(value=><li key={value}>{value}</li>)}</ul></details>
+            <details><summary>{tt("Responsible Companies", "Empresas responsables", "Empresas responsáveis")} ({responsibleCompanyOptions.length})</summary><ul>{responsibleCompanyOptions.map(option=><li key={`${option.id ?? "historical"}:${option.label}`}><strong>{option.label}</strong> — {option.assignable ? tt("active and assignable", "activa y asignable", "ativa e atribuível") : option.unavailabilityReason === "inactive" ? tt("inactive", "inactiva", "inativa") : tt("historical only; not authorized for new assignment", "solo histórica; no autorizada para nueva asignación", "somente histórica; não autorizada para nova atribuição")}</li>)}</ul></details>
+            <details><summary>{tt("Report Types", "Tipos de informe", "Tipos de relatório")} ({createReportTypes.length})</summary><ul>{createReportTypes.map(value=><li key={value}>{value}</li>)}</ul></details>
+            {selectedProjectId !== null && <p><a href={`/projects/${selectedProjectId}/directory`} target="_blank" rel="noreferrer">{tt("Manage project companies in BIMLog", "Administrar empresas del proyecto en BIMLog", "Gerenciar empresas do projeto no BIMLog")}</a> · {tt("Return here and refresh after an authorized change.", "Regrese aquí y actualice después de un cambio autorizado.", "Retorne aqui e atualize após uma alteração autorizada.")}</p>}
+          </section>
+          <hr />
+          <h3>{tt("My view settings", "Configuración de mi vista")}</h3>
           <label className="lens-next__field lens-next__field--wide">
             <span>My view</span>
             <select
@@ -1027,10 +1106,11 @@ export function LensNextPanelView({
         <button type="button" className="lens-next__filter-results" onClick={() => { setCompactDetailOpen(false); activateWorkspace("viewpoints"); }}>{tt("View results", "Ver resultados")} ({filteredIssues.length})</button>
       </section>
 
-      {(apiError || bridgeError) && (
+      {(apiError || bridgeError || catalogError) && (
         <div className="lens-next__alerts" role="status" aria-live="polite">
           {apiError && <p>{apiError}</p>}
           {bridgeError && <p>{bridgeError}</p>}
+          {catalogError && <p>{catalogError}</p>}
         </div>
       )}
 
@@ -1132,6 +1212,37 @@ export function LensNextPanelView({
               {tt("Link BIMLog item", "Vincular elemento BIMLog")}
             </button>
           </div>
+          <section className="lens-next__detail-panel lens-next__viewpoint-gallery" aria-label={tt("Issue viewpoints", "Puntos de vista de la incidencia", "Pontos de vista da ocorrência")}>
+            <header><h3>{tt("Issue viewpoints", "Puntos de vista de la incidencia", "Pontos de vista da ocorrência")}</h3><span>{issueViewpoints.filter(item=>item.lifecycleStatus==="active").length} {tt("active", "activos", "ativos")}</span></header>
+            {issueViewpointsState === "loading" && <p role="status">{tt("Loading viewpoints…", "Cargando puntos de vista…", "Carregando pontos de vista…")}</p>}
+            <div className="lens-next__viewpoint-cards">
+              {issueViewpoints.map((item,index) => {
+                const activeItems = issueViewpoints.filter(candidate=>candidate.lifecycleStatus==="active");
+                const activeIndex = activeItems.findIndex(candidate=>candidate.id===item.id);
+                const reorder = (offset:number) => { const ordered=activeItems.map(candidate=>candidate.id); const destination=activeIndex+offset; if(activeIndex<0||destination<0||destination>=ordered.length)return; [ordered[activeIndex],ordered[destination]]=[ordered[destination],ordered[activeIndex]]; onUpdateIssueViewpoint(item.id,{action:"reorder",orderedIds:ordered,reason:viewpointReason}); };
+                return <article key={item.id} data-selected={item.id===selectedIssueViewpointId} data-lifecycle={item.lifecycleStatus}>
+                  <button type="button" className="lens-next__viewpoint-card" onClick={()=>onSelectIssueViewpoint(item.id)}><strong>{item.name}</strong>{item.isPrimary&&<span>{tt("Primary", "Principal", "Principal")}</span>}<small>{item.viewpointType} · {item.lifecycleStatus} · {index+1}</small></button>
+                  {item.id===selectedIssueViewpointId&&item.lifecycleStatus==="active"&&<div className="lens-next__viewpoint-actions">
+                    <button type="button" disabled={issueViewpointsState==="saving"} onClick={onOpenSelectedIssueViewpoint}>{tt("Open selected viewpoint", "Abrir punto de vista seleccionado", "Abrir ponto de vista selecionado")}</button>
+                    <button type="button" disabled={activeIndex<=0||viewpointReason.trim().length<5} onClick={()=>reorder(-1)}>↑</button><button type="button" disabled={activeIndex<0||activeIndex>=activeItems.length-1||viewpointReason.trim().length<5} onClick={()=>reorder(1)}>↓</button>
+                    <button type="button" disabled={item.isPrimary||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"make_primary",reason:viewpointReason})}>{tt("Make primary", "Hacer principal", "Tornar principal")}</button>
+                    <button type="button" disabled={!newViewpointName.trim()||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"rename",name:newViewpointName.trim(),reason:viewpointReason})}>{tt("Rename", "Renombrar", "Renomear")}</button>
+                    <button type="button" disabled={item.isPrimary||activeItems.length<=1||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"archive",reason:viewpointReason})}>{tt("Archive", "Archivar", "Arquivar")}</button>
+                    <button type="button" onClick={onLoadSelectedIssueViewpointHistory}>{tt("Viewpoint history", "Historial del punto de vista", "Histórico do ponto de vista")}</button>
+                  </div>}
+                </article>;
+              })}
+            </div>
+            {issueViewpoints.length===0&&issueViewpointsState!=="loading"&&<p>{tt("No Issue viewpoints are available.", "No hay puntos de vista disponibles para la incidencia.", "Não há pontos de vista disponíveis para a ocorrência.")}</p>}
+            <div className="lens-next__filters">
+              <label className="lens-next__field"><span>{tt("Viewpoint name", "Nombre del punto de vista", "Nome do ponto de vista")}</span><input value={newViewpointName} maxLength={120} onChange={event=>setNewViewpointName(event.target.value)}/></label>
+              <label className="lens-next__field"><span>{tt("Type", "Tipo", "Tipo")}</span><select value={newViewpointType} onChange={event=>setNewViewpointType(event.target.value as LensNextIssueViewpoint["viewpointType"])}><option value="coordination">Coordination</option><option value="detail">Detail</option><option value="context">Context</option><option value="verification">Verification</option></select></label>
+              <label className="lens-next__field lens-next__field--wide"><span>{tt("Reason for viewpoint audit history", "Motivo para el historial de auditoría del punto de vista", "Motivo para o histórico de auditoria do ponto de vista")}</span><textarea minLength={5} value={viewpointReason} onChange={event=>setViewpointReason(event.target.value)}/></label>
+              <button type="button" disabled={!selectedIssue.publishingAllowed||issueViewpointsState==="saving"||newViewpointName.trim().length<1||viewpointReason.trim().length<5} onClick={()=>onAddIssueViewpoint(newViewpointName.trim(),newViewpointType,viewpointReason)}>{issueViewpointsState==="saving"?tt("Saving viewpoint…","Guardando punto de vista…","Salvando ponto de vista…"):tt("Add Viewpoint","Agregar punto de vista","Adicionar ponto de vista")}</button>
+            </div>
+            {issueViewpointsMessage&&<p role="status">{issueViewpointsMessage}</p>}
+            {issueViewpointHistory==="loading"?<p role="status">{tt("Loading viewpoint history…","Cargando historial del punto de vista…","Carregando histórico do ponto de vista…")}</p>:issueViewpointHistory&&<ol>{issueViewpointHistory.map((revision,index)=><li key={String(revision.id??index)}><strong>{String(revision.action??"")}</strong> · {String(revision.name??"")} · {String(revision.occurred_at??"")}</li>)}</ol>}
+          </section>
           <nav className="lens-next__detail-tabs" aria-label="Issue detail views">
             {(["overview", "knowledge", "resolution", "bimlog", "properties", "activity"] as const).map(view => (
               <button key={view} type="button" aria-pressed={detailView === view} onClick={() => { setDetailView(view); if (view === "activity" && !history && !historyError) onLoadHistory(); }}>
@@ -1148,6 +1259,22 @@ export function LensNextPanelView({
               <div><dt>{tt("Responsible company", "Empresa responsable")}</dt><dd>{selectedIssue.responsibleCompany || tt("Unassigned", "Sin asignar")}</dd></div>
             </dl>
             <p className="lens-next__data-boundary">{tt("Clash pair, surrounding geometry, grid and distance are unavailable for this BIMLog issue until an exact project/model-bound clash link is verified. This image is a capture, not interactive 3D.", "El par de interferencia, la geometría cercana, la retícula y la distancia no están disponibles para esta incidencia BIMLog hasta verificar un vínculo exacto con la interferencia del proyecto y modelo. Esta imagen es una captura, no un modelo 3D interactivo.")}</p>
+            <details className="lens-next__edit-issue">
+              <summary>{tt("Edit governed Issue fields", "Editar campos gobernados de la incidencia")}</summary>
+              {!selectedIssue.publishingAllowed ? <p>{tt("Your active project role does not allow Issue edits.", "Su rol activo en el proyecto no permite editar incidencias.")}</p> : <div className="lens-next__filters">
+                <label className="lens-next__field"><span>{tt("Trade", "Disciplina")}</span><select value={editDraft.trade} onChange={event => setEditDraft({...editDraft, trade:event.target.value})}>{createTrades.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Floor", "Piso")}</span><select value={editDraft.floor} onChange={event => setEditDraft({...editDraft, floor:event.target.value})}>{createFloors.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Responsible company", "Empresa responsable")}</span><select disabled={catalogState !== "current"} value={editDraft.responsibleCompany} onChange={event => setEditDraft({...editDraft, responsibleCompany:event.target.value})}><option value="">{tt("Unassigned", "Sin asignar")}</option>{editDraft.responsibleCompany && !createResponsibleCompanies.includes(editDraft.responsibleCompany) && <option value={editDraft.responsibleCompany}>{editDraft.responsibleCompany} · historical</option>}{createResponsibleCompanies.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Report type", "Tipo de informe")}</span><select value={editDraft.reportType} onChange={event => setEditDraft({...editDraft, reportType:event.target.value})}>{createReportTypes.map(value=><option key={value} value={value}>{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Priority", "Prioridad")}</span><select value={editDraft.priority} onChange={event => setEditDraft({...editDraft, priority:Number(event.target.value)})}>{[1,2,3,4,5].map(value=><option key={value} value={value}>P{value}</option>)}</select></label>
+                <label className="lens-next__field"><span>{tt("Status", "Estado")}</span><select value={editDraft.status} onChange={event => setEditDraft({...editDraft, status:event.target.value as LensNextStatus})}>{LENS_NEXT_STATUSES.map(value=><option key={value} value={value}>{STATUS_LABELS[value]}</option>)}</select></label>
+                <label className="lens-next__field lens-next__field--wide"><span>{tt("Instruction", "Instrucción")}</span><textarea value={editDraft.note} onChange={event => setEditDraft({...editDraft, note:event.target.value})}/></label>
+                <label className="lens-next__field lens-next__field--wide"><span>{tt("Open items / Equipment tag", "Pendientes / Etiqueta de equipo")}</span><textarea value={editDraft.openItems} onChange={event => setEditDraft({...editDraft, openItems:event.target.value})}/></label>
+                <label className="lens-next__field lens-next__field--wide"><span>{tt("Reason for audit history", "Motivo para el historial de auditoría")}</span><textarea required minLength={5} value={editReason} onChange={event=>setEditReason(event.target.value)}/></label>
+                <button type="button" disabled={editState === "saving" || editReason.trim().length < 5 || catalogState !== "current"} onClick={()=>onEditIssue(editDraft,editReason)}>{editState === "saving" ? tt("Saving…", "Guardando…") : tt("Save Issue changes", "Guardar cambios")}</button>
+                {editMessage && <p role="status">{editMessage}</p>}
+              </div>}
+            </details>
           </section>}
           {detailView === "knowledge" && selectedIssue && <LensNextKnowledgePanel context={knowledgeContext} error={knowledgeError} onRetry={onRetryKnowledge} onClassify={onClassifyKnowledge} activeIssueKey={`${selectedIssue.identity.serverId}:${selectedIssue.identity.revisionNumber}`} />}
           {detailView === "resolution" && selectedIssue && <LensNextResolutionPanel record={resolutionRecord} knowledge={knowledgeContext} evidence={resolutionEvidence} attachments={referenceAttachments} lessonProposal={lessonProposal} error={resolutionError} onRetry={onRetryResolution} onSave={onSaveResolution} onTransition={onTransitionResolution} onAddEvidence={onAddResolutionEvidence} onProposeLesson={onProposeLesson} activeIssueKey={`${selectedIssue.identity.serverId}:${selectedIssue.identity.revisionNumber}`} />}

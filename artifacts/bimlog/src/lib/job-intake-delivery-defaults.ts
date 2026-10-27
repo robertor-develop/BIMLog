@@ -51,7 +51,11 @@ type WorkflowDefinition = {
   phases: Array<{ name: string; tasks: Array<{ name?: string }> }>;
 };
 
-export function selectPublishedDeliveryWorkflow(current: any, option: { versionId: string; definition: WorkflowDefinition } | null) {
+export function selectPublishedDeliveryWorkflow(
+  current: any,
+  option: { versionId: string; definition: WorkflowDefinition } | null,
+  selectionSource: "explicit" | "automatic" = "explicit",
+) {
   const priorStrategy = String(current?.deliveryWorkflowGeneratedStrategy ?? "");
   const priorMilestones = String(current?.deliveryWorkflowGeneratedMilestones ?? "");
   const strategyIsGenerated = !!priorStrategy && current?.submittalStrategy === priorStrategy;
@@ -64,6 +68,7 @@ export function selectPublishedDeliveryWorkflow(current: any, option: { versionI
     deliveryWorkflowDerivedFromVersionId: null,
     deliveryWorkflowGeneratedStrategy: null,
     deliveryWorkflowGeneratedMilestones: null,
+    deliveryWorkflowSelectionSource: null,
   };
   const taskNames = option.definition.phases.flatMap(phase => phase.tasks.map(task => String(task.name ?? "").trim()).filter(Boolean));
   const strategy = taskNames.join(" → ");
@@ -76,6 +81,7 @@ export function selectPublishedDeliveryWorkflow(current: any, option: { versionI
     deliveryWorkflowDerivedFromVersionId: option.versionId,
     deliveryWorkflowGeneratedStrategy: strategy,
     deliveryWorkflowGeneratedMilestones: milestones,
+    deliveryWorkflowSelectionSource: selectionSource,
   };
 }
 
@@ -87,13 +93,15 @@ export function hydrateSelectedDeliveryWorkflowGuidance(
   return items.map(item => {
     const versionId = String(item?.deliveryWorkflowVersionId ?? "").trim();
     const serviceId = String(item?.classification?.serviceId ?? "").trim();
-    const bound = !versionId && serviceId
+    const replaceableAutomaticSelection =
+      !versionId || item?.deliveryWorkflowSelectionSource === "automatic";
+    const bound = replaceableAutomaticSelection && serviceId
       ? options.filter(option => option.source === "company" && option.serviceEntryIds?.includes(serviceId))
       : [];
     if (bound.length === 1) {
       const option = bound[0];
       const deliverableType = option.definition.deliverableTypes?.[0] ?? String(item?.deliverableType ?? "GENERAL");
-      const hydrated = selectPublishedDeliveryWorkflow({ ...item, deliverableType }, option);
+      const hydrated = selectPublishedDeliveryWorkflow({ ...item, deliverableType }, option, "automatic");
       return JSON.stringify(hydrated) === JSON.stringify(item) ? item : hydrated;
     }
     const type = String(item?.deliverableType ?? "GENERAL");
@@ -103,7 +111,10 @@ export function hydrateSelectedDeliveryWorkflowGuidance(
     const automatic = company.length === 1 ? company[0] : company.length === 0 && defaults.length === 1 ? defaults[0] : undefined;
     const option = versionId ? byVersion.get(versionId) : automatic;
     if (!option) return item;
-    const hydrated = selectPublishedDeliveryWorkflow(item, option);
+    const selectionSource = versionId
+      ? item?.deliveryWorkflowSelectionSource === "automatic" ? "automatic" : "explicit"
+      : "automatic";
+    const hydrated = selectPublishedDeliveryWorkflow(item, option, selectionSource);
     return JSON.stringify(hydrated) === JSON.stringify(item) ? item : hydrated;
   });
 }

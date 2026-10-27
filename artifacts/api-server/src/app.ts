@@ -72,6 +72,7 @@ import { startFeedbackPackageSnapshotWorker } from "./lib/feedback-package-worke
 import { startFeedbackTelegramDeliveryWorker } from "./lib/feedback-telegram-worker";
 import { storage as feedbackStorage } from "./lib/storage-adapter";
 import { ensureLensNextPublishingSchema } from "./lib/lens-next-publishing";
+import { ensureLensIssueViewpointsSchema } from "./lib/lens-issue-viewpoints-migration";
 import { startEnterpriseIdentityMigration, waitForEnterpriseIdentityMigration } from "./lib/enterprise-identity-migration";
 import { ensureCompanyMasterCatalogSchema } from "./lib/company-master-catalog-migration";
 import { ensureWorkflowGovernancePolicySchema } from "./lib/workflow-governance-policy-migration";
@@ -1475,6 +1476,14 @@ const livingBriefAndLensStartupBarrier = queueDatabaseStartup(async () => {
   }
 });
 
+// The additive multi-viewpoint authority depends on the legacy lens_viewpoints
+// table and columns ensured by the preceding startup barrier.
+const lensIssueViewpointsStartupBarrier = queueDatabaseStartup(() =>
+  ensureLensIssueViewpointsSchema(pool).then(() => {
+    console.log("[migration] Lens Issue multi-viewpoint authority ensured");
+  }),
+);
+
 const meetingLensStartupBarrier = queueDatabaseStartup(async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_lens_viewpoint_links (
@@ -1534,6 +1543,7 @@ const edtEngineStartupBarrier = queueDatabaseStartup(async () => {
 export const startupBarrier = Promise.all([
   waitForDatabaseStartup(),
   lensNextPublishingStartupBarrier,
+  lensIssueViewpointsStartupBarrier,
   feedbackStartupBarrier,
   verifyFeedbackScannerStartup(),
   verifyFeedbackBackupStartup(),

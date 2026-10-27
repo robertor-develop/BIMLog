@@ -5,6 +5,8 @@ import {
   createLensNextBridgeClient,
   type LensNextApiClient,
   type LensNextBridgeClient,
+  type LensNextResponsibleCompanyOption,
+  type LensNextIssueViewpoint,
 } from "./lens-next-client";
 import {
   activeLensNextIssues,
@@ -101,7 +103,12 @@ export function LensNextPanel({
   const [issues, setIssues] = useState<readonly LensNextIssue[]>([]);
   const [referenceFloors, setReferenceFloors] = useState<readonly string[]>([]);
   const [responsibleCompanies, setResponsibleCompanies] = useState<readonly string[]>([]);
+  const [responsibleCompanyOptions, setResponsibleCompanyOptions] = useState<readonly LensNextResponsibleCompanyOption[]>([]);
   const [customTrades, setCustomTrades] = useState<readonly string[]>([]);
+  const [catalogState, setCatalogState] = useState<"idle" | "loading" | "current" | "stale" | "error">("idle");
+  const [catalogError, setCatalogError] = useState<string | null>(null);
+  const [catalogSyncedAt, setCatalogSyncedAt] = useState<string | null>(null);
+  const [catalogExpiresAt, setCatalogExpiresAt] = useState<string | null>(null);
   const [selectedServerId, setSelectedServerId] = useState<number | null>(null);
   const [filters, setFilters] = useState<LensNextFilters>({
     ...LENS_NEXT_DEFAULT_FILTERS,
@@ -129,6 +136,11 @@ export function LensNextPanel({
     null,
   );
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [issueViewpoints, setIssueViewpoints] = useState<readonly LensNextIssueViewpoint[]>([]);
+  const [issueViewpointsState, setIssueViewpointsState] = useState<"idle" | "loading" | "saving" | "error">("idle");
+  const [issueViewpointsMessage, setIssueViewpointsMessage] = useState<string | null>(null);
+  const [selectedIssueViewpointId, setSelectedIssueViewpointId] = useState<string | null>(null);
+  const [issueViewpointHistory, setIssueViewpointHistory] = useState<readonly Record<string, unknown>[] | "loading" | null>(null);
   const [linkedItems, setLinkedItems] = useState<LensNextLinksResult | "loading" | null>(null);
   const [linkedItemsError, setLinkedItemsError] = useState<string | null>(null);
   const [referenceAttachments, setReferenceAttachments] = useState<LensNextAttachmentsResult | "loading" | null>(null);
@@ -141,6 +153,8 @@ export function LensNextPanel({
   const [localUploadMessage, setLocalUploadMessage] = useState<string | null>(null);
   const [createState, setCreateState] = useState<"idle" | "capturing" | "creating" | "success" | "error">("idle");
   const [createMessage, setCreateMessage] = useState<string | null>(null);
+  const [editState, setEditState] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [editMessage, setEditMessage] = useState<string | null>(null);
   const [createdIssueServerId, setCreatedIssueServerId] = useState<number | null>(null);
   const [layoutState, setLayoutState] = useState<"idle" | "running" | "success" | "error">("idle");
   const [layoutMessage, setLayoutMessage] = useState<string | null>(null);
@@ -267,8 +281,8 @@ export function LensNextPanel({
     [issues, referenceFloors],
   );
   const createResponsibleCompanies = useMemo(
-    () => [...new Set([...responsibleCompanies, ...issues.map(issue => issue.responsibleCompany).filter((value): value is string => Boolean(value)), "Other"])].sort(),
-    [issues, responsibleCompanies],
+    () => [...new Set(responsibleCompanies)].sort(),
+    [responsibleCompanies],
   );
   const filterCompanies = useMemo(
     () => [...new Set(activeIssues.map(issue => issue.responsibleCompany?.trim()).filter((value): value is string => Boolean(value)))].sort(),
@@ -295,17 +309,31 @@ export function LensNextPanel({
       }
       if (mode === "initial") setApiState("connecting");
       setRefreshState("refreshing");
+      setCatalogState("loading");
       setApiError(null);
+      setCatalogError(null);
       try {
-        const [incoming, referenceData] = await Promise.all([
+        const [issuesResult, catalogResult] = await Promise.allSettled([
           apiClient.loadIssues(authorizedProjectId, signal),
           apiClient.loadReferenceData(authorizedProjectId, signal),
         ]);
         if (sequence !== refreshSequence.current || signal?.aborted) return;
+        if (issuesResult.status === "rejected") throw issuesResult.reason;
+        const incoming = issuesResult.value;
         setIssues((current) => reconcileLensNextRefresh(current, incoming));
-        setReferenceFloors(referenceData.floors);
-        setResponsibleCompanies(referenceData.responsibleCompanies);
-        setCustomTrades(referenceData.customTrades);
+        if (catalogResult.status === "fulfilled") {
+          const referenceData = catalogResult.value;
+          setReferenceFloors(referenceData.floors);
+          setResponsibleCompanies(referenceData.responsibleCompanies);
+          setResponsibleCompanyOptions(referenceData.responsibleCompanyOptions);
+          setCustomTrades(referenceData.customTrades);
+          setCatalogSyncedAt(referenceData.generatedAt);
+          setCatalogExpiresAt(referenceData.expiresAt);
+          setCatalogState(Date.parse(referenceData.expiresAt) > Date.now() ? "current" : "stale");
+        } else {
+          setCatalogState(current => current === "current" || current === "stale" ? "stale" : "error");
+          setCatalogError(catalogResult.reason instanceof Error ? catalogResult.reason.message : "Governed catalogs are unavailable");
+        }
         setSelectedServerId((current) =>
           current !== null &&
           incoming.some((issue) => issue.identity.serverId === current)
@@ -330,12 +358,28 @@ export function LensNextPanel({
   useEffect(() => {
     const controller = new AbortController();
     setIssues([]);
+    setReferenceFloors([]);
+    setResponsibleCompanies([]);
+    setResponsibleCompanyOptions([]);
+    setCustomTrades([]);
+    setCatalogState("loading");
+    setCatalogError(null);
+    setCatalogSyncedAt(null);
+    setCatalogExpiresAt(null);
     setSelectedServerId(null);
     setHistory(null);
     setHistoryError(null);
     void loadIssues("initial", controller.signal);
     return () => controller.abort();
   }, [loadIssues]);
+
+  useEffect(() => {
+    if (!catalogExpiresAt || catalogState !== "current") return;
+    const remaining = Date.parse(catalogExpiresAt) - Date.now();
+    if (remaining <= 0) { setCatalogState("stale"); return; }
+    const timer = window.setTimeout(() => setCatalogState("stale"), remaining);
+    return () => window.clearTimeout(timer);
+  }, [catalogExpiresAt, catalogState]);
 
   useEffect(() => {
     if (autoRefreshMs < 10_000 || authorizedProjectId === null || !apiClient)
@@ -415,6 +459,49 @@ export function LensNextPanel({
       );
     }
   }, [apiClient, selectedIssue]);
+
+  const loadIssueViewpoints = useCallback(async (signal?: AbortSignal) => {
+    if (!apiClient || !selectedIssue) { setIssueViewpoints([]); setSelectedIssueViewpointId(null); setIssueViewpointsState("idle"); return; }
+    setIssueViewpointsState("loading"); setIssueViewpointsMessage(null);
+    try {
+      const loaded = await apiClient.loadIssueViewpoints(selectedIssue, signal);
+      setIssueViewpoints(loaded);
+      setSelectedIssueViewpointId(current => loaded.some(item => item.id === current) ? current : (loaded.find(item => item.isPrimary && item.lifecycleStatus === "active") ?? loaded.find(item => item.lifecycleStatus === "active") ?? loaded[0])?.id ?? null);
+      setIssueViewpointsState("idle");
+    } catch (error) { if (!signal?.aborted) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoints could not be loaded"); } }
+  }, [apiClient, selectedIssue]);
+  useEffect(() => { const controller = new AbortController(); void loadIssueViewpoints(controller.signal); return () => controller.abort(); }, [loadIssueViewpoints]);
+
+  const addIssueViewpoint = useCallback(async (name: string, viewpointType: LensNextIssueViewpoint["viewpointType"], reason: string) => {
+    if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || selectedIssue.identity.projectId !== bridgeContext.projectId) return;
+    setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
+    try {
+      const captured = await bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext);
+      const added = await apiClient.addIssueViewpoint(selectedIssue, { name, viewpointType, modelFingerprint: bridgeContext.modelFingerprint, visualStateJson: captured.visualStateJson, visualStateDigest: captured.visualStateDigest, reason, idempotencyKey: crypto.randomUUID() });
+      await loadIssueViewpoints(); setSelectedIssueViewpointId(added.id); setIssueViewpointsMessage("Viewpoint captured and added to this Issue.");
+    } catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint capture failed"); }
+  }, [apiClient, bridgeClient, bridgeContext, loadIssueViewpoints, selectedIssue]);
+
+  const updateIssueViewpoint = useCallback(async (issueViewpointId: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }) => {
+    if (!apiClient || !selectedIssue) return;
+    setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
+    try { await apiClient.updateIssueViewpoint(selectedIssue, issueViewpointId, input); await loadIssueViewpoints(); setIssueViewpointsMessage("Issue viewpoint updated."); }
+    catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoint update failed"); }
+  }, [apiClient, loadIssueViewpoints, selectedIssue]);
+
+  const openSelectedIssueViewpoint = useCallback(async () => {
+    if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || !selectedIssueViewpointId) return;
+    setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
+    try { const stored = await apiClient.loadIssueViewpointVisualState(selectedIssue, selectedIssueViewpointId); await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson, stored.visualStateDigest); setIssueViewpointsState("idle"); setIssueViewpointsMessage("Selected Issue viewpoint opened in Navisworks."); }
+    catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Selected Issue viewpoint could not be opened"); }
+  }, [apiClient, bridgeClient, bridgeContext, selectedIssue, selectedIssueViewpointId]);
+
+  const loadSelectedIssueViewpointHistory = useCallback(async () => {
+    if (!apiClient || !selectedIssue || !selectedIssueViewpointId) return;
+    setIssueViewpointHistory("loading");
+    try { setIssueViewpointHistory(await apiClient.loadIssueViewpointHistory(selectedIssue, selectedIssueViewpointId)); }
+    catch (error) { setIssueViewpointHistory(null); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint history could not be loaded"); }
+  }, [apiClient, selectedIssue, selectedIssueViewpointId]);
 
   const loadKnowledge=useCallback(async(signal?:AbortSignal)=>{
     if(!apiClient||!selectedIssue){setKnowledgeContext(null);setKnowledgeError(null);return;}
@@ -624,6 +711,18 @@ export function LensNextPanel({
     }
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
 
+  const editIssue = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
+    if (!apiClient || !selectedIssue) return;
+    setEditState("saving"); setEditMessage(null);
+    try {
+      await apiClient.editIssueFields(selectedIssue, draft, reason);
+      await loadIssues("refresh");
+      setEditState("success"); setEditMessage("Issue fields saved in BIMLog with immutable audit history.");
+    } catch (error) {
+      setEditState("error"); setEditMessage(error instanceof Error ? error.message : "Governed Issue edit failed");
+    }
+  }, [apiClient, loadIssues, selectedIssue]);
+
   const materializeMyView = useCallback(async () => {
     if (!bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId || !viewSettings) return;
     const dimensions = viewSettings.groupBy;
@@ -748,7 +847,7 @@ export function LensNextPanel({
       const serverSkipped = lensNextXmlSkippedSummary(loaded.skipped);
       const skipped = [serverSkipped, nativeSkipped].filter(Boolean).join("; ");
       const skippedCount = loaded.skipped.length + (summary.skippedCount ?? 0);
-      setXmlExportMessage(`${skippedCount ? "Partial XML V2 export" : "XML V2 export complete"}: ${summary.serializedCount} filtered viewpoint(s) organized under Open/Resolved, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} ${summary.outputPath}`);
+      setXmlExportMessage(`${skippedCount ? "Partial XML V2 export" : "XML V2 export complete"}: ${summary.serializedCount} filtered primary Issue viewpoint(s) organized under Open/Resolved, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} Additional Issue viewpoints are listed in the Excel export; XML V2 currently exports only each Issue's primary viewpoint. ${summary.outputPath}`);
     } catch (error) {
       setXmlExportState("error"); setXmlExportMessage(error instanceof Error ? error.message : "XML export failed");
     }
@@ -774,6 +873,9 @@ export function LensNextPanel({
       createMessage={createMessage}
       createdIssueServerId={createdIssueServerId}
       onCreateIssue={(draft, reason) => void createIssue(draft, reason)}
+      editState={editState}
+      editMessage={editMessage}
+      onEditIssue={(draft, reason) => void editIssue(draft, reason)}
       layoutEnabled={bridgeState === "connected" && bridgeContext?.projectId === authorizedProjectId}
       layoutState={layoutState}
       layoutMessage={layoutMessage}
@@ -805,6 +907,16 @@ export function LensNextPanel({
       onCustomGroupByChange={(next) => { setCustomGroupBy(next); setViewPreset("custom"); }}
       selectedServerId={selectedServerId}
       selectedIssue={selectedIssue}
+      issueViewpoints={issueViewpoints}
+      issueViewpointsState={issueViewpointsState}
+      issueViewpointsMessage={issueViewpointsMessage}
+      selectedIssueViewpointId={selectedIssueViewpointId}
+      issueViewpointHistory={issueViewpointHistory}
+      onSelectIssueViewpoint={(id)=>{setSelectedIssueViewpointId(id);setIssueViewpointHistory(null);}}
+      onAddIssueViewpoint={(name,type,reason)=>void addIssueViewpoint(name,type,reason)}
+      onUpdateIssueViewpoint={(id,input)=>void updateIssueViewpoint(id,input)}
+      onOpenSelectedIssueViewpoint={()=>void openSelectedIssueViewpoint()}
+      onLoadSelectedIssueViewpointHistory={()=>void loadSelectedIssueViewpointHistory()}
       linkedItems={linkedItems}
       linkedItemsError={linkedItemsError}
       onLinkBimlogItem={(type, id) => void linkBimlogItem(type, id)}
@@ -836,11 +948,15 @@ export function LensNextPanel({
       createTrades={trades}
       createFloors={floors}
       createResponsibleCompanies={createResponsibleCompanies}
+      responsibleCompanyOptions={responsibleCompanyOptions}
       createReportTypes={LENS_NEXT_REPORT_TYPE_OPTIONS}
       apiState={apiState}
       bridgeState={bridgeState}
       refreshState={refreshState}
       apiError={apiError}
+      catalogState={catalogState}
+      catalogError={catalogError}
+      catalogSyncedAt={catalogSyncedAt}
       bridgeError={bridgeError}
       history={history}
       historyError={historyError}

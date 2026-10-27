@@ -9,7 +9,6 @@ import {
   assertLensNextProjectId,
   createLensNextOpenWorkingViewRequest,
 } from "./lens-next-model.ts";
-import { conventionCompanyCodes } from "@workspace/api-zod";
 import type {
   LensNextBridgeProjectContext,
   LensNextHistory,
@@ -122,10 +121,32 @@ export interface LensNextApiClientOptions {
   fetchImpl?: FetchLike;
 }
 
+export type LensNextIssueViewpoint = Readonly<{
+  id: string;
+  issueId: number;
+  projectId: number;
+  modelFingerprint: string | null;
+  name: string;
+  viewpointType: "coordination" | "detail" | "context" | "verification";
+  displayOrder: number;
+  isPrimary: boolean;
+  lifecycleStatus: "active" | "archived";
+  navisworksGuid: string | null;
+  screenshotUrl: string | null;
+  visualStateDigest: string | null;
+  capturedAt: string;
+}>;
+
 export interface LensNextApiClient {
   resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId?: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
-  loadReferenceData(projectId: number, signal?: AbortSignal): Promise<{ floors: string[]; responsibleCompanies: string[]; customTrades: string[] }>;
+  loadReferenceData(projectId: number, signal?: AbortSignal): Promise<LensNextReferenceData>;
+  editIssueFields(issue: LensNextIssue, fields: LensNextCreateDraft, reason: string, signal?: AbortSignal): Promise<number>;
+  loadIssueViewpoints(issue: LensNextIssue, signal?: AbortSignal): Promise<readonly LensNextIssueViewpoint[]>;
+  addIssueViewpoint(issue: LensNextIssue, input: { name: string; viewpointType: LensNextIssueViewpoint["viewpointType"]; modelFingerprint: string; visualStateJson: string; visualStateDigest: string; reason: string; idempotencyKey: string }, signal?: AbortSignal): Promise<LensNextIssueViewpoint>;
+  updateIssueViewpoint(issue: LensNextIssue, issueViewpointId: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }, signal?: AbortSignal): Promise<void>;
+  loadIssueViewpointVisualState(issue: LensNextIssue, issueViewpointId: string, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string; modelFingerprint: string }>;
+  loadIssueViewpointHistory(issue: LensNextIssue, issueViewpointId: string, signal?: AbortSignal): Promise<readonly Record<string, unknown>[]>;
   loadHistory(
     identity: LensNextImmutableIssueIdentity,
     signal?: AbortSignal,
@@ -154,6 +175,31 @@ export interface LensNextApiClient {
   proposeLesson(identity:LensNextImmutableIssueIdentity,lesson:string,organizationalApplicability:string,signal?:AbortSignal):Promise<LensNextLessonProposal>;
 }
 
+export type LensNextResponsibleCompanyOption = {
+  id: number | null;
+  label: string;
+  historicalLabel: string;
+  active: boolean;
+  projectAuthorized: boolean;
+  assignable: boolean;
+  source: "project_directory" | "project_member" | "naming_convention" | "historical_issue";
+  unavailabilityReason: "inactive" | "not_project_authorized" | "historical_only" | null;
+};
+
+export type LensNextReferenceData = {
+  projectId: number;
+  contractVersion: "lens-issue-catalog.v1";
+  generatedAt: string;
+  expiresAt: string;
+  floors: string[];
+  responsibleCompanies: string[];
+  responsibleCompanyOptions: LensNextResponsibleCompanyOption[];
+  customTrades: string[];
+  missingValueGuidance: string;
+};
+
+export const LENS_NEXT_CATALOG_TTL_MS = 5 * 60 * 1000;
+
 export function createLensNextApiClient(
   options: LensNextApiClientOptions,
 ): LensNextApiClient {
@@ -176,6 +222,14 @@ export function createLensNextApiClient(
       body: JSON.stringify(body), signal,
     });
     return jsonBody(response, "BIMLog controlled publish");
+  };
+  const patch = async (path: string, body: unknown, signal?: AbortSignal): Promise<unknown> => {
+    const response = await fetchImpl(`${base}${path}`, {
+      method: "PATCH", credentials: "same-origin",
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "Content-Type": "application/json; charset=utf-8" },
+      body: JSON.stringify(body), signal,
+    });
+    return jsonBody(response, "BIMLog governed Issue edit");
   };
   const remove = async (path: string, signal?: AbortSignal): Promise<unknown> => {
     const response = await fetchImpl(`${base}${path}`, { method: "DELETE", credentials: "same-origin", headers: { Accept: "application/json", Authorization: `Bearer ${token}` }, signal });
@@ -239,10 +293,8 @@ export function createLensNextApiClient(
     },
     async loadReferenceData(projectId: number, signal?: AbortSignal) {
       const exactProjectId = assertLensNextProjectId(projectId);
-      const [levelsRaw, membersRaw, conventionRaw, directoryRaw] = await Promise.all([
+      const [levelsRaw, directoryRaw] = await Promise.all([
         get(`/projects/${exactProjectId}/levels`, signal),
-        get(`/projects/${exactProjectId}/members`, signal),
-        get(`/projects/${exactProjectId}/conventions`, signal),
         get(`/projects/${exactProjectId}/clash-reports/lens-viewpoints/responsible-companies`, signal),
       ]);
       const levelsBody = levelsRaw && typeof levelsRaw === "object" && !Array.isArray(levelsRaw)
@@ -251,38 +303,102 @@ export function createLensNextApiClient(
       const floors = Array.isArray(levelsBody?.levels)
         ? levelsBody.levels.map(value => String(value).trim()).filter(Boolean)
         : [];
-      const memberCompanies = Array.isArray(membersRaw)
-        ? membersRaw
-            .map(member => member && typeof member === "object" ? String((member as Record<string, unknown>).userCompanyName ?? "").trim() : "")
-            .filter(Boolean)
-        : [];
-      const conventionBody = conventionRaw && typeof conventionRaw === "object" && !Array.isArray(conventionRaw)
-        ? conventionRaw as Record<string, unknown>
-        : null;
-      const conventionCompanies = Array.isArray(conventionBody?.companyAssignmentStatus)
-        ? conventionBody.companyAssignmentStatus
-            .map(company => company && typeof company === "object" ? String((company as Record<string, unknown>).companyName ?? "").trim() : "")
-            .filter(Boolean)
-        : [];
-      // Saved originator codes are project choices even before those companies
-      // have user accounts. Assignment status alone omits these new-project choices.
-      const conventionCodes = conventionCompanyCodes(conventionBody);
       const directoryBody = directoryRaw && typeof directoryRaw === "object" && !Array.isArray(directoryRaw)
         ? directoryRaw as Record<string, unknown> : null;
-      const directoryCompanies = Array.isArray(directoryBody?.companies)
-        ? directoryBody.companies.filter((value): value is string => typeof value === "string")
-            .map(value => value.trim()).filter(Boolean)
-        : [];
+      if (directoryBody?.contractVersion !== "lens-issue-catalog.v1" || Number(directoryBody.projectId) !== exactProjectId) {
+        throw new Error("BIMLog governed catalog contract is unavailable; existing values remain visible but new assignments are disabled.");
+      }
       const customTrades = Array.isArray(directoryBody?.trades)
         ? directoryBody.trades.filter((value): value is string => typeof value === "string")
             .map(value => value.trim()).filter(Boolean)
         : [];
-      const responsibleCompanies = [...memberCompanies, ...conventionCompanies, ...conventionCodes, ...directoryCompanies];
+      const companyOptions: LensNextResponsibleCompanyOption[] = Array.isArray(directoryBody.companyOptions)
+        ? directoryBody.companyOptions.flatMap(value => {
+            if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+            const item = value as Record<string, unknown>;
+            const label = String(item.label ?? "").trim();
+            const source = String(item.source ?? "") as LensNextResponsibleCompanyOption["source"];
+            const reason = item.unavailabilityReason == null ? null : String(item.unavailabilityReason) as LensNextResponsibleCompanyOption["unavailabilityReason"];
+            if (!label || !["project_directory", "project_member", "naming_convention", "historical_issue"].includes(source)) return [];
+            if (reason !== null && !["inactive", "not_project_authorized", "historical_only"].includes(reason)) return [];
+            const id = item.id == null ? null : Number(item.id);
+            if (id !== null && (!Number.isSafeInteger(id) || id <= 0)) return [];
+            return [{ id, label, historicalLabel: String(item.historicalLabel ?? label), active: item.active === true,
+              projectAuthorized: item.projectAuthorized === true, assignable: item.assignable === true, source, unavailabilityReason: reason }];
+          })
+        : [];
+      const responsibleCompanies = companyOptions.filter(option => option.assignable).map(option => option.label);
+      const generatedAt = String(directoryBody.generatedAt ?? "");
+      const generatedTime = Date.parse(generatedAt);
+      if (!Number.isFinite(generatedTime)) throw new Error("BIMLog governed catalog timestamp is invalid");
       return Object.freeze({
+        projectId: exactProjectId,
+        contractVersion: "lens-issue-catalog.v1" as const,
+        generatedAt,
+        expiresAt: new Date(generatedTime + LENS_NEXT_CATALOG_TTL_MS).toISOString(),
         floors: [...new Set(floors)].sort(),
         responsibleCompanies: [...new Set(responsibleCompanies)].sort(),
+        responsibleCompanyOptions: companyOptions,
         customTrades: [...new Set(customTrades)].sort(),
+        missingValueGuidance: String(directoryBody.missingValueGuidance ?? ""),
       });
+    },
+    async editIssueFields(issue: LensNextIssue, fields: LensNextCreateDraft, reason: string, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await patch(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/fields`, {
+        contractVersion: "lens-issue-edit.v1", mutationVersion: issue.mutationVersion, reason,
+        fields: { trade: fields.trade, floor: fields.floor, responsibleCompany: fields.responsibleCompany,
+          reportType: fields.reportType, priority: fields.priority, status: fields.status,
+          instruction: fields.note, openItems: fields.openItems },
+      }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw) || (raw as Record<string, unknown>).success !== true
+        || (raw as Record<string, unknown>).contractVersion !== "lens-issue-edit.v1") throw new Error("BIMLog governed Issue edit receipt is invalid");
+      const edited = (raw as Record<string, unknown>).issue as Record<string, unknown> | undefined;
+      const mutationVersion = Number(edited?.mutationVersion);
+      if (!Number.isSafeInteger(mutationVersion) || mutationVersion <= issue.mutationVersion) throw new Error("BIMLog governed Issue edit version did not advance");
+      return mutationVersion;
+    },
+    async loadIssueViewpoints(issue: LensNextIssue, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await get(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/viewpoints`, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog Issue viewpoints response is invalid");
+      const body = raw as Record<string, unknown>;
+      if (body.success !== true || body.contractVersion !== "lens-issue-viewpoints.v1" || Number(body.issueId) !== identity.serverId || !Array.isArray(body.viewpoints)) throw new Error("BIMLog Issue viewpoints response is invalid");
+      return Object.freeze(body.viewpoints.map(rawViewpoint => {
+        const item = rawViewpoint as Record<string, unknown>;
+        const viewpointType = String(item.viewpoint_type ?? item.viewpointType);
+        const lifecycleStatus = String(item.lifecycle_status ?? item.lifecycleStatus);
+        const id = String(item.id ?? "");
+        if (!id || !["coordination", "detail", "context", "verification"].includes(viewpointType) || !["active", "archived"].includes(lifecycleStatus)) throw new Error("BIMLog Issue viewpoint item is invalid");
+        return Object.freeze({ id, issueId: Number(item.issue_id ?? item.issueId), projectId: Number(item.project_id ?? item.projectId), modelFingerprint: item.model_fingerprint == null && item.modelFingerprint == null ? null : String(item.model_fingerprint ?? item.modelFingerprint), name: String(item.name ?? ""), viewpointType: viewpointType as LensNextIssueViewpoint["viewpointType"], displayOrder: Number(item.display_order ?? item.displayOrder), isPrimary: item.is_primary === true || item.isPrimary === true, lifecycleStatus: lifecycleStatus as LensNextIssueViewpoint["lifecycleStatus"], navisworksGuid: item.navisworks_guid == null && item.navisworksGuid == null ? null : String(item.navisworks_guid ?? item.navisworksGuid), screenshotUrl: item.screenshot_url == null && item.screenshotUrl == null ? null : String(item.screenshot_url ?? item.screenshotUrl), visualStateDigest: item.visual_state_digest == null && item.visualStateDigest == null ? null : String(item.visual_state_digest ?? item.visualStateDigest), capturedAt: String(item.captured_at ?? item.capturedAt ?? "") });
+      }));
+    },
+    async addIssueViewpoint(issue: LensNextIssue, input: { name: string; viewpointType: LensNextIssueViewpoint["viewpointType"]; modelFingerprint: string; visualStateJson: string; visualStateDigest: string; reason: string; idempotencyKey: string }, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await post(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/viewpoints`, { contractVersion: "lens-issue-viewpoints.v1", expectedMutationVersion: issue.mutationVersion, ...input }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw) || (raw as Record<string, unknown>).success !== true) throw new Error("BIMLog did not confirm the added Issue viewpoint");
+      const item = (raw as Record<string, unknown>).viewpoint as Record<string, unknown> | undefined;
+      if (!item || !String(item.id ?? "") || Number(item.issueId ?? identity.serverId) !== identity.serverId) throw new Error("BIMLog added Issue viewpoint receipt is invalid");
+      return Object.freeze({ id: String(item.id), issueId: identity.serverId, projectId: identity.projectId, modelFingerprint: String(item.modelFingerprint ?? input.modelFingerprint), name: String(item.name ?? input.name), viewpointType: String(item.viewpointType ?? input.viewpointType) as LensNextIssueViewpoint["viewpointType"], displayOrder: Number(item.displayOrder), isPrimary: item.isPrimary === true, lifecycleStatus: String(item.lifecycleStatus ?? "active") as LensNextIssueViewpoint["lifecycleStatus"], navisworksGuid: null, screenshotUrl: null, visualStateDigest: String(item.visualStateDigest ?? input.visualStateDigest), capturedAt: String(item.capturedAt ?? new Date().toISOString()) });
+    },
+    async updateIssueViewpoint(issue: LensNextIssue, issueViewpointId: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await patch(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/viewpoints/${encodeURIComponent(issueViewpointId)}`, { contractVersion: "lens-issue-viewpoints.v1", ...input }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw) || (raw as Record<string, unknown>).success !== true) throw new Error("BIMLog did not confirm the Issue viewpoint update");
+    },
+    async loadIssueViewpointVisualState(issue: LensNextIssue, issueViewpointId: string, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await get(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/viewpoints/${encodeURIComponent(issueViewpointId)}/visual-state`, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog Issue viewpoint visual state is invalid");
+      const body = raw as Record<string, unknown>, visualStateJson = String(body.visualStateJson ?? ""), visualStateDigest = String(body.visualStateDigest ?? "").toLowerCase(), modelFingerprint = String(body.modelFingerprint ?? "").toLowerCase();
+      if (body.success !== true || !visualStateJson || !/^[0-9a-f]{64}$/.test(visualStateDigest) || !modelFingerprint) throw new Error("BIMLog Issue viewpoint visual state is incomplete");
+      return Object.freeze({ visualStateJson, visualStateDigest, modelFingerprint });
+    },
+    async loadIssueViewpointHistory(issue: LensNextIssue, issueViewpointId: string, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await get(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/viewpoints/${encodeURIComponent(issueViewpointId)}/history`, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw) || (raw as Record<string, unknown>).contractVersion !== "lens-issue-viewpoint-history.v1" || !Array.isArray((raw as Record<string, unknown>).revisions)) throw new Error("BIMLog Issue viewpoint history is invalid");
+      return Object.freeze((raw as { revisions: Record<string, unknown>[] }).revisions.map(item => Object.freeze({ ...item })));
     },
     async loadHistory(
       identity: LensNextImmutableIssueIdentity,

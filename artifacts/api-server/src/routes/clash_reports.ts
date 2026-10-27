@@ -35,6 +35,8 @@ import {
 import { clashReportScopeWhere, clashScopeWhere } from "../lib/clash-report-provenance";
 import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../lib/clash-visual-package-truth";
 import { resolveLensCompanyDirectoryReference, type CompanyDirectoryCandidate } from "../lib/company-directory-resolution";
+import { lensIssueFieldAuthorities, uniqueLensResponsibleCompanyOptions, type LensResponsibleCompanyOption } from "../lib/lens-issue-field-authority";
+import { assertCatalogLabel, assertLensIssueStatusTransition, normalizeGovernedLabel, LENS_ISSUE_BASE_TRADES, LENS_ISSUE_REPORT_TYPES } from "../lib/lens-issue-edit-policy";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -1464,6 +1466,156 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
   }
 );
 
+router.get("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const issueId = Number(req.params.viewpointId);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0) {
+      res.status(400).json({ error: "lens_issue_viewpoint_identity_invalid" }); return;
+    }
+    const issue = await pool.query(`SELECT id FROM lens_viewpoints WHERE id=$1 AND project_id=$2`, [issueId, projectId]);
+    if (!issue.rowCount) { res.status(404).json({ error: "lens_issue_not_found" }); return; }
+    const viewpoints = await pool.query(`SELECT id,issue_id,project_id,model_fingerprint,name,viewpoint_type,display_order,is_primary,lifecycle_status,navisworks_guid,screenshot_url,visual_state_digest,captured_by_user_id,captured_at,renamed_at,archived_at,created_at,updated_at FROM lens_issue_viewpoints WHERE issue_id=$1 AND project_id=$2 ORDER BY CASE WHEN lifecycle_status='active' THEN 0 ELSE 1 END,display_order,id`, [issueId, projectId]);
+    res.json({ success: true, contractVersion: "lens-issue-viewpoints.v1", issueId, viewpoints: viewpoints.rows });
+  },
+);
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const issueId = Number(req.params.viewpointId);
+    const body = req.body ?? {};
+    const name = typeof body.name === "string" ? body.name.trim() : "";
+    const viewpointType = typeof body.viewpointType === "string" ? body.viewpointType.trim() : "";
+    const modelFingerprint = typeof body.modelFingerprint === "string" ? body.modelFingerprint.trim().toLowerCase() : "";
+    const idempotencyKey = typeof body.idempotencyKey === "string" ? body.idempotencyKey.trim() : "";
+    const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+    const visualStateJson = typeof body.visualStateJson === "string" ? body.visualStateJson.trim() : "";
+    const visualStateDigest = typeof body.visualStateDigest === "string" ? body.visualStateDigest.trim().toLowerCase() : "";
+    const expectedMutationVersion = Number(body.expectedMutationVersion);
+    if (body.contractVersion !== "lens-issue-viewpoints.v1" || !Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0) {
+      res.status(400).json({ error: "lens_issue_viewpoint_request_invalid" }); return;
+    }
+    if (name.length < 1 || name.length > 120 || !["coordination", "detail", "context", "verification"].includes(viewpointType) || modelFingerprint.length < 8 || modelFingerprint.length > 256 || idempotencyKey.length < 8 || idempotencyKey.length > 200 || reason.length < 5 || reason.length > 500) {
+      res.status(422).json({ error: "lens_issue_viewpoint_fields_invalid" }); return;
+    }
+    if (!Number.isSafeInteger(expectedMutationVersion) || expectedMutationVersion < 1 || !visualStateJson || Buffer.byteLength(visualStateJson, "utf8") > 4 * 1024 * 1024 || !/^[0-9a-f]{64}$/.test(visualStateDigest)) {
+      res.status(422).json({ error: "lens_issue_viewpoint_visual_state_invalid" }); return;
+    }
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const issueResult = await client.query(`SELECT id,viewpoint_id,lifecycle_status,revision_number,mutation_version FROM lens_viewpoints WHERE id=$1 AND project_id=$2 FOR UPDATE`, [issueId, projectId]);
+      const issue = issueResult.rows[0];
+      if (!issue || issue.lifecycle_status !== "active") { await client.query("ROLLBACK"); res.status(404).json({ error: "lens_issue_not_found" }); return; }
+      const replay = await client.query(`SELECT id,name,display_order,is_primary,lifecycle_status,visual_state_digest FROM lens_issue_viewpoints WHERE issue_id=$1 AND idempotency_key=$2`, [issueId, idempotencyKey]);
+      if (replay.rows[0]) { await client.query("COMMIT"); res.status(200).json({ success: true, created: false, replayed: true, viewpoint: replay.rows[0] }); return; }
+      if (Number(issue.mutation_version) !== expectedMutationVersion) { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_stale_write", currentMutationVersion: Number(issue.mutation_version) }); return; }
+      validatePersistedLensNextVisualState(visualStateJson, visualStateDigest, { projectId, serverId: issueId, viewpointId: String(issue.viewpoint_id), lifecycleStatus: String(issue.lifecycle_status), revisionNumber: Number(issue.revision_number) });
+      const parsedVisualState = JSON.parse(visualStateJson) as Record<string, unknown>;
+      const capturedFingerprint = String(parsedVisualState.ModelFingerprint ?? parsedVisualState.modelFingerprint ?? "").trim().toLowerCase();
+      if (capturedFingerprint !== modelFingerprint) { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_viewpoint_model_mismatch" }); return; }
+      const orderResult = await client.query(`SELECT COALESCE(MAX(display_order),-1)+1 AS next_order FROM lens_issue_viewpoints WHERE issue_id=$1 AND lifecycle_status='active'`, [issueId]);
+      const id = randomUUID();
+      const displayOrder = Number(orderResult.rows[0]?.next_order ?? 0);
+      await client.query(`INSERT INTO lens_issue_viewpoints(id,issue_id,idempotency_key,project_id,model_fingerprint,name,viewpoint_type,display_order,is_primary,lifecycle_status,visual_state_json,visual_state_digest,captured_by_user_id,captured_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,false,'active',$9,$10,$11,now())`, [id, issueId, idempotencyKey, projectId, modelFingerprint, name, viewpointType, displayOrder, visualStateJson, visualStateDigest, req.user!.userId]);
+      await client.query(`INSERT INTO lens_issue_viewpoint_revisions(id,issue_viewpoint_id,revision_number,action,name,display_order,is_primary,lifecycle_status,model_fingerprint,visual_state_json,visual_state_digest,actor_user_id,reason) VALUES($1,$2,1,'captured',$3,$4,false,'active',$5,$6,$7,$8,$9)`, [`${id}-r1`, id, name, displayOrder, modelFingerprint, visualStateJson, visualStateDigest, req.user!.userId, reason]);
+      await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,details) VALUES($1,$2,$3,$4,'lens_issue_viewpoint_added','lens_viewpoint',$5,$6)`, [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, issueId, JSON.stringify({ issueViewpointId: id, name, viewpointType, displayOrder, reason, modelFingerprint, visualStateDigest })]);
+      await client.query("COMMIT");
+      res.status(201).json({ success: true, created: true, replayed: false, viewpoint: { id, issueId, projectId, modelFingerprint, name, viewpointType, displayOrder, isPrimary: false, lifecycleStatus: "active", visualStateDigest } });
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch { /* preserve original failure */ }
+      if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
+      throw error;
+    } finally { client.release(); }
+  },
+);
+
+router.patch("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const issueId = Number(req.params.viewpointId);
+    const issueViewpointId = String(req.params.issueViewpointId ?? "").trim();
+    const action = String(req.body?.action ?? "").trim();
+    const reason = String(req.body?.reason ?? "").trim();
+    const name = String(req.body?.name ?? "").trim();
+    const orderedIds = Array.isArray(req.body?.orderedIds) ? req.body.orderedIds.map((value: unknown) => String(value)) : [];
+    if (req.body?.contractVersion !== "lens-issue-viewpoints.v1" || !Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(issueId) || issueId <= 0 || !issueViewpointId || !["rename", "reorder", "make_primary", "archive"].includes(action) || reason.length < 5 || reason.length > 500) {
+      res.status(400).json({ error: "lens_issue_viewpoint_update_invalid" }); return;
+    }
+    if (action === "rename" && (name.length < 1 || name.length > 120)) { res.status(422).json({ error: "lens_issue_viewpoint_name_invalid" }); return; }
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const rowsResult = await client.query(`SELECT * FROM lens_issue_viewpoints WHERE issue_id=$1 AND project_id=$2 ORDER BY display_order,id FOR UPDATE`, [issueId, projectId]);
+      const rows = rowsResult.rows;
+      const target = rows.find(row => row.id === issueViewpointId);
+      if (!target) { await client.query("ROLLBACK"); res.status(404).json({ error: "lens_issue_viewpoint_not_found" }); return; }
+      if (target.lifecycle_status !== "active" && action !== "rename") { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_viewpoint_not_active" }); return; }
+      let affected = [target];
+      if (action === "rename") await client.query(`UPDATE lens_issue_viewpoints SET name=$1,renamed_at=now(),updated_at=now() WHERE id=$2`, [name, issueViewpointId]);
+      if (action === "make_primary") {
+        await client.query(`UPDATE lens_issue_viewpoints SET is_primary=false,updated_at=now() WHERE issue_id=$1 AND is_primary=true`, [issueId]);
+        await client.query(`UPDATE lens_issue_viewpoints SET is_primary=true,updated_at=now() WHERE id=$1`, [issueViewpointId]);
+      }
+      if (action === "archive") {
+        const active = rows.filter(row => row.lifecycle_status === "active");
+        if (active.length <= 1 || target.is_primary) { await client.query("ROLLBACK"); res.status(409).json({ error: target.is_primary ? "lens_issue_viewpoint_primary_archive_forbidden" : "lens_issue_viewpoint_last_archive_forbidden" }); return; }
+        await client.query(`UPDATE lens_issue_viewpoints SET lifecycle_status='archived',archived_at=now(),updated_at=now() WHERE id=$1`, [issueViewpointId]);
+      }
+      if (action === "reorder") {
+        const activeIds = rows.filter(row => row.lifecycle_status === "active").map(row => String(row.id)).sort();
+        if (orderedIds.length !== activeIds.length || [...orderedIds].sort().some((id, index) => id !== activeIds[index])) { await client.query("ROLLBACK"); res.status(422).json({ error: "lens_issue_viewpoint_order_invalid" }); return; }
+        affected = orderedIds.map((id: string) => rows.find(row => row.id === id)!);
+        for (let index = 0; index < orderedIds.length; index += 1) await client.query(`UPDATE lens_issue_viewpoints SET display_order=$1,updated_at=now() WHERE id=$2`, [index, orderedIds[index]]);
+      }
+      for (const row of affected) {
+        const currentResult = await client.query(`SELECT * FROM lens_issue_viewpoints WHERE id=$1`, [row.id]);
+        const current = currentResult.rows[0];
+        const revisionResult = await client.query(`SELECT COALESCE(MAX(revision_number),0)+1 AS next_revision FROM lens_issue_viewpoint_revisions WHERE issue_viewpoint_id=$1`, [row.id]);
+        const revision = Number(revisionResult.rows[0].next_revision);
+        await client.query(`INSERT INTO lens_issue_viewpoint_revisions(id,issue_viewpoint_id,revision_number,action,name,display_order,is_primary,lifecycle_status,model_fingerprint,navisworks_guid,screenshot_url,visual_state_json,visual_state_digest,actor_user_id,reason) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`, [`${row.id}-r${revision}`, row.id, revision, action === "make_primary" ? "made_primary" : action === "archive" ? "archived" : action === "rename" ? "renamed" : "reordered", current.name, current.display_order, current.is_primary, current.lifecycle_status, current.model_fingerprint, current.navisworks_guid, current.screenshot_url, current.visual_state_json, current.visual_state_digest, req.user!.userId, reason]);
+      }
+      await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,details) VALUES($1,$2,$3,$4,$5,'lens_viewpoint',$6,$7)`, [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, `lens_issue_viewpoint_${action}`, issueId, JSON.stringify({ issueViewpointId, orderedIds: action === "reorder" ? orderedIds : undefined, name: action === "rename" ? name : undefined, reason })]);
+      await client.query("COMMIT");
+      res.json({ success: true, contractVersion: "lens-issue-viewpoints.v1", action });
+    } catch (error) {
+      try { await client.query("ROLLBACK"); } catch { /* preserve original failure */ }
+      throw error;
+    } finally { client.release(); }
+  },
+);
+
+router.get("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId/visual-state",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), issueId = Number(req.params.viewpointId), issueViewpointId = String(req.params.issueViewpointId ?? "");
+    const result = await pool.query(`SELECT visual_state_json,visual_state_digest,model_fingerprint FROM lens_issue_viewpoints WHERE id=$1 AND issue_id=$2 AND project_id=$3`, [issueViewpointId, issueId, projectId]);
+    const row = result.rows[0];
+    if (!row?.visual_state_json || !row?.visual_state_digest) { res.status(404).json({ error: "lens_issue_viewpoint_visual_state_not_found" }); return; }
+    res.json({ success: true, visualStateJson: row.visual_state_json, visualStateDigest: row.visual_state_digest, modelFingerprint: row.model_fingerprint });
+  },
+);
+
+router.get("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId/history",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), issueId = Number(req.params.viewpointId), issueViewpointId = String(req.params.issueViewpointId ?? "");
+    const ownership = await pool.query(`SELECT id FROM lens_issue_viewpoints WHERE id=$1 AND issue_id=$2 AND project_id=$3`, [issueViewpointId, issueId, projectId]);
+    if (!ownership.rowCount) { res.status(404).json({ error: "lens_issue_viewpoint_not_found" }); return; }
+    const history = await pool.query(`SELECT id,revision_number,action,name,display_order,is_primary,lifecycle_status,actor_user_id,reason,occurred_at FROM lens_issue_viewpoint_revisions WHERE issue_viewpoint_id=$1 ORDER BY revision_number DESC`, [issueViewpointId]);
+    res.json({ success: true, contractVersion: "lens-issue-viewpoint-history.v1", issueViewpointId, revisions: history.rows });
+  },
+);
+
 router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
   authMiddleware,
   requirePermission("admin", "write"),
@@ -1639,7 +1791,14 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         .filter(v => reportType === "all" || v.reportType === reportType)
         .filter(v => status === "all" || v.status === status)
         .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
-      const header = ["Date", "Code", "Viewpoint ID", "Floor", "Trade", "Responsible Company", "Report Type", "Priority", "State", "Revision", "Note", "Open Items", "Status"];
+      const issueViewpointRows = filtered.length ? await pool.query(`SELECT issue_id,name,is_primary,lifecycle_status,display_order FROM lens_issue_viewpoints WHERE issue_id = ANY($1::int[]) ORDER BY issue_id,display_order,id`, [filtered.map(row => row.id)]) : { rows: [] as any[] };
+      const issueViewpointsByIssue = new Map<number, string[]>();
+      for (const row of issueViewpointRows.rows) {
+        const list = issueViewpointsByIssue.get(Number(row.issue_id)) ?? [];
+        list.push(`${row.name}${row.is_primary ? " [Primary]" : ""}${row.lifecycle_status === "archived" ? " [Archived]" : ""}`);
+        issueViewpointsByIssue.set(Number(row.issue_id), list);
+      }
+      const header = ["Date", "Code", "Viewpoint ID", "Floor", "Trade", "Responsible Company", "Report Type", "Priority", "State", "Revision", "Note", "Open Items", "Status", "Issue Viewpoints"];
       const appBaseUrl = getAppUrl().replace(/\/+$/, "");
       const exportRows = filtered.map(v => ({
         date: v.capturedAt ? new Date(v.capturedAt) : null,
@@ -1656,6 +1815,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         note: v.note || "",
         openItems: v.openItems || "",
         status: statusLabel(v.status),
+        issueViewpoints: (issueViewpointsByIssue.get(v.id) ?? []).join(" | "),
       }));
       const worksheet = XLSX.utils.aoa_to_sheet([
         ["BIMLog by IgniteSmart"],
@@ -1679,10 +1839,11 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
           v.note,
           v.openItems,
           v.status,
+          v.issueViewpoints,
         ]),
       ]);
       worksheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } }];
-      worksheet["!cols"] = header.map((_, i) => ({ wch: i === 10 ? 44 : i === 2 || i === 5 ? 26 : 16 }));
+      worksheet["!cols"] = header.map((_, i) => ({ wch: i === 10 || i === 13 ? 44 : i === 2 || i === 5 ? 26 : 16 }));
       worksheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 6, c: 0 }, e: { r: Math.max(6, filtered.length + 6), c: header.length - 1 } }) };
       worksheet["!freeze"] = { xSplit: 0, ySplit: 7 };
       exportRows.forEach((row, index) => {
@@ -2010,7 +2171,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
       ]);
       const ids = [...new Set(directoryRows.map((row) => row.companyId).filter((id): id is number => Number.isInteger(id)))];
       const companyRows = ids.length ? await db.select({ id: companiesTable.id, name: companiesTable.name,
-        retiredIntoCompanyId: companiesTable.retiredIntoCompanyId }).from(companiesTable)
+        retiredIntoCompanyId: companiesTable.retiredIntoCompanyId, retiredAt: companiesTable.retiredAt }).from(companiesTable)
         .where(inArray(companiesTable.id, ids)) : [];
       const byId = new Map(companyRows.map((row) => [row.id, row]));
       const candidates: CompanyDirectoryCandidate[] = companyRows.map((row) => ({
@@ -2019,8 +2180,10 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
         companyName: row.name,
         source: row.retiredIntoCompanyId == null ? "company" : "directory_alias",
       }));
-      const names = new Set<string>((await loadProjectCompanyChoices(projectId)).companies);
+      const projectChoices = await loadProjectCompanyChoices(projectId);
+      const names = new Set<string>(projectChoices.companies);
       const references: ReturnType<typeof resolveLensCompanyDirectoryReference>[] = [];
+      const options: LensResponsibleCompanyOption[] = [];
       for (const row of directoryRows) {
         const v = row.companyName?.trim();
         if (!v) continue;
@@ -2036,16 +2199,42 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/responsible-compa
         const resolved = resolveLensCompanyDirectoryReference({ companyId: row.companyId, companyName: v, candidates });
         names.add(resolved.displayName);
         references.push(resolved);
+        options.push({
+          id: resolved.canonicalCompanyId,
+          label: resolved.displayName,
+          historicalLabel: resolved.historicalValue,
+          active: company?.retiredAt == null,
+          projectAuthorized: true,
+          assignable: company?.retiredAt == null,
+          source: "project_directory",
+          unavailabilityReason: company?.retiredAt == null ? null : "inactive",
+        });
       }
       for (const row of lensRows) {
         const v = row.responsibleCompany?.trim();
-        if (v) names.add(v);
+        if (!v) continue;
+        names.add(v);
+        if (!options.some(option => option.label.toLocaleLowerCase("en-US") === v.toLocaleLowerCase("en-US"))) {
+          options.push({ id: null, label: v, historicalLabel: v, active: false, projectAuthorized: false,
+            assignable: false, source: "historical_issue", unavailabilityReason: "historical_only" });
+        }
       }
       const customTradeRows = await pool.query(
         `SELECT name FROM lens_project_trades WHERE project_id=$1 ORDER BY lower(name), id`,
         [projectId],
       );
-      res.json({ success: true, companies: Array.from(names).sort((a, b) => a.localeCompare(b)), references,
+      for (const name of projectChoices.companies) {
+        if (!options.some(option => option.label.toLocaleLowerCase("en-US") === name.toLocaleLowerCase("en-US"))) {
+          options.push({ id: null, label: name, historicalLabel: name, active: true, projectAuthorized: true,
+            assignable: true, source: projectChoices.conventionCodes.includes(name) ? "naming_convention" : "project_member", unavailabilityReason: null });
+        }
+      }
+      res.setHeader("Cache-Control", "private, no-store");
+      res.json({ success: true, contractVersion: "lens-issue-catalog.v1", projectId,
+        authority: lensIssueFieldAuthorities, generatedAt: new Date().toISOString(),
+        companies: Array.from(names).sort((a, b) => a.localeCompare(b)),
+        companyOptions: uniqueLensResponsibleCompanyOptions(options), references,
+        missingValueGuidance: "A company must exist in the active BIMLog authority and be authorized for this project before it can be assigned.",
         trades: customTradeRows.rows.map((row) => String(row.name)) });
     } catch (err) {
       res.status(500).json({ error: "responsible_companies_failed", message: err instanceof Error ? err.message : String(err) });
@@ -2386,6 +2575,81 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
       res.json({ success: true, viewpoint: { id: updated.id, status: updated.status, updatedAt: updated.updatedAt } });
     } catch (err) {
       res.status(500).json({ error: "lens_update_failed", message: err instanceof Error ? err.message : String(err) });
+    }
+  }
+);
+
+// Governed Issue edit. This updates the current Issue state in place while the
+// immutable activity ledger records the complete before/after change. Camera
+// evidence and viewpoint revision/history are intentionally untouched.
+router.patch("/projects/:projectId/clash-reports/lens-next/issues/:id/fields",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), id = Number(req.params.id);
+    const body = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body as Record<string, unknown> : {};
+    const allowedKeys = new Set(["contractVersion", "mutationVersion", "reason", "fields"]);
+    if (body.contractVersion !== "lens-issue-edit.v1" || Object.keys(body).some(key => !allowedKeys.has(key))) {
+      res.status(400).json({ error: "lens_issue_edit_invalid", message: "The governed Issue edit contract is invalid." }); return;
+    }
+    const fields = body.fields && typeof body.fields === "object" && !Array.isArray(body.fields) ? body.fields as Record<string, unknown> : null;
+    const fieldKeys = new Set(["trade", "floor", "responsibleCompany", "reportType", "priority", "status", "instruction", "openItems"]);
+    if (!fields || Object.keys(fields).some(key => !fieldKeys.has(key))) {
+      res.status(400).json({ error: "lens_issue_fields_invalid", message: "Issue fields contain an unsupported value." }); return;
+    }
+    const mutationVersion = Number(body.mutationVersion), priority = Number(fields.priority);
+    const reason = String(body.reason ?? "").trim();
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(id) || id <= 0
+      || !Number.isSafeInteger(mutationVersion) || mutationVersion <= 0 || reason.length < 5 || reason.length > 1000
+      || !Number.isInteger(priority) || priority < 1 || priority > 5) {
+      res.status(400).json({ error: "lens_issue_edit_invalid", message: "Version, priority, and an audit reason of at least 5 characters are required." }); return;
+    }
+    try {
+      const trade = normalizeGovernedLabel(fields.trade, "trade", 80);
+      const floor = normalizeGovernedLabel(fields.floor, "floor", 120);
+      const reportType = assertCatalogLabel(normalizeGovernedLabel(fields.reportType, "reportType", 40), LENS_ISSUE_REPORT_TYPES, "reportType");
+      const status = normalizeGovernedLabel(fields.status, "status", 32);
+      const instruction = normalizeGovernedLabel(fields.instruction, "instruction", 4000);
+      const openItems = String(fields.openItems ?? "").trim().slice(0, 4000);
+      const responsibleRequested = String(fields.responsibleCompany ?? "").trim();
+      const [companyChoices, tradeRows, levelRows] = await Promise.all([
+        loadProjectCompanyChoices(projectId),
+        pool.query(`SELECT name FROM lens_project_trades WHERE project_id=$1`, [projectId]),
+        pool.query(`SELECT nf.allowed_values FROM naming_conventions nc JOIN naming_fields nf ON nf.convention_id=nc.id WHERE nc.project_id=$1 AND lower(nf.label)='level' LIMIT 1`, [projectId]),
+      ]);
+      const tradeChoices = [...LENS_ISSUE_BASE_TRADES, ...tradeRows.rows.map(row => String(row.name))];
+      const floorChoices = Array.isArray(levelRows.rows[0]?.allowed_values) ? levelRows.rows[0].allowed_values.map(String) : [];
+      const governedTrade = assertCatalogLabel(trade, tradeChoices, "trade");
+      const governedFloor = assertCatalogLabel(floor, floorChoices, "floor");
+      const client = await pool.connect();
+      try {
+        await client.query("BEGIN");
+        const found = await client.query(`SELECT * FROM lens_viewpoints WHERE id=$1 AND project_id=$2 FOR UPDATE`, [id, projectId]);
+        const before = found.rows[0];
+        if (!before) { await client.query("ROLLBACK"); res.status(404).json({ error: "not_found", message: "Lens Issue not found." }); return; }
+        if (before.lifecycle_status !== "active") { await client.query("ROLLBACK"); res.status(409).json({ error: "not_active", message: "Only the active Issue revision can be edited." }); return; }
+        if (Number(before.mutation_version) !== mutationVersion) { await client.query("ROLLBACK"); res.status(409).json({ error: "lens_issue_version_conflict", message: "The Issue changed after editing began.", currentMutationVersion: Number(before.mutation_version) }); return; }
+        assertLensIssueStatusTransition(String(before.status), status);
+        const unchangedHistoricalCompany = responsibleRequested && String(before.responsible_company ?? "").localeCompare(responsibleRequested, "en-US", { sensitivity: "base" }) === 0;
+        const responsibleCompany = responsibleRequested ? (unchangedHistoricalCompany ? String(before.responsible_company) : assertCatalogLabel(responsibleRequested, companyChoices.companies, "responsibleCompany")) : null;
+        const updated = (await client.query(`UPDATE lens_viewpoints SET trade=$1,floor=$2,responsible_company=$3,report_type=$4,priority=$5,status=$6,note=$7,open_items=$8,mutation_version=mutation_version+1,updated_at=now() WHERE id=$9 AND project_id=$10 AND mutation_version=$11 RETURNING *`,
+          [governedTrade, governedFloor, responsibleCompany, reportType, priority, status, instruction, openItems || null, id, projectId, mutationVersion])).rows[0];
+        if (!updated) throw new Error("LENS_ISSUE_VERSION_CONFLICT");
+        const beforeFields = { trade: before.trade, floor: before.floor, responsibleCompany: before.responsible_company, reportType: before.report_type, priority: before.priority, status: before.status, instruction: before.note, openItems: before.open_items };
+        const afterFields = { trade: updated.trade, floor: updated.floor, responsibleCompany: updated.responsible_company, reportType: updated.report_type, priority: updated.priority, status: updated.status, instruction: updated.note, openItems: updated.open_items };
+        await client.query(`INSERT INTO activity_log(project_id,user_id,user_full_name,user_company_name,action_type,entity_type,entity_id,file_name_before,file_name_after,details) VALUES($1,$2,$3,$4,'lens_issue_fields_updated','lens_issue',$5,$6,$7,$8)`,
+          [projectId, req.user!.userId, req.user!.fullName, req.user!.companyName, id, JSON.stringify(beforeFields), JSON.stringify(afterFields), JSON.stringify({ reason, sourceApplication: "Lens Next", issueId: id, projectId })]);
+        if (before.status !== updated.status) await client.query(`INSERT INTO lens_viewpoint_events(project_id,viewpoint_id,event_type,from_status,to_status,changed_by_id) VALUES($1,$2,'status_changed',$3,$4,$5)`, [projectId, id, before.status, updated.status, req.user!.userId]);
+        await client.query("COMMIT");
+        res.json({ success: true, contractVersion: "lens-issue-edit.v1", issue: { serverId: id, mutationVersion: Number(updated.mutation_version), fields: afterFields }, audit: { reason, sourceApplication: "Lens Next" } });
+      } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.startsWith("LENS_ISSUE_STATUS_TRANSITION_INVALID")) { res.status(409).json({ error: "invalid_status_transition", message: "That status transition is not permitted." }); return; }
+      if (message.startsWith("LENS_ISSUE_CATALOG_VALUE_FORBIDDEN")) { res.status(422).json({ error: "catalog_value_forbidden", message: "A governed field value is not authorized for this project. Refresh catalogs and try again." }); return; }
+      if (message.startsWith("LENS_ISSUE_FIELD_INVALID")) { res.status(400).json({ error: "lens_issue_field_invalid", message: "A required Issue field is invalid." }); return; }
+      if (message === "LENS_ISSUE_VERSION_CONFLICT") { res.status(409).json({ error: "lens_issue_version_conflict", message: "The Issue changed after editing began." }); return; }
+      res.status(500).json({ error: "lens_issue_edit_failed", message: "The governed Issue edit did not commit." });
     }
   }
 );
