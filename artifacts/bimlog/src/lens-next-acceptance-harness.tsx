@@ -90,6 +90,7 @@ function Harness() {
     inventorySummary: { matched: 63, platformOnly: 37, navisworksOnly: 0, conflicted: 0, unresolved: 0 },
     synchronizationPlan: { items: synchronizationItems, inSync: synchronizedCount, confirmLocalIdentity: 0, pullFromBimlog: pullCount, uploadToBimlog: 0, manualConflict: 0, blocked: 0, executable: pullCount > 0 }, uploadableLocalViewpoints: [], localUploadState: "idle", localUploadMessage: null, onUploadLocalViewpoint: noop,
     createEnabled: true, createState: "idle", createMessage: null, createdIssueServerId: null, onCreateIssue: noop,
+    editState: "idle", editMessage: null, onEditIssue: noop,
     layoutEnabled: true, layoutState: "idle", layoutMessage: null, onMaterializeMyView: noop,
     reconciliationState: "idle", reconciliationMessage: null, onRunReconciliation: noop,
     platformPullState: "idle", platformPullMessage: null, onPullPlatformViewpoints: noop,
@@ -104,7 +105,9 @@ function Harness() {
     filters, onFiltersChange: (next) => { setFilters(next); setPage(1); }, trades: ["HVAC", "Plumbing", "Fire Protection", "Electrical"], floors: ["L1", "L2", "L3", "Roof"],
     filterCompanies: ["BIMTech Corp", "Elara MEP"], filterReportTypes: ["Coordination"],
     createTrades: ["HVAC", "Plumbing"], createFloors: ["L1", "L2"], createResponsibleCompanies: ["BIMTech Corp"], createReportTypes: ["Coordination"],
+    responsibleCompanyOptions: [{ id: 1, label: "BIMTech Corp", historicalLabel: "BIMTech Corp", active: true, projectAuthorized: true, assignable: true, source: "project_directory", unavailabilityReason: null }],
     apiState: "connected", bridgeState: "connected", refreshState: "fresh", apiError: null, bridgeError: null,
+    catalogState: "current", catalogError: null, catalogSyncedAt: "2026-09-16T14:10:00.000Z",
     history: null, historyError: null, lastRefreshedAt: "2026-09-16T14:10:00.000Z", bridgeOpenEnabled: true,
     workingViewState: "idle", workingViewUnavailable: false, visualRepairState: "idle", visualRepairMessage: null, onRepairCurrentWorkingView: noop,
     onRefresh: noop, onSelectIssue: setSelectedServerId, onCloseIssue: () => setSelectedServerId(null), onOpenWorkingView: noop, onLoadHistory: noop,
@@ -113,7 +116,7 @@ function Harness() {
   return <div className="lens-next-acceptance-shell">
     <div className="lens-next-acceptance-toolbar">
       <strong>Test-only acceptance fixture · real LensNextPanelView</strong>
-      <button type="button" onClick={() => setLanguage(language === "en" ? "es" : "en")}>Language: {language.toUpperCase()}</button>
+      <button type="button" onClick={() => setLanguage(language === "en" ? "es" : language === "es" ? "pt" : "en")}>Language: {language.toUpperCase()}</button>
     </div>
     <main className="lens-next-workspace lens-next-workspace--embedded"><LensNextPanelView {...props} /></main>
   </div>;

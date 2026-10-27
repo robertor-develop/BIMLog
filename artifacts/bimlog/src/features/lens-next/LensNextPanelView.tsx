@@ -42,6 +42,9 @@ const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 const STATUS_LABELS_ES: Record<LensNextStatus, string> = {
   open: "Abierta", follow_up: "Seguimiento", waiting_design: "En espera de diseño", approved: "Aprobada", resolved: "Resuelta",
 };
+const STATUS_LABELS_PT: Record<LensNextStatus, string> = {
+  open: "Aberta", follow_up: "Acompanhamento", waiting_design: "Aguardando projeto", approved: "Aprovada", resolved: "Resolvida",
+};
 
 function formatTimestamp(value: string | null): string {
   if (!value) return "Not recorded";
@@ -736,7 +739,7 @@ export function LensNextPanelView({
         <details>
           <summary>{tt("Status and evidence", "Estado y evidencia")}</summary>
           <div className="lens-next__record-summary-detail">
-            {LENS_NEXT_STATUSES.map(status => <span key={status}>{tt(STATUS_LABELS[status], STATUS_LABELS_ES[status])}: {issueSummary.byStatus[status]}</span>)}
+            {LENS_NEXT_STATUSES.map(status => <span key={status}>{tt(STATUS_LABELS[status], STATUS_LABELS_ES[status], STATUS_LABELS_PT[status])}: {issueSummary.byStatus[status]}</span>)}
             <span>{tt("Visual package available", "Paquete visual disponible")}: {issueSummary.withVisualPackage}</span>
           </div>
           <small>{tt("Counts describe filtered BIMLog issue records, not the Navisworks clash inventory or current page. An image reference does not guarantee the image can load.", "Los conteos describen incidencias BIMLog filtradas, no el inventario de interferencias de Navisworks ni la página actual. Una referencia de imagen no garantiza que pueda cargarse.")}</small>
@@ -897,24 +900,24 @@ export function LensNextPanelView({
       </details>
 
       <details ref={settingsSectionRef} className="lens-next__view-settings" aria-label="Personal issue view">
-        <summary>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias")}</summary>
+        <summary>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias", "Campos e catálogos de ocorrências")}</summary>
         <div className="lens-next__view-settings-content">
-          <section className="lens-next__catalog-settings" aria-label={tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias")}>
-            <h3>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias")}</h3>
+          <section className="lens-next__catalog-settings" aria-label={tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias", "Campos e catálogos de ocorrências")}>
+            <h3>{tt("Issue Fields and Catalogs", "Campos y catálogos de incidencias", "Campos e catálogos de ocorrências")}</h3>
             <dl className="lens-next__overview-facts">
-              <div><dt>{tt("Active BIMLog project", "Proyecto BIMLog activo")}</dt><dd>{activeProject?.name ?? tt("Not selected", "No seleccionado")}</dd></div>
-              <div><dt>{tt("Active model", "Modelo activo")}</dt><dd>{bridgeDisplayName ?? tt("Unavailable", "No disponible")}</dd></div>
-              <div><dt>{tt("Last catalog synchronization", "Última sincronización de catálogos")}</dt><dd>{catalogSyncedAt ? formatTimestamp(catalogSyncedAt) : tt("Never", "Nunca")}</dd></div>
-              <div><dt>{tt("Catalog health", "Estado de catálogos")}</dt><dd data-catalog-state={catalogState}>{catalogState}</dd></div>
-              <div><dt>{tt("Scope", "Alcance")}</dt><dd>{tt("Current authorized project only", "Solo el proyecto autorizado actual")}</dd></div>
+              <div><dt>{tt("Active BIMLog project", "Proyecto BIMLog activo", "Projeto BIMLog ativo")}</dt><dd>{activeProject?.name ?? tt("Not selected", "No seleccionado", "Não selecionado")}</dd></div>
+              <div><dt>{tt("Active model", "Modelo activo", "Modelo ativo")}</dt><dd>{bridgeDisplayName ?? tt("Unavailable", "No disponible", "Indisponível")}</dd></div>
+              <div><dt>{tt("Last catalog synchronization", "Última sincronización de catálogos", "Última sincronização dos catálogos")}</dt><dd>{catalogSyncedAt ? formatTimestamp(catalogSyncedAt) : tt("Never", "Nunca", "Nunca")}</dd></div>
+              <div><dt>{tt("Catalog health", "Estado de catálogos", "Estado dos catálogos")}</dt><dd data-catalog-state={catalogState}>{catalogState}</dd></div>
+              <div><dt>{tt("Scope", "Alcance", "Escopo")}</dt><dd>{tt("Current authorized project only", "Solo el proyecto autorizado actual", "Somente o projeto autorizado atual")}</dd></div>
             </dl>
             {catalogError && <p role="alert">{catalogError}</p>}
-            <button type="button" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? tt("Refreshing catalogs…", "Actualizando catálogos…") : tt("Refresh Issue data and catalogs", "Actualizar incidencias y catálogos")}</button>
-            <details><summary>{tt("Trades", "Disciplinas")} ({createTrades.length})</summary><ul>{createTrades.map(value=><li key={value}>{value}</li>)}</ul></details>
-            <details><summary>{tt("Floors / Levels", "Pisos / Niveles")} ({createFloors.length})</summary><ul>{createFloors.map(value=><li key={value}>{value}</li>)}</ul></details>
-            <details><summary>{tt("Responsible Companies", "Empresas responsables")} ({responsibleCompanyOptions.length})</summary><ul>{responsibleCompanyOptions.map(option=><li key={`${option.id ?? "historical"}:${option.label}`}><strong>{option.label}</strong> — {option.assignable ? tt("active and assignable", "activa y asignable") : option.unavailabilityReason === "inactive" ? tt("inactive", "inactiva") : tt("historical only; not authorized for new assignment", "solo histórica; no autorizada para nueva asignación")}</li>)}</ul></details>
-            <details><summary>{tt("Report Types", "Tipos de informe")} ({createReportTypes.length})</summary><ul>{createReportTypes.map(value=><li key={value}>{value}</li>)}</ul></details>
-            {selectedProjectId !== null && <p><a href={`/projects/${selectedProjectId}/directory`} target="_blank" rel="noreferrer">{tt("Manage project companies in BIMLog", "Administrar empresas del proyecto en BIMLog")}</a> · {tt("Return here and refresh after an authorized change.", "Regrese aquí y actualice después de un cambio autorizado.")}</p>}
+            <button type="button" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? tt("Refreshing catalogs…", "Actualizando catálogos…", "Atualizando catálogos…") : tt("Refresh Issue data and catalogs", "Actualizar incidencias y catálogos", "Atualizar ocorrências e catálogos")}</button>
+            <details><summary>{tt("Trades", "Disciplinas", "Disciplinas")} ({createTrades.length})</summary><ul>{createTrades.map(value=><li key={value}>{value}</li>)}</ul></details>
+            <details><summary>{tt("Floors / Levels", "Pisos / Niveles", "Pavimentos / Níveis")} ({createFloors.length})</summary><ul>{createFloors.map(value=><li key={value}>{value}</li>)}</ul></details>
+            <details><summary>{tt("Responsible Companies", "Empresas responsables", "Empresas responsáveis")} ({responsibleCompanyOptions.length})</summary><ul>{responsibleCompanyOptions.map(option=><li key={`${option.id ?? "historical"}:${option.label}`}><strong>{option.label}</strong> — {option.assignable ? tt("active and assignable", "activa y asignable", "ativa e atribuível") : option.unavailabilityReason === "inactive" ? tt("inactive", "inactiva", "inativa") : tt("historical only; not authorized for new assignment", "solo histórica; no autorizada para nueva asignación", "somente histórica; não autorizada para nova atribuição")}</li>)}</ul></details>
+            <details><summary>{tt("Report Types", "Tipos de informe", "Tipos de relatório")} ({createReportTypes.length})</summary><ul>{createReportTypes.map(value=><li key={value}>{value}</li>)}</ul></details>
+            {selectedProjectId !== null && <p><a href={`/projects/${selectedProjectId}/directory`} target="_blank" rel="noreferrer">{tt("Manage project companies in BIMLog", "Administrar empresas del proyecto en BIMLog", "Gerenciar empresas do projeto no BIMLog")}</a> · {tt("Return here and refresh after an authorized change.", "Regrese aquí y actualice después de un cambio autorizado.", "Retorne aqui e atualize após uma alteração autorizada.")}</p>}
           </section>
           <hr />
           <h3>{tt("My view settings", "Configuración de mi vista")}</h3>
