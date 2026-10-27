@@ -1572,7 +1572,7 @@ router.patch("/projects/:projectId/clash-reports/lens-next/issues/:viewpointId/v
       if (action === "reorder") {
         const activeIds = rows.filter(row => row.lifecycle_status === "active").map(row => String(row.id)).sort();
         if (orderedIds.length !== activeIds.length || [...orderedIds].sort().some((id, index) => id !== activeIds[index])) { await client.query("ROLLBACK"); res.status(422).json({ error: "lens_issue_viewpoint_order_invalid" }); return; }
-        affected = orderedIds.map(id => rows.find(row => row.id === id)!);
+        affected = orderedIds.map((id: string) => rows.find(row => row.id === id)!);
         for (let index = 0; index < orderedIds.length; index += 1) await client.query(`UPDATE lens_issue_viewpoints SET display_order=$1,updated_at=now() WHERE id=$2`, [index, orderedIds[index]]);
       }
       for (const row of affected) {
@@ -1791,7 +1791,14 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         .filter(v => reportType === "all" || v.reportType === reportType)
         .filter(v => status === "all" || v.status === status)
         .filter(v => lifecycleScope === "all" || (v.lifecycleStatus ?? "active") === "active");
-      const header = ["Date", "Code", "Viewpoint ID", "Floor", "Trade", "Responsible Company", "Report Type", "Priority", "State", "Revision", "Note", "Open Items", "Status"];
+      const issueViewpointRows = filtered.length ? await pool.query(`SELECT issue_id,name,is_primary,lifecycle_status,display_order FROM lens_issue_viewpoints WHERE issue_id = ANY($1::int[]) ORDER BY issue_id,display_order,id`, [filtered.map(row => row.id)]) : { rows: [] as any[] };
+      const issueViewpointsByIssue = new Map<number, string[]>();
+      for (const row of issueViewpointRows.rows) {
+        const list = issueViewpointsByIssue.get(Number(row.issue_id)) ?? [];
+        list.push(`${row.name}${row.is_primary ? " [Primary]" : ""}${row.lifecycle_status === "archived" ? " [Archived]" : ""}`);
+        issueViewpointsByIssue.set(Number(row.issue_id), list);
+      }
+      const header = ["Date", "Code", "Viewpoint ID", "Floor", "Trade", "Responsible Company", "Report Type", "Priority", "State", "Revision", "Note", "Open Items", "Status", "Issue Viewpoints"];
       const appBaseUrl = getAppUrl().replace(/\/+$/, "");
       const exportRows = filtered.map(v => ({
         date: v.capturedAt ? new Date(v.capturedAt) : null,
@@ -1808,6 +1815,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         note: v.note || "",
         openItems: v.openItems || "",
         status: statusLabel(v.status),
+        issueViewpoints: (issueViewpointsByIssue.get(v.id) ?? []).join(" | "),
       }));
       const worksheet = XLSX.utils.aoa_to_sheet([
         ["BIMLog by IgniteSmart"],
@@ -1831,10 +1839,11 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
           v.note,
           v.openItems,
           v.status,
+          v.issueViewpoints,
         ]),
       ]);
       worksheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: header.length - 1 } }];
-      worksheet["!cols"] = header.map((_, i) => ({ wch: i === 10 ? 44 : i === 2 || i === 5 ? 26 : 16 }));
+      worksheet["!cols"] = header.map((_, i) => ({ wch: i === 10 || i === 13 ? 44 : i === 2 || i === 5 ? 26 : 16 }));
       worksheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 6, c: 0 }, e: { r: Math.max(6, filtered.length + 6), c: header.length - 1 } }) };
       worksheet["!freeze"] = { xSplit: 0, ySplit: 7 };
       exportRows.forEach((row, index) => {

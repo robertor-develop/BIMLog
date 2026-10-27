@@ -847,7 +847,7 @@ export function LensNextPanel({
       const serverSkipped = lensNextXmlSkippedSummary(loaded.skipped);
       const skipped = [serverSkipped, nativeSkipped].filter(Boolean).join("; ");
       const skippedCount = loaded.skipped.length + (summary.skippedCount ?? 0);
-      setXmlExportMessage(`${skippedCount ? "Partial XML V2 export" : "XML V2 export complete"}: ${summary.serializedCount} filtered viewpoint(s) organized under Open/Resolved, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} ${summary.outputPath}`);
+      setXmlExportMessage(`${skippedCount ? "Partial XML V2 export" : "XML V2 export complete"}: ${summary.serializedCount} filtered primary Issue viewpoint(s) organized under Open/Resolved, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} Additional Issue viewpoints are listed in the Excel export; XML V2 currently exports only each Issue's primary viewpoint. ${summary.outputPath}`);
     } catch (error) {
       setXmlExportState("error"); setXmlExportMessage(error instanceof Error ? error.message : "XML export failed");
     }
