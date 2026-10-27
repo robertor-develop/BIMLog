@@ -141,6 +141,7 @@ export interface LensNextApiClient {
   resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId?: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
   loadReferenceData(projectId: number, signal?: AbortSignal): Promise<LensNextReferenceData>;
+  registerProjectCompany(projectId: number, companyName: string, signal?: AbortSignal): Promise<{ id: number; name: string; reused: boolean; directoryEntryReused: boolean }>;
   editIssueFields(issue: LensNextIssue, fields: LensNextCreateDraft, reason: string, signal?: AbortSignal): Promise<number>;
   loadIssueViewpoints(issue: LensNextIssue, signal?: AbortSignal): Promise<readonly LensNextIssueViewpoint[]>;
   addIssueViewpoint(issue: LensNextIssue, input: { name: string; viewpointType: LensNextIssueViewpoint["viewpointType"]; modelFingerprint: string; visualStateJson: string; visualStateDigest: string; reason: string; idempotencyKey: string }, signal?: AbortSignal): Promise<LensNextIssueViewpoint>;
@@ -342,6 +343,21 @@ export function createLensNextApiClient(
         customTrades: [...new Set(customTrades)].sort(),
         missingValueGuidance: String(directoryBody.missingValueGuidance ?? ""),
       });
+    },
+    async registerProjectCompany(projectId: number, companyName: string, signal?: AbortSignal) {
+      const exactProjectId = assertLensNextProjectId(projectId);
+      const exactName = companyName.trim().replace(/\s+/g, " ");
+      if (exactName.length < 2 || exactName.length > 160) throw new Error("Company name must contain 2 to 160 characters.");
+      const raw = await post(`/projects/${exactProjectId}/directory/companies`, {
+        company_name: exactName,
+        source_application: "Lens Next",
+      }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog project company receipt is invalid");
+      const body = raw as Record<string, unknown>;
+      const id = Number(body.id);
+      const name = String(body.name ?? "").trim();
+      if (!Number.isSafeInteger(id) || id <= 0 || !name) throw new Error("BIMLog project company receipt is invalid");
+      return Object.freeze({ id, name, reused: body.reused === true, directoryEntryReused: body.directoryEntryReused === true });
     },
     async editIssueFields(issue: LensNextIssue, fields: LensNextCreateDraft, reason: string, signal?: AbortSignal) {
       const identity = assertLensNextImmutableIdentity(issue.identity);
