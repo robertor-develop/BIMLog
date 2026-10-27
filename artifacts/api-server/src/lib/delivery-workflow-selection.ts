@@ -32,9 +32,12 @@ export async function deliveryWorkflowOptions(
     policy?.mode === "approved_only" ? "approved_only" : "defaults_allowed";
   const rows = (
     await client.query(
-      `SELECT t.id "templateId",t.code,t.name,v.id "versionId",v.version,v.definition,v.fingerprint
+      `SELECT t.id "templateId",t.code,t.name,v.id "versionId",v.version,v.definition,v.fingerprint,
+        COALESCE(array_agg(binding.service_entry_id) FILTER (WHERE binding.service_entry_id IS NOT NULL),'{}') "serviceEntryIds"
     FROM company_delivery_workflow_templates t JOIN company_delivery_workflow_versions v ON v.template_id=t.id
-    WHERE t.company_id=$1 AND v.state='published' ORDER BY t.code,v.version DESC`,
+    LEFT JOIN company_service_delivery_workflow_bindings binding ON binding.workflow_version_id=v.id AND binding.company_id=t.company_id
+    WHERE t.company_id=$1 AND v.state='published'
+    GROUP BY t.id,t.code,t.name,v.id,v.version,v.definition,v.fingerprint ORDER BY t.code,v.version DESC`,
       [companyId],
     )
   ).rows;
@@ -56,6 +59,7 @@ export async function deliveryWorkflowOptions(
       source: "company" as const,
       definition,
       fingerprint,
+      serviceEntryIds: Array.isArray(row.serviceEntryIds) ? row.serviceEntryIds.map(String) : [],
     };
   });
   const publishedPolicies = await publishedGovernanceRows(client, companyId);

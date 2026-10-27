@@ -3,6 +3,7 @@ import { Router, type Request, type Response } from "express";
 import { pool } from "@workspace/db";
 import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
 import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-migration";
+import { ensureDeliveryWorkflowTemplateSchema } from "../lib/delivery-workflow-template-migration";
 import { classificationColumn, normalizeCompanyCatalogUsage, type CompanyCatalogKind } from "../lib/company-master-catalog-usage";
 
 const router = Router();
@@ -71,12 +72,46 @@ router.patch("/company/master-catalogs/policy", authMiddleware, async (req, res)
 router.get("/company/master-catalogs/:kind", authMiddleware, async (req, res): Promise<void> => {
   const kind = kindOf(req, res); if (!kind) return;
   await ensureCompanyMasterCatalogSchema();
+  await ensureDeliveryWorkflowTemplateSchema();
   const current = await actor(req);
   if (!current) { res.status(401).json({ code: "AUTHORITY_INVALID" }); return; }
   const includeInactive = req.query.includeInactive === "true" && (current.isPmo || current.isSuperAdmin);
-  const result = await pool.query(`SELECT id,kind,code,name,aliases,canonical_company_id "canonicalCompanyId",state,version,created_at "createdAt",updated_at "updatedAt"
-    FROM company_master_catalog_entries WHERE company_id=$1 AND kind=$2 AND ($3::boolean OR state='active') ORDER BY name,id`, [current.companyId,kind,includeInactive]);
+  const result = await pool.query(`SELECT entry.id,entry.kind,entry.code,entry.name,entry.aliases,entry.canonical_company_id "canonicalCompanyId",entry.state,entry.version,entry.created_at "createdAt",entry.updated_at "updatedAt",
+    binding.workflow_version_id "deliveryWorkflowVersionId",binding.version "deliveryWorkflowBindingVersion"
+    FROM company_master_catalog_entries entry
+    LEFT JOIN company_service_delivery_workflow_bindings binding ON binding.service_entry_id=entry.id AND binding.company_id=entry.company_id
+    WHERE entry.company_id=$1 AND entry.kind=$2 AND ($3::boolean OR entry.state='active') ORDER BY entry.name,entry.id`, [current.companyId,kind,includeInactive]);
   res.json({ kind, companyId: current.companyId, canManage: current.isPmo || current.isSuperAdmin, entries: result.rows });
+});
+
+router.put("/company/master-catalogs/service/:id/delivery-workflow", authMiddleware, async (req, res): Promise<void> => {
+  await ensureCompanyMasterCatalogSchema();
+  await ensureDeliveryWorkflowTemplateSchema();
+  const current = await actor(req);
+  if (!current || (!current.isPmo && !current.isSuperAdmin)) { res.status(403).json({ code: "COMPANY_CATALOG_PMO_REQUIRED" }); return; }
+  const serviceId = parameter(req.params.id);
+  const workflowVersionId = String(req.body?.workflowVersionId ?? "").trim();
+  const expectedVersion = req.body?.expectedVersion == null ? null : Number(req.body.expectedVersion);
+  if (!workflowVersionId || (expectedVersion !== null && (!Number.isSafeInteger(expectedVersion) || expectedVersion <= 0))) {
+    res.status(400).json({ code: "SERVICE_WORKFLOW_BINDING_INVALID" }); return;
+  }
+  const connection = await pool.connect();
+  try {
+    await connection.query("BEGIN");
+    const service = (await connection.query(`SELECT id FROM company_master_catalog_entries WHERE id=$1 AND company_id=$2 AND kind='service' AND state='active' FOR UPDATE`, [serviceId,current.companyId])).rows[0];
+    const workflow = (await connection.query(`SELECT v.id FROM company_delivery_workflow_versions v JOIN company_delivery_workflow_templates t ON t.id=v.template_id WHERE v.id=$1 AND t.company_id=$2 AND v.state='published'`, [workflowVersionId,current.companyId])).rows[0];
+    if (!service || !workflow) { await connection.query("ROLLBACK"); res.status(409).json({ code: "SERVICE_WORKFLOW_AUTHORITY_INVALID" }); return; }
+    const existing = (await connection.query(`SELECT version FROM company_service_delivery_workflow_bindings WHERE service_entry_id=$1 FOR UPDATE`, [serviceId])).rows[0];
+    if ((existing && expectedVersion !== Number(existing.version)) || (!existing && expectedVersion !== null)) {
+      await connection.query("ROLLBACK"); res.status(409).json({ code: "SERVICE_WORKFLOW_BINDING_STALE" }); return;
+    }
+    const result = await connection.query(`INSERT INTO company_service_delivery_workflow_bindings(service_entry_id,company_id,workflow_version_id,updated_by_id)
+      VALUES($1,$2,$3,$4) ON CONFLICT(service_entry_id) DO UPDATE SET workflow_version_id=EXCLUDED.workflow_version_id,version=company_service_delivery_workflow_bindings.version+1,updated_by_id=EXCLUDED.updated_by_id,updated_at=now()
+      RETURNING service_entry_id "serviceEntryId",workflow_version_id "workflowVersionId",version`, [serviceId,current.companyId,workflowVersionId,current.userId]);
+    await connection.query("COMMIT");
+    res.json({ binding: result.rows[0] });
+  } catch (error) { await connection.query("ROLLBACK"); throw error; }
+  finally { connection.release(); }
 });
 
 router.get("/company/master-catalogs/:kind/:id/usage", authMiddleware, async (req, res): Promise<void> => {

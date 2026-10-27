@@ -21,6 +21,7 @@ type Props = {
   apuVersions: IntakeApuVersion[];
   defaultWorkflow: string;
   deliveryWorkflowOptions?: Array<{ versionId: string; name: string; source: string; version: number;
+    serviceEntryIds?: string[];
     governancePolicy?: { code: string; version: number } | null;
     activationBlock?: { code: string; message: string } | null;
     definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: Array<{ name?: string }> }> } }>;

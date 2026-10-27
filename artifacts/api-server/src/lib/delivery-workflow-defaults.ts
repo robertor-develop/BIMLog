@@ -14,6 +14,7 @@ export type DeliveryWorkflowOption = {
   source: "bimlog" | "company";
   definition: DeliveryWorkflowDefinition;
   fingerprint: string;
+  serviceEntryIds?: string[];
   governancePolicy?: { versionId: string; code: string; version: number } | null;
   activationBlock?: { code: string; message: string } | null;
 };

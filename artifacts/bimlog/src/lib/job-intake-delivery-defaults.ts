@@ -81,11 +81,21 @@ export function selectPublishedDeliveryWorkflow(current: any, option: { versionI
 
 export function hydrateSelectedDeliveryWorkflowGuidance(
   items: any[],
-  options: Array<{ versionId: string; source?: string; definition: WorkflowDefinition }>,
+  options: Array<{ versionId: string; source?: string; serviceEntryIds?: string[]; definition: WorkflowDefinition }>,
 ) {
   const byVersion = new Map(options.map(option => [option.versionId, option]));
   return items.map(item => {
     const versionId = String(item?.deliveryWorkflowVersionId ?? "").trim();
+    const serviceId = String(item?.classification?.serviceId ?? "").trim();
+    const bound = !versionId && serviceId
+      ? options.filter(option => option.source === "company" && option.serviceEntryIds?.includes(serviceId))
+      : [];
+    if (bound.length === 1) {
+      const option = bound[0];
+      const deliverableType = option.definition.deliverableTypes?.[0] ?? String(item?.deliverableType ?? "GENERAL");
+      const hydrated = selectPublishedDeliveryWorkflow({ ...item, deliverableType }, option);
+      return JSON.stringify(hydrated) === JSON.stringify(item) ? item : hydrated;
+    }
     const type = String(item?.deliverableType ?? "GENERAL");
     const matches = options.filter(option => (option.definition.deliverableTypes ?? []).includes(type));
     const company = matches.filter(option => option.source === "company");
