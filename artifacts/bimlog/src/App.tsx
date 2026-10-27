@@ -35,6 +35,7 @@ const CommercialWorkspace = namedPage(() => import("@/pages/CommercialWorkspace"
 const FinancialApuWorkspace = namedPage(() => import("@/pages/FinancialApuWorkspace"), "FinancialApuWorkspace");
 const FinancialBudgetWorkspace = namedPage(() => import("@/pages/FinancialBudgetWorkspace"), "FinancialBudgetWorkspace");
 const FinancialContractWorkspace = namedPage(() => import("@/pages/FinancialContractWorkspace"), "FinancialContractWorkspace");
+const FinancialContractItemsWorkspace = namedPage(() => import("@/pages/FinancialContractItemsWorkspace"), "FinancialContractItemsWorkspace");
 const JobIntakeWorkspace = namedPage(() => import("@/pages/JobIntakeWorkspace"), "JobIntakeWorkspace");
 const JobOperationsWorkspace = namedPage(() => import("@/pages/JobOperationsWorkspace"), "JobOperationsWorkspace");
 const TeamPerformanceWorkspace = namedPage(() => import("@/pages/TeamPerformanceWorkspace"), "TeamPerformanceWorkspace");
@@ -244,6 +245,9 @@ function Router() {
       </Route>
       <Route path="/projects/:id/financial/contracts">
         {() => <ProjectRoute component={FinancialContractWorkspace} />}
+      </Route>
+      <Route path="/projects/:id/financial/contracts/:contractId/items">
+        {() => <ProjectRoute component={FinancialContractItemsWorkspace} />}
       </Route>
       <Route path="/projects/:id/financial/apu">
         {() => <ProjectRoute component={FinancialApuWorkspace} />}
