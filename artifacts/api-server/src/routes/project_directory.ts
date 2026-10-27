@@ -819,6 +819,8 @@ router.post(
       String(req.body?.primary_contact_phone ?? ""),
     );
     const notes = normalizeCompanyName(String(req.body?.notes ?? ""));
+    const sourceApplication = normalizeCompanyName(String(req.body?.source_application ?? "BIMLog Directory"));
+    const recordedSource = sourceApplication === "Lens Next" ? "Lens Next" : "BIMLog Directory";
     if (contactEmail && !isDirectoryRecipientEmail(contactEmail)) { res.status(422).json({ error: "real_contact_email_required" }); return; }
     if (!companyName) {
       res.status(400).json({ error: "company_name_required" });
@@ -929,7 +931,7 @@ router.post(
               notes ||
               [
                 contactPhone ? `Phone: ${contactPhone}` : "",
-                "Registered from Meeting attendee workflow.",
+                `Registered from ${recordedSource}.`,
               ]
                 .filter(Boolean)
                 .join(" "),
@@ -948,7 +950,7 @@ router.post(
           entityId: createdEntry.id,
           fileNameBefore: null,
           fileNameAfter: null,
-          details: `Registered project directory company: ${companyName}`,
+          details: `Registered project directory company from ${recordedSource}: ${companyName}`,
         });
         return {
           company,

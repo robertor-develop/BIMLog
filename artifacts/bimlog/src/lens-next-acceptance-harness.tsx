@@ -111,7 +111,8 @@ function Harness() {
     catalogState: "current", catalogError: null, catalogSyncedAt: "2026-09-16T14:10:00.000Z",
     history: null, historyError: null, lastRefreshedAt: "2026-09-16T14:10:00.000Z", bridgeOpenEnabled: true,
     workingViewState: "idle", workingViewUnavailable: false, visualRepairState: "idle", visualRepairMessage: null, onRepairCurrentWorkingView: noop,
-    onRefresh: noop, onSelectIssue: setSelectedServerId, onCloseIssue: () => setSelectedServerId(null), onOpenWorkingView: noop, onLoadHistory: noop,
+    onRefresh: noop, onRegisterProjectCompany: async () => true, companyRegistrationState: "idle", companyRegistrationMessage: null,
+    onSelectIssue: setSelectedServerId, onCloseIssue: () => setSelectedServerId(null), onOpenWorkingView: noop, onLoadHistory: noop,
     publishState: "idle", publishMessage: null, onPublishAction: noop,
   };
   return <div className="lens-next-acceptance-shell">

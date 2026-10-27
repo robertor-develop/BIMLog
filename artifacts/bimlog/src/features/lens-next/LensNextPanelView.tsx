@@ -431,6 +431,9 @@ export interface LensNextPanelViewProps {
   visualRepairMessage: string | null;
   onRepairCurrentWorkingView(): void;
   onRefresh(): void;
+  onRegisterProjectCompany(companyName: string): Promise<boolean>;
+  companyRegistrationState: "idle" | "saving" | "success" | "error";
+  companyRegistrationMessage: string | null;
   onSelectIssue(serverId: number): void;
   onCloseIssue(): void;
   onOpenWorkingView(): void;
@@ -531,6 +534,9 @@ export function LensNextPanelView({
   visualRepairMessage,
   onRepairCurrentWorkingView,
   onRefresh,
+  onRegisterProjectCompany,
+  companyRegistrationState,
+  companyRegistrationMessage,
   onSelectIssue,
   onCloseIssue,
   onOpenWorkingView,
@@ -547,6 +553,7 @@ export function LensNextPanelView({
     } catch { return language; }
   });
   const tt = React.useCallback((en: string, es: string, pt?: string) => lensLanguage === "es" ? es : lensLanguage === "pt" ? (pt ?? en) : en, [lensLanguage]);
+  const [newCompanyName, setNewCompanyName] = React.useState("");
   const selectLensLanguage = (next: "en" | "es" | "pt") => {
     setLensLanguage(next);
     try { window.localStorage.setItem("bimlog-lens-language", next); } catch { /* local preference is optional */ }
@@ -939,6 +946,11 @@ export function LensNextPanelView({
             </dl>
             {catalogError && <p role="alert">{catalogError}</p>}
             <button type="button" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? tt("Refreshing catalogs…", "Actualizando catálogos…", "Atualizando catálogos…") : tt("Refresh Issue data and catalogs", "Actualizar incidencias y catálogos", "Atualizar ocorrências e catálogos")}</button>
+            <form onSubmit={event => { event.preventDefault(); const value = newCompanyName.trim(); if (!value) return; void onRegisterProjectCompany(value).then(saved => { if (saved) setNewCompanyName(""); }); }}>
+              <label className="lens-next__field"><span>{tt("Add responsible company to this project", "Agregar empresa responsable a este proyecto", "Adicionar empresa responsável a este projeto")}</span><input value={newCompanyName} maxLength={160} disabled={companyRegistrationState === "saving"} onChange={event => setNewCompanyName(event.target.value)} placeholder={tt("Company name", "Nombre de la empresa", "Nome da empresa")} /></label>
+              <button type="submit" disabled={companyRegistrationState === "saving" || newCompanyName.trim().length < 2}>{companyRegistrationState === "saving" ? tt("Adding and refreshing…", "Agregando y actualizando…", "Adicionando e atualizando…") : tt("Add to project and reuse in Lens", "Agregar al proyecto y reutilizar en Lens", "Adicionar ao projeto e reutilizar no Lens")}</button>
+            </form>
+            {companyRegistrationMessage && <p role={companyRegistrationState === "error" ? "alert" : "status"}>{companyRegistrationMessage}</p>}
             <details><summary>{tt("Trades", "Disciplinas", "Disciplinas")} ({createTrades.length})</summary><ul>{createTrades.map(value=><li key={value}>{value}</li>)}</ul></details>
             <details><summary>{tt("Floors / Levels", "Pisos / Niveles", "Pavimentos / Níveis")} ({createFloors.length})</summary><ul>{createFloors.map(value=><li key={value}>{value}</li>)}</ul></details>
             <details><summary>{tt("Responsible Companies", "Empresas responsables", "Empresas responsáveis")} ({responsibleCompanyOptions.length})</summary><ul>{responsibleCompanyOptions.map(option=><li key={`${option.id ?? "historical"}:${option.label}`}><strong>{option.label}</strong> — {option.assignable ? tt("active and assignable", "activa y asignable", "ativa e atribuível") : option.unavailabilityReason === "inactive" ? tt("inactive", "inactiva", "inativa") : tt("historical only; not authorized for new assignment", "solo histórica; no autorizada para nueva asignación", "somente histórica; não autorizada para nova atribuição")}</li>)}</ul></details>

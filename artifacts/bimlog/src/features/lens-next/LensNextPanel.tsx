@@ -109,6 +109,8 @@ export function LensNextPanel({
   const [catalogError, setCatalogError] = useState<string | null>(null);
   const [catalogSyncedAt, setCatalogSyncedAt] = useState<string | null>(null);
   const [catalogExpiresAt, setCatalogExpiresAt] = useState<string | null>(null);
+  const [companyRegistrationState, setCompanyRegistrationState] = useState<"idle" | "saving" | "success" | "error">("idle");
+  const [companyRegistrationMessage, setCompanyRegistrationMessage] = useState<string | null>(null);
   const [selectedServerId, setSelectedServerId] = useState<number | null>(null);
   const [filters, setFilters] = useState<LensNextFilters>({
     ...LENS_NEXT_DEFAULT_FILTERS,
@@ -380,6 +382,29 @@ export function LensNextPanel({
     const timer = window.setTimeout(() => setCatalogState("stale"), remaining);
     return () => window.clearTimeout(timer);
   }, [catalogExpiresAt, catalogState]);
+
+  const registerProjectCompany = useCallback(async (companyName: string) => {
+    if (!apiClient || authorizedProjectId === null) {
+      setCompanyRegistrationState("error");
+      setCompanyRegistrationMessage("Select an authenticated BIMLog project first.");
+      return false;
+    }
+    setCompanyRegistrationState("saving");
+    setCompanyRegistrationMessage(null);
+    try {
+      const receipt = await apiClient.registerProjectCompany(authorizedProjectId, companyName);
+      await loadIssues("refresh");
+      setCompanyRegistrationState("success");
+      setCompanyRegistrationMessage(receipt.directoryEntryReused
+        ? `${receipt.name} is already authorized for this project and is available in Lens.`
+        : `${receipt.name} was added to this project, recorded in activity history, and is now available in Lens.`);
+      return true;
+    } catch (error) {
+      setCompanyRegistrationState("error");
+      setCompanyRegistrationMessage(error instanceof Error ? error.message : "Company registration failed.");
+      return false;
+    }
+  }, [apiClient, authorizedProjectId, loadIssues]);
 
   useEffect(() => {
     if (autoRefreshMs < 10_000 || authorizedProjectId === null || !apiClient)
@@ -978,6 +1003,9 @@ export function LensNextPanel({
       visualRepairMessage={visualRepairMessage}
       onRepairCurrentWorkingView={() => void repairCurrentWorkingView()}
       onRefresh={() => void loadIssues("refresh")}
+      onRegisterProjectCompany={registerProjectCompany}
+      companyRegistrationState={companyRegistrationState}
+      companyRegistrationMessage={companyRegistrationMessage}
       onSelectIssue={(serverId) => {
         setSelectedServerId(serverId);
         setBridgeError(null);
