@@ -5,7 +5,7 @@ import { usersTable } from "./users";
 
 export const lensIssueViewpointsTable = pgTable("lens_issue_viewpoints", {
   id: text("id").primaryKey(),
-  issueId: integer("issue_id").notNull().references(() => lensViewpointsTable.id, { onDelete: "cascade" }),
+  issueId: integer("issue_id").notNull().references(() => lensViewpointsTable.id),
   idempotencyKey: text("idempotency_key").notNull(),
   projectId: integer("project_id").notNull(),
   modelFingerprint: text("model_fingerprint"),
@@ -33,7 +33,7 @@ export const lensIssueViewpointsTable = pgTable("lens_issue_viewpoints", {
 
 export const lensIssueViewpointRevisionsTable = pgTable("lens_issue_viewpoint_revisions", {
   id: text("id").primaryKey(),
-  issueViewpointId: text("issue_viewpoint_id").notNull().references(() => lensIssueViewpointsTable.id, { onDelete: "cascade" }),
+  issueViewpointId: text("issue_viewpoint_id").notNull().references(() => lensIssueViewpointsTable.id),
   revisionNumber: integer("revision_number").notNull(),
   action: text("action").notNull(),
   name: text("name").notNull(),

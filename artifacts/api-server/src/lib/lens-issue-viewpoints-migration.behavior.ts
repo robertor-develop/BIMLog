@@ -7,6 +7,7 @@ assert.match(LENS_ISSUE_VIEWPOINTS_SQL, /CREATE TABLE IF NOT EXISTS lens_issue_v
 assert.match(LENS_ISSUE_VIEWPOINTS_SQL, /WHERE is_primary AND lifecycle_status='active'/);
 assert.match(LENS_ISSUE_VIEWPOINTS_SQL, /'legacy-primary-' \|\| issue\.id::text/);
 assert.doesNotMatch(LENS_ISSUE_VIEWPOINTS_SQL, /UPDATE\s+lens_viewpoints/i);
+assert.doesNotMatch(LENS_ISSUE_VIEWPOINTS_SQL, /ON DELETE CASCADE/i);
 
 const calls: string[] = [];
 let released = false;

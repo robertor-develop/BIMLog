@@ -3,7 +3,7 @@ import { pool } from "@workspace/db";
 export const LENS_ISSUE_VIEWPOINTS_SQL = String.raw`
 CREATE TABLE IF NOT EXISTS lens_issue_viewpoints (
   id text PRIMARY KEY,
-  issue_id integer NOT NULL REFERENCES lens_viewpoints(id) ON DELETE CASCADE,
+  issue_id integer NOT NULL REFERENCES lens_viewpoints(id),
   idempotency_key text NOT NULL,
   project_id integer NOT NULL,
   model_fingerprint text,
@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS lens_issue_viewpoints_order_idx
 
 CREATE TABLE IF NOT EXISTS lens_issue_viewpoint_revisions (
   id text PRIMARY KEY,
-  issue_viewpoint_id text NOT NULL REFERENCES lens_issue_viewpoints(id) ON DELETE CASCADE,
+  issue_viewpoint_id text NOT NULL REFERENCES lens_issue_viewpoints(id),
   revision_number integer NOT NULL CHECK (revision_number > 0),
   action text NOT NULL CHECK (action IN ('captured','renamed','reordered','made_primary','archived','restored','opened')),
   name text NOT NULL,
