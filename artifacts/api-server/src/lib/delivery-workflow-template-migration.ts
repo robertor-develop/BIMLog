@@ -43,12 +43,19 @@ CREATE UNIQUE INDEX IF NOT EXISTS company_delivery_workflow_one_published_versio
 CREATE TABLE IF NOT EXISTS company_service_delivery_workflow_bindings (
   service_entry_id text PRIMARY KEY REFERENCES company_master_catalog_entries(id),
   company_id integer NOT NULL REFERENCES companies(id),
-  workflow_version_id text NOT NULL REFERENCES company_delivery_workflow_versions(id),
+  workflow_version_id text NOT NULL,
   version integer NOT NULL DEFAULT 1 CHECK (version>0),
   updated_by_id integer NOT NULL REFERENCES users(id),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='company_service_delivery_workflow_bindings_workflow_version_id_company_delivery_workflow_versions_id_fk' AND conrelid='company_service_delivery_workflow_bindings'::regclass) THEN
+    ALTER TABLE company_service_delivery_workflow_bindings
+      ADD CONSTRAINT company_service_delivery_workflow_bindings_workflow_version_id_company_delivery_workflow_versions_id_fk
+      FOREIGN KEY (workflow_version_id) REFERENCES company_delivery_workflow_versions(id);
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS company_service_workflow_company_idx
   ON company_service_delivery_workflow_bindings(company_id,workflow_version_id);
 CREATE TABLE IF NOT EXISTS company_delivery_workflow_events (

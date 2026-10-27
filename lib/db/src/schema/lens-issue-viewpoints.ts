@@ -29,6 +29,9 @@ export const lensIssueViewpointsTable = pgTable("lens_issue_viewpoints", {
   idempotencyUnique: uniqueIndex("lens_issue_viewpoints_idempotency_uq").on(table.issueId, table.idempotencyKey),
   issueGuidActiveUnique: uniqueIndex("lens_issue_viewpoints_issue_guid_active_uq").on(table.issueId, table.navisworksGuid).where(sql`navisworks_guid IS NOT NULL AND lifecycle_status='active'`),
   issueOrderIndex: index("lens_issue_viewpoints_order_idx").on(table.issueId, table.lifecycleStatus, table.displayOrder, table.id),
+  viewpointTypeCheck: check("lens_issue_viewpoints_viewpoint_type_check", sql`${table.viewpointType} IN ('coordination','detail','context','verification')`),
+  displayOrderCheck: check("lens_issue_viewpoints_display_order_check", sql`${table.displayOrder} >= 0`),
+  lifecycleStatusCheck: check("lens_issue_viewpoints_lifecycle_status_check", sql`${table.lifecycleStatus} IN ('active','archived')`),
   archiveCheck: check("lens_issue_viewpoints_archive_chk", sql`(${table.lifecycleStatus}='archived')=(${table.archivedAt} IS NOT NULL)`),
 }));
 

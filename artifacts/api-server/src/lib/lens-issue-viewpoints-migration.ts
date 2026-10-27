@@ -25,6 +25,15 @@ CREATE TABLE IF NOT EXISTS lens_issue_viewpoints (
   CONSTRAINT lens_issue_viewpoints_archive_chk CHECK ((lifecycle_status='archived')=(archived_at IS NOT NULL))
 );
 DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoints_viewpoint_type_check' AND conrelid='lens_issue_viewpoints'::regclass) THEN
+    ALTER TABLE lens_issue_viewpoints ADD CONSTRAINT lens_issue_viewpoints_viewpoint_type_check CHECK (viewpoint_type IN ('coordination','detail','context','verification'));
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoints_display_order_check' AND conrelid='lens_issue_viewpoints'::regclass) THEN
+    ALTER TABLE lens_issue_viewpoints ADD CONSTRAINT lens_issue_viewpoints_display_order_check CHECK (display_order >= 0);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoints_lifecycle_status_check' AND conrelid='lens_issue_viewpoints'::regclass) THEN
+    ALTER TABLE lens_issue_viewpoints ADD CONSTRAINT lens_issue_viewpoints_lifecycle_status_check CHECK (lifecycle_status IN ('active','archived'));
+  END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='lens_issue_viewpoints_archive_chk' AND conrelid='lens_issue_viewpoints'::regclass) THEN
     ALTER TABLE lens_issue_viewpoints ADD CONSTRAINT lens_issue_viewpoints_archive_chk CHECK ((lifecycle_status='archived')=(archived_at IS NOT NULL));
   END IF;
