@@ -1,7 +1,14 @@
 import { runObservableGate } from "./lib/observable-gate-runner.mjs";
 
 const commands = [
-  ["scripts/test-recovery-ga-http.mjs", "--scenario=all"],
+  ["scripts/test-recovery-ga-http.mjs", "--scenario=project"],
+  ["scripts/test-recovery-ga-http.mjs", "--scenario=catalog"],
+  ["scripts/test-recovery-ga-http.mjs", "--scenario=directory"],
+  ["scripts/test-recovery-ga-http.mjs", "--scenario=roles"],
+  ["scripts/test-recovery-ga-http.mjs", "--scenario=convention"],
+  ["scripts/test-recovery-ga-http.mjs", "--scenario=convention-integrity"],
+  ["scripts/test-recovery-ga-http.mjs", "--scenario=versions"],
+  ["scripts/test-recovery-ga-http.mjs", "--scenario=files"],
   ["scripts/test-intake-activation.mjs"],
   ["scripts/test-ga-final-block02-build006-convention-checkpoint.mjs"],
   ["scripts/test-ga-final-block02-build007-naming-parity.mjs"],

@@ -2,7 +2,7 @@ import { runNodeGate as runNode, runTsGate as runTs } from "./lib/observable-gat
 
 runNode("scripts/test-ga-final-block01-build001-agent-access.mjs");
 runNode("scripts/test-ga-final-block01-build002-agent-isolation.mjs");
-runNode("scripts/test-recovery-ga-block04.mjs");
+runNode("scripts/test-recovery-ga-block04.mjs", { timeout: 300_000 });
 for(const file of [
   "artifacts/api-server/src/lib/block22-build106-object-authorization.behavior.ts",
   "artifacts/api-server/src/lib/consolidation-build116-role-isolation.behavior.ts",

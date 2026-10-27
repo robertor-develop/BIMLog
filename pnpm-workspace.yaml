@@ -35,6 +35,9 @@ catalog:
 
 minimumReleaseAge: 1440
 
+minimumReleaseAgeExclude:
+  - qs@6.16.1
+
 onlyBuiltDependencies:
   - '@swc/core'
   - esbuild
@@ -107,7 +110,7 @@ overrides:
   path-to-regexp: 8.4.0
   picomatch: 2.3.2
   proxy-addr: 2.0.8
-  qs: 6.16.0
+  qs: 6.16.1
   tmp: 0.2.7
   'exceljs>uuid': 11.1.1
   'gaxios>uuid': 11.1.1

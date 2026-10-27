@@ -1,12 +1,23 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Whole-platform audit repair Block 1 — 2026-10-27
+
+- [x] Regenerate the deterministic accessibility/responsive matrix from the actual route graph, restoring the Financial Contract Items route and exact 66-surface/198-viewport coverage.
+- [x] Replace the monolithic recovery HTTP scenario with eight independently observable, bounded PostgreSQL/HTTP scenarios and preserve the complete Intake, convention, file and authorization gates.
+- [x] Advance the governed `qs` override to patched 6.16.1 and prove zero known production dependency vulnerabilities.
+- [x] Pass the repaired complete GA Block 05 through Builds 031–033 without weakening the intentional fail-closed protected-file, temporary-project, independent or customer-acceptance verdicts.
+- [ ] Pass the exact clean production build, commit and push the candidate, publish once, verify immutable production identity, and repeat the authenticated smoke/audit.
+- [ ] Obtain provider originals/checksums for all 16 protected non-portable file records before claiming custody recovery.
+- [ ] Complete synthetic-only ownership/dependency/storage evidence before authorizing temporary Gauntlet project deletion.
+- [ ] Complete the current-authority company-identity binding repair, SharePoint provider proof, commercial-provider configuration, and named-user/Native/customer/independent acceptance where release-scoped.
+
 ## Lorena recommendations Build 5 — 2026-10-27
 
 - [x] Inspect the exact deployed Build 4 journey and identify a real remaining product defect instead of inventing an unapproved feature.
 - [x] Preserve governed Contract Item Discipline and Service on every future workflow-generated phase task and package while retaining the exact immutable workflow Phase.
 - [x] Recover missing Discipline and Service for already-activated history from the exact same Intake's immutable scope snapshot without mutating historical rows or crossing project/intake scope.
 - [x] Bind the future-write and historical-read paths at `c39d6783b00be2e9e4ae373caf8840397f17d5ee` with a focused eight-check regression and pass existing classification propagation, activation, full-lifecycle, Lorena Block 4, and API/frontend TypeScript gates.
-- [ ] Run the exact clean production gate, push and publish the exact candidate, verify immutable runtime identity, then pass authenticated desktop, responsive, reload, clean-reentry, bilingual, console/network and complete read-only audit gates.
+- [x] Run the exact clean production gate, push and publish exact source `06c3fb6702a01139040d2a102bc785d4e6ea758e`, verify immutable runtime identity, then pass authenticated desktop, responsive, reload, clean-reentry, bilingual, console/network and complete read-only audit gates.
 
 ## Lorena recommendations Build 4 — 2026-10-27
 

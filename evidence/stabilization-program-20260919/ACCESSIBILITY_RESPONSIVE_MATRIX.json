@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
-    "routeTemplates": 45,
+    "routeTemplates": 46,
     "projectSurfaces": 20,
-    "customerSurfaces": 65,
-    "viewportCases": 195
+    "customerSurfaces": 66,
+    "viewportCases": 198
   },
   "viewports": [
     {
@@ -441,6 +441,29 @@
     },
     {
       "order": 27,
+      "path": "/projects/:id/financial/contracts/:contractId/items",
+      "guard": "project",
+      "target": "FinancialContractItemsWorkspace",
+      "samplePath": "/projects/1/financial/contracts/:contractId/items",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 28,
       "path": "/projects/:id/financial/apu",
       "guard": "project",
       "target": "FinancialApuWorkspace",
@@ -463,7 +486,7 @@
       ]
     },
     {
-      "order": 28,
+      "order": 29,
       "path": "/projects/:id/commercial/team-performance",
       "guard": "project",
       "target": "TeamPerformanceWorkspace",
@@ -486,7 +509,7 @@
       ]
     },
     {
-      "order": 29,
+      "order": 30,
       "path": "/projects/:id/intake",
       "guard": "project",
       "target": "JobIntakeWorkspace",
@@ -509,7 +532,7 @@
       ]
     },
     {
-      "order": 30,
+      "order": 31,
       "path": "/projects/:id/operations",
       "guard": "project",
       "target": "JobOperationsWorkspace",
@@ -532,7 +555,7 @@
       ]
     },
     {
-      "order": 31,
+      "order": 32,
       "path": "/projects/:id/submittal-tracker",
       "guard": "project",
       "target": "LegacySubmittalTrackerRedirect",
@@ -555,7 +578,7 @@
       ]
     },
     {
-      "order": 33,
+      "order": 34,
       "path": "/help",
       "guard": "authenticated",
       "target": "HelpCenter",
@@ -578,7 +601,7 @@
       ]
     },
     {
-      "order": 34,
+      "order": 35,
       "path": "/setup-guide",
       "guard": "authenticated",
       "target": "SetupGuideRedirect",
@@ -601,7 +624,7 @@
       ]
     },
     {
-      "order": 35,
+      "order": 36,
       "path": "/training/project-setup",
       "guard": "authenticated",
       "target": "ProjectSetupTraining",
@@ -624,7 +647,7 @@
       ]
     },
     {
-      "order": 36,
+      "order": 37,
       "path": "/profile",
       "guard": "authenticated",
       "target": "Profile",
@@ -647,7 +670,7 @@
       ]
     },
     {
-      "order": 37,
+      "order": 38,
       "path": "/settings/company-profile",
       "guard": "authenticated",
       "target": "CompanyProfile",
@@ -670,7 +693,7 @@
       ]
     },
     {
-      "order": 38,
+      "order": 39,
       "path": "/settings/notifications",
       "guard": "authenticated",
       "target": "NotificationSettings",
@@ -693,7 +716,7 @@
       ]
     },
     {
-      "order": 39,
+      "order": 40,
       "path": "/settings/financial-controls",
       "guard": "authenticated",
       "target": "FinancialControlsSettings",
@@ -716,7 +739,7 @@
       ]
     },
     {
-      "order": 40,
+      "order": 41,
       "path": "/settings/billing-support",
       "guard": "authenticated",
       "target": "CommercialWorkspace",
@@ -739,7 +762,7 @@
       ]
     },
     {
-      "order": 41,
+      "order": 42,
       "path": "/admin/feedback",
       "guard": "access",
       "target": "AdminPanel",
@@ -762,7 +785,7 @@
       ]
     },
     {
-      "order": 42,
+      "order": 43,
       "path": "/company-catalogs",
       "guard": "access",
       "target": "CompanyMasterCatalogs",
@@ -785,7 +808,7 @@
       ]
     },
     {
-      "order": 43,
+      "order": 44,
       "path": "/company-workflows",
       "guard": "access",
       "target": "CompanyDeliveryWorkflows",
@@ -808,7 +831,7 @@
       ]
     },
     {
-      "order": 44,
+      "order": 45,
       "path": "/company-workflow-governance",
       "guard": "access",
       "target": "CompanyWorkflowGovernance",
@@ -831,7 +854,7 @@
       ]
     },
     {
-      "order": 45,
+      "order": 46,
       "path": "/company-pricing-templates",
       "guard": "access",
       "target": "CompanyPricingTemplates",
@@ -854,7 +877,7 @@
       ]
     },
     {
-      "order": 46,
+      "order": 47,
       "path": "/knowledge",
       "guard": "authenticated",
       "target": "CoordinationKnowledgeLibrary",
@@ -877,7 +900,7 @@
       ]
     },
     {
-      "order": 47,
+      "order": 48,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel",
@@ -900,7 +923,7 @@
       ]
     },
     {
-      "order": 48,
+      "order": 49,
       "path": "/feedback",
       "guard": "authenticated",
       "target": "Dashboard",
@@ -923,7 +946,7 @@
       ]
     },
     {
-      "order": 49,
+      "order": 50,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl",
@@ -946,7 +969,7 @@
       ]
     },
     {
-      "order": 50,
+      "order": 51,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief",
@@ -969,7 +992,7 @@
       ]
     },
     {
-      "order": 51,
+      "order": 52,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing",
@@ -992,7 +1015,7 @@
       ]
     },
     {
-      "order": 52,
+      "order": 53,
       "path": "/features",
       "guard": "public",
       "target": "Features",
@@ -1015,7 +1038,7 @@
       ]
     },
     {
-      "order": 53,
+      "order": 54,
       "path": "/about",
       "guard": "public",
       "target": "About",
@@ -1038,7 +1061,7 @@
       ]
     },
     {
-      "order": 54,
+      "order": 55,
       "path": "/contact",
       "guard": "public",
       "target": "Contact",
