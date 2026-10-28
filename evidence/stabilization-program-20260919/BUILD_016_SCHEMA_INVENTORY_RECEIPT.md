@@ -3,7 +3,7 @@
 Result: `PASS`
 
 - Added a read-only database inventory receipt bound to the complete source contract.
-- Source contract: `223 tables / 273 indexes / 184 startup tables`.
+- Current source contract: `307 tables / 396 explicit indexes / 4,050 columns / 519 checks / 268 startup tables`.
 - The receipt hashes the sorted source contract and the observed database inventory.
 - Missing and extra tables/indexes are reported separately; startup tables are checked explicitly.
 - PostgreSQL constraint-backed indexes are catalog-proven and classified separately from unexplained indexes.

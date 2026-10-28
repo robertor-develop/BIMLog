@@ -3,7 +3,7 @@
 Result: `PASS_PENDING_PUSH_PUBLICATION_AND_LIVE_SMOKE`
 
 - Consolidates source schema identity, read-only development/production inventory, migration preview, and publication decision into one immutable receipt.
-- Publication proceeds with `schemaAction=NONE` only when both databases match the exact 223-table/273-explicit-index/184-startup-table source contract; catalog-proven constraint indexes are classified separately.
+- Publication proceeds with `schemaAction=NONE` only when both databases match the current exact 307-table/396-explicit-index/4,050-column/519-check/268-startup-table source contract; catalog-proven constraint indexes are classified separately.
 - Any difference stops for the existing complete-preview, additive-inventory, backup/restore, and pre/post count procedure.
 - Development-to-production data copy remains explicitly off.
 - Build 019 proves the same contract through backup SHA-256, restore, row-count equality, startup serialization, and two exact-artifact readiness cycles.

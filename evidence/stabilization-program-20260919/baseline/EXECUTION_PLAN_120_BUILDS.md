@@ -107,7 +107,7 @@ Every publication milestone runs, at minimum:
 
 | Build | Deliverable | Acceptance |
 |---:|---|---|
-| 016 | Produce an exact production schema inventory and compare it with the 223-table/273-index/184-startup-table source contract. | Differences are classified; no hidden startup mutation remains. |
+| 016 | Produce an exact production schema inventory and compare it with the current 307-table/396-index/268-startup-table source contract. | Differences are classified; no hidden startup mutation remains. |
 | 017 | Make the disposable `bimlog_rfi_test` fixture deterministic on Windows with correct UTF-8 identity and bounded cleanup. | Fixture creation, tests, and cleanup repeat twice without manual repair. |
 | 018 | Prove every pending migration on a restored disposable database and detect DROP/rename/data-loss behavior. | Migration preview is additive or has an explicitly proven transformation and rollback. |
 | 019 | Verify backup creation, restore, migration replay, startup serialization, and idempotent restart. | Restored database reaches the exact expected checksum and application readiness. |
