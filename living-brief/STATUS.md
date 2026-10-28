@@ -1,8 +1,8 @@
 # STATUS.md - Current Accepted Platform State
 
-## 2026-10-27 — Entire-platform closure Block 1, Build 1 release-state reconciliation
+## 2026-10-27 — Entire-platform closure Block 1, Builds 1–5 candidate
 
-The 50-build entire-platform closure program begins with five bounded release-integrity repairs. Build 1 reconciles the exact deployed source `94ee1a1ed36688baed067548773f9c7065288382`: identity evidence commit `a29b7ca2c`, canonical governed-directory company reuse `6a03d9111`, and same-project historical Lens responsible-company reuse `94ee1a1ed`. The candidate preserves project isolation, nonblank company validation, immutable Lens history and the existing release `v1.05.N18-P37`; it does not claim Ruben field acceptance. Builds 2–5 will separately repair the production dependency advisory, dependency provenance, stale recovery inventory, and final GA aggregate observability. This first block is push-only; publication remains due after Block 2 / Build 10.
+The 50-build entire-platform closure program begins with five bounded release-integrity repairs. Build 1 reconciles the exact deployed source `94ee1a1ed36688baed067548773f9c7065288382`: identity evidence commit `a29b7ca2c`, canonical governed-directory company reuse `6a03d9111`, and same-project historical Lens responsible-company reuse `94ee1a1ed`. Builds 2–5 replace the vulnerable SendGrid `deepmerge` transitive dependency with a governed local security backport, bind dependency provenance to `qs` 6.16.1 and that backport, preserve last-known evidence while classifying two retired historical recovery roots, and give the 14-scenario authenticated recovery aggregate an observable derived timeout budget. The real Build 031 security/isolation aggregate passes against disposable PostgreSQL with zero production mutations. The candidate preserves project isolation, nonblank company validation, immutable Lens history and release `v1.05.N18-P37`; it does not claim Ruben field acceptance. This first block is push-only; publication remains due after Block 2 / Build 10.
 
 ## 2026-10-27 — Whole-platform audit repair Block 1 candidate
 

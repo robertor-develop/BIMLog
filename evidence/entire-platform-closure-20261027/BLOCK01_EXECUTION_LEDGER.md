@@ -27,17 +27,17 @@ MANDATORY_BOOTSTRAP=PASS Constitution 3.5.0 Amendment 0021; professional identit
 
 ## Current checkpoint
 
-ACTIVE_BUILD=4
-LAST_COMPLETED_ACTION=Build 4 recovery inventory now classifies retired or missing historical worktrees and preserves their last-known evidence; commit pending
-CURRENT_COMMIT=d6bca0f07
-TESTS_COMPLETED=Builds 1-3 committed; recovery self-test PASS; governed inventory write and unchanged replay PASS with one available and two retired-or-missing roots
-TESTS_PENDING=Create focused Build 4 commit
+ACTIVE_BUILD=5
+LAST_COMPLETED_ACTION=Build 5 focused and complete block acceptance passed; focused commit pending before clean production assembly
+CURRENT_COMMIT=c7daf0dc8
+TESTS_COMPLETED=Builds 1-4 committed; timeout contract, full block aggregate tail, production audit, provenance, Living Brief 25-case matrix, TypeScript, accessibility/responsive 66-surface/198-viewport matrix and database safety PASS; clean production assembly correctly awaits commit
+TESTS_PENDING=Create focused Build 5 commit, rerun clean production build, push and verify remote identity
 DEFECTS_DISCOVERED=Living Brief stale after 94ee1a1e; deepmerge advisory; stale qs provenance expectation; missing historical recovery worktree crash; final GA aggregate timeout
-DEFECTS_CORRECTED=Living Brief reconciliation; SendGrid deepmerge advisory; stale qs 6.16.0 provenance expectation; historical recovery worktree crash
+DEFECTS_CORRECTED=Living Brief reconciliation; SendGrid deepmerge advisory; stale qs 6.16.0 provenance expectation; historical recovery worktree crash; final GA aggregate timeout
 BROWSER_RESOURCES_OWNED=NONE
 PUSH_STATUS=NOT_STARTED
 PUBLICATION_STATUS=NOT_DUE
-SAFE_RESUME_POINT=Commit accepted Build 4 then begin final GA aggregate Build 5
+SAFE_RESUME_POINT=Regenerate final Build 5 state, create focused commit, rerun clean production build, push and verify
 
 ## Build 1 evidence
 
@@ -72,4 +72,13 @@ SCOPE=Classify retired or missing historical recovery roots without crashing or 
 POSITIVE_TEST=Available canonical root inventories normally and unchanged replay PASS
 NEGATIVE_TEST=Two absent historical roots classified retired_or_missing with lastKnownHead and preserved file evidence
 SAFETY_TEST=Read-only inventory retains deletionAllowed=false, wholesaleMergeAllowed=false and sourceMutated=false
+
+## Build 5 evidence
+
+STATUS=FOCUSED_AND_BLOCK_ACCEPTANCE_PASS_COMMIT_PENDING
+SCOPE=Derive aggregate timeout budgets from all 14 observable recovery scenarios and bind one complete Block 1 regression
+POSITIVE_TEST=Timeout contract and observable runner PASS; real Build 031 security/isolation aggregate PASS
+NEGATIVE_TEST=Contract rejects stale 300000/360000 millisecond wrapper constants and scenario-count drift
+AUTHORIZATION_ISOLATION_TEST=Authenticated HTTP/database project, catalog, directory, role, convention, file and object matrices PASS with production_mutations=0
+CONNECTED_REGRESSION=Production audit, provenance, Living Brief integrity/freshness, full TypeScript, accessibility/responsive, database safety and pre-assembly build gates PASS
 

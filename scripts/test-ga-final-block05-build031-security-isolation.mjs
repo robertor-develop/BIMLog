@@ -1,8 +1,9 @@
 import { runNodeGate as runNode, runTsGate as runTs } from "./lib/observable-gate-runner.mjs";
+import { RECOVERY_GA_BLOCK04_TIMEOUT_MS } from "./lib/ga-timeout-contract.mjs";
 
 runNode("scripts/test-ga-final-block01-build001-agent-access.mjs");
 runNode("scripts/test-ga-final-block01-build002-agent-isolation.mjs");
-runNode("scripts/test-recovery-ga-block04.mjs", { timeout: 300_000 });
+runNode("scripts/test-recovery-ga-block04.mjs", { timeout: RECOVERY_GA_BLOCK04_TIMEOUT_MS });
 for(const file of [
   "artifacts/api-server/src/lib/block22-build106-object-authorization.behavior.ts",
   "artifacts/api-server/src/lib/consolidation-build116-role-isolation.behavior.ts",

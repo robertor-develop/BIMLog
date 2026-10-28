@@ -1,4 +1,5 @@
 import { runObservableGate } from "./lib/observable-gate-runner.mjs";
+import { RECOVERY_GA_BLOCK04_SCENARIO_COUNT, RECOVERY_GA_BLOCK04_SCENARIO_TIMEOUT_MS } from "./lib/ga-timeout-contract.mjs";
 
 const commands = [
   ["scripts/test-recovery-ga-http.mjs", "--scenario=project"],
@@ -16,5 +17,6 @@ const commands = [
   ["scripts/test-ga-final-block02-build009-template-edt.mjs"],
   ["scripts/test-ga-final-block02-build010-file-lifecycle.mjs"],
 ];
-for (const args of commands) runObservableGate(args.join(" "), process.execPath, args, { timeout: 120_000 });
+if (commands.length !== RECOVERY_GA_BLOCK04_SCENARIO_COUNT) throw new Error(`Recovery GA timeout contract expects ${RECOVERY_GA_BLOCK04_SCENARIO_COUNT} scenarios; received ${commands.length}`);
+for (const args of commands) runObservableGate(args.join(" "), process.execPath, args, { timeout: RECOVERY_GA_BLOCK04_SCENARIO_TIMEOUT_MS });
 console.log("RECOVERY_GA_BLOCK04=PASS builds=B-GA016..B-GA020 authenticated_http=true real_postgresql=true production_mutations=0 protected_projects_unchanged=true");
