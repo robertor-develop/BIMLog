@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "fac25cc386413ba15bf8e13c2c061e9f747bdd2625621ed3f755c42e4ab6bcec",
-  "itemCount": 536,
+  "sourceSha256": "db5cc7991b37564dd084b8298f89fbffa406551167de6ec08ba364e0060c5105",
+  "itemCount": 535,
   "counts": {
-    "ACTIVE": 479,
+    "ACTIVE": 478,
     "SUPERSEDED": 45,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 377,
+    "ACTIVE_DEFECT": 376,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 92,
     "ACCEPTED_LIMITATION": 3,
@@ -99,25 +99,6 @@
     }
   ],
   "items": [
-    {
-      "id": "54090045bf001b2e",
-      "sourceLine": 10,
-      "heading": "Entire-platform closure Block 1 — Builds 001–005 — 2026-10-27",
-      "statement": "Pass the final clean production assembly from tracked corrective baseline `ea7115a5c` plus its exact-root-override refinement, push the accepted block, verify exact remote identity, and keep publication pending until Build 010.",
-      "classification": "ACTIVE",
-      "dispositionCategory": "ACTIVE_DEFECT",
-      "workClass": "PRODUCT_WORK",
-      "ownership": {
-        "owner": "Platform",
-        "route": "/dashboard",
-        "module": "artifacts/bimlog/src/App.tsx"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:10",
-        "Entire-platform closure Block 1 — Builds 001–005 — 2026-10-27"
-      ],
-      "currentAuthority": false
-    },
     {
       "id": "c08ccce69ea311cb",
       "sourceLine": 11,

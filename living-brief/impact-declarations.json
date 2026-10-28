@@ -78973,8 +78973,8 @@
     },
     {
       "taskId": "entire-platform-closure-block01-build005-20261027",
-      "reviewedThroughCommit": "ea7115a5c632678f2488ef73d4d0b62e18f16c45",
-      "reviewedAt": "2026-10-28T02:14:30.000Z",
+      "reviewedThroughCommit": "3d62e1c3a1288d0cacbc4a71bfe8d8f9096901c5",
+      "reviewedAt": "2026-10-28T02:22:00.000Z",
       "status": "candidate",
       "captureTiming": "post_build_pre_push_reconciliation",
       "authorities": [
@@ -79036,14 +79036,13 @@
       ],
       "reason": "Reconcile the accepted five-build release-integrity block without claiming publication or Ruben field acceptance.",
       "reviewedChangedPaths": [
-        "artifacts/api-server/build.ts",
+        "evidence/entire-platform-closure-20261027/BLOCK01_EXECUTION_LEDGER.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "scripts/test-local-directory-runtime-lock-binding.mjs"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "13e51e03999892889262c2f29e7094d909685b5bec2dbc9c653fe8c9c5fdfc87"
+      "reviewedChangeSha256": "0ebb00c588f34a8c51ff04bf6aaf99671dcb5008712befc2c4a89a28226be7a8"
     }
   ]
 }
