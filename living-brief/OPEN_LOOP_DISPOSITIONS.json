@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "85c1b2e8c26e48f0ed272630c5f31c2a1a57c3f9cd4a7bd326fe55588d19b7a9",
-  "itemCount": 539,
+  "sourceSha256": "842e040c868eca11987973a938f4c850cca2d1f782103af9410736be2ee5b081",
+  "itemCount": 538,
   "counts": {
-    "ACTIVE": 482,
+    "ACTIVE": 481,
     "SUPERSEDED": 45,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 378,
+    "ACTIVE_DEFECT": 377,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 94,
     "ACCEPTED_LIMITATION": 3,
@@ -10274,50 +10274,12 @@
       "currentAuthority": false
     },
     {
-      "id": "b2487a98b5cc73cf",
-      "sourceLine": 6576,
-      "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
-      "statement": "Run the network-backed production advisory audit after explicit dependency-metadata egress approval.",
-      "classification": "ACTIVE",
-      "dispositionCategory": "ACTIVE_DEFECT",
-      "workClass": "PRODUCT_WORK",
-      "ownership": {
-        "owner": "Platform",
-        "route": "/dashboard",
-        "module": "artifacts/bimlog/src/App.tsx"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:6576",
-        "2026-10-27 — Entire-platform closure Block 2 release boundary"
-      ],
-      "currentAuthority": false
-    },
-    {
       "id": "592dae57dcb0fb97",
-      "sourceLine": 6577,
+      "sourceLine": 6578,
       "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
       "statement": "Pass the exact-head production build and complete pre-push gate, then synchronize canonical `master` without force.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:6577",
-        "2026-10-27 — Entire-platform closure Block 2 release boundary"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "5ba8edef2c0d737d",
-      "sourceLine": 6578,
-      "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
-      "statement": "Publish through the established signed-in Replit workspace using Shell and Publish only; verify schema correspondence, restore readiness, deployment identity, health and production version.",
-      "classification": "ACTIVE",
-      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
         "owner": "Release engineering",
@@ -10331,8 +10293,27 @@
       "currentAuthority": false
     },
     {
-      "id": "7d0f8372cbeff9a5",
+      "id": "5ba8edef2c0d737d",
       "sourceLine": 6579,
+      "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
+      "statement": "Publish through the established signed-in Replit workspace using Shell and Publish only; verify schema correspondence, restore readiness, deployment identity, health and production version.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6579",
+        "2026-10-27 — Entire-platform closure Block 2 release boundary"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7d0f8372cbeff9a5",
+      "sourceLine": 6580,
       "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
       "statement": "Pass three consecutive authenticated live rounds: full smoke, refresh/reopen, and clean reentry. Do not convert this release into Ruben/Navisworks field acceptance.",
       "classification": "ACTIVE",
@@ -10344,7 +10325,7 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:6579",
+        "OPEN_LOOP.md:6580",
         "2026-10-27 — Entire-platform closure Block 2 release boundary"
       ],
       "currentAuthority": false
