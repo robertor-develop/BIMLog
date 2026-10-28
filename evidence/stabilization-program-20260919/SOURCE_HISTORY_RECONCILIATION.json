@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "baseCommit": "d5d2c266614d42c6bf40a1c938ff68056570570d",
+  "baseCommit": "498a50dddca40c5b979548625fabda026beba70c",
   "candidates": [
     {
       "name": "product-default",
       "branch": "codex/bimlog-product-defaults-block01-20260915",
       "head": "431558843985d59cf4a66a8e46744189c0a4a320",
-      "baseOnly": 107,
+      "baseOnly": 3109,
       "candidateOnly": 44,
       "subjects": [
         {
@@ -458,7 +458,7 @@
       "name": "next-200",
       "branch": "codex/bimlog-next200-block01-20260915",
       "head": "843c6219842aa326efc9e298b0a8caca90f39571",
-      "baseOnly": 182,
+      "baseOnly": 3184,
       "candidateOnly": 71,
       "subjects": [
         {

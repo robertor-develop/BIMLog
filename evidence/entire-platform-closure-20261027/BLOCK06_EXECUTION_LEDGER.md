@@ -27,3 +27,18 @@
 - Push status: pending.
 - Publication status: pending exact runtime-change determination at Build 030.
 - Exact safe resume point: rerun Build 026 behavior and full current-registry assertions, then create its focused corrective commit before Build 027.
+
+## Build 026 accepted / Build 027 active — 2026-10-28
+
+- Build 026 corrective commit: `498a50ddd` (`docs: refresh build 026 source authority inventory`).
+- Build 026 tests: focused classifier PASS; tracked artifact consistency PASS; 84/84 registered worktrees classified; 161/161 branches classified; zero prunable entries; one baseline-dirty match preserved without traversal; diff check PASS.
+- Active build: 027.
+- Last completed action: regenerated product-default and Next-200 history reconciliation against the current canonical lineage.
+- Tests completed: source-history classifier behavior; candidate path/commit/disposition consistency; wholesale integration prohibition.
+- Tests pending: Build 027 focused commit; Builds 028–030; connected and full block regression; push/remote verification; release decision and live verification.
+- Defects discovered: current-only history counts had drifted from 107/182 to 3,109/3,184; the first strengthened test incorrectly referenced `commits` instead of the artifact's `subjects` field.
+- Defects corrected: refreshed the tracked history artifact and P37 narrative; corrected the test-field assumption; focused test now passes for both candidate histories.
+- Browser resources owned: none.
+- Push status: pending.
+- Publication status: pending exact runtime-change determination at Build 030.
+- Exact safe resume point: create the focused Build 027 corrective commit, then begin Build 028 dirty-candidate reconciliation.
