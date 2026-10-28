@@ -6569,3 +6569,12 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Verify production authority read-only, dry-run and apply the exact nine-project append-only company31 correction, retire company35 into31, preserve company38 and all historical rows, memberships and roles, then verify the resulting database state.
 - [ ] Complete actual Rubén and Lorena authenticated access, refresh, reopen and clean-reentry acceptance. The visible Chrome profile exposes only the synthetic Roberto Test 1 credential; do not reset credentials, fabricate a token or impersonate either user.
 
+## 2026-10-27 — Entire-platform closure Block 2 release boundary
+
+- [x] Revalidate accepted Builds 006–010 against current source with focused multipart, provenance, authorization, isolation, persistence, platform, TypeScript, secret and database gates.
+- [x] Pass the connected entire-platform Block 1 aggregate against disposable PostgreSQL with zero production mutations.
+- [ ] Run the network-backed production advisory audit after explicit dependency-metadata egress approval.
+- [ ] Pass the exact-head production build and complete pre-push gate, then synchronize canonical `master` without force.
+- [ ] Publish through the established signed-in Replit workspace using Shell and Publish only; verify schema correspondence, restore readiness, deployment identity, health and production version.
+- [ ] Pass three consecutive authenticated live rounds: full smoke, refresh/reopen, and clean reentry. Do not convert this release into Ruben/Navisworks field acceptance.
+
