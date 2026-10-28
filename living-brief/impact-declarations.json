@@ -79682,8 +79682,8 @@
     },
     {
       "taskId": "revision2-r01-r05-capability-parity-program-20261028",
-      "reviewedThroughCommit": "b06f953d2de8b77c1a8f0fc26807ffdb8c0487a2",
-      "reviewedAt": "2026-10-28T16:41:47Z",
+      "reviewedThroughCommit": "2c42a3e055aaf77c05f2758a0f3dc8f5851c3aa7",
+      "reviewedAt": "2026-10-28T16:46:00Z",
       "status": "candidate",
       "captureTiming": "post_r05_focused_acceptance_pre_block_regression",
       "authorities": [
@@ -79745,11 +79745,9 @@
       ],
       "reason": "Reconcile exact identity disposition, complete backend inventory, frontend exposure evidence, user-journey comprehension and the capability-preserving implementation program.",
       "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "df67e5c6566d0ea9f9f5f401944ae79f1db2038374f991978db1ba3d6cb2b67d"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
