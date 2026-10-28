@@ -80029,6 +80029,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "325a09c1326665ac24104932186699310c55768b8c8e79839c0180ea792615cb"
+    },
+    {
+      "taskId": "revision2-p011-p020-dashboard-test-repair-20261028",
+      "reviewedThroughCommit": "ba6efca4eae16a3a4a6ec3161cd1daff93f197e3",
+      "reviewedAt": "2026-10-28T22:45:00Z",
+      "status": "candidate",
+      "captureTiming": "post_release_gate_stale_test_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or permanent law changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The legacy test now verifies the governed dashboard dispatcher and card bindings already accepted by P017."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only a stale test expectation changed; runtime source, schema, persistence, and customer data are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin or Native boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The P011–P020 publication candidate status remains accurate."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The remaining release and audit gates are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit count or disposition changed."
+        }
+      ],
+      "reason": "Replace obsolete inline-route matching with verification of the governed dashboard dispatcher contract.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
