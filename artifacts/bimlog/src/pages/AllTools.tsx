@@ -57,6 +57,11 @@ export function AllTools() {
               {entries.filter(entry => entry.group === group.id).map(entry => <button key={entry.id} type="button" aria-disabled={!entry.href} aria-describedby={`tool-purpose-${entry.id}`} onClick={() => entry.href && setLocation(entry.href)} className="all-tools-card" style={{ textAlign: "left", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))", padding: 16, cursor: entry.href ? "pointer" : "not-allowed", color: "inherit", opacity: entry.href ? 1 : .72 }}>
                 <span style={{ display: "flex", justifyContent: "space-between", gap: 12, fontWeight: 750 }}>{entry.name[lang]}{entry.href ? <ArrowRight aria-hidden style={{ width: 16, height: 16, flexShrink: 0 }} /> : <LockKeyhole aria-hidden style={{ width: 16, height: 16, flexShrink: 0 }} />}</span>
                 <span id={`tool-purpose-${entry.id}`} style={{ display: "block", marginTop: 7, fontSize: 12, lineHeight: 1.5, color: "hsl(var(--muted-foreground))" }}>{entry.purpose[lang]}</span>
+                {entry.guidance && <dl style={{ display: "grid", gap: 5, margin: "12px 0 0", fontSize: 11, lineHeight: 1.4 }}>
+                  <div><dt style={{ display: "inline", fontWeight: 800 }}>{tt("Before you start: ", "Antes de empezar: ")}</dt><dd style={{ display: "inline", margin: 0 }}>{entry.guidance.prerequisite[lang]}</dd></div>
+                  <div><dt style={{ display: "inline", fontWeight: 800 }}>{tt("Who acts: ", "Quién actúa: ")}</dt><dd style={{ display: "inline", margin: 0 }}>{entry.guidance.actor[lang]}</dd></div>
+                  <div><dt style={{ display: "inline", fontWeight: 800 }}>{tt("Next: ", "Siguiente: ")}</dt><dd style={{ display: "inline", margin: 0 }}>{entry.guidance.nextStep[lang]}</dd></div>
+                </dl>}
                 {entry.availability !== "available" && <span style={{ display: "block", marginTop: 10, fontSize: 11, fontWeight: 750, color: "#92400E" }}>{entry.availability === "requires-project" ? tt("Requires an active project assignment", "Requiere una asignación activa de proyecto") : tt("Administrator only", "Solo administradores")}</span>}
               </button>)}
             </div>

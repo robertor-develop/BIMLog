@@ -23,6 +23,13 @@ export interface CapabilityDirectoryEntry {
   href: string;
   audience: CapabilityAudience;
   projectRequired?: boolean;
+  guidance?: CapabilityGuidance;
+}
+
+export interface CapabilityGuidance {
+  prerequisite: { en: string; es: string };
+  actor: { en: string; es: string };
+  nextStep: { en: string; es: string };
 }
 
 export type CapabilityAvailability = "available" | "requires-project" | "administrator-only";
@@ -54,25 +61,55 @@ export const capabilityDirectory: CapabilityDirectoryEntry[] = [
   { id: "billing", group: "Settings", name: { en: "Billing and Support", es: "Facturación y soporte" }, purpose: { en: "Manage subscription, invoices, and support cases.", es: "Gestione suscripción, facturas y casos de soporte." }, tasks: ["billing", "invoices", "support"], href: "/settings/billing-support", audience: "authenticated" }
 ];
 
+const standardGuidance = (prerequisite: string, prerequisiteEs: string, actor: string, actorEs: string, nextStep: string, nextStepEs: string): CapabilityGuidance => ({
+  prerequisite: { en: prerequisite, es: prerequisiteEs }, actor: { en: actor, es: actorEs }, nextStep: { en: nextStep, es: nextStepEs },
+});
+
+export const capabilityGuidance: Record<string, CapabilityGuidance> = {
+  home: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Every authorized user", "Todo usuario autorizado", "Open a priority or choose a project.", "Abra una prioridad o elija un proyecto."),
+  pending: standardGuidance("Sign in with assigned work.", "Inicie sesión con trabajo asignado.", "Assigned reviewer or owner", "Revisor o responsable asignado", "Complete or route the waiting action.", "Complete o derive la acción pendiente."),
+  intake: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Project administrator or intake owner", "Administrador de proyecto o responsable de ingreso", "Complete readiness and activate governed operations.", "Complete la preparación y active operaciones gobernadas."),
+  operations: standardGuidance("An active, governed project.", "Un proyecto activo y gobernado.", "Authorized project delivery team", "Equipo autorizado de entrega", "Update work and preserve delivery evidence.", "Actualice el trabajo y preserve evidencia de entrega."),
+  files: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized document participant", "Participante autorizado de documentos", "Upload, review, or open the governed record.", "Cargue, revise o abra el registro gobernado."),
+  rfis: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized RFI creator, responder, or reviewer", "Creador, respondedor o revisor RFI autorizado", "Create, answer, close, report, or export the RFI.", "Cree, responda, cierre, reporte o exporte el RFI."),
+  submittals: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized submittal participant", "Participante autorizado de submittals", "Prepare, review, and record the package decision.", "Prepare, revise y registre la decisión del paquete."),
+  coordination: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized coordination participant", "Participante autorizado de coordinación", "Resolve the issue and preserve the decision trail.", "Resuelva la incidencia y preserve el rastro de decisión."),
+  lens: standardGuidance("Authorized visual coordination access.", "Acceso autorizado de coordinación visual.", "Coordination specialist", "Especialista de coordinación", "Open a governed viewpoint or return evidence to coordination.", "Abra un punto de vista gobernado o devuelva evidencia a coordinación."),
+  knowledge: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Coordination participant or author", "Participante o autor de coordinación", "Apply a reviewed precedent or author a governed lesson.", "Aplique un precedente revisado o redacte una lección gobernada."),
+  reports: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized project participant", "Participante autorizado del proyecto", "Select evidence, generate the report, and verify the export.", "Seleccione evidencia, genere el reporte y verifique la exportación."),
+  "project-admin": standardGuidance("Project-administration permission.", "Permiso de administración de proyectos.", "Project administrator", "Administrador de proyectos", "Create or govern projects, membership, and access.", "Cree o gobierne proyectos, membresía y acceso."),
+  catalogs: standardGuidance("Company-catalog permission.", "Permiso de catálogos de empresa.", "Company administrator", "Administrador de empresa", "Publish reusable company data for authorized projects.", "Publique datos reutilizables para proyectos autorizados."),
+  workflows: standardGuidance("Company-workflow permission.", "Permiso de flujos de empresa.", "Workflow administrator", "Administrador de flujos", "Publish a version for governance review.", "Publique una versión para revisión de gobernanza."),
+  governance: standardGuidance("A published workflow and governance permission.", "Un flujo publicado y permiso de gobernanza.", "Workflow governor", "Gobernador de flujos", "Approve or reject the version and control project availability.", "Apruebe o rechace la versión y controle su disponibilidad."),
+  "pricing-templates": standardGuidance("Company-pricing permission.", "Permiso de precios de empresa.", "Pricing administrator", "Administrador de precios", "Approve a reusable template for governed estimating.", "Apruebe una plantilla reutilizable para estimación gobernada."),
+  profile: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Current user", "Usuario actual", "Save profile or visibility choices and re-enter work.", "Guarde opciones de perfil o visibilidad y vuelva al trabajo."),
+  notifications: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Current user", "Usuario actual", "Save delivery preferences and verify the channel.", "Guarde preferencias y verifique el canal."),
+  "financial-controls": standardGuidance("Authorized financial-control access.", "Acceso autorizado a controles financieros.", "Financial administrator", "Administrador financiero", "Save governed approval limits and verify enforcement.", "Guarde límites gobernados y verifique su aplicación."),
+  billing: standardGuidance("Authorized company billing access.", "Acceso autorizado a facturación.", "Company billing administrator", "Administrador de facturación", "Review billing or open a traceable support case.", "Revise facturación o abra un caso de soporte rastreable."),
+};
+
+const addGuidance = (entry: CapabilityDirectoryEntry): CapabilityDirectoryEntry => ({ ...entry, guidance: capabilityGuidance[entry.id] });
+
 export function resolveCapabilityDirectory(profile: AccessProfile): CapabilityDirectoryEntry[] {
   const projectId = profile.facts.activeProjects[0]?.id;
   return capabilityDirectory.filter((entry) => {
     if (entry.audience === "authenticated") return profile.facts.authenticated;
     if (entry.audience === "project") return profile.facts.isSuperAdmin || Boolean(projectId);
     return profile.decisions[entry.audience]?.allow === true;
-  }).map((entry) => ({ ...entry, href: entry.href.replace(":projectId", String(projectId ?? "")) }));
+  }).map((entry) => addGuidance({ ...entry, href: entry.href.replace(":projectId", String(projectId ?? "")) }));
 }
 
 export function resolveCapabilityDirectoryViews(profile: AccessProfile): CapabilityDirectoryView[] {
   const projectId = profile.facts.activeProjects[0]?.id;
   return capabilityDirectory.map(entry => {
-    if (entry.audience === "authenticated") return { ...entry, availability: "available" as const };
+    const guided = addGuidance(entry);
+    if (entry.audience === "authenticated") return { ...guided, availability: "available" as const };
     if (entry.audience === "project") return projectId || profile.facts.isSuperAdmin
-      ? { ...entry, href: entry.href.replace(":projectId", String(projectId ?? "")), availability: "available" as const }
-      : { ...entry, href: undefined, availability: "requires-project" as const };
+      ? { ...guided, href: entry.href.replace(":projectId", String(projectId ?? "")), availability: "available" as const }
+      : { ...guided, href: undefined, availability: "requires-project" as const };
     return profile.decisions[entry.audience]?.allow
-      ? { ...entry, availability: "available" as const }
-      : { ...entry, href: undefined, availability: "administrator-only" as const };
+      ? { ...guided, availability: "available" as const }
+      : { ...guided, href: undefined, availability: "administrator-only" as const };
   });
 }
 
