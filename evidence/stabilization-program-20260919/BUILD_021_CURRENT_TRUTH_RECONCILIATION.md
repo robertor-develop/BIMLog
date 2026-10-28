@@ -1,11 +1,11 @@
 # Build 021 — current truth reconciliation
 
-- Current published Platform: `v1.05.N18-P33`
-- Exact published source: `be902808b59c264d31480f5d76424f8fdaff5cbe`
-- Exact source tree: `3dab033cc3f109e78e69c1d5934b6959d1842717`
-- Replit publication receipt: `e89dc3b4`
+- Current published Platform: `v1.05.N18-P37`
+- Exact published source: `2e2d249b288b01577c59d6246aac69fe7f9bc2aa`
+- Exact source tree: `a07b187e47d6b7f2f0594dee9501c992967cf5ad`
+- Replit publication receipt: `8829e505`
 - Production database/schema/customer-data mutation: none
 - Public health/readiness: HTTP 200
-- Authenticated Chrome and two-tab reload continuity: pass
+- Authenticated Chrome smoke, refresh/reopen, and clean reentry: pass under acceptance record `QA-B04-1028-0745`
 - Historical candidate sections: preserved and explicitly non-authoritative for current release state
-- Next active milestone: Builds 021–025, push at Build 025, no publication before Build 030
+- Next active milestone after this block: Builds 026–030, with publication due at Build 030
