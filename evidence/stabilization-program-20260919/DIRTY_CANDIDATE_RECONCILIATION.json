@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "authorityCommit": "2f98a2b1",
+  "authorityCommit": "be376e804",
   "destructiveActionAuthorized": false,
   "candidates": [
     {
@@ -12,7 +12,7 @@
       "effectiveBehavior": "Adds a convention company directory and consumes names in Lens Next responsible-company reference data.",
       "disposition": "MAP_TO_PROGRAM",
       "targetBuilds": "046-050,066-070",
-      "cleanCandidateLocation": "codex/bimlog-stabilization-program-20260919 (future bounded implementation only)",
+      "cleanCandidateLocation": "codex/bimlog-template-gap-block01-20260923 (future bounded implementation only)",
       "reason": "Requires current-schema migration proof and current Convention/Lens acceptance; not safe as a wholesale dirty copy."
     },
     {
@@ -24,7 +24,7 @@
       "effectiveBehavior": "Prototype Lens workflow, visual-state, publishing routes, UI, and three schema modules.",
       "disposition": "MAP_TO_PROGRAM",
       "targetBuilds": "066-070",
-      "cleanCandidateLocation": "codex/bimlog-stabilization-program-20260919 (future Lens Platform block)",
+      "cleanCandidateLocation": "codex/bimlog-template-gap-block01-20260923 (future Lens Platform block)",
       "reason": "Overlapping schema/API/UI prototype lacks current field and migration acceptance; preserve but do not integrate now."
     },
     {
@@ -37,7 +37,7 @@
       "disposition": "SUPERSEDE",
       "targetBuilds": "076-080",
       "cleanCandidateLocation": "artifacts/api-server/src/lib/feedback-scanner.ts and feedback-scanner.behavior.ts in current lineage",
-      "reason": "Current P33 lineage already contains a newer governed scanner with signed Replit launcher/database checks."
+      "reason": "Current P37 lineage already contains a newer governed scanner with signed Replit launcher/database checks."
     },
     {
       "id": "native-field-package-evidence",
@@ -52,8 +52,8 @@
       "effectiveBehavior": "Historical N02-P01 through N15-P10 ZIPs, hashes, package receipts, range proof, and failure collector.",
       "disposition": "EVIDENCE_ONLY",
       "targetBuilds": "071-075",
-      "cleanCandidateLocation": "preserved historical worktrees; current accepted identity is N18-P33",
-      "reason": "Historical packages and receipts cannot replace the current P33 Native identity or field proof."
+      "cleanCandidateLocation": "preserved historical worktrees; current accepted identity is N18-P37",
+      "reason": "Historical packages and receipts cannot replace the current P37 Native identity or field proof."
     },
     {
       "id": "prework-security-retirement-identity-action-connectors",
@@ -70,7 +70,7 @@
       "effectiveBehavior": "PDF authorization, project retirement, enterprise identity, unified action audit, and connector-foundation prototypes.",
       "disposition": "SUPERSEDE",
       "targetBuilds": "061-110",
-      "cleanCandidateLocation": "current P33 lineage contains the evolved source modules and governed behavior tests",
+      "cleanCandidateLocation": "current P37 lineage contains the evolved source modules and governed behavior tests",
       "reason": "Named source modules are already present and evolved in current source; historical branch evidence remains preserved."
     }
   ]

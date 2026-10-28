@@ -42,3 +42,18 @@
 - Push status: pending.
 - Publication status: pending exact runtime-change determination at Build 030.
 - Exact safe resume point: create the focused Build 027 corrective commit, then begin Build 028 dirty-candidate reconciliation.
+
+## Build 027 accepted / Build 028 accepted — 2026-10-28
+
+- Build 027 corrective commit: `be376e804` (`docs: refresh build 027 history reconciliation`).
+- Build 027 tests: two candidate histories covered; 115/115 candidate-only commits recorded; 162/162 changed paths classified; path/disposition consistency PASS; wholesale integration prohibited; diff check PASS.
+- Active build: 028.
+- Last completed action: revalidated all five dirty candidate families without traversing or mutating their preserved source worktrees.
+- Build 028 tests: five unique candidate families PASS; dispositions are two `MAP_TO_PROGRAM`, two `SUPERSEDE`, one `EVIDENCE_ONLY`; destructive authorization false; stale P33 identity rejection PASS; diff check PASS.
+- Defects discovered: Build 028 evidence still named the superseded P33/N18-P33 source and Native release identities.
+- Defects corrected: current authority and clean-target narrative now use the canonical P37/N18-P37 lineage; the checker rejects stale P33 identity text.
+- Tests pending: Build 028 focused commit; Builds 029–030; connected and full block regression; push/remote verification; release decision and live verification.
+- Browser resources owned: none.
+- Push status: pending.
+- Publication status: pending exact runtime-change determination at Build 030.
+- Exact safe resume point: create the focused Build 028 corrective commit, then generate Build 029's preservation-first cleanup manifest without executing cleanup.
