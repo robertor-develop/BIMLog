@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "bimlog-block01-release-gate-v1",
+  "builds": [1, 2, 3, 4, 5],
+  "requiredContracts": ["contracts/release-singularity.schema.json", "contracts/company-35-binding-correction.json", "contracts/company-selector-authority.json", "contracts/requirement-evidence-ledger.json"],
+  "requiredIdentityFields": ["sourceCommit", "sourceTree", "packageId", "assetManifestSha256", "databaseMigrationLevel", "healthIdentity"],
+  "negativeGates": ["stale_source", "stale_package", "stale_schema", "unbound_runtime", "company38_name_merge", "duplicate_identity", "destructive_cleanup"],
+  "destructiveCleanupAllowed": false,
+  "publicationRequired": false
+}
