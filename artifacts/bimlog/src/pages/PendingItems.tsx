@@ -3,6 +3,7 @@ import { useLocation, useSearch } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { ArrowLeft, ArrowRight, FileText, ClipboardList, FileWarning, CheckCircle2, LoaderCircle, RefreshCw } from "lucide-react";
+import { pendingItemLifecycle } from "@/lib/pending-item-lifecycle";
 
 type ItemType = "rfis" | "submittals" | "files";
 
@@ -198,7 +199,9 @@ export function PendingItems() {
 
       {!loading && rows.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {rows.map(r => (
+          {rows.map(r => {
+            const lifecycle = pendingItemLifecycle(type, { status: itemStatus(r), dueDate: r.due_date, title: itemTitle(r) }, lang);
+            return (
             <button
               key={`${r.project_id}-${r.id}`}
               type="button"
@@ -227,10 +230,18 @@ export function PendingItems() {
                   {r.project_name}
                   {r.due_date && ` · ${tt("Due", "Vence")} ${new Date(r.due_date).toLocaleDateString(lang === "es" ? "es-BO" : "en-US")}`}
                 </div>
+                <dl className="pending-item-lifecycle" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "5px 10px", margin: "9px 0 0", fontSize: 10, lineHeight: 1.35, color: "#475569" }}>
+                  <div><dt style={{ fontWeight: 800 }}>{tt("State", "Estado")}</dt><dd style={{ margin: 0 }}>{lifecycle.state}</dd></div>
+                  <div><dt style={{ fontWeight: 800 }}>{tt("Missing", "Falta")}</dt><dd style={{ margin: 0 }}>{lifecycle.missing}</dd></div>
+                  <div><dt style={{ fontWeight: 800 }}>{tt("Who can act", "Quién puede actuar")}</dt><dd style={{ margin: 0 }}>{lifecycle.actor}</dd></div>
+                  <div><dt style={{ fontWeight: 800 }}>{tt("Next action", "Siguiente acción")}</dt><dd style={{ margin: 0 }}>{lifecycle.nextAction}</dd></div>
+                  <div><dt style={{ fontWeight: 800 }}>{tt("Result appears in", "El resultado aparece en")}</dt><dd style={{ margin: 0 }}>{lifecycle.result}</dd></div>
+                </dl>
               </div>
               <ArrowRight style={{ width: 16, height: 16, color: meta.color, flexShrink: 0 }} />
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
