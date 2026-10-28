@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { pool } from "@workspace/db";
+import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
@@ -18,6 +19,7 @@ await pool.query(`CREATE TABLE IF NOT EXISTS project_company_binding_versions(pr
 await pool.query(`CREATE TABLE IF NOT EXISTS financial_contracts(id text PRIMARY KEY)`);
 await pool.query(`CREATE TABLE IF NOT EXISTS financial_contract_versions(id text PRIMARY KEY)`);
 await pool.query(`CREATE TABLE IF NOT EXISTS project_cost_nodes(id text PRIMARY KEY)`);
+await ensureCompanyMasterCatalogSchema();
 await ensureDeliveryWorkflowRuntimeSchema();
 await pool.query(`CREATE TABLE IF NOT EXISTS edt_operations_director_grants(id text PRIMARY KEY,company_id integer,project_id integer,user_id integer)`);
 await pool.query(`CREATE TABLE IF NOT EXISTS edt_operations_director_revocations(grant_id text)`);
