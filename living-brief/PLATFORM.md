@@ -1533,6 +1533,7 @@ It changes only when the code structure or curated architectural facts change.
 ## Frontend pages (artifacts/bimlog/src/pages)
 - artifacts/bimlog/src/pages/About.tsx
 - artifacts/bimlog/src/pages/AdminPanel.tsx
+- artifacts/bimlog/src/pages/AllTools.tsx
 - artifacts/bimlog/src/pages/CommercialWorkspace.tsx
 - artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx
 - artifacts/bimlog/src/pages/CompanyMasterCatalogs.tsx
@@ -1619,6 +1620,7 @@ It changes only when the code structure or curated architectural facts change.
 - /data-retention
 - /dashboard
 - /pending
+- /all-tools
 - /lens-next
 - /projects/:id/financial/cost-structure
 - /projects/:id/financial/budget

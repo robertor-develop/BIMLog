@@ -1,11 +1,13 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
+  "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "0033af188b70677d4cd897ad4e1f0d8f2765648cab1414bd1f4f1d893f0be565",
+  "bundleSha256": "d4420dd69e3c994c14319014eb7d45d87bc2fb74303cd879bf0d05435cba5f32",
   "impact": {
-    "baselineCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
+    "baselineCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
     "changedPaths": [
+      "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+      "living-brief/PLATFORM.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
@@ -21,11 +23,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "claude",
@@ -33,11 +35,11 @@
       "sha256": "ed75b86537e090a358183b372aca181f4c850aad38b704b2e41bcb98780eb4be",
       "sourceChangedAt": "2026-10-27T07:57:39-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "quality",
@@ -45,11 +47,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "vision",
@@ -57,23 +59,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "26e4be5e31a176a814ef2c952e68d0798ecfc39ca25c4004d00ba4d1d5905914",
-      "sourceChangedAt": "2026-10-27T13:00:09-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "sha256": "e329f09295bd0650fd82be2a39b38626ec680a3b67bf9c9af3582724e3bad850",
+      "sourceChangedAt": "2026-10-28T18:32:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "plugin",
@@ -81,11 +83,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "report_design_system",
@@ -93,11 +95,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "standards_register",
@@ -105,11 +107,11 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "status",
@@ -117,11 +119,11 @@
       "sha256": "064cae8b75982e04700c4edbb1ee0abe3c7a66672f99e958b8859a80b89613b1",
       "sourceChangedAt": "2026-10-28T01:50:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "open_loop",
@@ -129,11 +131,11 @@
       "sha256": "4714d137d8a6254f7b52c9f5282708ca0e8844bbfb714445db9b2f19e8617bc0",
       "sourceChangedAt": "2026-10-28T12:43:17-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     },
     {
       "key": "audit",
@@ -141,11 +143,11 @@
       "sha256": "e96601a5b0f4a0e6ede78c92f124119fdca0de48404160ad1ce93f0dcb5cdcfc",
       "sourceChangedAt": "2026-10-27T13:00:09-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
-      "semanticReviewTask": "revision2-p001-p005-parity-adjudication-20261028",
+      "reconciledThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "semanticReviewTask": "revision2-p006-p010-capability-directory-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T17:36:23Z"
+      "semanticReviewedAt": "2026-10-28T18:32:00Z"
     }
   ]
 }

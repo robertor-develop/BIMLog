@@ -79886,6 +79886,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p006-p010-capability-directory-20261028",
+      "reviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "reviewedAt": "2026-10-28T18:32:00Z",
+      "status": "candidate",
+      "captureTiming": "post_p010_focused_acceptance_pre_publication_regression",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability directory changes no ecosystem identity or permanent cross-product law."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The authorized five-build and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds tested discoverability, permission-state, localization, accessibility, and responsive controls without weakening acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation directly preserves complete, discoverable, progressively organized operational power."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "P006–P010 expose existing authorized capabilities through the frontend and change no schema, persistence contract, or customer data."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, installer, package, connector, or Lens boundary changed in this block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability directory changes no report or export design authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability directory changes no external standard or compliance claim."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production identity is unchanged until the authorized publication and live acceptance complete."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing P001–P020 program remains authoritative and this block fulfills only P006–P010."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block implements the adjudicated navigation gap without changing independent audit counts or dispositions."
+        }
+      ],
+      "reason": "Implement P006–P010 as a role-aware, searchable, bilingual All Tools directory while preserving daily navigation and preventing unauthorized record exposure.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "42556e46bbfb90ac1f5a908114178c919f7680d738e059f8b18b6bd47facb6c2"
     }
   ]
 }
