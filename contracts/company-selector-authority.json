@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "bimlog-company-selector-authority-v1",
+  "canonicalCompanyId": 31,
+  "retiredAliases": [{ "companyId": 35, "retiredIntoCompanyId": 31 }],
+  "unresolvedCompanies": [{ "companyId": 38, "rule": "identity_evidence_required_before_merge" }],
+  "selectionRules": {
+    "operationalLists": "exclude_retired_aliases",
+    "historicalReferences": "resolve_bounded_alias_chain",
+    "membership": "never_inferred_from_alias_or_name",
+    "newCompany": "allow_distinct_identity_reject_collision_with_join_guidance"
+  },
+  "negativeNameVariants": ["BIMTECH.", "  bimtech ", "ＢＩＭＴＥＣＨ", "BIM TECH", "BIM-TECH"]
+}
