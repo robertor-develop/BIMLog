@@ -79467,7 +79467,7 @@
     },
     {
       "taskId": "stabilization-block05-build021-current-truth-reconciliation-20261028",
-      "reviewedThroughCommit": "2141214328dc1130690bfb85644e98c990ae5592",
+      "reviewedThroughCommit": "757fee9599a06958e78274aee2c629bf72f077b1",
       "reviewedAt": "2026-10-28T10:05:10Z",
       "status": "candidate",
       "captureTiming": "post_current_truth_correction_pre_focused_retest",
@@ -79519,8 +79519,8 @@
         },
         {
           "key": "open_loop",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The P37 current-authority correction is already accepted in baseline commit 2141214328dc1130690bfb85644e98c990ae5592; this derived-state refresh changes no further OPEN_LOOP obligation."
+          "result": "updated",
+          "reason": "The Block 05 current authority now records focused acceptance and the successful complete regression while preserving push and remote verification as pending."
         },
         {
           "key": "audit",
@@ -79531,9 +79531,11 @@
       "reason": "Reconcile the sole current OPEN_LOOP authority and Build 021 evidence with the already accepted P37 production identity.",
       "reviewedChangedPaths": [
         "evidence/entire-platform-closure-20261027/BLOCK05_EXECUTION_LEDGER.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "dc4bc03b963266bc9f2db46d1ad035e7fa7ca039bc98a27f3d5d08db54d3510d"
+      "reviewedChangeSha256": "efc9533dc22d60b5a48adb260da447178776705ce9f061e1e234861d9cb47d27"
     }
   ]
 }

@@ -17,20 +17,22 @@
 - Builds already unpublished on entry: 0.
 - Publication after this block: no; Build 025 is a push-only checkpoint and publication is due after Build 030.
 - Accepted implementation commits already in lineage: B021 `781f149e5`, B022 `d3f3d97b9`, B023 `b6d782827`, B024 `8f287acd7`, B025 `b3ba648b1`.
-- Active build: block regression after accepted Build 025.
+- Active build: final exact-head regression and push after accepted Build 025.
 - Build 021: accepted; original implementation `781f149e5`; current-truth corrective commit `d6f6fe5c5031c41da61030e516a505b5891cf9fa`.
 - Build 022: accepted; focused implementation commit `d3f3d97b9`; 538/538 unchecked entries classified with evidence (481 active, 45 superseded, 3 accepted limitations, 9 closed with evidence).
 - Build 023: accepted; focused implementation commit `b6d782827`; deterministic PLATFORM generation, current-state documentation contract, and Living Brief integrity pass.
 - Build 024: accepted; focused implementation commit `8f287acd7`; Lens Next sole-product negative self-test and frontend TypeScript pass.
 - Build 025: accepted; focused implementation commit `b3ba648b1`; release/provider/version/Lens/disposition contradiction gate and negative self-test pass.
-- Last completed action: repaired the complete-gate semantic-review digest baseline after the first full run reached pre-push and rejected the stale post-commit digest; focused Living Brief and current-state retests pass.
+- Last completed action: complete local release regression retry passed at exact commit `757fee9599a06958e78274aee2c629bf72f077b1`.
 - Tests completed: authority verifier, professional identity, instruction authority, repository/remote/deployment/migration/worktree identity checks; release identity; 538-item OPEN_LOOP disposition integrity; current-state contract; Living Brief integrity with 11 required documents, 38 internal links, 40 standards links, and 23 continuity cases.
-- Tests pending: corrective metadata commit, complete connected/block regression retry, final worktree review, push verification.
+- Tests pending: final evidence-bearing exact-head regression, final worktree review, push, and remote verification.
 - Defects discovered: authoritative OPEN_LOOP marker still names P36; Build 021 evidence report still names P33.
 - Defects corrected: Build 021 evidence now records P37/source/package-era receipt; the sole OPEN_LOOP authority now records exact P37 source, package, migration, and authenticated acceptance evidence.
 - Recoverable conditions: local release invocation required an explicit receipt path; clean-candidate gate required metadata commit; first complete run found a stale semantic-review digest at final pre-push after all preceding suites passed.
-- Test retry count: 1 complete-gate retry pending after focused correction.
+- Test retry count: 1 complete-gate retry completed successfully; one final exact-head evidence-bearing run pending.
 - Browser resources owned: none.
-- Push status: pending.
+- Complete block regression: PASS; local release receipt `C:\Users\soporte\Documents\Codex\2026-10-27\bimlog-main-04-06\work\block05-local-release-receipt-retry1.json`, receipt SHA-256 `1c4e2c1af9b9430bbc8704417b222558924b476d830042148c99faefaec0da6f`.
+- Corrective commits: `d6f6fe5c5` current truth, `214121432` executable state, `757fee959` semantic-review seal.
+- Push status: pending final exact-head evidence commit and gate.
 - Publication status: not required for this block.
-- Exact safe resume point: commit the semantic-digest correction on the clean candidate, then repeat the complete local release gate from the beginning.
+- Exact safe resume point: reconcile final regression evidence, commit it, rerun the exact-head local release gate, then push and verify the remote.
