@@ -80167,6 +80167,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
+      "reviewedAt": "2026-10-28T23:35:00Z",
+      "status": "candidate",
+      "captureTiming": "post_release_gate_accessibility_matrix_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The governed matrix now covers 67 surfaces and 201 desktop, tablet, and 390px viewport cases including All Tools."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The matrix verifies the accepted progressively organized product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This corrective commit updates generated evidence only; runtime and schema are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Candidate status is unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Remaining gates are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Accessibility/responsive evidence now includes the accepted All Tools surface."
+        }
+      ],
+      "reason": "Reconcile the source-derived accessibility/responsive matrix with the accepted /all-tools route.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
