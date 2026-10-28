@@ -12,8 +12,11 @@
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
       "package.json",
+      "scripts/lib/ga-timeout-contract.mjs",
+      "scripts/test-entire-platform-closure-block01.mjs",
       "scripts/test-ga-final-block05-build031-security-isolation.mjs",
       "scripts/test-ga-final-block05.mjs",
+      "scripts/test-ga-timeout-contract.mjs",
       "scripts/test-recovery-ga-block04.mjs"
     ],
     "affectedDocuments": [

@@ -5726,8 +5726,10 @@
       "reviewedChangedPaths": [
         "artifacts/api-server/build.ts",
         "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
+        "living-brief/state.json",
         "package.json"
       ],
       "reviewedChangeSha256": "57acaa002353853bc987b9ed8eebb9c2a322d9ca1fdc8d930d65f93d0e97982c"
@@ -79040,11 +79042,14 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
         "package.json",
+        "scripts/lib/ga-timeout-contract.mjs",
+        "scripts/test-entire-platform-closure-block01.mjs",
         "scripts/test-ga-final-block05-build031-security-isolation.mjs",
         "scripts/test-ga-final-block05.mjs",
+        "scripts/test-ga-timeout-contract.mjs",
         "scripts/test-recovery-ga-block04.mjs"
       ],
-      "reviewedChangeSha256": "5ffd43b42d6d4d6e3a5c4ddc584d278c4e5d30407bb0e150a66f2509ef1e28ee"
+      "reviewedChangeSha256": "e0712f7a1ab276acdf34a8787541a3f2559b01e6be11058b71411bd1a0dc9926"
     }
   ]
 }
