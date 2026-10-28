@@ -6603,3 +6603,13 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Complete the combined exact-head regression after Living Brief reconciliation, push the full five-build block, and verify local and remote heads match.
 - [ ] Preserve provider, native/field and independent acceptance obligations as separate evidence; do not convert them into self-certified product completion.
 
+## Corrected independent audit Revision 2 — R01–R05
+
+- [x] R01 uniquely dispositioned all 130 audit identities without inflating accepted, provider, or field evidence into implementation work.
+- [x] R02 inventoried all 796 governed backend routes, 74 source owners, 39 capability groups, and 72 persistence tables.
+- [x] R03 classified every backend capability against frontend exposure evidence. The 589 routes without a direct static reference remain adjudication candidates—not deletion authority—and the missing visible searchable All Tools entry is a confirmed platform gap.
+- [x] R04 bound the owner’s ten capability-preservation and comprehension rules, six lifecycle questions, guided novice journeys, and direct expert access into one acceptance contract.
+- [x] R05 generated the exact evidence-based implementation program: P001–P020 in four five-build blocks, with publication boundaries at P010 and P020.
+- [ ] Complete the exact-head block regression, push and remote verification. Do not claim runtime publication value from analysis/evidence-only changes.
+- [ ] Begin P001 only after R01–R05 acceptance closes; preserve all stable module, record, permission, route, and business-concept identities.
+

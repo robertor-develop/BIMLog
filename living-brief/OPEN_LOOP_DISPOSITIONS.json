@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "dc4d6c5f48da525a236f1ddf94f6447c91932d81394d4b97f63fb6c230300fba",
-  "itemCount": 540,
+  "sourceSha256": "4714d137d8a6254f7b52c9f5282708ca0e8844bbfb714445db9b2f19e8617bc0",
+  "itemCount": 542,
   "counts": {
-    "ACTIVE": 483,
+    "ACTIVE": 485,
     "SUPERSEDED": 45,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 379,
+    "ACTIVE_DEFECT": 381,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 94,
     "ACCEPTED_LIMITATION": 3,
@@ -10365,6 +10365,44 @@
       "evidence": [
         "OPEN_LOOP.md:6604",
         "Corrected 60-build program — Block 1, Builds 1–5"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "c780d13e1e7abe4e",
+      "sourceLine": 6613,
+      "heading": "Corrected independent audit Revision 2 — R01–R05",
+      "statement": "Complete the exact-head block regression, push and remote verification. Do not claim runtime publication value from analysis/evidence-only changes.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6613",
+        "Corrected independent audit Revision 2 — R01–R05"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "15eb87cc1acce433",
+      "sourceLine": 6614,
+      "heading": "Corrected independent audit Revision 2 — R01–R05",
+      "statement": "Begin P001 only after R01–R05 acceptance closes; preserve all stable module, record, permission, route, and business-concept identities.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6614",
+        "Corrected independent audit Revision 2 — R01–R05"
       ],
       "currentAuthority": false
     }
