@@ -74,6 +74,7 @@ overrides:
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
   axios: 1.20.0
   body-parser: 2.4.0
+  deepmerge: file:vendor/deepmerge-safe
   brace-expansion@1: 1.1.21
   brace-expansion@2: 2.1.7
   follow-redirects: 1.16.1
@@ -2927,9 +2928,9 @@ packages:
     resolution: {integrity: sha512-aW35yZM6Bb/4oJlZncMH2LCoZtJXTRxES17vE3hoRiowU2kWHaJKFkSBDnDR+cm9J+9QhXmREyIfv0pji9ejCQ==}
     engines: {node: '>=10'}
 
-  deepmerge@4.3.1:
-    resolution: {integrity: sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==}
-    engines: {node: '>=0.10.0'}
+  deepmerge@file:vendor/deepmerge-safe:
+    resolution: {directory: vendor/deepmerge-safe, type: directory}
+    engines: {node: '>=18'}
 
   defaults@1.0.4:
     resolution: {integrity: sha512-eFuaLoy/Rxalv2kr+lqMlUnrDWV+3j4pljOIJgLIhI058IQfWJ7vXhyEIHu+HtC738klGALYxOKDO0bQP3tg8A==}
@@ -6676,7 +6677,7 @@ snapshots:
 
   '@sendgrid/helpers@8.0.0':
     dependencies:
-      deepmerge: 4.3.1
+      deepmerge: file:vendor/deepmerge-safe
 
   '@sendgrid/mail@8.1.6(debug@4.4.3(supports-color@7.2.0))(supports-color@7.2.0)':
     dependencies:
@@ -7637,7 +7638,7 @@ snapshots:
     dependencies:
       mimic-response: 3.1.0
 
-  deepmerge@4.3.1: {}
+  deepmerge@file:vendor/deepmerge-safe: {}
 
   defaults@1.0.4:
     dependencies:

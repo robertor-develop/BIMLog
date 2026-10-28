@@ -27,16 +27,17 @@ MANDATORY_BOOTSTRAP=PASS Constitution 3.5.0 Amendment 0021; professional identit
 
 ## Current checkpoint
 
-ACTIVE_BUILD=1
-LAST_COMPLETED_ACTION=Build 1 implementation and focused acceptance passed; commit pending
-TESTS_COMPLETED=check:living-brief PASS; test:living-brief 25/25 PASS; Lens field authority PASS
-TESTS_PENDING=Regenerate final reviewed digest after this checkpoint; create focused Build 1 commit
+ACTIVE_BUILD=2
+LAST_COMPLETED_ACTION=Build 2 security backport and focused acceptance passed; commit pending
+CURRENT_COMMIT=e7b9dde6c
+TESTS_COMPLETED=Build 1 committed; deepmerge unsafe-key/compatibility PASS; production audit zero vulnerabilities; API typecheck PASS; SendGrid module/configuration/verification PASS
+TESTS_PENDING=Create focused Build 2 commit
 DEFECTS_DISCOVERED=Living Brief stale after 94ee1a1e; deepmerge advisory; stale qs provenance expectation; missing historical recovery worktree crash; final GA aggregate timeout
-DEFECTS_CORRECTED=Living Brief now reconciles exact deployed 94ee1a1e Lens history and Block 1 program authority
+DEFECTS_CORRECTED=Living Brief reconciliation; SendGrid deepmerge advisory removed with governed local security backport
 BROWSER_RESOURCES_OWNED=NONE
 PUSH_STATUS=NOT_STARTED
 PUBLICATION_STATUS=NOT_DUE
-SAFE_RESUME_POINT=Refresh Build 1 Living Brief state digest, repeat integrity check, commit Build 1
+SAFE_RESUME_POINT=Commit accepted Build 2 then begin dependency provenance Build 3
 
 ## Build 1 evidence
 
@@ -46,4 +47,13 @@ POSITIVE_TEST=Living Brief integrity and 25-case freshness matrix
 NEGATIVE_TEST=Freshness matrix rejects missing, stale, future, mismatched, omitted and nonancestor states
 AUTHORIZATION_ISOLATION_TEST=Lens project-scoped company catalog regression PASS
 PERSISTENCE_TEST=Not applicable; documentation/release-state build only
+
+## Build 2 evidence
+
+STATUS=FOCUSED_ACCEPTANCE_PASS_COMMIT_PENDING
+SCOPE=Replace vulnerable transitive deepmerge with a truthful non-upstream BIMLog security backport that rejects __proto__, constructor and prototype keys
+POSITIVE_TEST=Object, array and merge.all compatibility PASS; SendGrid module/configuration/verification PASS; API typecheck PASS
+NEGATIVE_TEST=Three prototype-control key vectors rejected; Object.prototype remains unchanged
+SECURITY_TEST=pnpm audit --prod --audit-level low reports no known vulnerabilities
+PERSISTENCE_TEST=Fresh lockfile resolves @sendgrid/helpers deepmerge to vendor/deepmerge-safe version 4.3.1-bimlog.1
 
