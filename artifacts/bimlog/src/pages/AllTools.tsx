@@ -31,6 +31,7 @@ export function AllTools() {
 
   const entries = useMemo(() => profile ? searchCapabilities(resolveCapabilityDirectoryViews(profile), query, lang) : [], [profile, query, lang]);
   const groups = capabilityGroups.filter(group => entries.some(entry => entry.group === group.id));
+  const recommendedJourney = profile ? resolveCapabilityDirectoryViews(profile).filter(entry => ["intake", "operations", "files", "reports"].includes(entry.id) && entry.href) : [];
 
   return (
     <div className="app-shell">
@@ -48,6 +49,13 @@ export function AllTools() {
         </header>
         {error && <div role="alert" style={{ maxWidth: 1120, margin: "0 auto", padding: 16, border: "1px solid #FCA5A5", borderRadius: 8, background: "#FEF2F2" }}>{tt("Your authorized tools could not be loaded.", "No se pudieron cargar sus herramientas autorizadas.")} <button type="button" onClick={() => setRetry(value => value + 1)}><RefreshCw aria-hidden /> {tt("Try again", "Intentar de nuevo")}</button></div>}
         {!error && !profile && <div role="status" aria-live="polite" style={{ maxWidth: 1120, margin: "0 auto" }}>{tt("Loading authorized tools…", "Cargando herramientas autorizadas…")}</div>}
+        {profile && recommendedJourney.length > 0 && !query && <section aria-labelledby="recommended-journey" style={{ maxWidth: 1120, margin: "0 auto 28px", padding: 18, border: "1px solid #BFDBFE", borderRadius: 12, background: "#EFF6FF" }}>
+          <h2 id="recommended-journey" style={{ margin: 0, fontSize: 16, color: "#1E3A8A" }}>{tt("Recommended project journey", "Recorrido recomendado del proyecto")}</h2>
+          <p style={{ margin: "6px 0 14px", fontSize: 12, color: "#334155" }}>{tt("New to this project? Move from intake to operations, documents, and reports. You can also skip directly to any authorized tool below.", "¿Es nuevo en este proyecto? Avance de ingreso a operaciones, documentos y reportes. También puede ir directamente a cualquier herramienta autorizada abajo.")}</p>
+          <ol style={{ display: "flex", flexWrap: "wrap", gap: 8, margin: 0, padding: 0, listStyle: "none" }}>
+            {recommendedJourney.map((entry, index) => <li key={entry.id}><button type="button" onClick={() => entry.href && setLocation(entry.href)} style={{ border: "1px solid #93C5FD", borderRadius: 999, background: "white", color: "#1D4ED8", padding: "7px 11px", cursor: "pointer", fontWeight: 750, fontSize: 12 }}>{index + 1}. {entry.name[lang]}</button></li>)}
+          </ol>
+        </section>}
         {profile && entries.length === 0 && <div role="status" style={{ maxWidth: 1120, margin: "0 auto", padding: 28, textAlign: "center", border: "1px dashed hsl(var(--border))", borderRadius: 10 }}>{tt("No authorized tools match your search.", "Ninguna herramienta autorizada coincide con su búsqueda.")}</div>}
         {profile && entries.length > 0 && <div style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gap: 28 }}>
           {groups.map(group => <section key={group.id} aria-labelledby={`tools-${group.id.toLowerCase()}`}>
@@ -56,6 +64,7 @@ export function AllTools() {
             <div className="all-tools-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
               {entries.filter(entry => entry.group === group.id).map(entry => <button key={entry.id} type="button" aria-disabled={!entry.href} aria-describedby={`tool-purpose-${entry.id}`} onClick={() => entry.href && setLocation(entry.href)} className="all-tools-card" style={{ textAlign: "left", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))", padding: 16, cursor: entry.href ? "pointer" : "not-allowed", color: "inherit", opacity: entry.href ? 1 : .72 }}>
                 <span style={{ display: "flex", justifyContent: "space-between", gap: 12, fontWeight: 750 }}>{entry.name[lang]}{entry.href ? <ArrowRight aria-hidden style={{ width: 16, height: 16, flexShrink: 0 }} /> : <LockKeyhole aria-hidden style={{ width: 16, height: 16, flexShrink: 0 }} />}</span>
+                {entry.href && <span style={{ display: "block", marginTop: 5, color: "#1D4ED8", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".04em" }}>{tt("Direct expert access", "Acceso directo experto")}</span>}
                 <span id={`tool-purpose-${entry.id}`} style={{ display: "block", marginTop: 7, fontSize: 12, lineHeight: 1.5, color: "hsl(var(--muted-foreground))" }}>{entry.purpose[lang]}</span>
                 {entry.guidance && <dl style={{ display: "grid", gap: 5, margin: "12px 0 0", fontSize: 11, lineHeight: 1.4 }}>
                   <div><dt style={{ display: "inline", fontWeight: 800 }}>{tt("Before you start: ", "Antes de empezar: ")}</dt><dd style={{ display: "inline", margin: 0 }}>{entry.guidance.prerequisite[lang]}</dd></div>
