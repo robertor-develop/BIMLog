@@ -33,6 +33,7 @@ The five focused implementation commits already exist in the accepted ancestry. 
 - Product defects found: 0. One stale test expectation was found and corrected: the approved Lorena Intake contract makes Quantity the sole user-entered work amount and keeps `plannedHours` only as a derived compatibility mirror; the old UX023 assertion still expected the removed contradictory hours input.
 - Corrective focused tests: UX023 quantity/legacy normalization PASS; UX025 resource-demand compatibility PASS; Lorena Intake contract PASS; Contract Item editor behavior PASS; full team-resource-planning suite PASS.
 - Second full-gate stale expectation corrected: UX025 no longer derives unassigned demand from the removed contradictory `plannedHours` input; canonical Quantity remains `12`.
+- Full-gate route inventory correction: regenerated the governed source-derived UX inventory to include `/projects/:id/financial/contracts/:contractId/items`; 65 route/tab bindings, four explicit unavailable capability groups.
 - Environment recoveries: sandbox `F:\Temp` fixture denial corrected by approved filesystem execution; npm advisory service egress remains pending.
 
 ## Current checkpoint

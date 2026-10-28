@@ -128,6 +128,13 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/projects/:id/financial/contracts/:contractId/items",
+      "owner": "FinancialContractItemsWorkspace",
+      "availability": "gated",
+      "boundary": "authenticated project membership; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/projects/:id/financial/apu",
       "owner": "FinancialApuWorkspace",
       "availability": "gated",
