@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "1e67b9ed689509029435e5e4449ddf99f27d014063beab85b23e62e9c9cf4a11",
+  "sourceSha256": "6f2b32285500c072ab03d6159d58c70dafcfa5ca55b81442f36df82eee81e585",
   "itemCount": 538,
   "counts": {
     "ACTIVE": 481,
@@ -10275,30 +10275,11 @@
     },
     {
       "id": "592dae57dcb0fb97",
-      "sourceLine": 6579,
+      "sourceLine": 6580,
       "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
       "statement": "Pass the exact-head production build and complete pre-push gate, then synchronize canonical `master` without force.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:6579",
-        "2026-10-27 — Entire-platform closure Block 2 release boundary"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "5ba8edef2c0d737d",
-      "sourceLine": 6580,
-      "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
-      "statement": "Publish through the established signed-in Replit workspace using Shell and Publish only; verify schema correspondence, restore readiness, deployment identity, health and production version.",
-      "classification": "ACTIVE",
-      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
         "owner": "Release engineering",
@@ -10312,8 +10293,27 @@
       "currentAuthority": false
     },
     {
-      "id": "7d0f8372cbeff9a5",
+      "id": "5ba8edef2c0d737d",
       "sourceLine": 6581,
+      "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
+      "statement": "Publish through the established signed-in Replit workspace using Shell and Publish only; verify schema correspondence, restore readiness, deployment identity, health and production version.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "EXTERNAL_OWNER_INPUT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6581",
+        "2026-10-27 — Entire-platform closure Block 2 release boundary"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "7d0f8372cbeff9a5",
+      "sourceLine": 6582,
       "heading": "2026-10-27 — Entire-platform closure Block 2 release boundary",
       "statement": "Pass three consecutive authenticated live rounds: full smoke, refresh/reopen, and clean reentry. Do not convert this release into Ruben/Navisworks field acceptance.",
       "classification": "ACTIVE",
@@ -10325,7 +10325,7 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:6581",
+        "OPEN_LOOP.md:6582",
         "2026-10-27 — Entire-platform closure Block 2 release boundary"
       ],
       "currentAuthority": false

@@ -79117,9 +79117,9 @@
       "reviewedChangeSha256": "27d69e307f45dc40e9d5aa0ae933ed6bb673c54aadaf94a8ffe220026c8483b4"
     },
     {
-      "taskId": "entire-platform-closure-block02-intake-test-correction-20261027",
-      "reviewedThroughCommit": "e2c7cd07ac6c7a2ae66874f8a31b79370f0b8e4f",
-      "reviewedAt": "2026-10-27T23:05:00.000Z",
+      "taskId": "entire-platform-closure-block02-governance-test-correction-20261028",
+      "reviewedThroughCommit": "7b0ad3746fb4cdf16ba7e54b3598b7c20924e56c",
+      "reviewedAt": "2026-10-28T04:49:47.000Z",
       "status": "candidate",
       "captureTiming": "post_correction_pre_release_reconciliation",
       "authorities": [
@@ -79179,14 +79179,14 @@
           "reason": "Whole-platform and field-acceptance debts remain explicit."
         }
       ],
-      "reason": "Record both adjacent full-gate stale-test corrections and the reviewed source-derived UX route inventory without changing the approved Lorena Intake product contract or claiming publication.",
+      "reason": "Record the adjacent full-gate stale-test corrections, reviewed source-derived UX route inventory, and the twelfth already-governed historical duplicate-loop reconciliation without changing product behavior or claiming publication.",
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "c176d13d773071a0e0c9aa0a61fc027270ca91a1bcf131bdd9bca48935402c18"
+      "reviewedChangeSha256": "0b90a435a728b140156180ad8e23665c429f85514f0bf9efc3c71d46ab8d2287"
     }
   ]
 }
