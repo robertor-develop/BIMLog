@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "c132e8d91d4ad040274b7f3220b5b32d5bf101ded013e17324fcee50422aa5cf",
-  "itemCount": 538,
+  "sourceSha256": "dc4d6c5f48da525a236f1ddf94f6447c91932d81394d4b97f63fb6c230300fba",
+  "itemCount": 540,
   "counts": {
-    "ACTIVE": 481,
+    "ACTIVE": 483,
     "SUPERSEDED": 45,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 377,
+    "ACTIVE_DEFECT": 379,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 94,
     "ACCEPTED_LIMITATION": 3,
@@ -10327,6 +10327,44 @@
       "evidence": [
         "OPEN_LOOP.md:6594",
         "2026-10-27 — Entire-platform closure Block 2 release boundary"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "0edfc0fb0d313de9",
+      "sourceLine": 6603,
+      "heading": "Corrected 60-build program — Block 1, Builds 1–5",
+      "statement": "Complete the combined exact-head regression after Living Brief reconciliation, push the full five-build block, and verify local and remote heads match.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6603",
+        "Corrected 60-build program — Block 1, Builds 1–5"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "2e0d08fcca239805",
+      "sourceLine": 6604,
+      "heading": "Corrected 60-build program — Block 1, Builds 1–5",
+      "statement": "Preserve provider, native/field and independent acceptance obligations as separate evidence; do not convert them into self-certified product completion.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6604",
+        "Corrected 60-build program — Block 1, Builds 1–5"
       ],
       "currentAuthority": false
     }

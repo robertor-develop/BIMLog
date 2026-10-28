@@ -79608,6 +79608,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d98c4c96507e35b9575ed05b578e3d0e6fd8433ff19390ef41343dea63875ff4"
+    },
+    {
+      "taskId": "corrected-60-build-program-block01-builds001-005-20261028",
+      "reviewedThroughCommit": "b7623acc67e13b9f766332bdf2ce9312618763de",
+      "reviewedAt": "2026-10-28T15:46:45Z",
+      "status": "candidate",
+      "captureTiming": "post_build005_focused_acceptance_pre_block_regression",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or permanent product law changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build cadence and conditional ten-build publication boundary remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block strengthens identity, evidence and release gates without changing acceptance thresholds."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or unresolved business rule changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The already-applied Company-35 correction is bound and verified; no new production mutation or route behavior was introduced."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, installer, package or Lens support boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export design authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production identity and publication status remain unchanged because publication is not due after the first block."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Current authority now records Builds 001–005 focused acceptance, pending combined regression and push, and preserved external acceptance obligations."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit result or independent acceptance threshold changed."
+        }
+      ],
+      "reason": "Reconcile corrected-program Block 1 identity, Company-35 correction, selector authority, 130-item requirement evidence and release-gate acceptance before combined regression and push.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5a1890adc03102145023b64442a0ee82775db0d16f9db21865ed546bd961f3dc"
     }
   ]
 }

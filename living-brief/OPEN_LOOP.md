@@ -6593,3 +6593,13 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Publish through the established signed-in Replit workspace using Shell and Publish only; verify schema correspondence, restore readiness, deployment identity, health and production version.
 - [ ] Pass three consecutive authenticated live rounds: full smoke, refresh/reopen, and clean reentry. Do not convert this release into Ruben/Navisworks field acceptance.
 
+## Corrected 60-build program — Block 1, Builds 1–5
+
+- [x] Build 1 consolidates source, tree, artifact, package, asset-manifest, database-migration and runtime identity into one fail-closed machine-readable release-singularity contract; stale and mismatched identities are rejected.
+- [x] Build 2 binds the already-applied Company-35 correction to the exact nine project IDs and preserves append-only history, memberships, roles, accepted evidence and unrelated Company 38; isolated PostgreSQL proves authority denial, stale refusal, rollback-only dry run, idempotent replay and collision isolation.
+- [x] Build 3 records one operational/retired alias and selector authority, preserves bounded historical resolution, rejects name-based membership, permits a genuinely distinct new company and requires identity evidence before any Company-38 merge.
+- [x] Build 4 reconciles all 130 audited identities exactly once: 108 accepted evidence, one product identity, 15 provider obligations and six field obligations; historical receipts remain preserved.
+- [x] Build 5 assembles the block release gate across identity, Company-35 correction, selector authority, requirement evidence, public health metadata and stale-identity negative cases; destructive cleanup is prohibited and publication is not due at the first five-build boundary.
+- [ ] Complete the combined exact-head regression after Living Brief reconciliation, push the full five-build block, and verify local and remote heads match.
+- [ ] Preserve provider, native/field and independent acceptance obligations as separate evidence; do not convert them into self-certified product completion.
+
