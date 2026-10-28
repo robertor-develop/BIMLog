@@ -6,7 +6,7 @@
 - [x] B002 remove the production SendGrid/deepmerge advisory without changing email behavior.
 - [x] B003 bind dependency provenance to the actual governed `qs` resolution and integrity record.
 - [x] B004 make recovery inventory classify retired or missing historical worktrees truthfully instead of crashing.
-- [x] B005 repair final GA aggregate timeout/observability and bind the complete Block 1 regression.
+- [x] B005 repair final GA aggregate timeout/observability, bind the complete Block 1 regression, and accept the governed local security backport in exact-lock production runtime assembly.
 - [ ] Push the five accepted commits, verify exact remote identity, and keep publication pending until Build 010.
 - [ ] Obtain Ruben's authenticated Navisworks 2025 create/save/reopen evidence and exact screenshot comparison before claiming field acceptance.
 

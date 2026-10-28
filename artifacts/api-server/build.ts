@@ -568,6 +568,25 @@ async function assembleRuntimeFromInstalledGraph(
       );
     }
     const lockedReference = assertDependencyEdge(issuer, packageName, declaredSpec, version);
+    if (lockedReference.startsWith("file:")) {
+      if (lockedReference !== declaredSpec) {
+        throw new Error(`Local directory dependency lock mismatch for ${packageName}: expected ${declaredSpec}, received ${lockedReference}.`);
+      }
+      const localLockKey = `${packageName}@${lockedReference}`;
+      const packages = findYamlBlock(lockLines, 0, "packages");
+      const packageBlock = packages && findYamlBlock(packages, 2, localLockKey);
+      if (!packageBlock) throw new Error(`pnpm-lock.yaml local package entry is missing: ${localLockKey}.`);
+      const resolution = readYamlScalar(packageBlock, 4, "resolution");
+      const expectedDirectory = lockedReference.slice("file:".length);
+      if (resolution !== `{directory: ${expectedDirectory}, type: directory}`) {
+        throw new Error(`pnpm-lock.yaml local package resolution mismatch: ${localLockKey}.`);
+      }
+      const snapshots = findYamlBlock(lockLines, 0, "snapshots");
+      if (!snapshots || !hasYamlEntry(snapshots, 2, localLockKey)) {
+        throw new Error(`pnpm-lock.yaml local package snapshot is missing: ${localLockKey}.`);
+      }
+      return { packageLockKey: localLockKey, snapshotLockKey: localLockKey };
+    }
     const lockKeyPattern = new RegExp(
       `^  ['\"]?${escapeRegExp(packageName)}@${escapeRegExp(version)}(?:\\([^\\r\\n]+\\))?['\"]?:\\s*$`,
       "m",

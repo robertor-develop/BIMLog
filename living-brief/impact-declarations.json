@@ -78974,7 +78974,7 @@
     {
       "taskId": "entire-platform-closure-block01-build005-20261027",
       "reviewedThroughCommit": "c7daf0dc87bf57836ff4bf2b483aaa732894093f",
-      "reviewedAt": "2026-10-28T01:44:30.000Z",
+      "reviewedAt": "2026-10-28T02:01:50.000Z",
       "status": "candidate",
       "captureTiming": "post_build_pre_push_reconciliation",
       "authorities": [
@@ -79036,6 +79036,7 @@
       ],
       "reason": "Reconcile the accepted five-build release-integrity block without claiming publication or Ruben field acceptance.",
       "reviewedChangedPaths": [
+        "artifacts/api-server/build.ts",
         "evidence/entire-platform-closure-20261027/BLOCK01_EXECUTION_LEDGER.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -79049,7 +79050,7 @@
         "scripts/test-ga-timeout-contract.mjs",
         "scripts/test-recovery-ga-block04.mjs"
       ],
-      "reviewedChangeSha256": "e0712f7a1ab276acdf34a8787541a3f2559b01e6be11058b71411bd1a0dc9926"
+      "reviewedChangeSha256": "2b0e912f72e9f5714862fe0b869e2655f84bdece8f4731213b36bdb663dc29b2"
     }
   ]
 }
