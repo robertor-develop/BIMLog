@@ -3,10 +3,11 @@
   "scope": "C002 bounded recovery inventory; not a semantic equivalence or restoration claim",
   "deletionAllowed": false,
   "wholesaleMergeAllowed": false,
-  "sourceHead": "d21e4af3398857af7c324cf1a4973aa4f31f1e74",
+  "sourceHead": "d6bca0f0704377ef8ab8de2acd592d15f706ee4d",
   "worktrees": [
     {
       "root": "F:/BIMLog/Repositories/bimlog",
+      "status": "available",
       "head": "835354da1ded3fd742e6b80246ea52f35de50aae",
       "sourceMutated": false,
       "files": [
@@ -14,7 +15,7 @@
           "relative": ".replit",
           "sourceSha256": "00dfc0960e429de36965d9f598cb3f24b2de9cf1d6fb253daee085200f5c9152",
           "bytes": 471,
-          "currentSha256": "4113b0b19925049cf6c09927a4bad19ac8e0cfd51e0eeebcc7dcd9b4cf84e06f",
+          "currentSha256": "cf53fdf300676123b4e28202e998dede388bb0be6c07f01187eb3124e2cbe134",
           "identical": false,
           "decision": "PRESERVE_ONLY",
           "reason": "Outside bounded APU/Procore recovery; no mutation or deletion authorized.",
@@ -64,7 +65,8 @@
     },
     {
       "root": "F:/BIMLog/Repositories/bimlog/.worktrees/commercial-financial-recovery-successor-20260731",
-      "head": "b80f455d75b9e8f202061364fe722dbc0183b598",
+      "status": "retired_or_missing",
+      "lastKnownHead": "b80f455d75b9e8f202061364fe722dbc0183b598",
       "sourceMutated": false,
       "files": [
         {
@@ -231,7 +233,8 @@
     },
     {
       "root": "F:/BIMLog/Repositories/bimlog/.worktrees/generic-apu-ui-20260805",
-      "head": "362c9533ab432206bbb2ed207bbf4d8746bf4260",
+      "status": "retired_or_missing",
+      "lastKnownHead": "362c9533ab432206bbb2ed207bbf4d8746bf4260",
       "sourceMutated": false,
       "files": [
         {

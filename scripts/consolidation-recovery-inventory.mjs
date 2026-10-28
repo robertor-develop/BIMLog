@@ -18,7 +18,16 @@ const classify = relative => {
   if (/database-safety/.test(relative)) return {decision:"PRESERVE_NOT_REPLACE", reason:"Historical safety edits must not overwrite the current database protection implementation.", compareWith:relative};
   return {decision:"PRESERVE_ONLY", reason:"Outside bounded APU/Procore recovery; no mutation or deletion authorized.", compareWith:null};
 };
-const worktrees = roots.map(root => {
+const inventoryRoot = (root, prior) => {
+  if (!fs.existsSync(root)) {
+    return {
+      root,
+      status:"retired_or_missing",
+      lastKnownHead:prior?.head ?? prior?.lastKnownHead ?? null,
+      sourceMutated:false,
+      files:prior?.files ?? [],
+    };
+  }
   const names = new Set([
     ...git(root,"diff","--name-only","HEAD","--").trim().split(/\r?\n/),
     ...git(root,"ls-files","--others","--exclude-standard","--","artifacts/api-server/src/lib","artifacts/bimlog/src","artifacts/bimlog/apu-project-26-harness.html").trim().split(/\r?\n/),
@@ -30,13 +39,20 @@ const worktrees = roots.map(root => {
     const currentHash = fs.existsSync(target) && fs.statSync(target).isFile() ? sha(fs.readFileSync(target)) : null;
     return {relative, sourceSha256:bytes ? sha(bytes):null, bytes:bytes?.length ?? null, currentSha256:currentHash, identical:bytes !== null && sha(bytes) === currentHash, ...classify(relative)};
   });
-  return {root,head:git(root,"rev-parse","HEAD").trim(),sourceMutated:false,files};
-});
-const result = {schemaVersion:1, scope:"C002 bounded recovery inventory; not a semantic equivalence or restoration claim", deletionAllowed:false, wholesaleMergeAllowed:false, sourceHead:git(process.cwd(),"rev-parse","HEAD").trim(),worktrees};
+  return {root,status:"available",head:git(root,"rev-parse","HEAD").trim(),sourceMutated:false,files};
+};
 const output = path.resolve("evidence/coordination-routing-20260925/CONSOLIDATION_C002_RECOVERY.json");
-if (process.argv.includes("--write")) fs.writeFileSync(output,JSON.stringify(result,null,2)+"\n");
+const saved = fs.existsSync(output) ? JSON.parse(fs.readFileSync(output,"utf8")) : {worktrees:[]};
+const worktrees = roots.map(root => inventoryRoot(root,saved.worktrees.find(worktree => worktree.root === root)));
+const result = {schemaVersion:1, scope:"C002 bounded recovery inventory; not a semantic equivalence or restoration claim", deletionAllowed:false, wholesaleMergeAllowed:false, sourceHead:git(process.cwd(),"rev-parse","HEAD").trim(),worktrees};
+if (process.argv.includes("--self-test")) {
+  const missing = inventoryRoot(path.join(process.cwd(),"definitely-retired-recovery-worktree"), {head:"abc123",files:[{relative:"preserved.txt"}]});
+  if (missing.status !== "retired_or_missing" || missing.lastKnownHead !== "abc123" || missing.files.length !== 1) throw new Error("missing historical root classification failed");
+  const available = inventoryRoot(process.cwd(), null);
+  if (available.status !== "available" || !available.head) throw new Error("available root classification failed");
+  console.log("C002_RECOVERY_SELF_TEST=PASS available=1 retired_or_missing=1 evidencePreserved=1");
+} else if (process.argv.includes("--write")) fs.writeFileSync(output,JSON.stringify(result,null,2)+"\n");
 else {
-  const saved=JSON.parse(fs.readFileSync(output,"utf8"));
   if (JSON.stringify(saved.worktrees)!==JSON.stringify(result.worktrees)) throw new Error("Preserved recovery sources changed; inspect differences before recovery");
 }
-console.log(`C002_RECOVERY=${process.argv.includes("--write")?"RECORDED":"UNCHANGED"} roots=${roots.length} files=${worktrees.reduce((n,w)=>n+w.files.length,0)} deletionAllowed=false`);
+if (!process.argv.includes("--self-test")) console.log(`C002_RECOVERY=${process.argv.includes("--write")?"RECORDED":"UNCHANGED"} roots=${roots.length} available=${worktrees.filter(w=>w.status==="available").length} retiredOrMissing=${worktrees.filter(w=>w.status==="retired_or_missing").length} files=${worktrees.reduce((n,w)=>n+w.files.length,0)} deletionAllowed=false`);

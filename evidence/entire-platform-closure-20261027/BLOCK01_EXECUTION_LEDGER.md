@@ -27,17 +27,17 @@ MANDATORY_BOOTSTRAP=PASS Constitution 3.5.0 Amendment 0021; professional identit
 
 ## Current checkpoint
 
-ACTIVE_BUILD=3
-LAST_COMPLETED_ACTION=Build 3 dependency provenance repair and focused acceptance passed; commit pending
-CURRENT_COMMIT=0940085e9
-TESTS_COMPLETED=Builds 1-2 committed; dependency provenance PASS with 972 integrity-bound resolutions; production audit clean; deepmerge security regression PASS
-TESTS_PENDING=Create focused Build 3 commit
+ACTIVE_BUILD=4
+LAST_COMPLETED_ACTION=Build 4 recovery inventory now classifies retired or missing historical worktrees and preserves their last-known evidence; commit pending
+CURRENT_COMMIT=d6bca0f07
+TESTS_COMPLETED=Builds 1-3 committed; recovery self-test PASS; governed inventory write and unchanged replay PASS with one available and two retired-or-missing roots
+TESTS_PENDING=Create focused Build 4 commit
 DEFECTS_DISCOVERED=Living Brief stale after 94ee1a1e; deepmerge advisory; stale qs provenance expectation; missing historical recovery worktree crash; final GA aggregate timeout
-DEFECTS_CORRECTED=Living Brief reconciliation; SendGrid deepmerge advisory; stale qs 6.16.0 provenance expectation
+DEFECTS_CORRECTED=Living Brief reconciliation; SendGrid deepmerge advisory; stale qs 6.16.0 provenance expectation; historical recovery worktree crash
 BROWSER_RESOURCES_OWNED=NONE
 PUSH_STATUS=NOT_STARTED
 PUBLICATION_STATUS=NOT_DUE
-SAFE_RESUME_POINT=Commit accepted Build 3 then begin recovery inventory Build 4
+SAFE_RESUME_POINT=Commit accepted Build 4 then begin final GA aggregate Build 5
 
 ## Build 1 evidence
 
@@ -64,4 +64,12 @@ SCOPE=Bind provenance to governed qs 6.16.1 and the local deepmerge security bac
 POSITIVE_TEST=check:dependency-provenance PASS with pnpm 11.17.0, lockfile 9.0 and 972 integrity-bound resolutions
 NEGATIVE_TEST=Checker forbids qs 6.16.0 and rejects missing deepmerge workspace, lockfile or SendGrid bindings
 CONNECTED_REGRESSION=Production audit clean; deepmerge prototype regression PASS
+
+## Build 4 evidence
+
+STATUS=FOCUSED_ACCEPTANCE_PASS_COMMIT_PENDING
+SCOPE=Classify retired or missing historical recovery roots without crashing or discarding last-known evidence
+POSITIVE_TEST=Available canonical root inventories normally and unchanged replay PASS
+NEGATIVE_TEST=Two absent historical roots classified retired_or_missing with lastKnownHead and preserved file evidence
+SAFETY_TEST=Read-only inventory retains deletionAllowed=false, wholesaleMergeAllowed=false and sourceMutated=false
 
