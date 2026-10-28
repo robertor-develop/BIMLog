@@ -86,6 +86,13 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/all-tools",
+      "owner": "AllTools",
+      "availability": "gated",
+      "boundary": "authenticated; feature checks still apply",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/lens-next",
       "owner": "LensNextWorkspace",
       "availability": "gated",
