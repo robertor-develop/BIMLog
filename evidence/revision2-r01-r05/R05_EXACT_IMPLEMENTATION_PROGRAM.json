@@ -1,0 +1,246 @@
+{
+  "schemaVersion": "bimlog-revision2-exact-implementation-program-v1",
+  "generatedFrom": "R01 identity disposition + R02 backend inventory + R03 frontend exposure + R04 journey reconciliation",
+  "buildCount": 20,
+  "blockCount": 4,
+  "buildsPerBlock": 5,
+  "publicationEveryBlocks": 2,
+  "programLaw": "complete_discoverable_understandable_progressively_organized_without_capability_loss",
+  "prohibitedStrategies": [
+    "no_module_deletion",
+    "no_vague_more_menu_for_functional_pages",
+    "no_summary_card_substitution_for_workflows",
+    "no_backend_capability_left_inaccessible_without_explicit_disposition",
+    "no_merging_distinct_business_concepts_for_cosmetic_simplicity",
+    "no_completion_claim_without_discoverable_executable_ui"
+  ],
+  "entryGate": "P001 begins from the preserved 796-route inventory and may not convert provisional missing-frontend candidates into deletion authority.",
+  "exitGate": "No completion until every backend capability has an intentional exposure disposition and novice plus expert acceptance both pass.",
+  "builds": [
+    {
+      "id": "P001",
+      "block": 1,
+      "objective": "Resolve dynamic frontend API construction into the capability matcher without changing runtime behavior.",
+      "gaps": [
+        "GAP-PARITY-ADJUDICATION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P002",
+      "block": 1,
+      "objective": "Adjudicate every read route as operable, read-only, partial, administrator-only, API/native-only, or missing frontend.",
+      "gaps": [
+        "GAP-PARITY-ADJUDICATION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P003",
+      "block": 1,
+      "objective": "Adjudicate every mutation route and verify the visible permission, success, error, and evidence states.",
+      "gaps": [
+        "GAP-PARITY-ADJUDICATION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P004",
+      "block": 1,
+      "objective": "Reconcile route families to modules so shared services are not mistaken for duplicate business concepts.",
+      "gaps": [
+        "GAP-PARITY-ADJUDICATION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P005",
+      "block": 1,
+      "objective": "Freeze the confirmed parity-gap set and permanent no-capability-loss regression gate.",
+      "gaps": [
+        "GAP-PARITY-ADJUDICATION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P006",
+      "block": 2,
+      "objective": "Define the complete role-filtered capability-directory contract from the adjudicated registry.",
+      "gaps": [
+        "GAP-ALL-TOOLS"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P007",
+      "block": 2,
+      "objective": "Expose a visible authenticated All Tools destination without replacing daily navigation.",
+      "gaps": [
+        "GAP-ALL-TOOLS"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P008",
+      "block": 2,
+      "objective": "Add searchable module, capability, task, and plain-language purpose indexing.",
+      "gaps": [
+        "GAP-ALL-TOOLS"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P009",
+      "block": 2,
+      "objective": "Expose permission and administrator-only states without leaking unauthorized records.",
+      "gaps": [
+        "GAP-ALL-TOOLS"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P010",
+      "block": 2,
+      "objective": "Verify direct expert navigation, browser history, refresh, reopen, localization, accessibility, and responsive containment.",
+      "gaps": [
+        "GAP-ALL-TOOLS"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": true
+    },
+    {
+      "id": "P011",
+      "block": 3,
+      "objective": "Align primary daily navigation to Home, Intake, Operations, Documents, Coordination, and Reports while preserving exact destinations.",
+      "gaps": [
+        "GAP-ALL-TOOLS"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P012",
+      "block": 3,
+      "objective": "Group the full capability directory by stable business concepts without vague More or essential Advanced buckets.",
+      "gaps": [
+        "GAP-ALL-TOOLS"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P013",
+      "block": 3,
+      "objective": "Add plain-language purpose, prerequisite, actor, and next-step explanations to complex modules.",
+      "gaps": [
+        "GAP-LIFECYCLE-COMPREHENSION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P014",
+      "block": 3,
+      "objective": "Preserve guided recommendations while enabling authorized users to bypass wizards through direct expert routes.",
+      "gaps": [
+        "GAP-ALL-TOOLS",
+        "GAP-LIFECYCLE-COMPREHENSION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P015",
+      "block": 3,
+      "objective": "Run role, tenant, project, company, localization, accessibility, responsive, and navigation regression for both navigation levels.",
+      "gaps": [
+        "GAP-ALL-TOOLS"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P016",
+      "block": 4,
+      "objective": "Inventory every dashboard card and bind it to governed underlying records and actions.",
+      "gaps": [
+        "GAP-DASHBOARD-ACTIONABILITY"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P017",
+      "block": 4,
+      "objective": "Repair cards that summarize without an actionable destination; preserve the underlying working module.",
+      "gaps": [
+        "GAP-DASHBOARD-ACTIONABILITY"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P018",
+      "block": 4,
+      "objective": "Expose record state, missing information, authorized actor, next action, and resulting destination for principal lifecycles.",
+      "gaps": [
+        "GAP-LIFECYCLE-COMPREHENSION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P019",
+      "block": 4,
+      "objective": "Verify create, edit, save, refresh, reopen, error recovery, evidence trail, report, and export continuity.",
+      "gaps": [
+        "GAP-LIFECYCLE-COMPREHENSION",
+        "GAP-DASHBOARD-ACTIONABILITY"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": false
+    },
+    {
+      "id": "P020",
+      "block": 4,
+      "objective": "Run complete capability-parity and comprehension acceptance: novice principal journey plus unrestricted authorized expert reachability.",
+      "gaps": [
+        "GAP-PARITY-ADJUDICATION",
+        "GAP-ALL-TOOLS",
+        "GAP-DASHBOARD-ACTIONABILITY",
+        "GAP-LIFECYCLE-COMPREHENSION"
+      ],
+      "protectedBehavior": "preserve_all_legitimate_capabilities_and_stable_business_identity",
+      "acceptance": "focused_positive_negative_permission_isolation_persistence_connected_regression",
+      "publicationBoundary": true
+    }
+  ]
+}
