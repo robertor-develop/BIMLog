@@ -23,12 +23,14 @@
 - Build 023: accepted; focused implementation commit `b6d782827`; deterministic PLATFORM generation, current-state documentation contract, and Living Brief integrity pass.
 - Build 024: accepted; focused implementation commit `8f287acd7`; Lens Next sole-product negative self-test and frontend TypeScript pass.
 - Build 025: accepted; focused implementation commit `b3ba648b1`; release/provider/version/Lens/disposition contradiction gate and negative self-test pass.
-- Last completed action: all five focused build gates passed sequentially.
+- Last completed action: repaired the complete-gate semantic-review digest baseline after the first full run reached pre-push and rejected the stale post-commit digest; focused Living Brief and current-state retests pass.
 - Tests completed: authority verifier, professional identity, instruction authority, repository/remote/deployment/migration/worktree identity checks; release identity; 538-item OPEN_LOOP disposition integrity; current-state contract; Living Brief integrity with 11 required documents, 38 internal links, 40 standards links, and 23 continuity cases.
-- Tests pending: complete connected/block regression, final worktree review, corrective metadata commit, push verification.
+- Tests pending: corrective metadata commit, complete connected/block regression retry, final worktree review, push verification.
 - Defects discovered: authoritative OPEN_LOOP marker still names P36; Build 021 evidence report still names P33.
 - Defects corrected: Build 021 evidence now records P37/source/package-era receipt; the sole OPEN_LOOP authority now records exact P37 source, package, migration, and authenticated acceptance evidence.
+- Recoverable conditions: local release invocation required an explicit receipt path; clean-candidate gate required metadata commit; first complete run found a stale semantic-review digest at final pre-push after all preceding suites passed.
+- Test retry count: 1 complete-gate retry pending after focused correction.
 - Browser resources owned: none.
 - Push status: pending.
 - Publication status: not required for this block.
-- Exact safe resume point: run the complete block regression and repair any proven failure before push.
+- Exact safe resume point: commit the semantic-digest correction on the clean candidate, then repeat the complete local release gate from the beginning.
