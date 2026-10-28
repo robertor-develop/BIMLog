@@ -4,6 +4,7 @@ const manifest = JSON.parse(fs.readFileSync("evidence/stabilization-program-2026
 if (manifest.executionAuthorized !== false || manifest.broadRecursiveActionAllowed !== false) throw new Error("cleanup manifest must remain planning-only and prohibit broad recursive action");
 if (manifest.worktreeCount !== manifest.worktrees.length || manifest.branchCount !== manifest.branches.length) throw new Error("cleanup manifest counts do not reconcile");
 const paths = new Set();
+const branches = new Set();
 for (const item of manifest.worktrees) {
   if (!item.sourcePath || /[*?]/.test(item.sourcePath)) throw new Error(`non-exact source path: ${item.sourcePath}`);
   if (!item.preservationDirectory.startsWith(`${manifest.archiveRoot}/`) || /[*?]/.test(item.preservationDirectory)) throw new Error(`invalid preservation directory: ${item.preservationDirectory}`);
@@ -13,5 +14,7 @@ for (const item of manifest.worktrees) {
 }
 for (const item of manifest.branches) {
   if (!item.branch || /[*?]/.test(item.branch) || item.deletionAllowed !== false || item.deletionPreconditions.length < 4) throw new Error(`unsafe branch plan: ${item.branch}`);
+  if (branches.has(item.branch.toLowerCase())) throw new Error(`duplicate branch: ${item.branch}`);
+  branches.add(item.branch.toLowerCase());
 }
 console.log(JSON.stringify({ status: "PASS", worktrees: manifest.worktreeCount, branches: manifest.branchCount, executionAuthorized: manifest.executionAuthorized }));

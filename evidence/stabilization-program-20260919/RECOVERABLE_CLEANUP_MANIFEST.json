@@ -1,139 +1,14 @@
 {
   "schemaVersion": 1,
   "sourceInventory": "evidence/stabilization-program-20260919/SOURCE_AUTHORITY_INVENTORY.json",
-  "sourceInventorySha256": "f864ea92c0762495a383c6ea4d52d78ecaa9c8e65ad9a3d0cd5517a3dfff8353",
-  "sourceHead": "b3ba648b1c964ae3867366acfcdd17ca37222b0a",
+  "sourceInventorySha256": "5bace84ac91e9f618194d82699df3ae6974615cdff7d6acc197fae24bc9968b5",
+  "sourceHead": "c806ac928025cebc8b4a0b05e499724a8dd2f5fa",
   "executionAuthorized": false,
   "broadRecursiveActionAllowed": false,
   "archiveRoot": "F:/BIMLog/Archives/recoverable-worktrees",
-  "worktreeCount": 73,
-  "branchCount": 81,
+  "worktreeCount": 67,
+  "branchCount": 99,
   "worktrees": [
-    {
-      "sourcePath": "C:/Users/soporte/.codex/worktrees/97cc/bimlog",
-      "branch": null,
-      "head": "79f296f6fe16e0740c56ecf2595768b0b9f47e8a",
-      "prunable": true,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/Users-soporte-.codex-worktrees-97cc-bimlog-79f296f6fe16",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Repositories/bimlog/.worktrees/living-brief-whitespace-seal-20260811",
-      "branch": "codex/living-brief-whitespace-seal-20260811",
-      "head": "7bb2e69b38e19c3ada3c56a48417332bc57425ac",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-living-brief-whitespace-seal-20260811-7bb2e69b38e1",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Repositories/bimlog/.worktrees/rfi-build8-contract-parity-20260805",
-      "branch": "codex/rfi-build8-contract-parity",
-      "head": "b0b996ebd9cf2fd0505b5a7eeafe74877077931e",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-rfi-build8-contract-parity-b0b996ebd9cf",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Repositories/bimlog/.worktrees/schema-parity-living-brief-seal-20260811",
-      "branch": "codex/schema-parity-living-brief-seal-20260811",
-      "head": "7235fdeb63c11878bcff4ebaf1a9e2af12a24411",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-schema-parity-living-brief-seal-20260811-7235fdeb63c1",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Repositories/bimlog/.worktrees/schema-parity-repair-20260811",
-      "branch": "codex/schema-parity-repair-20260811",
-      "head": "08151f39e0db79c0196d50e64cd60b651c4f4992",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-schema-parity-repair-20260811-08151f39e0db",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
     {
       "sourcePath": "F:/BIMLog/Worktrees/bimlog-apu-intake-empty-state-build01-20260914",
       "branch": "codex/bimlog-apu-intake-empty-state-build01-20260914",
@@ -210,11 +85,11 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-build44-final-xml-closure-20260908",
-      "branch": "codex/bimlog-build44-final-xml-closure-20260908",
-      "head": "fc6d8b9647a1f149ae39adff0450c08a2cc7e105",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-commercial-ga-final-20261015b",
+      "branch": "codex/bimlog-commercial-ga-final-20261015b",
+      "head": "d2127f73b567d50a120a5764462ebde051dc73e2",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-build44-final-xml-closure-20260908-fc6d8b9647a1",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-commercial-ga-final-20261015b-d2127f73b567",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -235,111 +110,11 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-build46-camera-unit-contract-20260908",
-      "branch": "codex/bimlog-build46-camera-unit-contract-20260908",
-      "head": "38620db50599962a22d910f8c14bcb01803f6236",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-commercial-ga-final-current-20261015",
+      "branch": "codex/bimlog-commercial-ga-final-current-20261015",
+      "head": "dc2cc5af06ca3bad87182efe96a030a62b67ddcd",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-build46-camera-unit-contract-20260908-38620db50599",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-build47-platform-legacy-409-20260908",
-      "branch": "codex/bimlog-build47-platform-legacy-409-20260908",
-      "head": "e6532fc37ec6ca3354fac7aeb4402269cb726edb",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-build47-platform-legacy-409-20260908-e6532fc37ec6",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-build5-operations-20260812",
-      "branch": "codex/bimlog-build5-operations-20260812",
-      "head": "ac3d2b8b57f02080c6cbb7935312dd051ef12fed",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-build5-operations-20260812-ac3d2b8b57f0",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-build6-team-capacity-20260813",
-      "branch": "codex/bimlog-build6-team-capacity-20260813",
-      "head": "601bf94aa5505d0137f8ae1858b40356d9f3aaf6",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-build6-team-capacity-20260813-601bf94aa550",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-build7-advanced-contracts-integration-20260817",
-      "branch": "codex/bimlog-build7-advanced-contracts-integration-20260817",
-      "head": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-build7-advanced-contracts-integration-20260817-972fd7cfca7c",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-commercial-ga-final-current-20261015-dc2cc5af06ca",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -410,11 +185,11 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-digest-v3-platform-release-20260901",
-      "branch": null,
-      "head": "81fb21b713a5c126c8b44778e421957697e1c574",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-edt-engine-block01-20260922",
+      "branch": "codex/bimlog-edt-engine-block01-20260922",
+      "head": "d67b5b992ebb2d867440e1face3ee5a85a88d8cf",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/BIMLog-Worktrees-bimlog-digest-v3-platform-release-20260901-81fb21b713a5",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-edt-engine-block01-20260922-d67b5b992ebb",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -435,11 +210,11 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-feedback-ops-20260820",
-      "branch": "codex/bimlog-feedback-v1.60.35.10-f-20260821",
-      "head": "cd96e19dc3cf5c0d6949dd6c9ae69006e8b3ad46",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-knowledge-block01-20260921",
+      "branch": "codex/bimlog-knowledge-block01-20260921",
+      "head": "b4ec61aff3e8df14713edf3a8d9f5f7b624c1195",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-feedback-v1.60.35.10-f-20260821-cd96e19dc3cf",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-knowledge-block01-20260921-b4ec61aff3e8",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -460,11 +235,11 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-feedback-v1603511f-20260821",
-      "branch": "codex/bimlog-feedback-v1.60.35.11-f-20260821",
-      "head": "40f3a2cbd78de7c146d556d8ddad3443644f7a10",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-knowledge-block02-20260921",
+      "branch": "codex/bimlog-knowledge-block02-20260921",
+      "head": "dd68f4ea7c46c8391999c117463b237e8f6ce711",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-feedback-v1.60.35.11-f-20260821-40f3a2cbd78d",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-knowledge-block02-20260921-dd68f4ea7c46",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -485,11 +260,11 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-feedback-v1603512f-20260821",
-      "branch": "codex/bimlog-feedback-v1.60.35.12-f-20260821",
-      "head": "efcb77df83f3352da4224948fad7433154bf35d8",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-knowledge-block03-20260921",
+      "branch": "codex/bimlog-knowledge-block03-20260921",
+      "head": "a5acd62b53ea6d65c80a406c19fc9ef75412e31a",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-feedback-v1.60.35.12-f-20260821-efcb77df83f3",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-knowledge-block03-20260921-a5acd62b53ea",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -510,11 +285,11 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-files-patch-a-20260730",
-      "branch": "codex/files-patch-a-20260730",
-      "head": "7284da1ee124d7df9e65af09b6126ce114bb5b99",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-knowledge-block04-20260921",
+      "branch": "codex/bimlog-knowledge-block04-20260921",
+      "head": "9b21b8872379e39a404e554b76073706651022b4",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-files-patch-a-20260730-7284da1ee124",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-knowledge-block04-20260921-9b21b8872379",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -535,11 +310,61 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-files-patch-a-20260730-b",
-      "branch": "codex/files-patch-a-20260730-b",
-      "head": "7284da1ee124d7df9e65af09b6126ce114bb5b99",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-knowledge-block05-20260921",
+      "branch": "codex/bimlog-knowledge-block05-20260921",
+      "head": "f29c229623fd9ae1f9d4088b04ffa7d594bbc5f7",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-files-patch-a-20260730-b-7284da1ee124",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-knowledge-block05-20260921-f29c229623fd",
+      "requiredEvidence": [
+        "source-identity.json",
+        "tracked-and-binary.patch",
+        "untracked-file-manifest.json",
+        "branch.bundle",
+        "sha256-manifest.json",
+        "restore-verification.json"
+      ],
+      "removalAllowed": false,
+      "removalPreconditions": [
+        "exact source head and branch recorded",
+        "tracked and binary diff captured even when empty",
+        "untracked names, sizes, and hashes captured",
+        "bundle verifies and recreates the exact head",
+        "archive hash manifest verifies",
+        "restore rehearsal succeeds outside the source path",
+        "Roberto separately authorizes the exact removal target"
+      ]
+    },
+    {
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-knowledge-block06-20260921",
+      "branch": "codex/bimlog-knowledge-block06-20260921",
+      "head": "60f90bdad09fc66186ee92e657b220c39f6b4f58",
+      "prunable": false,
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-knowledge-block06-20260921-60f90bdad09f",
+      "requiredEvidence": [
+        "source-identity.json",
+        "tracked-and-binary.patch",
+        "untracked-file-manifest.json",
+        "branch.bundle",
+        "sha256-manifest.json",
+        "restore-verification.json"
+      ],
+      "removalAllowed": false,
+      "removalPreconditions": [
+        "exact source head and branch recorded",
+        "tracked and binary diff captured even when empty",
+        "untracked names, sizes, and hashes captured",
+        "bundle verifies and recreates the exact head",
+        "archive hash manifest verifies",
+        "restore rehearsal succeeds outside the source path",
+        "Roberto separately authorizes the exact removal target"
+      ]
+    },
+    {
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-knowledge-block07-20260922",
+      "branch": "codex/bimlog-knowledge-block07-20260922",
+      "head": "c97efd491f15d393f7c432419f2e2d908cd574a8",
+      "prunable": false,
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-knowledge-block07-20260922-c97efd491f15",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -565,6 +390,31 @@
       "head": "6d4feebaa1833bbac6a6d5f74c34053cd483df35",
       "prunable": false,
       "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-legacy-working-view-final-20260910-6d4feebaa183",
+      "requiredEvidence": [
+        "source-identity.json",
+        "tracked-and-binary.patch",
+        "untracked-file-manifest.json",
+        "branch.bundle",
+        "sha256-manifest.json",
+        "restore-verification.json"
+      ],
+      "removalAllowed": false,
+      "removalPreconditions": [
+        "exact source head and branch recorded",
+        "tracked and binary diff captured even when empty",
+        "untracked names, sizes, and hashes captured",
+        "bundle verifies and recreates the exact head",
+        "archive hash manifest verifies",
+        "restore rehearsal succeeds outside the source path",
+        "Roberto separately authorizes the exact removal target"
+      ]
+    },
+    {
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-docked-block01-20260923",
+      "branch": "codex/bimlog-lens-docked-block01-20260923",
+      "head": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "prunable": false,
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-lens-docked-block01-20260923-49e0c9013028",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -1035,31 +885,6 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-next-build17-perspective-validation-20260903",
-      "branch": "codex/lens-next-build17-perspective-validation-20260903",
-      "head": "c35f86a5de783177ef11a233d7a49e7f90497371",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-lens-next-build17-perspective-validation-20260903-c35f86a5de78",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
       "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-next-build17a-fov-presence-20260903",
       "branch": "codex/lens-next-build17a-fov-presence-20260903",
       "head": "c88e54f7977121764e105c31f17e976cc24eb138",
@@ -1310,31 +1135,6 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-next-build25d-range-capture-20260905",
-      "branch": "codex/lens-next-build25d-range-capture-20260905",
-      "head": "055afd95716b6a83cc05f29aaaadc89cd1b1e613",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-lens-next-build25d-range-capture-20260905-055afd95716b",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
       "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-next-build25f-range-sentinel-20260905",
       "branch": "codex/lens-next-build25f-range-sentinel-20260905",
       "head": "5d4c9c31b323dbb015dacd18c6ebbc15ba2301d2",
@@ -1410,61 +1210,36 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-next-m7-repair-20260822",
-      "branch": "codex/bimlog-lens-next-m7-repair-20260822",
-      "head": "b9d99d5dff1cbc08c7b55839b664740e2817ebc7",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-lens-next-m7-repair-20260822-b9d99d5dff1c",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-next-m8-publishing-20260822",
-      "branch": "codex/bimlog-lens-next-m8-publishing-20260822",
-      "head": "1f98cb575b14225983bd6f190f2fc31ee4bb1f42",
-      "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-lens-next-m8-publishing-20260822-1f98cb575b14",
-      "requiredEvidence": [
-        "source-identity.json",
-        "tracked-and-binary.patch",
-        "untracked-file-manifest.json",
-        "branch.bundle",
-        "sha256-manifest.json",
-        "restore-verification.json"
-      ],
-      "removalAllowed": false,
-      "removalPreconditions": [
-        "exact source head and branch recorded",
-        "tracked and binary diff captured even when empty",
-        "untracked names, sizes, and hashes captured",
-        "bundle verifies and recreates the exact head",
-        "archive hash manifest verifies",
-        "restore rehearsal succeeds outside the source path",
-        "Roberto separately authorizes the exact removal target"
-      ]
-    },
-    {
       "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-p32-release-20260917",
       "branch": "codex/bimlog-lens-p32-release-20260917",
       "head": "74e736cb6bebe277a38f0241c89e71b974c15c42",
       "prunable": false,
       "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-lens-p32-release-20260917-74e736cb6beb",
+      "requiredEvidence": [
+        "source-identity.json",
+        "tracked-and-binary.patch",
+        "untracked-file-manifest.json",
+        "branch.bundle",
+        "sha256-manifest.json",
+        "restore-verification.json"
+      ],
+      "removalAllowed": false,
+      "removalPreconditions": [
+        "exact source head and branch recorded",
+        "tracked and binary diff captured even when empty",
+        "untracked names, sizes, and hashes captured",
+        "bundle verifies and recreates the exact head",
+        "archive hash manifest verifies",
+        "restore rehearsal succeeds outside the source path",
+        "Roberto separately authorizes the exact removal target"
+      ]
+    },
+    {
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-lens-redline-p37-20261001",
+      "branch": "codex/bimlog-lens-redline-p37-20261001",
+      "head": "345dc645a05e0f4befb14b408c5cfdd8c863498a",
+      "prunable": false,
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-lens-redline-p37-20261001-345dc645a05e",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -1515,6 +1290,31 @@
       "head": "cc4168c93666349032d5de2a96e9c931fde9e18e",
       "prunable": false,
       "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-lorena-intake-controls-20260916-cc4168c93666",
+      "requiredEvidence": [
+        "source-identity.json",
+        "tracked-and-binary.patch",
+        "untracked-file-manifest.json",
+        "branch.bundle",
+        "sha256-manifest.json",
+        "restore-verification.json"
+      ],
+      "removalAllowed": false,
+      "removalPreconditions": [
+        "exact source head and branch recorded",
+        "tracked and binary diff captured even when empty",
+        "untracked names, sizes, and hashes captured",
+        "bundle verifies and recreates the exact head",
+        "archive hash manifest verifies",
+        "restore rehearsal succeeds outside the source path",
+        "Roberto separately authorizes the exact removal target"
+      ]
+    },
+    {
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-norte-project-cleanup-20261006",
+      "branch": "codex/bimlog-norte-project-cleanup-20261006",
+      "head": "9c719f5295c69efb6bef3ad0a62e4ea0acde655c",
+      "prunable": false,
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-norte-project-cleanup-20261006-9c719f5295c6",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -1760,11 +1560,61 @@
       ]
     },
     {
-      "sourcePath": "F:/BIMLog/Worktrees/bimlog-search-contract-helper-20260729",
-      "branch": "codex/search-contract-helper-20260729",
-      "head": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-ruben-publish-schema-20261027",
+      "branch": "codex/bimlog-ruben-publish-schema-20261027",
+      "head": "ed7d5d8c138732e7162352d567ecee021e6153b7",
       "prunable": false,
-      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-search-contract-helper-20260729-7cc3d10c2a83",
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-ruben-publish-schema-20261027-ed7d5d8c1387",
+      "requiredEvidence": [
+        "source-identity.json",
+        "tracked-and-binary.patch",
+        "untracked-file-manifest.json",
+        "branch.bundle",
+        "sha256-manifest.json",
+        "restore-verification.json"
+      ],
+      "removalAllowed": false,
+      "removalPreconditions": [
+        "exact source head and branch recorded",
+        "tracked and binary diff captured even when empty",
+        "untracked names, sizes, and hashes captured",
+        "bundle verifies and recreates the exact head",
+        "archive hash manifest verifies",
+        "restore rehearsal succeeds outside the source path",
+        "Roberto separately authorizes the exact removal target"
+      ]
+    },
+    {
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-sharepoint-block01-20260925",
+      "branch": "codex/bimlog-sharepoint-block01-20260925",
+      "head": "b3d5a065abd45e2fd0f07db559d489b9612153d5",
+      "prunable": false,
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-sharepoint-block01-20260925-b3d5a065abd4",
+      "requiredEvidence": [
+        "source-identity.json",
+        "tracked-and-binary.patch",
+        "untracked-file-manifest.json",
+        "branch.bundle",
+        "sha256-manifest.json",
+        "restore-verification.json"
+      ],
+      "removalAllowed": false,
+      "removalPreconditions": [
+        "exact source head and branch recorded",
+        "tracked and binary diff captured even when empty",
+        "untracked names, sizes, and hashes captured",
+        "bundle verifies and recreates the exact head",
+        "archive hash manifest verifies",
+        "restore rehearsal succeeds outside the source path",
+        "Roberto separately authorizes the exact removal target"
+      ]
+    },
+    {
+      "sourcePath": "F:/BIMLog/Worktrees/bimlog-stabilization-program-20260919",
+      "branch": "codex/bimlog-stabilization-program-20260919",
+      "head": "85043fe0a12261acb5f02c884053d0db4877fcd0",
+      "prunable": false,
+      "preservationDirectory": "F:/BIMLog/Archives/recoverable-worktrees/codex-bimlog-stabilization-program-20260919-85043fe0a122",
       "requiredEvidence": [
         "source-identity.json",
         "tracked-and-binary.patch",
@@ -1957,9 +1807,57 @@
       ]
     },
     {
+      "branch": "codex/bimlog-commercial-ga-final-20261015",
+      "head": "d2127f73b567d50a120a5764462ebde051dc73e2",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-commercial-ga-final-20261015-d2127f73b567.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-commercial-ga-final-20261015b",
+      "head": "d2127f73b567d50a120a5764462ebde051dc73e2",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-commercial-ga-final-20261015b-d2127f73b567.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-commercial-ga-final-current-20261015",
+      "head": "dc2cc5af06ca3bad87182efe96a030a62b67ddcd",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-commercial-ga-final-current-20261015-dc2cc5af06ca.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
       "branch": "codex/bimlog-coordination-release-b-integration-20260909",
       "head": "6739e8fb30c756fc7c215dd1de464ea2e3002213",
       "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-coordination-release-b-integration-20260909-6739e8fb30c7.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-edt-engine-block01-20260922",
+      "head": "d67b5b992ebb2d867440e1face3ee5a85a88d8cf",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-edt-engine-block01-20260922-d67b5b992ebb.bundle",
       "deletionAllowed": false,
       "deletionPreconditions": [
         "branch is not checked out",
@@ -2029,6 +1927,90 @@
       ]
     },
     {
+      "branch": "codex/bimlog-knowledge-block01-20260921",
+      "head": "b4ec61aff3e8df14713edf3a8d9f5f7b624c1195",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-knowledge-block01-20260921-b4ec61aff3e8.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block02-20260921",
+      "head": "dd68f4ea7c46c8391999c117463b237e8f6ce711",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-knowledge-block02-20260921-dd68f4ea7c46.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block03-20260921",
+      "head": "a5acd62b53ea6d65c80a406c19fc9ef75412e31a",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-knowledge-block03-20260921-a5acd62b53ea.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block04-20260921",
+      "head": "9b21b8872379e39a404e554b76073706651022b4",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-knowledge-block04-20260921-9b21b8872379.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block05-20260921",
+      "head": "f29c229623fd9ae1f9d4088b04ffa7d594bbc5f7",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-knowledge-block05-20260921-f29c229623fd.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block06-20260921",
+      "head": "60f90bdad09fc66186ee92e657b220c39f6b4f58",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-knowledge-block06-20260921-60f90bdad09f.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block07-20260922",
+      "head": "c97efd491f15d393f7c432419f2e2d908cd574a8",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-knowledge-block07-20260922-c97efd491f15.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
       "branch": "codex/bimlog-legacy-working-view-final-20260910",
       "head": "6d4feebaa1833bbac6a6d5f74c34053cd483df35",
       "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-legacy-working-view-final-20260910-6d4feebaa183.bundle",
@@ -2041,9 +2023,33 @@
       ]
     },
     {
+      "branch": "codex/bimlog-lens-docked-block01-20260923",
+      "head": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-lens-docked-block01-20260923-49e0c9013028.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
       "branch": "codex/bimlog-lens-elara-regression-20260915",
       "head": "93894dbb8ba213f8f99a54d72b6521703fc685a2",
       "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-lens-elara-regression-20260915-93894dbb8ba2.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-lens-governed-fields-multiview-20261027",
+      "head": "c12a73df9dccb3ac4c9ee730e0041b056e4f700c",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-lens-governed-fields-multiview-20261027-c12a73df9dcc.bundle",
       "deletionAllowed": false,
       "deletionPreconditions": [
         "branch is not checked out",
@@ -2101,6 +2107,18 @@
       ]
     },
     {
+      "branch": "codex/bimlog-lens-redline-p37-20261001",
+      "head": "345dc645a05e0f4befb14b408c5cfdd8c863498a",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-lens-redline-p37-20261001-345dc645a05e.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
       "branch": "codex/bimlog-lorena-block01-20260917",
       "head": "887589a3ee2b05ee92a51427cdd72ef0a92241af",
       "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-lorena-block01-20260917-887589a3ee2b.bundle",
@@ -2116,6 +2134,18 @@
       "branch": "codex/bimlog-lorena-intake-controls-20260916",
       "head": "cc4168c93666349032d5de2a96e9c931fde9e18e",
       "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-lorena-intake-controls-20260916-cc4168c93666.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-norte-project-cleanup-20261006",
+      "head": "9c719f5295c69efb6bef3ad0a62e4ea0acde655c",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-norte-project-cleanup-20261006-9c719f5295c6.bundle",
       "deletionAllowed": false,
       "deletionPreconditions": [
         "branch is not checked out",
@@ -2236,6 +2266,42 @@
       "branch": "codex/bimlog-postbuild20-corrective-06-task-assignment-20260910",
       "head": "7c07d65e41d1fabc7472eef0e8eafea708a9c088",
       "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-postbuild20-corrective-06-task-assignment-20260910-7c07d65e41d1.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-ruben-publish-schema-20261027",
+      "head": "ed7d5d8c138732e7162352d567ecee021e6153b7",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-ruben-publish-schema-20261027-ed7d5d8c1387.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-sharepoint-block01-20260925",
+      "head": "b3d5a065abd45e2fd0f07db559d489b9612153d5",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-sharepoint-block01-20260925-b3d5a065abd4.bundle",
+      "deletionAllowed": false,
+      "deletionPreconditions": [
+        "branch is not checked out",
+        "bundle verifies and recreates the exact head",
+        "head is represented in the worktree preservation manifest or a dedicated bundle",
+        "Roberto separately authorizes the exact branch deletion"
+      ]
+    },
+    {
+      "branch": "codex/bimlog-stabilization-program-20260919",
+      "head": "85043fe0a12261acb5f02c884053d0db4877fcd0",
+      "preservationBundle": "F:/BIMLog/Archives/recoverable-worktrees/branches/codex-bimlog-stabilization-program-20260919-85043fe0a122.bundle",
       "deletionAllowed": false,
       "deletionPreconditions": [
         "branch is not checked out",

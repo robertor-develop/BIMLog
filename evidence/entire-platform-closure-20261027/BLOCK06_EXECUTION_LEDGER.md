@@ -57,3 +57,18 @@
 - Push status: pending.
 - Publication status: pending exact runtime-change determination at Build 030.
 - Exact safe resume point: create the focused Build 028 corrective commit, then generate Build 029's preservation-first cleanup manifest without executing cleanup.
+
+## Build 028 committed / Build 029 accepted — 2026-10-28
+
+- Build 028 corrective commit: `da5dfd29d` (`docs: refresh build 028 dirty candidate reconciliation`).
+- Active build: 029.
+- Last completed action: regenerated the planning-only cleanup manifest from the accepted Build 026 inventory.
+- Build 029 tests: 67 unique exact worktree plans PASS; 99 unique exact branch plans PASS; no globs/wildcards; all archive destinations remain F-rooted; `executionAuthorized=false`; `broadRecursiveActionAllowed=false`; every worktree `removalAllowed=false`; every branch `deletionAllowed=false`; diff check PASS.
+- Defects discovered: the prior cleanup report described 73 worktrees, 81 branches, and one prunable entry; current classified registry requires 67 worktree and 99 branch plans with zero prunable entries.
+- Defects corrected: regenerated the manifest, refreshed the report, and added duplicate-branch rejection.
+- Tests pending: Build 029 focused commit; Build 030 aggregate reconciliation; connected and full block regression; push/remote verification; release decision and live verification.
+- Destructive cleanup executed: none.
+- Browser resources owned: none.
+- Push status: pending.
+- Publication status: pending exact runtime-change determination at Build 030.
+- Exact safe resume point: create the focused Build 029 corrective commit, then begin Build 030 aggregate reconciliation.
