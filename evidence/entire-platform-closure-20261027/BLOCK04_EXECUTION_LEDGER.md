@@ -26,14 +26,23 @@
 ## Current checkpoint
 
 - Authority: Constitution PASS; professional identity ALLOW; instruction authority ALLOW with exact durable-owner binding.
-- Last completed action: Build 020 operator tests and exact source/restored publication rehearsal passed; stale Build 016/020 schema-total evidence was corrected to current truth.
-- Tests completed: authority/bootstrap, public health identity, Builds 016-020 focused gates.
-- Tests pending: production inventory comparison; ten-build prepublication regression; Living Brief reconciliation; push; publication; deployment verification; three authenticated production rounds.
+- Last completed action: publication, deployed-identity verification, three authenticated production rounds, disposable restore cleanup, and task-tab cleanup passed.
+- Tests completed: authority/bootstrap; Builds 016-020 focused, negative, authorization, isolation, persistence, and connected regression gates; exact production database publication receipt; complete provider build; production health; authenticated create/refresh/reopen/clean-reentry acceptance.
+- Tests pending: none for Stabilization Block 04.
 - Build 020 rehearsal receipt SHA-256: `a80f9f9d5e47de4dbf5cfc4c1fad83394c9abc19ecd7cea0598c6069ed33cf01`.
 - Build 019 backup SHA-256: `54d36aa73ed92f14a9ee1862439a8a5891aae692a000479032b965a28c8bfbe6` (1,418,246 bytes).
 - Build 019 source/restored count manifest SHA-256: `17fd07501680a18399972e30d5657bca8d0c63318deac7b5759189c00edad62a`.
-- Defects discovered: the first restored readiness run used a newly inherited broad-ACL proof directory and correctly failed its security assertion; Build 016/020 evidence still contained superseded 223/273/184 schema totals.
-- Defects corrected: reran under the existing hardened F-rooted proof directory; both readiness/restart cycles passed; evidence and program scope now state the verified 307/396/268 contract.
-- Push status: pending accepted block regression.
-- Publication status: required after Build 020.
-- Exact safe resume point: run the complete ten-build prepublication suite, reconcile Living Brief impact, commit and push the release candidate.
+- Defects discovered: the first restored readiness run used a newly inherited broad-ACL proof directory and correctly failed its security assertion; Build 016/020 evidence still contained superseded 223/273/184 schema totals; the first production database receipt found one explicit short check-constraint name that disagreed with the established PostgreSQL-generated production identity.
+- Defects corrected: reran under the existing hardened F-rooted proof directory; both readiness/restart cycles passed; evidence and program scope now state the verified 307/396/268 contract; source and startup migration preserve the established long constraint identity and safely rename only the legacy short form.
+- Corrective commits: `d06499ce68a10a3d2212f74d68011b40d53f41e2`, `16bb0cc956de9777535b50976fe0953eff3ddbe8`, `dcdca300876a9f2d1f5a2c670145ec334bba3bfc`, `817b69a907bcb3a4a2706ee59a79ce2a8640ec83`, `e191a1a7fdf145762b35940ed85568952f6c10b6`, `2e2d249b288b01577c59d6246aac69fe7f9bc2aa`.
+- Final local release-gate receipt SHA-256: `967a5688debe3f66758df019b3467cfb5199f39978ca91c4c3471c528e3286bc`.
+- Production database publication receipt SHA-256: `73bbdd02891ccb019f20bef56705a513a59b6c51051c749a75829fe1de620e2c` (`schemaAction=NONE`, `publishable=true`, `developmentDataCopy=OFF_REQUIRED`).
+- Push status: release candidate pushed and local/remote verified at `2e2d249b288b01577c59d6246aac69fe7f9bc2aa` before publication.
+- Publication status: COMPLETE; Replit publish history `8829e505`; runtime live at exact source commit `2e2d249b288b01577c59d6246aac69fe7f9bc2aa`.
+- Deployed identity: release `v1.05.N18-P37`; asset manifest `472fa32c6e6d06fe12a060050843aab67066fe714138bbf0712651292fcea582`; package `bimlog-2e2d249b288b0157-472fa32c6e6d06fe`; database migration `schema-af1a3df01ae67e1393054434`; identity bound `b3af88d56bddb162fb12f7498c7fa2280100cfdbf3614f8ff7c9a580747f5492`.
+- Authenticated Round 1: PASS; negative create validation, bounded draft creation `QA-B04-1028-0745`, creator self-approval protection, save confirmation, and audit history verified.
+- Authenticated Round 2: PASS; hard refresh, list persistence, record reopen, values, authorization state, and audit history verified.
+- Authenticated Round 3: PASS; clean authenticated tab reentry, isolated BIMCorp context, persisted record reopen, values, authorization state, and audit history verified.
+- Browser/network state: no application error state was observed; health and affected API-backed create/read workflows returned usable production results. Dedicated Chrome DevTools console capture was unavailable because the existing managed DevTools profile was already locked; no browser or tool host was restarted.
+- Cleanup: exact disposable database `bimlog_rfi_restore_test` dropped and verified absent; temporary health and clean-reentry tabs closed; user production and Replit tabs preserved.
+- Exact safe resume point: begin the next authorized block from the published Block 04 runtime identity above.
