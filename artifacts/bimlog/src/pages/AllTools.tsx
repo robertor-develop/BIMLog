@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowRight, Grid3X3, RefreshCw } from "lucide-react";
+import { ArrowRight, Grid3X3, RefreshCw, Search, X } from "lucide-react";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { useI18n } from "@/lib/i18n";
 import { loadAccessProfile, type AccessProfile } from "@/lib/access-profile";
-import { resolveCapabilityDirectory } from "@/lib/capability-directory";
+import { resolveCapabilityDirectory, searchCapabilities } from "@/lib/capability-directory";
 import { useAuthStore } from "@/store/auth";
 
 export function AllTools() {
@@ -14,6 +14,7 @@ export function AllTools() {
   const [profile, setProfile] = useState<AccessProfile | null>(null);
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
+  const [query, setQuery] = useState("");
   const tt = (en: string, es: string) => lang === "es" ? es : en;
 
   useEffect(() => {
@@ -27,7 +28,7 @@ export function AllTools() {
     return () => controller.abort();
   }, [token, retry]);
 
-  const entries = profile ? resolveCapabilityDirectory(profile) : [];
+  const entries = useMemo(() => profile ? searchCapabilities(resolveCapabilityDirectory(profile), query, lang) : [], [profile, query, lang]);
   const groups = [...new Set(entries.map(entry => entry.group))];
 
   return (
@@ -37,10 +38,17 @@ export function AllTools() {
         <header style={{ maxWidth: 1120, margin: "0 auto 28px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Grid3X3 aria-hidden style={{ width: 24, height: 24, color: "#2563EB" }} /><h1 style={{ margin: 0, fontSize: 28 }}>{tt("All Tools", "Todas las herramientas")}</h1></div>
           <p style={{ color: "hsl(var(--muted-foreground))", maxWidth: 760 }}>{tt("Use daily navigation for routine work, or open any authorized BIMLog capability directly here.", "Use la navegación diaria para el trabajo habitual o abra directamente aquí cualquier capacidad autorizada de BIMLog.")}</p>
+          <div role="search" style={{ display: "flex", alignItems: "center", gap: 8, maxWidth: 640, border: "1px solid hsl(var(--border))", borderRadius: 9, padding: "9px 12px", background: "hsl(var(--card))" }}>
+            <Search aria-hidden style={{ width: 17, height: 17 }} />
+            <label htmlFor="all-tools-search" className="sr-only">{tt("Search tools, tasks, and purposes", "Buscar herramientas, tareas y propósitos")}</label>
+            <input id="all-tools-search" value={query} onChange={event => setQuery(event.target.value)} placeholder={tt("Search modules, tasks, or purpose…", "Buscar módulos, tareas o propósito…")} style={{ flex: 1, minWidth: 0, border: 0, outline: 0, background: "transparent", color: "inherit" }} />
+            {query && <button type="button" aria-label={tt("Clear search", "Limpiar búsqueda")} onClick={() => setQuery("")} style={{ border: 0, background: "transparent", cursor: "pointer", color: "inherit", display: "grid", placeItems: "center" }}><X aria-hidden style={{ width: 16, height: 16 }} /></button>}
+          </div>
         </header>
         {error && <div role="alert" style={{ maxWidth: 1120, margin: "0 auto", padding: 16, border: "1px solid #FCA5A5", borderRadius: 8, background: "#FEF2F2" }}>{tt("Your authorized tools could not be loaded.", "No se pudieron cargar sus herramientas autorizadas.")} <button type="button" onClick={() => setRetry(value => value + 1)}><RefreshCw aria-hidden /> {tt("Try again", "Intentar de nuevo")}</button></div>}
         {!error && !profile && <div role="status" aria-live="polite" style={{ maxWidth: 1120, margin: "0 auto" }}>{tt("Loading authorized tools…", "Cargando herramientas autorizadas…")}</div>}
-        {profile && <div style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gap: 28 }}>
+        {profile && entries.length === 0 && <div role="status" style={{ maxWidth: 1120, margin: "0 auto", padding: 28, textAlign: "center", border: "1px dashed hsl(var(--border))", borderRadius: 10 }}>{tt("No authorized tools match your search.", "Ninguna herramienta autorizada coincide con su búsqueda.")}</div>}
+        {profile && entries.length > 0 && <div style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gap: 28 }}>
           {groups.map(group => <section key={group} aria-labelledby={`tools-${group.toLowerCase()}`}>
             <h2 id={`tools-${group.toLowerCase()}`} style={{ fontSize: 16 }}>{group}</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>

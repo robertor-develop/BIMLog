@@ -45,3 +45,10 @@ export function resolveCapabilityDirectory(profile: AccessProfile): CapabilityDi
     return profile.decisions[entry.audience]?.allow === true;
   }).map((entry) => ({ ...entry, href: entry.href.replace(":projectId", String(projectId ?? "")) }));
 }
+
+export function searchCapabilities(entries: CapabilityDirectoryEntry[], query: string, lang: "en" | "es") {
+  const normalized = query.trim().toLocaleLowerCase(lang === "es" ? "es" : "en");
+  if (!normalized) return entries;
+  return entries.filter(entry => [entry.group, entry.name.en, entry.name.es, entry.purpose.en, entry.purpose.es, ...entry.tasks]
+    .some(value => value.toLocaleLowerCase(lang === "es" ? "es" : "en").includes(normalized)));
+}

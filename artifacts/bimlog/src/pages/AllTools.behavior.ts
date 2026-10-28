@@ -8,5 +8,8 @@ assert.match(app, /path="\/all-tools"/);
 assert.match(sidebar, /"All Tools", "Todas las herramientas"/);
 assert.match(page, /resolveCapabilityDirectory/);
 assert.match(page, /setLocation\(entry\.href\)/);
+assert.match(page, /searchCapabilities/);
+assert.match(page, /id="all-tools-search"/);
+assert.match(page, /Clear search/);
 assert.doesNotMatch(sidebar, /More Tools|Más herramientas/);
 console.log("ALL_TOOLS_P007=PASS visible_route=true direct_actions=true");
