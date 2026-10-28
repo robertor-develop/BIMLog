@@ -2998,6 +2998,10 @@ export function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose,
       {revisionFamily.length > 0 && (
         <>
           <PanelSection title={w("Version History", "Historial de Versiones", lang)} />
+          <p style={{ fontSize: 11, color: "#475569", margin: "0 0 5px", fontWeight: 700 }}>
+            {w("Current revision", "Revisión actual", lang)}: R{submittal.revisionNumber ?? 0}
+            {submittal.parentSubmittalId ? ` · ${w("Parent record", "Registro padre", lang)} #${submittal.parentSubmittalId}` : ` · ${w("Original record", "Registro original", lang)}`}
+          </p>
           <p style={{ fontSize: 11, color: "#64748B", margin: "0 0 7px" }}>{w("Previous revisions are immutable review records. Open one to read it; changes belong in a new revision.", "Las revisiones anteriores son registros de revisión inmutables. Abre una para leerla; los cambios pertenecen a una nueva revisión.", lang)}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
             {revisionFamily.map(revision => <button key={revision.id} type="button" onClick={() => onOpenRevision(revision)} disabled={revision.id === submittal.id} style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "7px 9px", border: "1px solid #E2E8F0", borderRadius: 6, background: revision.id === submittal.id ? "#EFF6FF" : "white", color: "#1E293B", cursor: revision.id === submittal.id ? "default" : "pointer", textAlign: "left", fontSize: 11 }}>

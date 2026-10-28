@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 const api = await readFile(new URL("../routes/submittals.ts", import.meta.url), "utf8");
 const files = await readFile(new URL("../routes/files.ts", import.meta.url), "utf8");
 const ui = await readFile(new URL("../../../bimlog/src/pages/project/SubmittalsTab.tsx", import.meta.url), "utf8");
+const editor = await readFile(new URL("../../../bimlog/src/lib/submittal-editor-contract.ts", import.meta.url), "utf8");
 
 const checks = [
   ["upload requires authenticated project write authority", api, /submittals\/attachments\/upload"[\s\S]*authMiddleware,[\s\S]*requirePermission\("admin", "write"\)/],
@@ -15,9 +16,10 @@ const checks = [
   ["download lookup binds file and project", files, /eq\(filesTable\.id, fileId\), eq\(filesTable\.projectId, projectId\)/],
   ["stored attachment content is served through storage abstraction", files, /if \(file\.storagePath\)[\s\S]*storage\.download\(file\.storagePath\)/],
   ["UI uploads through the project-scoped endpoint", ui, /`\/api\/v1\/projects\/\$\{projectId\}\/submittals\/attachments\/upload`/],
-  ["UI persists attachment references through authoritative submittal update", ui, /`\/api\/v1\/projects\/\$\{projectId\}\/submittals\/\$\{submittal\.id\}`[\s\S]*JSON\.stringify\(\{ attachmentsJson: nextAttachments \}\)/],
+  ["UI persists attachment references through concurrency-safe authoritative submittal update", ui, /`\/api\/v1\/projects\/\$\{projectId\}\/submittals\/\$\{submittal\.id\}`[\s\S]*JSON\.stringify\(\{ attachmentsJson: nextAttachments, expectedUpdatedAt: submittal\.updatedAt \}\)/],
   ["UI opens authenticated project file URLs without changing relationships", ui, /<a href=\{name\} target="_blank" rel="noreferrer"/],
-  ["attachment edits remain separate from linked RFI identity", ui, /linkedRfiId: editForm\.linkedRfiId[\s\S]*attachmentsJson: attachmentValues\(editForm\.attachmentsText\)/],
+  ["UI delegates updates through the authoritative editor contract", ui, /buildSubmittalUpdateRequest\(editForm, submittal\.updatedAt\)/],
+  ["attachment edits remain separate from linked RFI identity", editor, /linkedRfiId: form\.linkedRfiId[\s\S]*attachmentsJson: attachmentValues\(form\.attachmentsText\)/],
 ];
 
 for (const [label, source, pattern] of checks) assert.match(source, pattern, label);
