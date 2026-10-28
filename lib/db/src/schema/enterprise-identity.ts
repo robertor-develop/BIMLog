@@ -368,7 +368,10 @@ export const companyServiceDeliveryWorkflowBindingsTable = pgTable(
       t.companyId,
       t.workflowVersionId,
     ),
-    check("company_service_workflow_version_check", sql`${t.version}>0`),
+    check(
+      "company_service_delivery_workflow_bindings_version_check",
+      sql`${t.version}>0`,
+    ),
   ],
 );
 

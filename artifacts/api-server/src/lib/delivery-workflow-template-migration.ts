@@ -44,11 +44,27 @@ CREATE TABLE IF NOT EXISTS company_service_delivery_workflow_bindings (
   service_entry_id text PRIMARY KEY REFERENCES company_master_catalog_entries(id),
   company_id integer NOT NULL REFERENCES companies(id),
   workflow_version_id text NOT NULL,
-  version integer NOT NULL DEFAULT 1 CHECK (version>0),
+  version integer NOT NULL DEFAULT 1
+    CONSTRAINT company_service_delivery_workflow_bindings_version_check CHECK (version>0),
   updated_by_id integer NOT NULL REFERENCES users(id),
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+DO $$ BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname='company_service_workflow_version_check'
+      AND conrelid='company_service_delivery_workflow_bindings'::regclass
+  ) AND NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conname='company_service_delivery_workflow_bindings_version_check'
+      AND conrelid='company_service_delivery_workflow_bindings'::regclass
+  ) THEN
+    ALTER TABLE company_service_delivery_workflow_bindings
+      RENAME CONSTRAINT company_service_workflow_version_check
+      TO company_service_delivery_workflow_bindings_version_check;
+  END IF;
+END $$;
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='company_service_delivery_workflow_bindings_workflow_version_id_company_delivery_workflow_versions_id_fk' AND conrelid='company_service_delivery_workflow_bindings'::regclass) THEN
     ALTER TABLE company_service_delivery_workflow_bindings

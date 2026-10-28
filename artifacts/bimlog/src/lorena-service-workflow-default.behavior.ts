@@ -60,9 +60,11 @@ const enterpriseIdentitySchema = readFileSync(new URL("lib/db/src/schema/enterpr
 const route = readFileSync(new URL("artifacts/api-server/src/routes/company-master-catalogs.ts", root), "utf8");
 const selection = readFileSync(new URL("artifacts/api-server/src/lib/delivery-workflow-selection.ts", root), "utf8");
 assert.match(migration, /company_service_delivery_workflow_bindings/);
+assert.match(migration, /CONSTRAINT company_service_delivery_workflow_bindings_version_check CHECK \(version>0\)/);
+assert.match(migration, /RENAME CONSTRAINT company_service_workflow_version_check[\s\S]*?TO company_service_delivery_workflow_bindings_version_check/);
 assert.match(enterpriseIdentitySchema, /workflowVersionId: text\("workflow_version_id"\)[\s\S]*?\.references\(\(\) => companyDeliveryWorkflowVersionsTable\.id\)/);
 assert.match(route, /kind='service' AND state='active'/);
 assert.match(route, /t\.company_id=\$2 AND v\.state='published'/);
 assert.match(route, /SERVICE_WORKFLOW_BINDING_STALE/);
 assert.match(selection, /binding\.company_id=t\.company_id/);
-console.log("Lorena service workflow default behavior passed: 15 checks");
+console.log("Lorena service workflow default behavior passed: 17 checks");
