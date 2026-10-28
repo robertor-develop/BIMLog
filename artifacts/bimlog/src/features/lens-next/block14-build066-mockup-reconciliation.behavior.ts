@@ -18,19 +18,22 @@ const client = createLensNextApiClient({
     const url = String(input);
     calls.push(url);
     if (url.endsWith("/levels")) return Response.json({ levels: ["L02", "L01", "L02"] });
-    if (url.endsWith("/members")) return Response.json([
-      { userCompanyName: "Acme MEP" },
-      { userCompanyName: "" },
-    ]);
-    if (url.endsWith("/conventions")) return Response.json({
-      companyCode: "BIM, DDS, WP, RL, MEGA, DDS, ",
-      companyAssignmentStatus: [
-        { code: "ACM", hasUsers: true, companyName: "Acme MEP" },
-        { code: "STR", hasUsers: true, companyName: "Strong Structures" },
-        { code: "UNBOUND", hasUsers: false },
-      ],
+    if (url.endsWith("/responsible-companies")) return Response.json({
+      contractVersion: "lens-issue-catalog.v1",
+      projectId: 29,
+      generatedAt: "2026-10-28T05:30:00.000Z",
+      trades: [],
+      companyOptions: ["Acme MEP", "BIM", "DDS", "Directory Contractor", "MEGA", "RL", "Strong Structures", "WP"].map((label, index) => ({
+        id: index + 1,
+        label,
+        historicalLabel: label,
+        active: true,
+        projectAuthorized: true,
+        assignable: true,
+        source: "project_directory",
+        unavailabilityReason: null,
+      })),
     });
-    if (url.endsWith("/responsible-companies")) return Response.json({ companies: ["Directory Contractor", "Acme MEP", " "] });
     throw new Error(`Unexpected request: ${url}`);
   },
 });
@@ -38,8 +41,6 @@ const client = createLensNextApiClient({
 const referenceData = await client.loadReferenceData(29);
 assert.deepEqual(calls, [
   "/api/v1/projects/29/levels",
-  "/api/v1/projects/29/members",
-  "/api/v1/projects/29/conventions",
   "/api/v1/projects/29/clash-reports/lens-viewpoints/responsible-companies",
 ]);
 assert.deepEqual(referenceData.floors, ["L01", "L02"]);
@@ -50,10 +51,12 @@ const noFabrication = createLensNextApiClient({
   fetchImpl: async (input) => {
     const url = String(input);
     if (url.endsWith("/levels")) return Response.json({ levels: [] });
-    if (url.endsWith("/members")) return Response.json([]);
-    if (url.endsWith("/responsible-companies")) return Response.json({ companies: [] });
-    if (url.endsWith("/conventions")) return Response.json({
-      companyAssignmentStatus: [{ code: "CODE_ONLY", hasUsers: false }],
+    if (url.endsWith("/responsible-companies")) return Response.json({
+      contractVersion: "lens-issue-catalog.v1",
+      projectId: 29,
+      generatedAt: "2026-10-28T05:30:00.000Z",
+      trades: [],
+      companyOptions: [],
     });
     throw new Error(`Unexpected request: ${url}`);
   },
@@ -69,13 +72,22 @@ const newProject = createLensNextApiClient({
     assert.ok(url.startsWith("/api/v1/projects/71/"));
     assert.ok(!init?.method || init.method === "GET");
     if (url.endsWith("/levels")) return Response.json({ levels: [] });
-    if (url.endsWith("/members")) return Response.json([{ userCompanyName: "BIMTECH CORP" }]);
-    if (url.endsWith("/conventions")) return Response.json({
-      companyCode: "STALE",
-      fields: [{ label: "Originator", allowedValues: ["BIM", "DDS", "WP", "RL", "MEGA"] }],
-      companyAssignmentStatus: [{ code: "DDS", hasUsers: false }],
+    if (url.endsWith("/responsible-companies")) return Response.json({
+      contractVersion: "lens-issue-catalog.v1",
+      projectId: 71,
+      generatedAt: "2026-10-28T05:30:00.000Z",
+      trades: [],
+      companyOptions: ["BIM", "BIMTECH CORP", "DDS", "MEGA", "RL", "WP"].map((label, index) => ({
+        id: index + 1,
+        label,
+        historicalLabel: label,
+        active: true,
+        projectAuthorized: true,
+        assignable: true,
+        source: "naming_convention",
+        unavailabilityReason: null,
+      })),
     });
-    if (url.endsWith("/responsible-companies")) return Response.json({ companies: [] });
     throw new Error(`Unexpected request: ${url}`);
   },
 });
