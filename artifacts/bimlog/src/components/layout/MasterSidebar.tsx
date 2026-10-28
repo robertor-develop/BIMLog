@@ -6,7 +6,7 @@ import { SidebarUtilities } from "@/components/layout/SidebarUtilities";
 import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
 import { loadAccessProfile } from "@/lib/access-profile";
-import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu, Settings2, ChevronLeft, ChevronRight, GripVertical, BookOpen } from "lucide-react";
+import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu, Settings2, ChevronLeft, ChevronRight, GripVertical, BookOpen, Grid3X3 } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -486,6 +486,7 @@ export function MasterSidebar() {
       <nav className="sidebar-nav" style={{ flex: 1 }} aria-label={t("Headquarters navigation", "Navegación de sede")}>
         {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Headquarters", "Sede")}</span>}
         {navButton(t("BIMLog Headquarters", "Sede BIMLog"), "/dashboard", LayoutDashboard)}
+        {navButton(t("All Tools", "Todas las herramientas"), "/all-tools", Grid3X3)}
 
         {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Knowledge", "Conocimiento")}</span>}
         {navButton(t("Coordination Knowledge", "Conocimiento de Coordinación"), "/knowledge", BookOpen)}

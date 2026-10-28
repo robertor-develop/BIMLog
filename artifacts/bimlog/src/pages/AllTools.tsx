@@ -1,0 +1,59 @@
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+import { ArrowRight, Grid3X3, RefreshCw } from "lucide-react";
+import { MasterSidebar } from "@/components/layout/MasterSidebar";
+import { useI18n } from "@/lib/i18n";
+import { loadAccessProfile, type AccessProfile } from "@/lib/access-profile";
+import { resolveCapabilityDirectory } from "@/lib/capability-directory";
+import { useAuthStore } from "@/store/auth";
+
+export function AllTools() {
+  const { token } = useAuthStore();
+  const { lang } = useI18n();
+  const [, setLocation] = useLocation();
+  const [profile, setProfile] = useState<AccessProfile | null>(null);
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const tt = (en: string, es: string) => lang === "es" ? es : en;
+
+  useEffect(() => {
+    if (!token) return;
+    const controller = new AbortController();
+    setProfile(null);
+    setError(false);
+    loadAccessProfile(token, controller.signal).then(setProfile).catch(() => {
+      if (!controller.signal.aborted) setError(true);
+    });
+    return () => controller.abort();
+  }, [token, retry]);
+
+  const entries = profile ? resolveCapabilityDirectory(profile) : [];
+  const groups = [...new Set(entries.map(entry => entry.group))];
+
+  return (
+    <div className="app-shell">
+      <MasterSidebar />
+      <main id="main-content" tabIndex={-1} className="all-tools-page" style={{ flex: 1, minWidth: 0, overflow: "auto", padding: "28px clamp(18px, 4vw, 48px)" }}>
+        <header style={{ maxWidth: 1120, margin: "0 auto 28px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}><Grid3X3 aria-hidden style={{ width: 24, height: 24, color: "#2563EB" }} /><h1 style={{ margin: 0, fontSize: 28 }}>{tt("All Tools", "Todas las herramientas")}</h1></div>
+          <p style={{ color: "hsl(var(--muted-foreground))", maxWidth: 760 }}>{tt("Use daily navigation for routine work, or open any authorized BIMLog capability directly here.", "Use la navegación diaria para el trabajo habitual o abra directamente aquí cualquier capacidad autorizada de BIMLog.")}</p>
+        </header>
+        {error && <div role="alert" style={{ maxWidth: 1120, margin: "0 auto", padding: 16, border: "1px solid #FCA5A5", borderRadius: 8, background: "#FEF2F2" }}>{tt("Your authorized tools could not be loaded.", "No se pudieron cargar sus herramientas autorizadas.")} <button type="button" onClick={() => setRetry(value => value + 1)}><RefreshCw aria-hidden /> {tt("Try again", "Intentar de nuevo")}</button></div>}
+        {!error && !profile && <div role="status" aria-live="polite" style={{ maxWidth: 1120, margin: "0 auto" }}>{tt("Loading authorized tools…", "Cargando herramientas autorizadas…")}</div>}
+        {profile && <div style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gap: 28 }}>
+          {groups.map(group => <section key={group} aria-labelledby={`tools-${group.toLowerCase()}`}>
+            <h2 id={`tools-${group.toLowerCase()}`} style={{ fontSize: 16 }}>{group}</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
+              {entries.filter(entry => entry.group === group).map(entry => <button key={entry.id} type="button" onClick={() => setLocation(entry.href)} className="all-tools-card" style={{ textAlign: "left", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))", padding: 16, cursor: "pointer", color: "inherit" }}>
+                <span style={{ display: "flex", justifyContent: "space-between", gap: 12, fontWeight: 750 }}>{entry.name[lang]}<ArrowRight aria-hidden style={{ width: 16, height: 16, flexShrink: 0 }} /></span>
+                <span style={{ display: "block", marginTop: 7, fontSize: 12, lineHeight: 1.5, color: "hsl(var(--muted-foreground))" }}>{entry.purpose[lang]}</span>
+              </button>)}
+            </div>
+          </section>)}
+        </div>}
+      </main>
+    </div>
+  );
+}
+
+export default AllTools;

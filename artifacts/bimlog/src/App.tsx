@@ -24,6 +24,7 @@ const Register = namedPage(() => import("@/pages/Register"), "Register");
 const VerifyEmail = namedPage(() => import("@/pages/VerifyEmail"), "VerifyEmail");
 const Dashboard = namedPage(() => import("@/pages/Dashboard"), "Dashboard");
 const PendingItems = namedPage(() => import("@/pages/PendingItems"), "PendingItems");
+const AllTools = namedPage(() => import("@/pages/AllTools"), "AllTools");
 const ProjectDetail = namedPage(() => import("@/pages/ProjectDetail"), "ProjectDetail");
 const HelpCenter = namedPage(() => import("@/pages/HelpCenter"), "HelpCenter");
 const ProjectSetupTraining = namedPage(() => import("@/pages/ProjectSetupTraining"), "ProjectSetupTraining");
@@ -227,6 +228,9 @@ function Router() {
       </Route>
       <Route path="/pending">
         {() => <ProtectedRoute component={PendingItems} />}
+      </Route>
+      <Route path="/all-tools">
+        {() => <ProtectedRoute component={AllTools} />}
       </Route>
       <Route path="/lens-next">
         {() => <ProtectedRoute component={LensNextWorkspace} />}
