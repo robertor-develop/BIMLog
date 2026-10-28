@@ -79188,6 +79188,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c3bc88f0eb7f39b36178a3c6444bb63c0c05a3ae2401042ba8c5e853b2f67cdf"
+    },
+    {
+      "taskId": "entire-platform-closure-block03-schema-receipt-correction-20261028",
+      "reviewedThroughCommit": "bc7a4d42ea31431917a00bd3602a20708347efa5",
+      "reviewedAt": "2026-10-28T07:25:00Z",
+      "status": "candidate",
+      "captureTiming": "post_correction_pre_block_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing release discipline remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The schema receipt self-test now reflects the current generated schema inventory without weakening exact comparison."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision or business rule changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime schema or workflow changed; only stale expected inventory totals were corrected."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native binary or installer source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export design authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external or naming standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 03 verification state is recorded in its execution ledger."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No durable product obligation changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit authority or acceptance threshold changed."
+        }
+      ],
+      "reason": "Reconcile the focused Build 014 correction that refreshes hard-coded schema receipt totals from the unchanged authoritative generator output.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
