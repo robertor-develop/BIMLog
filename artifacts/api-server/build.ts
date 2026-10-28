@@ -569,8 +569,9 @@ async function assembleRuntimeFromInstalledGraph(
     }
     const lockedReference = assertDependencyEdge(issuer, packageName, declaredSpec, version);
     if (lockedReference.startsWith("file:")) {
-      if (lockedReference !== declaredSpec) {
-        throw new Error(`Local directory dependency lock mismatch for ${packageName}: expected ${declaredSpec}, received ${lockedReference}.`);
+      const overrides = findYamlBlock(lockLines, 0, "overrides");
+      if (!overrides || readYamlScalar(overrides, 2, packageName) !== lockedReference) {
+        throw new Error(`Local directory dependency is not bound by an exact root override: ${packageName}@${lockedReference}.`);
       }
       const localLockKey = `${packageName}@${lockedReference}`;
       const packages = findYamlBlock(lockLines, 0, "packages");

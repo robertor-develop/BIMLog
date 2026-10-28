@@ -4,7 +4,8 @@ import fs from "node:fs";
 const source = fs.readFileSync("artifacts/api-server/build.ts", "utf8");
 for (const contract of [
   'lockedReference.startsWith("file:")',
-  "lockedReference !== declaredSpec",
+  'findYamlBlock(lockLines, 0, "overrides")',
+  "exact root override",
   "type: directory",
   "local package entry is missing",
   "local package resolution mismatch",
