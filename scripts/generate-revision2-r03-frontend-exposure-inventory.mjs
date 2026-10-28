@@ -7,7 +7,9 @@ const backend = JSON.parse(fs.readFileSync(path.join(root, "evidence/revision2-r
 const output = path.join(root, "evidence/revision2-r01-r05/R03_FRONTEND_EXPOSURE_INVENTORY.json");
 
 function clean(value) {
-  return value.replace(/^\/api\/v\d+/, "").replace(/\?.*$/, "").replace(/\/$/, "") || "/";
+  const apiRoot = value.match(/\/api\/v\d+(?:\/|$)/)?.index;
+  const rooted = apiRoot === undefined ? value : value.slice(apiRoot);
+  return rooted.replace(/^\/api\/v\d+/, "").replace(/\?.*$/, "").replace(/\/$/, "") || "/";
 }
 function matches(routePath, apiPath) {
   const expected = clean(routePath).split("/").filter(Boolean);

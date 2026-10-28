@@ -28,12 +28,12 @@
   "counts": {
     "backendCapabilities": 796,
     "directFrontendReferences": 315,
-    "fully-operable": 91,
-    "read-only": 76,
+    "fully-operable": 154,
+    "read-only": 133,
     "partially-exposed": 0,
-    "administrator-only": 1,
-    "intentionally-api-native-only": 39,
-    "missing-frontend": 589
+    "administrator-only": 15,
+    "intentionally-api-native-only": 31,
+    "missing-frontend": 463
   },
   "entries": [
     {
@@ -87,26 +87,53 @@
     {
       "backendIdentity": "DELETE /integrations/telegram",
       "capabilityGroup": "integrations",
-      "classification": "intentionally-api-native-only",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "document_and_justify_api_native_boundary"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/notifications/NotificationPreferenceCenter.tsx",
+          "apiPath": "${API}/api/v1/integrations/telegram"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/integrations/telegram"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "DELETE /me/connections/:provider",
       "capabilityGroup": "me",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/me/connections/sendgrid"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/me/connections/${provider}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "DELETE /notifications/:id",
       "capabilityGroup": "notifications",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/notifications/read-all"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/notifications/${id}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "DELETE /projects/:projectId",
@@ -120,6 +147,10 @@
         {
           "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",
           "apiPath": "/api/v1/projects/71/"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/workspace-register"
         },
         {
           "screen": "artifacts/bimlog/src/project-26-apu-harness.tsx",
@@ -263,10 +294,15 @@
     {
       "backendIdentity": "DELETE /projects/:projectId/invitations/:invId",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/TeamTab.tsx",
+          "apiPath": "${BASE}/api/v1/projects/${projectId}/invitations/${id}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "DELETE /projects/:projectId/links/:linkId",
@@ -512,18 +548,28 @@
     {
       "backendIdentity": "GET /admin/commercial-launch",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/commercial-launch"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/commercial-launch/authorization",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/commercial-launch/authorization"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/commercial-launch/dossier",
@@ -533,6 +579,10 @@
         {
           "screen": "artifacts/bimlog/src/components/admin/commercial-launch-dossier-panel.behavior.ts",
           "apiPath": "/api/v1/admin/commercial-launch/dossier"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/commercial-launch/dossier"
         }
       ],
       "evidenceConfidence": "direct-static-reference",
@@ -541,10 +591,15 @@
     {
       "backendIdentity": "GET /admin/commercial-launch/verifications",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/commercial-launch/verifications"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/companies",
@@ -653,34 +708,54 @@
     {
       "backendIdentity": "GET /admin/sales-inquiries",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/sales-inquiries/:id/assignment-history",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/assignment-history"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/sales-inquiries/:id/follow-ups",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/follow-ups"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/support/cases",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SupportCaseQueue.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/support/cases"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/support/cases/:id/data-request/fulfillment",
@@ -709,18 +784,28 @@
     {
       "backendIdentity": "GET /admin/support/cases/:id/satisfaction",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SupportSatisfactionSummary.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/support/cases/${caseId}/satisfaction"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/support/satisfaction-summary",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SupportQualitySummary.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/support/satisfaction-summary"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /admin/users",
@@ -844,10 +929,15 @@
     {
       "backendIdentity": "GET /auth/me",
       "capabilityGroup": "auth",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/auth/me"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /autodesk/callback",
@@ -892,26 +982,41 @@
     {
       "backendIdentity": "GET /commercial/billing-history",
       "capabilityGroup": "commercial",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/lib/commercial-billing-history-client.ts",
+          "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/billing-history"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /commercial/billing-identity",
       "capabilityGroup": "commercial",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/lib/commercial-billing-identity-client.ts",
+          "apiPath": "${base}/api/v1/commercial/billing-identity"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /commercial/invoices/:invoiceId",
       "capabilityGroup": "commercial",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/lib/commercial-invoice-statement-client.ts",
+          "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/invoices/${encodeURIComponent(input.invoiceId)}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /commercial/invoices/:invoiceId/statement.pdf",
@@ -934,6 +1039,10 @@
         {
           "screen": "artifacts/bimlog/src/pages/commercial-workspace.behavior.ts",
           "apiPath": "/api/v1/commercial/workspace"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/CommercialWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/commercial/workspace"
         }
       ],
       "evidenceConfidence": "direct-static-reference",
@@ -1055,26 +1164,41 @@
     {
       "backendIdentity": "GET /coordination-knowledge/capabilities",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/capabilities"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/conflict-types",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/conflict-types"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/conflict-types/:id",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/conflict-types/${encodeURIComponent(entityId)}${path}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/conflict-types/:id/history",
@@ -1087,18 +1211,28 @@
     {
       "backendIdentity": "GET /coordination-knowledge/events/:entityType/:id",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/events/${entityType}/${encodeURIComponent(entityId)}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/evidence/:entityType/:id",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/evidence/${entityType}/${encodeURIComponent(entityId)}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/lens-context/:lensViewpointId",
@@ -1135,18 +1269,28 @@
     {
       "backendIdentity": "GET /coordination-knowledge/lesson-proposals",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/lesson-proposals"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/resolution-methods",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/resolution-methods"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/resolution-methods/:id",
@@ -1167,10 +1311,15 @@
     {
       "backendIdentity": "GET /coordination-knowledge/rules",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/rules"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/rules/:id",
@@ -1183,10 +1332,15 @@
     {
       "backendIdentity": "GET /coordination-knowledge/rules/:id/history",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/rules/${encodeURIComponent(stableId)}/history"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /coordination-knowledge/search",
@@ -1215,18 +1369,28 @@
     {
       "backendIdentity": "GET /cvr-health",
       "capabilityGroup": "cvr-health",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+          "apiPath": "${API_BASE}/api/v1/cvr-health"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /dashboard/adoption-summary",
       "capabilityGroup": "dashboard",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/lib/dashboard-adoption-summary.ts",
+          "apiPath": "${apiBase}/api/v1/dashboard/adoption-summary"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /dashboard/briefing",
@@ -1281,10 +1445,15 @@
     {
       "backendIdentity": "GET /dashboard/stats",
       "capabilityGroup": "dashboard",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+          "apiPath": "${API_BASE}/api/v1/dashboard/stats"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /downloads/sync-agent-mac",
@@ -1382,10 +1551,19 @@
     {
       "backendIdentity": "GET /feedback/:id/assets",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${id}/assets"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/assets"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /feedback/:id/assets/:assetId/download",
@@ -1398,10 +1576,15 @@
     {
       "backendIdentity": "GET /feedback/:id/history",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${id}/history"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /feedback/:id/package-snapshot.json",
@@ -1422,10 +1605,15 @@
     {
       "backendIdentity": "GET /feedback/:id/package.zip",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${item.id}/package.zip"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /feedback/admin",
@@ -1438,10 +1626,15 @@
     {
       "backendIdentity": "GET /feedback/admin/:id/assets/:assetId/download",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/admin/${selectedId}/assets/${Number(asset.id)}/download"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /feedback/admin/:id/detail",
@@ -1486,10 +1679,15 @@
     {
       "backendIdentity": "GET /feedback/admin/:id/package.zip",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package.zip"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /feedback/admin/export.csv",
@@ -1526,18 +1724,28 @@
     {
       "backendIdentity": "GET /feedback/mine",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/mine"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /feedback/notifications",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/notifications"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /financial-controls/admin",
@@ -1566,10 +1774,15 @@
     {
       "backendIdentity": "GET /healthz",
       "capabilityGroup": "healthz",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/lib/commercial-launch-verification-workflow.ts",
+          "apiPath": "${apiBase}/api/v1/healthz"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /integrations/telegram/admin/conversations",
@@ -1638,10 +1851,15 @@
     {
       "backendIdentity": "GET /integrations/telegram/conversations",
       "capabilityGroup": "integrations",
-      "classification": "intentionally-api-native-only",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "document_and_justify_api_native_boundary"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/integrations/telegram/conversations"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /integrations/telegram/deliveries",
@@ -1670,18 +1888,32 @@
     {
       "backendIdentity": "GET /integrations/telegram/notification-settings",
       "capabilityGroup": "integrations",
-      "classification": "intentionally-api-native-only",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "document_and_justify_api_native_boundary"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/notifications/NotificationPreferenceCenter.tsx",
+          "apiPath": "${API}/api/v1/integrations/telegram/notification-settings"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /integrations/telegram/status",
       "capabilityGroup": "integrations",
-      "classification": "intentionally-api-native-only",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "document_and_justify_api_native_boundary"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/notifications/NotificationPreferenceCenter.tsx",
+          "apiPath": "${API}/api/v1/integrations/telegram/status"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/integrations/telegram/status"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /living-brief/access",
@@ -1702,10 +1934,15 @@
     {
       "backendIdentity": "GET /living-brief/eligibility",
       "capabilityGroup": "living-brief",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/App.tsx",
+          "apiPath": "${API_BASE}/api/v1/living-brief/eligibility"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /living-brief/password/recovery",
@@ -1737,8 +1974,16 @@
       "classification": "read-only",
       "frontendReferences": [
         {
+          "screen": "artifacts/bimlog/src/components/job-intake/EmailReadinessSection.tsx",
+          "apiPath": "${API_BASE}/api/v1/me/connections"
+        },
+        {
           "screen": "artifacts/bimlog/src/integration-catalog-harness.tsx",
           "apiPath": "/api/v1/me/connections"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/me/connections"
         },
         {
           "screen": "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
@@ -1755,10 +2000,15 @@
     {
       "backendIdentity": "GET /me/connections/:provider/authorize",
       "capabilityGroup": "me",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/me/connections/${providerParam}/authorize"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /me/connections/:provider/browse",
@@ -1791,6 +2041,10 @@
           "apiPath": "/api/v1/me/provider-catalog"
         },
         {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/me/provider-catalog"
+        },
+        {
           "screen": "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
           "apiPath": "/api/v1/me/provider-catalog"
         },
@@ -1805,10 +2059,15 @@
     {
       "backendIdentity": "GET /notifications",
       "capabilityGroup": "notifications",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/notifications"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /onboarding",
@@ -1830,6 +2089,10 @@
         {
           "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
           "apiPath": "/api/v1/projects"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects"
         }
       ],
       "evidenceConfidence": "direct-static-reference",
@@ -1847,6 +2110,10 @@
         {
           "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",
           "apiPath": "/api/v1/projects/71/"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/workspace-register"
         },
         {
           "screen": "artifacts/bimlog/src/project-26-apu-harness.tsx",
@@ -1869,6 +2136,10 @@
       "capabilityGroup": "projects",
       "classification": "read-only",
       "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${proj.id}/activity"
+        },
         {
           "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/activity"
@@ -2115,18 +2386,28 @@
     {
       "backendIdentity": "GET /projects/:projectId/commercial/team-performance",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/TeamPerformanceWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/commercial/team-performance"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/commercial/team-performance/resource-planning",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/commercial/team-performance/resource-planning"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/company-options",
@@ -2152,18 +2433,28 @@
     {
       "backendIdentity": "GET /projects/:projectId/convention/status",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "apiPath": "${API_BASE_CB}/api/v1/projects/${projectId}/convention/status"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/convention/versions",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "apiPath": "${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/conventions",
@@ -2173,6 +2464,10 @@
         {
           "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
           "apiPath": "/api/v1/projects/${projectId}/conventions"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "apiPath": "${API_BASE_CB}/api/v1/projects/${projectId}/conventions"
         },
         {
           "screen": "artifacts/bimlog/src/pages/project/CoordinationHub.tsx",
@@ -2339,16 +2634,25 @@
     {
       "backendIdentity": "GET /projects/:projectId/edt-engine/time-review",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/job-operations/TimeApprovalPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/edt-engine/time-review"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/files",
       "capabilityGroup": "projects",
       "classification": "read-only",
       "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/BudgetSourcePicker.tsx",
+          "apiPath": "${import.meta.env.VITE_API_URL ?? \"\"}/api/v1/projects/${projectId}/files"
+        },
         {
           "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/files"
@@ -2437,6 +2741,10 @@
           "apiPath": "/api/v1/projects/77/financial/apu"
         },
         {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu"
+        },
+        {
           "screen": "artifacts/bimlog/src/project-26-apu-harness.tsx",
           "apiPath": "/api/v1/projects/26/financial/apu"
         }
@@ -2447,50 +2755,80 @@
     {
       "backendIdentity": "GET /projects/:projectId/financial/apu/bonus-proposals",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+          "apiPath": "${(import.meta.env.VITE_API_URL as string | undefined) ?? \"\"}/api/v1/projects/${projectId}/financial/apu/bonus-proposals"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/financial/apu/forecast",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/forecast"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/financial/apu/forecast.csv",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/forecast.csv"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/financial/apu/library-applications",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/library-applications"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/financial/apu/performance",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/performance"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/financial/apu/performance.csv",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/performance.csv"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/financial/contracts",
@@ -2513,6 +2851,14 @@
         {
           "screen": "artifacts/bimlog/src/advanced-contracts-workspace-harness.tsx",
           "apiPath": "/api/v1/projects/77/financial/contracts/contract-77"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialContractItemsWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/contracts/${encodeURIComponent(contractId)}"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/contracts/current-view.pdf"
         }
       ],
       "evidenceConfidence": "direct-static-reference",
@@ -2558,6 +2904,10 @@
         {
           "screen": "artifacts/bimlog/src/advanced-contracts-workspace-harness.tsx",
           "apiPath": "/api/v1/projects/77/financial/contracts/contract-77/payments"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/ContractPaymentApplicationsPanel.tsx",
+          "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/projects/${projectId}/financial/contracts/${encodeURIComponent(contract.id)}/payments"
         }
       ],
       "evidenceConfidence": "direct-static-reference",
@@ -2582,18 +2932,28 @@
     {
       "backendIdentity": "GET /projects/:projectId/financial/contracts/current-view.pdf",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/contracts/current-view.pdf"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/financial/current-view/export.pdf",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/current-view/export.pdf"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/financial/snapshots/:snapshotId",
@@ -2643,10 +3003,15 @@
     {
       "backendIdentity": "GET /projects/:projectId/intake",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/ProjectHome.tsx",
+          "apiPath": "${import.meta.env.VITE_API_URL || \"\"}/api/v1/projects/${projectId}/intake"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/integrations/folder-wizard",
@@ -2729,6 +3094,10 @@
       "capabilityGroup": "projects",
       "classification": "read-only",
       "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/TeamTab.tsx",
+          "apiPath": "${BASE}/api/v1/projects/${projectId}/invitations"
+        },
         {
           "screen": "artifacts/bimlog/src/pages/project/TeamTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/invitations"
@@ -2899,10 +3268,15 @@
     {
       "backendIdentity": "GET /projects/:projectId/pricing-template-options",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/pricing-template-options"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /projects/:projectId/project-insights",
@@ -3031,6 +3405,10 @@
       "capabilityGroup": "projects",
       "classification": "read-only",
       "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${proj.id}/rfis"
+        },
         {
           "screen": "artifacts/bimlog/src/pages/project/RfisTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/rfis"
@@ -3323,6 +3701,10 @@
       "classification": "read-only",
       "frontendReferences": [
         {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${proj.id}/submittals"
+        },
+        {
           "screen": "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/submittals"
         }
@@ -3486,10 +3868,15 @@
     {
       "backendIdentity": "GET /projects/workspace-register",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/workspace-register"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /public/commercial-availability",
@@ -3541,58 +3928,93 @@
     {
       "backendIdentity": "GET /search",
       "capabilityGroup": "search",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/search"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /support/cases",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /support/cases/",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /support/cases/:id/data-request/correction",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/correction"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /support/cases/:id/data-request/export",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/export"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /support/cases/:id/data-request/fulfillment",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/fulfillment"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /support/cases/:id/data-request/restriction",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportDataRequestReceipt.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/data-request/restriction"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /support/cases/:id/events",
@@ -3613,34 +4035,70 @@
     {
       "backendIdentity": "GET /support/cases/:id/satisfaction",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportSatisfaction.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/satisfaction"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /users/:userId/company-profile",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/company-profile"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/layout/Navbar.tsx",
+          "apiPath": "${BASE}/api/v1/users/me/company-profile"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/CompanyProfile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/company-profile"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /users/me/company-profile",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/company-profile"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/layout/Navbar.tsx",
+          "apiPath": "${BASE}/api/v1/users/me/company-profile"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/CompanyProfile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/company-profile"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET /users/me/performance-score",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "read-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/performance-score"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "GET ${satisfactionPath}",
@@ -3693,26 +4151,41 @@
     {
       "backendIdentity": "PATCH /admin/sales-inquiries/:id/assignment",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/assignment"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /admin/sales-inquiries/:id/next-action",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/next-action"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /admin/sales-inquiries/:id/status",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/status"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /admin/support/cases/:id/assignment",
@@ -3757,10 +4230,15 @@
     {
       "backendIdentity": "PATCH /commercial/billing-identity",
       "capabilityGroup": "commercial",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/lib/commercial-billing-identity-client.ts",
+          "apiPath": "${base}/api/v1/commercial/billing-identity"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /company/delivery-workflows/:id/versions/:versionId",
@@ -3797,10 +4275,15 @@
     {
       "backendIdentity": "PATCH /coordination-knowledge/conflict-types/:id",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/conflict-types/${encodeURIComponent(entityId)}${path}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /coordination-knowledge/resolution-methods/:id",
@@ -3829,10 +4312,15 @@
     {
       "backendIdentity": "PATCH /feedback/admin/:id",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/AdminPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/admin/follow-up.${format}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /integrations/telegram/admin/support-cases/:id/status",
@@ -3845,26 +4333,41 @@
     {
       "backendIdentity": "PATCH /integrations/telegram/language",
       "capabilityGroup": "integrations",
-      "classification": "intentionally-api-native-only",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "document_and_justify_api_native_boundary"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/integrations/telegram/language"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /notifications/:id/read",
       "capabilityGroup": "notifications",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/notifications/${id}/read"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /notifications/read-all",
       "capabilityGroup": "notifications",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/notifications/read-all"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /onboarding",
@@ -4242,34 +4745,54 @@
     {
       "backendIdentity": "PATCH /support/cases/:id/lifecycle",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases/${item.id}/lifecycle"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /users/me",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /users/me/company",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/company"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PATCH /users/me/password",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/password"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /:projectId/files/:fileId/supersede",
@@ -4282,10 +4805,15 @@
     {
       "backendIdentity": "POST /admin/commercial-launch/verify",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/lib/commercial-launch-verification-workflow.ts",
+          "apiPath": "${apiBase}/api/v1/admin/commercial-launch/verify"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /admin/company-master-catalog-grants",
@@ -4410,10 +4938,15 @@
     {
       "backendIdentity": "POST /admin/sales-inquiries/:id/follow-ups",
       "capabilityGroup": "admin",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "administrator-only",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/admin/SalesInquiryQueue.tsx",
+          "apiPath": "${API_BASE}/api/v1/admin/sales-inquiries/${selected.id}/follow-ups"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /admin/support/cases/:id/data-request/correction",
@@ -4591,26 +5124,41 @@
     {
       "backendIdentity": "POST /auth/forgot-password",
       "capabilityGroup": "auth",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/ResetPassword.tsx",
+          "apiPath": "${API_BASE}/api/v1/auth/forgot-password"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /auth/invitations/accept",
       "capabilityGroup": "auth",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Register.tsx",
+          "apiPath": "${BASE}/api/v1/auth/invitations/accept"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /auth/invitations/preview",
       "capabilityGroup": "auth",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Register.tsx",
+          "apiPath": "${BASE}/api/v1/auth/invitations/preview"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /auth/launch-step-up",
@@ -4647,10 +5195,15 @@
     {
       "backendIdentity": "POST /auth/reset-password",
       "capabilityGroup": "auth",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/ResetPassword.tsx",
+          "apiPath": "${API_BASE}/api/v1/auth/reset-password"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /commercial/billing-portal",
@@ -4679,10 +5232,15 @@
     {
       "backendIdentity": "POST /commercial/subscription-setup",
       "capabilityGroup": "commercial",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/lib/commercial-workspace-client.ts",
+          "apiPath": "${import.meta.env.BASE_URL.replace(/\\/$/,\"\")}/api/v1/commercial/subscription-setup"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /company/delivery-workflows",
@@ -4823,18 +5381,28 @@
     {
       "backendIdentity": "POST /contact",
       "capabilityGroup": "contact",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Contact.tsx",
+          "apiPath": "${API_BASE}/api/v1/contact"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /coordination-knowledge/conflict-types",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/conflict-types"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /coordination-knowledge/conflict-types/:id/${action.replaceAll(",
@@ -4847,10 +5415,15 @@
     {
       "backendIdentity": "POST /coordination-knowledge/evidence/:entityType/:id",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/evidence/${entityType}/${encodeURIComponent(entityId)}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /coordination-knowledge/lens-context/:lensViewpointId/lesson-proposal",
@@ -4879,10 +5452,15 @@
     {
       "backendIdentity": "POST /coordination-knowledge/lesson-proposals/:id/${action}",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/lesson-proposals/${encodeURIComponent(item.id)}/${action}"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /coordination-knowledge/lesson-proposals/:id/merge",
@@ -4903,10 +5481,15 @@
     {
       "backendIdentity": "POST /coordination-knowledge/resolution-methods",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/resolution-methods"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /coordination-knowledge/resolution-methods/:id/${action.replaceAll(",
@@ -4919,10 +5502,15 @@
     {
       "backendIdentity": "POST /coordination-knowledge/rules",
       "capabilityGroup": "coordination-knowledge",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+          "apiPath": "${API_BASE}/api/v1/coordination-knowledge/rules"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /coordination-knowledge/rules/:id/${action.replaceAll(",
@@ -4959,10 +5547,15 @@
     {
       "backendIdentity": "POST /dashboard/export-pdf",
       "capabilityGroup": "dashboard",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+          "apiPath": "${API_BASE}/api/v1/dashboard/export-pdf"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /dashboard/pending/export-pdf",
@@ -4991,10 +5584,15 @@
     {
       "backendIdentity": "POST /feedback",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /feedback-agent/:outboxId/result",
@@ -5015,10 +5613,19 @@
     {
       "backendIdentity": "POST /feedback/:id/assets",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${id}/assets"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/assets"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /feedback/:id/comments",
@@ -5031,26 +5638,41 @@
     {
       "backendIdentity": "POST /feedback/:id/reopen",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${item.id}/reopen"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /feedback/:id/transcription",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/transcription"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /feedback/:id/transcription/:jobId/review",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/transcription/${jobId}/review"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /feedback/admin/:id/events",
@@ -5063,26 +5685,41 @@
     {
       "backendIdentity": "POST /feedback/capture-consents",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/capture-consents"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /feedback/capture-consents/:id/revoke",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/capture-consents/${id}/revoke"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /feedback/notifications/:eventId/read",
       "capabilityGroup": "feedback",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+          "apiPath": "${API_BASE}/api/v1/feedback/notifications/${eventId}/read"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /financial-controls/approval-policies",
@@ -5203,10 +5840,15 @@
     {
       "backendIdentity": "POST /integrations/telegram/link",
       "capabilityGroup": "integrations",
-      "classification": "intentionally-api-native-only",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "document_and_justify_api_native_boundary"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/integrations/telegram/link"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /integrations/telegram/notification-outbox/process",
@@ -5283,10 +5925,15 @@
     {
       "backendIdentity": "POST /me/connections/sendgrid/verify",
       "capabilityGroup": "me",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/me/connections/sendgrid/verify"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /onboarding/complete",
@@ -5337,6 +5984,10 @@
         {
           "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
           "apiPath": "/api/v1/projects"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects"
         }
       ],
       "evidenceConfidence": "direct-static-reference",
@@ -5369,10 +6020,15 @@
     {
       "backendIdentity": "POST /projects/:projectId/assign-company-user",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/convention-builder/ConventionPartyAssignment.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/assign-company-user"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/assistant/ask",
@@ -5650,42 +6306,67 @@
     {
       "backendIdentity": "POST /projects/:projectId/convention/discover",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "apiPath": "${API_BASE_CB}/api/v1/projects/${projectId}/convention/discover"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/convention/discover-upload",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "apiPath": "${API_BASE_CB}/api/v1/projects/${projectId}/convention/discover-upload"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/convention/reanalyze",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "apiPath": "${API_BASE_CB}/api/v1/projects/${projectId}/convention/reanalyze"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/convention/versions",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "apiPath": "${API_BASE_CB}/api/v1/projects/${projectId}/convention/versions"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/conventions/suggest-value",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/CoordinationHub.tsx",
+          "apiPath": "${COORD_API_BASE}/api/v1/projects/${projectId}/conventions/suggest-value"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/coordination-hub/credentials",
@@ -5913,10 +6594,15 @@
     {
       "backendIdentity": "POST /projects/:projectId/edt-engine/time-entries/:entryId/transition",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/job-operations/TimeApprovalPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/edt-engine/time-entries/${encodeURIComponent(selection.entry.id)}/transition"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/edt-engine/work-items/:workItemId/issuances",
@@ -5931,6 +6617,10 @@
       "capabilityGroup": "projects",
       "classification": "fully-operable",
       "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/BudgetSourcePicker.tsx",
+          "apiPath": "${import.meta.env.VITE_API_URL ?? \"\"}/api/v1/projects/${projectId}/files"
+        },
         {
           "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/files"
@@ -5992,10 +6682,15 @@
     {
       "backendIdentity": "POST /projects/:projectId/financial/apu/bonus-proposals",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+          "apiPath": "${(import.meta.env.VITE_API_URL as string | undefined) ?? \"\"}/api/v1/projects/${projectId}/financial/apu/bonus-proposals"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/financial/apu/bonus-proposals/:proposalId/decision",
@@ -6008,18 +6703,28 @@
     {
       "backendIdentity": "POST /projects/:projectId/financial/apu/library-applications",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/library-applications"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/financial/budgets",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/budgets"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/financial/budgets/:budgetVersionId/actions",
@@ -6114,6 +6819,10 @@
         {
           "screen": "artifacts/bimlog/src/advanced-contracts-workspace-harness.tsx",
           "apiPath": "/api/v1/projects/77/financial/contracts/contract-77/payments"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/ContractPaymentApplicationsPanel.tsx",
+          "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/projects/${projectId}/financial/contracts/${encodeURIComponent(contract.id)}/payments"
         }
       ],
       "evidenceConfidence": "direct-static-reference",
@@ -6194,18 +6903,28 @@
     {
       "backendIdentity": "POST /projects/:projectId/financial/cost-libraries",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/cost-libraries"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/financial/cost-structures",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/cost-structures"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/financial/generic-apu/:projectApuVersionId/budget-control/evaluate",
@@ -6226,26 +6945,41 @@
     {
       "backendIdentity": "POST /projects/:projectId/financial/imports/:sessionId/confirm",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/imports/${preview.id}/confirm"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/financial/imports/preview",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/imports/preview"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/intake",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/ProjectHome.tsx",
+          "apiPath": "${import.meta.env.VITE_API_URL || \"\"}/api/v1/projects/${projectId}/intake"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/:projectId/intake-agent/preview",
@@ -6363,6 +7097,10 @@
       "capabilityGroup": "projects",
       "classification": "fully-operable",
       "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/project/TeamTab.tsx",
+          "apiPath": "${BASE}/api/v1/projects/${projectId}/invitations"
+        },
         {
           "screen": "artifacts/bimlog/src/pages/project/TeamTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/invitations"
@@ -6707,6 +7445,10 @@
       "classification": "fully-operable",
       "frontendReferences": [
         {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${proj.id}/rfis"
+        },
+        {
           "screen": "artifacts/bimlog/src/pages/project/RfisTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/rfis"
         },
@@ -7041,6 +7783,10 @@
       "classification": "fully-operable",
       "frontendReferences": [
         {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${proj.id}/submittals"
+        },
+        {
           "screen": "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
           "apiPath": "/api/v1/projects/${projectId}/submittals"
         }
@@ -7233,10 +7979,15 @@
     {
       "backendIdentity": "POST /projects/:projectId/workspace-state",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${project.id}/workspace-state"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /projects/workspace-state/batch",
@@ -7330,10 +8081,15 @@
     {
       "backendIdentity": "POST /support/cases",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /support/cases/:id/messages",
@@ -7346,34 +8102,62 @@
     {
       "backendIdentity": "POST /support/cases/:id/satisfaction",
       "capabilityGroup": "support",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/commercial/SupportSatisfaction.tsx",
+          "apiPath": "${API_BASE}/api/v1/support/cases/${caseId}/satisfaction"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /users/me/api-token",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/api-token"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /users/me/company-logo",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/CompanyProfile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/company-logo"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /users/me/company-profile",
       "capabilityGroup": "users",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/company-profile"
+        },
+        {
+          "screen": "artifacts/bimlog/src/components/layout/Navbar.tsx",
+          "apiPath": "${BASE}/api/v1/users/me/company-profile"
+        },
+        {
+          "screen": "artifacts/bimlog/src/pages/CompanyProfile.tsx",
+          "apiPath": "${API_BASE}/api/v1/users/me/company-profile"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "POST /webhooks/telegram/:adapterId",
@@ -7442,18 +8226,28 @@
     {
       "backendIdentity": "PUT /integrations/telegram/notification-settings",
       "capabilityGroup": "integrations",
-      "classification": "intentionally-api-native-only",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "document_and_justify_api_native_boundary"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/notifications/NotificationPreferenceCenter.tsx",
+          "apiPath": "${API}/api/v1/integrations/telegram/notification-settings"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PUT /integrations/telegram/notification-settings/modules/rfi",
       "capabilityGroup": "integrations",
-      "classification": "intentionally-api-native-only",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "document_and_justify_api_native_boundary"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/notifications/NotificationPreferenceCenter.tsx",
+          "apiPath": "${API}/api/v1/integrations/telegram/notification-settings/modules/rfi"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PUT /me/connections/anthropic",
@@ -7466,10 +8260,15 @@
     {
       "backendIdentity": "PUT /me/connections/sendgrid",
       "capabilityGroup": "me",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/Profile.tsx",
+          "apiPath": "${API_BASE}/api/v1/me/connections/sendgrid"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PUT /projects/:projectId/commercial/team-performance/resource-planning/profiles/:userId",
@@ -7489,6 +8288,10 @@
           "apiPath": "/api/v1/projects/${projectId}/conventions"
         },
         {
+          "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "apiPath": "${API_BASE_CB}/api/v1/projects/${projectId}/conventions"
+        },
+        {
           "screen": "artifacts/bimlog/src/pages/project/CoordinationHub.tsx",
           "apiPath": "/api/v1/projects/${projectId}/conventions"
         }
@@ -7506,6 +8309,10 @@
           "apiPath": "/api/v1/projects/77/financial/apu"
         },
         {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu"
+        },
+        {
           "screen": "artifacts/bimlog/src/project-26-apu-harness.tsx",
           "apiPath": "/api/v1/projects/26/financial/apu"
         }
@@ -7516,26 +8323,41 @@
     {
       "backendIdentity": "PUT /projects/:projectId/financial/apu/forecast",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/forecast"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PUT /projects/:projectId/financial/apu/performance",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+          "apiPath": "${API_BASE}/api/v1/projects/${projectId}/financial/apu/performance"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PUT /projects/:projectId/intake",
       "capabilityGroup": "projects",
-      "classification": "missing-frontend",
-      "frontendReferences": [],
-      "evidenceConfidence": "candidate-requires-source-adjudication",
-      "requiredFollowUp": "prove_existing_dynamic_frontend_or_add_visible_authorized_entry_help_success_error_evidence"
+      "classification": "fully-operable",
+      "frontendReferences": [
+        {
+          "screen": "artifacts/bimlog/src/components/layout/ProjectHome.tsx",
+          "apiPath": "${import.meta.env.VITE_API_URL || \"\"}/api/v1/projects/${projectId}/intake"
+        }
+      ],
+      "evidenceConfidence": "direct-static-reference",
+      "requiredFollowUp": "verify_end_to_end_operability_and_permission_states"
     },
     {
       "backendIdentity": "PUT /projects/:projectId/meetings/draft",
