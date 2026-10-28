@@ -79817,6 +79817,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p001-p005-parity-adjudication-20261028",
+      "reviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
+      "reviewedAt": "2026-10-28T17:36:23Z",
+      "status": "candidate",
+      "captureTiming": "post_p005_focused_acceptance_pre_block_regression",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or permanent cross-product law changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-build and publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds parity evidence and a no-capability-loss regression gate without weakening acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves the complete, discoverable, progressively organized product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "P001–P005 change audit tooling and evidence only; no runtime route, schema, persistence, or customer data changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, installer, package, or Lens boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export design authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production identity remains unchanged because this is an evidence-only block."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing P001–P020 program remains authoritative; this block fulfills P001–P005."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block freezes adjudicated parity evidence and preserves every unresolved gap."
+        }
+      ],
+      "reason": "Reconcile dynamic frontend references, all read and mutation dispositions, route-family ownership, and the frozen no-capability-loss gap set.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
