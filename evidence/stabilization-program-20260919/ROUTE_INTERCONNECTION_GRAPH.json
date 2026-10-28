@@ -7,7 +7,7 @@
     "sidebarTabs": 18,
     "sidebarLinks": 5,
     "apiRoutes": 796,
-    "frontendApiReferences": 317,
+    "frontendApiReferences": 315,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -10395,14 +10395,6 @@
     {
       "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",
       "apiPath": "/api/v1/projects/29/levels"
-    },
-    {
-      "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",
-      "apiPath": "/api/v1/projects/29/members"
-    },
-    {
-      "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",
-      "apiPath": "/api/v1/projects/29/conventions"
     },
     {
       "screen": "artifacts/bimlog/src/features/lens-next/block14-build066-mockup-reconciliation.behavior.ts",

@@ -6578,6 +6578,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Regenerate and review the governed UX route inventory; the Contract Items workspace is included and all 65 route/tab bindings have source owners.
 - [x] Align post-120 Block 38 with the twelve already-governed historical duplicate-loop reconciliations; Block 38/39 pass and no product behavior changed.
 - [x] Refresh six shifted source line references in the governed 45-entry AI inventory; no entry point, provider or acquisition authority changed.
+- [x] Replace the stale Lens Build 066 multi-endpoint fixture with the current fail-closed `lens-issue-catalog.v1` contract; complete Lens acceptance passes without changing runtime behavior.
 - [ ] Pass the exact-head production build and complete pre-push gate, then synchronize canonical `master` without force.
 - [ ] Publish through the established signed-in Replit workspace using Shell and Publish only; verify schema correspondence, restore readiness, deployment identity, health and production version.
 - [ ] Pass three consecutive authenticated live rounds: full smoke, refresh/reopen, and clean reentry. Do not convert this release into Ruben/Navisworks field acceptance.
