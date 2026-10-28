@@ -86,3 +86,26 @@
 - Push status: pending.
 - Publication status: not required if the final exact changed-path audit continues to show zero runtime/product changes.
 - Exact safe resume point: create the focused Build 030 corrective commit, rerun its aggregate gate at exact committed HEAD, then reconcile Living Brief and run full block regression.
+
+## Build 030 committed / Living Brief reconciled — 2026-10-28
+
+- Build 030 corrective commit: `5736d7f7de1259d8dfec73dea4fc372770d38adf` (`test: reconcile build 030 source authority gate`).
+- Exact-head focused retest: all five Build 026–030 gates PASS at `5736d7f7de1259d8dfec73dea4fc372770d38adf`; aggregate changed-path boundary reports 15 authorized evidence/tooling paths and zero product patches.
+- Last completed action: reconciled current Block 06 truth into OPEN_LOOP authority, regenerated all 538 dispositions and Living Brief state, and passed the 11-document/38-internal-link/40-standards-link integrity gate.
+- Recoverable condition: initial Living Brief gate rejected a future fixed review timestamp; corrected to actual UTC `2026-10-28T12:24:23Z`, regenerated state, and retested PASS.
+- Tests pending: commit Living Brief evidence reconciliation; connected and full block regression; exact-head retry; normal push; remote verification; unchanged-production identity/health verification.
+- Browser resources owned: none.
+- Push status: pending.
+- Publication status: no publication required, subject to final changed-path and release-gate confirmation.
+- Exact safe resume point: commit the Living Brief reconciliation, then run the complete local release gate to a task-workspace receipt.
+
+## Corrected independent audit reconciled — 2026-10-28
+
+- Audit authority: corrected BIMLog Revision 2 dossier, documents `00`–`20`, delivered by MAIN00 and read in full after the Build 030 focused commit.
+- Corrected count rule: I001–I010 and C001–C120 are 130 requirement identities, not 130 automatic builds or a predeclared 26-block implementation program.
+- Preserved acceptance: prior Lorena and Ruben acceptance remains accepted unless either reports a new issue or a later build changes the accepted workflow.
+- Mandatory next package: five analysis/evidence builds R01–R05 (identity disposition, backend capability inventory, frontend exposure inventory, user-journey reconciliation, and exact implementation-program generation).
+- Product direction: progressive clarity without capability loss; preserve direct expert access and a visible searchable All Tools route; dashboard summaries must open governed records and actions.
+- Block 06 disposition: the already-completed Builds 026–030 remain preservation-first source-authority evidence and contain zero product/runtime changes. They do not substitute for R01–R05 and do not establish platform completion.
+- Publication disposition: no publication is required for this documentation/tooling-only block; unchanged P37 identity and health must still be verified after the normal push.
+- Exact safe resume point: commit this reconciled evidence, run the full local release gate, push normally, verify the remote, then begin R01–R05 as the next authorized block.
