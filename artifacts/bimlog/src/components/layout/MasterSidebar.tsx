@@ -6,7 +6,7 @@ import { SidebarUtilities } from "@/components/layout/SidebarUtilities";
 import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
 import { loadAccessProfile } from "@/lib/access-profile";
-import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu, Settings2, ChevronLeft, ChevronRight, GripVertical, BookOpen, Grid3X3 } from "lucide-react";
+import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu, Settings2, ChevronLeft, ChevronRight, GripVertical, BookOpen, Grid3X3, ClipboardList, BriefcaseBusiness, Files, Network, BarChart3 } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -39,6 +39,7 @@ export function MasterSidebar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
+  const [activeProjectId, setActiveProjectId] = useState<number | null>(null);
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showBell, setShowBell] = useState(false);
@@ -126,6 +127,7 @@ export function MasterSidebar() {
     loadAccessProfile(token)
       .then(profile => {
         if (!active) return;
+        setActiveProjectId(profile.facts.activeProjects[0]?.id ?? null);
         setShowAdminPanel(profile.decisions.project_administration.allow);
         setShowCompanyCatalogs(profile.decisions.company_catalogs.allow);
         setShowTotalControl(profile.decisions.total_control.allow);
@@ -386,6 +388,31 @@ export function MasterSidebar() {
     );
   };
 
+  const projectDailyNavButton = (
+    label: string,
+    destination: string,
+    Icon: ComponentType<{ style?: CSSProperties }>,
+  ) => {
+    const route = activeProjectId ? `/projects/${activeProjectId}/${destination}` : undefined;
+    const isActive = Boolean(route && (location === route || location.startsWith(`${route}/`)));
+    const unavailable = t(`${label} requires an active project assignment`, `${label} requiere una asignación activa de proyecto`);
+    return (
+      <button
+        type="button"
+        className={`sidebar-nav-item${isActive ? " active" : ""}`}
+        aria-current={isActive ? "page" : undefined}
+        aria-disabled={!route}
+        aria-label={route ? label : unavailable}
+        title={route ? label : unavailable}
+        style={{ width: "100%", background: "none", border: "none", cursor: route ? "pointer" : "not-allowed", textAlign: "left", display: "flex", alignItems: "center", justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start", gap: sidebarCollapsed && !isMobile ? 0 : 8, opacity: route ? 1 : .58 }}
+        onClick={() => { if (route) { setLocation(route); setMobileOpen(false); } }}
+      >
+        <Icon style={{ width: 14, height: 14, flexShrink: 0 }} />
+        {(!sidebarCollapsed || isMobile) && <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>}
+      </button>
+    );
+  };
+
   return (
     <>
     {isMobile && (
@@ -484,8 +511,15 @@ export function MasterSidebar() {
       </div>
 
       <nav className="sidebar-nav" style={{ flex: 1 }} aria-label={t("Headquarters navigation", "Navegación de sede")}>
-        {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Headquarters", "Sede")}</span>}
-        {navButton(t("BIMLog Headquarters", "Sede BIMLog"), "/dashboard", LayoutDashboard)}
+        {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Daily work", "Trabajo diario")}</span>}
+        {navButton(t("Home", "Inicio"), "/dashboard", LayoutDashboard)}
+        {projectDailyNavButton(t("Intake", "Ingreso"), "intake", ClipboardList)}
+        {projectDailyNavButton(t("Operations", "Operaciones"), "operations", BriefcaseBusiness)}
+        {projectDailyNavButton(t("Documents", "Documentos"), "files", Files)}
+        {projectDailyNavButton(t("Coordination", "Coordinación"), "coordination", Network)}
+        {projectDailyNavButton(t("Reports", "Reportes"), "reports", BarChart3)}
+
+        {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Full capability directory", "Directorio completo de capacidades")}</span>}
         {navButton(t("All Tools", "Todas las herramientas"), "/all-tools", Grid3X3)}
 
         {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Knowledge", "Conocimiento")}</span>}
