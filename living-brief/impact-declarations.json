@@ -79467,7 +79467,7 @@
     },
     {
       "taskId": "stabilization-block05-build021-current-truth-reconciliation-20261028",
-      "reviewedThroughCommit": "b3b62c9dd73727d1552de28ca6ca6769d6531168",
+      "reviewedThroughCommit": "d6f6fe5c5031c41da61030e516a505b5891cf9fa",
       "reviewedAt": "2026-10-28T10:05:10Z",
       "status": "candidate",
       "captureTiming": "post_current_truth_correction_pre_focused_retest",
@@ -79530,12 +79530,12 @@
       ],
       "reason": "Reconcile the sole current OPEN_LOOP authority and Build 021 evidence with the already accepted P37 production identity.",
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/BUILD_021_CURRENT_TRUTH_RECONCILIATION.md",
+        "evidence/entire-platform-closure-20261027/BLOCK05_EXECUTION_LEDGER.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "29db3003f42187f0e0a00f342b7833c019b3bd6913a3447b2822f5ebcb5b0900"
+      "reviewedChangeSha256": "cab77ea8c348600ca391528cff63b3fb22eb7a9d9bfe45e3b299bbc1ca13ec72"
     }
   ]
 }

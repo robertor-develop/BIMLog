@@ -17,13 +17,18 @@
 - Builds already unpublished on entry: 0.
 - Publication after this block: no; Build 025 is a push-only checkpoint and publication is due after Build 030.
 - Accepted implementation commits already in lineage: B021 `781f149e5`, B022 `d3f3d97b9`, B023 `b6d782827`, B024 `8f287acd7`, B025 `b3ba648b1`.
-- Active build: 021, accepted pending focused corrective commit.
-- Last completed action: Build 021 focused and connected retest passed after regenerating its deterministic inventories and Living Brief state.
+- Active build: block regression after accepted Build 025.
+- Build 021: accepted; original implementation `781f149e5`; current-truth corrective commit `d6f6fe5c5031c41da61030e516a505b5891cf9fa`.
+- Build 022: accepted; focused implementation commit `d3f3d97b9`; 538/538 unchecked entries classified with evidence (481 active, 45 superseded, 3 accepted limitations, 9 closed with evidence).
+- Build 023: accepted; focused implementation commit `b6d782827`; deterministic PLATFORM generation, current-state documentation contract, and Living Brief integrity pass.
+- Build 024: accepted; focused implementation commit `8f287acd7`; Lens Next sole-product negative self-test and frontend TypeScript pass.
+- Build 025: accepted; focused implementation commit `b3ba648b1`; release/provider/version/Lens/disposition contradiction gate and negative self-test pass.
+- Last completed action: all five focused build gates passed sequentially.
 - Tests completed: authority verifier, professional identity, instruction authority, repository/remote/deployment/migration/worktree identity checks; release identity; 538-item OPEN_LOOP disposition integrity; current-state contract; Living Brief integrity with 11 required documents, 38 internal links, 40 standards links, and 23 continuity cases.
-- Tests pending: focused Build 022–025 checks; negative contradiction checks; connected regression; complete block regression; push verification.
+- Tests pending: complete connected/block regression, final worktree review, corrective metadata commit, push verification.
 - Defects discovered: authoritative OPEN_LOOP marker still names P36; Build 021 evidence report still names P33.
 - Defects corrected: Build 021 evidence now records P37/source/package-era receipt; the sole OPEN_LOOP authority now records exact P37 source, package, migration, and authenticated acceptance evidence.
 - Browser resources owned: none.
 - Push status: pending.
 - Publication status: not required for this block.
-- Exact safe resume point: create the Build 021 corrective commit, record its identity, then begin Build 022.
+- Exact safe resume point: run the complete block regression and repair any proven failure before push.
