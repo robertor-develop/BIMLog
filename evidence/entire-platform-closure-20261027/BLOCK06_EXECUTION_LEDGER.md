@@ -72,3 +72,17 @@
 - Push status: pending.
 - Publication status: pending exact runtime-change determination at Build 030.
 - Exact safe resume point: create the focused Build 029 corrective commit, then begin Build 030 aggregate reconciliation.
+
+## Build 029 committed / Build 030 focused acceptance — 2026-10-28
+
+- Build 029 corrective commit: `08ba929b9` (`docs: refresh build 029 cleanup manifest`).
+- Active build: 030.
+- Last completed action: updated and passed the aggregate source-authority reconciliation gate against the immutable accepted Block 05 head.
+- Build 030 focused tests: 84 worktrees internally reconciled; 161 branches internally reconciled; 61 ancestry-unmerged; 162 candidate paths mapped; five dirty candidate families classified; 67 worktree and 99 branch preservation plans matched; zero product patches integrated; changed-path boundary PASS; diff check PASS.
+- Defects discovered: aggregate gate hard-coded obsolete 143/142/1/18 worktree counts and the 2026-09-19 base; Build 030 report incorrectly demanded publication despite zero accepted runtime patches.
+- Defects corrected: aggregate derives counts from current artifacts, binds changed-path scope to accepted Block 05 head `c806ac928025cebc8b4a0b05e499724a8dd2f5fa`, and records the authoritative conditional no-publication disposition for documentation/tooling-only changes.
+- Tests pending: focused Build 030 commit and exact-head retest; Living Brief reconciliation; connected and full block regression; push/remote verification; unchanged-production identity/health verification.
+- Browser resources owned: none.
+- Push status: pending.
+- Publication status: not required if the final exact changed-path audit continues to show zero runtime/product changes.
+- Exact safe resume point: create the focused Build 030 corrective commit, rerun its aggregate gate at exact committed HEAD, then reconcile Living Brief and run full block regression.

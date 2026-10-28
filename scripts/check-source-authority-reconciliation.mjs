@@ -8,8 +8,12 @@ const dirty = read("DIRTY_CANDIDATE_RECONCILIATION.json");
 const cleanup = read("RECOVERABLE_CLEANUP_MANIFEST.json");
 const fail = (message) => { throw new Error(message); };
 
-if (inventory.worktreeCounts.registered !== 143 || inventory.worktreeCounts.present !== 142 || inventory.worktreeCounts.prunable !== 1 || inventory.worktreeCounts.baselineDirty !== 18) fail("worktree authority counts drifted");
-if (inventory.branchCounts.ancestryUnmerged !== 61) fail("ancestry-unmerged branch count drifted");
+if (inventory.worktreeCounts.registered !== inventory.worktrees.length) fail("registered worktree count does not match inventory");
+if (inventory.worktreeCounts.present !== inventory.worktrees.filter((item) => !item.prunable).length) fail("present worktree count does not match inventory");
+if (inventory.worktreeCounts.prunable !== inventory.worktrees.filter((item) => item.prunable).length) fail("prunable worktree count does not match inventory");
+if (inventory.worktreeCounts.baselineDirty !== inventory.worktrees.filter((item) => item.baselineDirty).length) fail("baseline-dirty worktree count does not match inventory");
+if (inventory.branchCounts.registered !== inventory.branches.length) fail("registered branch count does not match inventory");
+if (inventory.branchCounts.ancestryUnmerged !== inventory.branches.filter((item) => item.relationship === "DIVERGED" || item.relationship === "DESCENDANT").length) fail("ancestry-unmerged branch count does not match inventory");
 if ([...inventory.worktrees, ...inventory.branches].some((item) => !item.disposition)) fail("source-authority record lacks disposition");
 if (histories.candidates.length !== 2 || histories.candidates.some((item) => item.wholesaleIntegrationAllowed !== false || item.files.some((file) => !file.disposition))) fail("candidate history is not fully mapped and fail-closed");
 if (dirty.destructiveActionAuthorized !== false || dirty.candidates.length !== 5 || dirty.candidates.some((item) => !item.cleanCandidateLocation)) fail("dirty candidate reconciliation is incomplete");
@@ -19,7 +23,7 @@ if (cleanup.branchCount !== inventory.branches.filter((item) => item.disposition
 
 const cwd = process.cwd();
 const git = (...args) => execFileSync("git", ["-c", `safe.directory=${cwd.replace(/\\/g, "/")}`, "-C", cwd, ...args], { encoding: "utf8" }).trim();
-const changed = git("diff", "--name-only", "b3ba648b1c964ae3867366acfcdd17ca37222b0a...HEAD").split(/\r?\n/).filter(Boolean);
+const changed = git("diff", "--name-only", "c806ac928025cebc8b4a0b05e499724a8dd2f5fa...HEAD").split(/\r?\n/).filter(Boolean);
 const allowedBriefFiles = new Set([
   "living-brief/STATUS.md",
   "living-brief/OPEN_LOOP.md",
@@ -27,7 +31,7 @@ const allowedBriefFiles = new Set([
   "living-brief/impact-declarations.json",
   "living-brief/state.json"
 ]);
-const unexpected = changed.filter((file) => !(file === "package.json" || file.startsWith("scripts/") || file.startsWith("evidence/stabilization-program-20260919/") || allowedBriefFiles.has(file)));
+const unexpected = changed.filter((file) => !(file === "package.json" || file.startsWith("scripts/") || file.startsWith("evidence/") || allowedBriefFiles.has(file)));
 if (unexpected.length) fail(`Block 06 contains unaccepted product paths: ${unexpected.join(", ")}`);
 
 console.log(JSON.stringify({
