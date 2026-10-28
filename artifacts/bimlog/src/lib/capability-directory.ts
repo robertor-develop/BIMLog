@@ -3,6 +3,17 @@ import type { AccessProfile, AccessSurface } from "@/lib/access-profile";
 export type CapabilityAudience = "authenticated" | "project" | AccessSurface;
 export type CapabilityGroup = "Home" | "Intake" | "Operations" | "Documents" | "Coordination" | "Reports" | "Administration" | "Settings";
 
+export const capabilityGroups: ReadonlyArray<{ id: CapabilityGroup; label: { en: string; es: string }; description: { en: string; es: string } }> = [
+  { id: "Home", label: { en: "Home", es: "Inicio" }, description: { en: "Priorities and work waiting for you.", es: "Prioridades y trabajo que espera por usted." } },
+  { id: "Intake", label: { en: "Intake", es: "Ingreso" }, description: { en: "Set up governed work before project execution.", es: "Prepare el trabajo gobernado antes de ejecutar el proyecto." } },
+  { id: "Operations", label: { en: "Operations", es: "Operaciones" }, description: { en: "Plan, assign, and deliver project work.", es: "Planifique, asigne y entregue trabajo del proyecto." } },
+  { id: "Documents", label: { en: "Documents", es: "Documentos" }, description: { en: "Control files, questions, reviews, and formal records.", es: "Controle archivos, preguntas, revisiones y registros formales." } },
+  { id: "Coordination", label: { en: "Coordination", es: "Coordinación" }, description: { en: "Resolve model, clash, issue, and decision work.", es: "Resuelva trabajo de modelos, interferencias, incidencias y decisiones." } },
+  { id: "Reports", label: { en: "Reports", es: "Reportes" }, description: { en: "Review evidence and create governed outputs.", es: "Revise evidencia y cree resultados gobernados." } },
+  { id: "Administration", label: { en: "Administration", es: "Administración" }, description: { en: "Configure projects, company standards, access, and approvals.", es: "Configure proyectos, estándares de empresa, acceso y aprobaciones." } },
+  { id: "Settings", label: { en: "Settings", es: "Configuración" }, description: { en: "Manage your profile, notifications, billing, and controls.", es: "Gestione su perfil, notificaciones, facturación y controles." } },
+];
+
 export interface CapabilityDirectoryEntry {
   id: string;
   group: CapabilityGroup;
