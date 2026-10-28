@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
+  "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
   "bundleSha256": "11e8d591c914182ea3959c19c57785717c31203dbe1d25b0d0886412d1248cf3",
   "impact": {
-    "baselineCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
+    "baselineCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
     "changedPaths": [
       "living-brief/impact-declarations.json"
     ],
@@ -21,11 +21,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "claude",
@@ -33,11 +33,11 @@
       "sha256": "ed75b86537e090a358183b372aca181f4c850aad38b704b2e41bcb98780eb4be",
       "sourceChangedAt": "2026-10-27T07:57:39-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "quality",
@@ -45,11 +45,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "vision",
@@ -57,11 +57,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "platform",
@@ -69,11 +69,11 @@
       "sha256": "26e4be5e31a176a814ef2c952e68d0798ecfc39ca25c4004d00ba4d1d5905914",
       "sourceChangedAt": "2026-10-27T13:00:09-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "plugin",
@@ -81,11 +81,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "report_design_system",
@@ -93,11 +93,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "standards_register",
@@ -105,11 +105,11 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "status",
@@ -117,11 +117,11 @@
       "sha256": "064cae8b75982e04700c4edbb1ee0abe3c7a66672f99e958b8859a80b89613b1",
       "sourceChangedAt": "2026-10-28T01:50:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "open_loop",
@@ -129,11 +129,11 @@
       "sha256": "68fb54d561923d82bebe0f2f943e72f4b8c8cc2cf86d0850976ecb9307481bd1",
       "sourceChangedAt": "2026-10-28T01:50:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     },
     {
       "key": "audit",
@@ -141,11 +141,11 @@
       "sha256": "e96601a5b0f4a0e6ede78c92f124119fdca0de48404160ad1ce93f0dcb5cdcfc",
       "sourceChangedAt": "2026-10-27T13:00:09-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewedThroughCommit": "dcdca300876a9f2d1f5a2c670145ec334bba3bfc",
-      "semanticReviewTask": "entire-platform-closure-block04-governance-fixture-correction-20261028",
+      "reconciledThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "semanticReviewTask": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T07:56:00Z"
+      "semanticReviewedAt": "2026-10-28T09:08:26Z"
     }
   ]
 }

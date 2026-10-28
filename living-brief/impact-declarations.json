@@ -79395,6 +79395,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "entire-platform-closure-block04-production-constraint-identity-correction-20261028",
+      "reviewedThroughCommit": "e191a1a7fdf145762b35940ed85568952f6c10b6",
+      "reviewedAt": "2026-10-28T09:08:26Z",
+      "status": "candidate",
+      "captureTiming": "post_production_database_operator_pre_release_gate_retry",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The fixed publication and database-safety discipline remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The publication operator correctly stopped on a constraint-name mismatch; the correction preserves the check expression and adds focused regression coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision or business rule changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The workflow-binding version check keeps identical behavior while source and startup migration adopt the established production constraint identity."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, installer, or package changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export design authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed; an internal PostgreSQL constraint identity was reconciled."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 04 remains in controlled publication recovery pending the repeated full release gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No durable product obligation changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit authority or acceptance threshold changed."
+        }
+      ],
+      "reason": "Reconcile the production database operator correction that preserves the established workflow-binding version-check identity without changing its expression or customer data.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
