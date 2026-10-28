@@ -79118,7 +79118,7 @@
     },
     {
       "taskId": "entire-platform-closure-block02-intake-test-correction-20261027",
-      "reviewedThroughCommit": "58e715278527bdb4c34a21cff65d81aa17ed4549",
+      "reviewedThroughCommit": "430bde911d7c7731c5be4de338a782da8aaf6d4e",
       "reviewedAt": "2026-10-27T23:05:00.000Z",
       "status": "candidate",
       "captureTiming": "post_correction_pre_release_reconciliation",
@@ -79179,14 +79179,14 @@
           "reason": "Whole-platform and field-acceptance debts remain explicit."
         }
       ],
-      "reason": "Record the full-gate stale-test correction without changing the approved Lorena Intake product contract or claiming publication.",
+      "reason": "Record both adjacent full-gate stale-test corrections without changing the approved Lorena Intake product contract or claiming publication.",
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "fd4a074962b7b98b3720d5eba5d838504ebb181aaf90cecfca16ea9d3c6ae1e1"
+      "reviewedChangeSha256": "01c631f81ef8968dbdafab2b246cb83716f25e0344d2db0cca3c8afefce6a719"
     }
   ]
 }

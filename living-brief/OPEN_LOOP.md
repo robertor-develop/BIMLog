@@ -6574,7 +6574,7 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] Revalidate accepted Builds 006–010 against current source with focused multipart, provenance, authorization, isolation, persistence, platform, TypeScript, secret and database gates.
 - [x] Pass the connected entire-platform Block 1 aggregate against disposable PostgreSQL with zero production mutations.
 - [x] Run the network-backed production advisory audit: zero known vulnerabilities.
-- [x] Correct the stale UX023 expectation without reverting the approved Quantity-only Intake contract; focused compatibility and Lorena Intake regression pass.
+- [x] Correct adjacent stale UX023/UX025 expectations without reverting the approved Quantity-only Intake contract; focused compatibility, Lorena Intake and team-resource-planning regressions pass.
 - [ ] Pass the exact-head production build and complete pre-push gate, then synchronize canonical `master` without force.
 - [ ] Publish through the established signed-in Replit workspace using Shell and Publish only; verify schema correspondence, restore readiness, deployment identity, health and production version.
 - [ ] Pass three consecutive authenticated live rounds: full smoke, refresh/reopen, and clean reentry. Do not convert this release into Ruben/Navisworks field acceptance.
