@@ -80098,6 +80098,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p011-p020-all-tools-route-inventory-20261028",
+      "reviewedThroughCommit": "3a84a4773d9ef04081957b662f7b3b1803c4de42",
+      "reviewedAt": "2026-10-28T23:10:00Z",
+      "status": "candidate",
+      "captureTiming": "post_release_gate_route_inventory_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The source-derived UX route inventory now includes the accepted All Tools route."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The inventory reflects the accepted discoverability direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This corrective commit updates governed evidence only; runtime and schema are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Candidate status is unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Remaining gates are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "The governed UX route count advances from 65 to 66 with /all-tools and its authenticated boundary."
+        }
+      ],
+      "reason": "Reconcile the generated UX route inventory with the accepted /all-tools runtime route.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
