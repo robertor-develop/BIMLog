@@ -7,9 +7,11 @@ const sidebar = fs.readFileSync(new URL("../components/layout/MasterSidebar.tsx"
 assert.match(app, /path="\/all-tools"/);
 assert.match(sidebar, /"All Tools", "Todas las herramientas"/);
 assert.match(page, /resolveCapabilityDirectory/);
-assert.match(page, /setLocation\(entry\.href\)/);
+assert.match(page, /entry\.href && setLocation\(entry\.href\)/);
 assert.match(page, /searchCapabilities/);
 assert.match(page, /id="all-tools-search"/);
 assert.match(page, /Clear search/);
+assert.match(page, /Administrator only/);
+assert.match(page, /disabled=\{!entry\.href\}/);
 assert.doesNotMatch(sidebar, /More Tools|Más herramientas/);
 console.log("ALL_TOOLS_P007=PASS visible_route=true direct_actions=true");

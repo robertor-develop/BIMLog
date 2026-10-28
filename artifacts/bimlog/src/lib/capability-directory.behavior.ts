@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { capabilityDirectory, resolveCapabilityDirectory, searchCapabilities } from "./capability-directory";
+import { capabilityDirectory, resolveCapabilityDirectory, resolveCapabilityDirectoryViews, searchCapabilities } from "./capability-directory";
 import type { AccessProfile, AccessSurface } from "./access-profile";
 
 const surfaces: AccessSurface[] = ["dashboard", "project_workspace", "project_administration", "total_control", "living_brief", "company_catalogs", "company_pricing", "company_workflows", "feedback_administration"];
@@ -20,4 +20,10 @@ assert.deepEqual(searchCapabilities(admin, "governance", "en").map(entry => entr
 assert.ok(searchCapabilities(admin, "aprobados", "es").some(entry => entry.id === "governance"));
 assert.ok(searchCapabilities(member, "exports", "en").some(entry => entry.id === "rfis"));
 assert.equal(searchCapabilities(member, "", "en").length, member.length);
+const memberViews = resolveCapabilityDirectoryViews(profile(["dashboard", "project_workspace"]));
+assert.equal(memberViews.length, capabilityDirectory.length);
+assert.equal(memberViews.find(entry => entry.id === "governance")?.availability, "administrator-only");
+assert.equal(memberViews.find(entry => entry.id === "governance")?.href, undefined);
+assert.equal(resolveCapabilityDirectoryViews(profile(["dashboard"], [])).find(entry => entry.id === "rfis")?.availability, "requires-project");
+assert.equal(resolveCapabilityDirectoryViews(profile(["dashboard", "company_workflows"])).find(entry => entry.id === "governance")?.href, "/company-workflow-governance");
 console.log(`CAPABILITY_DIRECTORY_P006=PASS entries=${capabilityDirectory.length} member=${member.length} admin=${admin.length}`);

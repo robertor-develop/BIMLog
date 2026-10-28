@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowRight, Grid3X3, RefreshCw, Search, X } from "lucide-react";
+import { ArrowRight, Grid3X3, LockKeyhole, RefreshCw, Search, X } from "lucide-react";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { useI18n } from "@/lib/i18n";
 import { loadAccessProfile, type AccessProfile } from "@/lib/access-profile";
-import { resolveCapabilityDirectory, searchCapabilities } from "@/lib/capability-directory";
+import { resolveCapabilityDirectoryViews, searchCapabilities } from "@/lib/capability-directory";
 import { useAuthStore } from "@/store/auth";
 
 export function AllTools() {
@@ -28,7 +28,7 @@ export function AllTools() {
     return () => controller.abort();
   }, [token, retry]);
 
-  const entries = useMemo(() => profile ? searchCapabilities(resolveCapabilityDirectory(profile), query, lang) : [], [profile, query, lang]);
+  const entries = useMemo(() => profile ? searchCapabilities(resolveCapabilityDirectoryViews(profile), query, lang) : [], [profile, query, lang]);
   const groups = [...new Set(entries.map(entry => entry.group))];
 
   return (
@@ -52,9 +52,10 @@ export function AllTools() {
           {groups.map(group => <section key={group} aria-labelledby={`tools-${group.toLowerCase()}`}>
             <h2 id={`tools-${group.toLowerCase()}`} style={{ fontSize: 16 }}>{group}</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 12 }}>
-              {entries.filter(entry => entry.group === group).map(entry => <button key={entry.id} type="button" onClick={() => setLocation(entry.href)} className="all-tools-card" style={{ textAlign: "left", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))", padding: 16, cursor: "pointer", color: "inherit" }}>
-                <span style={{ display: "flex", justifyContent: "space-between", gap: 12, fontWeight: 750 }}>{entry.name[lang]}<ArrowRight aria-hidden style={{ width: 16, height: 16, flexShrink: 0 }} /></span>
+              {entries.filter(entry => entry.group === group).map(entry => <button key={entry.id} type="button" disabled={!entry.href} onClick={() => entry.href && setLocation(entry.href)} className="all-tools-card" style={{ textAlign: "left", border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))", padding: 16, cursor: entry.href ? "pointer" : "not-allowed", color: "inherit", opacity: entry.href ? 1 : .72 }}>
+                <span style={{ display: "flex", justifyContent: "space-between", gap: 12, fontWeight: 750 }}>{entry.name[lang]}{entry.href ? <ArrowRight aria-hidden style={{ width: 16, height: 16, flexShrink: 0 }} /> : <LockKeyhole aria-hidden style={{ width: 16, height: 16, flexShrink: 0 }} />}</span>
                 <span style={{ display: "block", marginTop: 7, fontSize: 12, lineHeight: 1.5, color: "hsl(var(--muted-foreground))" }}>{entry.purpose[lang]}</span>
+                {entry.availability !== "available" && <span style={{ display: "block", marginTop: 10, fontSize: 11, fontWeight: 750, color: "#92400E" }}>{entry.availability === "requires-project" ? tt("Requires an active project assignment", "Requiere una asignación activa de proyecto") : tt("Administrator only", "Solo administradores")}</span>}
               </button>)}
             </div>
           </section>)}

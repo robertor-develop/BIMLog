@@ -14,6 +14,12 @@ export interface CapabilityDirectoryEntry {
   projectRequired?: boolean;
 }
 
+export type CapabilityAvailability = "available" | "requires-project" | "administrator-only";
+export interface CapabilityDirectoryView extends Omit<CapabilityDirectoryEntry, "href"> {
+  href?: string;
+  availability: CapabilityAvailability;
+}
+
 export const capabilityDirectory: CapabilityDirectoryEntry[] = [
   { id: "home", group: "Home", name: { en: "Home", es: "Inicio" }, purpose: { en: "Review projects, priorities, and company work.", es: "Revise proyectos, prioridades y trabajo de la empresa." }, tasks: ["dashboard", "projects", "priorities"], href: "/dashboard", audience: "dashboard" },
   { id: "pending", group: "Home", name: { en: "Pending items", es: "Pendientes" }, purpose: { en: "Open work waiting for your action.", es: "Abra trabajo que espera su acción." }, tasks: ["approvals", "assignments", "review"], href: "/pending", audience: "authenticated" },
@@ -46,7 +52,20 @@ export function resolveCapabilityDirectory(profile: AccessProfile): CapabilityDi
   }).map((entry) => ({ ...entry, href: entry.href.replace(":projectId", String(projectId ?? "")) }));
 }
 
-export function searchCapabilities(entries: CapabilityDirectoryEntry[], query: string, lang: "en" | "es") {
+export function resolveCapabilityDirectoryViews(profile: AccessProfile): CapabilityDirectoryView[] {
+  const projectId = profile.facts.activeProjects[0]?.id;
+  return capabilityDirectory.map(entry => {
+    if (entry.audience === "authenticated") return { ...entry, availability: "available" as const };
+    if (entry.audience === "project") return projectId || profile.facts.isSuperAdmin
+      ? { ...entry, href: entry.href.replace(":projectId", String(projectId ?? "")), availability: "available" as const }
+      : { ...entry, href: undefined, availability: "requires-project" as const };
+    return profile.decisions[entry.audience]?.allow
+      ? { ...entry, availability: "available" as const }
+      : { ...entry, href: undefined, availability: "administrator-only" as const };
+  });
+}
+
+export function searchCapabilities<T extends CapabilityDirectoryEntry | CapabilityDirectoryView>(entries: T[], query: string, lang: "en" | "es"): T[] {
   const normalized = query.trim().toLocaleLowerCase(lang === "es" ? "es" : "en");
   if (!normalized) return entries;
   return entries.filter(entry => [entry.group, entry.name.en, entry.name.es, entry.purpose.en, entry.purpose.es, ...entry.tasks]
