@@ -18,6 +18,7 @@ function focusableElements(dialog: HTMLElement) {
 const exactTitles: Record<string, string> = {
   "/dashboard": "BIMLog Headquarters",
   "/pending": "Pending Items",
+  "/all-tools": "All Tools",
   "/lens-next": "Lens Next",
   "/help": "BIMLog Help Center",
   "/setup-guide": "BIMLog Setup Guide",
