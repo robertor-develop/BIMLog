@@ -9,7 +9,9 @@ const result = jobIntakeCompletion(plan,[],{...core,budget:true,anyCommercial:tr
 assert.equal(result.ready,true);
 assert.equal(result.totals.plannedLaborCost,'130');
 assert.equal(result.totals.assignedHours,'0');
-assert.equal(result.totals.unassignedHours,'800');
+// Intake Quantity is the approved work amount; the removed contradictory
+// plannedHours input cannot continue to drive resource-demand totals.
+assert.equal(result.totals.unassignedHours,'12');
 assert.equal(plan.team.assignments[0].userId,null);
 assert.equal(plan.team.assignments[0].personName,'');
 assert.equal(jobIntakeCompletion(normalizeJobIntakeData({...input,team:{assignments:[{role:'',scopeItemId:'S1',plannedHours:'20'}]}}),[],core).ready,false);
