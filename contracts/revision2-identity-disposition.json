@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "bimlog-revision2-identity-disposition-v1",
+  "sourceLedger": "contracts/requirement-evidence-ledger.json",
+  "identityUniverse": {
+    "prefixes": { "I": 10, "C": 120 },
+    "total": 130
+  },
+  "dispositions": {
+    "accepted_preserve": {
+      "sourceLayer": "accepted",
+      "requiredAction": "preserve_capability_and_regression_evidence",
+      "mayGenerateImplementationBuild": false
+    },
+    "product_gap": {
+      "sourceLayer": "product",
+      "requiredAction": "include_in_confirmed_product_gap_program",
+      "mayGenerateImplementationBuild": true
+    },
+    "provider_obligation": {
+      "sourceLayer": "provider",
+      "requiredAction": "preserve_provider_boundary_and_verify_failure_safe_behavior",
+      "mayGenerateImplementationBuild": false
+    },
+    "field_acceptance": {
+      "sourceLayer": "field",
+      "requiredAction": "preserve_field_owner_and_do_not_self_certify",
+      "mayGenerateImplementationBuild": false
+    }
+  },
+  "completionRules": {
+    "exactlyOneDispositionPerIdentity": true,
+    "historicalEvidence": "preserve_and_reference_never_overwrite",
+    "acceptedCapabilityRemovalAllowed": false,
+    "providerOrFieldEvidenceMayBeConvertedToProductCompletion": false,
+    "implementationProgramBasis": "confirmed_product_defective_partial_or_missing_only"
+  }
+}
