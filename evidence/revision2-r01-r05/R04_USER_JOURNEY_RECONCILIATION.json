@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "bimlog-revision2-user-journey-reconciliation-v1",
+  "productLaw": "complete_discoverable_understandable_progressively_organized_without_capability_loss",
+  "protectedBehaviors": [
+    "no_module_deletion",
+    "no_vague_more_menu_for_functional_pages",
+    "no_summary_card_substitution_for_workflows",
+    "no_backend_capability_left_inaccessible_without_explicit_disposition",
+    "no_merging_distinct_business_concepts_for_cosmetic_simplicity",
+    "no_completion_claim_without_discoverable_executable_ui"
+  ],
+  "navigationModel": {
+    "primaryDailyWork": [
+      "Home",
+      "Intake",
+      "Operations",
+      "Documents",
+      "Coordination",
+      "Reports"
+    ],
+    "fullCapabilityLevel": {
+      "label": "All Tools",
+      "visible": true,
+      "searchable": true,
+      "currentState": "missing"
+    },
+    "expertDirectAccessRequired": true,
+    "guidedJourneyRequired": true
+  },
+  "lifecycleQuestions": [
+    "where_am_i",
+    "what_state",
+    "what_is_missing",
+    "who_can_act",
+    "what_happens_next",
+    "where_result_appears"
+  ],
+  "exposureSnapshot": {
+    "backendCapabilities": 796,
+    "directFrontendReferences": 315,
+    "fully-operable": 91,
+    "read-only": 76,
+    "partially-exposed": 0,
+    "administrator-only": 1,
+    "intentionally-api-native-only": 39,
+    "missing-frontend": 589
+  },
+  "requirements": [
+    {
+      "id": "J01",
+      "rule": "complete_frontend_backend_parity",
+      "disposition": "needs_route_adjudication",
+      "evidence": "R03 exposes every backend capability and preserves unresolved dynamic-reference candidates for source review."
+    },
+    {
+      "id": "J02",
+      "rule": "role_based_organization_without_capability_removal",
+      "disposition": "partial",
+      "evidence": "Role-specific defaults exist, but no universal visible searchable capability directory is present."
+    },
+    {
+      "id": "J03",
+      "rule": "two_navigation_levels",
+      "disposition": "confirmed_gap",
+      "evidence": "Daily navigation exists; the full visible searchable All Tools level is absent."
+    },
+    {
+      "id": "J04",
+      "rule": "guided_journeys_and_direct_expert_access",
+      "disposition": "partial",
+      "evidence": "Guided project journeys exist; direct expert access is not proven complete without All Tools."
+    },
+    {
+      "id": "J05",
+      "rule": "explain_instead_of_conceal",
+      "disposition": "acceptance_rule",
+      "evidence": "Complex modules must retain specific names and receive plain-language purpose/help text."
+    },
+    {
+      "id": "J06",
+      "rule": "operational_dashboards",
+      "disposition": "needs_actionability_audit",
+      "evidence": "Every dashboard card must be traced to its governed records and actions."
+    },
+    {
+      "id": "J07",
+      "rule": "visible_lifecycle_states",
+      "disposition": "needs_lifecycle_audit",
+      "evidence": "Every principal record needs state, missing data, actor, next action, and destination evidence."
+    },
+    {
+      "id": "J08",
+      "rule": "capability_parity_classification",
+      "disposition": "implemented_as_evidence",
+      "evidence": "R02 and R03 establish complete inventories and the required exposure classifications."
+    },
+    {
+      "id": "J09",
+      "rule": "no_essential_work_hidden_as_advanced",
+      "disposition": "needs_navigation_audit",
+      "evidence": "Approvals, assignments, workflows, reports, exports, and integrations require visible placement."
+    },
+    {
+      "id": "J10",
+      "rule": "novice_comprehension_and_expert_power",
+      "disposition": "needs_dual_acceptance",
+      "evidence": "Both principal-journey comprehension and unrestricted authorized expert reachability are required."
+    }
+  ],
+  "implementationCandidates": [
+    {
+      "id": "GAP-ALL-TOOLS",
+      "source": "J02,J03,J04,J09,J10",
+      "state": "confirmed",
+      "rule": "add_visible_searchable_role_filtered_full_capability_directory"
+    },
+    {
+      "id": "GAP-PARITY-ADJUDICATION",
+      "source": "J01,J08",
+      "state": "required",
+      "rule": "adjudicate_every_candidate_missing_frontend_before_implementation"
+    },
+    {
+      "id": "GAP-DASHBOARD-ACTIONABILITY",
+      "source": "J06",
+      "state": "required",
+      "rule": "trace_every_summary_to_records_and_actions"
+    },
+    {
+      "id": "GAP-LIFECYCLE-COMPREHENSION",
+      "source": "J07,J10",
+      "state": "required",
+      "rule": "audit_principal_records_for_six_lifecycle_questions"
+    }
+  ]
+}
