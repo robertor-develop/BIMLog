@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Entire-platform closure Block 1 — Builds 001–005 — 2026-10-27
+
+- [x] B001 reconcile the exact deployed `94ee1a1e` Lens company-authority/history repair and the new 50-build closure cadence into the Living Brief without claiming Ruben field acceptance.
+- [ ] B002 remove the production SendGrid/deepmerge advisory without changing email behavior.
+- [ ] B003 bind dependency provenance to the actual governed `qs` resolution and integrity record.
+- [ ] B004 make recovery inventory classify retired or missing historical worktrees truthfully instead of crashing.
+- [ ] B005 repair final GA aggregate timeout/observability, bind the complete Block 1 regression, push the five accepted commits, and keep publication pending until Build 010.
+- [ ] Obtain Ruben's authenticated Navisworks 2025 create/save/reopen evidence and exact screenshot comparison before claiming field acceptance.
+
 ## Whole-platform audit repair Block 1 — 2026-10-27
 
 - [x] Regenerate the deterministic accessibility/responsive matrix from the actual route graph, restoring the Financial Contract Items route and exact 66-surface/198-viewport coverage.
