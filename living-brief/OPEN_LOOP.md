@@ -6613,3 +6613,12 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Complete the exact-head block regression, push and remote verification. Do not claim runtime publication value from analysis/evidence-only changes.
 - [ ] Begin P001 only after R01–R05 acceptance closes; preserve all stable module, record, permission, route, and business-concept identities.
 
+## Corrected program Blocks 3–4 — P011–P020
+
+- [x] P011–P015 provide primary daily navigation plus visible searchable full-capability navigation, bilingual grouping, explanations, novice guidance, expert access, and no-capability-loss regression.
+- [x] P016–P020 provide operational dashboard actions, lifecycle visibility, connected RFI/submittal/report continuity, and novice/expert comprehension acceptance.
+- [x] Pass the combined automated P011–P020 regression and exact production build at implementation source `afe8f54315274594d377a8679c1598d74bbf42ea`.
+- [ ] Reconcile deterministic release evidence, pass the clean local release gate, push P016–P020 without force, and verify local/remote identity.
+- [ ] Publish the ten-build P011–P020 boundary, verify deployed source/version/health, and pass three consecutive authenticated Chrome rounds.
+- [ ] Reconcile the authoritative full-platform audit after P020. Do not treat the 463 unresolved R03 missing-frontend candidates as implemented or claim all-platform completion without evidence-based disposition and resulting build execution.
+

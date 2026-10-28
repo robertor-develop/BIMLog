@@ -1,16 +1,16 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "4714d137d8a6254f7b52c9f5282708ca0e8844bbfb714445db9b2f19e8617bc0",
-  "itemCount": 542,
+  "sourceSha256": "3130c53062fcd10529495180dac83eaf6b6565c49587929364ffde62eeb396f3",
+  "itemCount": 545,
   "counts": {
-    "ACTIVE": 485,
+    "ACTIVE": 488,
     "SUPERSEDED": 45,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
   },
   "dispositionCounts": {
-    "ACTIVE_DEFECT": 381,
+    "ACTIVE_DEFECT": 384,
     "VALID_FUTURE_ROADMAP": 10,
     "EXTERNAL_OWNER_INPUT": 94,
     "ACCEPTED_LIMITATION": 3,
@@ -10403,6 +10403,63 @@
       "evidence": [
         "OPEN_LOOP.md:6614",
         "Corrected independent audit Revision 2 — R01–R05"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "dc8cad48de5e34cd",
+      "sourceLine": 6621,
+      "heading": "Corrected program Blocks 3–4 — P011–P020",
+      "statement": "Reconcile deterministic release evidence, pass the clean local release gate, push P016–P020 without force, and verify local/remote identity.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6621",
+        "Corrected program Blocks 3–4 — P011–P020"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "be0c22458eebd428",
+      "sourceLine": 6622,
+      "heading": "Corrected program Blocks 3–4 — P011–P020",
+      "statement": "Publish the ten-build P011–P020 boundary, verify deployed source/version/health, and pass three consecutive authenticated Chrome rounds.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6622",
+        "Corrected program Blocks 3–4 — P011–P020"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "478f0b84cf4f3ed8",
+      "sourceLine": 6623,
+      "heading": "Corrected program Blocks 3–4 — P011–P020",
+      "statement": "Reconcile the authoritative full-platform audit after P020. Do not treat the 463 unresolved R03 missing-frontend candidates as implemented or claim all-platform completion without evidence-based disposition and resulting build execution.",
+      "classification": "ACTIVE",
+      "dispositionCategory": "ACTIVE_DEFECT",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:6623",
+        "Corrected program Blocks 3–4 — P011–P020"
       ],
       "currentAuthority": false
     }

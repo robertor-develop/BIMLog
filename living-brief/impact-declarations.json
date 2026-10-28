@@ -79957,6 +79957,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "42556e46bbfb90ac1f5a908114178c919f7680d738e059f8b18b6bd47facb6c2"
+    },
+    {
+      "taskId": "revision2-p011-p020-navigation-operations-20261028",
+      "reviewedThroughCommit": "afe8f54315274594d377a8679c1598d74bbf42ea",
+      "reviewedAt": "2026-10-28T21:00:00Z",
+      "status": "candidate",
+      "captureTiming": "post_p020_combined_acceptance_pre_publication_gate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or permanent cross-product law changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The authorized five-build and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "P011–P020 add tested navigation, dashboard, lifecycle, workflow-continuity, and novice/expert acceptance gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The runtime implementation advances the accepted complete, discoverable, progressively organized product direction without removing power."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Runtime navigation, dashboard actions, and lifecycle presentation changed; schema, persistence contracts, and customer data did not."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, installer, package, connector, or Lens boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report and export workflows remain connected but their design authority did not change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS now records the exact P011–P020 candidate scope, passing automated gates, and remaining publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP now records completed P011–P020 implementation and the remaining release and full-platform reconciliation gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "R03 frontend exposure evidence is refreshed while 463 unresolved candidates remain explicitly open."
+        }
+      ],
+      "reason": "Reconcile the complete P011–P020 navigation, operational-dashboard, lifecycle, workflow-continuity, and comprehension implementation before the ten-build publication gate.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "325a09c1326665ac24104932186699310c55768b8c8e79839c0180ea792615cb"
     }
   ]
 }
