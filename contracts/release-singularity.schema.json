@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bimlog.app/contracts/release-singularity.schema.json",
+  "title": "BIMLog release singularity",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "source", "artifact", "database", "runtime"],
+  "properties": {
+    "schemaVersion": { "const": "bimlog-release-singularity-v1" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commit", "tree"],
+      "properties": {
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "tree": { "type": "string", "pattern": "^[0-9a-f]{40}$" }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceCommit", "packageId", "assetManifestSha256"],
+      "properties": {
+        "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "packageId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,200}$" },
+        "assetManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["migrationLevel"],
+      "properties": {
+        "migrationLevel": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,200}$" }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceCommit", "packageId", "assetManifestSha256", "databaseMigrationLevel", "identityBound"],
+      "properties": {
+        "sourceCommit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "packageId": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,200}$" },
+        "assetManifestSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "databaseMigrationLevel": { "type": "string", "pattern": "^[A-Za-z0-9._:-]{1,200}$" },
+        "identityBound": { "const": true }
+      }
+    }
+  }
+}
