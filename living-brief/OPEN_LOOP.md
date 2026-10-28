@@ -7,7 +7,7 @@
 - [x] B003 bind dependency provenance to the actual governed `qs` resolution and integrity record.
 - [x] B004 make recovery inventory classify retired or missing historical worktrees truthfully instead of crashing.
 - [x] B005 repair final GA aggregate timeout/observability, bind the complete Block 1 regression, and accept the governed local security backport in exact-lock production runtime assembly.
-- [ ] Push the five accepted commits, verify exact remote identity, and keep publication pending until Build 010.
+- [ ] Pass the final clean production assembly from tracked corrective baseline `b95b30f7f`, push the accepted block, verify exact remote identity, and keep publication pending until Build 010.
 - [ ] Obtain Ruben's authenticated Navisworks 2025 create/save/reopen evidence and exact screenshot comparison before claiming field acceptance.
 
 ## Whole-platform audit repair Block 1 — 2026-10-27

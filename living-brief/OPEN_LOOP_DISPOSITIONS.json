@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "f2b870461b9928368d080fd3ec7e5a7f42efa69c8ef00dc260a0a687fd0ac1bd",
+  "sourceSha256": "f43c9a1391801f36b6d713e48014f768481130d19a5dcf58e00251b3045c54e1",
   "itemCount": 536,
   "counts": {
     "ACTIVE": 479,
@@ -100,10 +100,10 @@
   ],
   "items": [
     {
-      "id": "8f420243bdb663bb",
+      "id": "957177de769bee78",
       "sourceLine": 10,
       "heading": "Entire-platform closure Block 1 — Builds 001–005 — 2026-10-27",
-      "statement": "Push the five accepted commits, verify exact remote identity, and keep publication pending until Build 010.",
+      "statement": "Pass the final clean production assembly from tracked corrective baseline `b95b30f7f`, push the accepted block, verify exact remote identity, and keep publication pending until Build 010.",
       "classification": "ACTIVE",
       "dispositionCategory": "ACTIVE_DEFECT",
       "workClass": "PRODUCT_WORK",
