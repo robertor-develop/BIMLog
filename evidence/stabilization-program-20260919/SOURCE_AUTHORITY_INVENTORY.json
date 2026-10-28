@@ -1,32 +1,32 @@
 {
   "schemaVersion": 1,
-  "capturedAt": "2026-09-19T13:09:51.455Z",
-  "sourceHead": "b3ba648b1c964ae3867366acfcdd17ca37222b0a",
-  "sourceTree": "ea3b958a9d6d3f60fb1a4b400be27651b077ed75",
-  "currentPath": "F:/BIMLog/Worktrees/bimlog-stabilization-program-20260919",
-  "currentBranch": "codex/bimlog-stabilization-program-20260919",
+  "capturedAt": "2026-10-28T11:54:36.105Z",
+  "sourceHead": "c806ac928025cebc8b4a0b05e499724a8dd2f5fa",
+  "sourceTree": "ccad6cca4f92b5f1f6ad5281046dbe1e00472a8b",
+  "currentPath": "F:/BIMLog/Worktrees/bimlog-template-gap-block01-20260923",
+  "currentBranch": "codex/bimlog-template-gap-block01-20260923",
   "worktreeCounts": {
-    "registered": 143,
-    "present": 142,
-    "prunable": 1,
-    "baselineDirty": 18,
+    "registered": 84,
+    "present": 84,
+    "prunable": 0,
+    "baselineDirty": 1,
     "dispositions": {
       "KEEP": 1,
-      "INTEGRATE": 65,
+      "INTEGRATE": 14,
       "SUPERSEDE": 0,
-      "EVIDENCE_ONLY": 4,
-      "RETIRE": 73
+      "EVIDENCE_ONLY": 2,
+      "RETIRE": 67
     }
   },
   "branchCounts": {
-    "registered": 143,
+    "registered": 161,
     "ancestryUnmerged": 61,
     "dispositions": {
       "KEEP": 2,
       "INTEGRATE": 60,
       "SUPERSEDE": 0,
       "EVIDENCE_ONLY": 0,
-      "RETIRE": 81
+      "RETIRE": 99
     }
   },
   "worktrees": [
@@ -46,21 +46,6 @@
       "reason": "preserve dirty delta for effective-behavior reconciliation"
     },
     {
-      "path": "C:/Users/soporte/.codex/worktrees/97cc/bimlog",
-      "head": "79f296f6fe16e0740c56ecf2595768b0b9f47e8a",
-      "branch": null,
-      "detached": true,
-      "prunable": true,
-      "prunableReason": "gitdir file points to non-existent location",
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "missing registry entry; preserve metadata until recoverable cleanup"
-    },
-    {
       "path": "C:/Users/soporte/Documents/Codex/2026-08-16/bimlog-main-04/replit-observability-worktree",
       "head": "d52ad6ead50776d8e357d5ecd263db3722456e1c",
       "branch": "codex/replit-create-observability-reconcile-20260902",
@@ -74,261 +59,6 @@
       "dirtyUntracked": 0,
       "disposition": "INTEGRATE",
       "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/auth-audit-redaction-rebind-20260816",
-      "head": "fb210d2dd05ee4910ec69ef60be8312314a9a98c",
-      "branch": "codex/auth-audit-redaction-rebind-20260816",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/clash-report-delete-reason-20260805",
-      "head": "2f4ddd9417f38065727d7cf8833ffd51c4d62f12",
-      "branch": "codex/clash-report-delete-reason-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/commercial-financial-recovery-successor-20260731",
-      "head": "b80f455d75b9e8f202061364fe722dbc0183b598",
-      "branch": "codex/commercial-financial-recovery-successor-20260731",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/electron-runtime-hardening-20260803",
-      "head": "3761cd5b333629cc0c5e283761eac3c59085c86a",
-      "branch": "codex/electron-runtime-hardening-20260803",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/generic-apu-ui-20260805",
-      "head": "362c9533ab432206bbb2ed207bbf4d8746bf4260",
-      "branch": "codex/generic-apu-ui-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/generic-apu-ui-clean-six-20260805",
-      "head": "e429a72b33ea16f45fb05083ba2018d0e2921b4f",
-      "branch": "codex/generic-apu-ui-clean-six-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/generic-apu-ui-row8-states-20260805",
-      "head": "362c9533ab432206bbb2ed207bbf4d8746bf4260",
-      "branch": "codex/generic-apu-ui-row8-states-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/help-center-print-pdf-20260811",
-      "head": "8f531981567f993c5c01ee218b32d451639e4866",
-      "branch": "codex/help-center-print-pdf-20260811",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/linked-items-creation-ux-20260805",
-      "head": "799c09e43bf443f24adc4891e9af1b5b1f678265",
-      "branch": "codex/linked-items-creation-ux-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/living-brief-f5-password-removal-20260805",
-      "head": "06f2dfbdd5f9ca504cefacdeeb914deb961f7ab3",
-      "branch": "codex/living-brief-f5-password-removal-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/living-brief-runtime-closure-20260805",
-      "head": "2cea97f985f3167c601dfd3df4c78813676f5680",
-      "branch": "codex/living-brief-runtime-closure-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/living-brief-whitespace-seal-20260811",
-      "head": "7bb2e69b38e19c3ada3c56a48417332bc57425ac",
-      "branch": "codex/living-brief-whitespace-seal-20260811",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/platform-pdf-consistency-20260730",
-      "head": "9cda868f866b1dc8faf640b051207c652edd3994",
-      "branch": "codex/platform-pdf-consistency-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/procore-rfi-e2e-20260805",
-      "head": "5041decdd6d8d9edc9ad15f5beb6495102008ed7",
-      "branch": "codex/procore-rfi-e2e-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/rfi-build8-contract-parity-20260805",
-      "head": "b0b996ebd9cf2fd0505b5a7eeafe74877077931e",
-      "branch": "codex/rfi-build8-contract-parity",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/schema-parity-living-brief-seal-20260811",
-      "head": "7235fdeb63c11878bcff4ebaf1a9e2af12a24411",
-      "branch": "codex/schema-parity-living-brief-seal-20260811",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Repositories/bimlog/.worktrees/schema-parity-repair-20260811",
-      "head": "08151f39e0db79c0196d50e64cd60b651c4f4992",
-      "branch": "codex/schema-parity-repair-20260811",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-apu-intake-empty-state-build01-20260914",
@@ -346,21 +76,6 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-auth-redaction-card1-20260730",
-      "head": "36adc02133866af3d274cc3cbd3552b6a3eb4512",
-      "branch": "codex/auth-redaction-card1-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
       "path": "F:/BIMLog/Worktrees/bimlog-build21-owner-approval-override-20260910",
       "head": "20eb1ed1e26fde31ea49a3fb1fa7a7f1750899ed",
       "branch": "codex/bimlog-build21-owner-approval-override-20260910",
@@ -374,36 +89,6 @@
       "dirtyUntracked": 0,
       "disposition": "RETIRE",
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build38-navisworks2025-field-rc-20260907",
-      "head": "7b1f5ff25396626cd634794ec18a782d60604f0d",
-      "branch": "codex/bimlog-build38-navisworks2025-field-rc-20260907",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "EVIDENCE_ONLY",
-      "reason": "retained package, field, rollback, or detached evidence"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build39-xml-missing-scale-20260908",
-      "head": "a7d3e051e01a0ff7522e7be05ca31d7f6ba5a955",
-      "branch": "codex/bimlog-build39-xml-missing-scale-20260908",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-build40-apu-n14-publish-20260908",
@@ -421,24 +106,9 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-build41-xml-legacy-repair-20260908",
-      "head": "cd606f2343e1126dee09783862893c726e64c9c4",
-      "branch": "codex/bimlog-build41-xml-legacy-repair-20260908",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build44-final-xml-closure-20260908",
-      "head": "fc6d8b9647a1f149ae39adff0450c08a2cc7e105",
-      "branch": "codex/bimlog-build44-final-xml-closure-20260908",
+      "path": "F:/BIMLog/Worktrees/bimlog-commercial-ga-final-20261015b",
+      "head": "d2127f73b567d50a120a5764462ebde051dc73e2",
+      "branch": "codex/bimlog-commercial-ga-final-20261015b",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
@@ -451,9 +121,9 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-build46-camera-unit-contract-20260908",
-      "head": "38620db50599962a22d910f8c14bcb01803f6236",
-      "branch": "codex/bimlog-build46-camera-unit-contract-20260908",
+      "path": "F:/BIMLog/Worktrees/bimlog-commercial-ga-final-current-20261015",
+      "head": "dc2cc5af06ca3bad87182efe96a030a62b67ddcd",
+      "branch": "codex/bimlog-commercial-ga-final-current-20261015",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
@@ -464,111 +134,6 @@
       "dirtyUntracked": 0,
       "disposition": "RETIRE",
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build47-platform-legacy-409-20260908",
-      "head": "e6532fc37ec6ca3354fac7aeb4402269cb726edb",
-      "branch": "codex/bimlog-build47-platform-legacy-409-20260908",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build5-operations-20260812",
-      "head": "ac3d2b8b57f02080c6cbb7935312dd051ef12fed",
-      "branch": "codex/bimlog-build5-operations-20260812",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build6-team-capacity-20260813",
-      "head": "601bf94aa5505d0137f8ae1858b40356d9f3aaf6",
-      "branch": "codex/bimlog-build6-team-capacity-20260813",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build7-advanced-contracts-backend-20260816",
-      "head": "88d745d340d6c57390c77eef1542f6b283025f7d",
-      "branch": "codex/bimlog-build7-advanced-contracts-backend-20260816",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build7-advanced-contracts-integration-20260817",
-      "head": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
-      "branch": "codex/bimlog-build7-advanced-contracts-integration-20260817",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-build7-advanced-contracts-ui-20260816",
-      "head": "1c66fdc4fada201fb73293301d7b8a70b99ad8bc",
-      "branch": "codex/bimlog-build7-advanced-contracts-ui-20260816",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-clash-reports-ui-correction-20260805",
-      "head": "dea028ef27a5960dd5392348b46652db8cd50177",
-      "branch": "codex/clash-reports-ui-correction-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-coordination-release-a-build1-20260909",
@@ -631,54 +196,9 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-dashboard-two-path-security-20260801",
-      "head": "4129f37b00d5da50a350fba53c89911b5b2c40b9",
-      "branch": "codex/dashboard-two-path-encoding-guard",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-digest-v3-platform-release-20260901",
-      "head": "81fb21b713a5c126c8b44778e421957697e1c574",
-      "branch": null,
-      "detached": true,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-feedback-addendum-20260817",
-      "head": "34c9d383bbf10532d46394dc3c25f639fb4cb209",
-      "branch": "codex/bimlog-feedback-addendum-20260817",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-feedback-ops-20260820",
-      "head": "cd96e19dc3cf5c0d6949dd6c9ae69006e8b3ad46",
-      "branch": "codex/bimlog-feedback-v1.60.35.10-f-20260821",
+      "path": "F:/BIMLog/Worktrees/bimlog-edt-engine-block01-20260922",
+      "head": "d67b5b992ebb2d867440e1face3ee5a85a88d8cf",
+      "branch": "codex/bimlog-edt-engine-block01-20260922",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
@@ -689,216 +209,6 @@
       "dirtyUntracked": 0,
       "disposition": "RETIRE",
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-feedback-v1603511f-20260821",
-      "head": "40f3a2cbd78de7c146d556d8ddad3443644f7a10",
-      "branch": "codex/bimlog-feedback-v1.60.35.11-f-20260821",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-feedback-v1603512f-20260821",
-      "head": "efcb77df83f3352da4224948fad7433154bf35d8",
-      "branch": "codex/bimlog-feedback-v1.60.35.12-f-20260821",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-files-patch-a-20260730",
-      "head": "7284da1ee124d7df9e65af09b6126ce114bb5b99",
-      "branch": "codex/files-patch-a-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-files-patch-a-20260730-b",
-      "head": "7284da1ee124d7df9e65af09b6126ce114bb5b99",
-      "branch": "codex/files-patch-a-20260730-b",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-h1-http-runtime-20260730",
-      "head": "147462023a774498dbd3c9e46c8427d9e6b36eb7",
-      "branch": "codex/h1-http-runtime-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-01-20260831",
-      "head": "c7695f385ef5ad48591d155763a24f924894efd5",
-      "branch": "codex/bimlog-intake-apu-01-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-02-20260831",
-      "head": "42ac5e88a6f8aad6d7b0f47a69a48471f6d47349",
-      "branch": "codex/bimlog-intake-apu-02-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-03-20260831",
-      "head": "95ef04c6ade5a744e0bbc2a8cb1447a36a8be893",
-      "branch": "codex/bimlog-intake-apu-03-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-04-20260831",
-      "head": "35819a295c8dd128408d3e4d5b8c6d9641ee7aa3",
-      "branch": "codex/bimlog-intake-apu-04-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-05-20260831",
-      "head": "bc06e5cca5f27e00be91fe38d6edb702753149d7",
-      "branch": "codex/bimlog-intake-apu-05-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-06-20260831",
-      "head": "e14ed477f723db9b22deb7da844e94b1b4c610ca",
-      "branch": "codex/bimlog-intake-apu-06-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-07-20260831",
-      "head": "57321723be9338f32a1f95b5ad25d71f4285bab9",
-      "branch": "codex/bimlog-intake-apu-07-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-08-20260831",
-      "head": "b9ef54b53ed3daff51650bf05aa676ab1df80e64",
-      "branch": "codex/bimlog-intake-apu-08-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-09-20260831",
-      "head": "b8dec0c806451667f4b1a8e2aecb89d1992ab826",
-      "branch": "codex/bimlog-intake-apu-09-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-intake-apu-10-20260901",
@@ -916,39 +226,129 @@
       "reason": "ancestry does not prove supersession; effective diff required"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-integration-runtime-ui-20260730",
-      "head": "2af082ba7c2f6aff50f3f2a63c189fe76506f785",
-      "branch": "codex/integration-runtime-ui-20260730",
+      "path": "F:/BIMLog/Worktrees/bimlog-knowledge-block01-20260921",
+      "head": "b4ec61aff3e8df14713edf3a8d9f5f7b624c1195",
+      "branch": "codex/bimlog-knowledge-block01-20260921",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
-      "relationship": "DIVERGED",
+      "relationship": "ANCESTOR",
       "baselineDirty": false,
       "dirtyEvidence": "Build 002 clean classification",
       "dirtyTracked": 0,
       "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-integrations-error-state-20260730",
-      "head": "72207b7db83092fc56689218fb5d7b554591cc49",
-      "branch": "integrations-error-state-20260730",
+      "path": "F:/BIMLog/Worktrees/bimlog-knowledge-block02-20260921",
+      "head": "dd68f4ea7c46c8391999c117463b237e8f6ce711",
+      "branch": "codex/bimlog-knowledge-block02-20260921",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
-      "relationship": "DIVERGED",
+      "relationship": "ANCESTOR",
       "baselineDirty": false,
       "dirtyEvidence": "Build 002 clean classification",
       "dirtyTracked": 0,
       "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
+    },
+    {
+      "path": "F:/BIMLog/Worktrees/bimlog-knowledge-block03-20260921",
+      "head": "a5acd62b53ea6d65c80a406c19fc9ef75412e31a",
+      "branch": "codex/bimlog-knowledge-block03-20260921",
+      "detached": false,
+      "prunable": false,
+      "prunableReason": null,
+      "relationship": "ANCESTOR",
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
+      "dirtyUntracked": 0,
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
+    },
+    {
+      "path": "F:/BIMLog/Worktrees/bimlog-knowledge-block04-20260921",
+      "head": "9b21b8872379e39a404e554b76073706651022b4",
+      "branch": "codex/bimlog-knowledge-block04-20260921",
+      "detached": false,
+      "prunable": false,
+      "prunableReason": null,
+      "relationship": "ANCESTOR",
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
+      "dirtyUntracked": 0,
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
+    },
+    {
+      "path": "F:/BIMLog/Worktrees/bimlog-knowledge-block05-20260921",
+      "head": "f29c229623fd9ae1f9d4088b04ffa7d594bbc5f7",
+      "branch": "codex/bimlog-knowledge-block05-20260921",
+      "detached": false,
+      "prunable": false,
+      "prunableReason": null,
+      "relationship": "ANCESTOR",
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
+      "dirtyUntracked": 0,
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
+    },
+    {
+      "path": "F:/BIMLog/Worktrees/bimlog-knowledge-block06-20260921",
+      "head": "60f90bdad09fc66186ee92e657b220c39f6b4f58",
+      "branch": "codex/bimlog-knowledge-block06-20260921",
+      "detached": false,
+      "prunable": false,
+      "prunableReason": null,
+      "relationship": "ANCESTOR",
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
+      "dirtyUntracked": 0,
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
+    },
+    {
+      "path": "F:/BIMLog/Worktrees/bimlog-knowledge-block07-20260922",
+      "head": "c97efd491f15d393f7c432419f2e2d908cd574a8",
+      "branch": "codex/bimlog-knowledge-block07-20260922",
+      "detached": false,
+      "prunable": false,
+      "prunableReason": null,
+      "relationship": "ANCESTOR",
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
+      "dirtyUntracked": 0,
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-legacy-working-view-final-20260910",
       "head": "6d4feebaa1833bbac6a6d5f74c34053cd483df35",
       "branch": "codex/bimlog-legacy-working-view-final-20260910",
+      "detached": false,
+      "prunable": false,
+      "prunableReason": null,
+      "relationship": "ANCESTOR",
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
+      "dirtyUntracked": 0,
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
+    },
+    {
+      "path": "F:/BIMLog/Worktrees/bimlog-lens-docked-block01-20260923",
+      "head": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "branch": "codex/bimlog-lens-docked-block01-20260923",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
@@ -976,19 +376,19 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-mockup-block01-20260917",
-      "head": "84c4f6f2bbe4b32ae8890c3e999403e5cf70bda4",
-      "branch": "codex/bimlog-lens-mockup-block01-20260917",
+      "path": "F:/BIMLog/Worktrees/bimlog-lens-governed-fields-multiview-20261027",
+      "head": "c12a73df9dccb3ac4c9ee730e0041b056e4f700c",
+      "branch": "codex/bimlog-lens-governed-fields-multiview-20261027",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
       "relationship": "ANCESTOR",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
       "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
+      "disposition": "EVIDENCE_ONLY",
+      "reason": "retained package, field, rollback, or detached evidence"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-lens-model-continuity-20260918",
@@ -1004,21 +404,6 @@
       "dirtyUntracked": 0,
       "disposition": "RETIRE",
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
-      "head": "a52f79be7c34daecc5daf0ec164e5a2adab0f864",
-      "branch": "codex/bimlog-lens-next-20260812",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-lens-next-build02-regression-20260903",
@@ -1261,21 +646,6 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-build17-perspective-validation-20260903",
-      "head": "c35f86a5de783177ef11a233d7a49e7f90497371",
-      "branch": "codex/lens-next-build17-perspective-validation-20260903",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
       "path": "F:/BIMLog/Worktrees/bimlog-lens-next-build17a-fov-presence-20260903",
       "head": "c88e54f7977121764e105c31f17e976cc24eb138",
       "branch": "codex/lens-next-build17a-fov-presence-20260903",
@@ -1426,36 +796,6 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-build25d-range-capture-20260905",
-      "head": "055afd95716b6a83cc05f29aaaadc89cd1b1e613",
-      "branch": "codex/lens-next-build25d-range-capture-20260905",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-build25e-manual-range-proof-20260905",
-      "head": "055afd95716b6a83cc05f29aaaadc89cd1b1e613",
-      "branch": "codex/lens-next-build25e-manual-range-proof-20260905",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "EVIDENCE_ONLY",
-      "reason": "retained package, field, rollback, or detached evidence"
-    },
-    {
       "path": "F:/BIMLog/Worktrees/bimlog-lens-next-build25f-range-sentinel-20260905",
       "head": "5d4c9c31b323dbb015dacd18c6ebbc15ba2301d2",
       "branch": "codex/lens-next-build25f-range-sentinel-20260905",
@@ -1516,81 +856,6 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-build32-create-open-repair-20260907",
-      "head": "7bd0a7c776e9f0f9f38bfbee5f77932a5de0ac94",
-      "branch": "codex/lens-next-build32-create-open-repair-20260907",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-forensic-recovery-20260831",
-      "head": "ecdb46fa645729c67d90629e7daaf14be69a18bc",
-      "branch": "codex/lens-next-forensic-recovery-20260831",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-m3-integration",
-      "head": "f418081c200781a64cd696ba1199b612fe249821",
-      "branch": "lens-next-m3-authoritative-integration",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-m7-repair-20260822",
-      "head": "b9d99d5dff1cbc08c7b55839b664740e2817ebc7",
-      "branch": "codex/bimlog-lens-next-m7-repair-20260822",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-next-m8-publishing-20260822",
-      "head": "1f98cb575b14225983bd6f190f2fc31ee4bb1f42",
-      "branch": "codex/bimlog-lens-next-m8-publishing-20260822",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "RETIRE",
-      "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
       "path": "F:/BIMLog/Worktrees/bimlog-lens-p32-release-20260917",
       "head": "74e736cb6bebe277a38f0241c89e71b974c15c42",
       "branch": "codex/bimlog-lens-p32-release-20260917",
@@ -1606,19 +871,19 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-lens-sync-correlation-api-20260813",
-      "head": "60a6a5bb2985335651316ccdda5e4c6f8150a006",
-      "branch": "codex/bimlog-lens-sync-correlation-api-20260813",
+      "path": "F:/BIMLog/Worktrees/bimlog-lens-redline-p37-20261001",
+      "head": "345dc645a05e0f4befb14b408c5cfdd8c863498a",
+      "branch": "codex/bimlog-lens-redline-p37-20261001",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
-      "relationship": "DIVERGED",
+      "relationship": "ANCESTOR",
       "baselineDirty": false,
       "dirtyEvidence": "Build 002 clean classification",
       "dirtyTracked": 0,
       "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-lorena-block01-20260917",
@@ -1651,21 +916,6 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-n09-p04-release-20260902",
-      "head": "6936f54637d886e8de508b929f8eb81fe550315b",
-      "branch": null,
-      "detached": true,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "ANCESTOR",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "EVIDENCE_ONLY",
-      "reason": "retained package, field, rollback, or detached evidence"
-    },
-    {
       "path": "F:/BIMLog/Worktrees/bimlog-next200-block01-20260915",
       "head": "843c6219842aa326efc9e298b0a8caca90f39571",
       "branch": "codex/bimlog-next200-block01-20260915",
@@ -1679,6 +929,21 @@
       "dirtyUntracked": 0,
       "disposition": "INTEGRATE",
       "reason": "ancestry does not prove supersession; effective diff required"
+    },
+    {
+      "path": "F:/BIMLog/Worktrees/bimlog-norte-project-cleanup-20261006",
+      "head": "9c719f5295c69efb6bef3ad0a62e4ea0acde655c",
+      "branch": "codex/bimlog-norte-project-cleanup-20261006",
+      "detached": false,
+      "prunable": false,
+      "prunableReason": null,
+      "relationship": "ANCESTOR",
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
+      "dirtyUntracked": 0,
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-optional-sharing-builds01-10-20260915",
@@ -1861,39 +1126,9 @@
       "reason": "ancestry does not prove supersession; effective diff required"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-prework03-project-retirement-20260908",
-      "head": "9ee5747b9a774265a2f52d2ad3cc503a3caa4536",
-      "branch": "codex/bimlog-prework03-project-retirement-20260908",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
       "path": "F:/BIMLog/Worktrees/bimlog-prework03-retirement-build47-20260908",
       "head": "78d1dbfa1f6f4c0cf742339027f04d398dc43422",
       "branch": "codex/bimlog-prework03-retirement-build47-20260908",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-prework04-enterprise-identity-20260908",
-      "head": "f270ce5f82e929349878a47a62e28a360e99a697",
-      "branch": "codex/bimlog-prework04-enterprise-identity-20260908",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
@@ -1951,84 +1186,24 @@
       "reason": "ancestry does not prove supersession; effective diff required"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-process-manifest-phase-a-20260730",
-      "head": "d8752874f4737ef1800417c704046e6281fa278e",
-      "branch": "codex/process-manifest-phase-a-20260730",
+      "path": "F:/BIMLog/Worktrees/bimlog-ruben-publish-schema-20261027",
+      "head": "ed7d5d8c138732e7162352d567ecee021e6153b7",
+      "branch": "codex/bimlog-ruben-publish-schema-20261027",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
-      "relationship": "DIVERGED",
+      "relationship": "ANCESTOR",
       "baselineDirty": false,
       "dirtyEvidence": "Build 002 clean classification",
       "dirtyTracked": 0,
       "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-product-defaults-block01-20260915",
-      "head": "431558843985d59cf4a66a8e46744189c0a4a320",
-      "branch": "codex/bimlog-product-defaults-block01-20260915",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": true,
-      "dirtyEvidence": "Build 002 preserved dirty-worktree map; no worktree content was traversed",
-      "dirtyTracked": 1,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "preserve dirty delta for effective-behavior reconciliation"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-proposed-rfi-20260729",
-      "head": "b1568b00d27613eb4f8c7013a7d99aa0efbb1508",
-      "branch": "recovery/proposed-rfi-20260729",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-public-origin-phase-a-20260730",
-      "head": "1d55582da7a158f97a9b285d8a87a762a377ef9d",
-      "branch": "codex/public-origin-phase-a-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-release-clash-readonly-20260805",
-      "head": "8cd1eb1d679d9a3bb3938cbea6b3a582d654bcb2",
-      "branch": "codex/release-clash-readonly-20260805",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-search-contract-helper-20260729",
-      "head": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
-      "branch": "codex/search-contract-helper-20260729",
+      "path": "F:/BIMLog/Worktrees/bimlog-sharepoint-block01-20260925",
+      "head": "b3d5a065abd45e2fd0f07db559d489b9612153d5",
+      "branch": "codex/bimlog-sharepoint-block01-20260925",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
@@ -2057,8 +1232,23 @@
     },
     {
       "path": "F:/BIMLog/Worktrees/bimlog-stabilization-program-20260919",
-      "head": "b3ba648b1c964ae3867366acfcdd17ca37222b0a",
+      "head": "85043fe0a12261acb5f02c884053d0db4877fcd0",
       "branch": "codex/bimlog-stabilization-program-20260919",
+      "detached": false,
+      "prunable": false,
+      "prunableReason": null,
+      "relationship": "ANCESTOR",
+      "baselineDirty": false,
+      "dirtyEvidence": "Build 002 clean classification",
+      "dirtyTracked": 0,
+      "dirtyUntracked": 0,
+      "disposition": "RETIRE",
+      "reason": "clean historical ancestor eligible only for recoverable cleanup"
+    },
+    {
+      "path": "F:/BIMLog/Worktrees/bimlog-template-gap-block01-20260923",
+      "head": "c806ac928025cebc8b4a0b05e499724a8dd2f5fa",
+      "branch": "codex/bimlog-template-gap-block01-20260923",
       "detached": false,
       "prunable": false,
       "prunableReason": null,
@@ -2086,66 +1276,6 @@
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
     },
     {
-      "path": "F:/BIMLog/Worktrees/bimlog-ux-master-sidebar-failures-20260730",
-      "head": "f42c7deee2e6de2a84f2f3f88cdbb436ba5c54d1",
-      "branch": "codex/ux-master-sidebar-failures-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-ux-project-shell-states-20260730",
-      "head": "39b1af2b2a10c7020541dcfa04cc0174bd4e9d4d",
-      "branch": "codex/ux-project-shell-states-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-ux-public-pricing-features-es-20260730",
-      "head": "67d1570bf41ee7efeb4174a1a772abc227f21449",
-      "branch": "codex/ux-public-pricing-features-es-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/bimlog-worker-runtime-20260730",
-      "head": "84ecee5486c1d56f75627d488dc5add5de7e0ac7",
-      "branch": "codex/worker-runtime-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
-    },
-    {
       "path": "F:/BIMLog/Worktrees/lens-next-p14-historical-digest-20260910",
       "head": "4a4da343f451a8b528ccde6d5b99267d3f312b49",
       "branch": "codex/lens-next-p14-historical-digest-20260910",
@@ -2159,21 +1289,6 @@
       "dirtyUntracked": 0,
       "disposition": "RETIRE",
       "reason": "clean historical ancestor eligible only for recoverable cleanup"
-    },
-    {
-      "path": "F:/BIMLog/Worktrees/ux-project-sidebar-modal-20260730",
-      "head": "26857e1a6ec4d286a3128b6ec412679626f30254",
-      "branch": "codex/ux-project-sidebar-modal-20260730",
-      "detached": false,
-      "prunable": false,
-      "prunableReason": null,
-      "relationship": "DIVERGED",
-      "baselineDirty": false,
-      "dirtyEvidence": "Build 002 clean classification",
-      "dirtyTracked": 0,
-      "dirtyUntracked": 0,
-      "disposition": "INTEGRATE",
-      "reason": "ancestry does not prove supersession; effective diff required"
     }
   ],
   "branches": [
@@ -2181,17 +1296,17 @@
       "branch": "codex/auth-audit-redaction-rebind-20260816",
       "head": "fb210d2dd05ee4910ec69ef60be8312314a9a98c",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/auth-redaction-card1-20260730",
       "head": "36adc02133866af3d274cc3cbd3552b6a3eb4512",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-apu-intake-empty-state-build01-20260914",
@@ -2213,17 +1328,17 @@
       "branch": "codex/bimlog-build38-navisworks2025-field-rc-20260907",
       "head": "7b1f5ff25396626cd634794ec18a782d60604f0d",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-build39-xml-missing-scale-20260908",
       "head": "a7d3e051e01a0ff7522e7be05ca31d7f6ba5a955",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-build40-apu-n14-publish-20260908",
@@ -2237,7 +1352,7 @@
       "branch": "codex/bimlog-build41-xml-legacy-repair-20260908",
       "head": "cd606f2343e1126dee09783862893c726e64c9c4",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2245,7 +1360,7 @@
       "branch": "codex/bimlog-build44-final-xml-closure-20260908",
       "head": "fc6d8b9647a1f149ae39adff0450c08a2cc7e105",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2253,7 +1368,7 @@
       "branch": "codex/bimlog-build46-camera-unit-contract-20260908",
       "head": "38620db50599962a22d910f8c14bcb01803f6236",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2261,7 +1376,7 @@
       "branch": "codex/bimlog-build47-platform-legacy-409-20260908",
       "head": "e6532fc37ec6ca3354fac7aeb4402269cb726edb",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2269,7 +1384,7 @@
       "branch": "codex/bimlog-build5-operations-20260812",
       "head": "ac3d2b8b57f02080c6cbb7935312dd051ef12fed",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2277,7 +1392,7 @@
       "branch": "codex/bimlog-build6-team-capacity-20260813",
       "head": "601bf94aa5505d0137f8ae1858b40356d9f3aaf6",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2285,15 +1400,15 @@
       "branch": "codex/bimlog-build7-advanced-contracts-backend-20260816",
       "head": "88d745d340d6c57390c77eef1542f6b283025f7d",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-build7-advanced-contracts-integration-20260817",
       "head": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2301,9 +1416,33 @@
       "branch": "codex/bimlog-build7-advanced-contracts-ui-20260816",
       "head": "1c66fdc4fada201fb73293301d7b8a70b99ad8bc",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
+    },
+    {
+      "branch": "codex/bimlog-commercial-ga-final-20261015",
+      "head": "d2127f73b567d50a120a5764462ebde051dc73e2",
+      "relationship": "ANCESTOR",
+      "checkedOut": false,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-commercial-ga-final-20261015b",
+      "head": "d2127f73b567d50a120a5764462ebde051dc73e2",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-commercial-ga-final-current-20261015",
+      "head": "dc2cc5af06ca3bad87182efe96a030a62b67ddcd",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
     {
       "branch": "codex/bimlog-coordination-release-a-build1-20260909",
@@ -2330,10 +1469,18 @@
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
     {
+      "branch": "codex/bimlog-edt-engine-block01-20260922",
+      "head": "d67b5b992ebb2d867440e1face3ee5a85a88d8cf",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
       "branch": "codex/bimlog-feedback-addendum-20260817",
       "head": "34c9d383bbf10532d46394dc3c25f639fb4cb209",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2349,7 +1496,7 @@
       "branch": "codex/bimlog-feedback-v1.60.35.10-f-20260821",
       "head": "cd96e19dc3cf5c0d6949dd6c9ae69006e8b3ad46",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2357,7 +1504,7 @@
       "branch": "codex/bimlog-feedback-v1.60.35.11-f-20260821",
       "head": "40f3a2cbd78de7c146d556d8ddad3443644f7a10",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2365,7 +1512,7 @@
       "branch": "codex/bimlog-feedback-v1.60.35.12-f-20260821",
       "head": "efcb77df83f3352da4224948fad7433154bf35d8",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2373,73 +1520,73 @@
       "branch": "codex/bimlog-intake-apu-01-20260831",
       "head": "c7695f385ef5ad48591d155763a24f924894efd5",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-02-20260831",
       "head": "42ac5e88a6f8aad6d7b0f47a69a48471f6d47349",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-03-20260831",
       "head": "95ef04c6ade5a744e0bbc2a8cb1447a36a8be893",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-04-20260831",
       "head": "35819a295c8dd128408d3e4d5b8c6d9641ee7aa3",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-05-20260831",
       "head": "bc06e5cca5f27e00be91fe38d6edb702753149d7",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-06-20260831",
       "head": "e14ed477f723db9b22deb7da844e94b1b4c610ca",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-07-20260831",
       "head": "57321723be9338f32a1f95b5ad25d71f4285bab9",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-08-20260831",
       "head": "b9ef54b53ed3daff51650bf05aa676ab1df80e64",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-09-20260831",
       "head": "b8dec0c806451667f4b1a8e2aecb89d1992ab826",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-intake-apu-10-20260901",
@@ -2450,8 +1597,72 @@
       "reason": "checked-out unique history requires effective diff"
     },
     {
+      "branch": "codex/bimlog-knowledge-block01-20260921",
+      "head": "b4ec61aff3e8df14713edf3a8d9f5f7b624c1195",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block02-20260921",
+      "head": "dd68f4ea7c46c8391999c117463b237e8f6ce711",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block03-20260921",
+      "head": "a5acd62b53ea6d65c80a406c19fc9ef75412e31a",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block04-20260921",
+      "head": "9b21b8872379e39a404e554b76073706651022b4",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block05-20260921",
+      "head": "f29c229623fd9ae1f9d4088b04ffa7d594bbc5f7",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block06-20260921",
+      "head": "60f90bdad09fc66186ee92e657b220c39f6b4f58",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-knowledge-block07-20260922",
+      "head": "c97efd491f15d393f7c432419f2e2d908cd574a8",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
       "branch": "codex/bimlog-legacy-working-view-final-20260910",
       "head": "6d4feebaa1833bbac6a6d5f74c34053cd483df35",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-lens-docked-block01-20260923",
+      "head": "49e0c9013028fd007ef81ae27603e33c52ca224e",
       "relationship": "ANCESTOR",
       "checkedOut": true,
       "disposition": "RETIRE",
@@ -2466,10 +1677,18 @@
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
     {
+      "branch": "codex/bimlog-lens-governed-fields-multiview-20261027",
+      "head": "c12a73df9dccb3ac4c9ee730e0041b056e4f700c",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
       "branch": "codex/bimlog-lens-mockup-block01-20260917",
       "head": "84c4f6f2bbe4b32ae8890c3e999403e5cf70bda4",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2477,15 +1696,15 @@
       "branch": "codex/bimlog-lens-next-20260812",
       "head": "a52f79be7c34daecc5daf0ec164e5a2adab0f864",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-lens-next-m7-repair-20260822",
       "head": "b9d99d5dff1cbc08c7b55839b664740e2817ebc7",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2493,7 +1712,7 @@
       "branch": "codex/bimlog-lens-next-m8-publishing-20260822",
       "head": "1f98cb575b14225983bd6f190f2fc31ee4bb1f42",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2506,12 +1725,20 @@
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
     {
+      "branch": "codex/bimlog-lens-redline-p37-20261001",
+      "head": "345dc645a05e0f4befb14b408c5cfdd8c863498a",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
       "branch": "codex/bimlog-lens-sync-correlation-api-20260813",
       "head": "60a6a5bb2985335651316ccdda5e4c6f8150a006",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-lorena-block01-20260917",
@@ -2536,6 +1763,14 @@
       "checkedOut": true,
       "disposition": "INTEGRATE",
       "reason": "checked-out unique history requires effective diff"
+    },
+    {
+      "branch": "codex/bimlog-norte-project-cleanup-20261006",
+      "head": "9c719f5295c69efb6bef3ad0a62e4ea0acde655c",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
     {
       "branch": "codex/bimlog-optional-sharing-builds01-10-20260915",
@@ -2637,9 +1872,9 @@
       "branch": "codex/bimlog-prework03-project-retirement-20260908",
       "head": "9ee5747b9a774265a2f52d2ad3cc503a3caa4536",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-prework03-retirement-build47-20260908",
@@ -2653,9 +1888,9 @@
       "branch": "codex/bimlog-prework04-enterprise-identity-20260908",
       "head": "f270ce5f82e929349878a47a62e28a360e99a697",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/bimlog-prework04-enterprise-identity-build47-20260908",
@@ -2685,9 +1920,25 @@
       "branch": "codex/bimlog-product-defaults-block01-20260915",
       "head": "431558843985d59cf4a66a8e46744189c0a4a320",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
+    },
+    {
+      "branch": "codex/bimlog-ruben-publish-schema-20261027",
+      "head": "ed7d5d8c138732e7162352d567ecee021e6153b7",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-sharepoint-block01-20260925",
+      "head": "b3d5a065abd45e2fd0f07db559d489b9612153d5",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
     {
       "branch": "codex/bimlog-smoke-intake-01-client-contact-20260907",
@@ -2699,7 +1950,15 @@
     },
     {
       "branch": "codex/bimlog-stabilization-program-20260919",
-      "head": "b3ba648b1c964ae3867366acfcdd17ca37222b0a",
+      "head": "85043fe0a12261acb5f02c884053d0db4877fcd0",
+      "relationship": "ANCESTOR",
+      "checkedOut": true,
+      "disposition": "RETIRE",
+      "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
+    },
+    {
+      "branch": "codex/bimlog-template-gap-block01-20260923",
+      "head": "c806ac928025cebc8b4a0b05e499724a8dd2f5fa",
       "relationship": "EXACT",
       "checkedOut": true,
       "disposition": "KEEP",
@@ -2717,25 +1976,25 @@
       "branch": "codex/clash-report-delete-reason-20260805",
       "head": "2f4ddd9417f38065727d7cf8833ffd51c4d62f12",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/clash-reports-ui-correction-20260805",
       "head": "dea028ef27a5960dd5392348b46652db8cd50177",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/commercial-financial-recovery-successor-20260731",
       "head": "b80f455d75b9e8f202061364fe722dbc0183b598",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/dashboard-block1-20260918",
@@ -2749,23 +2008,23 @@
       "branch": "codex/dashboard-two-path-encoding-guard",
       "head": "4129f37b00d5da50a350fba53c89911b5b2c40b9",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/electron-runtime-hardening-20260803",
       "head": "3761cd5b333629cc0c5e283761eac3c59085c86a",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/files-patch-a-20260730",
       "head": "7284da1ee124d7df9e65af09b6126ce114bb5b99",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2773,7 +2032,7 @@
       "branch": "codex/files-patch-a-20260730-b",
       "head": "7284da1ee124d7df9e65af09b6126ce114bb5b99",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -2781,49 +2040,49 @@
       "branch": "codex/generic-apu-ui-20260805",
       "head": "362c9533ab432206bbb2ed207bbf4d8746bf4260",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/generic-apu-ui-clean-six-20260805",
       "head": "e429a72b33ea16f45fb05083ba2018d0e2921b4f",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/generic-apu-ui-row8-states-20260805",
       "head": "362c9533ab432206bbb2ed207bbf4d8746bf4260",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/h1-http-runtime-20260730",
       "head": "147462023a774498dbd3c9e46c8427d9e6b36eb7",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/help-center-print-pdf-20260811",
       "head": "8f531981567f993c5c01ee218b32d451639e4866",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/integration-runtime-ui-20260730",
       "head": "2af082ba7c2f6aff50f3f2a63c189fe76506f785",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/lens-next-build02-regression-20260903",
@@ -2957,7 +2216,7 @@
       "branch": "codex/lens-next-build17-perspective-validation-20260903",
       "head": "c35f86a5de783177ef11a233d7a49e7f90497371",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3045,7 +2304,7 @@
       "branch": "codex/lens-next-build25d-range-capture-20260905",
       "head": "055afd95716b6a83cc05f29aaaadc89cd1b1e613",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3053,7 +2312,7 @@
       "branch": "codex/lens-next-build25e-manual-range-proof-20260905",
       "head": "055afd95716b6a83cc05f29aaaadc89cd1b1e613",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3093,7 +2352,7 @@
       "branch": "codex/lens-next-build32-create-open-repair-20260907",
       "head": "7bd0a7c776e9f0f9f38bfbee5f77932a5de0ac94",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3101,7 +2360,7 @@
       "branch": "codex/lens-next-forensic-recovery-20260831",
       "head": "ecdb46fa645729c67d90629e7daaf14be69a18bc",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3125,23 +2384,23 @@
       "branch": "codex/linked-items-creation-ux-20260805",
       "head": "799c09e43bf443f24adc4891e9af1b5b1f678265",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/living-brief-f5-password-removal-20260805",
       "head": "06f2dfbdd5f9ca504cefacdeeb914deb961f7ab3",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/living-brief-runtime-closure-20260805",
       "head": "2cea97f985f3167c601dfd3df4c78813676f5680",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3149,7 +2408,7 @@
       "branch": "codex/living-brief-whitespace-seal-20260811",
       "head": "7bb2e69b38e19c3ada3c56a48417332bc57425ac",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3165,41 +2424,41 @@
       "branch": "codex/platform-pdf-consistency-20260730",
       "head": "9cda868f866b1dc8faf640b051207c652edd3994",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/process-manifest-phase-a-20260730",
       "head": "d8752874f4737ef1800417c704046e6281fa278e",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/procore-rfi-e2e-20260805",
       "head": "5041decdd6d8d9edc9ad15f5beb6495102008ed7",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/public-origin-phase-a-20260730",
       "head": "1d55582da7a158f97a9b285d8a87a762a377ef9d",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/release-clash-readonly-20260805",
       "head": "8cd1eb1d679d9a3bb3938cbea6b3a582d654bcb2",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/replit-create-observability-reconcile-20260902",
@@ -3213,7 +2472,7 @@
       "branch": "codex/rfi-build8-contract-parity",
       "head": "b0b996ebd9cf2fd0505b5a7eeafe74877077931e",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3221,7 +2480,7 @@
       "branch": "codex/schema-parity-living-brief-seal-20260811",
       "head": "7235fdeb63c11878bcff4ebaf1a9e2af12a24411",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3229,7 +2488,7 @@
       "branch": "codex/schema-parity-repair-20260811",
       "head": "08151f39e0db79c0196d50e64cd60b651c4f4992",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3237,7 +2496,7 @@
       "branch": "codex/search-contract-helper-20260729",
       "head": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
       "relationship": "ANCESTOR",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "RETIRE",
       "reason": "clean merged/ancestor branch eligible only for recoverable cleanup"
     },
@@ -3245,57 +2504,57 @@
       "branch": "codex/ux-master-sidebar-failures-20260730",
       "head": "f42c7deee2e6de2a84f2f3f88cdbb436ba5c54d1",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/ux-project-shell-states-20260730",
       "head": "39b1af2b2a10c7020541dcfa04cc0174bd4e9d4d",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/ux-project-sidebar-modal-20260730",
       "head": "26857e1a6ec4d286a3128b6ec412679626f30254",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/ux-public-pricing-features-es-20260730",
       "head": "67d1570bf41ee7efeb4174a1a772abc227f21449",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "codex/worker-runtime-20260730",
       "head": "84ecee5486c1d56f75627d488dc5add5de7e0ac7",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "integrations-error-state-20260730",
       "head": "72207b7db83092fc56689218fb5d7b554591cc49",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "lens-next-m3-authoritative-integration",
       "head": "f418081c200781a64cd696ba1199b612fe249821",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     },
     {
       "branch": "main",
@@ -3317,9 +2576,9 @@
       "branch": "recovery/proposed-rfi-20260729",
       "head": "b1568b00d27613eb4f8c7013a7d99aa0efbb1508",
       "relationship": "DIVERGED",
-      "checkedOut": true,
+      "checkedOut": false,
       "disposition": "INTEGRATE",
-      "reason": "checked-out unique history requires effective diff"
+      "reason": "unique history requires effective diff"
     }
   ]
 }
