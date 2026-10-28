@@ -27,17 +27,17 @@ MANDATORY_BOOTSTRAP=PASS Constitution 3.5.0 Amendment 0021; professional identit
 
 ## Current checkpoint
 
-ACTIVE_BUILD=2
-LAST_COMPLETED_ACTION=Build 2 security backport and focused acceptance passed; commit pending
-CURRENT_COMMIT=e7b9dde6c
-TESTS_COMPLETED=Build 1 committed; deepmerge unsafe-key/compatibility PASS; production audit zero vulnerabilities; API typecheck PASS; SendGrid module/configuration/verification PASS
-TESTS_PENDING=Create focused Build 2 commit
+ACTIVE_BUILD=3
+LAST_COMPLETED_ACTION=Build 3 dependency provenance repair and focused acceptance passed; commit pending
+CURRENT_COMMIT=0940085e9
+TESTS_COMPLETED=Builds 1-2 committed; dependency provenance PASS with 972 integrity-bound resolutions; production audit clean; deepmerge security regression PASS
+TESTS_PENDING=Create focused Build 3 commit
 DEFECTS_DISCOVERED=Living Brief stale after 94ee1a1e; deepmerge advisory; stale qs provenance expectation; missing historical recovery worktree crash; final GA aggregate timeout
-DEFECTS_CORRECTED=Living Brief reconciliation; SendGrid deepmerge advisory removed with governed local security backport
+DEFECTS_CORRECTED=Living Brief reconciliation; SendGrid deepmerge advisory; stale qs 6.16.0 provenance expectation
 BROWSER_RESOURCES_OWNED=NONE
 PUSH_STATUS=NOT_STARTED
 PUBLICATION_STATUS=NOT_DUE
-SAFE_RESUME_POINT=Commit accepted Build 2 then begin dependency provenance Build 3
+SAFE_RESUME_POINT=Commit accepted Build 3 then begin recovery inventory Build 4
 
 ## Build 1 evidence
 
@@ -56,4 +56,12 @@ POSITIVE_TEST=Object, array and merge.all compatibility PASS; SendGrid module/co
 NEGATIVE_TEST=Three prototype-control key vectors rejected; Object.prototype remains unchanged
 SECURITY_TEST=pnpm audit --prod --audit-level low reports no known vulnerabilities
 PERSISTENCE_TEST=Fresh lockfile resolves @sendgrid/helpers deepmerge to vendor/deepmerge-safe version 4.3.1-bimlog.1
+
+## Build 3 evidence
+
+STATUS=FOCUSED_ACCEPTANCE_PASS_COMMIT_PENDING
+SCOPE=Bind provenance to governed qs 6.16.1 and the local deepmerge security backport
+POSITIVE_TEST=check:dependency-provenance PASS with pnpm 11.17.0, lockfile 9.0 and 972 integrity-bound resolutions
+NEGATIVE_TEST=Checker forbids qs 6.16.0 and rejects missing deepmerge workspace, lockfile or SendGrid bindings
+CONNECTED_REGRESSION=Production audit clean; deepmerge prototype regression PASS
 

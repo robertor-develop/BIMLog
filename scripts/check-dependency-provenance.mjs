@@ -44,7 +44,7 @@ const patchedResolutions = [
   "nanoid@5.1.16",
   "path-to-regexp@8.4.0",
   "picomatch@2.3.2",
-  "qs@6.16.0",
+  "qs@6.16.1",
   "sharp@0.35.5",
   "tmp@0.2.7",
   "uuid@11.1.1",
@@ -54,6 +54,12 @@ for (const resolution of patchedResolutions) {
   const escaped = resolution.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   assert.match(lockfile, new RegExp(`^  ${escaped}:\\n    resolution: \\{integrity: sha512-`, "m"), `${resolution} must be integrity-bound`);
 }
+
+assert.doesNotMatch(workspace, /^\s*qs:\s*6\.16\.0$/m, "stale vulnerable qs override is forbidden");
+assert.doesNotMatch(lockfile, /^  qs@6\.16\.0:$/m, "stale vulnerable qs resolution is forbidden");
+assert.match(workspace, /^\s*deepmerge:\s*file:vendor\/deepmerge-safe$/m, "deepmerge must remain bound to the governed security backport");
+assert.match(lockfile, /^  deepmerge@file:vendor\/deepmerge-safe:\n    resolution: \{directory: vendor\/deepmerge-safe, type: directory\}$/m, "deepmerge backport must be directory-bound");
+assert.match(lockfile, /^      deepmerge: file:vendor\/deepmerge-safe$/m, "SendGrid helper must resolve the governed deepmerge backport");
 
 const integrityCount = lockfile.match(/resolution: \{integrity: sha512-/g)?.length ?? 0;
 assert.ok(integrityCount >= 500, `unexpectedly small integrity-bound closure: ${integrityCount}`);
