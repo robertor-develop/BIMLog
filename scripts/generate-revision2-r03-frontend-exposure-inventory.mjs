@@ -4,6 +4,8 @@ import path from "node:path";
 const root = process.cwd();
 const graph = JSON.parse(fs.readFileSync(path.join(root, "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json"), "utf8"));
 const backend = JSON.parse(fs.readFileSync(path.join(root, "evidence/revision2-r01-r05/R02_BACKEND_CAPABILITY_INVENTORY.json"), "utf8"));
+const appSource = fs.readFileSync(path.join(root, "artifacts/bimlog/src/App.tsx"), "utf8");
+const allToolsSource = fs.readFileSync(path.join(root, "artifacts/bimlog/src/pages/AllTools.tsx"), "utf8");
 const output = path.join(root, "evidence/revision2-r01-r05/R03_FRONTEND_EXPOSURE_INVENTORY.json");
 
 function clean(value) {
@@ -42,6 +44,7 @@ const entries = backend.routes.map((route) => {
 
 const classifications = ["fully-operable", "read-only", "partially-exposed", "administrator-only", "intentionally-api-native-only", "missing-frontend"];
 const counts = Object.fromEntries(classifications.map((name) => [name, entries.filter(({ classification }) => classification === name).length]));
+const searchableAllToolsEntry = /path="\/all-tools"/.test(appSource) && /all-tools-search/.test(allToolsSource) && /resolveCapabilityDirectoryViews/.test(allToolsSource);
 const inventory = {
   schemaVersion: "bimlog-revision2-frontend-exposure-inventory-v1",
   generatedFrom: [
@@ -54,8 +57,8 @@ const inventory = {
     projectTabs: graph.counts.projectTabs,
     sidebarTabs: graph.counts.sidebarTabs,
     sidebarLinks: graph.counts.sidebarLinks,
-    searchableAllToolsEntry: false,
-    disposition: "confirmed_global_discoverability_gap"
+    searchableAllToolsEntry,
+    disposition: searchableAllToolsEntry ? "closed_visible_searchable_permission_aware_directory" : "confirmed_global_discoverability_gap"
   },
   limitations: [
     "Static references do not prove complete user operability or lifecycle-state comprehension.",

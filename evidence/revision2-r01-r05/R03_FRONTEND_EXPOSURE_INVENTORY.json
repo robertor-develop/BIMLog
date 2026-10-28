@@ -13,12 +13,12 @@
     "missing-frontend"
   ],
   "navigationEvidence": {
-    "frontendRoutes": 58,
+    "frontendRoutes": 59,
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "searchableAllToolsEntry": false,
-    "disposition": "confirmed_global_discoverability_gap"
+    "searchableAllToolsEntry": true,
+    "disposition": "closed_visible_searchable_permission_aware_directory"
   },
   "limitations": [
     "Static references do not prove complete user operability or lifecycle-state comprehension.",
