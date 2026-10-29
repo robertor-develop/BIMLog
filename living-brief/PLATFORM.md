@@ -1575,6 +1575,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/TotalControl.tsx
 - artifacts/bimlog/src/pages/VerifyEmail.tsx
 - artifacts/bimlog/src/pages/not-found.tsx
+- artifacts/bimlog/src/pages/parity/admin-fix-specific-link.tsx
+- artifacts/bimlog/src/pages/parity/admin-launch-configuration.tsx
+- artifacts/bimlog/src/pages/parity/admin-master-catalogs.tsx
+- artifacts/bimlog/src/pages/parity/admin-overview.tsx
+- artifacts/bimlog/src/pages/parity/admin-platform-capabilities.tsx
 - artifacts/bimlog/src/pages/parity/admin-project-company-bindings.tsx
 - artifacts/bimlog/src/pages/project/ActivityTab.tsx
 - artifacts/bimlog/src/pages/project/AnalyticsTab.tsx
@@ -1653,6 +1658,11 @@ It changes only when the code structure or curated architectural facts change.
 - /feedback
 - /total-control
 - /admin/project-company-bindings
+- /admin/fix-specific-link
+- /admin/launch-configuration
+- /admin/master-catalogs
+- /admin/overview
+- /admin/platform-capabilities
 - /living-brief
 - /pricing
 - /features

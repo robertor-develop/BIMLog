@@ -80378,6 +80378,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2be656706bcbc48de97278de5905d7e37f7a272a263108c22b4b8033375f07e3"
+    },
+    {
+      "taskId": "revision2-p036-p040-prepublication-reconciliation-20261029",
+      "reviewedThroughCommit": "24c4768070fb03dc388de782f291a4df530e4901",
+      "reviewedAt": "2026-10-29T16:20:00Z",
+      "status": "candidate",
+      "captureTiming": "post_block08_regression_recovery",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog product identity and ecosystem boundaries are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-build push and ten-build publication cadence is preserved."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Route, interconnection, accessibility, timeout, retry, and idempotency evidence now covers P036-P040 and the viewpoint recovery correction."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "The accepted complete, discoverable, progressively organized platform direction is implemented without capability loss."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Five protected administrator frontend routes and bounded Lens viewpoint save recovery are added without schema or Native changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native plugin source, installer, bridge contract, or Autodesk load path changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering authority or design-system contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Block 08 implementation and regression status, emergency publication identity, and remaining release gates are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Exact-head push, publication, three-round live acceptance, and connected Navisworks positive acceptance remain open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Generated route and accessibility evidence includes all five newly exposed authorized surfaces."
+        }
+      ],
+      "reason": "Reconcile Living Brief authority through the accepted P036-P040 implementation, deterministic evidence repairs, and bounded viewpoint-save recovery.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7db1cd8dafda7b216d96815301e30e7b10bce96f6235d1997a3b588ca9ca527c"
     }
   ]
 }

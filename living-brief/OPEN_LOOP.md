@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Capability parity Block 08, P036–P040 — 2026-10-29
+
+- [x] Expose specific-link repair, launch configuration, platform master catalogs, administration overview, and platform capability status as five distinct protected frontend capabilities.
+- [x] Preserve direct expert access, role-aware authorization, explanatory states, and complete backend/frontend parity without deleting, merging, or concealing modules.
+- [x] Reconcile the route inventory, route interconnection graph, and accessibility/responsive matrix for the five new routes.
+- [x] Repair the Lens Next extra-viewpoint save freeze with bounded timeouts, retry-safe idempotency, double-submit prevention, and explicit recovery behavior; publish and verify emergency source `3fe3c429729dd7334050f6c5c0cd7df8fd6d72ef`.
+- [ ] Pass the exact-head prepublication gate, push normally, and verify every Block 08 commit on the canonical remote branch.
+- [ ] Publish the exact ten-build parity candidate, verify deployed commit/version/health/schema identity, and pass three consecutive authenticated Chrome rounds.
+- [ ] Obtain a connected Navisworks session for positive extra-viewpoint capture/save/reopen acceptance; current live evidence proves the authenticated disconnected fail-safe state only.
+
 ## Corrected program Blocks 5–6, P021–P030 — 2026-10-29
 
 - [x] Implement and focused-test P021–P025 sequentially with one accepted implementation commit per build.
