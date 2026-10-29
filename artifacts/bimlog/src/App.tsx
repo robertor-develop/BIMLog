@@ -362,7 +362,7 @@ function Router() {
         {() => <AccessRoute component={AdminSupport} surface="total_control" />}
       </Route>
       <Route path="/ai-control/budgets">
-        {() => <AccessRoute component={AiControlBudgets} surface="total_control" />}
+        {() => <ProtectedRoute component={AiControlBudgets} />}
       </Route>
       <Route path="/ai-control/companies">
         {() => <AccessRoute component={AiControlCompanies} surface="total_control" />}
