@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked source; deterministic",
   "counts": {
-    "frontendRoutes": 59,
+    "frontendRoutes": 60,
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
     "apiRoutes": 796,
-    "frontendApiReferences": 315,
+    "frontendApiReferences": 317,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -329,48 +329,54 @@
     },
     {
       "order": 52,
+      "path": "/admin/project-company-bindings",
+      "guard": "access",
+      "target": "ProjectCompanyBindings"
+    },
+    {
+      "order": 53,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief"
     },
     {
-      "order": 53,
+      "order": 54,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing"
     },
     {
-      "order": 54,
+      "order": 55,
       "path": "/features",
       "guard": "public",
       "target": "Features"
     },
     {
-      "order": 55,
+      "order": 56,
       "path": "/about",
       "guard": "public",
       "target": "About"
     },
     {
-      "order": 56,
+      "order": 57,
       "path": "/contact",
       "guard": "public",
       "target": "Contact"
     },
     {
-      "order": 57,
+      "order": 58,
       "path": "*",
       "guard": "public",
       "target": "NotFound"
     },
     {
-      "order": 58,
+      "order": 59,
       "path": "*",
       "guard": "public",
       "target": "inline"
     },
     {
-      "order": 59,
+      "order": 60,
       "path": "*",
       "guard": "public",
       "target": "inline"
@@ -10876,15 +10882,23 @@
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/files/${file.id}/confirm-violation"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/files/${file.id}/supersede"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/files"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/files/suggest-name"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/files/current-view.pdf"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
-      "apiPath": "/api/v1/projects/${projectId}/files"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/FilesTab.tsx",
