@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
-    "routeTemplates": 47,
+    "routeTemplates": 48,
     "projectSurfaces": 20,
-    "customerSurfaces": 67,
-    "viewportCases": 201
+    "customerSurfaces": 68,
+    "viewportCases": 204
   },
   "viewports": [
     {
@@ -993,6 +993,29 @@
     },
     {
       "order": 52,
+      "path": "/admin/project-company-bindings",
+      "guard": "access",
+      "target": "ProjectCompanyBindings",
+      "samplePath": "/admin/project-company-bindings",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 53,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief",
@@ -1015,7 +1038,7 @@
       ]
     },
     {
-      "order": 53,
+      "order": 54,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing",
@@ -1038,7 +1061,7 @@
       ]
     },
     {
-      "order": 54,
+      "order": 55,
       "path": "/features",
       "guard": "public",
       "target": "Features",
@@ -1061,7 +1084,7 @@
       ]
     },
     {
-      "order": 55,
+      "order": 56,
       "path": "/about",
       "guard": "public",
       "target": "About",
@@ -1084,7 +1107,7 @@
       ]
     },
     {
-      "order": 56,
+      "order": 57,
       "path": "/contact",
       "guard": "public",
       "target": "Contact",
