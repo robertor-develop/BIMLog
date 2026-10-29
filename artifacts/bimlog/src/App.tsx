@@ -78,6 +78,7 @@ const AuthOpenAiKey = namedPage(() => import("@/pages/parity/auth-openai-key"), 
 const AutodeskHubs = namedPage(() => import("@/pages/parity/autodesk-hubs"), "AutodeskHubs");
 const AutodeskLogin = namedPage(() => import("@/pages/parity/autodesk-login"), "AutodeskLogin");
 const AutodeskProjects = namedPage(() => import("@/pages/parity/autodesk-projects"), "AutodeskProjects");
+const AutodeskToken = namedPage(() => import("@/pages/parity/autodesk-token"), "AutodeskToken");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -249,6 +250,9 @@ function Router() {
       </Route>
       <Route path="/autodesk/projects/:hubId">
         {() => <ProtectedRoute component={AutodeskProjects} />}
+      </Route>
+      <Route path="/autodesk/token">
+        {() => <ProtectedRoute component={AutodeskToken} />}
       </Route>
       <Route path="/register" component={Register} />
       <Route path="/verify-email" component={VerifyEmail} />
