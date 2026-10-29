@@ -873,18 +873,41 @@ function ActivityFeedTab({ token }: { token: string }) {
 }
 
 // ── Feature Flags Tab ─────────────────────────────────────────────────────────
-function FeatureFlagsTab({ token }: { token: string }) {
+function FeatureFlagsTab({ token, isSuperAdmin }: { token: string; isSuperAdmin: boolean }) {
   const [flags, setFlags] = useState<Record<string, unknown>[]>([]);
   const [msg, setMsg] = useState("");
-  const load = () => apiFetch("/admin/feature-flags?scope=mine", token).then(r => r.json()).then(setFlags).catch((error) => logClientError("admin feature flags load", error));
-  useEffect(() => { load(); }, [token]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [savingId, setSavingId] = useState<number | null>(null);
+  const load = useCallback(() => {
+    setLoading(true); setError("");
+    return apiFetch("/admin/feature-flags?scope=mine", token)
+      .then(async response => { const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || "Unable to load feature flags."); return body; })
+      .then(body => setFlags(Array.isArray(body) ? body : []))
+      .catch(cause => { logClientError("admin feature flags load", cause); setError(cause instanceof Error ? cause.message : "Unable to load feature flags."); })
+      .finally(() => setLoading(false));
+  }, [token]);
+  useEffect(() => { void load(); }, [load]);
   const toggle = async (id: number, enabled: boolean) => {
-    await apiFetch(`/admin/feature-flags/${id}`, token, { method: "PATCH", body: JSON.stringify({ enabled: !enabled }) });
-    setMsg(`Flag updated.`); load();
+    setSavingId(id); setMsg(""); setError("");
+    try {
+      const response = await apiFetch(`/admin/feature-flags/${id}`, token, { method: "PATCH", body: JSON.stringify({ enabled: !enabled }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "Unable to update feature flag.");
+      setMsg("Feature flag updated and the governed projection was refreshed.");
+      await load();
+    } catch (cause) {
+      logClientError("admin feature flag update", cause);
+      setError(cause instanceof Error ? cause.message : "Unable to update feature flag.");
+    } finally { setSavingId(null); }
   };
   return (
     <div>
+      <p style={{ marginTop: 0, fontSize: 13 }}>Feature Flags shows the governed legacy projection for your administered scope. Only an authorized Super Admin can change a flag; every accepted update is audited.</p>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+      {loading && <p role="status">Loading governed feature flags…</p>}
+      {error && <div role="alert">{error} <Button size="sm" variant="outline" onClick={() => void load()}>Retry</Button></div>}
+      {!loading && !error && flags.length === 0 && <p role="status">No feature flags are available in this administered scope.</p>}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {flags.map((f: Record<string, unknown>) => (
           <div key={String(f.id)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "16px 20px" }}>
@@ -893,6 +916,9 @@ function FeatureFlagsTab({ token }: { token: string }) {
               <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>Applies to: {String(f.appliesTo)} · Last updated: {new Date(String(f.updatedAt)).toLocaleString()}</div>
             </div>
             <button
+              aria-label={`${String(f.enabled ? "Disable" : "Enable")} ${FLAG_LABELS[String(f.flagName)] || String(f.flagName)}`}
+              aria-pressed={Boolean(f.enabled)}
+              disabled={!isSuperAdmin || savingId !== null}
               onClick={() => toggle(f.id as number, f.enabled as boolean)}
               style={{
                 width: 48, height: 26, borderRadius: 13, border: "none", cursor: "pointer",
@@ -1771,7 +1797,7 @@ export function AdminPanel() {
           {activeTab === 3 && <ProjectsTab token={token} />}
           {activeTab === 4 && <EmailLogTab token={token} />}
           {activeTab === 5 && <ActivityFeedTab token={token} />}
-          {activeTab === 6 && <FeatureFlagsTab token={token} />}
+          {activeTab === 6 && <FeatureFlagsTab token={token} isSuperAdmin={isSuperAdmin} />}
           {activeTab === 7 && <AdminActionsLogTab token={token} />}
           {activeTab === 8 && <AiUsageTab token={token} />}
           {activeTab === 9 && isSuperAdmin && <FeedbackTab token={token} />}
