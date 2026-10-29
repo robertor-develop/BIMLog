@@ -37,6 +37,8 @@ export function Register() {
     invitationToken: inviteToken || undefined,
   });
   const [error, setError] = useState("");
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim());
+  const passwordValid = form.password.length >= 8;
   const BASE=import.meta.env.BASE_URL?.replace(/\/$/,"")||"";
   useEffect(()=>{
     const changed=()=>{
@@ -107,8 +109,11 @@ export function Register() {
       <div role="note" className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
         {EMAIL_VERIFICATION_POLICY.reason[lang === "es" ? "es" : "en"]}
       </div>
+      <div role="note" className="mb-4 rounded-lg border p-3 text-sm">
+        <strong>{tt("What happens next", "Qué sucede después")}:</strong> {tt("BIMLog creates your governed company account, signs you in, and opens your dashboard. If you have a valid invitation, it joins the authorized company or project without creating a duplicate company.", "BIMLog crea su cuenta empresarial gobernada, inicia la sesión y abre su panel. Si tiene una invitación válida, se une a la empresa o proyecto autorizado sin crear una empresa duplicada.")}
+      </div>
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive text-sm mb-4">
+        <div role="alert" aria-live="assertive" className="flex items-center gap-2 p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-destructive text-sm mb-4">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           {error}
         </div>
@@ -160,7 +165,9 @@ export function Register() {
             disabled={Boolean(inviteToken)}
             onChange={set("email")}
             autoComplete="email"
+            aria-invalid={Boolean(form.email) && !emailValid}
           />
+          {form.email && !emailValid && <p className="mt-1 text-xs text-destructive">{tt("Enter a valid email address.", "Ingrese una dirección de correo válida.")}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-foreground mb-1.5">
@@ -172,16 +179,18 @@ export function Register() {
             value={form.password}
             onChange={set("password")}
             autoComplete="new-password"
+            aria-invalid={Boolean(form.password) && !passwordValid}
           />
+          <p className="mt-1 text-xs text-muted-foreground">{tt("Use at least 8 characters.", "Use al menos 8 caracteres.")}</p>
         </div>
       </div>
 
       <Button
         className="w-full mt-6"
         disabled={
-          !form.email ||
+          !emailValid ||
           inviteLoading || (Boolean(inviteToken) && !invitation) || (!inviteToken && journey==="join") ||
-          !form.password ||
+          !passwordValid ||
           !form.fullName ||
           !form.companyName ||
           isPending
