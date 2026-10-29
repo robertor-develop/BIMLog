@@ -18,7 +18,7 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
   });
 }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs", "Company Catalogs", "Feature Catalog History"];
+const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs", "Company Catalogs", "Feature Catalog History", "Policy Authority Grants"];
 
 const ADMIN_PANEL_SHELL_CSS = `
   .hq-admin-page {
@@ -958,6 +958,98 @@ function FeatureCatalogHistoryTab({ token }: { token: string }) {
   </section>;
 }
 
+type PolicyAuthorityGrant = {
+  grantId: string;
+  status: "active" | "revoked";
+  effectiveFrom: string;
+  effectiveTo: string | null;
+  reasonCode: string;
+  createdAt: string;
+  revokedAt: string | null;
+  metadataOnly: true;
+};
+
+function PolicyAuthorityGrantsTab({ token }: { token: string }) {
+  const [companyId, setCompanyId] = useState("");
+  const [userId, setUserId] = useState("");
+  const [reasonCode, setReasonCode] = useState("");
+  const [explanationEn, setExplanationEn] = useState("");
+  const [explanationEs, setExplanationEs] = useState("");
+  const [grants, setGrants] = useState<PolicyAuthorityGrant[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const validCompanyId = Number.isSafeInteger(Number(companyId)) && Number(companyId) > 0;
+  const validUserId = Number.isSafeInteger(Number(userId)) && Number(userId) > 0;
+  const evidenceReady = /^[A-Z0-9_]{3,64}$/.test(reasonCode) && explanationEn.trim().length >= 3 && explanationEs.trim().length >= 3;
+
+  const load = useCallback(async () => {
+    if (!validCompanyId) { setError("Enter a positive company ID to inspect its grant metadata."); setGrants([]); return; }
+    setLoading(true); setError(""); setMessage("");
+    try {
+      const response = await apiFetch(`/admin/feature-policy-authority-grants?companyId=${encodeURIComponent(companyId)}`, token);
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error?.en || body.error || "Unable to load policy authority grants.");
+      setGrants(Array.isArray(body.grants) ? body.grants : []);
+    } catch (cause) {
+      logClientError("policy authority grants load", cause);
+      setError(cause instanceof Error ? cause.message : "Unable to load policy authority grants.");
+    } finally { setLoading(false); }
+  }, [companyId, token, validCompanyId]);
+
+  const evidenceBody = () => JSON.stringify({ reasonCode, explanation: { en: explanationEn.trim(), es: explanationEs.trim() } });
+  const createGrant = async () => {
+    if (!validCompanyId || !validUserId || !evidenceReady) { setError("Company ID, user ID, a valid reason code, and bilingual evidence are required."); return; }
+    setBusy(true); setError(""); setMessage("");
+    try {
+      const response = await apiFetch("/admin/feature-policy-authority-grants", token, { method: "POST", body: JSON.stringify({ companyId: Number(companyId), userId: Number(userId), reasonCode, explanation: { en: explanationEn.trim(), es: explanationEs.trim() } }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error?.en || body.error || "Unable to create the authority grant.");
+      setMessage(`Authority grant ${String(body.grantId)} was created with auditable evidence.`);
+      await load();
+    } catch (cause) {
+      logClientError("policy authority grant create", cause);
+      setError(cause instanceof Error ? cause.message : "Unable to create the authority grant.");
+    } finally { setBusy(false); }
+  };
+  const revokeGrant = async (grantId: string) => {
+    if (!evidenceReady) { setError("A valid reason code and bilingual evidence are required before revocation."); return; }
+    setBusy(true); setError(""); setMessage("");
+    try {
+      const response = await apiFetch(`/admin/feature-policy-authority-grants/${encodeURIComponent(grantId)}/revoke`, token, { method: "POST", body: evidenceBody() });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error?.en || body.error || "Unable to revoke the authority grant.");
+      setMessage(`Authority grant ${grantId} was revoked and retained in the evidence ledger.`);
+      await load();
+    } catch (cause) {
+      logClientError("policy authority grant revoke", cause);
+      setError(cause instanceof Error ? cause.message : "Unable to revoke the authority grant.");
+    } finally { setBusy(false); }
+  };
+
+  return <section aria-labelledby="policy-authority-grants-title">
+    <h2 id="policy-authority-grants-title">Policy Authority Grants</h2>
+    <p>Super Admin control for transitional company policy authority. Enter existing company and user IDs; the server rejects cross-company targets. The ledger exposes grant metadata only and preserves revoked evidence.</p>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12, marginBottom: 12 }}>
+      <label>Company ID<Input inputMode="numeric" value={companyId} onChange={event => setCompanyId(event.target.value)} placeholder="Positive company ID" /></label>
+      <label>User ID<Input inputMode="numeric" value={userId} onChange={event => setUserId(event.target.value)} placeholder="Existing user ID" /></label>
+      <label>Reason code<Input value={reasonCode} onChange={event => setReasonCode(event.target.value.toUpperCase())} placeholder="POLICY_AUTHORITY_GRANTED" /></label>
+      <label>Evidence (English)<Input value={explanationEn} onChange={event => setExplanationEn(event.target.value)} placeholder="Why this authority is required" /></label>
+      <label>Evidencia (español)<Input value={explanationEs} onChange={event => setExplanationEs(event.target.value)} placeholder="Por qué se requiere esta autoridad" /></label>
+    </div>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+      <Button variant="outline" onClick={() => void load()} disabled={loading || busy || !validCompanyId}>Inspect grant metadata</Button>
+      <Button onClick={() => void createGrant()} disabled={loading || busy || !validCompanyId || !validUserId || !evidenceReady}>Create audited grant</Button>
+    </div>
+    {message && <div role="status" style={{ padding: 10, marginBottom: 12, border: "1px solid #22c55e", borderRadius: 8 }}>{message}</div>}
+    {loading && <p role="status">Loading policy authority grant metadata…</p>}
+    {error && <div role="alert" style={{ padding: 10, marginBottom: 12, border: "1px solid #ef4444", borderRadius: 8 }}>{error}</div>}
+    {!loading && !error && validCompanyId && grants.length === 0 && <p role="status">No policy authority grants are recorded for this company.</p>}
+    {grants.length > 0 && <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse" }}><thead><tr><Th>Grant ID</Th><Th>Status</Th><Th>Reason</Th><Th>Effective period</Th><Th>Recorded</Th><Th>Action</Th></tr></thead><tbody>{grants.map(grant => <tr key={grant.grantId}><Td style={{ fontFamily: "monospace", fontSize: 11 }}>{grant.grantId}</Td><Td><Badge label={grant.status} color={grant.status === "active" ? "#22c55e" : "#94a3b8"} /></Td><Td>{grant.reasonCode}</Td><Td>{new Date(grant.effectiveFrom).toLocaleString()}{grant.effectiveTo ? ` – ${new Date(grant.effectiveTo).toLocaleString()}` : " – current"}</Td><Td>{new Date(grant.createdAt).toLocaleString()}{grant.revokedAt ? `; revoked ${new Date(grant.revokedAt).toLocaleString()}` : ""}</Td><Td>{grant.status === "active" ? <Button size="sm" variant="outline" disabled={busy || !evidenceReady} onClick={() => void revokeGrant(grant.grantId)}>Revoke with evidence</Button> : "Evidence retained"}</Td></tr>)}</tbody></table></div>}
+  </section>;
+}
+
 // ── Admin Actions Log Tab ─────────────────────────────────────────────────────
 function AdminActionsLogTab({ token }: { token: string }) {
   const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
@@ -1703,6 +1795,7 @@ export function AdminPanel() {
     else if (requested === "audit-activity") setActiveTab(5);
     else if (requested === "ai-usage" && isSuperAdmin) setActiveTab(8);
     else if (requested === "feature-catalog-history" && isSuperAdmin) setActiveTab(12);
+    else if (requested === "policy-authority-grants" && isSuperAdmin) setActiveTab(13);
     else if ((requested === "feedback" || window.location.pathname.endsWith("/admin/feedback")) && isSuperAdmin) setActiveTab(9);
     else if (requested === "feedback" && !isSuperAdmin) setActiveTab(0);
   }, [isSuperAdmin]);
@@ -1735,6 +1828,7 @@ export function AdminPanel() {
         "Master Catalogs": "Catálogos Maestros",
         "Company Catalogs": "Catálogos de Empresa",
         "Feature Catalog History": "Historial del Catálogo de Funciones",
+        "Policy Authority Grants": "Concesiones de Autoridad de Políticas",
       } as Record<string, string>,
     }
     : {
@@ -1783,8 +1877,8 @@ export function AdminPanel() {
         </section>
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
-          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => !["Feedback", "Master Catalogs", "Feature Catalog History"].includes(tab) || isSuperAdmin).map(({ tab, i }) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 12) url.searchParams.set("tab", "feature-catalog-history"); else if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 8) url.searchParams.set("tab", "ai-usage"); else if (i === 5) url.searchParams.set("tab", "audit-activity"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
+          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => !["Feedback", "Master Catalogs", "Feature Catalog History", "Policy Authority Grants"].includes(tab) || isSuperAdmin).map(({ tab, i }) => (
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 13) url.searchParams.set("tab", "policy-authority-grants"); else if (i === 12) url.searchParams.set("tab", "feature-catalog-history"); else if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 8) url.searchParams.set("tab", "ai-usage"); else if (i === 5) url.searchParams.set("tab", "audit-activity"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}
@@ -1804,6 +1898,7 @@ export function AdminPanel() {
           {activeTab === 10 && isSuperAdmin && <MasterCatalogsTab token={token} />}
           {activeTab === 11 && <CompanyMasterCatalogsTab token={token} spanish={isSpanishUi()} />}
           {activeTab === 12 && isSuperAdmin && <FeatureCatalogHistoryTab token={token} />}
+          {activeTab === 13 && isSuperAdmin && <PolicyAuthorityGrantsTab token={token} />}
         </main>
       </div>
     </div>
