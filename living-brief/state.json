@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
+  "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
   "bundleSha256": "11bfaa8f9d5c30e24ead18491251849075e844d3374c9d3f46becd64b0401f4c",
   "impact": {
-    "baselineCommit": "1aac426182d7ab56f77f537f8a69974642873395",
+    "baselineCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
     "changedPaths": [
       "living-brief/impact-declarations.json"
     ],
@@ -21,11 +21,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "claude",
@@ -33,11 +33,11 @@
       "sha256": "ed75b86537e090a358183b372aca181f4c850aad38b704b2e41bcb98780eb4be",
       "sourceChangedAt": "2026-10-27T07:57:39-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "quality",
@@ -45,11 +45,11 @@
       "sha256": "d0458fa586379c756a4b9097a96e80229cf6f7a1596c4646b778c0e50d5e3a14",
       "sourceChangedAt": "2026-10-03T22:46:34-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "vision",
@@ -57,11 +57,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "platform",
@@ -69,11 +69,11 @@
       "sha256": "e329f09295bd0650fd82be2a39b38626ec680a3b67bf9c9af3582724e3bad850",
       "sourceChangedAt": "2026-10-28T14:34:16-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "plugin",
@@ -81,11 +81,11 @@
       "sha256": "3707ef5553d2d8d80fe049ab68ef03ea02c66e4ae855d6882502649f2ab1def1",
       "sourceChangedAt": "2026-10-01T15:40:27-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "report_design_system",
@@ -93,11 +93,11 @@
       "sha256": "f00e0ad3c4b76d1a322673fa2300b8d6ddf7ddcc9f106a52441ff777a66ba3ee",
       "sourceChangedAt": "2026-09-28T10:28:01-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "standards_register",
@@ -105,11 +105,11 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "status",
@@ -117,11 +117,11 @@
       "sha256": "691ced31b6c56f0b66e13993dee2e39a50423400bdd472dde7954cec25a49fdb",
       "sourceChangedAt": "2026-10-28T18:36:59-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "open_loop",
@@ -129,11 +129,11 @@
       "sha256": "3130c53062fcd10529495180dac83eaf6b6565c49587929364ffde62eeb396f3",
       "sourceChangedAt": "2026-10-28T18:36:59-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     },
     {
       "key": "audit",
@@ -141,11 +141,11 @@
       "sha256": "e96601a5b0f4a0e6ede78c92f124119fdca0de48404160ad1ce93f0dcb5cdcfc",
       "sourceChangedAt": "2026-10-27T13:00:09-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
-      "semanticReviewTask": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-10-28T23:35:00Z"
+      "reconciledThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "semanticReviewTask": "revision2-p011-p020-release-gate-drift-repair-20261028",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-10-28T23:55:00Z"
     }
   ]
 }
