@@ -1,0 +1,7 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const read = path => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+const app=read("artifacts/bimlog/src/App.tsx"),page=read("artifacts/bimlog/src/pages/parity/admin-project-company-bindings.tsx"),directory=read("artifacts/bimlog/src/lib/capability-directory.ts"),routes=read("artifacts/api-server/src/routes/feature-policies.ts");
+assert.match(app,/path="\/admin\/project-company-bindings"[\s\S]*surface="total_control"/);assert.match(directory,/id: "project-company-bindings"[\s\S]*audience: "total_control"/);
+for(const token of ["Loading projects and companies","No projects are available","No active companies are available","role=\"alert\"","Immutable binding history","Saving immutable version","explanationEn","explanationEs"])assert.match(page,new RegExp(token));
+assert.match(page,/request\("\/admin\/project-company-bindings"[\s\S]*method: "POST"/);assert.match(page,/request\(`\/admin\/project-company-bindings\/\$\{nextProjectId\}`/);assert.match(routes,/router\.post\("\/admin\/project-company-bindings"[\s\S]*isSuperAdminMiddleware/);assert.match(routes,/router\.get\("\/admin\/project-company-bindings\/:projectId"[\s\S]*isSuperAdminMiddleware/);console.log("P022 project-company binding parity checks passed");
