@@ -53,7 +53,6 @@ const CompanyPricingTemplates = namedPage(() => import("@/pages/CompanyPricingTe
 const CoordinationKnowledgeLibrary = namedPage(() => import("@/pages/CoordinationKnowledgeLibrary"), "CoordinationKnowledgeLibrary");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
-const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -323,9 +322,6 @@ function Router() {
       </Route>
       <Route path="/total-control">
         {() => <AccessRoute component={TotalControl} surface="total_control" />}
-      </Route>
-      <Route path="/admin/project-company-bindings">
-        {() => <AccessRoute component={ProjectCompanyBindings} surface="total_control" />}
       </Route>
       <Route path="/admin/project-company-bindings">
         {() => <AccessRoute component={ProjectCompanyBindings} surface="total_control" />}
