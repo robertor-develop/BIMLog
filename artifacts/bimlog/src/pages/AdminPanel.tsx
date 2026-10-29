@@ -243,7 +243,7 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
 
 type MasterCatalogEntry = { id: string; code: string; name: string; state: "active" | "inactive" | "retired"; version: number };
 
-function MasterCatalogsTab({ token }: { token: string }) {
+export function MasterCatalogsTab({ token }: { token: string }) {
   const es = isSpanishUi();
   const [entries, setEntries] = useState<Record<"services" | "phases", MasterCatalogEntry[]>>({ services: [], phases: [] });
   const [drafts, setDrafts] = useState<Record<"services" | "phases", { code: string; name: string }>>({ services: { code: "", name: "" }, phases: { code: "", name: "" } });
