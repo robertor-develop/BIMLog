@@ -73,6 +73,7 @@ const AiControlRuns = namedPage(() => import("@/pages/parity/ai-control-runs"), 
 const AiControlStatus = namedPage(() => import("@/pages/parity/ai-control-status"), "AiControlStatus");
 const AiControlUsage = namedPage(() => import("@/pages/parity/ai-control-usage"), "AiControlUsage");
 const AuthLaunchStepUp = namedPage(() => import("@/pages/parity/auth-launch-step-up"), "AuthLaunchStepUp");
+const AuthLogin = namedPage(() => import("@/pages/parity/auth-login"), "AuthLogin");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -232,6 +233,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/login" component={Login} />
+      <Route path="/auth/login" component={AuthLogin} />
       <Route path="/register" component={Register} />
       <Route path="/verify-email" component={VerifyEmail} />
       <Route path="/reset-password" component={ResetPasswordPage} />
