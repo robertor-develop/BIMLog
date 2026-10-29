@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
-    "routeTemplates": 48,
+    "routeTemplates": 53,
     "projectSurfaces": 20,
-    "customerSurfaces": 68,
-    "viewportCases": 204
+    "customerSurfaces": 73,
+    "viewportCases": 219
   },
   "viewports": [
     {
@@ -1016,6 +1016,121 @@
     },
     {
       "order": 53,
+      "path": "/admin/fix-specific-link",
+      "guard": "access",
+      "target": "FixSpecificLink",
+      "samplePath": "/admin/fix-specific-link",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 54,
+      "path": "/admin/launch-configuration",
+      "guard": "access",
+      "target": "LaunchConfiguration",
+      "samplePath": "/admin/launch-configuration",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 55,
+      "path": "/admin/master-catalogs",
+      "guard": "access",
+      "target": "AdminMasterCatalogs",
+      "samplePath": "/admin/master-catalogs",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 56,
+      "path": "/admin/overview",
+      "guard": "access",
+      "target": "AdminOverview",
+      "samplePath": "/admin/overview",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 57,
+      "path": "/admin/platform-capabilities",
+      "guard": "access",
+      "target": "AdminPlatformCapabilities",
+      "samplePath": "/admin/platform-capabilities",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 58,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief",
@@ -1038,7 +1153,7 @@
       ]
     },
     {
-      "order": 54,
+      "order": 59,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing",
@@ -1061,7 +1176,7 @@
       ]
     },
     {
-      "order": 55,
+      "order": 60,
       "path": "/features",
       "guard": "public",
       "target": "Features",
@@ -1084,7 +1199,7 @@
       ]
     },
     {
-      "order": 56,
+      "order": 61,
       "path": "/about",
       "guard": "public",
       "target": "About",
@@ -1107,7 +1222,7 @@
       ]
     },
     {
-      "order": 57,
+      "order": 62,
       "path": "/contact",
       "guard": "public",
       "target": "Contact",
