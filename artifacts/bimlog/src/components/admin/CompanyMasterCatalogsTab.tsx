@@ -9,6 +9,7 @@ type WorkflowOption = { versionId: string; name: string; version: number; source
 type Usage = { intakeCount: number; taskCount: number; workPackageCount: number; totalCount: number };
 type PolicyMode = "approved_only" | "defaults_allowed";
 type Capability = { companyId: number; canManage: boolean; isSuperAdmin: boolean; mode: PolicyMode; policyVersion: number | null };
+type CatalogGrant = { id: string; userId: number; fullName: string; email: string; state: "active" | "revoked"; grantedAt: string; revokedAt?: string | null };
 const kinds: Kind[] = ["client", "discipline", "service", "phase"];
 const labels: Record<Kind, [string, string]> = {
   client: ["Clients", "Clientes"], discipline: ["Disciplines", "Disciplinas"], service: ["Services", "Servicios"], phase: ["Phases", "Fases"],
@@ -19,6 +20,8 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   const [entries, setEntries] = useState<Record<Kind, Entry[]>>({ client: [], discipline: [], service: [], phase: [] });
   const [drafts, setDrafts] = useState<Record<Kind, { code: string; name: string; aliases: string }>>({ client: { code: "", name: "", aliases: "" }, discipline: { code: "", name: "", aliases: "" }, service: { code: "", name: "", aliases: "" }, phase: { code: "", name: "", aliases: "" } });
   const [grantEmail, setGrantEmail] = useState("");
+  const [grants, setGrants] = useState<CatalogGrant[]>([]);
+  const [grantsError, setGrantsError] = useState("");
   const [policyDraft, setPolicyDraft] = useState<PolicyMode>("defaults_allowed");
   const [editing, setEditing] = useState<{ kind: Kind; id: string; name: string; aliases: string; version: number } | null>(null);
   const [selectedKind, setSelectedKind] = useState<Kind>("client");
@@ -56,14 +59,17 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   }, [token]);
   const load = useCallback(async () => {
     const cap = await request("/company/master-catalogs/capabilities") as Capability;
-    const [rows, workflowBody] = await Promise.all([
+    const [rows, workflowBody, grantsBody] = await Promise.all([
       Promise.all(kinds.map(async kind => [kind, (await request(`/company/master-catalogs/${kind}?includeInactive=true`)).entries ?? []] as const)),
       request("/company/delivery-workflows/options"),
+      cap.isSuperAdmin ? request(`/admin/company-master-catalog-grants/${cap.companyId}`).catch(error => ({ grants: [], error })) : Promise.resolve({ grants: [] }),
     ]);
     setCapability(cap);
     setPolicyDraft(cap.mode);
     setEntries(Object.fromEntries(rows) as Record<Kind, Entry[]>);
     setWorkflowOptions((workflowBody.options ?? []).filter((option: WorkflowOption) => option.source === "company"));
+    setGrants(grantsBody.grants ?? []);
+    setGrantsError(grantsBody.error ? t("Grant history could not be loaded. Retry before changing access.", "No se pudo cargar el historial de permisos. Reintente antes de cambiar el acceso.") : "");
     setLoadError("");
   }, [request]);
   useEffect(() => {
@@ -112,6 +118,15 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
       await load();
       setMessage(action === "grant" ? t("Company PMO access granted to the existing user account.", "Acceso PMO de empresa otorgado a la cuenta existente.") : t("Company PMO access revoked.", "Acceso PMO de empresa revocado."));
     } catch (error) { setMessage(String(error)); } finally { setBusy(false); }
+  }
+
+  async function revokeGrant(id: string) {
+    setBusy(true); setMessage("");
+    try {
+      await request(`/admin/company-master-catalog-grants/${id}/revoke`, { method: "POST" });
+      await load();
+      setMessage(t("Company PMO access revoked; the authority history remains visible.", "Acceso PMO de empresa revocado; el historial de autoridad permanece visible."));
+    } catch (error) { setMessage(explainRequestError(error)); } finally { setBusy(false); }
   }
 
   async function savePolicy() {
@@ -163,7 +178,7 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
     </section>}
     {ready && capability && <section style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14, minWidth: 0 }}><h3>{t("Company catalog policy", "Política del catálogo de empresa")}</h3><p>{t("This policy remains in force even if the last PMO administrator is revoked. Approved-only requires active company values for new project selections; existing saved selections remain historical.", "Esta política sigue vigente aunque se revoque al último administrador PMO. Solo aprobados exige valores activos de la empresa para nuevas selecciones del proyecto; las selecciones guardadas permanecen como historial.")}</p><label style={{ display: "grid", gap: 5, minWidth: 0 }}>{t("Selection mode", "Modo de selección")} <select style={{ width: "100%", minWidth: 0 }} value={policyDraft} disabled={!capability.canManage || !capability.policyVersion || busy} onChange={event => setPolicyDraft(event.target.value as PolicyMode)}><option value="approved_only">{t("Approved company values only", "Solo valores aprobados de la empresa")}</option><option value="defaults_allowed">{t("Company values and BIMLog defaults", "Valores de empresa y predeterminados de BIMLog")}</option></select></label>{capability.canManage && <button type="button" disabled={busy || !capability.policyVersion || policyDraft === capability.mode} onClick={() => void savePolicy()}>{t("Save policy", "Guardar política")}</button>}</section>}
     {message && <p role="status" style={{ padding: 10, background: "#fef3c7", borderRadius: 8 }}>{message}</p>}
-    {ready && capability?.isSuperAdmin && <section style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14 }}><h3>{t("Grant or revoke Company PMO access", "Otorgar o revocar acceso PMO de empresa")}</h3><p>{t("Enter the existing user's email. The server binds the grant to that user's own company; it does not grant global Super Admin.", "Ingrese el correo de la cuenta existente. El servidor vincula el permiso a la empresa de esa cuenta; no otorga Super Administrador global.")}</p><label>{t("User email", "Correo del usuario")} <input type="email" value={grantEmail} onChange={event => setGrantEmail(event.target.value)} /></label><div style={{ display: "flex", gap: 8, marginTop: 9 }}><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("grant")}>{t("Grant PMO", "Otorgar PMO")}</button><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("revoke")}>{t("Revoke PMO", "Revocar PMO")}</button></div></section>}
+    {ready && capability?.isSuperAdmin && <section aria-labelledby="company-catalog-grants-title" style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14 }}><h3 id="company-catalog-grants-title">{t("Company PMO authority", "Autoridad PMO de empresa")}</h3><p>{t("Grant an existing user access to manage this company's catalogs. The visible ledger preserves active and revoked authority without granting global Super Admin.", "Otorgue a una cuenta existente acceso para administrar los catálogos de esta empresa. El registro visible conserva la autoridad activa y revocada sin otorgar Super Administrador global.")}</p><label>{t("User email", "Correo del usuario")} <input type="email" value={grantEmail} onChange={event => setGrantEmail(event.target.value)} /></label><div style={{ display: "flex", gap: 8, marginTop: 9 }}><button type="button" disabled={busy || !grantEmail.includes("@") || Boolean(grantsError)} onClick={() => void grant("grant")}>{t("Grant PMO", "Otorgar PMO")}</button><button type="button" disabled={busy || !grantEmail.includes("@") || Boolean(grantsError)} onClick={() => void grant("revoke")}>{t("Revoke by email", "Revocar por correo")}</button></div>{grantsError && <p role="alert">{grantsError}</p>}{!grantsError && grants.length === 0 && <p role="status">{t("No Company PMO grants are recorded for this company.", "No hay permisos PMO registrados para esta empresa.")}</p>}{!grantsError && grants.length > 0 && <div style={{ overflowX: "auto", marginTop: 12 }}><table style={{ width: "100%", borderCollapse: "collapse" }}><thead><tr><th>{t("User", "Usuario")}</th><th>{t("Email", "Correo")}</th><th>{t("State", "Estado")}</th><th>{t("Granted", "Otorgado")}</th><th>{t("Action", "Acción")}</th></tr></thead><tbody>{grants.map(item => <tr key={item.id}><td>{item.fullName}</td><td>{item.email}</td><td>{item.state === "active" ? t("Active", "Activo") : t("Revoked", "Revocado")}</td><td>{new Date(item.grantedAt).toLocaleString()}</td><td>{item.state === "active" ? <button type="button" disabled={busy} onClick={() => void revokeGrant(item.id)}>{t("Revoke", "Revocar")}</button> : <span>{item.revokedAt ? new Date(item.revokedAt).toLocaleString() : t("Revoked", "Revocado")}</span>}</td></tr>)}</tbody></table></div>}</section>}
     {ready && capability && <nav className="company-catalog-kind-nav" aria-label={t("Company catalog sections", "Secciones del catálogo de empresa")} style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8, position: "sticky", top: 0, zIndex: 2, padding: "8px 0", background: "hsl(var(--background))" }}>
       {kinds.map(kind => { const summary = summarizeCompanyCatalog(entries[kind]); return <button key={kind} type="button" aria-pressed={selectedKind === kind} onClick={() => { setSelectedKind(kind); setEditing(null); setSearch(""); setStateFilter("all"); }} style={{ minWidth: 0, padding: "10px 8px", borderRadius: 8, border: selectedKind === kind ? "2px solid #2563eb" : "1px solid #cbd5e1", background: selectedKind === kind ? "#eff6ff" : "white" }}>
         <span style={{ display: "block", fontWeight: 700 }}>{spanish ? labels[kind][1] : labels[kind][0]}</span>
