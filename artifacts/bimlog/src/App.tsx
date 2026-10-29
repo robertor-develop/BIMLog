@@ -79,6 +79,7 @@ const AutodeskHubs = namedPage(() => import("@/pages/parity/autodesk-hubs"), "Au
 const AutodeskLogin = namedPage(() => import("@/pages/parity/autodesk-login"), "AutodeskLogin");
 const AutodeskProjects = namedPage(() => import("@/pages/parity/autodesk-projects"), "AutodeskProjects");
 const AutodeskToken = namedPage(() => import("@/pages/parity/autodesk-token"), "AutodeskToken");
+const CommercialBillingIdentity = namedPage(() => import("@/pages/parity/commercial-billing-identity"), "CommercialBillingIdentity");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -253,6 +254,9 @@ function Router() {
       </Route>
       <Route path="/autodesk/token">
         {() => <ProtectedRoute component={AutodeskToken} />}
+      </Route>
+      <Route path="/commercial/billing-identity">
+        {() => <ProtectedRoute component={CommercialBillingIdentity} />}
       </Route>
       <Route path="/register" component={Register} />
       <Route path="/verify-email" component={VerifyEmail} />
