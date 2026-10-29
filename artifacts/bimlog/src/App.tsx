@@ -341,7 +341,7 @@ function Router() {
         {() => <AccessRoute component={AdminMasterCatalogs} surface="total_control" />}
       </Route>
       <Route path="/admin/overview">
-        {() => <AccessRoute component={AdminOverview} surface="admin" />}
+        {() => <AccessRoute component={AdminOverview} surface="project_administration" />}
       </Route>
       <Route path="/admin/platform-capabilities">
         {() => <AccessRoute component={AdminPlatformCapabilities} surface="total_control" />}

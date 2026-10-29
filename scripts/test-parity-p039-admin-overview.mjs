@@ -5,7 +5,7 @@ const app=fs.readFileSync(new URL("../artifacts/bimlog/src/App.tsx",import.meta.
 const directory=fs.readFileSync(new URL("../artifacts/bimlog/src/lib/capability-directory.ts",import.meta.url),"utf8");
 const routes=fs.readFileSync(new URL("../artifacts/api-server/src/routes/admin.ts",import.meta.url),"utf8");
 const checks=[
- [app.includes('/admin/overview')&&app.includes('component={AdminOverview} surface="admin"'),"admin-protected direct route"],
+ [app.includes('/admin/overview')&&app.includes('component={AdminOverview} surface="project_administration"'),"project-administration protected direct route"],
  [directory.includes('id: "admin-overview"')&&directory.includes('href: "/admin/overview"'),"discoverable All Tools entry"],
  [page.includes("OverviewTab")&&page.includes("Operational summary"),"complete summary and lifecycle guidance"],
  [panel.includes('export function OverviewTab')&&panel.includes('/admin/overview?scope=mine'),"scoped operational data"],
