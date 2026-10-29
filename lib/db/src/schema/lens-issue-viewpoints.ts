@@ -58,7 +58,7 @@ export const lensIssueViewpointRevisionsTable = pgTable("lens_issue_viewpoint_re
   displayOrderCheck: check("lens_issue_viewpoint_revisions_display_order_check", sql`${table.displayOrder} >= 0`),
   lifecycleStatusCheck: check("lens_issue_viewpoint_revisions_lifecycle_status_check", sql`${table.lifecycleStatus} IN ('active','archived')`),
   revisionUnique: unique("lens_issue_viewpoint_revisions_number_uq").on(table.issueViewpointId, table.revisionNumber),
-  historyIndex: index("lens_issue_viewpoint_revisions_history_idx").on(table.issueViewpointId, table.revisionNumber.desc()),
+  historyIndex: index("lens_issue_viewpoint_revisions_history_idx").on(table.issueViewpointId, table.revisionNumber.desc().nullsFirst()),
 }));
 
 export type LensIssueViewpoint = typeof lensIssueViewpointsTable.$inferSelect;
