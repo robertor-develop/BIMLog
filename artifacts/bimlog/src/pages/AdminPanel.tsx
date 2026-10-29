@@ -756,15 +756,24 @@ function EmailLogTab({ token }: { token: string }) {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({ status: "", triggerType: "", from: "", to: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const load = useCallback(() => {
+    setLoading(true);
+    setError("");
     const params = new URLSearchParams({ page: String(page), ...Object.fromEntries(Object.entries(filters).filter(([, v]) => v)) });
-    apiFetch(`/admin/email-log?scope=mine&${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin email log load", error));
+    apiFetch(`/admin/email-log?scope=mine&${params}`, token)
+      .then(async r => { const body = await r.json().catch(() => ({})); if (!r.ok) throw new Error(body.error || "Unable to load email evidence."); return body; })
+      .then(d => { setLogs(d.data || []); setTotal(d.total || 0); })
+      .catch((cause) => { logClientError("admin email log load", cause); setError(cause instanceof Error ? cause.message : "Unable to load email evidence."); })
+      .finally(() => setLoading(false));
   }, [token, page, filters]);
   useEffect(() => { load(); }, [load]);
 
   return (
     <div>
+      <p style={{ marginTop: 0, fontSize: 13 }}>Email Log shows delivery evidence for projects you administer. A sent record confirms provider acceptance; failed and skipped records retain their reason without exposing message credentials.</p>
       <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
         <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 12 }}>
           <option value="">All Status</option>
@@ -776,6 +785,9 @@ function EmailLogTab({ token }: { token: string }) {
         <Button size="sm" onClick={load}>Filter</Button>
         <span style={{ marginLeft: "auto", fontSize: 12, color: "hsl(var(--muted-foreground))", alignSelf: "center" }}>{total} records</span>
       </div>
+      {loading && <div role="status" style={{ padding: "16px 0" }}>Loading email evidence…</div>}
+      {error && <div role="alert" style={{ padding: 12, border: "1px solid #ef4444", borderRadius: 8 }}>{error} <Button size="sm" variant="outline" onClick={load}>Retry</Button></div>}
+      {!loading && !error && logs.length === 0 && <div role="status" style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", textAlign: "center" }}>No email delivery records match this administered scope and filter.</div>}
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>To</Th><Th>Subject</Th><Th>Trigger</Th><Th>Status</Th><Th>Error</Th><Th>Sent At</Th></tr></thead>
