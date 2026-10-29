@@ -61,6 +61,7 @@ const AdminPlatformCapabilities = namedPage(() => import("@/pages/parity/admin-p
 const AdminPlatformStats = namedPage(() => import("@/pages/parity/admin-platform-stats"), "AdminPlatformStats");
 const AdminProjectsList = namedPage(() => import("@/pages/parity/admin-projects-list"), "AdminProjectsList");
 const AdminSupport = namedPage(() => import("@/pages/parity/admin-support"), "AdminSupport");
+const AiControlBudgets = namedPage(() => import("@/pages/parity/ai-control-budgets"), "AiControlBudgets");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -357,6 +358,9 @@ function Router() {
       </Route>
       <Route path="/admin/support-operations">
         {() => <AccessRoute component={AdminSupport} surface="total_control" />}
+      </Route>
+      <Route path="/ai-control/budgets">
+        {() => <AccessRoute component={AiControlBudgets} surface="total_control" />}
       </Route>
       <Route path="/living-brief">
         {() => <AccessRoute component={LivingBrief} surface="living_brief" />}
