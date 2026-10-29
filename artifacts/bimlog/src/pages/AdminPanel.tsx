@@ -642,34 +642,48 @@ function ProjectsTab({ token }: { token: string }) {
   const [transferModal, setTransferModal] = useState<number | null>(null);
   const [newOwnerId, setNewOwnerId] = useState("");
   const [msg, setMsg] = useState("");
+  const [projectState, setProjectState] = useState<"loading" | "ready" | "error" | "saving">("loading");
+  const [projectError, setProjectError] = useState("");
+  const projectSpanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const pt = (en: string, es: string) => projectSpanish ? es : en;
 
-  const load = () => {
-    apiFetch("/admin/projects?scope=mine", token).then(r => r.json()).then(setProjects).catch((error) => logClientError("admin projects load", error));
-    apiFetch("/admin/users?scope=mine", token).then(r => r.json()).then(d => setAllUsers(d.data || [])).catch((error) => logClientError("admin project users load", error));
+  const load = async () => {
+    setProjectState("loading"); setProjectError("");
+    try {
+      const [projectResponse, userResponse] = await Promise.all([apiFetch("/admin/projects?scope=mine", token), apiFetch("/admin/users?scope=mine", token)]);
+      if (!projectResponse.ok || !userResponse.ok) throw new Error(projectResponse.status === 403 || userResponse.status === 403 ? pt("You do not have project-administration permission.", "No tiene permiso de administración de proyectos.") : pt("Projects could not be loaded.", "No se pudieron cargar los proyectos."));
+      const projectRows = await projectResponse.json(), userRows = await userResponse.json();
+      setProjects(Array.isArray(projectRows) ? projectRows : []); setAllUsers(userRows.data || []); setProjectState("ready");
+    } catch (error) { logClientError("admin projects load", error); setProjectError(error instanceof Error ? error.message : pt("Projects could not be loaded.", "No se pudieron cargar los proyectos.")); setProjectState("error"); }
   };
-  useEffect(() => { load(); }, [token]);
+  useEffect(() => { void load(); }, [token]);
 
   const doArchive = async (id: number, status: string) => {
-    if (status === "archived") {
-      await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: "active" }) });
-      setMsg("Project restored."); load(); return;
-    }
-    if (await confirmAndRetireProject(id, (path, init) => apiFetch(path, token, init))) {
-      setMsg("Project retired; dependent records were preserved."); load();
-    }
+    setProjectState("saving"); setProjectError(""); setMsg("");
+    try {
+      if (status === "archived") { const response = await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: "active" }) }); if (!response.ok) throw new Error(pt("Project could not be restored.", "No se pudo restaurar el proyecto.")); setMsg(pt("Project restored; administration evidence was recorded.", "Proyecto restaurado; la evidencia administrativa quedó registrada.")); await load(); return; }
+      if (await confirmAndRetireProject(id, (path, init) => apiFetch(path, token, init))) { setMsg(pt("Project retired; dependent records were preserved and evidence recorded.", "Proyecto retirado; los registros dependientes se conservaron y la evidencia quedó registrada.")); await load(); } else setProjectState("ready");
+    } catch (error) { setProjectError(error instanceof Error ? error.message : pt("Project could not be changed.", "No se pudo cambiar el proyecto.")); setProjectState("error"); }
   };
   const doTransfer = async () => {
     if (!transferModal || !newOwnerId) return;
+    setProjectState("saving"); setProjectError(""); setMsg("");
     const r = await apiFetch(`/admin/projects/${transferModal}/transfer`, token, { method: "POST", body: JSON.stringify({ newOwnerId: parseInt(newOwnerId) }) });
     const d = await r.json();
-    if (d.id) { setTransferModal(null); setNewOwnerId(""); setMsg("Ownership transferred."); load(); }
-    else setMsg(d.error || "Failed");
+    if (r.ok && d.id) { setTransferModal(null); setNewOwnerId(""); setMsg(pt("Ownership transferred; evidence was recorded.", "Propiedad transferida; la evidencia quedó registrada.")); await load(); }
+    else { setProjectError(String(d.error || pt("Ownership could not be transferred.", "No se pudo transferir la propiedad."))); setProjectState("error"); }
   };
 
   return (
     <div>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+      {projectError && <div role="alert" style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: 12, color: "#b91c1c" }}>{projectError} <Button size="sm" variant="outline" onClick={() => void load()}>{pt("Try again", "Intentar de nuevo")}</Button></div>}
+      <h2 style={{ fontSize: 16 }}>{pt("Administered Projects", "Proyectos administrados")}</h2>
+      <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{pt("Open governed work, retire or restore without deleting dependent records, and transfer ownership to an authorized user. Accepted actions preserve administration evidence.", "Abra trabajo gobernado, retire o restaure sin eliminar registros dependientes y transfiera la propiedad a un usuario autorizado. Las acciones aceptadas preservan evidencia administrativa.")}</p>
+      {projectState === "loading" && <p role="status">{pt("Loading administered projects…", "Cargando proyectos administrados…")}</p>}
+      {projectState !== "loading" && !projectError && projects.length === 0 && <p role="status">{pt("No projects are currently in your administration scope.", "Actualmente no hay proyectos en su alcance administrativo.")}</p>}
       <div style={{ overflowX: "auto" }}>
+        {projects.length > 0 &&
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Project</Th><Th>Code</Th><Th>Company</Th><Th>Convention Cos.</Th><Th>Status</Th><Th>Members</Th><Th>Files</Th><Th>Created</Th><Th>Actions</Th></tr></thead>
           <tbody>
@@ -696,16 +710,16 @@ function ProjectsTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 11 }}>{new Date(String(p.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    <Button size="sm" variant="outline" onClick={() => setLocation(`/projects/${p.id}`)}>View</Button>
-                    <Button size="sm" variant="outline" onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</Button>
-                    <Button size="sm" variant="outline" onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</Button>
+                    <Button size="sm" variant="outline" disabled={projectState === "saving"} onClick={() => setLocation(`/projects/${p.id}`)}>{pt("View", "Ver")}</Button>
+                    <Button size="sm" variant="outline" disabled={projectState === "saving"} onClick={() => void doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? pt("Restore", "Restaurar") : pt("Retire", "Retirar")}</Button>
+                    <Button size="sm" variant="outline" disabled={projectState === "saving"} onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>{pt("Transfer", "Transferir")}</Button>
                   </div>
                 </Td>
               </tr>
               );
             })}
           </tbody>
-        </table>
+        </table>}
       </div>
       {transferModal && (
         <Modal title="Transfer Ownership" onClose={() => setTransferModal(null)}>
@@ -716,7 +730,7 @@ function ProjectsTab({ token }: { token: string }) {
               {allUsers.map((u: Record<string, unknown>) => <option key={String(u.id)} value={String(u.id)}>{String(u.fullName)} ({String(u.email)})</option>)}
             </select>
           </div>
-          <Button onClick={doTransfer} disabled={!newOwnerId}>Transfer</Button>
+          <Button onClick={() => void doTransfer()} disabled={!newOwnerId || projectState === "saving"}>{projectState === "saving" ? pt("Transferring…", "Transfiriendo…") : pt("Transfer", "Transferir")}</Button>
         </Modal>
       )}
     </div>
@@ -1587,6 +1601,7 @@ export function AdminPanel() {
     if (typeof window === "undefined") return;
     const requested = new URLSearchParams(window.location.search).get("tab");
     if (requested === "companies") setActiveTab(2);
+    else if (requested === "projects") setActiveTab(3);
     else if ((requested === "feedback" || window.location.pathname.endsWith("/admin/feedback")) && isSuperAdmin) setActiveTab(9);
     else if (requested === "feedback" && !isSuperAdmin) setActiveTab(0);
   }, [isSuperAdmin]);
@@ -1667,7 +1682,7 @@ export function AdminPanel() {
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
           {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => (tab !== "Feedback" && tab !== "Master Catalogs") || isSuperAdmin).map(({ tab, i }) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 2) url.searchParams.set("tab", "companies"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}
