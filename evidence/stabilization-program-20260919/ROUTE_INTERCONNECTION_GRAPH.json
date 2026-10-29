@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked source; deterministic",
   "counts": {
-    "frontendRoutes": 60,
+    "frontendRoutes": 65,
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
     "apiRoutes": 796,
-    "frontendApiReferences": 317,
+    "frontendApiReferences": 318,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -335,48 +335,78 @@
     },
     {
       "order": 53,
+      "path": "/admin/fix-specific-link",
+      "guard": "access",
+      "target": "FixSpecificLink"
+    },
+    {
+      "order": 54,
+      "path": "/admin/launch-configuration",
+      "guard": "access",
+      "target": "LaunchConfiguration"
+    },
+    {
+      "order": 55,
+      "path": "/admin/master-catalogs",
+      "guard": "access",
+      "target": "AdminMasterCatalogs"
+    },
+    {
+      "order": 56,
+      "path": "/admin/overview",
+      "guard": "access",
+      "target": "AdminOverview"
+    },
+    {
+      "order": 57,
+      "path": "/admin/platform-capabilities",
+      "guard": "access",
+      "target": "AdminPlatformCapabilities"
+    },
+    {
+      "order": 58,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief"
     },
     {
-      "order": 54,
+      "order": 59,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing"
     },
     {
-      "order": 55,
+      "order": 60,
       "path": "/features",
       "guard": "public",
       "target": "Features"
     },
     {
-      "order": 56,
+      "order": 61,
       "path": "/about",
       "guard": "public",
       "target": "About"
     },
     {
-      "order": 57,
+      "order": 62,
       "path": "/contact",
       "guard": "public",
       "target": "Contact"
     },
     {
-      "order": 58,
+      "order": 63,
       "path": "*",
       "guard": "public",
       "target": "NotFound"
     },
     {
-      "order": 59,
+      "order": 64,
       "path": "*",
       "guard": "public",
       "target": "inline"
     },
     {
-      "order": 60,
+      "order": 65,
       "path": "*",
       "guard": "public",
       "target": "inline"
@@ -10699,6 +10729,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/HelpCenter.tsx",
       "apiPath": "/api/v1/help/manual/pdf"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/parity/admin-fix-specific-link.tsx",
+      "apiPath": "${API_BASE}/api/v1/admin/fix-specific-link"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Profile.tsx",
