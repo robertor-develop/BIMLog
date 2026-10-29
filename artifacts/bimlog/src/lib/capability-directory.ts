@@ -63,6 +63,7 @@ export const capabilityDirectory: CapabilityDirectoryEntry[] = [
   { id: "notifications", group: "Settings", name: { en: "Notification Settings", es: "Configuración de notificaciones" }, purpose: { en: "Choose how BIMLog notifies you.", es: "Elija cómo BIMLog le notifica." }, tasks: ["notifications", "email", "telegram"], href: "/settings/notifications", audience: "authenticated" },
   { id: "financial-controls", group: "Settings", name: { en: "Financial Controls", es: "Controles financieros" }, purpose: { en: "Configure governed financial approval controls.", es: "Configure controles de aprobación financiera gobernados." }, tasks: ["finance", "approvals", "limits"], href: "/settings/financial-controls", audience: "authenticated" },
   { id: "billing", group: "Settings", name: { en: "Billing and Support", es: "Facturación y soporte" }, purpose: { en: "Manage subscription, invoices, and support cases.", es: "Gestione suscripción, facturas y casos de soporte." }, tasks: ["billing", "invoices", "support"], href: "/settings/billing-support", audience: "authenticated" }
+  ,{ id: "support-satisfaction", group: "Settings", name: { en: "Rate Closed Support", es: "Calificar soporte cerrado" }, purpose: { en: "Rate a support case after you confirm its resolution and close it.", es: "Califique un caso de soporte después de confirmar su resolución y cerrarlo." }, tasks: ["support rating", "satisfaction", "closed case", "customer service"], href: "/settings/billing-support", audience: "authenticated" }
 ];
 
 const standardGuidance = (prerequisite: string, prerequisiteEs: string, actor: string, actorEs: string, nextStep: string, nextStepEs: string): CapabilityGuidance => ({
@@ -94,6 +95,7 @@ export const capabilityGuidance: Record<string, CapabilityGuidance> = {
   notifications: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Current user", "Usuario actual", "Save delivery preferences and verify the channel.", "Guarde preferencias y verifique el canal."),
   "financial-controls": standardGuidance("Authorized financial-control access.", "Acceso autorizado a controles financieros.", "Financial administrator", "Administrador financiero", "Save governed approval limits and verify enforcement.", "Guarde límites gobernados y verifique su aplicación."),
   billing: standardGuidance("Authorized company billing access.", "Acceso autorizado a facturación.", "Company billing administrator", "Administrador de facturación", "Review billing or open a traceable support case.", "Revise facturación o abra un caso de soporte rastreable."),
+  "support-satisfaction": standardGuidance("A support case requested by you must be closed.", "Un caso de soporte solicitado por usted debe estar cerrado.", "The original support requester", "El solicitante original del caso", "Submit one traceable rating; the case owner can review it without exposing another tenant.", "Envíe una calificación trazable; el responsable del caso puede revisarla sin exponer otro tenant."),
 };
 
 const addGuidance = (entry: CapabilityDirectoryEntry): CapabilityDirectoryEntry => ({ ...entry, guidance: capabilityGuidance[entry.id] });
