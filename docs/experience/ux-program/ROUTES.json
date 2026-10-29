@@ -310,6 +310,41 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/admin/fix-specific-link",
+      "owner": "FixSpecificLink",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin/launch-configuration",
+      "owner": "LaunchConfiguration",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin/master-catalogs",
+      "owner": "AdminMasterCatalogs",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin/overview",
+      "owner": "AdminOverview",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
+      "route": "/admin/platform-capabilities",
+      "owner": "AdminPlatformCapabilities",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/living-brief",
       "owner": "LivingBrief",
       "availability": "gated",
