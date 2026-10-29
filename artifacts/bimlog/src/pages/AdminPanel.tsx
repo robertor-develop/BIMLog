@@ -366,7 +366,7 @@ function OverviewTab({ token }: { token: string }) {
 }
 
 // ── Users Tab ─────────────────────────────────────────────────────────────────
-function UsersTab({ token }: { token: string }) {
+function UsersTab({ token, isSuperAdmin }: { token: string; isSuperAdmin: boolean }) {
   const [users, setUsers] = useState<Record<string, unknown>[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -377,11 +377,17 @@ function UsersTab({ token }: { token: string }) {
   const [showPw, setShowPw] = useState(false);
   const [projectsList, setProjectsList] = useState<{ id: number; code: string; name: string }[]>([]);
   const [msg, setMsg] = useState("");
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState("");
+  const [editUser, setEditUser] = useState<Record<string, unknown> | null>(null);
+  const userSpanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const ut = (en: string, es: string) => userSpanish ? es : en;
 
   const load = useCallback(() => {
     setLoading(true);
+    setError("");
     apiFetch(`/admin/users?scope=mine&search=${encodeURIComponent(search)}`, token)
-      .then(r => r.json()).then(d => setUsers(d.data || [])).finally(() => setLoading(false));
+      .then(async r => { const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(String(d.error||ut("Users could not be loaded.","No se pudieron cargar los usuarios."))); setUsers(d.data||[]); }).catch(caught=>setError(caught instanceof Error?caught.message:ut("Users could not be loaded.","No se pudieron cargar los usuarios."))).finally(() => setLoading(false));
   }, [search, token]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
@@ -390,16 +396,15 @@ function UsersTab({ token }: { token: string }) {
 
   const deleteUser = async (id: number, name: string) => {
     if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
-    await apiFetch(`/admin/users/${id}`, token, { method: "DELETE" });
-    setMsg("User deleted."); load();
+    setPending(`delete:${id}`);setError("");const r=await apiFetch(`/admin/users/${id}`,token,{method:"DELETE"});const d=await r.json().catch(()=>({}));if(r.ok){setMsg(ut("User deleted; administration evidence was recorded.","Usuario eliminado; la evidencia administrativa quedó registrada."));load();}else setError(String(d.error||ut("User could not be deleted.","No se pudo eliminar el usuario.")));setPending("");
   };
 
   const doResetPw = async () => {
     if (!resetModal) return;
     const r = await apiFetch(`/admin/users/${resetModal}/reset-password`, token, { method: "POST", body: JSON.stringify({ password: newPw }) });
     const d = await r.json();
-    if (d.success) { setResetModal(null); setNewPw(""); setMsg("Password reset."); }
-    else setMsg(d.error || "Failed");
+    if (r.ok&&d.success) { setResetModal(null); setNewPw(""); setMsg(ut("Password reset; administration evidence was recorded.","Contraseña restablecida; la evidencia administrativa quedó registrada.")); }
+    else setError(String(d.error || ut("Password could not be reset.","No se pudo restablecer la contraseña.")));
   };
   const doCreate = async () => {
     const body: Record<string, unknown> = { ...createForm };
@@ -407,17 +412,21 @@ function UsersTab({ token }: { token: string }) {
     else delete body.projectId;
     const r = await apiFetch("/admin/users", token, { method: "POST", body: JSON.stringify(body) });
     const d = await r.json();
-    if (d.id) { setShowCreate(false); setCreateForm({ fullName: "", email: "", password: "", companyName: "", projectId: "" }); setMsg("User created."); load(); }
-    else setMsg(d.error || "Failed");
+    if (r.ok&&d.id) { setShowCreate(false); setCreateForm({ fullName: "", email: "", password: "", companyName: "", projectId: "" }); setMsg(ut("User created; administration evidence was recorded.","Usuario creado; la evidencia administrativa quedó registrada.")); load(); }
+    else setError(String(d.error || ut("User could not be created.","No se pudo crear el usuario.")));
   };
+  const saveUser=async()=>{if(!editUser)return;setPending(`edit:${editUser.id}`);setError("");const r=await apiFetch(`/admin/users/${editUser.id}`,token,{method:"PATCH",body:JSON.stringify({fullName:editUser.fullName,email:editUser.email})});const d=await r.json().catch(()=>({}));if(r.ok){setEditUser(null);setMsg(ut("User updated; administration evidence was recorded.","Usuario actualizado; la evidencia administrativa quedó registrada."));load();}else setError(String(d.error||ut("User could not be updated.","No se pudo actualizar el usuario.")));setPending("");};
+  const toggleCommercial=async(u:Record<string,unknown>)=>{const id=Number(u.id),enabled=!Boolean(u.commercialAccess);setPending(`commercial:${id}`);setError("");const r=await apiFetch(`/admin/users/${id}/commercial-entitlement`,token,{method:"POST",body:JSON.stringify({enabled,featureKey:"package",reason:"ADMIN_USER_ACCESS_CHANGED"})});const d=await r.json().catch(()=>({}));if(r.ok){setMsg(ut("Commercial access updated; administration evidence was recorded.","Acceso comercial actualizado; la evidencia administrativa quedó registrada."));load();}else setError(String(d.error||ut("Commercial access could not be updated.","No se pudo actualizar el acceso comercial.")));setPending("");};
 
   return (
     <div>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+      {error&&<div role="alert" style={{background:"#fef2f2",border:"1px solid #fecaca",borderRadius:8,padding:12,color:"#b91c1c"}}>{error} <Button size="sm" variant="outline" onClick={load}>{ut("Try again","Intentar de nuevo")}</Button></div>}
+      <h2 style={{fontSize:16}}>{ut("Project Users","Usuarios de proyectos")}</h2><p style={{fontSize:12,color:"hsl(var(--muted-foreground))"}}>{ut("Create, edit, reset credentials, or remove users in projects you administer. Commercial entitlement changes are visible only to verified super administrators. Accepted actions are recorded.","Cree, edite, restablezca credenciales o elimine usuarios de proyectos que administra. Los cambios de acceso comercial solo son visibles para superadministradores verificados. Las acciones aceptadas quedan registradas.")}</p>
       <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
         <Input placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 320 }} />
         <Button size="sm" onClick={load}>Search</Button>
-        <Button size="sm" style={{ marginLeft: "auto" }} onClick={() => setShowCreate(true)}>+ Create User</Button>
+        <Button size="sm" style={{ marginLeft: "auto" }} onClick={() => setShowCreate(true)}>+ {ut("Create User","Crear usuario")}</Button>
       </div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -435,8 +444,10 @@ function UsersTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(u.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <Button size="sm" variant="outline" onClick={() => { setResetModal(u.id as number); setNewPw(""); }}>Reset PW</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => deleteUser(u.id as number, String(u.fullName))}>Delete</Button>
+                    <Button size="sm" variant="outline" disabled={Boolean(pending)} onClick={()=>setEditUser({...u})}>{ut("Edit","Editar")}</Button>
+                    <Button size="sm" variant="outline" disabled={Boolean(pending)} onClick={() => { setResetModal(u.id as number); setNewPw(""); }}>{ut("Reset PW","Restablecer")}</Button>
+                    {isSuperAdmin&&<Button size="sm" variant="outline" disabled={Boolean(pending)} onClick={()=>void toggleCommercial(u)}>{Boolean(u.commercialAccess)?ut("Revoke Commercial","Revocar comercial"):ut("Grant Commercial","Otorgar comercial")}</Button>}
+                    <Button size="sm" variant="outline" disabled={Boolean(pending)} style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => void deleteUser(u.id as number, String(u.fullName))}>{pending===`delete:${u.id}`?ut("Deleting…","Eliminando…"):ut("Delete","Eliminar")}</Button>
                   </div>
                 </Td>
               </tr>
@@ -445,6 +456,8 @@ function UsersTab({ token }: { token: string }) {
         </table>
       </div>
       {loading && <div style={{ padding: 16, color: "hsl(var(--muted-foreground))", textAlign: "center" }}>Loading...</div>}
+      {!loading&&!error&&users.length===0&&<div role="status" style={{padding:16,textAlign:"center"}}>{ut("No users match this project scope or search.","Ningún usuario coincide con este alcance de proyecto o búsqueda.")}</div>}
+      {editUser&&<Modal title={ut("Edit User","Editar usuario")} onClose={()=>setEditUser(null)}><label>{ut("Full name","Nombre completo")}<Input value={String(editUser.fullName||"")} onChange={e=>setEditUser(u=>({...u!,fullName:e.target.value}))}/></label><label>{ut("Email","Correo")}<Input value={String(editUser.email||"")} onChange={e=>setEditUser(u=>({...u!,email:e.target.value}))}/></label><Button disabled={Boolean(pending)||!String(editUser.fullName||"").trim()||!String(editUser.email||"").trim()} onClick={()=>void saveUser()}>{pending.startsWith("edit:")?ut("Saving…","Guardando…"):ut("Save","Guardar")}</Button></Modal>}
       {resetModal && (
         <Modal title="Reset Password" onClose={() => setResetModal(null)}>
           <div style={{ marginBottom: 12 }}>
@@ -1601,6 +1614,7 @@ export function AdminPanel() {
     if (typeof window === "undefined") return;
     const requested = new URLSearchParams(window.location.search).get("tab");
     if (requested === "companies") setActiveTab(2);
+    else if (requested === "users") setActiveTab(1);
     else if (requested === "projects") setActiveTab(3);
     else if ((requested === "feedback" || window.location.pathname.endsWith("/admin/feedback")) && isSuperAdmin) setActiveTab(9);
     else if (requested === "feedback" && !isSuperAdmin) setActiveTab(0);
@@ -1682,7 +1696,7 @@ export function AdminPanel() {
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
           {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => (tab !== "Feedback" && tab !== "Master Catalogs") || isSuperAdmin).map(({ tab, i }) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}
@@ -1690,7 +1704,7 @@ export function AdminPanel() {
 
         <main className="hq-admin-content">
           {activeTab === 0 && <OverviewTab token={token} />}
-          {activeTab === 1 && <UsersTab token={token} />}
+          {activeTab === 1 && <UsersTab token={token} isSuperAdmin={isSuperAdmin} />}
           {activeTab === 2 && <CompaniesTab token={token} />}
           {activeTab === 3 && <ProjectsTab token={token} />}
           {activeTab === 4 && <EmailLogTab token={token} />}
