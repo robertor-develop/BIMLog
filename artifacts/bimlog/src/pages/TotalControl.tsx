@@ -956,6 +956,13 @@ export function TotalControl() {
   const [loadError, setLoadError] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    if (requested === "commercial-launch") setActiveTab(7);
+    else if (requested === "launch-configuration") setActiveTab(8);
+  }, []);
+
   const loadAll = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -1073,7 +1080,7 @@ export function TotalControl() {
         </section>
         <div className="hq-total-control-tabs" role="navigation" aria-label="Total Control sections">
           {TABS.map((tab, i) => (
-            <button key={tab} onClick={() => setActiveTab(i)} className="hq-total-control-tab" data-active={activeTab === i}>
+            <button key={tab} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 7) url.searchParams.set("tab", "commercial-launch"); else if (i === 8) url.searchParams.set("tab", "launch-configuration"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }} className="hq-total-control-tab" data-active={activeTab === i}>
               {copy.tabs[tab] || tab}
             </button>
           ))}
