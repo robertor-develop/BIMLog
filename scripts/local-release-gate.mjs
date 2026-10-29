@@ -9,7 +9,12 @@ const outputIndex = process.argv.indexOf("--output");
 if (outputIndex < 0 || !process.argv[outputIndex + 1]) throw new Error("Use --output <external receipt path>.");
 const output = path.resolve(process.argv[outputIndex + 1]);
 const git = (...args) => execFileSync("git", ["-c", `safe.directory=${root.replaceAll('\\', '/')}`, "-C", root, ...args], { encoding: "utf8" }).trim();
-if (git("status", "--porcelain")) throw new Error("Local release gate requires a clean candidate.");
+const gitExit = (...args) => spawnSync("git", ["-c", `safe.directory=${root.replaceAll('\\', '/')}`, "-C", root, ...args], { encoding: "utf8", windowsHide: true }).status;
+const candidateChanged = () =>
+  gitExit("diff", "--quiet", "--ignore-submodules", "--") !== 0 ||
+  gitExit("diff", "--cached", "--quiet", "--ignore-submodules", "--") !== 0 ||
+  Boolean(git("ls-files", "--others", "--exclude-standard"));
+if (candidateChanged()) throw new Error("Local release gate requires a clean candidate.");
 const candidate = { commit: git("rev-parse", "HEAD"), tree: git("rev-parse", "HEAD^{tree}") };
 
 const commands = [
@@ -36,7 +41,7 @@ for (const item of commands) {
   if (result.status !== 0) throw new Error(`Local release gate failed at ${item.id} with exit ${result.status}.`);
 }
 
-if (git("status", "--porcelain") || git("rev-parse", "HEAD") !== candidate.commit || git("rev-parse", "HEAD^{tree}") !== candidate.tree)
+if (candidateChanged() || git("rev-parse", "HEAD") !== candidate.commit || git("rev-parse", "HEAD^{tree}") !== candidate.tree)
   throw new Error("Candidate changed during release verification; rerun on the final clean source.");
 const payload = {
   schemaVersion: 1,

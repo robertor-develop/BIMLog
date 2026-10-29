@@ -1,0 +1,2568 @@
+{
+  "schemaVersion": "bimlog-revision2-p004-route-family-module-reconciliation-v1",
+  "build": "P004",
+  "law": "shared-services-may-be-grouped-for-navigation-but-distinct-route-owner-and-business-identities-remain-intact",
+  "counts": {
+    "routes": 796,
+    "families": 101,
+    "modules": 39,
+    "sharedServiceFamilies": 70
+  },
+  "modules": [
+    {
+      "moduleIdentity": "${satisfactionPath}",
+      "familyKeys": [
+        "${satisfactionPath}::artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts"
+      ],
+      "routeCount": 2,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "admin",
+      "familyKeys": [
+        "admin::artifacts/api-server/src/routes/admin.ts",
+        "admin::artifacts/api-server/src/routes/commercial-data-correction.ts",
+        "admin::artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+        "admin::artifacts/api-server/src/routes/commercial-data-request-review.ts",
+        "admin::artifacts/api-server/src/routes/commercial-data-restriction.ts",
+        "admin::artifacts/api-server/src/routes/commercial-workspace.ts",
+        "admin::artifacts/api-server/src/routes/company-master-catalogs.ts",
+        "admin::artifacts/api-server/src/routes/contact.ts",
+        "admin::artifacts/api-server/src/routes/feature-policies.ts",
+        "admin::artifacts/api-server/src/routes/features.ts",
+        "admin::artifacts/api-server/src/routes/launch-configuration.ts",
+        "admin::artifacts/api-server/src/routes/master-catalogs.ts",
+        "admin::artifacts/api-server/src/routes/support-case-messages.ts",
+        "admin::artifacts/api-server/src/routes/support-case-satisfaction.ts",
+        "admin::artifacts/api-server/src/routes/support-cases.ts"
+      ],
+      "routeCount": 70,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "ai-control",
+      "familyKeys": [
+        "ai-control::artifacts/api-server/src/routes/ai-control-plane.ts"
+      ],
+      "routeCount": 25,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "assistant",
+      "familyKeys": [
+        "assistant::artifacts/api-server/src/routes/agents.ts"
+      ],
+      "routeCount": 3,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "auth",
+      "familyKeys": [
+        "auth::artifacts/api-server/src/routes/auth.ts"
+      ],
+      "routeCount": 11,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "autodesk",
+      "familyKeys": [
+        "autodesk::artifacts/api-server/src/routes/autodesk.ts"
+      ],
+      "routeCount": 5,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "commercial",
+      "familyKeys": [
+        "commercial::artifacts/api-server/src/routes/commercial-provider-webhook.ts",
+        "commercial::artifacts/api-server/src/routes/commercial-workspace.ts"
+      ],
+      "routeCount": 10,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "company",
+      "familyKeys": [
+        "company::artifacts/api-server/src/routes/company-master-catalogs.ts",
+        "company::artifacts/api-server/src/routes/company-pricing-templates.ts",
+        "company::artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "company::artifacts/api-server/src/routes/workflow-governance-policies.ts"
+      ],
+      "routeCount": 33,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "config",
+      "familyKeys": [
+        "config::artifacts/api-server/src/routes/config.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "connections",
+      "familyKeys": [
+        "connections::artifacts/api-server/src/routes/connections.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "contact",
+      "familyKeys": [
+        "contact::artifacts/api-server/src/routes/contact.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "coordination-knowledge",
+      "familyKeys": [
+        "coordination-knowledge::artifacts/api-server/src/routes/coordination-knowledge.ts"
+      ],
+      "routeCount": 42,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "cvr-health",
+      "familyKeys": [
+        "cvr-health::artifacts/api-server/src/routes/files.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "dashboard",
+      "familyKeys": [
+        "dashboard::artifacts/api-server/src/routes/dashboard_briefing.ts"
+      ],
+      "routeCount": 9,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "downloads",
+      "familyKeys": [
+        "downloads::artifacts/api-server/src/routes/downloads.ts"
+      ],
+      "routeCount": 2,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "features",
+      "familyKeys": [
+        "features::artifacts/api-server/src/routes/feature-policies.ts",
+        "features::artifacts/api-server/src/routes/features.ts"
+      ],
+      "routeCount": 12,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "feedback",
+      "familyKeys": [
+        "feedback::artifacts/api-server/src/routes/feedback.ts"
+      ],
+      "routeCount": 31,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "feedback-agent",
+      "familyKeys": [
+        "feedback-agent::artifacts/api-server/src/routes/feedback.ts"
+      ],
+      "routeCount": 2,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "files",
+      "familyKeys": [
+        "files::artifacts/api-server/src/routes/files.ts"
+      ],
+      "routeCount": 2,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "financial-controls",
+      "familyKeys": [
+        "financial-controls::artifacts/api-server/src/routes/financial-controls.ts"
+      ],
+      "routeCount": 10,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "healthz",
+      "familyKeys": [
+        "healthz::artifacts/api-server/src/routes/health.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "help",
+      "familyKeys": [
+        "help::artifacts/api-server/src/routes/reports.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "integrations",
+      "familyKeys": [
+        "integrations::artifacts/api-server/src/routes/telegram-product.ts"
+      ],
+      "routeCount": 28,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "lens-next",
+      "familyKeys": [
+        "lens-next::artifacts/api-server/src/routes/projects.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "living-brief",
+      "familyKeys": [
+        "living-brief::artifacts/api-server/src/routes/living_brief.ts"
+      ],
+      "routeCount": 8,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "master-catalogs",
+      "familyKeys": [
+        "master-catalogs::artifacts/api-server/src/routes/master-catalogs.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "me",
+      "familyKeys": [
+        "me::artifacts/api-server/src/routes/connections.ts"
+      ],
+      "routeCount": 10,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "notifications",
+      "familyKeys": [
+        "notifications::artifacts/api-server/src/routes/notifications.ts"
+      ],
+      "routeCount": 4,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "onboarding",
+      "familyKeys": [
+        "onboarding::artifacts/api-server/src/routes/onboarding.ts"
+      ],
+      "routeCount": 6,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "projects",
+      "familyKeys": [
+        "projects::artifacts/api-server/src/routes/activity.ts",
+        "projects::artifacts/api-server/src/routes/agents.ts",
+        "projects::artifacts/api-server/src/routes/change_orders.ts",
+        "projects::artifacts/api-server/src/routes/clash_reports.ts",
+        "projects::artifacts/api-server/src/routes/company-pricing-templates.ts",
+        "projects::artifacts/api-server/src/routes/connections.ts",
+        "projects::artifacts/api-server/src/routes/contract-item-workflows.ts",
+        "projects::artifacts/api-server/src/routes/conventions.ts",
+        "projects::artifacts/api-server/src/routes/coordination-hub.ts",
+        "projects::artifacts/api-server/src/routes/coordination.ts",
+        "projects::artifacts/api-server/src/routes/coordinator-actions.ts",
+        "projects::artifacts/api-server/src/routes/documents.ts",
+        "projects::artifacts/api-server/src/routes/edt-engine.ts",
+        "projects::artifacts/api-server/src/routes/files.ts",
+        "projects::artifacts/api-server/src/routes/financial-apu.ts",
+        "projects::artifacts/api-server/src/routes/financial-budgets.ts",
+        "projects::artifacts/api-server/src/routes/financial-contracts.ts",
+        "projects::artifacts/api-server/src/routes/folder-wizard-imports.ts",
+        "projects::artifacts/api-server/src/routes/folder-wizard-routing.ts",
+        "projects::artifacts/api-server/src/routes/generic-apu-budget-controls.ts",
+        "projects::artifacts/api-server/src/routes/intelligence.ts",
+        "projects::artifacts/api-server/src/routes/job-intake.ts",
+        "projects::artifacts/api-server/src/routes/job-operations.ts",
+        "projects::artifacts/api-server/src/routes/linked_items.ts",
+        "projects::artifacts/api-server/src/routes/meeting_minutes.ts",
+        "projects::artifacts/api-server/src/routes/members.ts",
+        "projects::artifacts/api-server/src/routes/project_directory.ts",
+        "projects::artifacts/api-server/src/routes/projects.ts",
+        "projects::artifacts/api-server/src/routes/reports.ts",
+        "projects::artifacts/api-server/src/routes/rfis.ts",
+        "projects::artifacts/api-server/src/routes/schedule.ts",
+        "projects::artifacts/api-server/src/routes/submittal_reports.ts",
+        "projects::artifacts/api-server/src/routes/submittals.ts",
+        "projects::artifacts/api-server/src/routes/team-performance.ts",
+        "projects::artifacts/api-server/src/routes/telegram-product.ts",
+        "projects::artifacts/api-server/src/routes/transmittals.ts"
+      ],
+      "routeCount": 427,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "public",
+      "familyKeys": [
+        "public::artifacts/api-server/src/routes/public-commercial-availability.ts",
+        "public::artifacts/api-server/src/routes/public-legal-identity.ts"
+      ],
+      "routeCount": 2,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "release-diagnostics",
+      "familyKeys": [
+        "release-diagnostics::artifacts/api-server/src/routes/health.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "repair-execution",
+      "familyKeys": [
+        "repair-execution::artifacts/api-server/src/routes/repairs.ts"
+      ],
+      "routeCount": 2,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "repairs",
+      "familyKeys": [
+        "repairs::artifacts/api-server/src/routes/repairs.ts"
+      ],
+      "routeCount": 5,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "rfis",
+      "familyKeys": [
+        "rfis::artifacts/api-server/src/routes/rfis.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "search",
+      "familyKeys": [
+        "search::artifacts/api-server/src/routes/search.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "support",
+      "familyKeys": [
+        "support::artifacts/api-server/src/routes/commercial-data-correction.ts",
+        "support::artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
+        "support::artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+        "support::artifacts/api-server/src/routes/commercial-data-restriction.ts",
+        "support::artifacts/api-server/src/routes/support-case-messages.ts",
+        "support::artifacts/api-server/src/routes/support-case-satisfaction.ts",
+        "support::artifacts/api-server/src/routes/support-cases.ts"
+      ],
+      "routeCount": 14,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "users",
+      "familyKeys": [
+        "users::artifacts/api-server/src/routes/auth.ts",
+        "users::artifacts/api-server/src/routes/company-profile.ts"
+      ],
+      "routeCount": 9,
+      "preserveDistinctOwners": true
+    },
+    {
+      "moduleIdentity": "webhooks",
+      "familyKeys": [
+        "webhooks::artifacts/api-server/src/routes/telegram-product.ts"
+      ],
+      "routeCount": 1,
+      "preserveDistinctOwners": true
+    }
+  ],
+  "families": [
+    {
+      "familyKey": "${satisfactionPath}::artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
+      "moduleIdentity": "${satisfactionPath}",
+      "sourceOwner": "artifacts/api-server/src/routes/support-case-satisfaction.behavior.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET ${satisfactionPath}",
+        "POST ${satisfactionPath}"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/admin.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/admin.ts",
+      "routeCount": 23,
+      "routeIdentities": [
+        "DELETE /admin/companies/:id",
+        "DELETE /admin/projects/:id",
+        "DELETE /admin/users/:id",
+        "GET /admin/actions-log",
+        "GET /admin/activity",
+        "GET /admin/ai-usage",
+        "GET /admin/companies",
+        "GET /admin/email-log",
+        "GET /admin/feature-flags",
+        "GET /admin/overview",
+        "GET /admin/platform-stats",
+        "GET /admin/projects",
+        "GET /admin/projects-list",
+        "GET /admin/users",
+        "PATCH /admin/companies/:id",
+        "PATCH /admin/feature-flags/:id",
+        "PATCH /admin/projects/:id",
+        "PATCH /admin/users/:id",
+        "POST /admin/fix-specific-link",
+        "POST /admin/projects/:id/transfer",
+        "POST /admin/users",
+        "POST /admin/users/:id/commercial-entitlement",
+        "POST /admin/users/:id/reset-password"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/commercial-data-correction.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-data-correction.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "POST /admin/support/cases/:id/data-request/correction"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /admin/support/cases/:id/data-request/fulfillment",
+        "POST /admin/support/cases/:id/data-request/fulfillment"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/commercial-data-request-review.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-data-request-review.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "PATCH /admin/support/cases/:id/data-request"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/commercial-data-restriction.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-data-restriction.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "POST /admin/support/cases/:id/data-request/restriction"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/commercial-workspace.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "routeCount": 5,
+      "routeIdentities": [
+        "GET /admin/commercial-launch",
+        "GET /admin/commercial-launch/authorization",
+        "GET /admin/commercial-launch/dossier",
+        "GET /admin/commercial-launch/verifications",
+        "POST /admin/commercial-launch/verify"
+      ],
+      "dispositions": [
+        "administrator-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/company-master-catalogs.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/company-master-catalogs.ts",
+      "routeCount": 4,
+      "routeIdentities": [
+        "GET /admin/company-master-catalog-grants/:companyId",
+        "POST /admin/company-master-catalog-grants",
+        "POST /admin/company-master-catalog-grants/:id/revoke",
+        "POST /admin/company-master-catalog-grants/revoke-by-email"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/contact.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/contact.ts",
+      "routeCount": 7,
+      "routeIdentities": [
+        "GET /admin/sales-inquiries",
+        "GET /admin/sales-inquiries/:id/assignment-history",
+        "GET /admin/sales-inquiries/:id/follow-ups",
+        "PATCH /admin/sales-inquiries/:id/assignment",
+        "PATCH /admin/sales-inquiries/:id/next-action",
+        "PATCH /admin/sales-inquiries/:id/status",
+        "POST /admin/sales-inquiries/:id/follow-ups"
+      ],
+      "dispositions": [
+        "administrator-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/feature-policies.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/feature-policies.ts",
+      "routeCount": 5,
+      "routeIdentities": [
+        "GET /admin/feature-policy-authority-grants",
+        "GET /admin/project-company-bindings/:projectId",
+        "POST /admin/feature-policy-authority-grants",
+        "POST /admin/feature-policy-authority-grants/:grantId/revoke",
+        "POST /admin/project-company-bindings"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/features.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/features.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /admin/feature-catalog/versions",
+        "POST /admin/platform-capabilities/:featureKey"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/launch-configuration.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/launch-configuration.ts",
+      "routeCount": 8,
+      "routeIdentities": [
+        "GET /admin/launch-configuration/:environment",
+        "GET /admin/launch-configuration/:environment/history",
+        "POST /admin/launch-configuration/:environment/:action",
+        "POST /admin/launch-configuration/:environment/email/send-test",
+        "POST /admin/launch-configuration/:environment/email/verify",
+        "POST /admin/launch-configuration/:environment/payment/verify",
+        "POST /admin/launch-configuration/:environment/restore",
+        "PUT /admin/launch-configuration/:environment"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/master-catalogs.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/master-catalogs.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "PATCH /admin/master-catalogs/:catalog/:id",
+        "POST /admin/master-catalogs/:catalog"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/support-case-messages.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/support-case-messages.ts",
+      "routeCount": 3,
+      "routeIdentities": [
+        "GET /admin/support/cases/:id/messages",
+        "POST /admin/support/cases/:id/messages",
+        "PUT /admin/support/cases/:id/messages/read"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/support-case-satisfaction.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/support-case-satisfaction.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /admin/support/cases/:id/satisfaction",
+        "GET /admin/support/satisfaction-summary"
+      ],
+      "dispositions": [
+        "administrator-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "admin::artifacts/api-server/src/routes/support-cases.ts",
+      "moduleIdentity": "admin",
+      "sourceOwner": "artifacts/api-server/src/routes/support-cases.ts",
+      "routeCount": 4,
+      "routeIdentities": [
+        "GET /admin/support/cases",
+        "GET /admin/support/cases/:id/events",
+        "PATCH /admin/support/cases/:id/assignment",
+        "PATCH /admin/support/cases/:id/status"
+      ],
+      "dispositions": [
+        "administrator-only",
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "ai-control::artifacts/api-server/src/routes/ai-control-plane.ts",
+      "moduleIdentity": "ai-control",
+      "sourceOwner": "artifacts/api-server/src/routes/ai-control-plane.ts",
+      "routeCount": 25,
+      "routeIdentities": [
+        "DELETE /ai-control/company-ai-administrators/:id",
+        "DELETE /ai-control/provider-connections/:id",
+        "GET /ai-control/budgets",
+        "GET /ai-control/companies",
+        "GET /ai-control/company-ai-administrators",
+        "GET /ai-control/company-users",
+        "GET /ai-control/entitlements",
+        "GET /ai-control/prices",
+        "GET /ai-control/provider-connections",
+        "GET /ai-control/status",
+        "GET /ai-control/usage",
+        "PATCH /ai-control/provider-connections/:id",
+        "POST /ai-control/budgets",
+        "POST /ai-control/budgets/:id/allocations",
+        "POST /ai-control/company-ai-administrators",
+        "POST /ai-control/entitlements",
+        "POST /ai-control/estimates",
+        "POST /ai-control/estimates/:id/confirm",
+        "POST /ai-control/estimates/:id/confirm-files",
+        "POST /ai-control/prices",
+        "POST /ai-control/provider-connections",
+        "POST /ai-control/provider-connections/:id/rotate",
+        "POST /ai-control/provider-connections/:id/validate",
+        "POST /ai-control/runs/:id/cancel",
+        "POST /ai-control/runs/:id/reserve"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "assistant::artifacts/api-server/src/routes/agents.ts",
+      "moduleIdentity": "assistant",
+      "sourceOwner": "artifacts/api-server/src/routes/agents.ts",
+      "routeCount": 3,
+      "routeIdentities": [
+        "GET /assistant/conversations/:conversationId",
+        "GET /assistant/requests/:requestId",
+        "POST /assistant/ask"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "auth::artifacts/api-server/src/routes/auth.ts",
+      "moduleIdentity": "auth",
+      "sourceOwner": "artifacts/api-server/src/routes/auth.ts",
+      "routeCount": 11,
+      "routeIdentities": [
+        "DELETE /auth/openai-key",
+        "GET /auth/access-profile",
+        "GET /auth/me",
+        "POST /auth/forgot-password",
+        "POST /auth/invitations/accept",
+        "POST /auth/invitations/preview",
+        "POST /auth/launch-step-up",
+        "POST /auth/login",
+        "POST /auth/openai-key",
+        "POST /auth/register",
+        "POST /auth/reset-password"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "autodesk::artifacts/api-server/src/routes/autodesk.ts",
+      "moduleIdentity": "autodesk",
+      "sourceOwner": "artifacts/api-server/src/routes/autodesk.ts",
+      "routeCount": 5,
+      "routeIdentities": [
+        "GET /autodesk/callback",
+        "GET /autodesk/hubs",
+        "GET /autodesk/login",
+        "GET /autodesk/projects/:hubId",
+        "GET /autodesk/token"
+      ],
+      "dispositions": [
+        "intentionally-api-native-only",
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "commercial::artifacts/api-server/src/routes/commercial-provider-webhook.ts",
+      "moduleIdentity": "commercial",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-provider-webhook.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "POST /commercial/providers/stripe/webhook"
+      ],
+      "dispositions": [
+        "intentionally-api-native-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "commercial::artifacts/api-server/src/routes/commercial-workspace.ts",
+      "moduleIdentity": "commercial",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-workspace.ts",
+      "routeCount": 9,
+      "routeIdentities": [
+        "GET /commercial/billing-history",
+        "GET /commercial/billing-identity",
+        "GET /commercial/invoices/:invoiceId",
+        "GET /commercial/invoices/:invoiceId/statement.pdf",
+        "GET /commercial/workspace",
+        "PATCH /commercial/billing-identity",
+        "POST /commercial/billing-portal",
+        "POST /commercial/checkout",
+        "POST /commercial/subscription-setup"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "company::artifacts/api-server/src/routes/company-master-catalogs.ts",
+      "moduleIdentity": "company",
+      "sourceOwner": "artifacts/api-server/src/routes/company-master-catalogs.ts",
+      "routeCount": 7,
+      "routeIdentities": [
+        "GET /company/master-catalogs/:kind",
+        "GET /company/master-catalogs/:kind/:id/usage",
+        "GET /company/master-catalogs/capabilities",
+        "PATCH /company/master-catalogs/:kind/:id",
+        "PATCH /company/master-catalogs/policy",
+        "POST /company/master-catalogs/:kind",
+        "PUT /company/master-catalogs/service/:id/delivery-workflow"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "company::artifacts/api-server/src/routes/company-pricing-templates.ts",
+      "moduleIdentity": "company",
+      "sourceOwner": "artifacts/api-server/src/routes/company-pricing-templates.ts",
+      "routeCount": 8,
+      "routeIdentities": [
+        "GET /company/pricing-templates",
+        "GET /company/pricing-templates/:templateId",
+        "GET /company/pricing-templates/options",
+        "POST /company/pricing-templates",
+        "POST /company/pricing-templates/:templateId/publish",
+        "POST /company/pricing-templates/:templateId/retire",
+        "POST /company/pricing-templates/:templateId/versions",
+        "POST /company/pricing-templates/preview"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "company::artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+      "moduleIdentity": "company",
+      "sourceOwner": "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+      "routeCount": 10,
+      "routeIdentities": [
+        "GET /company/delivery-workflows",
+        "GET /company/delivery-workflows/:id",
+        "GET /company/delivery-workflows/options",
+        "PATCH /company/delivery-workflows/:id/versions/:versionId",
+        "POST /company/delivery-workflows",
+        "POST /company/delivery-workflows/:id/versions",
+        "POST /company/delivery-workflows/:id/versions/:versionId/approve",
+        "POST /company/delivery-workflows/:id/versions/:versionId/publish",
+        "POST /company/delivery-workflows/:id/versions/:versionId/retire",
+        "POST /company/delivery-workflows/preview"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "company::artifacts/api-server/src/routes/workflow-governance-policies.ts",
+      "moduleIdentity": "company",
+      "sourceOwner": "artifacts/api-server/src/routes/workflow-governance-policies.ts",
+      "routeCount": 8,
+      "routeIdentities": [
+        "GET /company/workflow-governance-policies",
+        "GET /company/workflow-governance-policies/:id",
+        "PATCH /company/workflow-governance-policies/:id/versions/:versionId",
+        "POST /company/workflow-governance-policies",
+        "POST /company/workflow-governance-policies/:id/versions",
+        "POST /company/workflow-governance-policies/:id/versions/:versionId/approve",
+        "POST /company/workflow-governance-policies/:id/versions/:versionId/publish",
+        "POST /company/workflow-governance-policies/:id/versions/:versionId/retire"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "config::artifacts/api-server/src/routes/config.ts",
+      "moduleIdentity": "config",
+      "sourceOwner": "artifacts/api-server/src/routes/config.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /config"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "connections::artifacts/api-server/src/routes/connections.ts",
+      "moduleIdentity": "connections",
+      "sourceOwner": "artifacts/api-server/src/routes/connections.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /connections/:provider/callback"
+      ],
+      "dispositions": [
+        "intentionally-api-native-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "contact::artifacts/api-server/src/routes/contact.ts",
+      "moduleIdentity": "contact",
+      "sourceOwner": "artifacts/api-server/src/routes/contact.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "POST /contact"
+      ],
+      "dispositions": [
+        "fully-operable"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "coordination-knowledge::artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "moduleIdentity": "coordination-knowledge",
+      "sourceOwner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "routeCount": 42,
+      "routeIdentities": [
+        "GET /coordination-knowledge/capabilities",
+        "GET /coordination-knowledge/conflict-types",
+        "GET /coordination-knowledge/conflict-types/:id",
+        "GET /coordination-knowledge/conflict-types/:id/history",
+        "GET /coordination-knowledge/events/:entityType/:id",
+        "GET /coordination-knowledge/evidence/:entityType/:id",
+        "GET /coordination-knowledge/lens-context/:lensViewpointId",
+        "GET /coordination-knowledge/lens-context/:lensViewpointId/lesson-proposal",
+        "GET /coordination-knowledge/lens-context/:lensViewpointId/resolution",
+        "GET /coordination-knowledge/lens-context/:lensViewpointId/resolution/evidence",
+        "GET /coordination-knowledge/lesson-proposals",
+        "GET /coordination-knowledge/resolution-methods",
+        "GET /coordination-knowledge/resolution-methods/:id",
+        "GET /coordination-knowledge/resolution-methods/:id/history",
+        "GET /coordination-knowledge/rules",
+        "GET /coordination-knowledge/rules/:id",
+        "GET /coordination-knowledge/rules/:id/history",
+        "GET /coordination-knowledge/search",
+        "GET /coordination-knowledge/starter-library/bimtech",
+        "GET /coordination-knowledge/taxonomy",
+        "PATCH /coordination-knowledge/conflict-types/:id",
+        "PATCH /coordination-knowledge/resolution-methods/:id",
+        "PATCH /coordination-knowledge/rules/:id",
+        "PATCH /coordination-knowledge/taxonomy/:id",
+        "POST /coordination-knowledge/conflict-types",
+        "POST /coordination-knowledge/conflict-types/:id/${action.replaceAll(",
+        "POST /coordination-knowledge/evidence/:entityType/:id",
+        "POST /coordination-knowledge/lens-context/:lensViewpointId/lesson-proposal",
+        "POST /coordination-knowledge/lens-context/:lensViewpointId/resolution/${action}",
+        "POST /coordination-knowledge/lens-context/:lensViewpointId/resolution/evidence",
+        "POST /coordination-knowledge/lesson-proposals/:id/${action}",
+        "POST /coordination-knowledge/lesson-proposals/:id/merge",
+        "POST /coordination-knowledge/lesson-proposals/:id/promote",
+        "POST /coordination-knowledge/resolution-methods",
+        "POST /coordination-knowledge/resolution-methods/:id/${action.replaceAll(",
+        "POST /coordination-knowledge/rules",
+        "POST /coordination-knowledge/rules/:id/${action.replaceAll(",
+        "POST /coordination-knowledge/starter-library/bimtech/import",
+        "POST /coordination-knowledge/taxonomy",
+        "POST /coordination-knowledge/taxonomy/:id/retire",
+        "PUT /coordination-knowledge/lens-context/:lensViewpointId/classification",
+        "PUT /coordination-knowledge/lens-context/:lensViewpointId/resolution"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "intentionally-api-native-only",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "cvr-health::artifacts/api-server/src/routes/files.ts",
+      "moduleIdentity": "cvr-health",
+      "sourceOwner": "artifacts/api-server/src/routes/files.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /cvr-health"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "dashboard::artifacts/api-server/src/routes/dashboard_briefing.ts",
+      "moduleIdentity": "dashboard",
+      "sourceOwner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
+      "routeCount": 9,
+      "routeIdentities": [
+        "GET /dashboard/adoption-summary",
+        "GET /dashboard/briefing",
+        "GET /dashboard/pending/files",
+        "GET /dashboard/pending/rfis",
+        "GET /dashboard/pending/submittals",
+        "GET /dashboard/responsibilities",
+        "GET /dashboard/stats",
+        "POST /dashboard/export-pdf",
+        "POST /dashboard/pending/export-pdf"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "downloads::artifacts/api-server/src/routes/downloads.ts",
+      "moduleIdentity": "downloads",
+      "sourceOwner": "artifacts/api-server/src/routes/downloads.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /downloads/sync-agent-mac",
+        "GET /downloads/sync-agent-windows"
+      ],
+      "dispositions": [
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "features::artifacts/api-server/src/routes/feature-policies.ts",
+      "moduleIdentity": "features",
+      "sourceOwner": "artifacts/api-server/src/routes/feature-policies.ts",
+      "routeCount": 9,
+      "routeIdentities": [
+        "GET /features/:featureKey/policy-resolution",
+        "GET /features/policies/audit/:scope",
+        "GET /features/policies/capabilities",
+        "GET /features/policies/company",
+        "GET /features/policies/projects/:projectId",
+        "GET /features/preferences",
+        "POST /features/policies/company/:featureKey",
+        "POST /features/policies/projects/:projectId/:featureKey",
+        "PUT /features/preferences/:featureKey"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "features::artifacts/api-server/src/routes/features.ts",
+      "moduleIdentity": "features",
+      "sourceOwner": "artifacts/api-server/src/routes/features.ts",
+      "routeCount": 3,
+      "routeIdentities": [
+        "GET /features/:featureKey/entitlement",
+        "GET /features/catalog",
+        "GET /features/catalog/:featureKey"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "feedback-agent::artifacts/api-server/src/routes/feedback.ts",
+      "moduleIdentity": "feedback-agent",
+      "sourceOwner": "artifacts/api-server/src/routes/feedback.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "POST /feedback-agent/:outboxId/result",
+        "POST /feedback-agent/claim"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "feedback::artifacts/api-server/src/routes/feedback.ts",
+      "moduleIdentity": "feedback",
+      "sourceOwner": "artifacts/api-server/src/routes/feedback.ts",
+      "routeCount": 31,
+      "routeIdentities": [
+        "GET /feedback/:id/assets",
+        "GET /feedback/:id/assets/:assetId/download",
+        "GET /feedback/:id/history",
+        "GET /feedback/:id/package-snapshot.json",
+        "GET /feedback/:id/package-snapshot.pdf",
+        "GET /feedback/:id/package.zip",
+        "GET /feedback/admin",
+        "GET /feedback/admin/:id/assets/:assetId/download",
+        "GET /feedback/admin/:id/detail",
+        "GET /feedback/admin/:id/package-snapshot.docx",
+        "GET /feedback/admin/:id/package-snapshot.json",
+        "GET /feedback/admin/:id/package-snapshot.pdf",
+        "GET /feedback/admin/:id/package-snapshot.xlsx",
+        "GET /feedback/admin/:id/package.zip",
+        "GET /feedback/admin/export.csv",
+        "GET /feedback/admin/follow-up.csv",
+        "GET /feedback/admin/follow-up.xlsx",
+        "GET /feedback/admin/operations-status",
+        "GET /feedback/mine",
+        "GET /feedback/notifications",
+        "PATCH /feedback/admin/:id",
+        "POST /feedback",
+        "POST /feedback/:id/assets",
+        "POST /feedback/:id/comments",
+        "POST /feedback/:id/reopen",
+        "POST /feedback/:id/transcription",
+        "POST /feedback/:id/transcription/:jobId/review",
+        "POST /feedback/admin/:id/events",
+        "POST /feedback/capture-consents",
+        "POST /feedback/capture-consents/:id/revoke",
+        "POST /feedback/notifications/:eventId/read"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "files::artifacts/api-server/src/routes/files.ts",
+      "moduleIdentity": "files",
+      "sourceOwner": "artifacts/api-server/src/routes/files.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "PATCH /:projectId/files/:fileId/confirm-violation",
+        "POST /:projectId/files/:fileId/supersede"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "financial-controls::artifacts/api-server/src/routes/financial-controls.ts",
+      "moduleIdentity": "financial-controls",
+      "sourceOwner": "artifacts/api-server/src/routes/financial-controls.ts",
+      "routeCount": 10,
+      "routeIdentities": [
+        "GET /financial-controls/admin",
+        "GET /financial-controls/audit",
+        "GET /financial-controls/state",
+        "POST /financial-controls/approval-policies",
+        "POST /financial-controls/bootstrap",
+        "POST /financial-controls/contexts",
+        "POST /financial-controls/evaluate",
+        "POST /financial-controls/grants",
+        "POST /financial-controls/grants/:grantId/revoke",
+        "POST /financial-controls/suspension"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "healthz::artifacts/api-server/src/routes/health.ts",
+      "moduleIdentity": "healthz",
+      "sourceOwner": "artifacts/api-server/src/routes/health.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /healthz"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "help::artifacts/api-server/src/routes/reports.ts",
+      "moduleIdentity": "help",
+      "sourceOwner": "artifacts/api-server/src/routes/reports.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "POST /help/manual/pdf"
+      ],
+      "dispositions": [
+        "fully-operable"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "integrations::artifacts/api-server/src/routes/telegram-product.ts",
+      "moduleIdentity": "integrations",
+      "sourceOwner": "artifacts/api-server/src/routes/telegram-product.ts",
+      "routeCount": 28,
+      "routeIdentities": [
+        "DELETE /integrations/telegram",
+        "GET /integrations/telegram/admin/conversations",
+        "GET /integrations/telegram/admin/conversations/:id",
+        "GET /integrations/telegram/admin/deliveries",
+        "GET /integrations/telegram/admin/deliveries/:id",
+        "GET /integrations/telegram/admin/notifications",
+        "GET /integrations/telegram/admin/notifications/:id",
+        "GET /integrations/telegram/admin/support-queue",
+        "GET /integrations/telegram/consent-version",
+        "GET /integrations/telegram/conversations",
+        "GET /integrations/telegram/deliveries",
+        "GET /integrations/telegram/deliveries/links/:token",
+        "GET /integrations/telegram/health",
+        "GET /integrations/telegram/notification-settings",
+        "GET /integrations/telegram/status",
+        "PATCH /integrations/telegram/admin/support-cases/:id/status",
+        "PATCH /integrations/telegram/language",
+        "POST /integrations/telegram/deliveries/:id/cancel",
+        "POST /integrations/telegram/deliveries/:id/confirm",
+        "POST /integrations/telegram/deliveries/:id/confirm-external",
+        "POST /integrations/telegram/deliveries/preview",
+        "POST /integrations/telegram/link",
+        "POST /integrations/telegram/notification-outbox/process",
+        "POST /integrations/telegram/notification-settings/pause",
+        "POST /integrations/telegram/notification-settings/resume",
+        "POST /integrations/telegram/notification-settings/test",
+        "PUT /integrations/telegram/notification-settings",
+        "PUT /integrations/telegram/notification-settings/modules/rfi"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "intentionally-api-native-only",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "lens-next::artifacts/api-server/src/routes/projects.ts",
+      "moduleIdentity": "lens-next",
+      "sourceOwner": "artifacts/api-server/src/routes/projects.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "POST /lens-next/model-bindings/resolve"
+      ],
+      "dispositions": [
+        "intentionally-api-native-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "living-brief::artifacts/api-server/src/routes/living_brief.ts",
+      "moduleIdentity": "living-brief",
+      "sourceOwner": "artifacts/api-server/src/routes/living_brief.ts",
+      "routeCount": 8,
+      "routeIdentities": [
+        "GET /living-brief/access",
+        "GET /living-brief/docs",
+        "GET /living-brief/eligibility",
+        "GET /living-brief/password/recovery",
+        "POST /living-brief/access",
+        "POST /living-brief/password",
+        "POST /living-brief/reconcile",
+        "POST /living-brief/unlock"
+      ],
+      "dispositions": [
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "master-catalogs::artifacts/api-server/src/routes/master-catalogs.ts",
+      "moduleIdentity": "master-catalogs",
+      "sourceOwner": "artifacts/api-server/src/routes/master-catalogs.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /master-catalogs/:catalog"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "me::artifacts/api-server/src/routes/connections.ts",
+      "moduleIdentity": "me",
+      "sourceOwner": "artifacts/api-server/src/routes/connections.ts",
+      "routeCount": 10,
+      "routeIdentities": [
+        "DELETE /me/connections/:provider",
+        "GET /me/ai-usage",
+        "GET /me/connections",
+        "GET /me/connections/:provider/authorize",
+        "GET /me/connections/:provider/browse",
+        "GET /me/connections/google-drive/files",
+        "GET /me/provider-catalog",
+        "POST /me/connections/sendgrid/verify",
+        "PUT /me/connections/anthropic",
+        "PUT /me/connections/sendgrid"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "notifications::artifacts/api-server/src/routes/notifications.ts",
+      "moduleIdentity": "notifications",
+      "sourceOwner": "artifacts/api-server/src/routes/notifications.ts",
+      "routeCount": 4,
+      "routeIdentities": [
+        "DELETE /notifications/:id",
+        "GET /notifications",
+        "PATCH /notifications/:id/read",
+        "PATCH /notifications/read-all"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "onboarding::artifacts/api-server/src/routes/onboarding.ts",
+      "moduleIdentity": "onboarding",
+      "sourceOwner": "artifacts/api-server/src/routes/onboarding.ts",
+      "routeCount": 6,
+      "routeIdentities": [
+        "GET /onboarding",
+        "PATCH /onboarding",
+        "POST /onboarding/complete",
+        "POST /onboarding/email-verification",
+        "POST /onboarding/email-verification/confirm",
+        "POST /onboarding/milestones"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/activity.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/activity.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /projects/:projectId/activity",
+        "GET /projects/:projectId/activity/export.pdf"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/agents.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/agents.ts",
+      "routeCount": 6,
+      "routeIdentities": [
+        "GET /projects/:projectId/insights",
+        "POST /projects/:projectId/agents/clash/:clashId",
+        "POST /projects/:projectId/agents/rfi/:rfiId",
+        "POST /projects/:projectId/assistant/ask",
+        "POST /projects/:projectId/briefing",
+        "POST /projects/:projectId/intake-agent/preview"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/change_orders.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/change_orders.ts",
+      "routeCount": 10,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/change-orders/:changeOrderId",
+        "GET /projects/:projectId/change-orders",
+        "GET /projects/:projectId/change-orders/:changeOrderId",
+        "GET /projects/:projectId/change-orders/:changeOrderId/export",
+        "GET /projects/:projectId/change-orders/current-view/pdf",
+        "PATCH /projects/:projectId/change-orders/:changeOrderId",
+        "POST /projects/:projectId/change-orders",
+        "POST /projects/:projectId/change-orders/:changeOrderId/${action}",
+        "POST /projects/:projectId/change-orders/:changeOrderId/ai-draft",
+        "POST /projects/:projectId/change-orders/import"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/clash_reports.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/clash_reports.ts",
+      "routeCount": 55,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/clash-reports/:reportId",
+        "DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId",
+        "DELETE /projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments/:attachmentId",
+        "DELETE /projects/:projectId/clash-reports/lens-next/issues/:serverId/links/:linkId",
+        "DELETE /projects/:projectId/clash-reports/lens-viewpoints/:id",
+        "DELETE /projects/:projectId/clash-reports/lens-viewpoints/reports/:reportRecordId",
+        "GET /projects/:projectId/clash-reports",
+        "GET /projects/:projectId/clash-reports/:reportId",
+        "GET /projects/:projectId/clash-reports/:reportId/current-view/pdf",
+        "GET /projects/:projectId/clash-reports/:reportId/pdf",
+        "GET /projects/:projectId/clash-reports/lens-import-context",
+        "GET /projects/:projectId/clash-reports/lens-next-id",
+        "GET /projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments",
+        "GET /projects/:projectId/clash-reports/lens-next/issues/:serverId/links",
+        "GET /projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints",
+        "GET /projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId/history",
+        "GET /projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId/visual-state",
+        "GET /projects/:projectId/clash-reports/lens-pull",
+        "GET /projects/:projectId/clash-reports/lens-viewpoints/:id/active",
+        "GET /projects/:projectId/clash-reports/lens-viewpoints/:id/history",
+        "GET /projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
+        "GET /projects/:projectId/clash-reports/lens-viewpoints/export-excel",
+        "GET /projects/:projectId/clash-reports/lens-viewpoints/reports",
+        "GET /projects/:projectId/clash-reports/lens-viewpoints/responsible-companies",
+        "GET /projects/:projectId/clash-reports/plugin-pull",
+        "GET /projects/:projectId/clashes/:clashId",
+        "PATCH /projects/:projectId/clash-reports/:reportId/clashes/:clashId",
+        "PATCH /projects/:projectId/clash-reports/:reportId/rename",
+        "PATCH /projects/:projectId/clash-reports/lens-next/issues/:id/fields",
+        "PATCH /projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints/:issueViewpointId",
+        "PATCH /projects/:projectId/clash-reports/lens-viewpoints/:id",
+        "PATCH /projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
+        "PATCH /projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
+        "PATCH /projects/:projectId/clash-reports/lens-viewpoints/batch-responsible-company",
+        "POST /projects/:projectId/clash-reports",
+        "POST /projects/:projectId/clash-reports/:reportId/clashes",
+        "POST /projects/:projectId/clash-reports/:reportId/rerank",
+        "POST /projects/:projectId/clash-reports/lens-import",
+        "POST /projects/:projectId/clash-reports/lens-next/issues/:id/publish",
+        "POST /projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments",
+        "POST /projects/:projectId/clash-reports/lens-next/issues/:serverId/links",
+        "POST /projects/:projectId/clash-reports/lens-next/issues/:serverId/local-viewpoint",
+        "POST /projects/:projectId/clash-reports/lens-next/issues/:viewpointId/viewpoints",
+        "POST /projects/:projectId/clash-reports/lens-next/issues/create",
+        "POST /projects/:projectId/clash-reports/lens-next/local-viewpoints/upload",
+        "POST /projects/:projectId/clash-reports/lens-sync",
+        "POST /projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
+        "POST /projects/:projectId/clash-reports/lens-viewpoints/:id/void",
+        "POST /projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
+        "POST /projects/:projectId/clash-reports/lens-viewpoints/repair-lifecycle",
+        "POST /projects/:projectId/clash-reports/lens-viewpoints/report",
+        "POST /projects/:projectId/clash-reports/lens-viewpoints/reset-test-data",
+        "POST /projects/:projectId/clash-reports/lens-viewpoints/trades",
+        "POST /projects/:projectId/clash-reports/plugin-sync",
+        "POST /projects/:projectId/clash-reports/upload"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/company-pricing-templates.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/company-pricing-templates.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /projects/:projectId/pricing-template-options",
+        "POST /projects/:projectId/apu-library/drafts"
+      ],
+      "dispositions": [
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/connections.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/connections.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /projects/:projectId/connections/procore/status",
+        "POST /projects/:projectId/connections/procore/discovery/preview"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/contract-item-workflows.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/contract-item-workflows.ts",
+      "routeCount": 4,
+      "routeIdentities": [
+        "GET /projects/:projectId/financial/contracts/:contractId/items/:stableLineId/workflow",
+        "PATCH /projects/:projectId/financial/contracts/:contractId/items/:stableLineId/workflow/nodes/:nodeId",
+        "POST /projects/:projectId/financial/contracts/:contractId/items/:stableLineId/workflow/initialize",
+        "POST /projects/:projectId/financial/contracts/:contractId/items/:stableLineId/workflow/nodes"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/conventions.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/conventions.ts",
+      "routeCount": 10,
+      "routeIdentities": [
+        "GET /projects/:projectId/convention/status",
+        "GET /projects/:projectId/convention/versions",
+        "GET /projects/:projectId/conventions",
+        "GET /projects/:projectId/levels",
+        "POST /projects/:projectId/convention/discover",
+        "POST /projects/:projectId/convention/discover-upload",
+        "POST /projects/:projectId/convention/reanalyze",
+        "POST /projects/:projectId/convention/versions",
+        "POST /projects/:projectId/conventions/suggest-value",
+        "PUT /projects/:projectId/conventions"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/coordination-hub.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/coordination-hub.ts",
+      "routeCount": 9,
+      "routeIdentities": [
+        "GET /projects/:projectId/coordination-hub/credential-lifecycle",
+        "GET /projects/:projectId/coordination-hub/credential-validation-operations",
+        "GET /projects/:projectId/coordination-hub/summary",
+        "POST /projects/:projectId/coordination-hub/credentials",
+        "POST /projects/:projectId/coordination-hub/credentials/:credentialId/rotate",
+        "POST /projects/:projectId/coordination-hub/credentials/:credentialId/validate",
+        "POST /projects/:projectId/coordination-hub/jobs",
+        "POST /projects/:projectId/coordination-hub/revisions",
+        "POST /projects/:projectId/coordination-hub/sharepoint-mapping"
+      ],
+      "dispositions": [
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/coordination.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/coordination.ts",
+      "routeCount": 3,
+      "routeIdentities": [
+        "GET /projects/:projectId/coordination/events",
+        "POST /projects/:projectId/coordination/confirm",
+        "POST /projects/:projectId/coordination/intake"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/coordinator-actions.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/coordinator-actions.ts",
+      "routeCount": 10,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/coordinator-saved-views/:savedViewId",
+        "GET /projects/:projectId/coordinator-actions",
+        "GET /projects/:projectId/coordinator-actions/export.pdf",
+        "GET /projects/:projectId/coordinator-saved-views",
+        "GET /projects/:projectId/project-insights",
+        "GET /projects/:projectId/project-insights/export-pdf",
+        "PATCH /projects/:projectId/coordinator-saved-views/:savedViewId",
+        "POST /projects/:projectId/coordinator-actions/meeting-links/execute",
+        "POST /projects/:projectId/coordinator-actions/meeting-links/preview",
+        "POST /projects/:projectId/coordinator-saved-views"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/documents.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/documents.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /projects/:projectId/documents/search",
+        "POST /projects/:projectId/documents/ai-search"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/edt-engine.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "routeCount": 15,
+      "routeIdentities": [
+        "GET /projects/:projectId/edt-engine/capabilities",
+        "GET /projects/:projectId/edt-engine/intakes/:intakeId/activation-candidate",
+        "GET /projects/:projectId/edt-engine/intakes/:intakeId/plan-preview",
+        "GET /projects/:projectId/edt-engine/operations-director-grants",
+        "GET /projects/:projectId/edt-engine/time-review",
+        "POST /projects/:projectId/edt-engine/activation-requests",
+        "POST /projects/:projectId/edt-engine/activation-requests/:requestId/approve",
+        "POST /projects/:projectId/edt-engine/change-requests",
+        "POST /projects/:projectId/edt-engine/change-requests/:requestId/decision",
+        "POST /projects/:projectId/edt-engine/economic-plans",
+        "POST /projects/:projectId/edt-engine/intakes/:intakeId/result-imports/preview",
+        "POST /projects/:projectId/edt-engine/issuances/:issuanceId/qc-decisions",
+        "POST /projects/:projectId/edt-engine/operations-director-grants",
+        "POST /projects/:projectId/edt-engine/time-entries/:entryId/transition",
+        "POST /projects/:projectId/edt-engine/work-items/:workItemId/issuances"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/files.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/files.ts",
+      "routeCount": 13,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/files/:fileId",
+        "GET /projects/:projectId/cvr-report",
+        "GET /projects/:projectId/files",
+        "GET /projects/:projectId/files/:fileId/download",
+        "GET /projects/:projectId/files/current-view.pdf",
+        "GET /projects/:projectId/files/custody-summary",
+        "GET /projects/:projectId/files/handover.zip",
+        "PATCH /projects/:projectId/files/:fileId",
+        "POST /projects/:projectId/files",
+        "POST /projects/:projectId/files/:fileId/cvr-approve",
+        "POST /projects/:projectId/files/:fileId/cvr-proceed",
+        "POST /projects/:projectId/files/:fileId/cvr-reject",
+        "POST /projects/:projectId/files/suggest-name"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/financial-apu.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/financial-apu.ts",
+      "routeCount": 13,
+      "routeIdentities": [
+        "GET /projects/:projectId/financial/apu",
+        "GET /projects/:projectId/financial/apu/bonus-proposals",
+        "GET /projects/:projectId/financial/apu/forecast",
+        "GET /projects/:projectId/financial/apu/forecast.csv",
+        "GET /projects/:projectId/financial/apu/library-applications",
+        "GET /projects/:projectId/financial/apu/performance",
+        "GET /projects/:projectId/financial/apu/performance.csv",
+        "POST /projects/:projectId/financial/apu/bonus-proposals",
+        "POST /projects/:projectId/financial/apu/bonus-proposals/:proposalId/decision",
+        "POST /projects/:projectId/financial/apu/library-applications",
+        "PUT /projects/:projectId/financial/apu",
+        "PUT /projects/:projectId/financial/apu/forecast",
+        "PUT /projects/:projectId/financial/apu/performance"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/financial-budgets.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/financial-budgets.ts",
+      "routeCount": 12,
+      "routeIdentities": [
+        "GET /projects/:projectId/financial/current-view/export.pdf",
+        "GET /projects/:projectId/financial/snapshots/:snapshotId",
+        "GET /projects/:projectId/financial/snapshots/:snapshotId/export.pdf",
+        "GET /projects/:projectId/financial/snapshots/:snapshotId/export.xlsx",
+        "GET /projects/:projectId/financial/workspace",
+        "POST /projects/:projectId/financial/budgets",
+        "POST /projects/:projectId/financial/budgets/:budgetVersionId/actions",
+        "POST /projects/:projectId/financial/budgets/:budgetVersionId/approve",
+        "POST /projects/:projectId/financial/cost-libraries",
+        "POST /projects/:projectId/financial/cost-structures",
+        "POST /projects/:projectId/financial/imports/:sessionId/confirm",
+        "POST /projects/:projectId/financial/imports/preview"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/financial-contracts.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/financial-contracts.ts",
+      "routeCount": 25,
+      "routeIdentities": [
+        "GET /projects/:projectId/financial/contracts",
+        "GET /projects/:projectId/financial/contracts/:contractId",
+        "GET /projects/:projectId/financial/contracts/:contractId/export.pdf",
+        "GET /projects/:projectId/financial/contracts/:contractId/export.xlsx",
+        "GET /projects/:projectId/financial/contracts/:contractId/grants",
+        "GET /projects/:projectId/financial/contracts/:contractId/payments",
+        "GET /projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId",
+        "GET /projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",
+        "GET /projects/:projectId/financial/contracts/current-view.pdf",
+        "POST /projects/:projectId/financial/contracts",
+        "POST /projects/:projectId/financial/contracts/:contractId/amendments",
+        "POST /projects/:projectId/financial/contracts/:contractId/amendments/:amendmentId/versions/:versionId/actions",
+        "POST /projects/:projectId/financial/contracts/:contractId/amendments/:amendmentId/versions/:versionId/approve",
+        "POST /projects/:projectId/financial/contracts/:contractId/amendments/:amendmentId/versions/:versionId/execute",
+        "POST /projects/:projectId/financial/contracts/:contractId/grants",
+        "POST /projects/:projectId/financial/contracts/:contractId/payments",
+        "POST /projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId/actions",
+        "POST /projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId/approve",
+        "POST /projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId/revisions",
+        "POST /projects/:projectId/financial/contracts/:contractId/versions/:versionId/actions",
+        "POST /projects/:projectId/financial/contracts/:contractId/versions/:versionId/approve",
+        "POST /projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",
+        "POST /projects/:projectId/financial/contracts/:contractId/versions/:versionId/execute",
+        "POST /projects/:projectId/financial/contracts/imports/:sessionId/confirm",
+        "POST /projects/:projectId/financial/contracts/imports/preview"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/folder-wizard-imports.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/folder-wizard-imports.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /projects/:projectId/integrations/folder-wizard",
+        "POST /projects/:projectId/integrations/folder-wizard"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/folder-wizard-routing.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/folder-wizard-routing.ts",
+      "routeCount": 9,
+      "routeIdentities": [
+        "GET /projects/:projectId/integrations/folder-wizard/destination",
+        "GET /projects/:projectId/integrations/folder-wizard/publishing-jobs",
+        "GET /projects/:projectId/integrations/folder-wizard/publishing-readiness",
+        "GET /projects/:projectId/integrations/folder-wizard/routing",
+        "POST /projects/:projectId/integrations/folder-wizard/destination",
+        "POST /projects/:projectId/integrations/folder-wizard/publish",
+        "POST /projects/:projectId/integrations/folder-wizard/publishing-candidate",
+        "POST /projects/:projectId/integrations/folder-wizard/routing",
+        "POST /projects/:projectId/integrations/folder-wizard/routing/preview"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/generic-apu-budget-controls.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/generic-apu-budget-controls.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "POST /projects/:projectId/financial/generic-apu/:projectApuVersionId/budget-control/evaluate",
+        "POST /projects/:projectId/financial/generic-apu/:projectApuVersionId/budget-control/overrides/:receiptId/reverse"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/intelligence.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/intelligence.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /projects/:projectId/intelligence-summary"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/job-intake.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/job-intake.ts",
+      "routeCount": 8,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/intake/documents/:documentId",
+        "GET /projects/:projectId/intake",
+        "POST /projects/:projectId/intake",
+        "POST /projects/:projectId/intake/activate",
+        "POST /projects/:projectId/intake/documents",
+        "POST /projects/:projectId/intake/documents/:documentId/mapping-apply",
+        "POST /projects/:projectId/intake/documents/:documentId/mapping-preview",
+        "PUT /projects/:projectId/intake"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/job-operations.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/job-operations.ts",
+      "routeCount": 27,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/operations/deliverables/:deliverableId",
+        "DELETE /projects/:projectId/operations/document-connections/:connectionId",
+        "GET /projects/:projectId/operations",
+        "GET /projects/:projectId/operations/work-items/:workItemId/delivery-workflow",
+        "PATCH /projects/:projectId/operations/assignments/:assignmentId",
+        "PATCH /projects/:projectId/operations/budget/variance-reviews/:reviewId",
+        "PATCH /projects/:projectId/operations/packages/:packageId",
+        "PATCH /projects/:projectId/operations/tasks/:taskId",
+        "PATCH /projects/:projectId/operations/work-items/:workItemId/delivery-workflow/roles/:role",
+        "PATCH /projects/:projectId/operations/work-items/:workItemId/delivery-workflow/steps/:phaseId/:taskId",
+        "POST /projects/:projectId/operations/budget/baselines",
+        "POST /projects/:projectId/operations/budget/variance-reviews",
+        "POST /projects/:projectId/operations/deliverables",
+        "POST /projects/:projectId/operations/document-connections",
+        "POST /projects/:projectId/operations/floor-hour-estimates",
+        "POST /projects/:projectId/operations/floor-hour-estimates/:estimateVersionId/decision",
+        "POST /projects/:projectId/operations/internal-cost/:kind/:versionId/decision",
+        "POST /projects/:projectId/operations/internal-cost/policies",
+        "POST /projects/:projectId/operations/internal-cost/profiles",
+        "POST /projects/:projectId/operations/packages",
+        "POST /projects/:projectId/operations/priced-assignments",
+        "POST /projects/:projectId/operations/time",
+        "POST /projects/:projectId/operations/work-items/:workItemId/delivery-workflow/advance",
+        "POST /projects/:projectId/operations/work-items/:workItemId/delivery-workflow/approval",
+        "POST /projects/:projectId/operations/work-items/:workItemId/delivery-workflow/evidence",
+        "POST /projects/:projectId/operations/work-items/:workItemId/delivery-workflow/qc",
+        "POST /projects/:projectId/operations/work-items/:workItemId/delivery-workflow/reopen"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/linked_items.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/linked_items.ts",
+      "routeCount": 3,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/links/:linkId",
+        "GET /projects/:projectId/links/:entityType/:entityId",
+        "POST /projects/:projectId/links"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/meeting_minutes.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/meeting_minutes.ts",
+      "routeCount": 29,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/meetings/:meetingId",
+        "DELETE /projects/:projectId/meetings/:meetingId/rfis/:rfiId",
+        "DELETE /projects/:projectId/meetings/:meetingId/submittals/:submittalId",
+        "DELETE /projects/:projectId/meetings/draft",
+        "GET /projects/:projectId/action-items",
+        "GET /projects/:projectId/meetings",
+        "GET /projects/:projectId/meetings/:meetingId",
+        "GET /projects/:projectId/meetings/current-view/pdf",
+        "GET /projects/:projectId/meetings/current-view/xlsx",
+        "GET /projects/:projectId/meetings/draft",
+        "GET /projects/:projectId/meetings/lens-viewpoint-candidates",
+        "GET /projects/:projectId/meetings/rfi-candidates",
+        "GET /projects/:projectId/meetings/submittal-candidates",
+        "PATCH /projects/:projectId/action-items/:itemId",
+        "PATCH /projects/:projectId/meetings/:meetingId",
+        "PATCH /projects/:projectId/meetings/:meetingId/clashes/:clashId",
+        "POST /projects/:projectId/meetings",
+        "POST /projects/:projectId/meetings/:meetingId/action-items",
+        "POST /projects/:projectId/meetings/:meetingId/ai-summary",
+        "POST /projects/:projectId/meetings/:meetingId/clashes/load",
+        "POST /projects/:projectId/meetings/:meetingId/clashes/refresh",
+        "POST /projects/:projectId/meetings/:meetingId/rfis",
+        "POST /projects/:projectId/meetings/:meetingId/schedule-bucket",
+        "POST /projects/:projectId/meetings/:meetingId/schedule-bucket/:bucketLinkId/sync",
+        "POST /projects/:projectId/meetings/:meetingId/schedule-bucket/preview",
+        "POST /projects/:projectId/meetings/:meetingId/submittals",
+        "POST /projects/:projectId/meetings/import",
+        "POST /projects/:projectId/meetings/transcribe-audio",
+        "PUT /projects/:projectId/meetings/draft"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/members.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/members.ts",
+      "routeCount": 9,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/invitations/:invId",
+        "DELETE /projects/:projectId/members/:memberId",
+        "GET /projects/:projectId/invitations",
+        "GET /projects/:projectId/members",
+        "GET /projects/:projectId/members/current-view/pdf",
+        "GET /projects/:projectId/members/eligible",
+        "PATCH /projects/:projectId/members/:memberId",
+        "POST /projects/:projectId/invitations",
+        "POST /projects/:projectId/members"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/project_directory.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/project_directory.ts",
+      "routeCount": 10,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/directory/:entryId",
+        "GET /projects/:projectId/company-options",
+        "GET /projects/:projectId/directory",
+        "GET /projects/:projectId/directory/export-pdf",
+        "PATCH /projects/:projectId/directory/:entryId",
+        "POST /projects/:projectId/directory",
+        "POST /projects/:projectId/directory/:entryId/invite",
+        "POST /projects/:projectId/directory/companies",
+        "POST /projects/:projectId/directory/contacts",
+        "POST /projects/:projectId/directory/import"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/projects.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/projects.ts",
+      "routeCount": 12,
+      "routeIdentities": [
+        "DELETE /projects/:projectId",
+        "GET /projects",
+        "GET /projects/:projectId",
+        "GET /projects/:projectId/retirement-preview",
+        "GET /projects/list-for-plugin",
+        "GET /projects/workspace-register",
+        "POST /projects",
+        "POST /projects/:projectId/assign-company-user",
+        "POST /projects/:projectId/restore",
+        "POST /projects/:projectId/retire",
+        "POST /projects/:projectId/workspace-state",
+        "POST /projects/workspace-state/batch"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/reports.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/reports.ts",
+      "routeCount": 12,
+      "routeIdentities": [
+        "GET /projects/:projectId/reports/audit-certificate/pdf",
+        "GET /projects/:projectId/reports/change-order-log/pdf",
+        "GET /projects/:projectId/reports/compliance/pdf",
+        "GET /projects/:projectId/reports/cvr/pdf",
+        "GET /projects/:projectId/reports/dispute/:module/:itemId/pdf",
+        "GET /projects/:projectId/reports/meeting-minutes/pdf",
+        "GET /projects/:projectId/reports/performance/pdf",
+        "GET /projects/:projectId/reports/project-health/pdf",
+        "GET /projects/:projectId/reports/rfi-aging/pdf",
+        "GET /projects/:projectId/reports/submittal-status/pdf",
+        "GET /projects/:projectId/reports/transmittal-log/pdf",
+        "POST /projects/:projectId/reports/current-view/pdf"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/rfis.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/rfis.ts",
+      "routeCount": 39,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/rfis/:rfiId",
+        "DELETE /projects/:projectId/rfis/attachments/staged/:fileId",
+        "GET /projects/:projectId/rfis",
+        "GET /projects/:projectId/rfis/:rfiId",
+        "GET /projects/:projectId/rfis/:rfiId/audit-certificate",
+        "GET /projects/:projectId/rfis/:rfiId/ball-in-court-history",
+        "GET /projects/:projectId/rfis/:rfiId/export",
+        "GET /projects/:projectId/rfis/:rfiId/export-complete",
+        "GET /projects/:projectId/rfis/:rfiId/export-word",
+        "GET /projects/:projectId/rfis/:rfiId/responses",
+        "GET /projects/:projectId/rfis/:rfiId/viewed-by",
+        "GET /projects/:projectId/rfis/export-excel",
+        "GET /projects/:projectId/rfis/export-pdf",
+        "GET /projects/:projectId/rfis/report-settings",
+        "PATCH /projects/:projectId/rfis/:rfiId",
+        "POST /projects/:projectId/rfis",
+        "POST /projects/:projectId/rfis/:rfiId/close",
+        "POST /projects/:projectId/rfis/:rfiId/generate-email-preview",
+        "POST /projects/:projectId/rfis/:rfiId/generate-response",
+        "POST /projects/:projectId/rfis/:rfiId/mark-sent",
+        "POST /projects/:projectId/rfis/:rfiId/reopen",
+        "POST /projects/:projectId/rfis/:rfiId/responses",
+        "POST /projects/:projectId/rfis/:rfiId/revise",
+        "POST /projects/:projectId/rfis/:rfiId/send",
+        "POST /projects/:projectId/rfis/:rfiId/view",
+        "POST /projects/:projectId/rfis/attachments/from-cloud",
+        "POST /projects/:projectId/rfis/attachments/from-google-drive",
+        "POST /projects/:projectId/rfis/attachments/paste-image",
+        "POST /projects/:projectId/rfis/attachments/screen-snip",
+        "POST /projects/:projectId/rfis/attachments/upload",
+        "POST /projects/:projectId/rfis/from-viewpoint",
+        "POST /projects/:projectId/rfis/generate-email-draft",
+        "POST /projects/:projectId/rfis/import",
+        "POST /projects/:projectId/rfis/import-prefill",
+        "POST /projects/:projectId/rfis/import/procore/commit",
+        "POST /projects/:projectId/rfis/import/procore/preview",
+        "POST /projects/:projectId/rfis/report-settings/preview",
+        "POST /projects/:projectId/rfis/report-settings/reset",
+        "PUT /projects/:projectId/rfis/report-settings"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/schedule.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/schedule.ts",
+      "routeCount": 13,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/milestones/:milestoneId",
+        "GET /projects/:projectId/milestones",
+        "GET /projects/:projectId/schedule/buckets",
+        "GET /projects/:projectId/schedule/export-pdf",
+        "GET /projects/:projectId/schedule/items/:sourceType/:sourceId/history",
+        "GET /projects/:projectId/schedule/live",
+        "PATCH /projects/:projectId/milestones/:milestoneId",
+        "PATCH /projects/:projectId/schedule/buckets/:bucketId",
+        "POST /projects/:projectId/milestones",
+        "POST /projects/:projectId/milestones/import",
+        "POST /projects/:projectId/schedule/buckets",
+        "POST /projects/:projectId/schedule/buckets/:fromBucketId/rollover",
+        "POST /projects/:projectId/schedule/items/move"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/submittal_reports.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "routeCount": 10,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/submittal-reports/:reportId",
+        "DELETE /projects/:projectId/submittal-reports/:reportId/items/:itemId",
+        "GET /projects/:projectId/submittal-reports",
+        "GET /projects/:projectId/submittal-reports/:reportId",
+        "GET /projects/:projectId/submittal-reports/:reportId/pdf",
+        "PATCH /projects/:projectId/submittal-reports/:reportId/items/:itemId",
+        "PATCH /projects/:projectId/submittal-reports/:reportId/rename",
+        "POST /projects/:projectId/submittal-reports",
+        "POST /projects/:projectId/submittal-reports/:reportId/items",
+        "POST /projects/:projectId/submittal-reports/upload"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/submittals.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/submittals.ts",
+      "routeCount": 28,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/submittal-register/:itemId",
+        "DELETE /projects/:projectId/submittals/:submittalId",
+        "GET /projects/:projectId/submittal-register",
+        "GET /projects/:projectId/submittal-register-coverage",
+        "GET /projects/:projectId/submittals",
+        "GET /projects/:projectId/submittals/:submittalId/audit-certificate",
+        "GET /projects/:projectId/submittals/:submittalId/export",
+        "GET /projects/:projectId/submittals/:submittalId/export-word",
+        "GET /projects/:projectId/submittals/:submittalId/viewed-by",
+        "GET /projects/:projectId/submittals/export-all",
+        "GET /projects/:projectId/submittals/export-excel",
+        "GET /projects/:projectId/submittals/tracker-excel",
+        "GET /projects/:projectId/submittals/tracker-pdf",
+        "PATCH /projects/:projectId/submittal-register/:itemId",
+        "PATCH /projects/:projectId/submittals/:submittalId",
+        "POST /projects/:projectId/submittal-register",
+        "POST /projects/:projectId/submittals",
+        "POST /projects/:projectId/submittals/:submittalId/ai-assist-description",
+        "POST /projects/:projectId/submittals/:submittalId/ai-check",
+        "POST /projects/:projectId/submittals/:submittalId/ai-draft-rejection",
+        "POST /projects/:projectId/submittals/:submittalId/ai-email-draft",
+        "POST /projects/:projectId/submittals/:submittalId/respond",
+        "POST /projects/:projectId/submittals/:submittalId/view",
+        "POST /projects/:projectId/submittals/ai-assist-description",
+        "POST /projects/:projectId/submittals/attachments/upload",
+        "POST /projects/:projectId/submittals/import",
+        "POST /projects/:projectId/submittals/inline-ai-check",
+        "PUT /projects/:projectId/submittal-register/:itemId/packages/:submittalId"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/team-performance.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/team-performance.ts",
+      "routeCount": 6,
+      "routeIdentities": [
+        "GET /projects/:projectId/commercial/team-performance",
+        "GET /projects/:projectId/commercial/team-performance/resource-planning",
+        "POST /projects/:projectId/commercial/team-performance/resource-planning/evaluate",
+        "POST /projects/:projectId/commercial/team-performance/resource-planning/scenarios",
+        "POST /projects/:projectId/commercial/team-performance/resource-planning/scenarios/:scenarioVersionId/apply",
+        "PUT /projects/:projectId/commercial/team-performance/resource-planning/profiles/:userId"
+      ],
+      "dispositions": [
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/telegram-product.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/telegram-product.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /projects/:projectId/rfis/:rfiId/notification-context",
+        "PUT /projects/:projectId/rfis/:rfiId/notification-watch"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "projects::artifacts/api-server/src/routes/transmittals.ts",
+      "moduleIdentity": "projects",
+      "sourceOwner": "artifacts/api-server/src/routes/transmittals.ts",
+      "routeCount": 12,
+      "routeIdentities": [
+        "DELETE /projects/:projectId/transmittals/:transmittalId",
+        "GET /projects/:projectId/transmittals",
+        "GET /projects/:projectId/transmittals/:transmittalId",
+        "GET /projects/:projectId/transmittals/:transmittalId/export",
+        "GET /projects/:projectId/transmittals/export-pdf",
+        "PATCH /projects/:projectId/transmittals/:transmittalId",
+        "POST /projects/:projectId/transmittals",
+        "POST /projects/:projectId/transmittals/:transmittalId/acknowledge",
+        "POST /projects/:projectId/transmittals/:transmittalId/ai-draft",
+        "POST /projects/:projectId/transmittals/:transmittalId/cancel",
+        "POST /projects/:projectId/transmittals/:transmittalId/send",
+        "POST /projects/:projectId/transmittals/import"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "public::artifacts/api-server/src/routes/public-commercial-availability.ts",
+      "moduleIdentity": "public",
+      "sourceOwner": "artifacts/api-server/src/routes/public-commercial-availability.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /public/commercial-availability"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "public::artifacts/api-server/src/routes/public-legal-identity.ts",
+      "moduleIdentity": "public",
+      "sourceOwner": "artifacts/api-server/src/routes/public-legal-identity.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /public/legal-identity"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "release-diagnostics::artifacts/api-server/src/routes/health.ts",
+      "moduleIdentity": "release-diagnostics",
+      "sourceOwner": "artifacts/api-server/src/routes/health.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /release-diagnostics"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "repair-execution::artifacts/api-server/src/routes/repairs.ts",
+      "moduleIdentity": "repair-execution",
+      "sourceOwner": "artifacts/api-server/src/routes/repairs.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "POST /repair-execution/:id/progress",
+        "POST /repair-execution/claim"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "repairs::artifacts/api-server/src/routes/repairs.ts",
+      "moduleIdentity": "repairs",
+      "sourceOwner": "artifacts/api-server/src/routes/repairs.ts",
+      "routeCount": 5,
+      "routeIdentities": [
+        "GET /repairs",
+        "POST /repairs",
+        "POST /repairs/:id/authorize",
+        "POST /repairs/delegates",
+        "POST /repairs/pin"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "rfis::artifacts/api-server/src/routes/rfis.ts",
+      "moduleIdentity": "rfis",
+      "sourceOwner": "artifacts/api-server/src/routes/rfis.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "POST /rfis/generate-question"
+      ],
+      "dispositions": [
+        "fully-operable"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "search::artifacts/api-server/src/routes/search.ts",
+      "moduleIdentity": "search",
+      "sourceOwner": "artifacts/api-server/src/routes/search.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /search"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "support::artifacts/api-server/src/routes/commercial-data-correction.ts",
+      "moduleIdentity": "support",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-data-correction.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /support/cases/:id/data-request/correction"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "support::artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
+      "moduleIdentity": "support",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment-projection.behavior.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /support/cases/"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "support::artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+      "moduleIdentity": "support",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-data-request-fulfillment.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /support/cases/:id/data-request/export",
+        "GET /support/cases/:id/data-request/fulfillment"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "support::artifacts/api-server/src/routes/commercial-data-restriction.ts",
+      "moduleIdentity": "support",
+      "sourceOwner": "artifacts/api-server/src/routes/commercial-data-restriction.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "GET /support/cases/:id/data-request/restriction"
+      ],
+      "dispositions": [
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "support::artifacts/api-server/src/routes/support-case-messages.ts",
+      "moduleIdentity": "support",
+      "sourceOwner": "artifacts/api-server/src/routes/support-case-messages.ts",
+      "routeCount": 3,
+      "routeIdentities": [
+        "GET /support/cases/:id/messages",
+        "POST /support/cases/:id/messages",
+        "PUT /support/cases/:id/messages/read"
+      ],
+      "dispositions": [
+        "missing-frontend"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "support::artifacts/api-server/src/routes/support-case-satisfaction.ts",
+      "moduleIdentity": "support",
+      "sourceOwner": "artifacts/api-server/src/routes/support-case-satisfaction.ts",
+      "routeCount": 2,
+      "routeIdentities": [
+        "GET /support/cases/:id/satisfaction",
+        "POST /support/cases/:id/satisfaction"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "support::artifacts/api-server/src/routes/support-cases.ts",
+      "moduleIdentity": "support",
+      "sourceOwner": "artifacts/api-server/src/routes/support-cases.ts",
+      "routeCount": 4,
+      "routeIdentities": [
+        "GET /support/cases",
+        "GET /support/cases/:id/events",
+        "PATCH /support/cases/:id/lifecycle",
+        "POST /support/cases"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "missing-frontend",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "users::artifacts/api-server/src/routes/auth.ts",
+      "moduleIdentity": "users",
+      "sourceOwner": "artifacts/api-server/src/routes/auth.ts",
+      "routeCount": 5,
+      "routeIdentities": [
+        "GET /users/me/performance-score",
+        "PATCH /users/me",
+        "PATCH /users/me/company",
+        "PATCH /users/me/password",
+        "POST /users/me/api-token"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "users::artifacts/api-server/src/routes/company-profile.ts",
+      "moduleIdentity": "users",
+      "sourceOwner": "artifacts/api-server/src/routes/company-profile.ts",
+      "routeCount": 4,
+      "routeIdentities": [
+        "GET /users/:userId/company-profile",
+        "GET /users/me/company-profile",
+        "POST /users/me/company-logo",
+        "POST /users/me/company-profile"
+      ],
+      "dispositions": [
+        "fully-operable",
+        "read-only"
+      ],
+      "sharedService": true,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    },
+    {
+      "familyKey": "webhooks::artifacts/api-server/src/routes/telegram-product.ts",
+      "moduleIdentity": "webhooks",
+      "sourceOwner": "artifacts/api-server/src/routes/telegram-product.ts",
+      "routeCount": 1,
+      "routeIdentities": [
+        "POST /webhooks/telegram/:adapterId"
+      ],
+      "dispositions": [
+        "intentionally-api-native-only"
+      ],
+      "sharedService": false,
+      "reconciliationRule": "group-for-discovery-without-merging-route-or-business-identity"
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import { conventionResolverUrl, documentIdentity, fileIntakeCanSubmit, fileIntak
 import { parseOperationalDocumentReturn } from "@/lib/job-operations-daily-work";
 import { ReportsReturnBanner } from "@/components/layout/ReportsReturnBanner";
 import { AnalyzeIntakeAction } from "@/components/AnalyzeIntakeAction";
+import { useAuthStore } from "@/store/auth";
 
 interface ValidationDetail {
   field: string;
@@ -72,6 +73,9 @@ export interface FileRow {
   rootFileId?: number | null;
   createdAt: string;
   updatedAt: string;
+  isSuperseded?: boolean;
+  supersededByFileId?: number | null;
+  userConfirmedNonCompliant?: boolean;
 }
 
 interface DocumentFamily {
@@ -129,6 +133,18 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const operationReturn = useMemo(() => parseOperationalDocumentReturn(search, projectId), [search, projectId]);
   const { data: files, isLoading, isError } = useListFiles(projectId);
   const { data: convention } = useGetConvention(projectId);
+  const { token } = useAuthStore();
+  const queryClient = useQueryClient();
+  const [lifecycleMessage, setLifecycleMessage] = useState("");
+  const [lifecycleError, setLifecycleError] = useState("");
+  const [lifecycleBusy, setLifecycleBusy] = useState<number | null>(null);
+  const fileLifecycle = async (file: FileRow, action: "confirm" | "supersede") => {
+    if (!token) { setLifecycleError(tr("Sign in again before changing file lifecycle.", "Inicie sesión nuevamente antes de cambiar el ciclo del archivo.")); return; }
+    let path=`/api/v1/projects/${projectId}/files/${file.id}/confirm-violation`, body:Record<string,unknown>|undefined;
+    if(action==="supersede") { const raw=window.prompt(tr("Replacement file ID from this project", "ID del archivo de reemplazo de este proyecto"), ""); const replacement=Number(raw); if(!Number.isSafeInteger(replacement)||replacement<=0||replacement===file.id){setLifecycleError(tr("Choose a different valid replacement file ID.","Elija un ID válido de otro archivo de reemplazo."));return;} path=`/api/v1/projects/${projectId}/files/${file.id}/supersede`; body={new_file_id:replacement}; }
+    setLifecycleBusy(file.id);setLifecycleError("");setLifecycleMessage("");
+    try{const response=await fetch(path,{method:action==="confirm"?"PATCH":"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:body?JSON.stringify(body):undefined});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(String(data.error||tr("File lifecycle could not be updated.","No se pudo actualizar el ciclo del archivo.")));setLifecycleMessage(action==="confirm"?tr("Naming violation confirmed; the file remains traceable as non-compliant.","Infracción de nombre confirmada; el archivo permanece trazable como no conforme."):tr("File supersession recorded; the prior file remains in history.","Sustitución de archivo registrada; el archivo anterior permanece en el historial."));await queryClient.invalidateQueries({queryKey:[`/api/v1/projects/${projectId}/files`]});}catch(caught){setLifecycleError(caught instanceof Error?caught.message:tr("File lifecycle could not be updated.","No se pudo actualizar el ciclo del archivo."));}finally{setLifecycleBusy(null);}
+  };
   const [showUpload] = useState(true);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [expandedRejected, setExpandedRejected] = useState<Set<number>>(new Set());
@@ -335,6 +351,8 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   return (
     <div style={{ minWidth: 0 }}>
       <ReportsReturnBanner projectId={projectId} />
+      {lifecycleMessage&&<div role="status" aria-live="polite" style={{marginBottom:12,padding:10,border:"1px solid #bbf7d0",borderRadius:8,background:"#f0fdf4",color:"#166534"}}>{lifecycleMessage}</div>}
+      {lifecycleError&&<div role="alert" style={{marginBottom:12,padding:10,border:"1px solid #fecaca",borderRadius:8,background:"#fef2f2",color:"#b91c1c"}}>{lifecycleError}</div>}
       {/* Header */}
       <div className="section-header" style={{ marginBottom: 16, display: "flex", flexWrap: "wrap", gap: 12 }}>
         <div style={{ minWidth: 0 }}>
@@ -674,7 +692,12 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                         {/* Actions (delete latest version) */}
                         {canWrite && (
                           <td style={{ textAlign: "right" }}>
-                            <DeleteButton projectId={projectId} fileId={latest.id} />
+                            <div style={{display:"flex",justifyContent:"flex-end",gap:5,flexWrap:"wrap"}}>
+                              {isRejected&&!latest.userConfirmedNonCompliant&&<Button size="sm" variant="outline" disabled={lifecycleBusy===latest.id} onClick={event=>{event.stopPropagation();void fileLifecycle(latest,"confirm");}}>{lifecycleBusy===latest.id?tr("Saving…","Guardando…"):tr("Confirm violation","Confirmar infracción")}</Button>}
+                              {!latest.isSuperseded&&files&&files.some(candidate=>candidate.id!==latest.id)&&<Button size="sm" variant="outline" disabled={lifecycleBusy===latest.id} title={tr("Record which current project file replaces this revision","Registre qué archivo vigente del proyecto reemplaza esta revisión")} onClick={event=>{event.stopPropagation();void fileLifecycle(latest,"supersede");}}>{tr("Supersede","Reemplazar")}</Button>}
+                              {latest.isSuperseded&&<span style={{fontSize:10,color:"#92400e"}}>{tr("Superseded by","Reemplazado por")} #{latest.supersededByFileId}</span>}
+                              <DeleteButton projectId={projectId} fileId={latest.id} />
+                            </div>
                           </td>
                         )}
                       </tr>

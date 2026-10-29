@@ -1,0 +1,137 @@
+import type { AccessProfile, AccessSurface } from "@/lib/access-profile";
+
+export type CapabilityAudience = "authenticated" | "project" | AccessSurface;
+export type CapabilityGroup = "Home" | "Intake" | "Operations" | "Documents" | "Coordination" | "Reports" | "Administration" | "Settings";
+
+export const capabilityGroups: ReadonlyArray<{ id: CapabilityGroup; label: { en: string; es: string }; description: { en: string; es: string } }> = [
+  { id: "Home", label: { en: "Home", es: "Inicio" }, description: { en: "Priorities and work waiting for you.", es: "Prioridades y trabajo que espera por usted." } },
+  { id: "Intake", label: { en: "Intake", es: "Ingreso" }, description: { en: "Set up governed work before project execution.", es: "Prepare el trabajo gobernado antes de ejecutar el proyecto." } },
+  { id: "Operations", label: { en: "Operations", es: "Operaciones" }, description: { en: "Plan, assign, and deliver project work.", es: "Planifique, asigne y entregue trabajo del proyecto." } },
+  { id: "Documents", label: { en: "Documents", es: "Documentos" }, description: { en: "Control files, questions, reviews, and formal records.", es: "Controle archivos, preguntas, revisiones y registros formales." } },
+  { id: "Coordination", label: { en: "Coordination", es: "Coordinación" }, description: { en: "Resolve model, clash, issue, and decision work.", es: "Resuelva trabajo de modelos, interferencias, incidencias y decisiones." } },
+  { id: "Reports", label: { en: "Reports", es: "Reportes" }, description: { en: "Review evidence and create governed outputs.", es: "Revise evidencia y cree resultados gobernados." } },
+  { id: "Administration", label: { en: "Administration", es: "Administración" }, description: { en: "Configure projects, company standards, access, and approvals.", es: "Configure proyectos, estándares de empresa, acceso y aprobaciones." } },
+  { id: "Settings", label: { en: "Settings", es: "Configuración" }, description: { en: "Manage your profile, notifications, billing, and controls.", es: "Gestione su perfil, notificaciones, facturación y controles." } },
+];
+
+export interface CapabilityDirectoryEntry {
+  id: string;
+  group: CapabilityGroup;
+  name: { en: string; es: string };
+  purpose: { en: string; es: string };
+  tasks: string[];
+  href: string;
+  audience: CapabilityAudience;
+  projectRequired?: boolean;
+  guidance?: CapabilityGuidance;
+}
+
+export interface CapabilityGuidance {
+  prerequisite: { en: string; es: string };
+  actor: { en: string; es: string };
+  nextStep: { en: string; es: string };
+}
+
+export type CapabilityAvailability = "available" | "requires-project" | "administrator-only";
+export interface CapabilityDirectoryView extends Omit<CapabilityDirectoryEntry, "href"> {
+  href?: string;
+  availability: CapabilityAvailability;
+}
+
+export const capabilityDirectory: CapabilityDirectoryEntry[] = [
+  { id: "home", group: "Home", name: { en: "Home", es: "Inicio" }, purpose: { en: "Review projects, priorities, and company work.", es: "Revise proyectos, prioridades y trabajo de la empresa." }, tasks: ["dashboard", "projects", "priorities"], href: "/dashboard", audience: "dashboard" },
+  { id: "pending", group: "Home", name: { en: "Pending items", es: "Pendientes" }, purpose: { en: "Open work waiting for your action.", es: "Abra trabajo que espera su acción." }, tasks: ["approvals", "assignments", "review"], href: "/pending", audience: "authenticated" },
+  { id: "intake", group: "Intake", name: { en: "Job Intake", es: "Ingreso de trabajo" }, purpose: { en: "Define project identity, contracts, workflows, and activation readiness.", es: "Defina identidad, contratos, flujos y preparación de activación." }, tasks: ["activate", "contracts", "workflows"], href: "/projects/:projectId/intake", audience: "project", projectRequired: true },
+  { id: "operations", group: "Operations", name: { en: "Operations", es: "Operaciones" }, purpose: { en: "Plan and execute governed project work.", es: "Planifique y ejecute trabajo gobernado del proyecto." }, tasks: ["tasks", "deliverables", "time"], href: "/projects/:projectId/operations", audience: "project", projectRequired: true },
+  { id: "files", group: "Documents", name: { en: "Files", es: "Archivos" }, purpose: { en: "Manage project documents and custody.", es: "Gestione documentos y custodia del proyecto." }, tasks: ["documents", "uploads", "versions"], href: "/projects/:projectId/files", audience: "project", projectRequired: true },
+  { id: "rfis", group: "Documents", name: { en: "RFIs", es: "RFI" }, purpose: { en: "Create, answer, track, report, and export RFIs.", es: "Cree, responda, siga, reporte y exporte RFI." }, tasks: ["questions", "responses", "exports"], href: "/projects/:projectId/rfis", audience: "project", projectRequired: true },
+  { id: "submittals", group: "Documents", name: { en: "Submittals", es: "Submittals" }, purpose: { en: "Operate the submittal register and packages.", es: "Opere el registro y paquetes de submittals." }, tasks: ["register", "packages", "reviews"], href: "/projects/:projectId/submittals", audience: "project", projectRequired: true },
+  { id: "coordination", group: "Coordination", name: { en: "Coordination", es: "Coordinación" }, purpose: { en: "Coordinate models, clashes, issues, and decisions.", es: "Coordine modelos, interferencias, incidencias y decisiones." }, tasks: ["clashes", "issues", "models"], href: "/projects/:projectId/coordination", audience: "project", projectRequired: true },
+  { id: "lens", group: "Coordination", name: { en: "BIMLog Lens", es: "BIMLog Lens" }, purpose: { en: "Open the visual coordination workspace.", es: "Abra el espacio visual de coordinación." }, tasks: ["viewpoints", "markup", "model"], href: "/lens-next", audience: "authenticated" },
+  { id: "knowledge", group: "Coordination", name: { en: "Coordination Knowledge", es: "Conocimiento de coordinación" }, purpose: { en: "Find reviewed precedents and resolution methods.", es: "Encuentre precedentes y métodos de resolución revisados." }, tasks: ["precedents", "methods", "guidance"], href: "/knowledge", audience: "authenticated" },
+  { id: "reports", group: "Reports", name: { en: "Reports", es: "Reportes" }, purpose: { en: "Generate project reports and exports.", es: "Genere reportes y exportaciones del proyecto." }, tasks: ["reports", "pdf", "excel"], href: "/projects/:projectId/reports", audience: "project", projectRequired: true },
+  { id: "project-admin", group: "Administration", name: { en: "Project Administration", es: "Administración de proyectos" }, purpose: { en: "Administer projects, membership, and governed access.", es: "Administre proyectos, membresía y acceso gobernado." }, tasks: ["projects", "members", "permissions"], href: "/admin", audience: "project_administration" },
+  { id: "company-directory", group: "Administration", name: { en: "Participating Companies", es: "Compañías participantes" }, purpose: { en: "Review and maintain the companies participating in projects you administer.", es: "Revise y mantenga las compañías que participan en los proyectos que administra." }, tasks: ["companies", "directory", "participants", "edit company"], href: "/admin?tab=companies", audience: "project_administration" },
+  { id: "project-company-bindings", group: "Administration", name: { en: "Project Company Authority", es: "Autoridad de empresa del proyecto" }, purpose: { en: "Bind each project to its authoritative company and review the immutable binding history.", es: "Vincule cada proyecto con su empresa autorizada y revise el historial inmutable de vinculaciones." }, tasks: ["project company", "binding", "authority", "metadata"], href: "/admin/project-company-bindings", audience: "total_control" },
+  { id: "admin-projects", group: "Administration", name: { en: "Administered Projects", es: "Proyectos administrados" }, purpose: { en: "Open, retire, restore, and transfer projects within your governed administration scope.", es: "Abra, retire, restaure y transfiera proyectos dentro de su alcance administrativo gobernado." }, tasks: ["projects", "retire", "restore", "transfer owner"], href: "/admin?tab=projects", audience: "project_administration" },
+  { id: "admin-users", group: "Administration", name: { en: "Project Users", es: "Usuarios de proyectos" }, purpose: { en: "Create and maintain users within your governed project scope.", es: "Cree y mantenga usuarios dentro de su alcance de proyecto gobernado." }, tasks: ["users", "create user", "edit user", "reset password", "commercial access"], href: "/admin?tab=users", audience: "project_administration" },
+  { id: "audit-activity", group: "Administration", name: { en: "Audit Activity & Admin Evidence", es: "Actividad de auditoría y evidencia administrativa" }, purpose: { en: "Review project activity and the distinct immutable record of administrative actions without merging either evidence trail.", es: "Revise la actividad del proyecto y el registro inmutable independiente de acciones administrativas sin fusionar ambos rastros de evidencia." }, tasks: ["audit", "activity", "admin log", "evidence"], href: "/admin?tab=audit-activity", audience: "project_administration" },
+  { id: "ai-usage", group: "Administration", name: { en: "AI Usage Evidence", es: "Evidencia de uso de IA" }, purpose: { en: "Review AI calls, credit units, billing modes, users, projects, and recent evidence by month.", es: "Revise llamadas de IA, unidades de crédito, modos de facturación, usuarios, proyectos y evidencia reciente por mes." }, tasks: ["ai usage", "credits", "billing mode", "usage evidence"], href: "/admin?tab=ai-usage", audience: "total_control" },
+  { id: "commercial-launch", group: "Administration", name: { en: "Commercial Launch Verification", es: "Verificación de lanzamiento comercial" }, purpose: { en: "Verify live commercial providers, source-bound evidence, launch authorization, and durable verification history before selling subscriptions.", es: "Verifique proveedores comerciales reales, evidencia vinculada a la fuente, autorización de lanzamiento e historial duradero antes de vender suscripciones." }, tasks: ["commercial launch", "verify providers", "launch authorization", "verification history"], href: "/total-control?tab=commercial-launch", audience: "total_control" },
+  { id: "catalogs", group: "Administration", name: { en: "Company Catalogs", es: "Catálogos de empresa" }, purpose: { en: "Manage reusable company clients, disciplines, services, and phases.", es: "Gestione clientes, disciplinas, servicios y fases reutilizables." }, tasks: ["clients", "disciplines", "services"], href: "/company-catalogs", audience: "company_catalogs" },
+  { id: "workflows", group: "Administration", name: { en: "Delivery Workflows", es: "Flujos de entrega" }, purpose: { en: "Publish reusable company workflows for project work.", es: "Publique flujos reutilizables para el trabajo del proyecto." }, tasks: ["workflow", "publish", "versions"], href: "/company-workflows", audience: "company_workflows" },
+  { id: "governance", group: "Administration", name: { en: "Workflow Governance", es: "Gobernanza de flujos" }, purpose: { en: "Control which company workflows are approved and available to projects.", es: "Controle qué flujos están aprobados y disponibles para proyectos." }, tasks: ["approval", "policy", "governance"], href: "/company-workflow-governance", audience: "company_workflows" },
+  { id: "pricing-templates", group: "Administration", name: { en: "APU Library", es: "Biblioteca APU" }, purpose: { en: "Manage approved reusable pricing templates.", es: "Gestione plantillas de precios reutilizables aprobadas." }, tasks: ["apu", "pricing", "templates"], href: "/company-pricing-templates", audience: "company_pricing" },
+  { id: "profile", group: "Settings", name: { en: "Profile and feature visibility", es: "Perfil y visibilidad de funciones" }, purpose: { en: "Manage your profile and visible authorized features.", es: "Gestione su perfil y funciones autorizadas visibles." }, tasks: ["profile", "features", "visibility"], href: "/profile", audience: "authenticated" },
+  { id: "notifications", group: "Settings", name: { en: "Notification Settings", es: "Configuración de notificaciones" }, purpose: { en: "Choose how BIMLog notifies you.", es: "Elija cómo BIMLog le notifica." }, tasks: ["notifications", "email", "telegram"], href: "/settings/notifications", audience: "authenticated" },
+  { id: "financial-controls", group: "Settings", name: { en: "Financial Controls", es: "Controles financieros" }, purpose: { en: "Configure governed financial approval controls.", es: "Configure controles de aprobación financiera gobernados." }, tasks: ["finance", "approvals", "limits"], href: "/settings/financial-controls", audience: "authenticated" },
+  { id: "billing", group: "Settings", name: { en: "Billing and Support", es: "Facturación y soporte" }, purpose: { en: "Manage subscription, invoices, and support cases.", es: "Gestione suscripción, facturas y casos de soporte." }, tasks: ["billing", "invoices", "support"], href: "/settings/billing-support", audience: "authenticated" }
+  ,{ id: "support-satisfaction", group: "Settings", name: { en: "Rate Closed Support", es: "Calificar soporte cerrado" }, purpose: { en: "Rate a support case after you confirm its resolution and close it.", es: "Califique un caso de soporte después de confirmar su resolución y cerrarlo." }, tasks: ["support rating", "satisfaction", "closed case", "customer service"], href: "/settings/billing-support", audience: "authenticated" }
+];
+
+const standardGuidance = (prerequisite: string, prerequisiteEs: string, actor: string, actorEs: string, nextStep: string, nextStepEs: string): CapabilityGuidance => ({
+  prerequisite: { en: prerequisite, es: prerequisiteEs }, actor: { en: actor, es: actorEs }, nextStep: { en: nextStep, es: nextStepEs },
+});
+
+export const capabilityGuidance: Record<string, CapabilityGuidance> = {
+  home: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Every authorized user", "Todo usuario autorizado", "Open a priority or choose a project.", "Abra una prioridad o elija un proyecto."),
+  pending: standardGuidance("Sign in with assigned work.", "Inicie sesión con trabajo asignado.", "Assigned reviewer or owner", "Revisor o responsable asignado", "Complete or route the waiting action.", "Complete o derive la acción pendiente."),
+  intake: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Project administrator or intake owner", "Administrador de proyecto o responsable de ingreso", "Complete readiness and activate governed operations.", "Complete la preparación y active operaciones gobernadas."),
+  operations: standardGuidance("An active, governed project.", "Un proyecto activo y gobernado.", "Authorized project delivery team", "Equipo autorizado de entrega", "Update work and preserve delivery evidence.", "Actualice el trabajo y preserve evidencia de entrega."),
+  files: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized document participant", "Participante autorizado de documentos", "Upload, review, or open the governed record.", "Cargue, revise o abra el registro gobernado."),
+  rfis: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized RFI creator, responder, or reviewer", "Creador, respondedor o revisor RFI autorizado", "Create, answer, close, report, or export the RFI.", "Cree, responda, cierre, reporte o exporte el RFI."),
+  submittals: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized submittal participant", "Participante autorizado de submittals", "Prepare, review, and record the package decision.", "Prepare, revise y registre la decisión del paquete."),
+  coordination: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized coordination participant", "Participante autorizado de coordinación", "Resolve the issue and preserve the decision trail.", "Resuelva la incidencia y preserve el rastro de decisión."),
+  lens: standardGuidance("Authorized visual coordination access.", "Acceso autorizado de coordinación visual.", "Coordination specialist", "Especialista de coordinación", "Open a governed viewpoint or return evidence to coordination.", "Abra un punto de vista gobernado o devuelva evidencia a coordinación."),
+  knowledge: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Coordination participant or author", "Participante o autor de coordinación", "Apply a reviewed precedent or author a governed lesson.", "Aplique un precedente revisado o redacte una lección gobernada."),
+  reports: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Authorized project participant", "Participante autorizado del proyecto", "Select evidence, generate the report, and verify the export.", "Seleccione evidencia, genere el reporte y verifique la exportación."),
+  "project-admin": standardGuidance("Project-administration permission.", "Permiso de administración de proyectos.", "Project administrator", "Administrador de proyectos", "Create or govern projects, membership, and access.", "Cree o gobierne proyectos, membresía y acceso."),
+  "company-directory": standardGuidance("Project-administration permission and a participating company in your administered projects.", "Permiso de administración de proyectos y una compañía participante en sus proyectos administrados.", "Project administrator", "Administrador de proyectos", "Update company details or return to project membership; every accepted change is recorded in the admin log.", "Actualice los datos de la compañía o vuelva a la membresía del proyecto; cada cambio aceptado queda en el registro administrativo."),
+  "project-company-bindings": standardGuidance("Verified super-administrator access, an existing project, and an active company.", "Acceso verificado de superadministrador, un proyecto existente y una empresa activa.", "Verified super administrator", "Superadministrador verificado", "Save a reasoned binding, then verify its new immutable version in the history.", "Guarde una vinculación justificada y verifique su nueva versión inmutable en el historial."),
+  "admin-projects": standardGuidance("Project-administration permission and at least one administered project.", "Permiso de administración de proyectos y al menos un proyecto administrado.", "Project administrator", "Administrador de proyectos", "Open the project, preserve it by retiring or restoring, or transfer ownership with recorded evidence.", "Abra el proyecto, presérvelo retirando o restaurando, o transfiera la propiedad con evidencia registrada."),
+  "admin-users": standardGuidance("Project-administration permission; creating a user also requires an administered project.", "Permiso de administración de proyectos; crear un usuario también requiere un proyecto administrado.", "Project administrator; commercial access requires a verified super administrator", "Administrador de proyectos; el acceso comercial requiere un superadministrador verificado", "Create or update the user, then verify membership and the administration evidence trail.", "Cree o actualice el usuario y luego verifique la membresía y el rastro de evidencia administrativa."),
+  "audit-activity": standardGuidance("Project-administration permission and at least one administered project.", "Permiso de administración de proyectos y al menos un proyecto administrado.", "Project administrator or authorized auditor", "Administrador de proyectos o auditor autorizado", "Review project activity, then use the adjacent Admin Log for the separate immutable record of administrative actions.", "Revise la actividad del proyecto y luego use el Registro Admin adyacente para el registro inmutable separado de acciones administrativas."),
+  "ai-usage": standardGuidance("Verified super-administrator access.", "Acceso verificado de superadministrador.", "Verified super administrator", "Superadministrador verificado", "Select a month, review attributable usage, and reconcile credits or billing mode with the underlying user and project.", "Seleccione un mes, revise el uso atribuible y concilie créditos o modo de facturación con el usuario y proyecto subyacentes."),
+  "commercial-launch": standardGuidance("Verified super-administrator access and complete commercial provider configuration.", "Acceso verificado de superadministrador y configuración completa de proveedores comerciales.", "Verified super administrator", "Superadministrador verificado", "Run live verification, confirm the deployed source matches the evidence, and preserve the durable authorization receipt.", "Ejecute la verificación real, confirme que la fuente desplegada coincida con la evidencia y preserve el comprobante duradero de autorización."),
+  catalogs: standardGuidance("Company-catalog permission.", "Permiso de catálogos de empresa.", "Company administrator", "Administrador de empresa", "Publish reusable company data for authorized projects.", "Publique datos reutilizables para proyectos autorizados."),
+  workflows: standardGuidance("Company-workflow permission.", "Permiso de flujos de empresa.", "Workflow administrator", "Administrador de flujos", "Publish a version for governance review.", "Publique una versión para revisión de gobernanza."),
+  governance: standardGuidance("A published workflow and governance permission.", "Un flujo publicado y permiso de gobernanza.", "Workflow governor", "Gobernador de flujos", "Approve or reject the version and control project availability.", "Apruebe o rechace la versión y controle su disponibilidad."),
+  "pricing-templates": standardGuidance("Company-pricing permission.", "Permiso de precios de empresa.", "Pricing administrator", "Administrador de precios", "Approve a reusable template for governed estimating.", "Apruebe una plantilla reutilizable para estimación gobernada."),
+  profile: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Current user", "Usuario actual", "Save profile or visibility choices and re-enter work.", "Guarde opciones de perfil o visibilidad y vuelva al trabajo."),
+  notifications: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Current user", "Usuario actual", "Save delivery preferences and verify the channel.", "Guarde preferencias y verifique el canal."),
+  "financial-controls": standardGuidance("Authorized financial-control access.", "Acceso autorizado a controles financieros.", "Financial administrator", "Administrador financiero", "Save governed approval limits and verify enforcement.", "Guarde límites gobernados y verifique su aplicación."),
+  billing: standardGuidance("Authorized company billing access.", "Acceso autorizado a facturación.", "Company billing administrator", "Administrador de facturación", "Review billing or open a traceable support case.", "Revise facturación o abra un caso de soporte rastreable."),
+  "support-satisfaction": standardGuidance("A support case requested by you must be closed.", "Un caso de soporte solicitado por usted debe estar cerrado.", "The original support requester", "El solicitante original del caso", "Submit one traceable rating; the case owner can review it without exposing another tenant.", "Envíe una calificación trazable; el responsable del caso puede revisarla sin exponer otro tenant."),
+};
+
+const addGuidance = (entry: CapabilityDirectoryEntry): CapabilityDirectoryEntry => ({ ...entry, guidance: capabilityGuidance[entry.id] });
+
+export function resolveCapabilityDirectory(profile: AccessProfile): CapabilityDirectoryEntry[] {
+  const projectId = profile.facts.activeProjects[0]?.id;
+  return capabilityDirectory.filter((entry) => {
+    if (entry.audience === "authenticated") return profile.facts.authenticated;
+    if (entry.audience === "project") return profile.facts.isSuperAdmin || Boolean(projectId);
+    return profile.decisions[entry.audience]?.allow === true;
+  }).map((entry) => addGuidance({ ...entry, href: entry.href.replace(":projectId", String(projectId ?? "")) }));
+}
+
+export function resolveCapabilityDirectoryViews(profile: AccessProfile): CapabilityDirectoryView[] {
+  const projectId = profile.facts.activeProjects[0]?.id;
+  return capabilityDirectory.map(entry => {
+    const guided = addGuidance(entry);
+    if (entry.audience === "authenticated") return { ...guided, availability: "available" as const };
+    if (entry.audience === "project") return projectId || profile.facts.isSuperAdmin
+      ? { ...guided, href: entry.href.replace(":projectId", String(projectId ?? "")), availability: "available" as const }
+      : { ...guided, href: undefined, availability: "requires-project" as const };
+    return profile.decisions[entry.audience]?.allow
+      ? { ...guided, availability: "available" as const }
+      : { ...guided, href: undefined, availability: "administrator-only" as const };
+  });
+}
+
+export function searchCapabilities<T extends CapabilityDirectoryEntry | CapabilityDirectoryView>(entries: T[], query: string, lang: "en" | "es"): T[] {
+  const normalized = query.trim().toLocaleLowerCase(lang === "es" ? "es" : "en");
+  if (!normalized) return entries;
+  return entries.filter(entry => [entry.group, entry.name.en, entry.name.es, entry.purpose.en, entry.purpose.es, ...entry.tasks]
+    .some(value => value.toLocaleLowerCase(lang === "es" ? "es" : "en").includes(normalized)));
+}

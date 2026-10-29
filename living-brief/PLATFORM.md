@@ -1533,6 +1533,7 @@ It changes only when the code structure or curated architectural facts change.
 ## Frontend pages (artifacts/bimlog/src/pages)
 - artifacts/bimlog/src/pages/About.tsx
 - artifacts/bimlog/src/pages/AdminPanel.tsx
+- artifacts/bimlog/src/pages/AllTools.tsx
 - artifacts/bimlog/src/pages/CommercialWorkspace.tsx
 - artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx
 - artifacts/bimlog/src/pages/CompanyMasterCatalogs.tsx
@@ -1574,6 +1575,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/TotalControl.tsx
 - artifacts/bimlog/src/pages/VerifyEmail.tsx
 - artifacts/bimlog/src/pages/not-found.tsx
+- artifacts/bimlog/src/pages/parity/admin-project-company-bindings.tsx
 - artifacts/bimlog/src/pages/project/ActivityTab.tsx
 - artifacts/bimlog/src/pages/project/AnalyticsTab.tsx
 - artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx
@@ -1619,6 +1621,7 @@ It changes only when the code structure or curated architectural facts change.
 - /data-retention
 - /dashboard
 - /pending
+- /all-tools
 - /lens-next
 - /projects/:id/financial/cost-structure
 - /projects/:id/financial/budget
@@ -1649,6 +1652,7 @@ It changes only when the code structure or curated architectural facts change.
 - /admin
 - /feedback
 - /total-control
+- /admin/project-company-bindings
 - /living-brief
 - /pricing
 - /features

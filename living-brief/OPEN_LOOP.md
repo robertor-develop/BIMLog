@@ -1,5 +1,16 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Corrected program Blocks 5–6, P021–P030 — 2026-10-29
+
+- [x] Implement and focused-test P021–P025 sequentially with one accepted implementation commit per build.
+- [x] Run the Block 5 connected regression, push normally, and verify canonical local/remote identity.
+- [x] Implement and focused-test P026–P030 sequentially with one accepted implementation commit per build.
+- [x] Run the Block 6 connected regression, push normally, and verify canonical local/remote identity.
+- [x] Reconcile the source schema, route graph, capability inventory, and accessibility/responsive evidence without mutating production data.
+- [ ] Pass the restarted exact-head prepublication gate after Living Brief reconciliation.
+- [ ] Synchronize the exact accepted commit to the existing Replit workspace, publish without copying development data, and verify deployed commit, production version, health, and schema identity.
+- [ ] Pass three consecutive authenticated Chrome rounds covering affected workflows, authorization/isolation, persistence, refresh/reopen, clean reentry, console, and relevant network responses before starting P031.
+
 ## Entire-platform closure Block 1 — Builds 001–005 — 2026-10-27
 
 - [x] B001 reconcile the exact deployed `94ee1a1e` Lens company-authority/history repair and the new 50-build closure cadence into the Living Brief without claiming Ruben field acceptance.
@@ -6612,4 +6623,13 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [x] R05 generated the exact evidence-based implementation program: P001–P020 in four five-build blocks, with publication boundaries at P010 and P020.
 - [ ] Complete the exact-head block regression, push and remote verification. Do not claim runtime publication value from analysis/evidence-only changes.
 - [ ] Begin P001 only after R01–R05 acceptance closes; preserve all stable module, record, permission, route, and business-concept identities.
+
+## Corrected program Blocks 3–4 — P011–P020
+
+- [x] P011–P015 provide primary daily navigation plus visible searchable full-capability navigation, bilingual grouping, explanations, novice guidance, expert access, and no-capability-loss regression.
+- [x] P016–P020 provide operational dashboard actions, lifecycle visibility, connected RFI/submittal/report continuity, and novice/expert comprehension acceptance.
+- [x] Pass the combined automated P011–P020 regression and exact production build at implementation source `afe8f54315274594d377a8679c1598d74bbf42ea`.
+- [ ] Reconcile deterministic release evidence, pass the clean local release gate, push P016–P020 without force, and verify local/remote identity.
+- [ ] Publish the ten-build P011–P020 boundary, verify deployed source/version/health, and pass three consecutive authenticated Chrome rounds.
+- [ ] Reconcile the authoritative full-platform audit after P020. Do not treat the 463 unresolved R03 missing-frontend candidates as implemented or claim all-platform completion without evidence-based disposition and resulting build execution.
 

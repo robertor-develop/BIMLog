@@ -79817,6 +79817,567 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p001-p005-parity-adjudication-20261028",
+      "reviewedThroughCommit": "cbf5c81a3fd31a3c9ef680084b84ed2a1913676e",
+      "reviewedAt": "2026-10-28T17:36:23Z",
+      "status": "candidate",
+      "captureTiming": "post_p005_focused_acceptance_pre_block_regression",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or permanent cross-product law changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-build and publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds parity evidence and a no-capability-loss regression gate without weakening acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block preserves the complete, discoverable, progressively organized product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "P001–P005 change audit tooling and evidence only; no runtime route, schema, persistence, or customer data changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, installer, package, or Lens boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export design authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production identity remains unchanged because this is an evidence-only block."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing P001–P020 program remains authoritative; this block fulfills P001–P005."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block freezes adjudicated parity evidence and preserves every unresolved gap."
+        }
+      ],
+      "reason": "Reconcile dynamic frontend references, all read and mutation dispositions, route-family ownership, and the frozen no-capability-loss gap set.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p006-p010-capability-directory-20261028",
+      "reviewedThroughCommit": "41e8e7d0500381b66d8cb5d2e33889ad21ea6167",
+      "reviewedAt": "2026-10-28T18:32:00Z",
+      "status": "candidate",
+      "captureTiming": "post_p010_focused_acceptance_pre_publication_regression",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability directory changes no ecosystem identity or permanent cross-product law."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The authorized five-build and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block adds tested discoverability, permission-state, localization, accessibility, and responsive controls without weakening acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation directly preserves complete, discoverable, progressively organized operational power."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "P006–P010 expose existing authorized capabilities through the frontend and change no schema, persistence contract, or customer data."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, installer, package, connector, or Lens boundary changed in this block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability directory changes no report or export design authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The capability directory changes no external standard or compliance claim."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production identity is unchanged until the authorized publication and live acceptance complete."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing P001–P020 program remains authoritative and this block fulfills only P006–P010."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block implements the adjudicated navigation gap without changing independent audit counts or dispositions."
+        }
+      ],
+      "reason": "Implement P006–P010 as a role-aware, searchable, bilingual All Tools directory while preserving daily navigation and preventing unauthorized record exposure.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "42556e46bbfb90ac1f5a908114178c919f7680d738e059f8b18b6bd47facb6c2"
+    },
+    {
+      "taskId": "revision2-p011-p020-navigation-operations-20261028",
+      "reviewedThroughCommit": "afe8f54315274594d377a8679c1598d74bbf42ea",
+      "reviewedAt": "2026-10-28T21:00:00Z",
+      "status": "candidate",
+      "captureTiming": "post_p020_combined_acceptance_pre_publication_gate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or permanent cross-product law changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The authorized five-build and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "P011–P020 add tested navigation, dashboard, lifecycle, workflow-continuity, and novice/expert acceptance gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The runtime implementation advances the accepted complete, discoverable, progressively organized product direction without removing power."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Runtime navigation, dashboard actions, and lifecycle presentation changed; schema, persistence contracts, and customer data did not."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, installer, package, connector, or Lens boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report and export workflows remain connected but their design authority did not change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "STATUS now records the exact P011–P020 candidate scope, passing automated gates, and remaining publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "OPEN_LOOP now records completed P011–P020 implementation and the remaining release and full-platform reconciliation gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "R03 frontend exposure evidence is refreshed while 463 unresolved candidates remain explicitly open."
+        }
+      ],
+      "reason": "Reconcile the complete P011–P020 navigation, operational-dashboard, lifecycle, workflow-continuity, and comprehension implementation before the ten-build publication gate.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "325a09c1326665ac24104932186699310c55768b8c8e79839c0180ea792615cb"
+    },
+    {
+      "taskId": "revision2-p011-p020-dashboard-test-repair-20261028",
+      "reviewedThroughCommit": "ba6efca4eae16a3a4a6ec3161cd1daff93f197e3",
+      "reviewedAt": "2026-10-28T22:45:00Z",
+      "status": "candidate",
+      "captureTiming": "post_release_gate_stale_test_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or permanent law changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The legacy test now verifies the governed dashboard dispatcher and card bindings already accepted by P017."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only a stale test expectation changed; runtime source, schema, persistence, and customer data are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin or Native boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The P011–P020 publication candidate status remains accurate."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The remaining release and audit gates are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit count or disposition changed."
+        }
+      ],
+      "reason": "Replace obsolete inline-route matching with verification of the governed dashboard dispatcher contract.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p011-p020-all-tools-route-inventory-20261028",
+      "reviewedThroughCommit": "3a84a4773d9ef04081957b662f7b3b1803c4de42",
+      "reviewedAt": "2026-10-28T23:10:00Z",
+      "status": "candidate",
+      "captureTiming": "post_release_gate_route_inventory_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The source-derived UX route inventory now includes the accepted All Tools route."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The inventory reflects the accepted discoverability direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This corrective commit updates governed evidence only; runtime and schema are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Candidate status is unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Remaining gates are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "The governed UX route count advances from 65 to 66 with /all-tools and its authenticated boundary."
+        }
+      ],
+      "reason": "Reconcile the generated UX route inventory with the accepted /all-tools runtime route.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p011-p020-all-tools-accessibility-matrix-20261028",
+      "reviewedThroughCommit": "1aac426182d7ab56f77f537f8a69974642873395",
+      "reviewedAt": "2026-10-28T23:35:00Z",
+      "status": "candidate",
+      "captureTiming": "post_release_gate_accessibility_matrix_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The governed matrix now covers 67 surfaces and 201 desktop, tablet, and 390px viewport cases including All Tools."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The matrix verifies the accepted progressively organized product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This corrective commit updates generated evidence only; runtime and schema are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Candidate status is unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Remaining gates are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Accessibility/responsive evidence now includes the accepted All Tools surface."
+        }
+      ],
+      "reason": "Reconcile the source-derived accessibility/responsive matrix with the accepted /all-tools route.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p011-p020-release-gate-drift-repair-20261028",
+      "reviewedThroughCommit": "9900c5ecbc6b6698d488ef7e49275863347d239e",
+      "reviewedAt": "2026-10-28T23:55:00Z",
+      "status": "candidate",
+      "captureTiming": "post_metadata_only_drift_repair",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The local release gate remains fail-closed on staged, unstaged, untracked, commit, or tree changes while ignoring metadata-only line-ending stat noise."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release tooling changed; runtime, schema, persistence, and customer data are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Candidate status is unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Remaining gates are unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit count or disposition changed."
+        }
+      ],
+      "reason": "Correct release immutability detection so semantic changes still fail closed while generated line-ending metadata noise does not create a false failure.",
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "revision2-p021-p030-prepublication-reconciliation-20261029",
+      "reviewedThroughCommit": "552e2f925c6b380b42e61453e5672767cb446350",
+      "reviewedAt": "2026-10-29T06:55:00Z",
+      "status": "candidate",
+      "captureTiming": "post_blocks_05_06_prepublication_gate_recovery",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The ten authorized parity builds preserve BIMLog product identity and ecosystem boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved five-build block and ten-build publication cadence are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The governed route, capability, schema, and accessibility evidence now covers the P021-P030 surfaces and 68 responsive customer surfaces."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The builds implement the existing complete, discoverable, progressively organized platform direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "P021-P030 add the approved protected administrator API parity routes without removing or merging capabilities."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No native plugin capability or boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering authority or design-system contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Blocks 5 and 6 are implemented, tested, pushed, and at the required publication boundary pending live acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Publication, deployed-identity verification, and three authenticated production rounds remain open before Block 7."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Generated route and accessibility evidence was reconciled after the authorized project-company-bindings route was added."
+        }
+      ],
+      "reason": "Reconcile Living Brief authority metadata through the accepted P021-P030 implementation and deterministic prepublication evidence repairs.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2be656706bcbc48de97278de5905d7e37f7a272a263108c22b4b8033375f07e3"
     }
   ]
 }

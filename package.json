@@ -10,6 +10,7 @@
   },
   "license": "MIT",
   "scripts": {
+    "test:revision2-p019-workflow-continuity": "node scripts/test-revision2-p019-workflow-continuity.mjs",
     "test:ga-terminal-build006": "node scripts/test-ga-terminal-build006.mjs",
     "test:ga-terminal-build005": "node scripts/test-ga-terminal-build005.mjs",
     "test:ga-terminal-build004": "node scripts/test-ga-terminal-build004.mjs",

@@ -57,6 +57,29 @@ import { mergeLensTradeOptions } from "./lens-trade-options";
 
 const LENS_NEXT_REPORT_TYPE_OPTIONS = ["SHOP", "SLEEVE", "COORDINATION", "FIELD", "OTHER"] as const;
 const LENS_NEXT_FALLBACK_FLOORS = ["CELLAR", "1", "2", "3", "4", "5", "ROOF", "Other"] as const;
+const ISSUE_VIEWPOINT_CAPTURE_TIMEOUT_MS = 75_000;
+const ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS = 45_000;
+
+async function withIssueViewpointTimeout<T>(
+  stage: "capture" | "save",
+  timeoutMs: number,
+  operation: (signal: AbortSignal) => Promise<T>,
+): Promise<T> {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await operation(controller.signal);
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error(stage === "capture"
+        ? "Navisworks did not finish capturing the viewpoint. The save was cancelled safely; reconnect the bridge and try again."
+        : "BIMLog did not confirm the viewpoint save in time. Nothing was submitted twice; try again to verify or finish the same save.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
 
 export interface LensNextPanelProps {
   projects: readonly LensNextProjectOption[];
@@ -143,6 +166,11 @@ export function LensNextPanel({
   const [issueViewpointsMessage, setIssueViewpointsMessage] = useState<string | null>(null);
   const [selectedIssueViewpointId, setSelectedIssueViewpointId] = useState<string | null>(null);
   const [issueViewpointHistory, setIssueViewpointHistory] = useState<readonly Record<string, unknown>[] | "loading" | null>(null);
+  const issueViewpointSaveInFlight = useRef(false);
+  const pendingIssueViewpointSave = useRef<{
+    fingerprint: string;
+    input: { name: string; viewpointType: LensNextIssueViewpoint["viewpointType"]; modelFingerprint: string; visualStateJson: string; visualStateDigest: string; reason: string; idempotencyKey: string };
+  } | null>(null);
   const [linkedItems, setLinkedItems] = useState<LensNextLinksResult | "loading" | null>(null);
   const [linkedItemsError, setLinkedItemsError] = useState<string | null>(null);
   const [referenceAttachments, setReferenceAttachments] = useState<LensNextAttachmentsResult | "loading" | null>(null);
@@ -498,13 +526,25 @@ export function LensNextPanel({
   useEffect(() => { const controller = new AbortController(); void loadIssueViewpoints(controller.signal); return () => controller.abort(); }, [loadIssueViewpoints]);
 
   const addIssueViewpoint = useCallback(async (name: string, viewpointType: LensNextIssueViewpoint["viewpointType"], reason: string) => {
-    if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || selectedIssue.identity.projectId !== bridgeContext.projectId) return;
+    if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || selectedIssue.identity.projectId !== bridgeContext.projectId || issueViewpointSaveInFlight.current) return;
+    issueViewpointSaveInFlight.current = true;
     setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
     try {
-      const captured = await bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext);
-      const added = await apiClient.addIssueViewpoint(selectedIssue, { name, viewpointType, modelFingerprint: bridgeContext.modelFingerprint, visualStateJson: captured.visualStateJson, visualStateDigest: captured.visualStateDigest, reason, idempotencyKey: crypto.randomUUID() });
-      await loadIssueViewpoints(); setSelectedIssueViewpointId(added.id); setIssueViewpointsMessage("Viewpoint captured and added to this Issue.");
+      const fingerprint = JSON.stringify([selectedIssue.identity.serverId, name, viewpointType, reason, bridgeContext.modelFingerprint]);
+      let pending = pendingIssueViewpointSave.current;
+      if (!pending || pending.fingerprint !== fingerprint) {
+        const captured = await withIssueViewpointTimeout("capture", ISSUE_VIEWPOINT_CAPTURE_TIMEOUT_MS,
+          signal => bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext, signal));
+        pending = { fingerprint, input: { name, viewpointType, modelFingerprint: bridgeContext.modelFingerprint, visualStateJson: captured.visualStateJson, visualStateDigest: captured.visualStateDigest, reason, idempotencyKey: crypto.randomUUID() } };
+        pendingIssueViewpointSave.current = pending;
+      }
+      const added = await withIssueViewpointTimeout("save", ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS,
+        signal => apiClient.addIssueViewpoint(selectedIssue, pending!.input, signal));
+      await withIssueViewpointTimeout("save", ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS, signal => loadIssueViewpoints(signal));
+      pendingIssueViewpointSave.current = null;
+      setSelectedIssueViewpointId(added.id); setIssueViewpointsMessage("Viewpoint captured and added to this Issue.");
     } catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint capture failed"); }
+    finally { issueViewpointSaveInFlight.current = false; }
   }, [apiClient, bridgeClient, bridgeContext, loadIssueViewpoints, selectedIssue]);
 
   const updateIssueViewpoint = useCallback(async (issueViewpointId: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }) => {

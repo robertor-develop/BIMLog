@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const read=p=>readFileSync(new URL(`../${p}`,import.meta.url),"utf8");
+const page=read("artifacts/bimlog/src/pages/Register.tsx"),app=read("artifacts/bimlog/src/App.tsx"),route=read("artifacts/api-server/src/routes/auth.ts");
+assert.match(app,/path="\/register" component=\{Register\}/);
+assert.match(page,/useRegister\(/); assert.match(page,/onSuccess:[\s\S]*login\(data\.token, data\.user\)[\s\S]*setLocation\("\/dashboard"\)/);
+for(const token of ["What happens next","Qué sucede después","role=\"alert\"","emailValid","passwordValid","Checking invitation","Creating account"])assert.match(page,new RegExp(token));
+assert.match(page,/journey===\"join\"[\s\S]*do not create another company/);
+assert.match(route,/router\.post\("\/auth\/register"/);assert.match(route,/res\.status\(409\)\.json\(\{ error: "Email already exists" \}\)/);assert.match(route,/INVITATION_LINK_REQUIRED/);
+console.log("P025 registration parity checks passed");

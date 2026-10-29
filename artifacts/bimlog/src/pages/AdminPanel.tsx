@@ -18,7 +18,7 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
   });
 }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs", "Company Catalogs"];
+const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs", "Company Catalogs", "Feature Catalog History", "Policy Authority Grants"];
 
 const ADMIN_PANEL_SHELL_CSS = `
   .hq-admin-page {
@@ -366,7 +366,7 @@ function OverviewTab({ token }: { token: string }) {
 }
 
 // ── Users Tab ─────────────────────────────────────────────────────────────────
-function UsersTab({ token }: { token: string }) {
+function UsersTab({ token, isSuperAdmin }: { token: string; isSuperAdmin: boolean }) {
   const [users, setUsers] = useState<Record<string, unknown>[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -377,11 +377,17 @@ function UsersTab({ token }: { token: string }) {
   const [showPw, setShowPw] = useState(false);
   const [projectsList, setProjectsList] = useState<{ id: number; code: string; name: string }[]>([]);
   const [msg, setMsg] = useState("");
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState("");
+  const [editUser, setEditUser] = useState<Record<string, unknown> | null>(null);
+  const userSpanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const ut = (en: string, es: string) => userSpanish ? es : en;
 
   const load = useCallback(() => {
     setLoading(true);
+    setError("");
     apiFetch(`/admin/users?scope=mine&search=${encodeURIComponent(search)}`, token)
-      .then(r => r.json()).then(d => setUsers(d.data || [])).finally(() => setLoading(false));
+      .then(async r => { const d=await r.json().catch(()=>({})); if(!r.ok)throw new Error(String(d.error||ut("Users could not be loaded.","No se pudieron cargar los usuarios."))); setUsers(d.data||[]); }).catch(caught=>setError(caught instanceof Error?caught.message:ut("Users could not be loaded.","No se pudieron cargar los usuarios."))).finally(() => setLoading(false));
   }, [search, token]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
@@ -390,16 +396,15 @@ function UsersTab({ token }: { token: string }) {
 
   const deleteUser = async (id: number, name: string) => {
     if (!confirm(`Delete user "${name}"? This cannot be undone.`)) return;
-    await apiFetch(`/admin/users/${id}`, token, { method: "DELETE" });
-    setMsg("User deleted."); load();
+    setPending(`delete:${id}`);setError("");const r=await apiFetch(`/admin/users/${id}`,token,{method:"DELETE"});const d=await r.json().catch(()=>({}));if(r.ok){setMsg(ut("User deleted; administration evidence was recorded.","Usuario eliminado; la evidencia administrativa quedó registrada."));load();}else setError(String(d.error||ut("User could not be deleted.","No se pudo eliminar el usuario.")));setPending("");
   };
 
   const doResetPw = async () => {
     if (!resetModal) return;
     const r = await apiFetch(`/admin/users/${resetModal}/reset-password`, token, { method: "POST", body: JSON.stringify({ password: newPw }) });
     const d = await r.json();
-    if (d.success) { setResetModal(null); setNewPw(""); setMsg("Password reset."); }
-    else setMsg(d.error || "Failed");
+    if (r.ok&&d.success) { setResetModal(null); setNewPw(""); setMsg(ut("Password reset; administration evidence was recorded.","Contraseña restablecida; la evidencia administrativa quedó registrada.")); }
+    else setError(String(d.error || ut("Password could not be reset.","No se pudo restablecer la contraseña.")));
   };
   const doCreate = async () => {
     const body: Record<string, unknown> = { ...createForm };
@@ -407,17 +412,21 @@ function UsersTab({ token }: { token: string }) {
     else delete body.projectId;
     const r = await apiFetch("/admin/users", token, { method: "POST", body: JSON.stringify(body) });
     const d = await r.json();
-    if (d.id) { setShowCreate(false); setCreateForm({ fullName: "", email: "", password: "", companyName: "", projectId: "" }); setMsg("User created."); load(); }
-    else setMsg(d.error || "Failed");
+    if (r.ok&&d.id) { setShowCreate(false); setCreateForm({ fullName: "", email: "", password: "", companyName: "", projectId: "" }); setMsg(ut("User created; administration evidence was recorded.","Usuario creado; la evidencia administrativa quedó registrada.")); load(); }
+    else setError(String(d.error || ut("User could not be created.","No se pudo crear el usuario.")));
   };
+  const saveUser=async()=>{if(!editUser)return;setPending(`edit:${editUser.id}`);setError("");const r=await apiFetch(`/admin/users/${editUser.id}`,token,{method:"PATCH",body:JSON.stringify({fullName:editUser.fullName,email:editUser.email})});const d=await r.json().catch(()=>({}));if(r.ok){setEditUser(null);setMsg(ut("User updated; administration evidence was recorded.","Usuario actualizado; la evidencia administrativa quedó registrada."));load();}else setError(String(d.error||ut("User could not be updated.","No se pudo actualizar el usuario.")));setPending("");};
+  const toggleCommercial=async(u:Record<string,unknown>)=>{const id=Number(u.id),enabled=!Boolean(u.commercialAccess);setPending(`commercial:${id}`);setError("");const r=await apiFetch(`/admin/users/${id}/commercial-entitlement`,token,{method:"POST",body:JSON.stringify({enabled,featureKey:"package",reason:"ADMIN_USER_ACCESS_CHANGED"})});const d=await r.json().catch(()=>({}));if(r.ok){setMsg(ut("Commercial access updated; administration evidence was recorded.","Acceso comercial actualizado; la evidencia administrativa quedó registrada."));load();}else setError(String(d.error||ut("Commercial access could not be updated.","No se pudo actualizar el acceso comercial.")));setPending("");};
 
   return (
     <div>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+      {error&&<div role="alert" style={{background:"#fef2f2",border:"1px solid #fecaca",borderRadius:8,padding:12,color:"#b91c1c"}}>{error} <Button size="sm" variant="outline" onClick={load}>{ut("Try again","Intentar de nuevo")}</Button></div>}
+      <h2 style={{fontSize:16}}>{ut("Project Users","Usuarios de proyectos")}</h2><p style={{fontSize:12,color:"hsl(var(--muted-foreground))"}}>{ut("Create, edit, reset credentials, or remove users in projects you administer. Commercial entitlement changes are visible only to verified super administrators. Accepted actions are recorded.","Cree, edite, restablezca credenciales o elimine usuarios de proyectos que administra. Los cambios de acceso comercial solo son visibles para superadministradores verificados. Las acciones aceptadas quedan registradas.")}</p>
       <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
         <Input placeholder="Search by name or email..." value={search} onChange={e => setSearch(e.target.value)} style={{ maxWidth: 320 }} />
         <Button size="sm" onClick={load}>Search</Button>
-        <Button size="sm" style={{ marginLeft: "auto" }} onClick={() => setShowCreate(true)}>+ Create User</Button>
+        <Button size="sm" style={{ marginLeft: "auto" }} onClick={() => setShowCreate(true)}>+ {ut("Create User","Crear usuario")}</Button>
       </div>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -435,8 +444,10 @@ function UsersTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{new Date(String(u.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <Button size="sm" variant="outline" onClick={() => { setResetModal(u.id as number); setNewPw(""); }}>Reset PW</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => deleteUser(u.id as number, String(u.fullName))}>Delete</Button>
+                    <Button size="sm" variant="outline" disabled={Boolean(pending)} onClick={()=>setEditUser({...u})}>{ut("Edit","Editar")}</Button>
+                    <Button size="sm" variant="outline" disabled={Boolean(pending)} onClick={() => { setResetModal(u.id as number); setNewPw(""); }}>{ut("Reset PW","Restablecer")}</Button>
+                    {isSuperAdmin&&<Button size="sm" variant="outline" disabled={Boolean(pending)} onClick={()=>void toggleCommercial(u)}>{Boolean(u.commercialAccess)?ut("Revoke Commercial","Revocar comercial"):ut("Grant Commercial","Otorgar comercial")}</Button>}
+                    <Button size="sm" variant="outline" disabled={Boolean(pending)} style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => void deleteUser(u.id as number, String(u.fullName))}>{pending===`delete:${u.id}`?ut("Deleting…","Eliminando…"):ut("Delete","Eliminar")}</Button>
                   </div>
                 </Td>
               </tr>
@@ -445,6 +456,8 @@ function UsersTab({ token }: { token: string }) {
         </table>
       </div>
       {loading && <div style={{ padding: 16, color: "hsl(var(--muted-foreground))", textAlign: "center" }}>Loading...</div>}
+      {!loading&&!error&&users.length===0&&<div role="status" style={{padding:16,textAlign:"center"}}>{ut("No users match this project scope or search.","Ningún usuario coincide con este alcance de proyecto o búsqueda.")}</div>}
+      {editUser&&<Modal title={ut("Edit User","Editar usuario")} onClose={()=>setEditUser(null)}><label>{ut("Full name","Nombre completo")}<Input value={String(editUser.fullName||"")} onChange={e=>setEditUser(u=>({...u!,fullName:e.target.value}))}/></label><label>{ut("Email","Correo")}<Input value={String(editUser.email||"")} onChange={e=>setEditUser(u=>({...u!,email:e.target.value}))}/></label><Button disabled={Boolean(pending)||!String(editUser.fullName||"").trim()||!String(editUser.email||"").trim()} onClick={()=>void saveUser()}>{pending.startsWith("edit:")?ut("Saving…","Guardando…"):ut("Save","Guardar")}</Button></Modal>}
       {resetModal && (
         <Modal title="Reset Password" onClose={() => setResetModal(null)}>
           <div style={{ marginBottom: 12 }}>
@@ -492,10 +505,26 @@ function CompaniesTab({ token }: { token: string }) {
   const [conventionSummary, setConventionSummary] = useState<Array<{ projectId: number; projectName: string; codes: string[]; assignedCodes: string[]; unassignedCodes: string[] }>>([]);
   const [editModal, setEditModal] = useState<Record<string, unknown> | null>(null);
   const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [pendingAction, setPendingAction] = useState("");
+  const spanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const t = (en: string, es: string) => spanish ? es : en;
 
-  const load = () => {
-    apiFetch("/admin/companies?scope=mine", token).then(r => r.json()).then(setCompanies).catch((error) => logClientError("admin companies load", error));
-    apiFetch("/admin/projects?scope=mine", token).then(r => r.json()).then((projects: any[]) => {
+  const load = async () => {
+    setLoading(true); setError("");
+    try {
+      const [companyResponse, projectResponse] = await Promise.all([
+        apiFetch("/admin/companies?scope=mine", token),
+        apiFetch("/admin/projects?scope=mine", token),
+      ]);
+      if (!companyResponse.ok || !projectResponse.ok) {
+        const denied = companyResponse.status === 401 || companyResponse.status === 403 || projectResponse.status === 401 || projectResponse.status === 403;
+        throw new Error(denied ? t("You do not have permission to manage participating companies.", "No tiene permiso para administrar compañías participantes.") : t("Participating companies could not be loaded.", "No se pudieron cargar las compañías participantes."));
+      }
+      const companyRows = await companyResponse.json();
+      const projects = await projectResponse.json() as any[];
+      setCompanies(Array.isArray(companyRows) ? companyRows : []);
       setConventionSummary(projects
         .filter(p => p.conventionCompanyCodes?.length > 0)
         .map(p => ({
@@ -505,24 +534,45 @@ function CompaniesTab({ token }: { token: string }) {
           assignedCodes: (p.conventionCompanyCodes || []).filter((c: string) => !(p.unassignedConventionCompanies || []).includes(c)),
           unassignedCodes: p.unassignedConventionCompanies || [],
         })));
-    }).catch((error) => logClientError("admin company users load", error));
+    } catch (caught) {
+      logClientError("admin companies load", caught);
+      setError(caught instanceof Error ? caught.message : t("Participating companies could not be loaded.", "No se pudieron cargar las compañías participantes."));
+    } finally { setLoading(false); }
   };
-  useEffect(() => { load(); }, [token]);
+  useEffect(() => { void load(); }, [token]);
 
   const doDelete = async (id: number, name: string, userCount: number) => {
+    if (userCount > 0) { setError(t("This company still has users. Reassign those users before deleting the company.", "Esta compañía todavía tiene usuarios. Reasigne esos usuarios antes de eliminarla.")); return; }
     if (!confirm(`Delete company "${name}"? This will affect ${userCount} user(s).`)) return;
-    await apiFetch(`/admin/companies/${id}`, token, { method: "DELETE" });
-    setMsg("Company deleted."); load();
+    setPendingAction(`delete:${id}`); setError(""); setMsg("");
+    try {
+      const response = await apiFetch(`/admin/companies/${id}`, token, { method: "DELETE" });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(String(body.error || t("Company could not be deleted.", "No se pudo eliminar la compañía.")));
+      setMsg(t("Company deleted. The admin log contains the evidence record.", "Compañía eliminada. El registro administrativo contiene la evidencia.")); await load();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : t("Company could not be deleted.", "No se pudo eliminar la compañía.")); }
+    finally { setPendingAction(""); }
   };
   const doSave = async () => {
     if (!editModal) return;
-    await apiFetch(`/admin/companies/${editModal.id}`, token, { method: "PATCH", body: JSON.stringify({ name: editModal.name, website: editModal.website, address: editModal.address, phone: editModal.phone }) });
-    setEditModal(null); setMsg("Company updated."); load();
+    setPendingAction(`save:${editModal.id}`); setError(""); setMsg("");
+    try {
+      const response = await apiFetch(`/admin/companies/${editModal.id}`, token, { method: "PATCH", body: JSON.stringify({ name: editModal.name, website: editModal.website, address: editModal.address, phone: editModal.phone }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(String(body.error || t("Company could not be updated.", "No se pudo actualizar la compañía.")));
+      setEditModal(null); setMsg(t("Company updated. The admin log contains the evidence record.", "Compañía actualizada. El registro administrativo contiene la evidencia.")); await load();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : t("Company could not be updated.", "No se pudo actualizar la compañía.")); }
+    finally { setPendingAction(""); }
   };
 
   return (
     <div>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+      {error && <div role="alert" style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#b91c1c" }}>{error} <Button size="sm" variant="outline" onClick={() => void load()}>{t("Try again", "Intentar de nuevo")}</Button></div>}
+      <section aria-labelledby="participating-companies-purpose" style={{ marginBottom: 14 }}>
+        <h2 id="participating-companies-purpose" style={{ fontSize: 16, margin: 0 }}>{t("Participating Companies", "Compañías participantes")}</h2>
+        <p style={{ margin: "5px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{t("Review companies connected to projects you administer. Edit verified directory details here; reassign users before deleting an unused company. Accepted changes appear in the Admin Log.", "Revise las compañías conectadas a los proyectos que administra. Edite aquí los datos verificados del directorio; reasigne usuarios antes de eliminar una compañía sin uso. Los cambios aceptados aparecen en el Registro Admin.")}</p>
+      </section>
 
       {conventionSummary.length > 0 && (
         <div style={{ marginBottom: 20, padding: 14, border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))" }}>
@@ -559,6 +609,9 @@ function CompaniesTab({ token }: { token: string }) {
       <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4, color: "hsl(var(--foreground))" }}>Participating Companies</div>
       <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>Companies with users assigned as members on your projects. Counts reflect only users and files within your project scope.</div>
       <div style={{ overflowX: "auto" }}>
+        {loading && <p role="status" aria-live="polite">{t("Loading participating companies…", "Cargando compañías participantes…")}</p>}
+        {!loading && !error && companies.length === 0 && <div role="status" style={{ padding: 18, border: "1px dashed hsl(var(--border))", borderRadius: 8 }}>{t("No participating companies are connected to projects you administer yet. Add project members from the Projects section; their companies will appear here.", "Todavía no hay compañías participantes conectadas a los proyectos que administra. Agregue miembros desde la sección Proyectos; sus compañías aparecerán aquí.")}</div>}
+        {!loading && companies.length > 0 &&
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Company</Th><Th>Users</Th><Th>Projects</Th><Th>Created</Th><Th>Actions</Th></tr></thead>
           <tbody>
@@ -570,14 +623,14 @@ function CompaniesTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 11 }}>{new Date(String(c.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <Button size="sm" variant="outline" onClick={() => setEditModal({ ...c })}>Edit</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(c.id as number, String(c.name), c.userCount as number)}>Delete</Button>
+                    <Button size="sm" variant="outline" disabled={Boolean(pendingAction)} onClick={() => setEditModal({ ...c })}>{t("Edit", "Editar")}</Button>
+                    <Button size="sm" variant="outline" disabled={Boolean(pendingAction) || Number(c.userCount || 0) > 0} title={Number(c.userCount || 0) > 0 ? t("Reassign users before deleting", "Reasigne usuarios antes de eliminar") : undefined} style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => void doDelete(c.id as number, String(c.name), Number(c.userCount || 0))}>{pendingAction === `delete:${c.id}` ? t("Deleting…", "Eliminando…") : t("Delete", "Eliminar")}</Button>
                   </div>
                 </Td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </table>}
       </div>
       {editModal && (
         <Modal title="Edit Company" onClose={() => setEditModal(null)}>
@@ -587,7 +640,7 @@ function CompaniesTab({ token }: { token: string }) {
               <Input value={String((editModal as Record<string, unknown>)[field] || "")} onChange={e => setEditModal(m => ({ ...m!, [field]: e.target.value }))} />
             </div>
           ))}
-          <Button onClick={doSave}>Save</Button>
+          <Button disabled={Boolean(pendingAction) || !String(editModal.name || "").trim()} onClick={() => void doSave()}>{pendingAction.startsWith("save:") ? t("Saving…", "Guardando…") : t("Save", "Guardar")}</Button>
         </Modal>
       )}
     </div>
@@ -602,34 +655,48 @@ function ProjectsTab({ token }: { token: string }) {
   const [transferModal, setTransferModal] = useState<number | null>(null);
   const [newOwnerId, setNewOwnerId] = useState("");
   const [msg, setMsg] = useState("");
+  const [projectState, setProjectState] = useState<"loading" | "ready" | "error" | "saving">("loading");
+  const [projectError, setProjectError] = useState("");
+  const projectSpanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const pt = (en: string, es: string) => projectSpanish ? es : en;
 
-  const load = () => {
-    apiFetch("/admin/projects?scope=mine", token).then(r => r.json()).then(setProjects).catch((error) => logClientError("admin projects load", error));
-    apiFetch("/admin/users?scope=mine", token).then(r => r.json()).then(d => setAllUsers(d.data || [])).catch((error) => logClientError("admin project users load", error));
+  const load = async () => {
+    setProjectState("loading"); setProjectError("");
+    try {
+      const [projectResponse, userResponse] = await Promise.all([apiFetch("/admin/projects?scope=mine", token), apiFetch("/admin/users?scope=mine", token)]);
+      if (!projectResponse.ok || !userResponse.ok) throw new Error(projectResponse.status === 403 || userResponse.status === 403 ? pt("You do not have project-administration permission.", "No tiene permiso de administración de proyectos.") : pt("Projects could not be loaded.", "No se pudieron cargar los proyectos."));
+      const projectRows = await projectResponse.json(), userRows = await userResponse.json();
+      setProjects(Array.isArray(projectRows) ? projectRows : []); setAllUsers(userRows.data || []); setProjectState("ready");
+    } catch (error) { logClientError("admin projects load", error); setProjectError(error instanceof Error ? error.message : pt("Projects could not be loaded.", "No se pudieron cargar los proyectos.")); setProjectState("error"); }
   };
-  useEffect(() => { load(); }, [token]);
+  useEffect(() => { void load(); }, [token]);
 
   const doArchive = async (id: number, status: string) => {
-    if (status === "archived") {
-      await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: "active" }) });
-      setMsg("Project restored."); load(); return;
-    }
-    if (await confirmAndRetireProject(id, (path, init) => apiFetch(path, token, init))) {
-      setMsg("Project retired; dependent records were preserved."); load();
-    }
+    setProjectState("saving"); setProjectError(""); setMsg("");
+    try {
+      if (status === "archived") { const response = await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: "active" }) }); if (!response.ok) throw new Error(pt("Project could not be restored.", "No se pudo restaurar el proyecto.")); setMsg(pt("Project restored; administration evidence was recorded.", "Proyecto restaurado; la evidencia administrativa quedó registrada.")); await load(); return; }
+      if (await confirmAndRetireProject(id, (path, init) => apiFetch(path, token, init))) { setMsg(pt("Project retired; dependent records were preserved and evidence recorded.", "Proyecto retirado; los registros dependientes se conservaron y la evidencia quedó registrada.")); await load(); } else setProjectState("ready");
+    } catch (error) { setProjectError(error instanceof Error ? error.message : pt("Project could not be changed.", "No se pudo cambiar el proyecto.")); setProjectState("error"); }
   };
   const doTransfer = async () => {
     if (!transferModal || !newOwnerId) return;
+    setProjectState("saving"); setProjectError(""); setMsg("");
     const r = await apiFetch(`/admin/projects/${transferModal}/transfer`, token, { method: "POST", body: JSON.stringify({ newOwnerId: parseInt(newOwnerId) }) });
     const d = await r.json();
-    if (d.id) { setTransferModal(null); setNewOwnerId(""); setMsg("Ownership transferred."); load(); }
-    else setMsg(d.error || "Failed");
+    if (r.ok && d.id) { setTransferModal(null); setNewOwnerId(""); setMsg(pt("Ownership transferred; evidence was recorded.", "Propiedad transferida; la evidencia quedó registrada.")); await load(); }
+    else { setProjectError(String(d.error || pt("Ownership could not be transferred.", "No se pudo transferir la propiedad."))); setProjectState("error"); }
   };
 
   return (
     <div>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+      {projectError && <div role="alert" style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: 12, color: "#b91c1c" }}>{projectError} <Button size="sm" variant="outline" onClick={() => void load()}>{pt("Try again", "Intentar de nuevo")}</Button></div>}
+      <h2 style={{ fontSize: 16 }}>{pt("Administered Projects", "Proyectos administrados")}</h2>
+      <p style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{pt("Open governed work, retire or restore without deleting dependent records, and transfer ownership to an authorized user. Accepted actions preserve administration evidence.", "Abra trabajo gobernado, retire o restaure sin eliminar registros dependientes y transfiera la propiedad a un usuario autorizado. Las acciones aceptadas preservan evidencia administrativa.")}</p>
+      {projectState === "loading" && <p role="status">{pt("Loading administered projects…", "Cargando proyectos administrados…")}</p>}
+      {projectState !== "loading" && !projectError && projects.length === 0 && <p role="status">{pt("No projects are currently in your administration scope.", "Actualmente no hay proyectos en su alcance administrativo.")}</p>}
       <div style={{ overflowX: "auto" }}>
+        {projects.length > 0 &&
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Project</Th><Th>Code</Th><Th>Company</Th><Th>Convention Cos.</Th><Th>Status</Th><Th>Members</Th><Th>Files</Th><Th>Created</Th><Th>Actions</Th></tr></thead>
           <tbody>
@@ -656,16 +723,16 @@ function ProjectsTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 11 }}>{new Date(String(p.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-                    <Button size="sm" variant="outline" onClick={() => setLocation(`/projects/${p.id}`)}>View</Button>
-                    <Button size="sm" variant="outline" onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</Button>
-                    <Button size="sm" variant="outline" onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</Button>
+                    <Button size="sm" variant="outline" disabled={projectState === "saving"} onClick={() => setLocation(`/projects/${p.id}`)}>{pt("View", "Ver")}</Button>
+                    <Button size="sm" variant="outline" disabled={projectState === "saving"} onClick={() => void doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? pt("Restore", "Restaurar") : pt("Retire", "Retirar")}</Button>
+                    <Button size="sm" variant="outline" disabled={projectState === "saving"} onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>{pt("Transfer", "Transferir")}</Button>
                   </div>
                 </Td>
               </tr>
               );
             })}
           </tbody>
-        </table>
+        </table>}
       </div>
       {transferModal && (
         <Modal title="Transfer Ownership" onClose={() => setTransferModal(null)}>
@@ -676,7 +743,7 @@ function ProjectsTab({ token }: { token: string }) {
               {allUsers.map((u: Record<string, unknown>) => <option key={String(u.id)} value={String(u.id)}>{String(u.fullName)} ({String(u.email)})</option>)}
             </select>
           </div>
-          <Button onClick={doTransfer} disabled={!newOwnerId}>Transfer</Button>
+          <Button onClick={() => void doTransfer()} disabled={!newOwnerId || projectState === "saving"}>{projectState === "saving" ? pt("Transferring…", "Transfiriendo…") : pt("Transfer", "Transferir")}</Button>
         </Modal>
       )}
     </div>
@@ -689,15 +756,24 @@ function EmailLogTab({ token }: { token: string }) {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState({ status: "", triggerType: "", from: "", to: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const load = useCallback(() => {
+    setLoading(true);
+    setError("");
     const params = new URLSearchParams({ page: String(page), ...Object.fromEntries(Object.entries(filters).filter(([, v]) => v)) });
-    apiFetch(`/admin/email-log?scope=mine&${params}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin email log load", error));
+    apiFetch(`/admin/email-log?scope=mine&${params}`, token)
+      .then(async r => { const body = await r.json().catch(() => ({})); if (!r.ok) throw new Error(body.error || "Unable to load email evidence."); return body; })
+      .then(d => { setLogs(d.data || []); setTotal(d.total || 0); })
+      .catch((cause) => { logClientError("admin email log load", cause); setError(cause instanceof Error ? cause.message : "Unable to load email evidence."); })
+      .finally(() => setLoading(false));
   }, [token, page, filters]);
   useEffect(() => { load(); }, [load]);
 
   return (
     <div>
+      <p style={{ marginTop: 0, fontSize: 13 }}>Email Log shows delivery evidence for projects you administer. A sent record confirms provider acceptance; failed and skipped records retain their reason without exposing message credentials.</p>
       <div style={{ display: "flex", gap: 10, marginBottom: 16, flexWrap: "wrap" }}>
         <select value={filters.status} onChange={e => setFilters(f => ({ ...f, status: e.target.value }))} style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 12 }}>
           <option value="">All Status</option>
@@ -709,6 +785,9 @@ function EmailLogTab({ token }: { token: string }) {
         <Button size="sm" onClick={load}>Filter</Button>
         <span style={{ marginLeft: "auto", fontSize: 12, color: "hsl(var(--muted-foreground))", alignSelf: "center" }}>{total} records</span>
       </div>
+      {loading && <div role="status" style={{ padding: "16px 0" }}>Loading email evidence…</div>}
+      {error && <div role="alert" style={{ padding: 12, border: "1px solid #ef4444", borderRadius: 8 }}>{error} <Button size="sm" variant="outline" onClick={load}>Retry</Button></div>}
+      {!loading && !error && logs.length === 0 && <div role="status" style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", textAlign: "center" }}>No email delivery records match this administered scope and filter.</div>}
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>To</Th><Th>Subject</Th><Th>Trigger</Th><Th>Status</Th><Th>Error</Th><Th>Sent At</Th></tr></thead>
@@ -742,13 +821,25 @@ function ActivityFeedTab({ token }: { token: string }) {
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const load = useCallback(() => {
-    apiFetch(`/admin/activity?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setItems(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin activity load", error));
+    setLoading(true);
+    setError("");
+    apiFetch(`/admin/activity?scope=mine&page=${page}`, token)
+      .then(async r => { const body = await r.json().catch(() => ({})); if (!r.ok) throw new Error(body.error || "Unable to load project activity."); return body; })
+      .then(d => { setItems(d.data || []); setTotal(d.total || 0); })
+      .catch((cause) => { logClientError("admin activity load", cause); setError(cause instanceof Error ? cause.message : "Unable to load project activity."); })
+      .finally(() => setLoading(false));
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (
     <div>
+      <p style={{ marginTop: 0, fontSize: 13 }}>Project Activity records operational events across projects you administer. For administrative changes, use the distinct adjacent <strong>Admin Log</strong>; the two evidence trails remain separate.</p>
+      {loading && <div role="status" style={{ padding: "16px 0" }}>Loading project activity…</div>}
+      {error && <div role="alert" style={{ padding: 12, border: "1px solid #ef4444", borderRadius: 8 }}>{error} <Button size="sm" variant="outline" onClick={load}>Retry</Button></div>}
       <div style={{ marginBottom: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{total} total events across all projects</div>
+      {!loading && !error && items.length === 0 && <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No project activity is recorded in your administered scope yet.</div>}
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Project</Th><Th>User</Th><Th>Company</Th><Th>Action</Th><Th>Entity</Th><Th>Details</Th><Th>When</Th></tr></thead>
@@ -782,18 +873,41 @@ function ActivityFeedTab({ token }: { token: string }) {
 }
 
 // ── Feature Flags Tab ─────────────────────────────────────────────────────────
-function FeatureFlagsTab({ token }: { token: string }) {
+function FeatureFlagsTab({ token, isSuperAdmin }: { token: string; isSuperAdmin: boolean }) {
   const [flags, setFlags] = useState<Record<string, unknown>[]>([]);
   const [msg, setMsg] = useState("");
-  const load = () => apiFetch("/admin/feature-flags?scope=mine", token).then(r => r.json()).then(setFlags).catch((error) => logClientError("admin feature flags load", error));
-  useEffect(() => { load(); }, [token]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [savingId, setSavingId] = useState<number | null>(null);
+  const load = useCallback(() => {
+    setLoading(true); setError("");
+    return apiFetch("/admin/feature-flags?scope=mine", token)
+      .then(async response => { const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error || "Unable to load feature flags."); return body; })
+      .then(body => setFlags(Array.isArray(body) ? body : []))
+      .catch(cause => { logClientError("admin feature flags load", cause); setError(cause instanceof Error ? cause.message : "Unable to load feature flags."); })
+      .finally(() => setLoading(false));
+  }, [token]);
+  useEffect(() => { void load(); }, [load]);
   const toggle = async (id: number, enabled: boolean) => {
-    await apiFetch(`/admin/feature-flags/${id}`, token, { method: "PATCH", body: JSON.stringify({ enabled: !enabled }) });
-    setMsg(`Flag updated.`); load();
+    setSavingId(id); setMsg(""); setError("");
+    try {
+      const response = await apiFetch(`/admin/feature-flags/${id}`, token, { method: "PATCH", body: JSON.stringify({ enabled: !enabled }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || "Unable to update feature flag.");
+      setMsg("Feature flag updated and the governed projection was refreshed.");
+      await load();
+    } catch (cause) {
+      logClientError("admin feature flag update", cause);
+      setError(cause instanceof Error ? cause.message : "Unable to update feature flag.");
+    } finally { setSavingId(null); }
   };
   return (
     <div>
+      <p style={{ marginTop: 0, fontSize: 13 }}>Feature Flags shows the governed legacy projection for your administered scope. Only an authorized Super Admin can change a flag; every accepted update is audited.</p>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+      {loading && <p role="status">Loading governed feature flags…</p>}
+      {error && <div role="alert">{error} <Button size="sm" variant="outline" onClick={() => void load()}>Retry</Button></div>}
+      {!loading && !error && flags.length === 0 && <p role="status">No feature flags are available in this administered scope.</p>}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {flags.map((f: Record<string, unknown>) => (
           <div key={String(f.id)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 10, padding: "16px 20px" }}>
@@ -802,6 +916,9 @@ function FeatureFlagsTab({ token }: { token: string }) {
               <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2 }}>Applies to: {String(f.appliesTo)} · Last updated: {new Date(String(f.updatedAt)).toLocaleString()}</div>
             </div>
             <button
+              aria-label={`${String(f.enabled ? "Disable" : "Enable")} ${FLAG_LABELS[String(f.flagName)] || String(f.flagName)}`}
+              aria-pressed={Boolean(f.enabled)}
+              disabled={!isSuperAdmin || savingId !== null}
               onClick={() => toggle(f.id as number, f.enabled as boolean)}
               style={{
                 width: 48, height: 26, borderRadius: 13, border: "none", cursor: "pointer",
@@ -818,19 +935,145 @@ function FeatureFlagsTab({ token }: { token: string }) {
   );
 }
 
+function FeatureCatalogHistoryTab({ token }: { token: string }) {
+  const [versions, setVersions] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const load = useCallback(() => {
+    setLoading(true); setError("");
+    apiFetch("/admin/feature-catalog/versions", token)
+      .then(async response => { const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error?.en || body.error || "Unable to load feature catalog history."); return body; })
+      .then(body => setVersions(body.versions || []))
+      .catch(cause => { logClientError("feature catalog history load", cause); setError(cause instanceof Error ? cause.message : "Unable to load feature catalog history."); })
+      .finally(() => setLoading(false));
+  }, [token]);
+  useEffect(() => { load(); }, [load]);
+  return <section aria-labelledby="feature-catalog-history-title">
+    <h2 id="feature-catalog-history-title">Feature Catalog History</h2>
+    <p>Read-only Super Admin evidence of every governed capability version, status, AI classification, effective period and verified activation authority.</p>
+    {loading && <p role="status">Loading feature catalog history…</p>}
+    {error && <div role="alert">{error} <Button size="sm" variant="outline" onClick={load}>Retry</Button></div>}
+    {!loading && !error && versions.length === 0 && <p role="status">No feature catalog versions are recorded.</p>}
+    {!loading && !error && versions.length > 0 && <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse" }}><thead><tr><Th>Feature</Th><Th>Version</Th><Th>Status</Th><Th>AI class</Th><Th>Effective</Th><Th>Activation authority</Th></tr></thead><tbody>{versions.map(item => <tr key={String(item.id)}><Td>{String(item.featureKey)}</Td><Td>{String(item.version)}</Td><Td><Badge label={String(item.capabilityStatus)} /></Td><Td>{String(item.aiClassification)}</Td><Td>{new Date(String(item.effectiveFrom)).toLocaleString()}{item.effectiveTo ? ` – ${new Date(String(item.effectiveTo)).toLocaleString()}` : " – current"}</Td><Td>{String(item.activationAuthority).replaceAll("_", " ")}</Td></tr>)}</tbody></table></div>}
+  </section>;
+}
+
+type PolicyAuthorityGrant = {
+  grantId: string;
+  status: "active" | "revoked";
+  effectiveFrom: string;
+  effectiveTo: string | null;
+  reasonCode: string;
+  createdAt: string;
+  revokedAt: string | null;
+  metadataOnly: true;
+};
+
+function PolicyAuthorityGrantsTab({ token }: { token: string }) {
+  const [companyId, setCompanyId] = useState("");
+  const [userId, setUserId] = useState("");
+  const [reasonCode, setReasonCode] = useState("");
+  const [explanationEn, setExplanationEn] = useState("");
+  const [explanationEs, setExplanationEs] = useState("");
+  const [grants, setGrants] = useState<PolicyAuthorityGrant[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const validCompanyId = Number.isSafeInteger(Number(companyId)) && Number(companyId) > 0;
+  const validUserId = Number.isSafeInteger(Number(userId)) && Number(userId) > 0;
+  const evidenceReady = /^[A-Z0-9_]{3,64}$/.test(reasonCode) && explanationEn.trim().length >= 3 && explanationEs.trim().length >= 3;
+
+  const load = useCallback(async () => {
+    if (!validCompanyId) { setError("Enter a positive company ID to inspect its grant metadata."); setGrants([]); return; }
+    setLoading(true); setError(""); setMessage("");
+    try {
+      const response = await apiFetch(`/admin/feature-policy-authority-grants?companyId=${encodeURIComponent(companyId)}`, token);
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error?.en || body.error || "Unable to load policy authority grants.");
+      setGrants(Array.isArray(body.grants) ? body.grants : []);
+    } catch (cause) {
+      logClientError("policy authority grants load", cause);
+      setError(cause instanceof Error ? cause.message : "Unable to load policy authority grants.");
+    } finally { setLoading(false); }
+  }, [companyId, token, validCompanyId]);
+
+  const evidenceBody = () => JSON.stringify({ reasonCode, explanation: { en: explanationEn.trim(), es: explanationEs.trim() } });
+  const createGrant = async () => {
+    if (!validCompanyId || !validUserId || !evidenceReady) { setError("Company ID, user ID, a valid reason code, and bilingual evidence are required."); return; }
+    setBusy(true); setError(""); setMessage("");
+    try {
+      const response = await apiFetch("/admin/feature-policy-authority-grants", token, { method: "POST", body: JSON.stringify({ companyId: Number(companyId), userId: Number(userId), reasonCode, explanation: { en: explanationEn.trim(), es: explanationEs.trim() } }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error?.en || body.error || "Unable to create the authority grant.");
+      setMessage(`Authority grant ${String(body.grantId)} was created with auditable evidence.`);
+      await load();
+    } catch (cause) {
+      logClientError("policy authority grant create", cause);
+      setError(cause instanceof Error ? cause.message : "Unable to create the authority grant.");
+    } finally { setBusy(false); }
+  };
+  const revokeGrant = async (grantId: string) => {
+    if (!evidenceReady) { setError("A valid reason code and bilingual evidence are required before revocation."); return; }
+    setBusy(true); setError(""); setMessage("");
+    try {
+      const response = await apiFetch(`/admin/feature-policy-authority-grants/${encodeURIComponent(grantId)}/revoke`, token, { method: "POST", body: evidenceBody() });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error?.en || body.error || "Unable to revoke the authority grant.");
+      setMessage(`Authority grant ${grantId} was revoked and retained in the evidence ledger.`);
+      await load();
+    } catch (cause) {
+      logClientError("policy authority grant revoke", cause);
+      setError(cause instanceof Error ? cause.message : "Unable to revoke the authority grant.");
+    } finally { setBusy(false); }
+  };
+
+  return <section aria-labelledby="policy-authority-grants-title">
+    <h2 id="policy-authority-grants-title">Policy Authority Grants</h2>
+    <p>Super Admin control for transitional company policy authority. Enter existing company and user IDs; the server rejects cross-company targets. The ledger exposes grant metadata only and preserves revoked evidence.</p>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: 12, marginBottom: 12 }}>
+      <label>Company ID<Input inputMode="numeric" value={companyId} onChange={event => setCompanyId(event.target.value)} placeholder="Positive company ID" /></label>
+      <label>User ID<Input inputMode="numeric" value={userId} onChange={event => setUserId(event.target.value)} placeholder="Existing user ID" /></label>
+      <label>Reason code<Input value={reasonCode} onChange={event => setReasonCode(event.target.value.toUpperCase())} placeholder="POLICY_AUTHORITY_GRANTED" /></label>
+      <label>Evidence (English)<Input value={explanationEn} onChange={event => setExplanationEn(event.target.value)} placeholder="Why this authority is required" /></label>
+      <label>Evidencia (español)<Input value={explanationEs} onChange={event => setExplanationEs(event.target.value)} placeholder="Por qué se requiere esta autoridad" /></label>
+    </div>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 16 }}>
+      <Button variant="outline" onClick={() => void load()} disabled={loading || busy || !validCompanyId}>Inspect grant metadata</Button>
+      <Button onClick={() => void createGrant()} disabled={loading || busy || !validCompanyId || !validUserId || !evidenceReady}>Create audited grant</Button>
+    </div>
+    {message && <div role="status" style={{ padding: 10, marginBottom: 12, border: "1px solid #22c55e", borderRadius: 8 }}>{message}</div>}
+    {loading && <p role="status">Loading policy authority grant metadata…</p>}
+    {error && <div role="alert" style={{ padding: 10, marginBottom: 12, border: "1px solid #ef4444", borderRadius: 8 }}>{error}</div>}
+    {!loading && !error && validCompanyId && grants.length === 0 && <p role="status">No policy authority grants are recorded for this company.</p>}
+    {grants.length > 0 && <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse" }}><thead><tr><Th>Grant ID</Th><Th>Status</Th><Th>Reason</Th><Th>Effective period</Th><Th>Recorded</Th><Th>Action</Th></tr></thead><tbody>{grants.map(grant => <tr key={grant.grantId}><Td style={{ fontFamily: "monospace", fontSize: 11 }}>{grant.grantId}</Td><Td><Badge label={grant.status} color={grant.status === "active" ? "#22c55e" : "#94a3b8"} /></Td><Td>{grant.reasonCode}</Td><Td>{new Date(grant.effectiveFrom).toLocaleString()}{grant.effectiveTo ? ` – ${new Date(grant.effectiveTo).toLocaleString()}` : " – current"}</Td><Td>{new Date(grant.createdAt).toLocaleString()}{grant.revokedAt ? `; revoked ${new Date(grant.revokedAt).toLocaleString()}` : ""}</Td><Td>{grant.status === "active" ? <Button size="sm" variant="outline" disabled={busy || !evidenceReady} onClick={() => void revokeGrant(grant.grantId)}>Revoke with evidence</Button> : "Evidence retained"}</Td></tr>)}</tbody></table></div>}
+  </section>;
+}
+
 // ── Admin Actions Log Tab ─────────────────────────────────────────────────────
 function AdminActionsLogTab({ token }: { token: string }) {
   const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const load = useCallback(() => {
-    apiFetch(`/admin/actions-log?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin actions log load", error));
+    setLoading(true);
+    setError("");
+    apiFetch(`/admin/actions-log?scope=mine&page=${page}`, token)
+      .then(async r => { const body = await r.json().catch(() => ({})); if (!r.ok) throw new Error(body.error || "Unable to load the admin action log."); return body; })
+      .then(d => { setLogs(d.data || []); setTotal(d.total || 0); })
+      .catch((cause) => { logClientError("admin actions log load", cause); setError(cause instanceof Error ? cause.message : "Unable to load the admin action log."); })
+      .finally(() => setLoading(false));
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (
     <div>
+      <p style={{ marginTop: 0, fontSize: 13 }}>Admin Log is the immutable evidence trail for administrative actions. Operational project events remain available separately in the adjacent <strong>Activity Feed</strong>.</p>
+      {loading && <div role="status" style={{ padding: "16px 0" }}>Loading admin actions…</div>}
+      {error && <div role="alert" style={{ padding: 12, border: "1px solid #ef4444", borderRadius: 8 }}>{error} <Button size="sm" variant="outline" onClick={load}>Retry</Button></div>}
       <div style={{ marginBottom: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{total} admin actions (immutable log)</div>
-      {logs.length === 0
+      {!loading && !error && logs.length === 0
         ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No admin actions recorded yet.</div>
         : (
           <div style={{ overflowX: "auto" }}>
@@ -927,8 +1170,8 @@ function AiUsageTab({ token }: { token: string }) {
       </div>
 
       {error && (
-        <div style={{ background: "#ef444422", border: "1px solid #ef444444", borderRadius: 8, padding: "10px 14px", marginBottom: 16, color: "#b91c1c", fontSize: 13 }}>
-          {error}
+        <div role="alert" style={{ background: "#ef444422", border: "1px solid #ef444444", borderRadius: 8, padding: "10px 14px", marginBottom: 16, color: "#b91c1c", fontSize: 13 }}>
+          {error} <Button size="sm" variant="outline" onClick={load}>Try again</Button>
         </div>
       )}
 
@@ -1545,9 +1788,16 @@ export function AdminPanel() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const requested = new URLSearchParams(window.location.search).get("tab") === "feedback" || window.location.pathname.endsWith("/admin/feedback");
-    if (requested && isSuperAdmin) setActiveTab(9);
-    else if (requested && !isSuperAdmin) setActiveTab(0);
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    if (requested === "companies") setActiveTab(2);
+    else if (requested === "users") setActiveTab(1);
+    else if (requested === "projects") setActiveTab(3);
+    else if (requested === "audit-activity") setActiveTab(5);
+    else if (requested === "ai-usage" && isSuperAdmin) setActiveTab(8);
+    else if (requested === "feature-catalog-history" && isSuperAdmin) setActiveTab(12);
+    else if (requested === "policy-authority-grants" && isSuperAdmin) setActiveTab(13);
+    else if ((requested === "feedback" || window.location.pathname.endsWith("/admin/feedback")) && isSuperAdmin) setActiveTab(9);
+    else if (requested === "feedback" && !isSuperAdmin) setActiveTab(0);
   }, [isSuperAdmin]);
 
   if (checking || !token) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "hsl(var(--muted-foreground))" }}>Checking access...</div>;
@@ -1577,6 +1827,8 @@ export function AdminPanel() {
         Feedback: "Comentarios",
         "Master Catalogs": "Catálogos Maestros",
         "Company Catalogs": "Catálogos de Empresa",
+        "Feature Catalog History": "Historial del Catálogo de Funciones",
+        "Policy Authority Grants": "Concesiones de Autoridad de Políticas",
       } as Record<string, string>,
     }
     : {
@@ -1625,8 +1877,8 @@ export function AdminPanel() {
         </section>
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
-          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => (tab !== "Feedback" && tab !== "Master Catalogs") || isSuperAdmin).map(({ tab, i }) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
+          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => !["Feedback", "Master Catalogs", "Feature Catalog History", "Policy Authority Grants"].includes(tab) || isSuperAdmin).map(({ tab, i }) => (
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 13) url.searchParams.set("tab", "policy-authority-grants"); else if (i === 12) url.searchParams.set("tab", "feature-catalog-history"); else if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 8) url.searchParams.set("tab", "ai-usage"); else if (i === 5) url.searchParams.set("tab", "audit-activity"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}
@@ -1634,17 +1886,19 @@ export function AdminPanel() {
 
         <main className="hq-admin-content">
           {activeTab === 0 && <OverviewTab token={token} />}
-          {activeTab === 1 && <UsersTab token={token} />}
+          {activeTab === 1 && <UsersTab token={token} isSuperAdmin={isSuperAdmin} />}
           {activeTab === 2 && <CompaniesTab token={token} />}
           {activeTab === 3 && <ProjectsTab token={token} />}
           {activeTab === 4 && <EmailLogTab token={token} />}
           {activeTab === 5 && <ActivityFeedTab token={token} />}
-          {activeTab === 6 && <FeatureFlagsTab token={token} />}
+          {activeTab === 6 && <FeatureFlagsTab token={token} isSuperAdmin={isSuperAdmin} />}
           {activeTab === 7 && <AdminActionsLogTab token={token} />}
           {activeTab === 8 && <AiUsageTab token={token} />}
           {activeTab === 9 && isSuperAdmin && <FeedbackTab token={token} />}
           {activeTab === 10 && isSuperAdmin && <MasterCatalogsTab token={token} />}
           {activeTab === 11 && <CompanyMasterCatalogsTab token={token} spanish={isSpanishUi()} />}
+          {activeTab === 12 && isSuperAdmin && <FeatureCatalogHistoryTab token={token} />}
+          {activeTab === 13 && isSuperAdmin && <PolicyAuthorityGrantsTab token={token} />}
         </main>
       </div>
     </div>

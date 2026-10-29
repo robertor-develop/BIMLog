@@ -32,6 +32,7 @@ import { assignedItemDestination } from "@/lib/assigned-item-destination";
 import { EMPTY_DASHBOARD_ADOPTION_SUMMARY, loadDashboardAdoptionSummary } from "@/lib/dashboard-adoption-summary";
 import { recommendationEligibleProjects } from "@/lib/headquarters-project-eligibility";
 import { dashboardGuidanceState } from "@/lib/dashboard-guidance-state";
+import { dashboardCardDestination } from "@/lib/dashboard-card-inventory";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -258,6 +259,16 @@ export function Dashboard() {
   const [showTestGuidance, setShowTestGuidance] = useState(false);
   const [showResponsibilities, setShowResponsibilities] = useState(false);
   const [showSecondaryWorkspace, setShowSecondaryWorkspace] = useState(false);
+  const openDashboardCard = (id: string) => {
+    const destination = dashboardCardDestination(id);
+    if (destination.startsWith("/dashboard#")) {
+      const anchor = destination.split("#")[1];
+      window.history.replaceState(null, "", destination);
+      document.getElementById(anchor)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    setLocation(destination);
+  };
 
   useEffect(() => {
     localStorage.setItem("bimlog:headquarters-project-view", JSON.stringify({ sort: projectSort }));
@@ -796,35 +807,35 @@ export function Dashboard() {
                 value={stats?.activeProjects ?? 0}
                 sub={`${projects?.length ?? 0} ${tt("total", "en total")}`}
                 actionLabel={tt("Open projects", "Abrir proyectos")}
-                navigate={() => setLocation("/projects")}
+                navigate={() => openDashboardCard("active-projects")}
               />
               <StatCard
                 label={tt("Files Processed", "Archivos procesados")}
                 value={stats?.filesProcessed ?? 0}
                 sub={tt("Across all projects", "En todos los proyectos")}
-                actionLabel={tt("Choose a project", "Elegir un proyecto")}
-                navigate={() => setLocation("/projects")}
+                actionLabel={tt("Review file records", "Revisar registros de archivos")}
+                navigate={() => openDashboardCard("files-processed")}
               />
               <StatCard
                 label={tt("Open RFIs", "RFI abiertos")}
                 value={stats?.openRfis ?? 0}
                 sub={tt("Across all projects", "En todos los proyectos")}
                 actionLabel={tt("Review RFIs", "Revisar RFI")}
-                navigate={() => setLocation("/pending?type=rfis")}
+                navigate={() => openDashboardCard("open-rfis")}
               />
               <StatCard
                 label={tt("Pending Submittals", "Submittals pendientes")}
                 value={stats?.pendingSubmittals ?? 0}
                 sub={tt("Awaiting review", "En espera de revisión")}
                 actionLabel={tt("Review submittals", "Revisar submittals")}
-                navigate={() => setLocation("/pending?type=submittals")}
+                navigate={() => openDashboardCard("pending-submittals")}
               />
               <StatCard
                 label={tt("Compliance Rate", "Tasa de cumplimiento")}
                 value={stats?.complianceRate === null || stats?.complianceRate === undefined ? "—" : `${stats.complianceRate}%`}
                 sub={tt("Completed uploads only", "Solo cargas completadas")}
                 actionLabel={tt("Review projects", "Revisar proyectos")}
-                navigate={() => setLocation("/projects")}
+                navigate={() => openDashboardCard("compliance-rate")}
               />
               </div>
             </section>
@@ -853,28 +864,28 @@ export function Dashboard() {
                 value={stats?.totalClashes ?? 0}
                 sub={`${stats?.p1Clashes ?? 0} ${tt("P1 Critical", "P1 críticas")}`}
                 actionLabel={tt("Choose a project", "Elegir un proyecto")}
-                navigate={() => setLocation("/projects")}
+                navigate={() => openDashboardCard("total-clashes")}
               />
               <StatCard
                 label={tt("Open Clashes", "Interferencias abiertas")}
                 value={stats?.openClashes ?? 0}
                 sub={tt("Unresolved coordination issues", "Problemas de coordinación sin resolver")}
                 actionLabel={tt("Choose a project", "Elegir un proyecto")}
-                navigate={() => setLocation("/projects")}
+                navigate={() => openDashboardCard("open-clashes")}
               />
               <StatCard
                 label={tt("Submittal Tracking", "Seguimiento de submittals")}
                 value={stats?.submittalTrackers ?? 0}
                 sub={tt("Active tracking logs", "Registros activos de seguimiento")}
                 actionLabel={tt("Review tracking", "Revisar seguimiento")}
-                navigate={() => setLocation("/pending?type=submittals")}
+                navigate={() => openDashboardCard("submittal-trackers")}
               />
               <StatCard
                 label={tt("Open Submittals", "Submittals abiertos")}
                 value={stats?.openSubmittalItems ?? 0}
                 sub={tt("Items needing attention", "Elementos que requieren atención")}
                 actionLabel={tt("Review submittals", "Revisar submittals")}
-                navigate={() => setLocation("/pending?type=submittals")}
+                navigate={() => openDashboardCard("open-submittal-items")}
               />
             </div>
           )}
@@ -1036,7 +1047,7 @@ export function Dashboard() {
           </section>
 
           {/* SECTION 4 — Your Projects */}
-          <div style={{ marginBottom: 28 }}>
+          <div id="headquarters-project-register" style={{ marginBottom: 28, scrollMarginTop: 20 }}>
             {/* Header row with heading + New Project button */}
             <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 16 }}>
               <div>

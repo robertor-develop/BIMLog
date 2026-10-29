@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
-    "routeTemplates": 46,
+    "routeTemplates": 48,
     "projectSurfaces": 20,
-    "customerSurfaces": 66,
-    "viewportCases": 198
+    "customerSurfaces": 68,
+    "viewportCases": 204
   },
   "viewports": [
     {
@@ -303,6 +303,29 @@
     },
     {
       "order": 21,
+      "path": "/all-tools",
+      "guard": "authenticated",
+      "target": "AllTools",
+      "samplePath": "/all-tools",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 22,
       "path": "/lens-next",
       "guard": "authenticated",
       "target": "LensNextWorkspace",
@@ -325,7 +348,7 @@
       ]
     },
     {
-      "order": 22,
+      "order": 23,
       "path": "/projects/:id/financial/cost-structure",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"structure\" />",
@@ -348,7 +371,7 @@
       ]
     },
     {
-      "order": 23,
+      "order": 24,
       "path": "/projects/:id/financial/budget",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"budget\" />",
@@ -371,7 +394,7 @@
       ]
     },
     {
-      "order": 24,
+      "order": 25,
       "path": "/projects/:id/financial/history",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"history\" />",
@@ -394,7 +417,7 @@
       ]
     },
     {
-      "order": 25,
+      "order": 26,
       "path": "/projects/:id/financial/snapshots/:snapshotId",
       "guard": "project",
       "target": "() => <FinancialBudgetWorkspace mode=\"snapshot\" />",
@@ -417,7 +440,7 @@
       ]
     },
     {
-      "order": 26,
+      "order": 27,
       "path": "/projects/:id/financial/contracts",
       "guard": "project",
       "target": "FinancialContractWorkspace",
@@ -440,7 +463,7 @@
       ]
     },
     {
-      "order": 27,
+      "order": 28,
       "path": "/projects/:id/financial/contracts/:contractId/items",
       "guard": "project",
       "target": "FinancialContractItemsWorkspace",
@@ -463,7 +486,7 @@
       ]
     },
     {
-      "order": 28,
+      "order": 29,
       "path": "/projects/:id/financial/apu",
       "guard": "project",
       "target": "FinancialApuWorkspace",
@@ -486,7 +509,7 @@
       ]
     },
     {
-      "order": 29,
+      "order": 30,
       "path": "/projects/:id/commercial/team-performance",
       "guard": "project",
       "target": "TeamPerformanceWorkspace",
@@ -509,7 +532,7 @@
       ]
     },
     {
-      "order": 30,
+      "order": 31,
       "path": "/projects/:id/intake",
       "guard": "project",
       "target": "JobIntakeWorkspace",
@@ -532,7 +555,7 @@
       ]
     },
     {
-      "order": 31,
+      "order": 32,
       "path": "/projects/:id/operations",
       "guard": "project",
       "target": "JobOperationsWorkspace",
@@ -555,7 +578,7 @@
       ]
     },
     {
-      "order": 32,
+      "order": 33,
       "path": "/projects/:id/submittal-tracker",
       "guard": "project",
       "target": "LegacySubmittalTrackerRedirect",
@@ -578,7 +601,7 @@
       ]
     },
     {
-      "order": 34,
+      "order": 35,
       "path": "/help",
       "guard": "authenticated",
       "target": "HelpCenter",
@@ -601,7 +624,7 @@
       ]
     },
     {
-      "order": 35,
+      "order": 36,
       "path": "/setup-guide",
       "guard": "authenticated",
       "target": "SetupGuideRedirect",
@@ -624,7 +647,7 @@
       ]
     },
     {
-      "order": 36,
+      "order": 37,
       "path": "/training/project-setup",
       "guard": "authenticated",
       "target": "ProjectSetupTraining",
@@ -647,7 +670,7 @@
       ]
     },
     {
-      "order": 37,
+      "order": 38,
       "path": "/profile",
       "guard": "authenticated",
       "target": "Profile",
@@ -670,7 +693,7 @@
       ]
     },
     {
-      "order": 38,
+      "order": 39,
       "path": "/settings/company-profile",
       "guard": "authenticated",
       "target": "CompanyProfile",
@@ -693,7 +716,7 @@
       ]
     },
     {
-      "order": 39,
+      "order": 40,
       "path": "/settings/notifications",
       "guard": "authenticated",
       "target": "NotificationSettings",
@@ -716,7 +739,7 @@
       ]
     },
     {
-      "order": 40,
+      "order": 41,
       "path": "/settings/financial-controls",
       "guard": "authenticated",
       "target": "FinancialControlsSettings",
@@ -739,7 +762,7 @@
       ]
     },
     {
-      "order": 41,
+      "order": 42,
       "path": "/settings/billing-support",
       "guard": "authenticated",
       "target": "CommercialWorkspace",
@@ -762,7 +785,7 @@
       ]
     },
     {
-      "order": 42,
+      "order": 43,
       "path": "/admin/feedback",
       "guard": "access",
       "target": "AdminPanel",
@@ -785,7 +808,7 @@
       ]
     },
     {
-      "order": 43,
+      "order": 44,
       "path": "/company-catalogs",
       "guard": "access",
       "target": "CompanyMasterCatalogs",
@@ -808,7 +831,7 @@
       ]
     },
     {
-      "order": 44,
+      "order": 45,
       "path": "/company-workflows",
       "guard": "access",
       "target": "CompanyDeliveryWorkflows",
@@ -831,7 +854,7 @@
       ]
     },
     {
-      "order": 45,
+      "order": 46,
       "path": "/company-workflow-governance",
       "guard": "access",
       "target": "CompanyWorkflowGovernance",
@@ -854,7 +877,7 @@
       ]
     },
     {
-      "order": 46,
+      "order": 47,
       "path": "/company-pricing-templates",
       "guard": "access",
       "target": "CompanyPricingTemplates",
@@ -877,7 +900,7 @@
       ]
     },
     {
-      "order": 47,
+      "order": 48,
       "path": "/knowledge",
       "guard": "authenticated",
       "target": "CoordinationKnowledgeLibrary",
@@ -900,7 +923,7 @@
       ]
     },
     {
-      "order": 48,
+      "order": 49,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel",
@@ -923,7 +946,7 @@
       ]
     },
     {
-      "order": 49,
+      "order": 50,
       "path": "/feedback",
       "guard": "authenticated",
       "target": "Dashboard",
@@ -946,7 +969,7 @@
       ]
     },
     {
-      "order": 50,
+      "order": 51,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl",
@@ -969,7 +992,30 @@
       ]
     },
     {
-      "order": 51,
+      "order": 52,
+      "path": "/admin/project-company-bindings",
+      "guard": "access",
+      "target": "ProjectCompanyBindings",
+      "samplePath": "/admin/project-company-bindings",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 53,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief",
@@ -992,7 +1038,7 @@
       ]
     },
     {
-      "order": 52,
+      "order": 54,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing",
@@ -1015,7 +1061,7 @@
       ]
     },
     {
-      "order": 53,
+      "order": 55,
       "path": "/features",
       "guard": "public",
       "target": "Features",
@@ -1038,7 +1084,7 @@
       ]
     },
     {
-      "order": 54,
+      "order": 56,
       "path": "/about",
       "guard": "public",
       "target": "About",
@@ -1061,7 +1107,7 @@
       ]
     },
     {
-      "order": 55,
+      "order": 57,
       "path": "/contact",
       "guard": "public",
       "target": "Contact",
