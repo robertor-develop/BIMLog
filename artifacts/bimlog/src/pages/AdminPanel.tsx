@@ -994,8 +994,8 @@ function AiUsageTab({ token }: { token: string }) {
       </div>
 
       {error && (
-        <div style={{ background: "#ef444422", border: "1px solid #ef444444", borderRadius: 8, padding: "10px 14px", marginBottom: 16, color: "#b91c1c", fontSize: 13 }}>
-          {error}
+        <div role="alert" style={{ background: "#ef444422", border: "1px solid #ef444444", borderRadius: 8, padding: "10px 14px", marginBottom: 16, color: "#b91c1c", fontSize: 13 }}>
+          {error} <Button size="sm" variant="outline" onClick={load}>Try again</Button>
         </div>
       )}
 
@@ -1616,6 +1616,7 @@ export function AdminPanel() {
     if (requested === "companies") setActiveTab(2);
     else if (requested === "users") setActiveTab(1);
     else if (requested === "projects") setActiveTab(3);
+    else if (requested === "ai-usage" && isSuperAdmin) setActiveTab(8);
     else if ((requested === "feedback" || window.location.pathname.endsWith("/admin/feedback")) && isSuperAdmin) setActiveTab(9);
     else if (requested === "feedback" && !isSuperAdmin) setActiveTab(0);
   }, [isSuperAdmin]);
@@ -1696,7 +1697,7 @@ export function AdminPanel() {
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
           {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => (tab !== "Feedback" && tab !== "Master Catalogs") || isSuperAdmin).map(({ tab, i }) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 8) url.searchParams.set("tab", "ai-usage"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}
