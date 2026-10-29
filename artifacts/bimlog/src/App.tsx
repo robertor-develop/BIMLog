@@ -70,6 +70,7 @@ const AiControlEstimates = namedPage(() => import("@/pages/parity/ai-control-est
 const AiControlPrices = namedPage(() => import("@/pages/parity/ai-control-prices"), "AiControlPrices");
 const AiControlProviderConnections = namedPage(() => import("@/pages/parity/ai-control-provider-connections"), "AiControlProviderConnections");
 const AiControlRuns = namedPage(() => import("@/pages/parity/ai-control-runs"), "AiControlRuns");
+const AiControlStatus = namedPage(() => import("@/pages/parity/ai-control-status"), "AiControlStatus");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -393,6 +394,9 @@ function Router() {
       </Route>
       <Route path="/ai-control/runs">
         {() => <ProtectedRoute component={AiControlRuns} />}
+      </Route>
+      <Route path="/ai-control/status">
+        {() => <ProtectedRoute component={AiControlStatus} />}
       </Route>
       <Route path="/living-brief">
         {() => <AccessRoute component={LivingBrief} surface="living_brief" />}
