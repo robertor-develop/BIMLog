@@ -303,6 +303,13 @@
       "verification": "source route binding; runtime findings in audit/COVERAGE.md"
     },
     {
+      "route": "/admin/project-company-bindings",
+      "owner": "ProjectCompanyBindings",
+      "availability": "gated",
+      "boundary": "surface permission",
+      "verification": "source route binding; runtime findings in audit/COVERAGE.md"
+    },
+    {
       "route": "/living-brief",
       "owner": "LivingBrief",
       "availability": "gated",
