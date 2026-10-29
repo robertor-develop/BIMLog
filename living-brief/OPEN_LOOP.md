@@ -1,5 +1,16 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Corrected program Blocks 5–6, P021–P030 — 2026-10-29
+
+- [x] Implement and focused-test P021–P025 sequentially with one accepted implementation commit per build.
+- [x] Run the Block 5 connected regression, push normally, and verify canonical local/remote identity.
+- [x] Implement and focused-test P026–P030 sequentially with one accepted implementation commit per build.
+- [x] Run the Block 6 connected regression, push normally, and verify canonical local/remote identity.
+- [x] Reconcile the source schema, route graph, capability inventory, and accessibility/responsive evidence without mutating production data.
+- [ ] Pass the restarted exact-head prepublication gate after Living Brief reconciliation.
+- [ ] Synchronize the exact accepted commit to the existing Replit workspace, publish without copying development data, and verify deployed commit, production version, health, and schema identity.
+- [ ] Pass three consecutive authenticated Chrome rounds covering affected workflows, authorization/isolation, persistence, refresh/reopen, clean reentry, console, and relevant network responses before starting P031.
+
 ## Entire-platform closure Block 1 — Builds 001–005 — 2026-10-27
 
 - [x] B001 reconcile the exact deployed `94ee1a1e` Lens company-authority/history repair and the new 50-build closure cadence into the Living Brief without claiming Ruben field acceptance.

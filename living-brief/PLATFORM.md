@@ -1575,6 +1575,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/TotalControl.tsx
 - artifacts/bimlog/src/pages/VerifyEmail.tsx
 - artifacts/bimlog/src/pages/not-found.tsx
+- artifacts/bimlog/src/pages/parity/admin-project-company-bindings.tsx
 - artifacts/bimlog/src/pages/project/ActivityTab.tsx
 - artifacts/bimlog/src/pages/project/AnalyticsTab.tsx
 - artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx
@@ -1651,6 +1652,7 @@ It changes only when the code structure or curated architectural facts change.
 - /admin
 - /feedback
 - /total-control
+- /admin/project-company-bindings
 - /living-brief
 - /pricing
 - /features
