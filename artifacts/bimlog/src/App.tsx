@@ -72,6 +72,7 @@ const AiControlProviderConnections = namedPage(() => import("@/pages/parity/ai-c
 const AiControlRuns = namedPage(() => import("@/pages/parity/ai-control-runs"), "AiControlRuns");
 const AiControlStatus = namedPage(() => import("@/pages/parity/ai-control-status"), "AiControlStatus");
 const AiControlUsage = namedPage(() => import("@/pages/parity/ai-control-usage"), "AiControlUsage");
+const AuthLaunchStepUp = namedPage(() => import("@/pages/parity/auth-launch-step-up"), "AuthLaunchStepUp");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -401,6 +402,9 @@ function Router() {
       </Route>
       <Route path="/ai-control/usage">
         {() => <ProtectedRoute component={AiControlUsage} />}
+      </Route>
+      <Route path="/auth/launch-step-up">
+        {() => <AccessRoute component={AuthLaunchStepUp} surface="total_control" />}
       </Route>
       <Route path="/living-brief">
         {() => <AccessRoute component={LivingBrief} surface="living_brief" />}
