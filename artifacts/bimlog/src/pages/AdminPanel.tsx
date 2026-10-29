@@ -18,7 +18,7 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
   });
 }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs", "Company Catalogs"];
+const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs", "Company Catalogs", "Feature Catalog History"];
 
 const ADMIN_PANEL_SHELL_CSS = `
   .hq-admin-page {
@@ -909,6 +909,29 @@ function FeatureFlagsTab({ token }: { token: string }) {
   );
 }
 
+function FeatureCatalogHistoryTab({ token }: { token: string }) {
+  const [versions, setVersions] = useState<Record<string, unknown>[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const load = useCallback(() => {
+    setLoading(true); setError("");
+    apiFetch("/admin/feature-catalog/versions", token)
+      .then(async response => { const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.error?.en || body.error || "Unable to load feature catalog history."); return body; })
+      .then(body => setVersions(body.versions || []))
+      .catch(cause => { logClientError("feature catalog history load", cause); setError(cause instanceof Error ? cause.message : "Unable to load feature catalog history."); })
+      .finally(() => setLoading(false));
+  }, [token]);
+  useEffect(() => { load(); }, [load]);
+  return <section aria-labelledby="feature-catalog-history-title">
+    <h2 id="feature-catalog-history-title">Feature Catalog History</h2>
+    <p>Read-only Super Admin evidence of every governed capability version, status, AI classification, effective period and verified activation authority.</p>
+    {loading && <p role="status">Loading feature catalog history…</p>}
+    {error && <div role="alert">{error} <Button size="sm" variant="outline" onClick={load}>Retry</Button></div>}
+    {!loading && !error && versions.length === 0 && <p role="status">No feature catalog versions are recorded.</p>}
+    {!loading && !error && versions.length > 0 && <div style={{ overflowX: "auto" }}><table style={{ width: "100%", borderCollapse: "collapse" }}><thead><tr><Th>Feature</Th><Th>Version</Th><Th>Status</Th><Th>AI class</Th><Th>Effective</Th><Th>Activation authority</Th></tr></thead><tbody>{versions.map(item => <tr key={String(item.id)}><Td>{String(item.featureKey)}</Td><Td>{String(item.version)}</Td><Td><Badge label={String(item.capabilityStatus)} /></Td><Td>{String(item.aiClassification)}</Td><Td>{new Date(String(item.effectiveFrom)).toLocaleString()}{item.effectiveTo ? ` – ${new Date(String(item.effectiveTo)).toLocaleString()}` : " – current"}</Td><Td>{String(item.activationAuthority).replaceAll("_", " ")}</Td></tr>)}</tbody></table></div>}
+  </section>;
+}
+
 // ── Admin Actions Log Tab ─────────────────────────────────────────────────────
 function AdminActionsLogTab({ token }: { token: string }) {
   const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
@@ -1653,6 +1676,7 @@ export function AdminPanel() {
     else if (requested === "projects") setActiveTab(3);
     else if (requested === "audit-activity") setActiveTab(5);
     else if (requested === "ai-usage" && isSuperAdmin) setActiveTab(8);
+    else if (requested === "feature-catalog-history" && isSuperAdmin) setActiveTab(12);
     else if ((requested === "feedback" || window.location.pathname.endsWith("/admin/feedback")) && isSuperAdmin) setActiveTab(9);
     else if (requested === "feedback" && !isSuperAdmin) setActiveTab(0);
   }, [isSuperAdmin]);
@@ -1684,6 +1708,7 @@ export function AdminPanel() {
         Feedback: "Comentarios",
         "Master Catalogs": "Catálogos Maestros",
         "Company Catalogs": "Catálogos de Empresa",
+        "Feature Catalog History": "Historial del Catálogo de Funciones",
       } as Record<string, string>,
     }
     : {
@@ -1732,8 +1757,8 @@ export function AdminPanel() {
         </section>
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
-          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => (tab !== "Feedback" && tab !== "Master Catalogs") || isSuperAdmin).map(({ tab, i }) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 8) url.searchParams.set("tab", "ai-usage"); else if (i === 5) url.searchParams.set("tab", "audit-activity"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
+          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => !["Feedback", "Master Catalogs", "Feature Catalog History"].includes(tab) || isSuperAdmin).map(({ tab, i }) => (
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 12) url.searchParams.set("tab", "feature-catalog-history"); else if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 8) url.searchParams.set("tab", "ai-usage"); else if (i === 5) url.searchParams.set("tab", "audit-activity"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}
@@ -1752,6 +1777,7 @@ export function AdminPanel() {
           {activeTab === 9 && isSuperAdmin && <FeedbackTab token={token} />}
           {activeTab === 10 && isSuperAdmin && <MasterCatalogsTab token={token} />}
           {activeTab === 11 && <CompanyMasterCatalogsTab token={token} spanish={isSpanishUi()} />}
+          {activeTab === 12 && isSuperAdmin && <FeatureCatalogHistoryTab token={token} />}
         </main>
       </div>
     </div>
