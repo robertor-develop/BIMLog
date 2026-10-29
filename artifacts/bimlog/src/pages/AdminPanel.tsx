@@ -492,10 +492,26 @@ function CompaniesTab({ token }: { token: string }) {
   const [conventionSummary, setConventionSummary] = useState<Array<{ projectId: number; projectName: string; codes: string[]; assignedCodes: string[]; unassignedCodes: string[] }>>([]);
   const [editModal, setEditModal] = useState<Record<string, unknown> | null>(null);
   const [msg, setMsg] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [pendingAction, setPendingAction] = useState("");
+  const spanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const t = (en: string, es: string) => spanish ? es : en;
 
-  const load = () => {
-    apiFetch("/admin/companies?scope=mine", token).then(r => r.json()).then(setCompanies).catch((error) => logClientError("admin companies load", error));
-    apiFetch("/admin/projects?scope=mine", token).then(r => r.json()).then((projects: any[]) => {
+  const load = async () => {
+    setLoading(true); setError("");
+    try {
+      const [companyResponse, projectResponse] = await Promise.all([
+        apiFetch("/admin/companies?scope=mine", token),
+        apiFetch("/admin/projects?scope=mine", token),
+      ]);
+      if (!companyResponse.ok || !projectResponse.ok) {
+        const denied = companyResponse.status === 401 || companyResponse.status === 403 || projectResponse.status === 401 || projectResponse.status === 403;
+        throw new Error(denied ? t("You do not have permission to manage participating companies.", "No tiene permiso para administrar compañías participantes.") : t("Participating companies could not be loaded.", "No se pudieron cargar las compañías participantes."));
+      }
+      const companyRows = await companyResponse.json();
+      const projects = await projectResponse.json() as any[];
+      setCompanies(Array.isArray(companyRows) ? companyRows : []);
       setConventionSummary(projects
         .filter(p => p.conventionCompanyCodes?.length > 0)
         .map(p => ({
@@ -505,24 +521,45 @@ function CompaniesTab({ token }: { token: string }) {
           assignedCodes: (p.conventionCompanyCodes || []).filter((c: string) => !(p.unassignedConventionCompanies || []).includes(c)),
           unassignedCodes: p.unassignedConventionCompanies || [],
         })));
-    }).catch((error) => logClientError("admin company users load", error));
+    } catch (caught) {
+      logClientError("admin companies load", caught);
+      setError(caught instanceof Error ? caught.message : t("Participating companies could not be loaded.", "No se pudieron cargar las compañías participantes."));
+    } finally { setLoading(false); }
   };
-  useEffect(() => { load(); }, [token]);
+  useEffect(() => { void load(); }, [token]);
 
   const doDelete = async (id: number, name: string, userCount: number) => {
+    if (userCount > 0) { setError(t("This company still has users. Reassign those users before deleting the company.", "Esta compañía todavía tiene usuarios. Reasigne esos usuarios antes de eliminarla.")); return; }
     if (!confirm(`Delete company "${name}"? This will affect ${userCount} user(s).`)) return;
-    await apiFetch(`/admin/companies/${id}`, token, { method: "DELETE" });
-    setMsg("Company deleted."); load();
+    setPendingAction(`delete:${id}`); setError(""); setMsg("");
+    try {
+      const response = await apiFetch(`/admin/companies/${id}`, token, { method: "DELETE" });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(String(body.error || t("Company could not be deleted.", "No se pudo eliminar la compañía.")));
+      setMsg(t("Company deleted. The admin log contains the evidence record.", "Compañía eliminada. El registro administrativo contiene la evidencia.")); await load();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : t("Company could not be deleted.", "No se pudo eliminar la compañía.")); }
+    finally { setPendingAction(""); }
   };
   const doSave = async () => {
     if (!editModal) return;
-    await apiFetch(`/admin/companies/${editModal.id}`, token, { method: "PATCH", body: JSON.stringify({ name: editModal.name, website: editModal.website, address: editModal.address, phone: editModal.phone }) });
-    setEditModal(null); setMsg("Company updated."); load();
+    setPendingAction(`save:${editModal.id}`); setError(""); setMsg("");
+    try {
+      const response = await apiFetch(`/admin/companies/${editModal.id}`, token, { method: "PATCH", body: JSON.stringify({ name: editModal.name, website: editModal.website, address: editModal.address, phone: editModal.phone }) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(String(body.error || t("Company could not be updated.", "No se pudo actualizar la compañía.")));
+      setEditModal(null); setMsg(t("Company updated. The admin log contains the evidence record.", "Compañía actualizada. El registro administrativo contiene la evidencia.")); await load();
+    } catch (caught) { setError(caught instanceof Error ? caught.message : t("Company could not be updated.", "No se pudo actualizar la compañía.")); }
+    finally { setPendingAction(""); }
   };
 
   return (
     <div>
       {msg && <div style={{ background: "#22c55e22", border: "1px solid #22c55e44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16a34a" }}>{msg}</div>}
+      {error && <div role="alert" style={{ background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#b91c1c" }}>{error} <Button size="sm" variant="outline" onClick={() => void load()}>{t("Try again", "Intentar de nuevo")}</Button></div>}
+      <section aria-labelledby="participating-companies-purpose" style={{ marginBottom: 14 }}>
+        <h2 id="participating-companies-purpose" style={{ fontSize: 16, margin: 0 }}>{t("Participating Companies", "Compañías participantes")}</h2>
+        <p style={{ margin: "5px 0 0", fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{t("Review companies connected to projects you administer. Edit verified directory details here; reassign users before deleting an unused company. Accepted changes appear in the Admin Log.", "Revise las compañías conectadas a los proyectos que administra. Edite aquí los datos verificados del directorio; reasigne usuarios antes de eliminar una compañía sin uso. Los cambios aceptados aparecen en el Registro Admin.")}</p>
+      </section>
 
       {conventionSummary.length > 0 && (
         <div style={{ marginBottom: 20, padding: 14, border: "1px solid hsl(var(--border))", borderRadius: 10, background: "hsl(var(--card))" }}>
@@ -559,6 +596,9 @@ function CompaniesTab({ token }: { token: string }) {
       <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4, color: "hsl(var(--foreground))" }}>Participating Companies</div>
       <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginBottom: 10 }}>Companies with users assigned as members on your projects. Counts reflect only users and files within your project scope.</div>
       <div style={{ overflowX: "auto" }}>
+        {loading && <p role="status" aria-live="polite">{t("Loading participating companies…", "Cargando compañías participantes…")}</p>}
+        {!loading && !error && companies.length === 0 && <div role="status" style={{ padding: 18, border: "1px dashed hsl(var(--border))", borderRadius: 8 }}>{t("No participating companies are connected to projects you administer yet. Add project members from the Projects section; their companies will appear here.", "Todavía no hay compañías participantes conectadas a los proyectos que administra. Agregue miembros desde la sección Proyectos; sus compañías aparecerán aquí.")}</div>}
+        {!loading && companies.length > 0 &&
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Company</Th><Th>Users</Th><Th>Projects</Th><Th>Created</Th><Th>Actions</Th></tr></thead>
           <tbody>
@@ -570,14 +610,14 @@ function CompaniesTab({ token }: { token: string }) {
                 <Td style={{ fontSize: 11 }}>{new Date(String(c.createdAt)).toLocaleDateString()}</Td>
                 <Td>
                   <div style={{ display: "flex", gap: 6 }}>
-                    <Button size="sm" variant="outline" onClick={() => setEditModal({ ...c })}>Edit</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(c.id as number, String(c.name), c.userCount as number)}>Delete</Button>
+                    <Button size="sm" variant="outline" disabled={Boolean(pendingAction)} onClick={() => setEditModal({ ...c })}>{t("Edit", "Editar")}</Button>
+                    <Button size="sm" variant="outline" disabled={Boolean(pendingAction) || Number(c.userCount || 0) > 0} title={Number(c.userCount || 0) > 0 ? t("Reassign users before deleting", "Reasigne usuarios antes de eliminar") : undefined} style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => void doDelete(c.id as number, String(c.name), Number(c.userCount || 0))}>{pendingAction === `delete:${c.id}` ? t("Deleting…", "Eliminando…") : t("Delete", "Eliminar")}</Button>
                   </div>
                 </Td>
               </tr>
             ))}
           </tbody>
-        </table>
+        </table>}
       </div>
       {editModal && (
         <Modal title="Edit Company" onClose={() => setEditModal(null)}>
@@ -587,7 +627,7 @@ function CompaniesTab({ token }: { token: string }) {
               <Input value={String((editModal as Record<string, unknown>)[field] || "")} onChange={e => setEditModal(m => ({ ...m!, [field]: e.target.value }))} />
             </div>
           ))}
-          <Button onClick={doSave}>Save</Button>
+          <Button disabled={Boolean(pendingAction) || !String(editModal.name || "").trim()} onClick={() => void doSave()}>{pendingAction.startsWith("save:") ? t("Saving…", "Guardando…") : t("Save", "Guardar")}</Button>
         </Modal>
       )}
     </div>
@@ -1545,9 +1585,10 @@ export function AdminPanel() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const requested = new URLSearchParams(window.location.search).get("tab") === "feedback" || window.location.pathname.endsWith("/admin/feedback");
-    if (requested && isSuperAdmin) setActiveTab(9);
-    else if (requested && !isSuperAdmin) setActiveTab(0);
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    if (requested === "companies") setActiveTab(2);
+    else if ((requested === "feedback" || window.location.pathname.endsWith("/admin/feedback")) && isSuperAdmin) setActiveTab(9);
+    else if (requested === "feedback" && !isSuperAdmin) setActiveTab(0);
   }, [isSuperAdmin]);
 
   if (checking || !token) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "hsl(var(--muted-foreground))" }}>Checking access...</div>;
@@ -1626,7 +1667,7 @@ export function AdminPanel() {
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
           {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => (tab !== "Feedback" && tab !== "Master Catalogs") || isSuperAdmin).map(({ tab, i }) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 2) url.searchParams.set("tab", "companies"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}

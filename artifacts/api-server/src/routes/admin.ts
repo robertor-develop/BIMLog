@@ -593,6 +593,12 @@ router.delete("/admin/companies/:id", async (req, res) => {
     const [company] = await db.select().from(companiesTable).where(eq(companiesTable.id, id)).limit(1);
     if (!company) { res.status(404).json({ error: "Company not found" }); return; }
 
+    const [{ userCount }] = await db.select({ userCount: count() }).from(usersTable).where(eq(usersTable.companyId, id));
+    if (Number(userCount) > 0) {
+      res.status(409).json({ error: "Reassign all company users before deleting this company" });
+      return;
+    }
+
     if ((req as any).isProjectAdminOnly) {
       const myPids = await getProjectAdminProjectIds(req.user!.userId);
       const companyInScope = myPids.length > 0
