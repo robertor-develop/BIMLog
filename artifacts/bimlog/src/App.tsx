@@ -56,6 +56,7 @@ const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-proj
 const FixSpecificLink = namedPage(() => import("@/pages/parity/admin-fix-specific-link"), "FixSpecificLink");
 const LaunchConfiguration = namedPage(() => import("@/pages/parity/admin-launch-configuration"), "LaunchConfiguration");
 const AdminMasterCatalogs = namedPage(() => import("@/pages/parity/admin-master-catalogs"), "AdminMasterCatalogs");
+const AdminOverview = namedPage(() => import("@/pages/parity/admin-overview"), "AdminOverview");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
 const About = namedPage(() => import("@/pages/About"), "About");
@@ -337,6 +338,9 @@ function Router() {
       </Route>
       <Route path="/admin/master-catalogs">
         {() => <AccessRoute component={AdminMasterCatalogs} surface="total_control" />}
+      </Route>
+      <Route path="/admin/overview">
+        {() => <AccessRoute component={AdminOverview} surface="admin" />}
       </Route>
       <Route path="/living-brief">
         {() => <AccessRoute component={LivingBrief} surface="living_brief" />}

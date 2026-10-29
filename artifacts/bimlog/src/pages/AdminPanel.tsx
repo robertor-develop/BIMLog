@@ -320,7 +320,7 @@ function Td({ children, style }: { children: React.ReactNode; style?: React.CSSP
 }
 
 // ── Overview Tab ──────────────────────────────────────────────────────────────
-function OverviewTab({ token }: { token: string }) {
+export function OverviewTab({ token }: { token: string }) {
   const [data, setData] = useState<{ stats: Record<string, number>; activity: Record<string, unknown>[] } | null>(null);
   useEffect(() => { apiFetch("/admin/overview?scope=mine", token).then(r => r.json()).then(setData).catch((error) => logClientError("admin overview load", error)); }, [token]);
   const es = isSpanishUi();
