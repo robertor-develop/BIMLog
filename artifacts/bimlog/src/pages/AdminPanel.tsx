@@ -809,13 +809,25 @@ function ActivityFeedTab({ token }: { token: string }) {
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const load = useCallback(() => {
-    apiFetch(`/admin/activity?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setItems(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin activity load", error));
+    setLoading(true);
+    setError("");
+    apiFetch(`/admin/activity?scope=mine&page=${page}`, token)
+      .then(async r => { const body = await r.json().catch(() => ({})); if (!r.ok) throw new Error(body.error || "Unable to load project activity."); return body; })
+      .then(d => { setItems(d.data || []); setTotal(d.total || 0); })
+      .catch((cause) => { logClientError("admin activity load", cause); setError(cause instanceof Error ? cause.message : "Unable to load project activity."); })
+      .finally(() => setLoading(false));
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (
     <div>
+      <p style={{ marginTop: 0, fontSize: 13 }}>Project Activity records operational events across projects you administer. For administrative changes, use the distinct adjacent <strong>Admin Log</strong>; the two evidence trails remain separate.</p>
+      {loading && <div role="status" style={{ padding: "16px 0" }}>Loading project activity…</div>}
+      {error && <div role="alert" style={{ padding: 12, border: "1px solid #ef4444", borderRadius: 8 }}>{error} <Button size="sm" variant="outline" onClick={load}>Retry</Button></div>}
       <div style={{ marginBottom: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{total} total events across all projects</div>
+      {!loading && !error && items.length === 0 && <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No project activity is recorded in your administered scope yet.</div>}
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead><tr><Th>Project</Th><Th>User</Th><Th>Company</Th><Th>Action</Th><Th>Entity</Th><Th>Details</Th><Th>When</Th></tr></thead>
@@ -890,14 +902,25 @@ function AdminActionsLogTab({ token }: { token: string }) {
   const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const load = useCallback(() => {
-    apiFetch(`/admin/actions-log?scope=mine&page=${page}`, token).then(r => r.json()).then(d => { setLogs(d.data || []); setTotal(d.total || 0); }).catch((error) => logClientError("admin actions log load", error));
+    setLoading(true);
+    setError("");
+    apiFetch(`/admin/actions-log?scope=mine&page=${page}`, token)
+      .then(async r => { const body = await r.json().catch(() => ({})); if (!r.ok) throw new Error(body.error || "Unable to load the admin action log."); return body; })
+      .then(d => { setLogs(d.data || []); setTotal(d.total || 0); })
+      .catch((cause) => { logClientError("admin actions log load", cause); setError(cause instanceof Error ? cause.message : "Unable to load the admin action log."); })
+      .finally(() => setLoading(false));
   }, [token, page]);
   useEffect(() => { load(); }, [load]);
   return (
     <div>
+      <p style={{ marginTop: 0, fontSize: 13 }}>Admin Log is the immutable evidence trail for administrative actions. Operational project events remain available separately in the adjacent <strong>Activity Feed</strong>.</p>
+      {loading && <div role="status" style={{ padding: "16px 0" }}>Loading admin actions…</div>}
+      {error && <div role="alert" style={{ padding: 12, border: "1px solid #ef4444", borderRadius: 8 }}>{error} <Button size="sm" variant="outline" onClick={load}>Retry</Button></div>}
       <div style={{ marginBottom: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{total} admin actions (immutable log)</div>
-      {logs.length === 0
+      {!loading && !error && logs.length === 0
         ? <div style={{ padding: "32px 0", color: "hsl(var(--muted-foreground))", fontSize: 13, textAlign: "center" }}>No admin actions recorded yet.</div>
         : (
           <div style={{ overflowX: "auto" }}>
@@ -1616,6 +1639,7 @@ export function AdminPanel() {
     if (requested === "companies") setActiveTab(2);
     else if (requested === "users") setActiveTab(1);
     else if (requested === "projects") setActiveTab(3);
+    else if (requested === "audit-activity") setActiveTab(5);
     else if (requested === "ai-usage" && isSuperAdmin) setActiveTab(8);
     else if ((requested === "feedback" || window.location.pathname.endsWith("/admin/feedback")) && isSuperAdmin) setActiveTab(9);
     else if (requested === "feedback" && !isSuperAdmin) setActiveTab(0);
@@ -1697,7 +1721,7 @@ export function AdminPanel() {
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
           {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => (tab !== "Feedback" && tab !== "Master Catalogs") || isSuperAdmin).map(({ tab, i }) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 8) url.searchParams.set("tab", "ai-usage"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else if (i === 8) url.searchParams.set("tab", "ai-usage"); else if (i === 5) url.searchParams.set("tab", "audit-activity"); else if (i === 1) url.searchParams.set("tab", "users"); else if (i === 2) url.searchParams.set("tab", "companies"); else if (i === 3) url.searchParams.set("tab", "projects"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}
