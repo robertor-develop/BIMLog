@@ -92,6 +92,22 @@ import {
 
 const router: Router = Router();
 
+ // Meeting detail operations share the same current tenant boundary. A stale
+ // cross-company membership alone must never authorize this record family.
+ router.use("/projects/:projectId/meetings/:meetingId", authMiddleware, async (req,res,next) => {
+   const raw=String(req.params.meetingId);
+   if(!/^\d+$/.test(raw)){next();return;}
+   const projectId=Number(req.params.projectId),meetingId=Number(raw);
+   if(!Number.isSafeInteger(projectId)||projectId<=0||!Number.isSafeInteger(meetingId)||meetingId<=0){res.status(400).json({error:"valid_meeting_identity_required"});return;}
+   try {
+     const result=await db.execute(sql`SELECT (actor.is_super_admin OR (actor.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id) AND EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active'))) allowed FROM projects p JOIN users creator ON creator.id=p.created_by_id JOIN users actor ON actor.id=${req.user!.userId} WHERE p.id=${projectId} AND p.status<>'archived'`);
+     if(result.rows[0]?.allowed!==true){res.status(403).json({error:"current_project_company_access_required"});return;}
+     res.set({"Cache-Control":"private, no-store","X-BIMLog-Project-Id":String(projectId)});
+     next();
+   }catch{res.status(503).json({error:"meeting_authority_unavailable"});}
+ });
+
+
 const safePdfText = safeMeetingReportText;
 
 const formatPdfDate = formatMeetingReportDate;
@@ -3151,6 +3167,7 @@ router.get(
           and(
             eq(meetingMinutesTable.id, meetingId),
             eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
           ),
         );
       if (!meeting) {
@@ -3280,7 +3297,7 @@ router.patch(
               eq(meetingMinutesTable.id, meetingId),
               eq(meetingMinutesTable.projectId, projectId),
               isNull(meetingMinutesTable.deletedAt),
-              sql`date_trunc('milliseconds', ${meetingMinutesTable.updatedAt}) = ${existingUpdatedAt}`,
+              sql`date_trunc('milliseconds', ${meetingMinutesTable.updatedAt}) = ${existingUpdatedAt.toISOString()}::timestamp`,
             ),
           )
           .returning();
@@ -3361,6 +3378,7 @@ router.post(
           and(
             eq(meetingMinutesTable.id, meetingId),
             eq(meetingMinutesTable.projectId, projectId),
+            isNull(meetingMinutesTable.deletedAt),
           ),
         );
       if (!meeting) {
@@ -3424,6 +3442,9 @@ router.post(
       return;
     }
     try {
+      const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
+        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
+      if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
       const actionInputs = resolveMeetingActionInputs(body);
       const created = await db
         .insert(actionItemsTable)
