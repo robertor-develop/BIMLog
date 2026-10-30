@@ -1,3 +1,4 @@
+import { MeetingDocumentImport } from "./meetings/MeetingDocumentImport";
 import { sameMeetingDraftPayload } from "./meetings/meeting-draft-contract";
 import { MeetingCurrentViewExports } from "./meetings/MeetingCurrentViewExports";
 import { MeetingActionCreate } from "./meetings/MeetingActionCreate";
@@ -811,44 +812,6 @@ export function MeetingsTab({
   const [audioUploading, setAudioUploading] = useState(false);
   const [showNoKeyModal, setShowNoKeyModal] = useState(false);
   const [audioProgress, setAudioProgress] = useState("");
-  const [importing, setImporting] = useState(false);
-  const [importMsg, setImportMsg] = useState("");
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImporting(true);
-    setImportMsg(t("Reading document with AI...", "Leyendo documento con IA..."));
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${API}/projects/${projectId}/meetings/import`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({}));
-        setImportMsg(d.message || t("Import failed", "No se pudo importar"));
-        return;
-      }
-      const data = await res.json();
-      setImportMsg(
-        t(
-          `Meeting imported successfully - ${data.title || "untitled"}`,
-          `Acta importada correctamente - ${data.title || "sin título"}`,
-        ),
-      );
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (err) {
-      setImportMsg(t("Import failed - please try again", "No se pudo importar; inténtelo de nuevo"));
-    } finally {
-      setImporting(false);
-      e.target.value = "";
-    }
-  };
-
-  // import message display handled inline
   const loadMeetings = async () => {
     const scope = ++meetingScope.current;
     setError("");
@@ -3208,31 +3171,7 @@ export function MeetingsTab({
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <MeetingCurrentViewExports projectId={projectId} token={token} lang={lang} view={view==="actions"?"actions":"meetings"} />
-            {canWrite && (
-              <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
-                <input
-                  type="file"
-                  onChange={handleImport}
-                  disabled={importing}
-                  style={{ display: "none" }}
-                />
-                <div
-                  className="btn btn-outline"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 6,
-                    opacity: importing ? 0.6 : 1,
-                    pointerEvents: importing ? "none" : "auto",
-                  }}
-                >
-                  <Download size={14} />{" "}
-                  {importing
-                    ? t("Importing...", "Importando...")
-                    : t("Import Minutes", "Importar Acta")}
-                </div>
-              </label>
-            )}
+            <MeetingDocumentImport projectId={projectId} token={token} lang={lang} canWrite={canWrite} onImported={loadMeetings} />
             {canWrite && (
               <button
                 className="btn btn-primary"
@@ -4559,21 +4498,6 @@ export function MeetingsTab({
           }}
         >
           {error}
-        </div>
-      )}
-      {importMsg && (
-        <div
-          style={{
-            background: "#EFF6FF",
-            border: "1px solid #BFDBFE",
-            borderRadius: 8,
-            padding: "10px 14px",
-            color: "#1D4ED8",
-            fontSize: 13,
-            marginBottom: 14,
-          }}
-        >
-          {importMsg}
         </div>
       )}
 

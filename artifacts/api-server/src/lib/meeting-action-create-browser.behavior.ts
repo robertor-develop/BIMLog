@@ -35,9 +35,9 @@ try{
  await cdp('Runtime.enable');await cdp('Page.enable');await cdp('Page.reload',{ignoreCache:true});await wait('Fixture action meeting');
  await evaluate("[...document.querySelectorAll('summary')].find(b=>b.textContent.includes('Add meeting action item')).click()");
  await evaluate("(()=>{const field=document.querySelector('textarea[aria-label=\"Action description\"]');Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(field,'Fixture action created');field.dispatchEvent(new Event('input',{bubbles:true}));})()");
- await evaluate("[...document.querySelectorAll('details input[type=checkbox]')][0].click()");
+ await evaluate("document.querySelector('.meeting-action-create input[type=checkbox]').click()");
  await evaluate("(()=>{const button=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Save meeting action');button.click();button.click();})()");
- await wait('Review the action fields and correct invalid values');assert.equal(posts,1);assert.equal(reads,0);assert.equal(await evaluate("document.querySelector('details fieldset').disabled"),false);
+ await wait('Review the action fields and correct invalid values');assert.equal(posts,1);assert.equal(reads,0);assert.equal(await evaluate("document.querySelector('.meeting-action-create fieldset').disabled"),false);
  await evaluate("(()=>{const button=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Save meeting action');button.click();button.click();})()"); await wait('The save receipt is retained');assert.equal(posts,2);assert.equal(reads,1);
  await cdp('Page.reload',{ignoreCache:true});await wait('Add meeting action item');failedRead=false;
  await evaluate("[...document.querySelectorAll('summary')].find(b=>b.textContent.includes('Add meeting action item')).click()");

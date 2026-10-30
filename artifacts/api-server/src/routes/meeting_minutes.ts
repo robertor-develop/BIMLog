@@ -1,3 +1,4 @@
+import { MeetingImportFailure, normalizeMeetingImportData, meetingImportFileName, meetingImportTimestamp } from "../lib/meeting-import-contract";
 import { Router } from "express";
 import crypto from "crypto";
 import * as XLSX from "xlsx";
@@ -96,8 +97,8 @@ const router: Router = Router();
  // cross-company membership alone must never authorize this record family.
  router.use("/projects/:projectId/meetings/:meetingId", authMiddleware, async (req,res,next) => {
    const raw=String(req.params.meetingId);
-   if(raw!=="current-view"&&raw!=="draft"&&!/^\d+$/.test(raw)){next();return;}
-   const projectId=Number(req.params.projectId),meetingId=raw==="current-view"||raw==="draft"?null:Number(raw);
+   if(raw!=="current-view"&&raw!=="draft"&&raw!=="import"&&!/^\d+$/.test(raw)){next();return;}
+   const projectId=Number(req.params.projectId),meetingId=raw==="current-view"||raw==="draft"||raw==="import"?null:Number(raw);
    if(!Number.isSafeInteger(projectId)||projectId<=0||(meetingId!==null&&(!Number.isSafeInteger(meetingId)||meetingId<=0))){res.status(400).json({error:"valid_meeting_identity_required"});return;}
    try {
      const result=await db.execute(sql`SELECT (actor.is_super_admin OR (actor.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id) AND EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active'))) allowed FROM projects p JOIN users creator ON creator.id=p.created_by_id JOIN users actor ON actor.id=${req.user!.userId} WHERE p.id=${projectId} AND p.status<>'archived'`);
@@ -3624,14 +3625,32 @@ router.post(
   singleFileUpload({ fileSize: 50 * 1024 * 1024 }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    res.set("X-BIMLog-Meeting-Import-Contract","v1");
     try {
       if (!req.file) {
         res.status(400).json({ error: "no_file" });
         return;
       }
+      const file=req.file;
+      if(file.buffer.length===0)throw new MeetingImportFailure(400,"meeting_import_empty_file");
+      const sourceFileName=meetingImportFileName(file.originalname);
+      const inputSha256=crypto.createHash("sha256").update(file.buffer).digest("hex");
+      const idempotencyDigest=meetingCommandIdempotencyDigest(req.get("Idempotency-Key"),{projectId,userId:req.user!.userId,command:"meeting.import"});
+      const outcome=await db.transaction(async tx=>{
+        if(idempotencyDigest){
+          await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${idempotencyDigest},0))`);
+          const [prior]=await tx.select({entityId:activityLogTable.entityId,details:activityLogTable.details}).from(activityLogTable).where(and(eq(activityLogTable.projectId,projectId),eq(activityLogTable.userId,req.user!.userId),eq(activityLogTable.actionType,"import"),eq(activityLogTable.entityType,"meeting"),ilike(activityLogTable.details,`%"idempotencyDigest":"${idempotencyDigest}"%`))).limit(1);
+          if(prior){
+            const receipt=parseMeetingCommandReceipt(prior.details);
+            if(!receipt||receipt.inputSha256!==inputSha256||receipt.sourceFileName!==sourceFileName)throw new MeetingImportFailure(409,"meeting_import_retry_source_changed");
+            const [record]=await tx.select().from(meetingMinutesTable).where(and(eq(meetingMinutesTable.id,Number(prior.entityId)),eq(meetingMinutesTable.projectId,projectId),isNull(meetingMinutesTable.deletedAt))).limit(1);
+            if(!record)throw new MeetingImportFailure(409,"meeting_import_receipt_record_unavailable");
+            return {record,replayed:true,attendeeCount:Number(receipt.attendeeCount),actionItemCount:Number(receipt.actionItemCount)};
+          }
+        }
       const { chunks, isPdf, pdfBase64 } = await extractFileText(
-        req.file.buffer,
-        req.file.originalname,
+        file.buffer,
+        sourceFileName,
       );
       const anthropic = await getAnthropicClientForUser({
         userId: req.user!.userId,
@@ -3689,7 +3708,7 @@ Extract the meeting information. Return ONLY valid JSON, no markdown. Use null f
               ? extractMsg.content[0].text
               : "{}";
           const clean = text.replace(/```json\n?|```/g, "").trim();
-          const parsed = JSON.parse(clean);
+          const parsed = normalizeMeetingImportData(JSON.parse(clean),false);
           data = {
             title: parsed.title ?? null,
             meetingDate: parsed.meetingDate ?? null,
@@ -3709,7 +3728,8 @@ Extract the meeting information. Return ONLY valid JSON, no markdown. Use null f
             data.actionItems.length,
           );
         } catch (e) {
-          console.error("[meeting-import] PDF direct extraction failed:", e);
+          if(e instanceof MeetingImportFailure)throw e;
+          throw new MeetingImportFailure(502,"meeting_import_extraction_failed");
         }
       } else {
         for (const chunk of chunks) {
@@ -3743,7 +3763,7 @@ ${chunk}`,
                 ? extractMsg.content[0].text
                 : "{}";
             const clean = text.replace(/```json\n?|```/g, "").trim();
-            const chunkData = JSON.parse(clean);
+            const chunkData = normalizeMeetingImportData(JSON.parse(clean),false);
             data.title = data.title || chunkData.title || null;
             data.meetingDate =
               data.meetingDate || chunkData.meetingDate || null;
@@ -3763,19 +3783,19 @@ ${chunk}`,
                 ...chunkData.actionItems,
               ];
           } catch (e) {
-            console.error("[meeting-import] chunk extraction failed:", e);
+            if(e instanceof MeetingImportFailure)throw e;
+            throw new MeetingImportFailure(502,"meeting_import_extraction_failed");
           }
         }
       } // end else (non-PDF)
 
-      const [meeting] = await db
+      data=normalizeMeetingImportData(data);
+      const [meeting] = await tx
         .insert(meetingMinutesTable)
         .values({
           projectId,
-          title: data.title || req.file.originalname,
-          meetingDate: data.meetingDate
-            ? new Date(data.meetingDate)
-            : new Date(),
+          title: data.title || sourceFileName,
+          meetingDate: meetingImportTimestamp(data),
           location: data.location || null,
           notes: data.notes || null,
           createdById: req.user!.userId,
@@ -3785,7 +3805,7 @@ ${chunk}`,
       if (data.attendees?.length > 0) {
         const validAttendees = data.attendees.filter((a: any) => a.fullName);
         if (validAttendees.length > 0) {
-          await db.insert(meetingAttendeesTable).values(
+          await tx.insert(meetingAttendeesTable).values(
             validAttendees.map((a: any) => ({
               meetingId: meeting.id,
               fullName: a.fullName,
@@ -3801,7 +3821,7 @@ ${chunk}`,
       if (data.actionItems?.length > 0) {
         const validItems = data.actionItems.filter((ai: any) => ai.description);
         if (validItems.length > 0) {
-          await db.insert(actionItemsTable).values(
+          await tx.insert(actionItemsTable).values(
             validItems.map((ai: any) => ({
               meetingId: meeting.id,
               projectId,
@@ -3814,7 +3834,7 @@ ${chunk}`,
         }
       }
 
-      await db.insert(activityLogTable).values({
+      await tx.insert(activityLogTable).values({
         projectId,
         userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "",
@@ -3822,21 +3842,21 @@ ${chunk}`,
         actionType: "import",
         entityType: "meeting",
         entityId: meeting.id,
-        details: `Imported meeting minutes from ${req.file.originalname} — ${data.attendees?.length ?? 0} attendees, ${data.actionItems?.length ?? 0} action items`,
+        details: JSON.stringify({version:1,kind:"meeting-import",idempotencyDigest,inputSha256,sourceFileName,byteCount:file.buffer.length,attendeeCount:data.attendees.filter((a:any)=>a.fullName).length,actionItemCount:data.actionItems.filter((a:any)=>a.description).length}),
       });
 
-      res.json({
-        imported: 1,
-        meetingId: meeting.id,
-        title: meeting.title,
-        message: "Meeting imported successfully",
+      return {record:meeting,replayed:false,attendeeCount:data.attendees.filter((a:any)=>a.fullName).length,actionItemCount:data.actionItems.filter((a:any)=>a.description).length};
       });
+      if(outcome.replayed)res.set("Idempotency-Replayed","true");
+      res.json({imported:1,projectId,meetingId:outcome.record.id,title:outcome.record.title,inputSha256,sourceFileName,byteCount:file.buffer.length,attendeeCount:outcome.attendeeCount,actionItemCount:outcome.actionItemCount,replayed:outcome.replayed,idempotencyProtected:Boolean(idempotencyDigest),message:"Meeting imported successfully"});
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
+      if(err instanceof MeetingImportFailure){res.status(err.status).json({error:err.code});return;}
+      if(err instanceof Error&&err.message==="meeting_idempotency_key_invalid"){res.status(400).json({error:err.message});return;}
       console.error("[meeting-import]", err);
       res
         .status(500)
-        .json({ error: err instanceof Error ? err.message : String(err) });
+        .json({ error: "meeting_import_failed" });
     }
   },
 );
