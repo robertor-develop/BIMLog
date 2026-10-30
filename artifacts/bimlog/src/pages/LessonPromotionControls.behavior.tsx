@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import React from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { LessonPromotionControls } from "./LessonPromotionControls";
+
+const base={item:{id:"lesson-1",status:"approved",proposal:{lesson:"Retain access clearance",organizationalApplicability:"Plant rooms"}},token:"fixture",spanish:false,canPromote:true,canMerge:true,options:[],onChanged(){}};
+const approved=renderToStaticMarkup(<LessonPromotionControls {...base}/>);
+assert.match(approved,/Promote approved lesson to draft knowledge/);
+assert.match(approved,/Confirm merge/);
+assert.match(approved,/Create linked draft/);
+assert.match(approved,/disabled=""/);
+const viewer=renderToStaticMarkup(<LessonPromotionControls {...base} canPromote={false} canMerge={false}/>);
+assert.doesNotMatch(viewer,/Create linked draft|Confirm merge/);
+const review=renderToStaticMarkup(<LessonPromotionControls {...base} item={{...base.item,status:"under_review"}}/>);
+assert.doesNotMatch(review,/Create linked draft/);
+assert.match(review,/Confirm merge/);
+const promoted=renderToStaticMarkup(<LessonPromotionControls {...base} item={{...base.item,promoted_entity_id:"knowledge-1"}}/>);
+assert.doesNotMatch(promoted,/Create linked draft/);
+const spanish=renderToStaticMarkup(<LessonPromotionControls {...base} spanish/>);
+assert.match(spanish,/Promover lección aprobada/);
+assert.match(spanish,/Confirmar fusión/);
+console.log("Lesson promotion rendered permissions, prerequisite state and Spanish controls: PASS");
