@@ -8,9 +8,11 @@ const output=process.env.SETUP_BROWSER_EVIDENCE_DIR;if(!output)throw new Error('
 const app=express();app.use(express.json());const user={id:71,email:'fixture@example.test',fullName:'Fixture Reader',companyId:31,companyName:'Fixture',isSuperAdmin:false};
 const fixtureToken=`e30.${Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+3600})).toString('base64url')}.synthetic-local-fixture`;
 let unavailable=true,saveDenied=false,saves=0;
-let state={email:user.email,companyName:'Fixture Company',emailVerifiedAt:null,workProfile:'bim_coordinator',preferredDisciplines:['Architecture'],preferredDocumentTypes:['Shop Drawings'],completedSteps:[] as string[],completedAt:null,projectCount:1,firstValueReached:false,firstValueEvidence:null};
+let completionDenied=true,completions=0;
+let state={email:user.email,companyName:'Fixture Company',emailVerifiedAt:null as string|null,workProfile:'bim_coordinator',preferredDisciplines:['Architecture'],preferredDocumentTypes:['Shop Drawings'],completedSteps:[] as string[],completedAt:null as string|null,projectCount:1,firstValueReached:false,firstValueEvidence:null};
 app.get('/seed',(_req,res)=>res.type('html').send(`<script>localStorage.setItem('bimlog-auth',${JSON.stringify(JSON.stringify({state:{token:fixtureToken,user,changedAt:Date.now()},version:1}))});localStorage.setItem('bimlog-lang','en');location.replace('/my-setup')</script>`));
 app.get('/api/v1/auth/me',(_req,res)=>res.json(user));
+app.post('/api/v1/onboarding/complete',(_req,res)=>{if(completionDenied){res.status(409).json({error:'fixture prerequisites changed'});return;}completions++;state.completedAt='2026-10-30T00:00:00Z';res.json({completedAt:state.completedAt});});
 app.get('/api/v1/onboarding',(_req,res)=>{if(unavailable){res.status(503).json({error:'fixture unavailable'});return;}res.json(state);});
 app.patch('/api/v1/onboarding',(req,res)=>{if(saveDenied){res.status(403).json({error:'fixture denied'});return;}saves++;state={...state,workProfile:req.body.workProfile,preferredDisciplines:req.body.preferredDisciplines,preferredDocumentTypes:req.body.preferredDocumentTypes,completedSteps:req.body.guidePaused?['guide_paused']:[]};res.json({saved:true});});
 app.all('/api/v1/*path',(_req,res)=>res.json([]));app.use(express.static(path.resolve(process.cwd(),'../../artifacts/bimlog/dist/public')));app.get('*path',(_req,res)=>res.sendFile(path.resolve(process.cwd(),'../../artifacts/bimlog/dist/public/index.html')));
@@ -32,6 +34,12 @@ try{
   await click('Save my preferences');await wait('Preferences saved');assert.equal(saves,1);assert.equal(state.workProfile,'designer');assert.ok(state.preferredDisciplines.includes('Electrical'));assert.deepEqual(state.completedSteps,['guide_paused']);
   await cdp('Page.reload',{ignoreCache:true});await wait('Fixture Company');assert.equal(await evaluate("document.querySelector('select').value"),'designer');assert.equal(await evaluate("[...document.querySelectorAll('label')].find(l=>l.textContent.trim()==='Electrical').querySelector('input').checked"),true);
   saveDenied=true;await click('Save my preferences');await wait('Save could not be confirmed');assert.equal(saves,1);saveDenied=false;await click('Reload saved setup');await wait('Fixture Company');
+  assert.equal(await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Mark my setup complete').disabled"),true);assert.equal(completions,0);
+  state.emailVerifiedAt='2026-10-30T00:00:00Z';await click('Reload saved setup');await wait('Verified');
+  const confirm=async()=>evaluate("[...document.querySelectorAll('label')].find(l=>l.textContent.includes('I reviewed the saved prerequisites')).querySelector('input').click()");
+  await confirm();await click('Mark my setup complete');await wait('Completion could not be confirmed');assert.equal(completions,0);
+  completionDenied=false;await click('Reload saved setup');await wait('Fixture Company');await confirm();await click('Mark my setup complete');await wait('Saved completion time');assert.equal(completions,1);
+  await cdp('Page.reload',{ignoreCache:true});await wait('Saved completion time');assert.equal(await evaluate("document.body.innerText.includes('2026-10-30T00:00:00Z')"),true);
   await evaluate("localStorage.setItem('bimlog-lang','es')");await cdp('Page.reload',{ignoreCache:true});await wait('Mis preferencias de configuración');await wait('Perfil de trabajo');
   await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);assert.deepEqual(runtimeErrors,[]);
   const screenshot=await cdp('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'my-setup-mobile.png'),Buffer.from(screenshot.result.data,'base64'));

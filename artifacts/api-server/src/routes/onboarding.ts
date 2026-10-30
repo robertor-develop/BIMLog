@@ -75,7 +75,8 @@ router.patch("/onboarding", authMiddleware, async (req,res) => {
 
 router.post("/onboarding/complete", authMiddleware, async (req,res) => {
   await waitForOnboardingMigration();
-  const result=await pool.query(`UPDATE user_onboarding_profiles p SET completed_steps='["email","company","profile","project","defaults"]'::jsonb,completed_at=now(),updated_at=now() WHERE user_id=$1 AND email_verified_at IS NOT NULL AND work_profile IS NOT NULL AND EXISTS(SELECT 1 FROM project_members m WHERE m.user_id=p.user_id) RETURNING completed_at`,[req.user!.userId]);
+  await ensureProfile(req.user!.userId,req.user!.companyId);
+  const result=await pool.query(`UPDATE user_onboarding_profiles p SET completed_steps='["email","company","profile","project","defaults"]'::jsonb,completed_at=COALESCE(completed_at,now()),updated_at=now() WHERE user_id=$1 AND email_verified_at IS NOT NULL AND work_profile IS NOT NULL AND EXISTS(SELECT 1 FROM project_members m JOIN projects scoped ON scoped.id=m.project_id JOIN users creator ON creator.id=scoped.created_by_id WHERE m.user_id=p.user_id AND m.status='active' AND scoped.status<>'archived' AND COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=scoped.id ORDER BY version DESC LIMIT 1),creator.company_id)=p.company_id) RETURNING completed_at`,[req.user!.userId]);
   if(!result.rows[0]){res.status(409).json({error:"ONBOARDING_PREREQUISITES_INCOMPLETE"});return;}
   res.json({completedAt:result.rows[0].completed_at});
 });
