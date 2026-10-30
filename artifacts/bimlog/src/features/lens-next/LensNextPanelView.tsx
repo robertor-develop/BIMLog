@@ -1236,10 +1236,12 @@ export function LensNextPanelView({
                   <button type="button" className="lens-next__viewpoint-card" onClick={()=>onSelectIssueViewpoint(item.id)}><strong>{item.name}</strong>{item.isPrimary&&<span>{tt("Primary", "Principal", "Principal")}</span>}<small>{item.viewpointType} · {item.lifecycleStatus} · {index+1}</small></button>
                   {item.id===selectedIssueViewpointId&&item.lifecycleStatus==="active"&&<div className="lens-next__viewpoint-actions">
                     <button type="button" disabled={issueViewpointsState==="saving"} onClick={onOpenSelectedIssueViewpoint}>{tt("Open selected viewpoint", "Abrir punto de vista seleccionado", "Abrir ponto de vista selecionado")}</button>
+                    <fieldset disabled={!selectedIssue.publishingAllowed||issueViewpointsState==="saving"} style={{border:0,padding:0,margin:0}} aria-label={tt("Viewpoint changes","Cambios de punto de vista","Alterações do ponto de vista")}>
                     <button type="button" disabled={activeIndex<=0||viewpointReason.trim().length<5} onClick={()=>reorder(-1)}>↑</button><button type="button" disabled={activeIndex<0||activeIndex>=activeItems.length-1||viewpointReason.trim().length<5} onClick={()=>reorder(1)}>↓</button>
                     <button type="button" disabled={item.isPrimary||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"make_primary",reason:viewpointReason})}>{tt("Make primary", "Hacer principal", "Tornar principal")}</button>
                     <button type="button" disabled={!newViewpointName.trim()||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"rename",name:newViewpointName.trim(),reason:viewpointReason})}>{tt("Rename", "Renombrar", "Renomear")}</button>
                     <button type="button" disabled={item.isPrimary||activeItems.length<=1||viewpointReason.trim().length<5} onClick={()=>onUpdateIssueViewpoint(item.id,{action:"archive",reason:viewpointReason})}>{tt("Archive", "Archivar", "Arquivar")}</button>
+                    </fieldset>
                     <button type="button" onClick={onLoadSelectedIssueViewpointHistory}>{tt("Viewpoint history", "Historial del punto de vista", "Histórico do ponto de vista")}</button>
                   </div>}
                 </article>;

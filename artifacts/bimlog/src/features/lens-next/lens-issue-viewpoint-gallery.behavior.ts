@@ -8,7 +8,7 @@ for (const action of ["rename", "reorder", "make_primary", "archive"]) assert.ok
 assert.match(route, /lens_issue_viewpoint_primary_archive_forbidden/);
 assert.match(route, /lens_issue_viewpoint_last_archive_forbidden/);
 assert.match(route, /lens-issue-viewpoint-history\.v1/);
-assert.match(panel, /captureCurrentVisualState\(selectedIssue, bridgeContext\)/);
+assert.match(panel, /captureCurrentVisualState\(selectedIssue, bridgeContext, signal\)/);
 assert.match(panel, /loadIssueViewpointVisualState\(selectedIssue, selectedIssueViewpointId\)/);
 assert.match(panel, /applyPlatformWorkingView\(selectedIssue, bridgeContext, stored\.visualStateJson/);
 assert.match(view, /Issue viewpoints/);

@@ -224,6 +224,8 @@ export function LensNextPanel({
     [issues, selectedServerId],
   );
   const activeIssues = useMemo(() => activeLensNextIssues(issues), [issues]);
+  const issueSelectionScope=useRef({issue:selectedIssue,client:apiClient});
+  if(issueSelectionScope.current.issue!==selectedIssue||issueSelectionScope.current.client!==apiClient)issueSelectionScope.current={issue:selectedIssue,client:apiClient};
   const filteredIssues = useMemo(
     () => sortLensNextIssuesBy(filterLensNextIssues(activeIssues, filters),issueSort),
     [activeIssues, filters,issueSort],
@@ -514,44 +516,54 @@ export function LensNextPanel({
   }, [apiClient, selectedIssue]);
 
   const loadIssueViewpoints = useCallback(async (signal?: AbortSignal) => {
-    if (!apiClient || !selectedIssue) { setIssueViewpoints([]); setSelectedIssueViewpointId(null); setIssueViewpointsState("idle"); return; }
-    setIssueViewpointsState("loading"); setIssueViewpointsMessage(null);
+    const selection=issueSelectionScope.current;
+    if (!apiClient || !selectedIssue) { setIssueViewpoints([]); setSelectedIssueViewpointId(null); setIssueViewpointsState("idle"); return false; }
+    setIssueViewpointsState("loading"); setIssueViewpointsMessage(null);setIssueViewpointHistory(null);
     try {
       const loaded = await apiClient.loadIssueViewpoints(selectedIssue, signal);
+      if(signal?.aborted||selection!==issueSelectionScope.current)return false;
       setIssueViewpoints(loaded);
       setSelectedIssueViewpointId(current => loaded.some(item => item.id === current) ? current : (loaded.find(item => item.isPrimary && item.lifecycleStatus === "active") ?? loaded.find(item => item.lifecycleStatus === "active") ?? loaded[0])?.id ?? null);
       setIssueViewpointsState("idle");
-    } catch (error) { if (!signal?.aborted) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoints could not be loaded"); } }
+      return true;
+    } catch (error) { if (!signal?.aborted&&selection===issueSelectionScope.current) {setIssueViewpoints([]);setSelectedIssueViewpointId(null);setIssueViewpointHistory(null); setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoints could not be loaded"); } return false; }
   }, [apiClient, selectedIssue]);
   useEffect(() => { const controller = new AbortController(); void loadIssueViewpoints(controller.signal); return () => controller.abort(); }, [loadIssueViewpoints]);
 
   const addIssueViewpoint = useCallback(async (name: string, viewpointType: LensNextIssueViewpoint["viewpointType"], reason: string) => {
+    const selection=issueSelectionScope.current;
     if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || selectedIssue.identity.projectId !== bridgeContext.projectId || issueViewpointSaveInFlight.current) return;
     issueViewpointSaveInFlight.current = true;
     setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
     try {
-      const fingerprint = JSON.stringify([selectedIssue.identity.serverId, name, viewpointType, reason, bridgeContext.modelFingerprint]);
+      const fingerprint = JSON.stringify([selectedIssue.identity.projectId,selectedIssue.identity.serverId, name, viewpointType, reason, bridgeContext.modelFingerprint]);
       let pending = pendingIssueViewpointSave.current;
       if (!pending || pending.fingerprint !== fingerprint) {
         const captured = await withIssueViewpointTimeout("capture", ISSUE_VIEWPOINT_CAPTURE_TIMEOUT_MS,
           signal => bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext, signal));
+        if(selection!==issueSelectionScope.current)return;
         pending = { fingerprint, input: { name, viewpointType, modelFingerprint: bridgeContext.modelFingerprint, visualStateJson: captured.visualStateJson, visualStateDigest: captured.visualStateDigest, reason, idempotencyKey: crypto.randomUUID() } };
         pendingIssueViewpointSave.current = pending;
       }
       const added = await withIssueViewpointTimeout("save", ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS,
         signal => apiClient.addIssueViewpoint(selectedIssue, pending!.input, signal));
-      await withIssueViewpointTimeout("save", ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS, signal => loadIssueViewpoints(signal));
+      if(selection!==issueSelectionScope.current)return;
+      const verified=await withIssueViewpointTimeout("save", ISSUE_VIEWPOINT_SAVE_TIMEOUT_MS, signal => loadIssueViewpoints(signal));
+      if(!verified)throw new Error("Save response received, but saved viewpoints could not be reopened. Retry the unchanged request to recover its saved identity.");
       pendingIssueViewpointSave.current = null;
       setSelectedIssueViewpointId(added.id); setIssueViewpointsMessage("Viewpoint captured and added to this Issue.");
-    } catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint capture failed"); }
+    } catch (error) { if(selection===issueSelectionScope.current){setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Viewpoint capture failed");} }
     finally { issueViewpointSaveInFlight.current = false; }
   }, [apiClient, bridgeClient, bridgeContext, loadIssueViewpoints, selectedIssue]);
 
   const updateIssueViewpoint = useCallback(async (issueViewpointId: string, input: { action: "rename" | "reorder" | "make_primary" | "archive"; reason: string; name?: string; orderedIds?: readonly string[] }) => {
-    if (!apiClient || !selectedIssue) return;
+    const selection=issueSelectionScope.current;
+    if (!apiClient || !selectedIssue || !selectedIssue.publishingAllowed || issueViewpointSaveInFlight.current) return;
+    issueViewpointSaveInFlight.current=true;
     setIssueViewpointsState("saving"); setIssueViewpointsMessage(null);
-    try { await apiClient.updateIssueViewpoint(selectedIssue, issueViewpointId, input); await loadIssueViewpoints(); setIssueViewpointsMessage("Issue viewpoint updated."); }
-    catch (error) { setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoint update failed"); }
+    try { await apiClient.updateIssueViewpoint(selectedIssue, issueViewpointId, input);if(selection!==issueSelectionScope.current)return; if(!await loadIssueViewpoints())throw new Error("Update response received, but saved viewpoints could not be reopened. Reload before another change.");if(selection!==issueSelectionScope.current)return; setIssueViewpointsMessage("Issue viewpoint updated."); }
+    catch (error) {if(selection===issueSelectionScope.current){ setIssueViewpointsState("error"); setIssueViewpointsMessage(error instanceof Error ? error.message : "Issue viewpoint update failed");} }
+    finally {issueViewpointSaveInFlight.current=false;}
   }, [apiClient, loadIssueViewpoints, selectedIssue]);
 
   const openSelectedIssueViewpoint = useCallback(async () => {
