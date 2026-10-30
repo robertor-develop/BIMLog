@@ -3204,7 +3204,8 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/reports",
       }).from(lensViewpointReportsTable)
         .where(eq(lensViewpointReportsTable.projectId, projectId))
         .orderBy(desc(lensViewpointReportsTable.generatedAt));
-      res.json({ reports: rows });
+      res.setHeader("Cache-Control", "private, no-store");
+      res.json({ projectId, reports: rows });
     } catch (err) {
       res.status(500).json({ error: "lens_reports_failed", message: err instanceof Error ? err.message : String(err) });
     }
@@ -3219,10 +3220,18 @@ router.delete("/projects/:projectId/clash-reports/lens-viewpoints/reports/:repor
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const reportRecordId = Number(req.params.reportRecordId);
+    if (!Number.isSafeInteger(reportRecordId) || reportRecordId <= 0) { res.status(400).json({ error: "invalid_report_id" }); return; }
     try {
-      const [deleted] = await db.delete(lensViewpointReportsTable)
+      const deleted = await db.transaction(async tx => {
+      const [row] = await tx.delete(lensViewpointReportsTable)
         .where(and(eq(lensViewpointReportsTable.id, reportRecordId), eq(lensViewpointReportsTable.projectId, projectId)))
-        .returning({ id: lensViewpointReportsTable.id });
+        .returning();
+      if (!row) return null;
+      await tx.insert(activityLogTable).values({ projectId, userId: req.user!.userId, userFullName: req.user!.fullName,
+        userCompanyName: req.user!.companyName, actionType: "lens_report_deleted", entityType: "lens_report", entityId: row.id,
+        fileNameBefore: row.reportNumber, details: JSON.stringify({ reportNumber: row.reportNumber, contentHash: row.contentHash, viewpointCount: row.viewpointCount }) });
+      return row;
+      });
       if (!deleted) { res.status(404).json({ error: "not_found", message: "Report not found" }); return; }
       res.json({ success: true, id: deleted.id });
     } catch (err) {

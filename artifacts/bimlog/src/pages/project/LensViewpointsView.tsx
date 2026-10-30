@@ -231,6 +231,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [toast, setToast] = useState<string | null>(null);
 
   const [history, setHistory] = useState<LensReport[]>([]);
+  const [reportHistoryError,setReportHistoryError]=useState("");
+  const [reportHistoryLoading,setReportHistoryLoading]=useState(false);
+  const [deletingReport,setDeletingReport]=useState<number|null>(null);
+  const reportHistoryRequest=useRef(0);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const pdfLock=useRef(false);
@@ -479,22 +483,25 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const deleteReport = async (id: number) => {
+    if (!canWrite || actionLock.current) return;
     if (!window.confirm(t("Delete this report record? This cannot be undone.", "¿Eliminar este reporte del historial? Esto no se puede deshacer."))) return;
-    const prev = history;
-    setHistory(p => p.filter(rp => rp.id !== id));
+    actionLock.current=true;
+    const context=contextEpoch.current;
+    setDeletingReport(id);
+    setReportHistoryError("");
     try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports/${id}`, {
-        method: "DELETE",
-        headers,
-      });
-      if (!r.ok) {
-        setHistory(prev);
-        const d = await r.json().catch(() => ({}));
-        setError(d.message || d.error || "Failed to delete report");
-      }
-    } catch (e) {
-      setHistory(prev);
-      setError(e instanceof Error ? e.message : String(e));
+      const response=await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports/${id}`,{method:"DELETE",headers});
+      const receipt=await response.json().catch(()=>({}));
+      if (context!==contextEpoch.current) return;
+      if (!response.ok) throw new Error(receipt.message||receipt.error||t("Failed to delete report","No se pudo eliminar el reporte"));
+      if (receipt.success!==true||receipt.id!==id) throw new Error(t("Invalid report deletion receipt.","Respuesta de eliminación de reporte inválida."));
+      if (!await loadHistory(id)) throw new Error(t("Deletion response received, but history could not be reopened. Reload report history.","Se recibió la eliminación, pero no se pudo reabrir el historial. Recargue el historial."));
+      if (context!==contextEpoch.current) return;
+      showToast(t("Report record deleted; audit retained.","Registro de reporte eliminado; auditoría conservada."));
+    } catch(error) {
+      if(context===contextEpoch.current)setReportHistoryError(error instanceof Error?error.message:String(error));
+    } finally {
+      if(context===contextEpoch.current){actionLock.current=false;setDeletingReport(null);}
     }
   };
 
@@ -923,18 +930,28 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  const loadHistory = async () => {
+  const loadHistory = async (deletedId?: number) => {
+    const context=contextEpoch.current;
+    const request=++reportHistoryRequest.current;
+    setReportHistoryLoading(true);
+    setReportHistoryError("");
     try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports`, { headers });
-      if (r.ok) {
-        const d = await r.json();
-        setHistory(d.reports ?? []);
-      }
-    } catch {
-      /* transient - the history list simply stays as-is */
+      const response=await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reports`,{headers});
+      const data=await response.json().catch(()=>({}));
+      if(context!==contextEpoch.current||request!==reportHistoryRequest.current)return false;
+      if(!response.ok)throw new Error(data.message||data.error||t("Unable to load report history.","No se pudo cargar el historial de reportes."));
+      if(data.projectId!==projectId||!Array.isArray(data.reports)||data.reports.some((row:LensReport)=>!Number.isSafeInteger(row.id)||typeof row.reportNumber!=="string"))throw new Error(t("Invalid report history response.","Respuesta de historial inválida."));
+      if(deletedId!==undefined&&data.reports.some((row:LensReport)=>row.id===deletedId))throw new Error(t("Deleted report is still present. Reload history.","El reporte eliminado sigue presente. Recargue el historial."));
+      setHistory(data.reports);
+      return true;
+    } catch(error) {
+      if(context===contextEpoch.current&&request===reportHistoryRequest.current){setHistory([]);setReportHistoryError(error instanceof Error?error.message:String(error));}
+      return false;
+    } finally {
+      if(context===contextEpoch.current&&request===reportHistoryRequest.current)setReportHistoryLoading(false);
     }
   };
-  useEffect(() => { loadHistory(); }, [projectId]);
+  useEffect(()=>{setHistory([]);setDeletingReport(null);void loadHistory();},[projectId,token]);
 
   const onLogoFile = (file?: File | null) => {
     if (!file) return;
@@ -1517,14 +1534,18 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         </div>
       )}
 
-      {history.length > 0 && (
+      {(
         <div style={{ marginTop: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <History size={16} color="#1E3A5F" />
             <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#111827" }}>
               {t("Report History", "Historial de Reportes")}
             </h3>
+            <button className="btn btn-sm btn-outline" disabled={reportHistoryLoading||deletingReport!==null} onClick={()=>void loadHistory()}>{t("Reload report history","Recargar historial de reportes")}</button>
           </div>
+          {reportHistoryLoading&&<p role="status">{t("Loading report history…","Cargando historial de reportes…")}</p>}
+          {reportHistoryError&&<p role="alert">{reportHistoryError}</p>}
+          {!reportHistoryLoading&&!reportHistoryError&&history.length===0&&<p>{t("No reports generated yet. Use Print PDF to create a report.","Aún no hay reportes. Use Imprimir PDF para crear un reporte.")}</p>}
           <div style={{ background: "white", border: "1px solid #E5E7EB", borderRadius: 10, overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
@@ -1557,11 +1578,11 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                       <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280" }}>{WATERMARK_LABEL[rp.watermarkType ?? ""] ?? "-"}</td>
                       <td style={{ padding: "8px 12px", fontSize: 12, color: "#6B7280", whiteSpace: "nowrap" }}>{rp.isExecutiveOnePager ? t("Executive", "Ejecutivo") : t("Full", "Completo")}</td>
                       <td style={{ padding: "8px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
-                        <button className="btn btn-sm btn-outline" onClick={() => deleteReport(rp.id)}
+                        {canWrite&&<button className="btn btn-sm btn-outline" disabled={deletingReport!==null||reportHistoryLoading} onClick={() => deleteReport(rp.id)}
                           title={t("Delete this report record", "Eliminar este reporte")}
                           style={{ fontSize: 11, padding: "4px 8px", color: "#DC2626", borderColor: "#FECACA", display: "inline-flex", alignItems: "center", gap: 4 }}>
                           <Trash2 size={12} /> {t("Delete", "Eliminar")}
-                        </button>
+                        </button>}
                       </td>
                     </tr>
                   );
