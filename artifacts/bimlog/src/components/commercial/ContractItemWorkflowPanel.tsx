@@ -1,39 +1,37 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type WorkflowNode = { id: string; parentId: string | null; type: "phase" | "revision" | "version" | "task"; name: string; sequence: number; status: string; dueDate: string | null; assigneeUserId: number | null; revision: number; children: WorkflowNode[] };
 type Props = { projectId: number; contractId: string; stableLineId: string; displayName: string; token: string; language: string; tt: (en: string, es: string) => string };
 
-const styles = `.ciw{margin-top:12px;padding:14px;border:1px solid #a9c7e8;border-radius:10px;background:#f7fbff}.ciw-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.ciw-head h4,.ciw-head p{margin:0}.ciw-head p{margin-top:4px;font-size:12px;color:#526273}.ciw-tree{display:grid;gap:10px;margin-top:14px}.ciw-node{padding:10px;border-left:4px solid #5b8bc2;border-radius:6px;background:#fff;box-shadow:0 1px 2px rgba(15,35,55,.08)}.ciw-node[data-type=revision]{margin-left:18px;border-color:#7c6bc4}.ciw-node[data-type=version]{margin-left:36px;border-color:#c0803d}.ciw-node[data-type=task]{margin-left:54px;border-color:#4b9a66}.ciw-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.ciw-label{display:flex;gap:8px;align-items:center}.ciw-label small{padding:2px 6px;border-radius:99px;background:#e9f1f9;color:#38536d}.ciw-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.ciw button,.ciw select{padding:6px 8px;border:1px solid #bdc9d6;border-radius:6px;background:#fff}.ciw button.primary{background:#1d5ca8;color:#fff;border-color:#1d5ca8}.ciw-empty{margin-top:12px;padding:12px;border-radius:8px;background:#eef6ff;color:#334e68}.ciw-error{margin-top:10px;color:#b42318}@media(max-width:700px){.ciw-head,.ciw-row{display:block}.ciw-actions{margin-top:8px}.ciw-node[data-type]{margin-left:0}}`;
+const styles = `.ciw{min-width:0;overflow-wrap:anywhere;margin-top:12px;padding:14px;border:1px solid #a9c7e8;border-radius:10px;background:#f7fbff}.ciw-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.ciw-head h4,.ciw-head p{margin:0}.ciw-head p{margin-top:4px;font-size:12px;color:#526273}.ciw-tree{display:grid;gap:10px;margin-top:14px}.ciw-node{padding:10px;border-left:4px solid #5b8bc2;border-radius:6px;background:#fff;box-shadow:0 1px 2px rgba(15,35,55,.08)}.ciw-node[data-type=revision]{margin-left:18px;border-color:#7c6bc4}.ciw-node[data-type=version]{margin-left:36px;border-color:#c0803d}.ciw-node[data-type=task]{margin-left:54px;border-color:#4b9a66}.ciw-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.ciw-label{display:flex;gap:8px;align-items:center}.ciw-label small{padding:2px 6px;border-radius:99px;background:#e9f1f9;color:#38536d}.ciw-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}.ciw input:not([type=checkbox]){width:100%;box-sizing:border-box}.ciw input[type=checkbox]{width:auto;min-height:20px}.ciw button,.ciw select{max-width:100%;white-space:normal;padding:6px 8px;border:1px solid #bdc9d6;border-radius:6px;background:#fff}.ciw button.primary{background:#1d5ca8;color:#fff;border-color:#1d5ca8}.ciw-empty{margin-top:12px;padding:12px;border-radius:8px;background:#eef6ff;color:#334e68}.ciw-error{margin-top:10px;color:#b42318}@media(max-width:700px){.ciw-head,.ciw-row{display:block}.ciw-actions{margin-top:8px}.ciw-node[data-type]{margin-left:0}}`;
 const childType: Record<WorkflowNode["type"], WorkflowNode["type"] | null> = { phase: "revision", revision: "version", version: "task", task: null };
 const typeLabel = (type: WorkflowNode["type"], tt: Props["tt"]) => ({ phase: tt("Phase", "Fase"), revision: tt("Revision", "Revisión"), version: tt("Internal Version", "Versión interna"), task: tt("Task", "Tarea") })[type];
 
 export function ContractItemWorkflowPanel({ projectId, contractId, stableLineId, displayName, token, language, tt }: Props) {
-  const [data, setData] = useState<any>(null), [busy, setBusy] = useState(false), [error, setError] = useState("");
+  const [data,setData]=useState<any>(null),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[draft,setDraft]=useState<{type:WorkflowNode["type"];parentId:string|null}|null>(null),[name,setName]=useState(""),[confirmed,setConfirmed]=useState(false);
+  const lock=useRef(false),epoch=useRef(0),controller=useRef<AbortController|null>(null),receipt=useRef<any>(null);
   const base = `/projects/${projectId}/financial/contracts/${encodeURIComponent(contractId)}/items/${encodeURIComponent(stableLineId)}/workflow`;
-  const request = async (path = "", options?: RequestInit) => {
-    const response = await fetch(`${API_BASE}/api/v1${base}${path}`, { ...options, headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json", ...(options?.headers ?? {}) } });
-    const body = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(body?.error?.[language] ?? body?.error?.en ?? tt("Workflow request failed.", "Falló la solicitud del flujo."));
+  const request=async(path="",options?:RequestInit)=>{
+    const response=await fetch(`${API_BASE}/api/v1${base}${path}`,{...options,signal:controller.current?.signal,headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"}});
+    const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body?.error?.[language]??body?.error?.en??tt("Workflow request failed.","Falló la solicitud del flujo."));
+    if(body.projectId!==projectId||body.contractId!==contractId||body.stableLineId!==stableLineId)throw new Error(tt("Workflow evidence belongs to another project, contract or item.","La evidencia pertenece a otro proyecto, contrato o partida."));
     return body;
   };
-  const load = async () => { setBusy(true); setError(""); try { setData(await request()); } catch (e) { setError(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); } };
-  useEffect(() => { void load(); }, [projectId, contractId, stableLineId, token, language]);
-  const initialize = async () => { setBusy(true); setError(""); try { setData(await request("/initialize", { method: "POST", body: "{}" })); } catch (e) { setError(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); } };
-  const add = async (type: WorkflowNode["type"], parentId: string | null) => {
-    const name = window.prompt(tt(`Name for new ${typeLabel(type, tt)}`, `Nombre de nueva ${typeLabel(type, tt)}`));
-    if (!name?.trim()) return;
-    setBusy(true); setError("");
-    try { setData(await request("/nodes", { method: "POST", body: JSON.stringify({ nodeType: type, parentId, name: name.trim() }) })); }
-    catch (e) { setError(e instanceof Error ? e.message : String(e)); }
-    finally { setBusy(false); }
+  const read=async(current:number)=>{
+    const result=await request();if(current!==epoch.current)return;
+    const expected=receipt.current;
+    if(expected){if(!result.workflow||result.workflow.id!==expected.workflow?.id||result.workflow.revision!==expected.workflow?.revision||JSON.stringify(result.nodes)!==JSON.stringify(expected.nodes)||!Array.isArray(result.history)||!expected.history?.every((event:any)=>result.history.some((saved:any)=>saved.id===event.id&&saved.event_type===event.event_type&&saved.node_id===event.node_id&&saved.after_state===event.after_state&&saved.actor_user_id===event.actor_user_id)))throw new Error(tt("The exact saved workflow and event history have not been reopened. Retry this read without another write.","No se reabrieron el flujo exacto y su historial. Reintente la lectura sin otra escritura."));receipt.current=null;setDraft(null);setName("");setConfirmed(false);setNotice(tt("The saved workflow revision, nodes and event history were reopened. Contract value is unchanged.","Se reabrieron revisión, nodos e historial guardados. El valor contractual no cambia."));}
+    setData(result);
   };
-  const changeStatus = async (node: WorkflowNode, status: string) => {
-    setBusy(true); setError("");
-    try { setData(await request(`/nodes/${encodeURIComponent(node.id)}`, { method: "PATCH", body: JSON.stringify({ expectedRevision: node.revision, status }) })); }
-    catch (e) { setError(e instanceof Error ? e.message : String(e)); }
-    finally { setBusy(false); }
-  };
+  const run=async(work:(current:number)=>Promise<void>)=>{if(lock.current)return;lock.current=true;setBusy(true);setError("");setNotice("");controller.current=new AbortController();const current=++epoch.current;try{await work(current);}catch(cause){if(current===epoch.current){setData(null);setError(cause instanceof Error?cause.message:String(cause));}}finally{if(current===epoch.current){lock.current=false;setBusy(false);}}};
+  const load=()=>run(async current=>{setData(null);await read(current);});
+  useEffect(()=>{epoch.current++;controller.current?.abort();lock.current=false;receipt.current=null;setData(null);setDraft(null);setName("");setConfirmed(false);setError("");setNotice("");void load();return()=>{epoch.current++;controller.current?.abort();};},[projectId,contractId,stableLineId,token,language]);
+  const mutate=(path:string,method:string,body:unknown)=>run(async current=>{if(receipt.current){await read(current);return;}const saved=await request(path,{method,body:JSON.stringify(body)});if(current!==epoch.current)return;if(!saved.workflow||!Array.isArray(saved.nodes)||!Array.isArray(saved.history)||saved.history.length===0)throw new Error(tt("The save returned incomplete workflow evidence. Reopen before retrying.","El guardado devolvió evidencia incompleta. Reabra antes de reintentar."));receipt.current=saved;setData(null);await read(current);});
+  const initialize=()=>mutate("/initialize","POST",{});
+  const add=(type:WorkflowNode["type"],parentId:string|null)=>{setDraft({type,parentId});setName("");setConfirmed(false);};
+  const saveNode=()=>{if(!draft||!name.trim()||!confirmed)return;void mutate("/nodes","POST",{nodeType:draft.type,parentId:draft.parentId,name:name.trim()});};
+  const changeStatus=(node:WorkflowNode,status:string)=>mutate(`/nodes/${encodeURIComponent(node.id)}`,"PATCH",{expectedRevision:node.revision,status});
   const renderNode = (node: WorkflowNode) => <div key={node.id}>
     <div className="ciw-node" data-type={node.type}><div className="ciw-row"><div className="ciw-label"><small>{typeLabel(node.type, tt)}</small><strong>{node.name}</strong></div><div className="ciw-actions"><select disabled={busy} value={node.status} onChange={(event) => void changeStatus(node, event.target.value)}><option value="not_started">{tt("Not started", "No iniciado")}</option><option value="in_progress">{tt("In progress", "En progreso")}</option><option value="blocked">{tt("Blocked", "Bloqueado")}</option><option value="complete">{tt("Complete", "Completo")}</option><option value="cancelled">{tt("Cancelled", "Cancelado")}</option></select>{childType[node.type] && <button disabled={busy} onClick={() => void add(childType[node.type]!, node.id)}>+ {typeLabel(childType[node.type]!, tt)}</button>}</div></div></div>
     {node.children.map(renderNode)}
@@ -46,9 +44,13 @@ export function ContractItemWorkflowPanel({ projectId, contractId, stableLineId,
     <a href={`/projects/${projectId}/operations`}>{tt("Open Operations", "Abrir Operaciones")}</a>
   </section>;
   return <section className="ciw"><style>{styles}</style><div className="ciw-head"><div><h4>{tt("Contract Item Workflow", "Flujo de la Partida de Contrato")}: {displayName}</h4><p>{tt("Execution follows Phase → Revision → Internal Version → Task. Adding execution detail never creates additional budget.", "La ejecución sigue Fase → Revisión → Versión interna → Tarea. Agregar detalle de ejecución nunca crea presupuesto adicional.")}</p></div>{data?.workflow && <button disabled={busy} onClick={() => void add("phase", null)}>+ {tt("Phase", "Fase")}</button>}</div>
-    {!data?.workflow && !busy && <div className="ciw-empty"><p>{tt("This Contract Item has a frozen APU and value, but its execution workflow has not been initialized.", "Esta Partida tiene APU y valor congelados, pero su flujo de ejecución aún no se ha iniciado.")}</p><button className="primary" onClick={() => void initialize()}>{tt("Initialize workflow", "Iniciar flujo")}</button></div>}
+    {data && !data.workflow && !busy && <div className="ciw-empty"><p>{tt("This Contract Item has a frozen APU and value, but its execution workflow has not been initialized.", "Esta Partida tiene APU y valor congelados, pero su flujo de ejecución aún no se ha iniciado.")}</p><button className="primary" onClick={() => void initialize()}>{tt("Initialize workflow", "Iniciar flujo")}</button></div>}
+    <button disabled={busy} onClick={()=>void load()}>{tt("Reopen workflow evidence","Reabrir evidencia del flujo")}</button>
+    {notice&&<p role="status">{notice}</p>}
+    {draft&&data?.workflow&&<div className="ciw-empty"><h4>{tt("New","Nueva")} {typeLabel(draft.type,tt)}</h4><label>{tt("Name","Nombre")}<input maxLength={200} value={name} onChange={event=>{setName(event.target.value);setConfirmed(false);}}/></label><label><input type="checkbox" checked={confirmed} onChange={event=>setConfirmed(event.target.checked)}/>{tt("Confirm this level and parent; no budget is added.","Confirmar nivel y padre; no se agrega presupuesto.")}</label><button disabled={busy||!confirmed||!name.trim()} onClick={saveNode}>{tt("Save workflow node","Guardar nodo del flujo")}</button><button disabled={busy} onClick={()=>setDraft(null)}>{tt("Cancel","Cancelar")}</button></div>}
+    {data?.history&&<details><summary>{tt("Attributable workflow history","Historial atribuible del flujo")}</summary>{data.history.map((event:any)=><p key={event.id}>{event.event_type} · #{event.actor_user_id} · {event.before_state} → {event.after_state} · {event.reason} · {event.occurred_at}</p>)}</details>}
     {busy && !data && <div className="ciw-empty">{tt("Loading workflow…", "Cargando flujo…")}</div>}
     {data?.workflow && <div className="ciw-tree">{data.nodes.map(renderNode)}</div>}
-    {error && <div className="ciw-error">{error}</div>}
+    {error && <div role="alert" className="ciw-error">{error}</div>}
   </section>;
 }
