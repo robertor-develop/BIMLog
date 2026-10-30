@@ -1,3 +1,7 @@
+## Release-count correction — 2026-10-30
+
+Ten builds is the current Blocks35/36 batch, not a verified aggregate unpublished count. Historical release backlog remains to be reconciled: observed production source3fe3c429 does not containP1752661aaea, and Block34 recorded deferred live gates. Supersedes prior exact-ten unpublished wording. Publication remains due; noP181 until exact aggregate source/migrations and authenticated acceptance are verified. BLOCK36_REMOTE_VERIFIED.json distinguishes current batch10 from unknown aggregate total. Remaining frozen programP181-P210 is30 builds; this does not count unresolved release/provider gates as completed.
+
 ## Block36 local regression seal — 2026-10-30
 
 - All five focused builds P176-P180 are locally accepted:782e867e8e6163c9bdc0fbc9bd129990ed33ecbb,0f241b38e37284c748247ad54cd5cde4cb237df4,fa9043a2e3fff9e43e999d07a395f47cd45bf356,394d18927 (EOF-only correction378815aa6029ad7a5c38a96bca20c456296f72b3),021c18311bc0a2c9cd611ff19964dcdd9ec01ad2. No block scope padding.
