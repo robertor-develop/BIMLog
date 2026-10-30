@@ -238,6 +238,10 @@ router.get("/projects/:projectId/financial/contracts/:contractId/export.pdf", ru
   await recordExport(req.user.userId,projectId,data,"pdf",sha256);
   res.type("application/pdf").set({"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff","X-BIMLog-Project-Id":String(projectId),"X-BIMLog-Contract-Id":data.contract.id,"X-BIMLog-Contract-Version-Id":data.contract.versionId,"X-BIMLog-Contract-Fingerprint":data.contract.contentFingerprint,"X-BIMLog-PDF-SHA256":sha256,"Content-Disposition":`attachment; filename=contract-${boundedText(data.contract.legalNumber,"legalNumber",1,100).replace(/[^A-Za-z0-9._-]/g,"-")}.pdf`}).send(output);
 }));
-router.get("/projects/:projectId/financial/contracts/:contractId/export.xlsx", run(async (req, res) => { const projectId = project(req), data = await contractExportData({ actorUserId: req.user.userId, projectId, contractId: req.params.contractId }), output = buildContractXlsx(data); await recordExport(req.user.userId, projectId, data, "xlsx"); res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").setHeader("Content-Disposition", `attachment; filename=contract-${boundedText(data.contract.legalNumber, "legalNumber", 1, 100).replace(/[^A-Za-z0-9._-]/g, "-")}.xlsx`); res.send(output); }));
+router.get("/projects/:projectId/financial/contracts/:contractId/export.xlsx", run(async (req, res) => {
+  const projectId=project(req),data=await contractExportData({actorUserId:req.user.userId,projectId,contractId:req.params.contractId}),output=buildContractXlsx(data),sha256=crypto.createHash("sha256").update(output).digest("hex");
+  await recordExport(req.user.userId,projectId,data,"xlsx",sha256);
+  res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").set({"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff","X-BIMLog-Project-Id":String(projectId),"X-BIMLog-Contract-Id":data.contract.id,"X-BIMLog-Contract-Version-Id":data.contract.versionId,"X-BIMLog-Contract-Fingerprint":data.contract.contentFingerprint,"X-BIMLog-XLSX-SHA256":sha256,"Content-Disposition":`attachment; filename=contract-${boundedText(data.contract.legalNumber,"legalNumber",1,100).replace(/[^A-Za-z0-9._-]/g,"-")}.xlsx`}).send(output);
+}));
 
 export default router;
