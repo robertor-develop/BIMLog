@@ -32,7 +32,7 @@ const authorities = [
 type OwnState = {
   scope: { companyId: number; projectId: number | null; scopeType: string };
   status: string;
-  commercial: { decision: string; code: string; state: string };
+  commercial: { decision: string; code: string; state: string; authorizesExecution?:boolean };
   context: null | {
     baseCurrency: string;
     reportingCurrency: string;
@@ -120,6 +120,7 @@ export function FinancialControlsSettings() {
   });
   const [suspensionReason, setSuspensionReason] = useState("");
   const [loadError,setLoadError]=useState("");
+  const [checkedAt,setCheckedAt]=useState<string|null>(null);
   const [bootstrapReceipt,setBootstrapReceipt]=useState<{contextId:string;grantId:string;companyId:number;projectId:number|null;administratorUserId:number}|null>(null);
   const [projectScopes,setProjectScopes]=useState<OwnState["projectScopes"]>([]);
   const loadRequest=useRef<AbortController|null>(null);
@@ -190,7 +191,7 @@ export function FinancialControlsSettings() {
     loadRequest.current?.abort();
     const controller=new AbortController();loadRequest.current=controller;
     setLoading(true);
-    setLoadError("");setState(null);setAdmin(null);setAuditJournal([]);
+    setLoadError("");setCheckedAt(null);setState(null);setAdmin(null);setAuditJournal([]);
     try {
       const own = (await request(
         `/financial-controls/state${query}`,
@@ -199,8 +200,9 @@ export function FinancialControlsSettings() {
       if(own.scope?.projectId!==(projectId?Number(projectId):null))throw new Error(tt("Financial scope response did not match the selected scope.","La respuesta financiera no corresponde al alcance seleccionado."));
       const nextAdmin=own.canManage?await request(`/financial-controls/admin${query}`,{signal:controller.signal}) as AdminState:null;
       const nextAudit=own.canAudit&&!own.canManage?(await request(`/financial-controls/audit${query}`,{signal:controller.signal}) as {journal:any[]}).journal:[];
+      if(!Array.isArray(own.authorities)||!Array.isArray(own.projectScopes)||!Array.isArray(own.approvalLimits)||(own.context&&!Array.isArray(own.context.permittedTransactionCurrencies))||!Array.isArray(nextAudit)||(nextAdmin&&(!['contexts','grants','policies','journal'].every(key=>Array.isArray(nextAdmin[key as keyof AdminState]))||nextAdmin.contexts.some(item=>!Array.isArray(item.permitted_transaction_currencies)))))throw new Error(tt("Invalid financial administration response. Reload the selected scope.","Respuesta de administración financiera inválida. Recargue el alcance seleccionado."));
       if(controller.signal.aborted)return;
-      setState(own);setAdmin(nextAdmin);setAuditJournal(nextAudit);setProjectScopes(own.projectScopes);
+      setState(own);setAdmin(nextAdmin);setAuditJournal(nextAudit);setProjectScopes(own.projectScopes);setCheckedAt(new Date().toISOString());
     } catch (error) {
       if(controller.signal.aborted)return;
       setState(null);
@@ -331,6 +333,11 @@ export function FinancialControlsSettings() {
           ) : (
             state && (
               <>
+                <section style={{...card,marginBottom:12}} aria-label={tt("Current financial state evidence","Evidencia del estado financiero actual")}>
+                  <p>{tt("Current scope: company / project","Alcance actual: empresa / proyecto")}: {state.scope.companyId} / {state.scope.projectId??tt("Company scope","Alcance de empresa")}</p>
+                  <p>{tt("Last loaded","Última consulta")}: {checkedAt??'—'}</p><Button disabled={busy||loading} onClick={()=>void load()}>{tt("Refresh current financial scope","Actualizar alcance financiero actual")}</Button>
+                  <details><summary>{tt("Inspect decision and authority sources","Inspeccionar decisión y fuentes de autoridad")}</summary><p>{tt("Commercial decision / code / state","Decisión comercial / código / estado")}: {state.commercial.decision} / {state.commercial.code} / {state.commercial.state}</p><p>{tt("This snapshot does not approve a transaction. Scope, role, currency, limits and suspension checks still apply at the requested operation.","Esta consulta no aprueba una transacción. Los controles de alcance, rol, moneda, límites y suspensión siguen aplicándose a cada operación.")}</p><ul>{state.authorities.map(authority=><li key={authority.grantId} style={{overflowWrap:"anywhere"}}>{authorityLabel(authority.authority)} · {authority.scopeType} · {authority.grantId} · {authority.effectiveFrom} / {authority.effectiveTo??'—'}</li>)}</ul>{state.authorities.length===0&&<p>{tt("No effective authority sources returned.","No se devolvieron fuentes de autoridad vigentes.")}</p>}</details>
+                </section>
                 <div
                   className="financial-grid"
                   style={{
