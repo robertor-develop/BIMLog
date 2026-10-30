@@ -1260,7 +1260,7 @@ router.get("/projects/:projectId/clash-reports/lens-import-context",
       const access = await pool.query<{ allowed: boolean }>(`
         SELECT (
           EXISTS (SELECT 1 FROM users WHERE id = $1 AND is_super_admin = true)
-          OR EXISTS (SELECT 1 FROM project_members WHERE user_id = $1 AND project_id = $2)
+          OR EXISTS (SELECT 1 FROM project_members WHERE user_id = $1 AND project_id = $2 AND status = 'active')
         ) AS allowed`, [req.user!.userId, sourceProjectId]);
       res.json({
         success: true,
