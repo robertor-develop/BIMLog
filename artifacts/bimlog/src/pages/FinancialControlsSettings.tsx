@@ -2,6 +2,7 @@ import { formatOptionalInstantDate } from "@workspace/api-zod";
 import { FinancialApprovalPolicyRecords } from "@/components/FinancialApprovalPolicyRecords";
 import { FinancialAuthorityJournal } from "@/components/FinancialAuthorityJournal";
 import { FinancialContextRecords } from "@/components/FinancialContextRecords";
+import { SyntheticFinancialAuthorization } from "@/components/SyntheticFinancialAuthorization";
 import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -446,6 +447,7 @@ export function FinancialControlsSettings() {
                     </div>
                   )}
                 </section>
+                <SyntheticFinancialAuthorization token={token} projectId={state.scope.projectId} es={lang==='es'}/>
                 {state.canAudit && !state.canManage && (
                   <section style={{ ...card, marginBottom: 12 }}>
                     <h2 style={{ fontSize: 15, margin: "0 0 8px" }}>
@@ -714,25 +716,6 @@ export function FinancialControlsSettings() {
                         )}
                       </Button>
                       <FinancialContextRecords contexts={admin.contexts} es={lang==='es'}/>
-                      <div
-                        style={{
-                          fontSize: 11,
-                          marginTop: 10,
-                          color: "#64748B",
-                        }}
-                      >
-                        {admin.contexts.map((item) => (
-                          <div key={item.id}>
-                            v{item.version} · {item.base_currency}/
-                            {item.reporting_currency} ·{" "}
-                            {new Date(item.effective_from).toLocaleDateString()}
-                            {item.effective_to
-                              ? ` – ${new Date(item.effective_to).toLocaleDateString()}`
-                              : ""}{" "}
-                            · {item.reason}
-                          </div>
-                        ))}
-                      </div>
                     </section>
                     <section style={card}>
                       <h2 style={{ fontSize: 15, margin: "0 0 10px" }}>

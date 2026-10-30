@@ -4,13 +4,16 @@ import {pool} from '@workspace/db';
 import router from '../routes/financial-controls';
 import {signToken} from '../middlewares/auth';
 import {startFinancialControlMigration} from './financial-control-migration';
+import {startFeatureCatalogMigration} from './feature-catalog-migration';
+import {startFeaturePolicyMigration} from './feature-policy-migration';
 const target=new URL(process.env.PROD_DATABASE_URL??'http://invalid');
 if(!['127.0.0.1','localhost'].includes(target.hostname)||target.port!=='55435'||target.pathname!=='/bimlog_financial_bootstrap_http')throw new Error('Refusing non-disposable bootstrap test database');
 await pool.query(`CREATE TABLE companies(id integer PRIMARY KEY,name text NOT NULL,retired_into_company_id integer);CREATE TABLE users(id integer PRIMARY KEY,email text NOT NULL,full_name text NOT NULL,password_hash text NOT NULL,company_id integer NOT NULL REFERENCES companies(id),is_super_admin boolean NOT NULL DEFAULT false);CREATE TABLE projects(id integer PRIMARY KEY,name text NOT NULL,status text NOT NULL DEFAULT 'active',created_by_id integer NOT NULL REFERENCES users(id));CREATE TABLE project_members(project_id integer,user_id integer,status text,role text);INSERT INTO companies(id,name) VALUES(1,'Fixture A'),(2,'Fixture B');INSERT INTO users VALUES(11,'super@example.test','Super','fixture',1,true),(12,'member@example.test','Member','fixture',1,false),(21,'other@example.test','Other','fixture',2,false);`);
 await startFinancialControlMigration();
+await startFeatureCatalogMigration();await startFeaturePolicyMigration();
 const app=express();app.use(express.json());app.use('/api/v1',router);const server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));const address=server.address();if(!address||typeof address==='string')throw new Error('No fixture server address');
 const token=(id:number)=>signToken({userId:id,email:`${id}@example.test`,fullName:'Fixture',companyId:id===21?2:1,companyName:'Fixture',isSuperAdmin:id===11});
-const request=async(actor:number,body:Record<string,unknown>,path='bootstrap')=>{const response=await fetch(`http://127.0.0.1:${address.port}/api/v1/financial-controls/${path}`,{method:'POST',headers:{Authorization:`Bearer ${token(actor)}`,'Content-Type':'application/json'},body:JSON.stringify(body)});return{status:response.status,body:await response.json() as {contextId:string;grantId:string;scope:{companyId:number;projectId:number|null;scopeType:string};code?:string;id?:string;version?:number}};};
+const request=async(actor:number,body:Record<string,unknown>,path='bootstrap')=>{const response=await fetch(`http://127.0.0.1:${address.port}/api/v1/financial-controls/${path}`,{method:'POST',headers:{Authorization:`Bearer ${token(actor)}`,'Content-Type':'application/json'},body:JSON.stringify(body)});return{status:response.status,body:await response.json() as {contextId:string;grantId:string;scope:{companyId:number;projectId:number|null;scopeType:string};code?:string;id?:string;version?:number;synthetic?:boolean;noFinancialRecordCreated?:boolean;decision?:string}};};
 const input={administratorUserId:12,baseCurrency:'USD',reportingCurrency:'USD',permittedCurrencies:['USD','EUR'],reason:'Initialize isolated financial controls'};
 try{
   assert.equal((await request(12,input)).status,403);
@@ -25,5 +28,10 @@ try{
   assert.equal((await request(12,{...contextInput,baseCurrency:'ZZZ'},'contexts')).status,400);
   assert.equal((await request(12,{...contextInput,effectiveFrom:'2026-10-29T12:00:00Z',effectiveTo:'2026-10-28T12:00:00Z'},'contexts')).status,400);
   assert.equal((await pool.query('SELECT count(*)::int n FROM financial_context_versions')).rows[0].n,2);
-  console.log('Financial bootstrap/context HTTP: initial-only scope/receipt/journal, saved context lineage/currencies and malformed currency/date no-mutation PASS');
+  const simulation=await request(12,{operation:'approve',makerUserId:12,category:'original_budget',amount:{amount:'1.000001',currency:'USD'},relatedRequests:[{makerUserId:12,category:'original_budget',amount:{amount:'0.000001',currency:'USD'},createdAt:'2026-10-29T12:00:00Z'}]},'evaluate');assert.equal(simulation.status,200,JSON.stringify(simulation.body));assert.equal(simulation.body.synthetic,true);assert.equal(simulation.body.noFinancialRecordCreated,true);assert.equal(simulation.body.decision,'deny');
+  const evaluationEvents=(await pool.query(`SELECT evidence FROM financial_authority_journal WHERE event_type='authorization_evaluated'`)).rows;assert.equal(evaluationEvents.length,1);assert.equal(evaluationEvents[0].evidence.synthetic,true);
+  assert.equal((await request(12,{operation:'execute'},'evaluate')).status,400);
+  assert.equal((await request(12,{operation:'approve',amount:{amount:'1e3',currency:'USD'}},'evaluate')).status,400);
+  assert.equal((await pool.query(`SELECT count(*)::int n FROM financial_authority_journal WHERE event_type='authorization_evaluated'`)).rows[0].n,1);assert.equal((await pool.query('SELECT count(*)::int n FROM financial_context_versions')).rows[0].n,2);
+  console.log('Financial control HTTP: bootstrap/context persistence, synthetic denial/journal, invalid operation/exact-decimal refusal and no extra financial state PASS');
 }finally{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));await pool.end();}
