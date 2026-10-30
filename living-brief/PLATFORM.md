@@ -1163,6 +1163,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-current-provider-approval.behavior.ts
 - artifacts/api-server/src/lib/procore-intake-agent.ts
+- artifacts/api-server/src/lib/procore-intake-authenticated-http.behavior.ts
 - artifacts/api-server/src/lib/procore-intake-mcp.behavior.ts
 - artifacts/api-server/src/lib/procore-intake-mcp.ts
 - artifacts/api-server/src/lib/procore-intake-state.behavior.ts

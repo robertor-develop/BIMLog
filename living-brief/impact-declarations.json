@@ -80525,6 +80525,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "425d7b658b18c5e97a5f23757396c13210db931620a2dd4ea1c3ae5abea92d09"
+    },
+    {
+      "taskId": "procore-authenticated-http-acceptance-20261030",
+      "reviewedThroughCommit": "42502df44d6b2374fde5d3456c266cef6d8bc5d7",
+      "reviewedAt": "2026-10-30T21:07:49.000Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The request verifies existing user, current-company, and project isolation; no doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No collaborator instruction or operating policy changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated HTTP fixtures strengthen verification without changing quality policy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The intake remains proposal-only and preserves direct expert workflows."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The source inventory now includes the authenticated Procore intake HTTP acceptance suite."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin behavior or protocol changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report output or design system changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the isolated authenticated HTTP evidence and distinguish it from browser and live-provider acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Close only the locally tested HTTP proposal gates; retain browser, live provider, import, receipt, and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Tests preserve the existing append-only commercial and provider approval histories."
+        }
+      ],
+      "reason": "Review authenticated state persistence, current identity and membership checks, exact-version proposal errors, and approval revocation using a disposable local database and controlled provider responses.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ef2c08431c7ae40514a9f222f2e5b4c433ed81c2e12d09e5441aa3c0510f9a77"
     }
   ]
 }

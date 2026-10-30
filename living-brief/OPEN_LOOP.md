@@ -4,8 +4,10 @@
 
 - [x] Add server-side intake state scoped by authenticated user, current company, and BIMLog project; add version-bearing Procore browse and revalidate the selected file/version before returning a proposal.
 - [x] Add controlled no-cost behavior checks for exact-version success, changed/unavailable source rejection, state isolation, provider-approval rechecks, and company retirement.
-- [ ] Reconcile the generated Living Brief seal and restart the API successfully.
-- [ ] Exercise authenticated HTTP persistence, reentry, project/role denial, and UI refresh behavior against isolated test fixtures.
+- [x] Reconcile the generated Living Brief seal and restart the API successfully.
+- [x] Exercise authenticated HTTP save/read, fresh-token and server reentry, user/company/project isolation, inactive/retired membership denial, exact-version proposal, malformed/changed/unavailable version rejection, and approval revocation against isolated PostgreSQL with controlled provider fixtures.
+- [ ] Verify signed-in browser refresh/reopen and role-specific acceptance beyond project membership.
+- [ ] Align the approved source tree through ordinary Git reconciliation before production build and release; do not bypass the identity guard or push this incomplete package.
 - [ ] Verify live Procore file-version responses and OAuth/source permissions when approved provider configuration is available; keep explicit confirmation, governed import, durable receipt, and record links as later work.
 
 ## BIMTECH company 31 access and Procore intake — 2026-10-30
