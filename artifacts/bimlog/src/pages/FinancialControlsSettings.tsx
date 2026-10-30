@@ -1,6 +1,6 @@
 import { formatOptionalInstantDate } from "@workspace/api-zod";
 import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
 import {
   ChevronLeft,
@@ -114,6 +114,10 @@ export function FinancialControlsSettings() {
     reason: "",
   });
   const [suspensionReason, setSuspensionReason] = useState("");
+  const [loadError,setLoadError]=useState("");
+  const [projectScopes,setProjectScopes]=useState<OwnState["projectScopes"]>([]);
+  const loadRequest=useRef<AbortController|null>(null);
+  useEffect(()=>{setProjectScopes([]);setProjectId("");},[token]);
   const [bootstrap, setBootstrap] = useState({
     administratorUserId: "",
     baseCurrency: "USD",
@@ -121,6 +125,12 @@ export function FinancialControlsSettings() {
     permittedCurrencies: "USD",
     reason: "",
   });
+  useEffect(()=>{
+    setContext({baseCurrency:"USD",reportingCurrency:"USD",permittedCurrencies:"USD",effectiveFrom:"",effectiveTo:"",reason:""});
+    setGrant({userId:"",authority:"financial_viewer",effectiveFrom:"",effectiveTo:"",reason:""});
+    setPolicy({transactionCategory:"",currency:"USD",maxAmount:"",effectiveFrom:"",effectiveTo:"",reason:""});
+    setSuspensionReason("");setBootstrap({administratorUserId:"",baseCurrency:"USD",reportingCurrency:"USD",permittedCurrencies:"USD",reason:""});
+  },[projectId,token]);
   const headers = useMemo(
     () => ({
       "Content-Type": "application/json",
@@ -170,30 +180,26 @@ export function FinancialControlsSettings() {
     return body;
   }
   async function load() {
+    loadRequest.current?.abort();
+    const controller=new AbortController();loadRequest.current=controller;
     setLoading(true);
+    setLoadError("");setState(null);setAdmin(null);setAuditJournal([]);
     try {
       const own = (await request(
         `/financial-controls/state${query}`,
+        {signal:controller.signal},
       )) as OwnState;
-      setState(own);
-      setAdmin(
-        own.canManage
-          ? ((await request(`/financial-controls/admin${query}`)) as AdminState)
-          : null,
-      );
-      setAuditJournal(
-        own.canAudit && !own.canManage
-          ? (
-              (await request(`/financial-controls/audit${query}`)) as {
-                journal: any[];
-              }
-            ).journal
-          : [],
-      );
+      if(own.scope?.projectId!==(projectId?Number(projectId):null))throw new Error(tt("Financial scope response did not match the selected scope.","La respuesta financiera no corresponde al alcance seleccionado."));
+      const nextAdmin=own.canManage?await request(`/financial-controls/admin${query}`,{signal:controller.signal}) as AdminState:null;
+      const nextAudit=own.canAudit&&!own.canManage?(await request(`/financial-controls/audit${query}`,{signal:controller.signal}) as {journal:any[]}).journal:[];
+      if(controller.signal.aborted)return;
+      setState(own);setAdmin(nextAdmin);setAuditJournal(nextAudit);setProjectScopes(own.projectScopes);
     } catch (error) {
+      if(controller.signal.aborted)return;
       setState(null);
       setAdmin(null);
       setAuditJournal([]);
+      setLoadError(error instanceof Error?error.message:tt("Financial controls unavailable","Controles financieros no disponibles"));
       toast({
         title: tt(
           "Financial controls unavailable",
@@ -203,12 +209,13 @@ export function FinancialControlsSettings() {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      if(!controller.signal.aborted)setLoading(false);
     }
   }
   useEffect(() => {
     void load();
-  }, [projectId]);
+    return()=>loadRequest.current?.abort();
+  }, [projectId,token]);
   async function mutate(path: string, body: Record<string, unknown>) {
     setBusy(true);
     try {
@@ -286,13 +293,14 @@ export function FinancialControlsSettings() {
               {tt("Scope", "Alcance")}
               <select
                 value={projectId}
+                disabled={busy||loading}
                 onChange={(e) => setProjectId(e.target.value)}
                 style={{ ...inputStyle, marginTop: 5 }}
               >
                 <option value="">
                   {tt("Current company", "Empresa actual")}
                 </option>
-                {state?.projectScopes.map((p) => (
+                {projectScopes.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name}
                   </option>
@@ -300,6 +308,7 @@ export function FinancialControlsSettings() {
               </select>
             </label>
           </section>
+          {loadError&&<div role="alert"><p>{loadError}</p><Button disabled={loading||busy} onClick={()=>void load()}>{tt("Retry selected financial scope","Reintentar alcance financiero seleccionado")}</Button></div>}
           {loading ? (
             <p>
               {tt(
