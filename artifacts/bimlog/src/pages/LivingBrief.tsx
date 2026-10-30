@@ -113,6 +113,10 @@ export function LivingBrief() {
   const recoveryLock = useRef(false);
   const [accessUsers, setAccessUsers] = useState<AccessUser[]>([]);
   const [docsBusy, setDocsBusy] = useState(false);
+  const [reconcileBusy, setReconcileBusy] = useState(false);
+  const [reconcileNeedsReload, setReconcileNeedsReload] = useState(false);
+  const [reconcileMessage, setReconcileMessage] = useState("");
+  const reconcileLock = useRef(false);
   const docsRequest = useRef<AbortController | null>(null);
   const sessionEpoch = useRef(0);
   const [accessBusy, setAccessBusy] = useState(false);
@@ -124,6 +128,10 @@ export function LivingBrief() {
     sessionEpoch.current += 1;
     docsRequest.current?.abort();
     setDocsBusy(false);
+    setReconcileBusy(false);
+    setReconcileNeedsReload(false);
+    setReconcileMessage("");
+    reconcileLock.current = false;
     setDocs([]);
     setActiveDoc(0);
     setUnlocked(false);
@@ -171,6 +179,7 @@ export function LivingBrief() {
       if (controller.signal.aborted) return;
       if (!Array.isArray(d.docs) || !d.docs.every((doc: Doc) => typeof doc.key === "string" && typeof doc.name === "string" && typeof doc.content === "string" && typeof doc.label?.en === "string" && typeof doc.label?.es === "string")) throw new Error("Invalid Living Brief documents response. Reload before using the documents.");
       setDocs(d.docs);
+      setReconcileNeedsReload(false);
       setActiveDoc(index => Math.min(index, Math.max(0, d.docs.length - 1)));
       setUnlocked(true);
       setError("");
@@ -285,26 +294,38 @@ export function LivingBrief() {
   };
 
   const reconcileMirror = async () => {
-    if (!token) return;
-    setAdminMsg("");
+    if (!token || !isSuperAdmin || reconcileLock.current || docsBusy || reconcileNeedsReload || error || !docs.length) return;
+    setReconcileMessage("");
     const expectedMirrorHashes = Object.fromEntries(
       docs.filter((document) => document.mirrorContentSha256).map((document) => [document.key, document.mirrorContentSha256]),
     );
     if (Object.keys(expectedMirrorHashes).length !== docs.length) {
-      setAdminMsg(tt("Reload after startup synchronization before reconciling.", "Recargue despu\u00e9s de la sincronizaci\u00f3n inicial antes de reconciliar."));
+      setReconcileMessage(tt("Reload after startup synchronization before reconciling.", "Recargue despu\u00e9s de la sincronizaci\u00f3n inicial antes de reconciliar."));
       return;
     }
+    const epoch = sessionEpoch.current;
+    reconcileLock.current = true;
+    setReconcileBusy(true);
+    try {
     const response = await apiFetch("/living-brief/reconcile", token, {
       method: "POST",
       body: JSON.stringify({ expectedMirrorHashes }),
     });
+    if (epoch !== sessionEpoch.current) return;
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
-      setAdminMsg(body.error || tt("Reconciliation blocked; reload verified mirror status.", "Reconciliaci\u00f3n bloqueada; recargue el estado verificado del espejo."));
+      if (epoch !== sessionEpoch.current) return;
+      setReconcileNeedsReload(true);
+      setReconcileMessage(body.error || tt("Reconciliation blocked; reload verified mirror status.", "Reconciliaci\u00f3n bloqueada; recargue el estado verificado del espejo."));
       return;
     }
-    setAdminMsg(tt("Verified source mirror reconciled.", "Espejo de fuente verificada reconciliado."));
+    setReconcileMessage(tt("Verified source mirror reconciled. Reloading saved source evidence.", "Espejo de fuente verificada reconciliado. Recargando evidencia guardada."));
     await loadDocs();
+    } catch (error) {
+      if (epoch === sessionEpoch.current) { setReconcileNeedsReload(true); setReconcileMessage(tt("Connection interrupted. Reload source evidence to verify the outcome before retrying.", "Conexión interrumpida. Recargue la evidencia fuente para verificar el resultado antes de reintentar.")); }
+    } finally {
+      if (epoch === sessionEpoch.current) { reconcileLock.current = false; setReconcileBusy(false); }
+    }
   };
 
   const copyFullBrief = async () => {
@@ -517,7 +538,11 @@ export function LivingBrief() {
                 "Copia \u00fanicamente la fuente desplegada verificada despu\u00e9s de comprobar cada hash del espejo observado en la \u00faltima recarga. Nunca acepta doctrina pegada o exclusiva de la base de datos.",
               )}
             </div>
-            <button onClick={reconcileMirror} style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
+            <p>{tt(`Observed documents: ${docs.length}; mirror hashes: ${docs.filter(d => d.mirrorContentSha256).length}.`, `Documentos observados: ${docs.length}; hashes del espejo: ${docs.filter(d => d.mirrorContentSha256).length}.`)}</p>
+            {reconcileBusy && <p role="status">{tt("Reconciling exact observed source…", "Reconciliando fuente observada exacta…")}</p>}
+            {reconcileMessage && <p role="status">{reconcileMessage}</p>}
+            {reconcileNeedsReload && <p role="alert">{tt("Reload documents before retrying reconciliation.", "Recargue documentos antes de reintentar la reconciliación.")}</p>}
+            <button disabled={reconcileBusy || docsBusy || reconcileNeedsReload || !!error || !docs.length || docs.some(d => !d.mirrorContentSha256)} onClick={reconcileMirror} style={{ padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
               {tt("Reconcile verified source", "Reconciliar fuente verificada")}
             </button>
           </div>
