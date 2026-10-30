@@ -1,19 +1,20 @@
 import { isDirectoryRecipientEmail, isCompanyOnlyEntry } from "@workspace/api-zod";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import {useConfig} from "@/lib/config-context";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { useProjectCompanyChoices } from "@/hooks/use-project-company-choices";
 import { Download, UserCheck, UserPlus, Users } from "lucide-react";
 
 interface DirectoryEntry {
-  id: number; fullName: string; email: string; companyName?: string;
+  id: number; fullName: string; email: string; companyName?: string; companyId?:number;
   role: string; bimlogStatus?: string; notes?: string;
 }
 
 interface MemberEntry {
   id: number; userId: number; userFullName: string; userEmail: string;
-  userCompanyName?: string; role: string; joinedAt?: string;
+  userCompanyName?: string; role: string; joinedAt?: string; status?:string;
 }
 
 type DirectoryScope = "all" | "members" | "contacts";
@@ -56,7 +57,8 @@ const normalizeEmail = (value: string | undefined) => (value || "").trim().toLow
 export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const companyChoices = useProjectCompanyChoices(projectId);
   const { lang } = useI18n();
-  const { token } = useAuthStore();
+  const { token,user } = useAuthStore();
+  const {adminRoles}=useConfig();
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
   const [members, setMembers] = useState<MemberEntry[]>([]);
@@ -71,7 +73,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
   const [pdfOptions, setPdfOptions] = useState<DirectoryPdfOptions>(DEFAULT_PDF_OPTIONS);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
-  const [form, setForm] = useState({ full_name: "", email: "", company_name: "", role: "", notes: "" });
+  const [form, setForm] = useState({ full_name: "", email: "", company_name: "", company_id:"", role: "", notes: "" });
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
   const [saving, setSaving] = useState(false);
@@ -80,19 +82,23 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
 
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const [rMembers, rDir] = await Promise.all([
-        fetch(`${API}/projects/${projectId}/members`, { headers: { Authorization: `Bearer ${token}` } }),
-        fetch(`${API}/projects/${projectId}/directory`, { headers: { Authorization: `Bearer ${token}` } }),
-      ]);
-      if (rMembers.ok) setMembers(await rMembers.json());
-      if (rDir.ok) setEntries(await rDir.json());
-    } finally { setLoading(false); }
+  const scopeEpoch=useRef(0),loadSequence=useRef(0),actionLock=useRef(false),pdfLock=useRef(false);
+  const [savedReceipt,setSavedReceipt]=useState<null|{ids:number[];kind:string;message:string}>(null),[companyContact,setCompanyContact]=useState(false);
+  const savedCompanies=Array.from(new Map(entries.filter(entry=>Number.isSafeInteger(entry.companyId)&&Number(entry.companyId)>0).map(entry=>[entry.companyId!,entry.companyName||String(entry.companyId)])).entries());
+  const load = async (expectedIds:number[]=[]) => {
+    const current=scopeEpoch.current,sequence=++loadSequence.current;setLoading(true);
+    try{
+      const [rMembers,rDir]=await Promise.all([fetch(`${API}/projects/${projectId}/members`,{headers:{Authorization:`Bearer ${token}`}}),fetch(`${API}/projects/${projectId}/directory`,{headers:{Authorization:`Bearer ${token}`}})]);
+      if(!rMembers.ok||!rDir.ok)throw new Error(t("Saved directory could not be loaded. Restore access and retry.","No se pudo cargar el directorio guardado. Restaure acceso y reintente."));
+      const memberRows=await rMembers.json(),directoryRows=await rDir.json();
+      if(current!==scopeEpoch.current||sequence!==loadSequence.current)return false;
+      if(!Array.isArray(memberRows)||!Array.isArray(directoryRows)||expectedIds.some(id=>!directoryRows.some(row=>row.id===id)))throw new Error(t("Saved receipt received, but exact contacts could not be reopened. Verify before submitting again.","Recibo guardado recibido, pero no se reabrieron los contactos exactos. Verifique antes de volver a enviar."));
+      setMembers(memberRows.filter(row=>row.status===undefined||row.status==="active"));setEntries(directoryRows);setError("");return true;
+    }catch(failure){if(current===scopeEpoch.current&&sequence===loadSequence.current){setError(failure instanceof Error?failure.message:String(failure));setMembers([]);setEntries([]);}return false;}
+    finally{if(current===scopeEpoch.current&&sequence===loadSequence.current)setLoading(false);}
   };
-
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [projectId]);
+  useEffect(()=>{scopeEpoch.current++;actionLock.current=false;pdfLock.current=false;setSavedReceipt(null);setMembers([]);setEntries([]);setShowForm(false);setForm({full_name:"",email:"",company_name:"",company_id:"",role:"",notes:""});setCompanyContact(false);setError("");setImportMsg("");setExportError("");setSaving(false);setImporting(false);setInviting(null);setExporting(false);void load();return()=>{scopeEpoch.current++;};},[projectId,token]);
+  const verifyReceipt=async(receipt:NonNullable<typeof savedReceipt>)=>{const current=scopeEpoch.current;if(await load(receipt.ids)&&current===scopeEpoch.current){setSavedReceipt(null);if(receipt.kind==="save"){setShowForm(false);setForm({full_name:"",email:"",company_name:"",company_id:"",role:"",notes:""});}setImportMsg(receipt.message);setError("");}};
 
   const normalizedSearch = search.trim().toLowerCase();
   const memberEmails = useMemo(() => new Set(members.map(m => normalizeEmail(m.userEmail))), [members]);
@@ -149,57 +155,42 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
 
   const filteredMembers = rows.filter(row => row.source === "member");
   const filteredContacts = rows.filter(row => row.source === "contact");
+  const canInvite=!!user?.isSuperAdmin||adminRoles.includes(members.find(member=>member.userId===user?.id)?.role??"");
   const anyDirectoryRecords = members.length + additionalContacts.length > 0;
   const selectedSectionCount = [pdfOptions.includeMembers, pdfOptions.includeContacts].filter(Boolean).length;
 
-  const save = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true); setError("");
-    try {
-      const r = await fetch(`${API}/projects/${projectId}/directory`, {
-        method: "POST", headers, body: JSON.stringify(form),
-      });
-      if (!r.ok) { const d = await r.json(); setError(d.error || t("Could not save this contact.", "No se pudo guardar este contacto.")); return; }
-      await load();
-      setShowForm(false);
-      setForm({ full_name: "", email: "", company_name: "", role: "", notes: "" });
-    } finally { setSaving(false); }
+  const save = async (e:React.FormEvent) => {
+    e.preventDefault();if(actionLock.current||savedReceipt||!canWrite)return;
+    const current=scopeEpoch.current;actionLock.current=true;setSaving(true);setError("");
+    try{
+      const response=await fetch(`${API}/projects/${projectId}/directory${companyContact?"/contacts":""}`,{method:"POST",headers,body:JSON.stringify({...form,...(companyContact?{company_id:Number(form.company_id)}:{})})});
+      const saved=await response.json();if(current!==scopeEpoch.current)return;if(!response.ok)throw new Error(saved.error||t("Contact could not be saved.","No se pudo guardar el contacto."));
+      if(!Number.isSafeInteger(saved.id)||saved.id<=0)throw new Error(t("Contact receipt is incomplete. Reopen the directory before retrying.","El recibo está incompleto. Reabra el directorio antes de reintentar."));
+      const receipt={ids:[saved.id],kind:"save",message:t("Contact saved and reopened.","Contacto guardado y reabierto.")};setSavedReceipt(receipt);await verifyReceipt(receipt);
+    }catch(failure){if(current===scopeEpoch.current)setError(failure instanceof Error?failure.message:String(failure));}
+    finally{if(current===scopeEpoch.current){actionLock.current=false;setSaving(false);}}
   };
-
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImporting(true); setImportMsg(t("Reading document with AI...", "Leyendo documento con IA..."));
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch(`${API}/projects/${projectId}/directory/import`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setImportMsg(t(`${data.imported ?? 0} contacts imported successfully`, `${data.imported ?? 0} contactos importados correctamente`));
-        setTimeout(() => window.location.reload(), 1500);
-      } else {
-        setImportMsg(t("Import failed - please try again", "La importacion fallo - intenta de nuevo"));
-      }
-    } catch { setImportMsg(t("Import failed", "La importacion fallo")); }
-    finally { setImporting(false); e.target.value = ""; }
+  const handleImport=async(e:React.ChangeEvent<HTMLInputElement>)=>{
+    const file=e.target.files?.[0],input=e.target;if(!file||actionLock.current||savedReceipt||!canWrite)return;
+    const current=scopeEpoch.current;actionLock.current=true;setImporting(true);setImportMsg(t("Reading document with AI...","Leyendo documento con IA..."));setError("");
+    try{
+      const data=new FormData();data.append("file",file);const response=await fetch(`${API}/projects/${projectId}/directory/import`,{method:"POST",headers:{Authorization:`Bearer ${token}`},body:data});const saved=await response.json();
+      if(current!==scopeEpoch.current)return;if(!response.ok)throw new Error(saved.error||t("Import could not be saved.","No se pudo guardar la importación."));
+      if(saved.projectId!==projectId||!Array.isArray(saved.entryIds)||!saved.entryIds.length||saved.imported!==saved.entryIds.length||!saved.entryIds.every((id:number)=>Number.isSafeInteger(id)&&id>0))throw new Error(t("Import receipt is incomplete. Reopen the directory before retrying.","El recibo de importación está incompleto. Reabra el directorio antes de reintentar."));
+      const receipt={ids:saved.entryIds,kind:"import",message:t(`${saved.imported} imported contacts saved and reopened.`,`${saved.imported} contactos importados guardados y reabiertos.`)};setSavedReceipt(receipt);setImportMsg(t("Import saved; verifying exact contacts…","Importación guardada; verificando contactos exactos…"));await verifyReceipt(receipt);
+    }catch(failure){if(current===scopeEpoch.current){setImportMsg("");setError(failure instanceof Error?failure.message:String(failure));}}
+    finally{if(current===scopeEpoch.current){actionLock.current=false;setImporting(false);input.value="";}}
   };
-
-  const invite = async (id: number) => {
-    setInviting(id);
-    try {
-      const rInvite = await fetch(`${API}/projects/${projectId}/directory/${id}/invite`, { method: "POST", headers });
-      if (!rInvite.ok) { setExportError(t("Invite failed. Please try again.", "La invitacion fallo. Intenta de nuevo.")); return; }
-      const result = await rInvite.json();
-      if (result.deliveryStatus && result.deliveryStatus !== "sent") {
-        setExportError(t("Invitation saved, but email was not delivered. Retry the invitation or contact support.", "Invitación guardada, pero el correo no se entregó. Reintente la invitación o contacte a soporte."));
-      }
-      await load();
-    } finally { setInviting(null); }
+  const invite=async(id:number)=>{
+    if(actionLock.current||savedReceipt||!canInvite)return;const current=scopeEpoch.current;actionLock.current=true;setInviting(id);setError("");setExportError("");
+    try{
+      const response=await fetch(`${API}/projects/${projectId}/directory/${id}/invite`,{method:"POST",headers});const saved=await response.json();if(current!==scopeEpoch.current)return;
+      if(!response.ok)throw new Error(saved.error||t("Invitation could not be confirmed. Reopen saved members before retrying.","No se pudo confirmar la invitación. Reabra miembros guardados antes de reintentar."));
+      if(saved.projectId!==projectId||saved.entryId!==id)throw new Error(t("Invitation receipt did not match this contact.","El recibo no coincide con este contacto."));
+      const message=saved.status==="invited"?saved.deliveryStatus==="sent"?t("Invitation saved; provider accepted email delivery.","Invitación guardada; el proveedor aceptó el envío."):t("Invitation saved, but email was not delivered. Reopen it before deciding to retry.","Invitación guardada, pero el correo no se entregó. Reábrala antes de decidir reintentar."):t("Project membership confirmed and directory reopened.","Membresía confirmada y directorio reabierto.");
+      const receipt={ids:[id],kind:"invite",message};setSavedReceipt(receipt);await verifyReceipt(receipt);
+    }catch(failure){if(current===scopeEpoch.current)setError(failure instanceof Error?failure.message:String(failure));}
+    finally{if(current===scopeEpoch.current){actionLock.current=false;setInviting(null);}}
   };
 
   const remove = async (id: number) => {
@@ -210,6 +201,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
   };
 
   const exportCurrentViewPdf = async () => {
+    if(pdfLock.current)return;pdfLock.current=true;const current=scopeEpoch.current;
     setExporting(true);
     setExportError("");
     try {
@@ -230,12 +222,15 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
       const res = await fetch(`${API}/projects/${projectId}/directory/export-pdf?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if(current!==scopeEpoch.current)return;
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setExportError(data.error || t("Directory PDF export failed.", "No se pudo exportar el PDF del directorio."));
         return;
       }
-      const blob = await res.blob();
+      if(current!==scopeEpoch.current)return;
+      if(!res.headers.get("Content-Type")?.includes("application/pdf"))throw new Error("Invalid PDF response");
+      const blob = await res.blob();if(!blob.size)throw new Error("Empty PDF response");if(current!==scopeEpoch.current)return;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -245,9 +240,9 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
       a.remove();
       URL.revokeObjectURL(url);
     } catch {
-      setExportError(t("Directory PDF export failed.", "No se pudo exportar el PDF del directorio."));
+      if(current===scopeEpoch.current)setExportError(t("Directory PDF export failed.", "No se pudo exportar el PDF del directorio."));
     } finally {
-      setExporting(false);
+      if(current===scopeEpoch.current){pdfLock.current=false;setExporting(false);}
     }
   };
 
@@ -324,7 +319,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
           <td style={{ textAlign: "right" }}>
             <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
               {canWrite && (contactEntry?.bimlogStatus === "none" || !contactEntry?.bimlogStatus) && (
-                <button className="btn btn-sm btn-outline" onClick={() => contactEntry && invite(contactEntry.id)} disabled={inviting === contactEntry?.id || !isDirectoryRecipientEmail(contactEntry?.email)}>
+                <button className="btn btn-sm btn-outline" title={!canInvite?t("Project administrator invitation permission required.","Se requiere permiso de administrador para invitar."):undefined} onClick={() => contactEntry && invite(contactEntry.id)} disabled={!canInvite||inviting === contactEntry?.id || !isDirectoryRecipientEmail(contactEntry?.email)}>
                   {inviting === contactEntry?.id ? t("Inviting...", "Invitando...") : t("Invite", "Invitar")}
                 </button>
               )}
@@ -342,6 +337,9 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
 
   return (
     <div className="tab-content-wrapper">
+      {error&&!showForm&&<p role="alert">{error}</p>}
+      {savedReceipt&&<p role="status">{t("Saved change awaits exact-contact verification.","El cambio guardado espera verificación de contactos exactos.")} <button disabled={loading} onClick={()=>void verifyReceipt(savedReceipt)}>{t("Verify saved contacts","Verificar contactos guardados")}</button></p>}
+      <button className="btn btn-sm btn-outline" disabled={loading||!!savedReceipt} onClick={()=>void load()}>{t("Reload saved directory","Recargar directorio guardado")}</button>
       <details style={{ marginBottom: 16 }}>
         <summary>{t("Project company choices", "Empresas disponibles del proyecto")}</summary>
         <p>{t("Saved originator codes and connected company names are available across project forms. A code alone does not create a contact, membership or contract participant.", "Los códigos de originador guardados y las empresas vinculadas están disponibles en los formularios del proyecto. Un código solo no crea un contacto, membresía ni participante contractual.")}</p>
@@ -386,7 +384,7 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
           />
           {canWrite && (
             <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
-              <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
+              <input type="file" onChange={handleImport} disabled={importing||!!savedReceipt} style={{ display: "none" }} />
               <span className="btn btn-outline" style={{ opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
                 {importing ? t("Importing...","Importando...") : t("Import Contacts","Importar contactos")}
               </span>
@@ -464,18 +462,18 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
         <div className="card" style={{ marginBottom: 20, padding: 20 }}>
           <h3 style={{ fontWeight: 600, marginBottom: 16 }}>{t("Add External Contact", "Agregar Contacto Externo")}</h3>
           {error && <div className="alert alert-danger" style={{ marginBottom: 12 }}>{error}</div>}
-          <form onSubmit={save} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <form onSubmit={save} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(240px,100%),1fr))", gap: 12 }}><fieldset disabled={saving||!!savedReceipt} style={{display:"contents"}}>
             <div>
               <label className="label">{t("Full Name", "Nombre Completo")} *</label>
               <input className="input" required value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} />
             </div>
             <div>
               <label className="label">{t("Email", "Correo")} *</label>
-              <input className="input" type="email" required value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
+              <input className="input" type="email" required={!companyContact} value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
             </div>
             <div>
-              <label className="label">{t("Company", "Empresa")}</label>
-              <input className="input" value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} />
+              <label><input type="checkbox" checked={companyContact} onChange={event=>setCompanyContact(event.target.checked)}/>{t("Contact for a saved project company","Contacto de una empresa guardada del proyecto")}</label>
+              {companyContact?<select className="input" required aria-label={t("Saved project company","Empresa guardada del proyecto")} value={form.company_id} onChange={event=>setForm(value=>({...value,company_id:event.target.value,company_name:savedCompanies.find(([id])=>id===Number(event.target.value))?.[1]||""}))}><option value="">{t("Choose saved company","Elija empresa guardada")}</option>{savedCompanies.map(([id,name])=><option key={id} value={id}>{name}</option>)}</select>:<><label className="label">{t("Company","Empresa")}</label><input className="input" value={form.company_name} onChange={e=>setForm(f=>({...f,company_name:e.target.value}))}/></>}
             </div>
             <div>
               <label className="label">{t("Role", "Rol")} *</label>
@@ -489,20 +487,20 @@ export function DirectoryTab({ projectId, canWrite }: { projectId: number; canWr
               <button className="btn btn-primary" type="submit" disabled={saving}>{saving ? t("Saving...", "Guardando...") : t("Save", "Guardar")}</button>
               <button className="btn btn-outline" type="button" onClick={() => { setShowForm(false); setError(""); }}>{t("Cancel", "Cancelar")}</button>
             </div>
-          </form>
+          </fieldset></form>
         </div>
       )}
 
       {loading && <div className="text-muted">{t("Loading...", "Cargando...")}</div>}
 
-      {!loading && !anyDirectoryRecords && (
+      {!loading && !error && !anyDirectoryRecords && (
         <div style={{ textAlign: "center", padding: 32, color: "#9CA3AF", border: "1px dashed #E5E7EB", borderRadius: 8 }}>
           <Users size={28} color="#D1D5DB" style={{ marginBottom: 8 }} />
           <div style={{ fontSize: 13 }}>{t("No directory records yet", "Aun no hay registros del directorio")}</div>
         </div>
       )}
 
-      {!loading && anyDirectoryRecords && rows.length === 0 && (
+      {!loading && !error && anyDirectoryRecords && rows.length === 0 && (
         <div style={{ textAlign: "center", padding: 32, color: "#9CA3AF", border: "1px dashed #E5E7EB", borderRadius: 8 }}>
           <Users size={28} color="#D1D5DB" style={{ marginBottom: 8 }} />
           <div style={{ fontSize: 13, fontWeight: 500 }}>{t("No records match the current filters", "Ningun registro coincide con los filtros actuales")}</div>

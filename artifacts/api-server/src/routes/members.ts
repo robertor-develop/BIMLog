@@ -178,6 +178,7 @@ router.get(
             userCompanyId: user[0]?.companyId || null,
             userCompanyName: companyName,
             role: m.role,
+            status: m.status,
             joinedAt: m.joinedAt.toISOString(),
           };
         }),
