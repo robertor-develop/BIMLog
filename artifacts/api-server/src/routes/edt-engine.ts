@@ -36,7 +36,23 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
   try {
     const projectId = edtProjectId(req);
     const actor = await resolveEdtRouteActor(req, projectId);
-    res.set("Cache-Control","private, no-store").json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants });
+    let changeReview;
+    if(req.query.include==="change-review"){
+      if(!actor.grants.includes("GOVERNED_CHANGE_REQUEST")&&!actor.grants.includes("GOVERNED_CHANGE_APPROVE"))
+        throw new EdtEngineConflict("PERMISSION_REQUIRED","Governed-change authority is required to read change evidence.");
+      const requests=(await pool.query(`SELECT r.id,r.work_item_id AS "workItemId",r.action_type AS "actionType",
+        r.target_version AS "targetVersion",r.before_state AS "beforeState",r.after_state AS "afterState",
+        r.request_fingerprint AS fingerprint,r.state,r.requested_by_id AS "requestedById",r.reason,r.evidence,
+        d.id AS "decisionId",d.outcome,d.decided_by_id AS "decidedById",d.reason AS "decisionReason"
+        FROM job_governed_change_requests r LEFT JOIN job_governed_change_decisions d ON d.request_id=r.id
+          AND d.company_id=r.company_id AND d.project_id=r.project_id
+        WHERE r.company_id=$1 AND r.project_id=$2 ORDER BY r.created_at,r.id`,[actor.actorCompanyId,projectId])).rows;
+      const workItems=(await pool.query(`SELECT w.id,w.name,w.display_code AS "displayCode",w.revision_number AS "revisionNumber",w.status
+        FROM job_activation_work_items w JOIN job_intakes i ON i.id=w.intake_id
+        WHERE w.project_id=$1 AND i.project_id=$1 AND i.company_id=$2 ORDER BY w.id`,[projectId,actor.actorCompanyId])).rows;
+      changeReview={requests,workItems,actorUserId:actor.actorUserId};
+    }
+    res.set("Cache-Control","private, no-store").json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants,...(changeReview?{changeReview}:{}) });
   } catch (error) {
     sendEdtRouteError(res, error);
   }
@@ -136,7 +152,7 @@ router.post("/projects/:projectId/edt-engine/change-requests", authMiddleware, a
       actionType:actionType as Parameters<typeof requestGovernedEdtChange>[0]["actionType"],
       targetVersion:requiredInteger(body,"targetVersion"),beforeState:recordField(body,"beforeState"),afterState:recordField(body,"afterState"),
       reason:requiredText(body,"reason"),evidence:recordField(body,"evidence"),idempotencyKey:requiredText(body,"idempotencyKey") });
-    res.status(result.idempotent?200:201).json(result);
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,...result});
   } catch(error){sendEdtRouteError(res,error);}
 });
 
@@ -146,7 +162,7 @@ router.post("/projects/:projectId/edt-engine/change-requests/:requestId/decision
     const outcome=requiredText(body,"outcome");if(outcome!=="approved"&&outcome!=="rejected")throw new EdtEngineConflict("REQUEST_BODY_INVALID","outcome must be approved or rejected.");
     const result=await decideGovernedEdtChange({actor,companyId:actor.actorCompanyId,projectId,requestId:String(req.params.requestId),
       expectedFingerprint:requiredText(body,"expectedFingerprint"),outcome,reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
-    res.json(result);
+    res.set("Cache-Control","private, no-store").json({projectId,requestId:String(req.params.requestId),...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
