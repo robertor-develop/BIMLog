@@ -51,7 +51,12 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
         FROM job_activation_work_item_issuances s JOIN job_activation_work_items w ON w.id=s.work_item_id AND w.project_id=s.project_id
         JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id AND i.company_id=s.company_id
         WHERE s.project_id=$1 AND s.company_id=$2 ORDER BY s.created_at,s.id`,[projectId,actor.actorCompanyId,actor.actorUserId])).rows;
-      issuanceReview={actorUserId:actor.actorUserId,issuances:issuances.map(row=>({...row,canDecide:actor.grants.includes("QC_DECIDE")&&row.independent&&row.state==="submitted"}))};
+      const workItems=(await pool.query(`SELECT w.id,w.name,w.display_code AS "displayCode",w.revision_number AS revision,w.issuance_version AS version,w.status
+        FROM job_activation_work_items w JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id
+        WHERE w.project_id=$1 AND i.company_id=$2 ORDER BY w.id`,[projectId,actor.actorCompanyId])).rows;
+      const evidenceFiles=(await pool.query(`SELECT id,file_name AS "fileName",version,status,is_superseded AS "isSuperseded"
+        FROM files WHERE project_id=$1 ORDER BY file_name,version DESC,id`,[projectId])).rows;
+      issuanceReview={actorUserId:actor.actorUserId,canSubmit:actor.grants.includes("ISSUANCE_SUBMIT"),workItems,evidenceFiles,issuances:issuances.map(row=>({...row,canDecide:actor.grants.includes("QC_DECIDE")&&row.independent&&row.state==="submitted"}))};
     }
     if(req.query.include==="intake-imports"){
       if(!actor.grants.includes("IMPORT_MANAGE"))throw new EdtEngineConflict("PERMISSION_REQUIRED","Import-management authority is required to read retained import previews.");
@@ -253,9 +258,10 @@ router.post("/projects/:projectId/edt-engine/work-items/:workItemId/issuances",a
     const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);const kind=requiredText(body,"kind");
     if(!["initial","internal_issuance","external_revision","corrected_resubmittal","reopen"].includes(kind))throw new EdtEngineConflict("REQUEST_BODY_INVALID","kind is not supported.");
     const evidenceFileId=body.evidenceFileId===undefined?undefined:requiredInteger(body,"evidenceFileId");
+    if(body.idempotencyKey!==undefined&&typeof body.idempotencyKey!=="string")throw new EdtEngineConflict("REQUEST_BODY_INVALID","A submission key must be text.");
     const result=await submitWorkItemIssuance({actor,companyId:actor.actorCompanyId,projectId,workItemId:String(req.params.workItemId),
-      kind:kind as Parameters<typeof submitWorkItemIssuance>[0]["kind"],packageSnapshot:recordField(body,"packageSnapshot"),evidenceFileId,sourceEvidence:recordField(body,"sourceEvidence")});
-    res.status(result.idempotent?200:201).json(result);
+      kind:kind as Parameters<typeof submitWorkItemIssuance>[0]["kind"],packageSnapshot:recordField(body,"packageSnapshot"),evidenceFileId,sourceEvidence:recordField(body,"sourceEvidence"),idempotencyKey:body.idempotencyKey as string|undefined});
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,workItemId:String(req.params.workItemId),...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
