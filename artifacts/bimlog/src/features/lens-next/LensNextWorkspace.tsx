@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useListProjects } from "@workspace/api-client-react";
 import { useAuthStore } from "../../store/auth";
 import { LensNextPanel } from "./LensNextPanel";
@@ -73,6 +73,8 @@ export function LensNextWorkspace() {
     getLensNextBridgeSessionSnapshot,
     () => null,
   );
+  const bindingRequest=useRef<AbortController|null>(null);
+  useEffect(()=>{setBindingBusy(false);return()=>bindingRequest.current?.abort();},[bridgeContext?.modelBindingKey,selectedProjectId,token,bridgeSession]);
 
   useEffect(() => {
     if (bridgeSession) return;
@@ -147,6 +149,7 @@ export function LensNextWorkspace() {
 
   const bindExplicitProject = useCallback(async () => {
     if (!token || !bridgeSession || !bridgeContext || bridgeContext.projectId !== null || selectedProjectId === null) return;
+    bindingRequest.current?.abort();const controller=new AbortController();bindingRequest.current=controller;
     setBindingBusy(true);
     setBridgeDiscoveryError(null);
     try {
@@ -156,16 +159,18 @@ export function LensNextWorkspace() {
         bridgeContext.displayName,
         null,
         selectedProjectId,
+        controller.signal,
       );
       if (binding.projectId !== selectedProjectId || binding.source !== "explicit_user_selection")
         throw new Error("BIMLog did not confirm the explicit project selection.");
       const client = createLensNextBridgeClient({ sessionToken: bridgeSession.token, bridgeOrigin });
-      const context = await client.bindProject(selectedProjectId, "explicit-user-selection");
-      setBridgeContext(context);
+      const context = await client.bindProject(selectedProjectId, "explicit-user-selection",controller.signal);
+      if(!controller.signal.aborted)setBridgeContext(context);
     } catch (error) {
+      if(controller.signal.aborted)return;
       setBridgeDiscoveryError(error instanceof Error ? error.message : "Lens Next project binding failed.");
     } finally {
-      setBindingBusy(false);
+      if(!controller.signal.aborted)setBindingBusy(false);
     }
   }, [bridgeContext, bridgeOrigin, bridgeSession, selectedProjectId, token]);
 

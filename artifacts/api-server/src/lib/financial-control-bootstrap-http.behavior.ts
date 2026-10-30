@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import express from 'express';
 import {pool} from '@workspace/db';
 import router from '../routes/financial-controls';
+import projectsRouter from '../routes/projects';
 import {signToken} from '../middlewares/auth';
 import {startFinancialControlMigration} from './financial-control-migration';
 import {startFeatureCatalogMigration} from './feature-catalog-migration';
@@ -11,7 +12,7 @@ if(!['127.0.0.1','localhost'].includes(target.hostname)||target.port!=='55435'||
 await pool.query(`CREATE TABLE companies(id integer PRIMARY KEY,name text NOT NULL,retired_into_company_id integer);CREATE TABLE users(id integer PRIMARY KEY,email text NOT NULL,full_name text NOT NULL,password_hash text NOT NULL,company_id integer NOT NULL REFERENCES companies(id),is_super_admin boolean NOT NULL DEFAULT false);CREATE TABLE projects(id integer PRIMARY KEY,name text NOT NULL,status text NOT NULL DEFAULT 'active',created_by_id integer NOT NULL REFERENCES users(id));CREATE TABLE project_members(project_id integer,user_id integer,status text,role text);INSERT INTO companies(id,name) VALUES(1,'Fixture A'),(2,'Fixture B');INSERT INTO users VALUES(11,'super@example.test','Super','fixture',1,true),(12,'member@example.test','Member','fixture',1,false),(21,'other@example.test','Other','fixture',2,false);`);
 await startFinancialControlMigration();
 await startFeatureCatalogMigration();await startFeaturePolicyMigration();
-const app=express();app.use(express.json());app.use('/api/v1',router);const server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));const address=server.address();if(!address||typeof address==='string')throw new Error('No fixture server address');
+const app=express();app.use(express.json());app.use('/api/v1',router);app.use('/api/v1',projectsRouter);const server=app.listen(0,'127.0.0.1');await new Promise<void>(resolve=>server.once('listening',resolve));const address=server.address();if(!address||typeof address==='string')throw new Error('No fixture server address');
 const token=(id:number)=>signToken({userId:id,email:`${id}@example.test`,fullName:'Fixture',companyId:id===21?2:1,companyName:'Fixture',isSuperAdmin:id===11});
 const request=async(actor:number,body:Record<string,unknown>,path='bootstrap')=>{const response=await fetch(`http://127.0.0.1:${address.port}/api/v1/financial-controls/${path}`,{method:'POST',headers:{Authorization:`Bearer ${token(actor)}`,'Content-Type':'application/json'},body:JSON.stringify(body)});return{status:response.status,body:await response.json() as {contextId:string;grantId:string;scope:{companyId:number;projectId:number|null;scopeType:string};code?:string;id?:string;version?:number;synthetic?:boolean;noFinancialRecordCreated?:boolean;decision?:string}};};
 const input={administratorUserId:12,baseCurrency:'USD',reportingCurrency:'USD',permittedCurrencies:['USD','EUR'],reason:'Initialize isolated financial controls'};
@@ -51,5 +52,13 @@ try{
   assert.equal(await readStatus(),'suspended');
   assert.equal((await request(12,{action:'invalid',reason:'Invalid action must not mutate'},'suspension')).status,400);
   assert.equal((await request(12,{action:'release',reason:'Isolated financial suspension released'},'suspension')).status,201);assert.equal(await readStatus(),'active');assert.equal((await pool.query('SELECT count(*)::int n FROM financial_suspension_events')).rows[0].n,2);
-  console.log('Financial controls HTTP: bootstrap/context/evaluation/grant/revocation/current-state plus suspension/release persistence and invalid-action no-mutation PASS');
+  await pool.query(`INSERT INTO projects(id,name,created_by_id) VALUES(101,'Active model project',12),(102,'Inactive model project',12);INSERT INTO project_members VALUES(101,12,'active','member'),(102,12,'inactive','member'),(102,21,'inactive','member');CREATE TABLE lens_next_model_bindings(id bigserial PRIMARY KEY,project_id integer,model_binding_key text,model_display_name text,evidence_source text,status text,bound_by_id integer,created_at timestamptz DEFAULT now(),updated_at timestamptz DEFAULT now());INSERT INTO lens_next_model_bindings(project_id,model_binding_key,model_display_name,evidence_source,status,bound_by_id) VALUES(101,'fixture-model','Fixture','fixture','active',12),(102,'fixture-model','Fixture','fixture','active',12);`);
+  const binding=async(actor:number,body:Record<string,unknown>)=>{const response=await fetch(`http://127.0.0.1:${address.port}/api/v1/lens-next/model-bindings/resolve`,{method:'POST',headers:{Authorization:`Bearer ${token(actor)}`,'Content-Type':'application/json'},body:JSON.stringify(body)});return{status:response.status,body:await response.json() as {projectId?:number;source?:string}};};
+  assert.equal((await binding(21,{modelBindingKey:'fixture-model',explicitProjectId:102})).status,403);
+  assert.equal((await binding(12,{modelBindingKey:'fixture-model',explicitProjectId:102})).status,403);
+  assert.equal((await binding(12,{modelBindingKey:'fixture-model',managedProjectId:102})).status,403);
+  const explicitBinding=await binding(12,{modelBindingKey:'fixture-model',explicitProjectId:101});assert.equal(explicitBinding.status,200);assert.equal(explicitBinding.body.projectId,101);assert.equal(explicitBinding.body.source,'explicit_user_selection');
+  const registryBinding=await binding(12,{modelBindingKey:'fixture-model'});assert.equal(registryBinding.status,200);assert.equal(registryBinding.body.projectId,101);assert.equal(registryBinding.body.source,'existing_registry');
+  assert.equal((await binding(12,{modelBindingKey:'../invalid'})).status,400);
+  console.log('Financial controls and model-binding HTTP: prior lifecycle gates plus inactive-member denial, active explicit/registry resolution and malformed-model refusal PASS');
 }finally{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));await pool.end();}

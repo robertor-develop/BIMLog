@@ -115,7 +115,7 @@ router.post("/lens-next/model-bindings/resolve", authMiddleware, async (req, res
     if (explicitProjectId !== null && (!Number.isSafeInteger(explicitProjectId) || explicitProjectId <= 0)) {
       res.status(400).json({ error: "invalid_explicit_project_id" }); return;
     }
-    const memberships = await db.select({ projectId: projectMembersTable.projectId }).from(projectMembersTable).where(eq(projectMembersTable.userId, userId));
+    const memberships = await db.select({ projectId: projectMembersTable.projectId }).from(projectMembersTable).where(and(eq(projectMembersTable.userId, userId),eq(projectMembersTable.status,"active")));
     const authorizedIds = memberships.map((row) => row.projectId);
     if (authorizedIds.length === 0) { res.status(403).json({ error: "no_authorized_projects" }); return; }
     if (managedProjectId !== null) {
