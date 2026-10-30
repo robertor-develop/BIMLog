@@ -171,83 +171,25 @@ export async function buildBudgetCurrentViewPdf(data: BudgetCurrentViewExport): 
   });
 }
 
-export async function buildBaselinePdf(data: BaselineExport): Promise<Buffer> {
-  const doc = createPdfDocument({
-      size: "LETTER",
-      margin: 42,
-      bufferPages: true,
-      info: {
-        Title: `Approved Budget Baseline - ${safe(data.project.code)}`,
-        Author: "BIMLog",
-        Subject: "Operational approved project budget baseline",
-      },
-    }),
-    chunks: Buffer[] = [];
-  doc.on("data", (c) => chunks.push(c));
-  const reportNumber = `BASELINE-${safe(data.project.code)}-V${data.snapshot.budgetVersion}`;
-  const drawHeader = () => {
-    doc.y = drawBrandedHeader(doc, {
-      margin: 42,
-      companyName: safe(data.project.companyName) || "Company",
-      projectName: safe(data.project.name) || "Project",
-      projectCode: safe(data.project.code),
-      title: "Approved Budget Baseline",
-      subtitle: "Operational budget record — not an accounting certification",
-      reportNumber,
-      reportDate: new Date(data.generatedAt),
-      theme: REPORT_THEMES.platform.standard,
-    }) + 12;
-  };
-  drawHeader();
-  doc.fillColor("#111827").fontSize(11).text(
-    `Budget version: ${data.snapshot.budgetVersion} | Status: Approved | Currency: ${data.snapshot.currency}`,
-  );
-  doc.text(
-    `Original Budget: ${data.snapshot.originalTotal}   Current Budget: ${data.snapshot.currentTotal}   Difference from Original: ${data.snapshot.differenceFromOriginal}`,
-  );
-  doc.text(
-    `Approved: ${safe(data.snapshot.approvedByName)} at ${data.snapshot.approvedAt} | Applicable limit: ${data.snapshot.approvalLimit}`,
-  );
-  doc.moveDown().fontSize(9);
-  for (const line of data.snapshot.lines) {
-    if (doc.y > 680) {
-      doc.addPage();
-      drawHeader();
-    }
-    doc
-      .text(
-        `${safe(line.hierarchicalPath)}  ${safe(line.projectName)}`,
-        42,
-        doc.y,
-        { continued: true, width: 400 },
-      )
-      .text(`${line.amount} ${data.snapshot.currency}`, { align: "right" });
-    doc
-      .fillColor("#555555")
-      .text(safe(line.description), 54, doc.y, { width: 500 })
-      .fillColor("#000000");
-  }
-  doc
-    .moveDown()
-    .fontSize(8)
-    .text(`Content fingerprint: ${data.snapshot.contentFingerprint}`)
-    .text(`Snapshot fingerprint: ${data.snapshot.snapshotFingerprint}`)
-    .text(`Generated: ${data.generatedAt}`);
-  addPageNumbers(doc, {
-    margin: 42,
-    footerY: 760,
-    fingerprintY: 742,
-    contentHash: data.snapshot.snapshotFingerprint,
-    companyName: safe(data.project.companyName),
-    projectName: safe(data.project.name),
-    reportNumber,
-    timestamp: data.generatedAt,
-  });
-  doc.end();
-  return new Promise((resolve, reject) => {
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-  });
+export async function buildBaselinePdf(data:BaselineExport,language:"en"|"es"="en"):Promise<Buffer>{
+ const tt=(en:string,es:string)=>language==="es"?es:en,doc=createPdfDocument({size:"LETTER",margin:42,bufferPages:true,info:{Title:`${tt("Approved Budget Baseline","Línea Base Presupuestaria Aprobada")} - ${safe(data.project.code)}`,Author:"BIMLog",Subject:tt("Operational approved project budget baseline","Línea base presupuestaria operativa aprobada")}}),chunks:Buffer[]=[];
+ doc.on("data",chunk=>chunks.push(chunk));const reportNumber=`BASELINE-${safe(data.project.code)}-V${data.snapshot.budgetVersion}`;
+ const header=()=>{doc.y=drawBrandedHeader(doc,{margin:42,companyName:safe(data.project.companyName)||"Company",projectName:safe(data.project.name)||"Project",projectCode:safe(data.project.code),title:tt("Approved Budget Baseline","Línea Base Presupuestaria Aprobada"),subtitle:tt("Approved operational budget","Presupuesto operativo aprobado"),reportNumber,reportDate:new Date(data.generatedAt),theme:REPORT_THEMES.platform.standard})+12;doc.x=42;doc.fillColor("#111827");};
+ const paragraph=(value:string,size=9,indent=42)=>{doc.fontSize(size);for(const part of (value.match(/.{1,800}/gu)??[""])){const height=doc.heightOfString(part,{width:570-indent});if(doc.y+height>700){doc.addPage();header();doc.fontSize(size);}doc.text(part,indent,doc.y,{width:570-indent,align:"left"});}};
+ header();paragraph(tt("Approved Budget Baseline","Línea Base Presupuestaria Aprobada"),13);paragraph(tt("Operational budget record; not an accounting certification or payment authorization.","Registro presupuestario operativo; no es certificación contable ni autorización de pago."),8);paragraph(`${tt("Budget version","Versión presupuestaria")}: ${data.snapshot.budgetVersion} | ${tt("Status: Approved","Estado: Aprobado")} | ${tt("Currency","Moneda")}: ${data.snapshot.currency}`,11);
+ paragraph(`${tt("Original Budget","Presupuesto original")}: ${data.snapshot.originalTotal}   ${tt("Current Budget","Presupuesto actual")}: ${data.snapshot.currentTotal}   ${tt("Difference from Original","Diferencia del original")}: ${data.snapshot.differenceFromOriginal}`,10);
+ paragraph(`${tt("Approved by","Aprobado por")}: ${safe(data.snapshot.approvedByName)} · ${data.snapshot.approvedAt} | ${tt("Applicable limit","Límite aplicable")}: ${data.snapshot.approvalLimit}`,9);doc.moveDown();
+ for(const [index,line] of data.snapshot.lines.entries()){if(index===data.snapshot.lines.length-1){doc.fontSize(9);const height=doc.heightOfString(safe(line.description),{width:516})+100;if(doc.y+height>700){doc.addPage();header();}}paragraph(`${safe(line.hierarchicalPath)} · ${safe(line.projectName)} · ${line.amount} ${data.snapshot.currency}`,9);paragraph(safe(line.description),9,54);}
+ doc.moveDown();paragraph(`${tt("Snapshot ID","ID de instantánea")}: ${data.snapshot.id}`,8);paragraph(`${tt("Content fingerprint","Huella de contenido")}: ${data.snapshot.contentFingerprint}`,8);paragraph(`${tt("Snapshot fingerprint","Huella de instantánea")}: ${data.snapshot.snapshotFingerprint}`,8);paragraph(`${tt("Generated","Generado")}: ${data.generatedAt}`,8);
+ addPageNumbers(doc,{margin:42,footerY:760,companyName:safe(data.project.companyName),projectName:safe(data.project.name),reportNumber,timestamp:data.generatedAt,lang:language});doc.end();
+ return new Promise((resolve,reject)=>{doc.on("end",()=>resolve(Buffer.concat(chunks)));doc.on("error",reject);});
+}
+// Preserve native numeric analysis where Excel can retain the exact decimal;
+// larger values remain text instead of silently rounding financial evidence.
+function exactBaselineCell(value:string):XLSX.CellObject{
+  const canonical=exactSignedDecimal(value),significant=canonical.replace(/[-.]/g,"").replace(/^0+/,"").replace(/0+$/,"").length;
+  let roundTrip=false;try{roundTrip=exactSignedDecimal(String(Number(canonical)))===canonical;}catch{/* Exponent notation cannot preserve the canonical decimal cell. */}
+  const scale=canonical.includes(".")?canonical.split(".")[1].length:0;return significant<=15&&roundTrip?{t:"n",v:canonical as unknown as number,z:scale?"0."+"0".repeat(scale):"0"}:{t:"s",v:canonical};
 }
 export function buildBaselineXlsx(data: BaselineExport): Buffer {
   const rows = data.snapshot.lines.map((line) => ({
@@ -292,11 +234,11 @@ export function buildBaselineXlsx(data: BaselineExport): Buffer {
         "Boundary",
         "Operational budget only; no accounting actuals, payments, commitments, forecasts, or cash disbursements.",
       ],
+      ["Snapshot ID",data.snapshot.id],
+      ["Exact values","Values beyond spreadsheet precision are preserved as text."],
     ], canonicalSpreadsheetWriteOptions({})),
     exactNumericCell = (value: string) => ({
-      t: "n" as const,
-      v: exactSignedDecimal(value) as unknown as number,
-      z: "0.######",
+      ...exactBaselineCell(value),
     });
   data.snapshot.lines.forEach((line, index) => {
     const row = index + 2;
@@ -309,6 +251,7 @@ export function buildBaselineXlsx(data: BaselineExport): Buffer {
     lines[`L${row}`] = exactNumericCell(data.snapshot.currentTotal);
     lines[`M${row}`] = exactNumericCell(data.snapshot.differenceFromOriginal);
   });
+  info["!cols"]=[{wch:28},{wch:100}];
   info.B8 = exactNumericCell(data.snapshot.originalTotal);
   info.B9 = exactNumericCell(data.snapshot.currentTotal);
   info.B10 = exactNumericCell(data.snapshot.differenceFromOriginal);

@@ -36,6 +36,7 @@ const router = Router(),
     fieldSize: 4 * 1024,
   });
 router.use("/projects/:projectId/financial", authMiddleware);
+router.use("/projects/:projectId/financial/snapshots/:snapshotId",(_req,res,next)=>{res.set("Cache-Control","private, no-store");next();});
 const run =
   (handler: (req: any, res: any) => Promise<void>) =>
   async (req: any, res: any) => {
@@ -381,7 +382,7 @@ async function exportData(
   projectId: number,
   snapshotId: unknown,
 ): Promise<BaselineExport> {
-  await authorizeFinancialOperation({
+  const authorization=await authorizeFinancialOperation({
     actorUserId,
     projectId,
     featureKey: "cost.report.export",
@@ -390,8 +391,8 @@ async function exportData(
   const id = boundedText(snapshotId, "snapshotId", 3, 100);
   const head = (
     await pool.query(
-      `SELECT s.*,p.name project_name,p.code project_code,c.name company_name,u.full_name approved_by_name FROM approved_budget_snapshots s JOIN projects p ON p.id=s.project_id JOIN companies c ON c.id=s.company_id JOIN users u ON u.id=s.approved_by_id WHERE s.id=$1 AND s.project_id=$2`,
-      [id, projectId],
+      `SELECT s.*,p.name project_name,p.code project_code,c.name company_name,u.full_name approved_by_name FROM approved_budget_snapshots s JOIN projects p ON p.id=s.project_id JOIN companies c ON c.id=s.company_id JOIN users u ON u.id=s.approved_by_id WHERE s.id=$1 AND s.project_id=$2 AND s.company_id=$3`,
+      [id, projectId,authorization.scope.companyId],
     )
   ).rows[0];
   if (!head)
@@ -445,6 +446,7 @@ async function recordSuccessfulExport(
   projectId: number,
   data: BaselineExport,
   kind: "pdf" | "xlsx",
+  artifactSha256?:string,
 ) {
   await pool.query(
     `INSERT INTO financial_authority_journal(id,event_type,company_id,project_id,actor_user_id,entity_type,entity_id,decision,reason_code,explanation_en,explanation_es,evidence) SELECT $1,$2,s.company_id,$3,$4,'approved_budget_snapshot',$5,'allow','BUDGET_EXPORT_ALLOWED','Approved snapshot export completed.','Exportación de instantánea aprobada completada.',$6::jsonb FROM approved_budget_snapshots s WHERE s.id=$5 AND s.project_id=$3`,
@@ -457,6 +459,7 @@ async function recordSuccessfulExport(
       JSON.stringify({
         format: kind,
         snapshotFingerprint: data.snapshot.snapshotFingerprint,
+        contentFingerprint:data.snapshot.contentFingerprint,artifactSha256,
       }),
     ],
   );
@@ -469,10 +472,13 @@ router.get(
       project(req),
       req.params.snapshotId,
     );
-    const output = await buildBaselinePdf(data);
-    await recordSuccessfulExport(req.user.userId, project(req), data, "pdf");
+    const language=req.query.lang??"en";
+    if(language!=="en"&&language!=="es")throw new FinancialControlError(400,"SNAPSHOT_EXPORT_LANGUAGE_INVALID","Choose English or Spanish.");
+    const output = await buildBaselinePdf(data,language),artifactHash=crypto.createHash("sha256").update(output).digest("hex");
+    await recordSuccessfulExport(req.user.userId, project(req), data, "pdf",artifactHash);
     res
       .type("application/pdf")
+      .set({"X-Content-Type-Options":"nosniff","X-BIMLog-Project-Id":String(project(req)),"X-BIMLog-Snapshot-Id":data.snapshot.id,"X-BIMLog-Budget-Version":String(data.snapshot.budgetVersion),"X-BIMLog-Snapshot-Fingerprint":data.snapshot.snapshotFingerprint,"X-BIMLog-Budget-Content-Fingerprint":data.snapshot.contentFingerprint,"X-BIMLog-Artifact-SHA256":artifactHash})
       .setHeader(
         "Content-Disposition",
         `attachment; filename=approved-budget-${data.snapshot.budgetVersion}.pdf`,
@@ -488,10 +494,11 @@ router.get(
       project(req),
       req.params.snapshotId,
     );
-    const output = buildBaselineXlsx(data);
-    await recordSuccessfulExport(req.user.userId, project(req), data, "xlsx");
+    const output = buildBaselineXlsx(data),artifactHash=crypto.createHash("sha256").update(output).digest("hex");
+    await recordSuccessfulExport(req.user.userId, project(req), data, "xlsx",artifactHash);
     res
       .type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+      .set({"X-Content-Type-Options":"nosniff","X-BIMLog-Project-Id":String(project(req)),"X-BIMLog-Snapshot-Id":data.snapshot.id,"X-BIMLog-Budget-Version":String(data.snapshot.budgetVersion),"X-BIMLog-Snapshot-Fingerprint":data.snapshot.snapshotFingerprint,"X-BIMLog-Budget-Content-Fingerprint":data.snapshot.contentFingerprint,"X-BIMLog-Artifact-SHA256":artifactHash})
       .setHeader(
         "Content-Disposition",
         `attachment; filename=approved-budget-${data.snapshot.budgetVersion}.xlsx`,
