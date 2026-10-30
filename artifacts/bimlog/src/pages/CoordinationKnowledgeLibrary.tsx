@@ -64,6 +64,19 @@ export function CoordinationKnowledgeLibrary() {
   const [ruleReloadKey, setRuleReloadKey] = useState(0);
   const [ruleHistory, setRuleHistory] = useState<Record<string, RuleRecord[] | "loading" | "error">>({});
   const [selectedRule, setSelectedRule] = useState<RuleRecord | null>(null);
+  const [openingRule,setOpeningRule]=useState<string|null>(null);
+  const ruleDetailRequest=useRef<AbortController|null>(null);
+  useEffect(()=>{return()=>ruleDetailRequest.current?.abort();},[token]);
+  const openRule=async(item:RuleRecord)=>{
+    ruleDetailRequest.current?.abort();const controller=new AbortController();ruleDetailRequest.current=controller;setOpeningRule(item.rule_id);setRuleError("");
+    try{
+      const response=await fetch(`${API_BASE}/api/v1/coordination-knowledge/rules/${encodeURIComponent(item.rule_id)}`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal});
+      const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.code||String(response.status));
+      if(!body.item||body.item.rule_id!==item.rule_id||!Number.isSafeInteger(body.item.revision))throw new Error(t("The rule response does not match the selected record.","La respuesta no corresponde a la regla seleccionada."));
+      if(!controller.signal.aborted)setSelectedRule(body.item);
+    }catch(caught){if(!controller.signal.aborted){setRuleError(String(caught instanceof Error?caught.message:caught));setRuleState("error");}}
+    finally{if(!controller.signal.aborted)setOpeningRule(null);}
+  };
   const [methods, setMethods] = useState<ResolutionMethodRecord[]>([]);
   const [methodFilters, setMethodFilters] = useState<MethodFilters>(emptyMethodFilters);
   const [methodState, setMethodState] = useState<"idle" | "loading" | "ready" | "error">("idle");
@@ -310,7 +323,7 @@ export function CoordinationKnowledgeLibrary() {
               <button className="knowledge-history-button" type="button" onClick={() => void loadRuleHistory(item)} disabled={history === "loading"}>{history === "loading" ? t("Loading history…", "Cargando historial…") : t("View revision history", "Ver historial de revisiones")}</button>
               {history === "error" && <p className="knowledge-inline-error" role="alert">{t("History is unavailable. Try again.", "El historial no está disponible. Intente nuevamente.")}</p>}
               {Array.isArray(history) && <ol className="knowledge-history">{history.map(version => <li key={version.id}>v{version.revision} · {statusText(version.status)}</li>)}</ol>}
-              <button type="button" onClick={()=>setSelectedRule(item)}>{t("Open detail / edit","Abrir detalle / editar")}</button>
+              <button type="button" disabled={openingRule!==null} onClick={()=>void openRule(item)}>{openingRule===item.rule_id?t("Loading rule…","Cargando regla…"):t("Open detail / edit","Abrir detalle / editar")}</button>
             </article>; })}
           </div></>}
         </div> : active === "methods" ? <div className="knowledge-catalog" aria-busy={methodState === "loading"}>
