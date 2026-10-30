@@ -2327,6 +2327,10 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    if (!Array.isArray(req.body?.ids) || req.body.ids.some((id: unknown) => typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0)) {
+      res.status(400).json({ error: "invalid_ids", message: "Every selected viewpoint must have a valid numeric ID." });
+      return;
+    }
     const ids: number[] = Array.isArray(req.body?.ids)
       ? Array.from(new Set(req.body.ids.map((x: unknown) => Number(x)).filter((x: number) => Number.isInteger(x) && x > 0)))
       : [];
@@ -2364,6 +2368,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
           idsByGroup.set(row.issueGroupId, list);
         }
 
+        if (ids.some(id => !byId.has(id))) throw new Error("selection_not_in_project");
         const selectedExisting = ids.filter(id => byId.has(id));
         const expandedIds = new Set<number>();
         const addChain = (startId: number) => {
@@ -2424,6 +2429,10 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
       }
       res.json({ success: true, ...result, floor });
     } catch (err) {
+      if (err instanceof Error && err.message === "selection_not_in_project") {
+        res.status(404).json({ error: "selection_not_in_project", message: "One or more selected viewpoints are unavailable in this project. Reload the selection; no floors were changed." });
+        return;
+      }
       res.status(500).json({ error: "lens_batch_floor_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }

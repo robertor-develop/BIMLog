@@ -553,11 +553,14 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const submitFloorCorrection = async () => {
+    if (!canWrite || actionLock.current) return;
+    const context = contextEpoch.current;
     const floor = floorCorrectionFloor.trim();
     const reason = floorCorrectionReason.trim();
     if (selectedIds.size === 0) { setFloorCorrectionError(t("Select at least one viewpoint.", "Seleccione al menos una vista.")); return; }
     if (!floor) { setFloorCorrectionError(t("Select the correct floor.", "Seleccione el piso correcto.")); return; }
     if (!reason) { setFloorCorrectionError(t("A reason is required for audit history.", "Se requiere un motivo para el historial.")); return; }
+    actionLock.current = true;
     setFloorCorrectionPhase("submitting");
     setFloorCorrectionError("");
     try {
@@ -567,11 +570,15 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         body: JSON.stringify({ ids: Array.from(selectedIds), floor, reason }),
       });
       const d = await r.json().catch(() => ({}));
+      if (context !== contextEpoch.current) return;
       if (!r.ok) {
         setFloorCorrectionPhase("input");
         setFloorCorrectionError(d.message || d.error || t("Floor correction failed.", "No se pudo corregir el piso."));
         return;
       }
+      if (d.success !== true || !Number.isInteger(d.updated) || !Number.isInteger(d.matched)) throw new Error(t("Invalid floor correction receipt.", "Respuesta de corrección de piso inválida."));
+      if (!await loadViewpoints()) throw new Error(t("Saved response received, but records could not be reopened. Reload before another action.", "Se recibió la respuesta de guardado, pero no se pudieron reabrir los registros. Recargue antes de otra acción."));
+      if (context !== contextEpoch.current) return;
       setFloorCorrectionOpen(false);
       setFloorCorrectionPhase("input");
       setSelectedIds(new Set());
@@ -579,10 +586,12 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         `Corrected floor on ${d.updated ?? 0} viewpoint(s); checked ${d.expanded ?? d.matched ?? 0} chain-linked record(s)`,
         `Piso corregido en ${d.updated ?? 0} vista(s); se revisaron ${d.expanded ?? d.matched ?? 0} registro(s) de cadena`
       ));
-      await loadViewpoints();
     } catch (e) {
+      if (context !== contextEpoch.current) return;
       setFloorCorrectionPhase("input");
       setFloorCorrectionError(e instanceof Error ? e.message : String(e));
+    } finally {
+      if (context === contextEpoch.current) actionLock.current = false;
     }
   };
 
@@ -1532,6 +1541,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
         >
           <div
+            role="dialog" aria-modal="true" aria-label={t("Batch Correct Floor", "Corregir Piso por Lote")}
             onClick={e => e.stopPropagation()}
             style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 520, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
           >
