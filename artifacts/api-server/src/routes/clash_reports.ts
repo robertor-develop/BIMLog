@@ -4661,16 +4661,24 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
         res.status(400).json({ error: "no_clashes", message: "Request body must include a non-empty clashes array" });
         return;
       }
+      for(const row of clashes){
+        if(!row||typeof row!=="object"||Array.isArray(row)||![row.fingerprint,row.clashId,row.name,row.description].some(value=>(typeof value==="string"&&value.trim())||(typeof value==="number"&&Number.isFinite(value)))||["distance","positionX","positionY","positionZ"].some(key=>row[key]!==undefined&&row[key]!==null&&row[key]!==""&&!Number.isFinite(Number(row[key])))){
+          res.status(422).json({error:"invalid_clash_snapshot",message:"Every clash must have an identity or description and finite supplied coordinates. No rows were synchronized."});return;
+        }
+        if([row.projectId,req.body?.projectId].some(value=>value!==undefined&&Number(value)!==projectId)){res.status(409).json({error:"clash_snapshot_project_mismatch",message:"Every supplied project ID must match the destination. No rows were synchronized."});return;}
+      }
 
+      const response = await db.transaction(async tx => {
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bimlog-plugin-sync'),${projectId})`);
       const today = new Date().toISOString().slice(0, 10);
       const reportName = `Plugin Sync - ${today}`;
 
-      let [report] = await db.select().from(clashReportsTable)
+      let [report] = await tx.select().from(clashReportsTable)
         .where(and(eq(clashReportsTable.projectId, projectId), eq(clashReportsTable.fileName, reportName)));
 
       if (!report) {
-        const existingReports = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
-        const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+        const existingReports = await tx.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+        const [project] = await tx.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
         const usedNums = new Set(existingReports.map(r => r.reportNumber).filter(Boolean));
         let seqNum = existingReports.length + 1;
         let autoNum = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
@@ -4678,7 +4686,7 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
           seqNum++;
           autoNum = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
         }
-        [report] = await db.insert(clashReportsTable).values({
+        [report] = await tx.insert(clashReportsTable).values({
           projectId,
           uploadedById: req.user!.userId,
           fileName: reportName,
@@ -4692,6 +4700,7 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
       let created = 0;
       let updated = 0;
       let fingerprinted = 0;
+      const results:Array<{id:number;reportId:number;status:string|null;fingerprint:string|null;created:boolean}>=[];
       const now = new Date();
 
       for (const c of clashes) {
@@ -4702,17 +4711,18 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
 
         let existing: typeof clashesTable.$inferSelect | undefined;
         if (fingerprint) {
-          [existing] = await db.select().from(clashesTable)
-            .where(and(eq(clashesTable.projectId, projectId), eq(clashesTable.fingerprint, fingerprint)));
+          [existing] = await tx.select().from(clashesTable)
+            .where(and(eq(clashesTable.projectId, projectId), eq(clashesTable.fingerprint, fingerprint), sql`EXISTS (SELECT 1 FROM clash_reports r WHERE r.id=${clashesTable.clashReportId} AND r.project_id=${projectId})`));
         }
 
         if (existing) {
-          await db.update(clashesTable)
+          const [saved]=await tx.update(clashesTable)
             .set({ status: c.status ?? existing.status, lastPluginSyncAt: now, updatedAt: now, deletedAt: null, deleteReason: null })
-            .where(eq(clashesTable.id, existing.id));
+            .where(eq(clashesTable.id, existing.id)).returning({id:clashesTable.id,reportId:clashesTable.clashReportId,status:clashesTable.status});
+          results.push({...saved,fingerprint,created:false});
           updated++;
         } else {
-          await db.insert(clashesTable).values({
+          const [saved]=await tx.insert(clashesTable).values({
             clashReportId: report.id,
             projectId,
             clashIdOriginal: c.clashId != null ? String(c.clashId) : null,
@@ -4734,16 +4744,20 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
             discipline1: c.trade1 ?? null,
             discipline2: c.trade2 ?? null,
             lastPluginSyncAt: now,
-          });
+          }).returning({id:clashesTable.id,reportId:clashesTable.clashReportId,status:clashesTable.status});
+          results.push({...saved,fingerprint,created:true});
           created++;
         }
       }
 
-      const [{ count: total }] = await db.select({ count: sql<number>`count(*)::int` }).from(clashesTable)
-        .where(and(eq(clashesTable.clashReportId, report.id), isNull(clashesTable.deletedAt)));
-      await db.update(clashReportsTable).set({ totalClashes: total, updatedAt: now }).where(eq(clashReportsTable.id, report.id));
+      let total=0;
+      for(const reportId of new Set([report.id,...results.map(row=>row.reportId)])){
+        const [counts]=await tx.select({count:sql<number>`count(*)::int`,p1Count:sql<number>`count(*) filter (where ${clashesTable.priority}='P1')::int`,p2Count:sql<number>`count(*) filter (where ${clashesTable.priority}='P2')::int`,p3Count:sql<number>`count(*) filter (where ${clashesTable.priority}='P3')::int`,p4Count:sql<number>`count(*) filter (where ${clashesTable.priority}='P4')::int`}).from(clashesTable).where(and(eq(clashesTable.projectId,projectId),eq(clashesTable.clashReportId,reportId),isNull(clashesTable.deletedAt)));
+        await tx.update(clashReportsTable).set({totalClashes:counts.count,p1Count:counts.p1Count,p2Count:counts.p2Count,p3Count:counts.p3Count,p4Count:counts.p4Count,updatedAt:now}).where(and(eq(clashReportsTable.id,reportId),eq(clashReportsTable.projectId,projectId)));
+        if(reportId===report.id)total=counts.count;
+      }
 
-      await db.insert(activityLogTable).values({
+      await tx.insert(activityLogTable).values({
         projectId,
         userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "",
@@ -4754,7 +4768,8 @@ router.post("/projects/:projectId/clash-reports/plugin-sync",
         details: `Plugin sync (${reportName}): ${created} created, ${updated} updated, ${fingerprinted} fingerprinted`,
       });
 
-      const response = { created, updated, fingerprinted, syncToken: now.toISOString(), message: "Sync complete" };
+      return { projectId, reportId:report.id, created, updated, fingerprinted, totalClashes:total, results, syncToken: now.toISOString(), message: "Sync complete" };
+      });
       console.log("[plugin-sync] sending response:", JSON.stringify(response));
       res.json(response);
     } catch (err) {
