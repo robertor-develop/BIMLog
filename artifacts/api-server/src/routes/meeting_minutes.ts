@@ -3386,6 +3386,9 @@ router.post(
         return;
       }
 
+      if(req.body?.expected_updated_at && new Date(req.body.expected_updated_at).getTime() !== new Date(meeting.updatedAt).getTime()){
+        res.status(409).json({error:"meeting_stale_update"});return;
+      }
       const prompt = `You are a construction project manager. Summarize these meeting notes and extract action items.
 Meeting: ${meeting.title} on ${new Date(meeting.meetingDate).toLocaleDateString()}
 Notes: ${meeting.notes ?? "(no notes)"}
@@ -3404,11 +3407,18 @@ Return JSON only: { "summary": "...", "action_items": [{ "description": "...", "
       const text = msg.content[0]?.type === "text" ? msg.content[0].text : "{}";
       const parsed = JSON.parse(text.replace(/```json\n?|```/g, "").trim());
 
-      await db
-        .update(meetingMinutesTable)
-        .set({ aiSummary: parsed.summary, updatedAt: new Date() })
-        .where(eq(meetingMinutesTable.id, meetingId));
-      res.json(parsed);
+      if (typeof parsed.summary !== "string" || parsed.summary.length > 16000) {
+        res.status(502).json({error:"meeting_summary_response_invalid"}); return;
+      }
+      const [saved] = await db.update(meetingMinutesTable)
+        .set({aiSummary:parsed.summary,updatedAt:nextMeetingVersionTimestamp(meeting.updatedAt)})
+        .where(and(eq(meetingMinutesTable.id,meetingId),eq(meetingMinutesTable.projectId,projectId),
+          isNull(meetingMinutesTable.deletedAt),
+          sql`date_trunc('milliseconds', ${meetingMinutesTable.updatedAt}) = ${new Date(meeting.updatedAt).toISOString()}::timestamp`))
+        .returning({updatedAt:meetingMinutesTable.updatedAt});
+      if(!saved){res.status(409).json({error:"meeting_stale_update"});return;}
+      res.json({...parsed,meeting:{id:meetingId,projectId,updatedAt:saved.updatedAt}});
+
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
       res
@@ -3442,59 +3452,52 @@ router.post(
       return;
     }
     try {
-      const [meeting] = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable)
-        .where(and(eq(meetingMinutesTable.id, meetingId), eq(meetingMinutesTable.projectId, projectId), isNull(meetingMinutesTable.deletedAt))).limit(1);
-      if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
-      const actionInputs = resolveMeetingActionInputs(body);
-      const created = await db
-        .insert(actionItemsTable)
-        .values(
-          actionInputs.map((item) => ({
-            meetingId,
-            projectId,
-            description: item.description,
-            assignedToId: item.assignedToId,
-            assignedToName: item.assignedToName,
-            assignedToExternalEmail: item.assignedToExternalEmail,
-            dueDate: item.dueDate,
-            status: "open" as const,
-          })),
-        )
-        .returning();
-
-      // Notify assigned BIMLog users
-      for (const item of created) {
-        if (item.assignedToId) {
-          await createNotification(
-            item.assignedToId,
-            projectId,
-            "action_item_due",
-            "New Action Item",
-            item.description,
-            `/projects/${projectId}/meetings`,
-          );
+      let actionInputs: ReturnType<typeof resolveMeetingActionInputs>;
+      try { actionInputs = resolveMeetingActionInputs(body); }
+      catch { res.status(400).json({error:"meeting_action_input_invalid"}); return; }
+      let idempotencyDigest: string | null = null;
+      try { idempotencyDigest = meetingCommandIdempotencyDigest(req.get("Idempotency-Key"), {projectId,userId:req.user!.userId,command:"meeting.actions.create"}); }
+      catch { res.status(400).json({error:"meeting_idempotency_key_invalid"}); return; }
+      const payloadDigest = crypto.createHash("sha256").update(JSON.stringify(actionInputs)).digest("hex");
+      const outcome = await db.transaction(async tx => {
+        const [meeting] = await tx.select({id:meetingMinutesTable.id}).from(meetingMinutesTable)
+          .where(and(eq(meetingMinutesTable.id,meetingId),eq(meetingMinutesTable.projectId,projectId),isNull(meetingMinutesTable.deletedAt))).limit(1).for("share");
+        if(!meeting) throw new MeetingClashLinkError(404,"meeting_not_found");
+        if(idempotencyDigest) {
+          await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${idempotencyDigest}))`);
+          const [event] = await tx.select({details:activityLogTable.details}).from(activityLogTable).where(and(
+            eq(activityLogTable.projectId,projectId),eq(activityLogTable.entityType,"action_items"),
+            eq(activityLogTable.entityId,meetingId),eq(activityLogTable.userId,req.user!.userId),
+            sql`${activityLogTable.details} LIKE ${'%"idempotencyDigest":"'+idempotencyDigest+'"%'}`)).limit(1);
+          if(event) {
+            const receipt=JSON.parse(event.details || "{}");
+            if(receipt.payloadDigest!==payloadDigest)throw new MeetingClashLinkError(409,"meeting_action_retry_payload_changed");
+            const ids=Array.isArray(receipt.actionIds)?receipt.actionIds.filter((id:unknown)=>Number.isSafeInteger(id)&&Number(id)>0):[];
+            if(!ids.length)throw new MeetingClashLinkError(409,"meeting_action_receipt_invalid");
+            const rows=await tx.select().from(actionItemsTable).where(and(eq(actionItemsTable.projectId,projectId),eq(actionItemsTable.meetingId,meetingId),inArray(actionItemsTable.id,ids))).orderBy(asc(actionItemsTable.id));
+            if(rows.length!==ids.length)throw new MeetingClashLinkError(409,"meeting_action_receipt_unavailable");
+            return {rows,replayed:true};
+          }
         }
-      }
-
-      await db.insert(activityLogTable).values({
-        projectId,
-        userId: req.user!.userId,
-        userFullName: req.user!.fullName,
-        userCompanyName: req.user!.companyName,
-        actionType: "create",
-        entityType: "action_items",
-        entityId: meetingId,
-        fileNameBefore: null,
-        fileNameAfter: null,
-        details: `Created ${created.length} action item(s) for meeting`,
-      });
-      res.status(201).json(created);
-    } catch (err) {
-      res
-        .status(500)
-        .json({
-          error: err instanceof Error ? err.message : "Internal server error",
+        const rows = await tx.insert(actionItemsTable).values(actionInputs.map(item=>({
+          meetingId,projectId,description:item.description,assignedToId:item.assignedToId,
+          assignedToName:item.assignedToName,assignedToExternalEmail:item.assignedToExternalEmail,dueDate:item.dueDate,status:"open" as const,
+        }))).returning();
+        await tx.insert(activityLogTable).values({
+          projectId,userId:req.user!.userId,userFullName:req.user!.fullName,userCompanyName:req.user!.companyName,
+          actionType:"create",entityType:"action_items",entityId:meetingId,fileNameBefore:null,fileNameAfter:null,
+          details:JSON.stringify({event:"meeting.actions.created",idempotencyDigest,payloadDigest,actionIds:rows.map(row=>row.id)}),
         });
+        return {rows,replayed:false};
+      });
+      if(!outcome.replayed) for(const item of outcome.rows) if(item.assignedToId) {
+        try { await createNotification(item.assignedToId,projectId,"action_item_due","New Action Item",item.description,`/projects/${projectId}/meetings`); }
+        catch { console.warn("[meeting-actions] saved action notification unavailable"); }
+      }
+      res.set("Idempotency-Replayed",String(outcome.replayed)).status(outcome.replayed?200:201).json(outcome.rows);
+    } catch (err) {
+      if(err instanceof MeetingClashLinkError){res.status(err.status).json({error:err.code});return;}
+      res.status(500).json({error:"meeting_action_create_failed"});
     }
   },
 );

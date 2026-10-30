@@ -1,3 +1,4 @@
+import { MeetingActionCreate } from "./meetings/MeetingActionCreate";
 import { useProjectCompanyChoices } from "@/hooks/use-project-company-choices";
 import { useState, useEffect, useRef, Fragment } from "react";
 import { useI18n } from "@/lib/i18n";
@@ -630,6 +631,8 @@ export function MeetingsTab({
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
   const [actionSaving, setActionSaving] = useState(false);
   const actionSaveLock = useRef(false);
+  const summaryRequestLock = useRef(false);
+  const summaryRequestEpoch = useRef(0);
   const meetingScope = useRef(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -3110,36 +3113,40 @@ export function MeetingsTab({
     }
   };
 
+  useEffect(() => {
+    summaryRequestEpoch.current++;
+    summaryRequestLock.current = false;
+    setAiLoading(false);
+    return () => { summaryRequestEpoch.current++; };
+  }, [projectId, token, editingMeeting?.id]);
   const generateAISummary = async () => {
-    if (!title || !meetingDate) {
-      setError("Enter title and date before generating summary");
+    if (!token || !canWrite || summaryRequestLock.current) return;
+    if (!editingMeeting) {
+      setError(t("Save this meeting, then reopen it to generate a summary from its saved notes.", "Guarde esta reunión y vuelva a abrirla para generar un resumen de sus notas guardadas."));
       return;
     }
+    const scope = ++summaryRequestEpoch.current;
+    const meetingId = editingMeeting.id;
+    summaryRequestLock.current = true;
     setAiLoading(true);
+    setError("");
     try {
-      const notes = buildNotes();
-      const tempSave = await fetch(`${API}/projects/${projectId}/meetings`, {
-        method: "POST",
-        headers: { ...headers, "Idempotency-Key": `meeting-ai-${crypto.randomUUID()}` },
-        body: JSON.stringify({
-          title: title || "Draft",
-          meeting_date: `${meetingDate}T${meetingTime}:00`,
-          notes,
-        }),
-      });
-      if (!tempSave.ok) return;
-      const meeting = await tempSave.json();
-      const r = await fetch(
-        `${API}/projects/${projectId}/meetings/${meeting.id}/ai-summary`,
-        { method: "POST", headers },
+      const response = await fetch(
+        `${API}/projects/${projectId}/meetings/${meetingId}/ai-summary`,
+        { method: "POST", headers, body: JSON.stringify({expected_updated_at:editingMeeting.updatedAt}) },
       );
-      if (r.ok) {
-        const d = await r.json();
-        setAiSummaryText(d.summary || "");
-      }
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(typeof body.error === "string" ? body.error : t("The summary provider is unavailable. Your saved meeting was not duplicated.", "El proveedor de resúmenes no está disponible. No se duplicó su reunión guardada."));
+      if (typeof body.summary !== "string") throw new Error(t("The summary response could not be verified. Reopen the saved meeting.", "No se pudo verificar el resumen. Vuelva a abrir la reunión guardada."));
+      if (scope !== summaryRequestEpoch.current) return;
+      if(body.meeting?.id!==meetingId||body.meeting?.projectId!==projectId||typeof body.meeting?.updatedAt!=="string"||!Number.isFinite(Date.parse(body.meeting.updatedAt)))throw new Error(t("The saved summary version could not be verified. Reopen this meeting before saving.","No se verificó la versión guardada del resumen. Reabra la reunión antes de guardar."));
+      setEditingMeeting(current => current?.id===meetingId?{...current,updatedAt:body.meeting.updatedAt}:current);
+      setAiSummaryText(body.summary);
       await loadMeetings();
+    } catch (error) {
+      if (scope === summaryRequestEpoch.current) setError(error instanceof Error ? error.message : t("Summary could not be generated. Retry after checking the provider.", "No se pudo generar el resumen. Revise el proveedor y reintente."));
     } finally {
-      setAiLoading(false);
+      if (scope === summaryRequestEpoch.current) { summaryRequestLock.current = false; setAiLoading(false); }
     }
   };
 
@@ -3567,6 +3574,7 @@ export function MeetingsTab({
                       </button>
                     )}
                   </div>
+                  {canWrite && <MeetingActionCreate projectId={projectId} meetingId={m.id} members={memberList} onSaved={loadMeetings} />}
                   {!!m.linkedRfis?.length && (
                     <div style={{ flexBasis: "100%", display: "grid", gap: 8 }}>
                       {m.linkedRfis.map((rfi) => (
