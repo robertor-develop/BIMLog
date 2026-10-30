@@ -1,6 +1,7 @@
 import { formatOptionalInstantDate } from "@workspace/api-zod";
 import { FinancialApprovalPolicyRecords } from "@/components/FinancialApprovalPolicyRecords";
 import { FinancialAuthorityJournal } from "@/components/FinancialAuthorityJournal";
+import { FinancialContextRecords } from "@/components/FinancialContextRecords";
 import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -712,6 +713,7 @@ export function FinancialControlsSettings() {
                           "Agregar versión de contexto",
                         )}
                       </Button>
+                      <FinancialContextRecords contexts={admin.contexts} es={lang==='es'}/>
                       <div
                         style={{
                           fontSize: 11,
