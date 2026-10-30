@@ -10,6 +10,7 @@ import { ContractPaymentApplicationsPanel } from "@/components/commercial/Contra
 import { ContractPaymentHistoryPanel } from "@/components/commercial/ContractPaymentHistoryPanel";
 import { ContractProductionAllocationReview } from "@/components/commercial/ContractProductionAllocationReview";
 import { ContractPoolPreparation } from "@/components/commercial/ContractPoolPreparation";
+import {ContractImportReview} from "@/components/commercial/ContractImportReview";
 import {ContractLifecycleAction} from "@/components/commercial/ContractLifecycleAction";
 import { ContractRecordAccess } from "@/components/commercial/ContractRecordAccess";
 import { isIndependentContractActor } from "@/lib/contract-review-controls";
@@ -289,6 +290,7 @@ export function FinancialContractWorkspace() {
     {error && <div className="fc-error" role="alert">{error}</div>}
     {pendingContractAction&&<ContractLifecycleAction key={poolContextKey+pendingContractAction.contract.id+pendingContractAction.action} projectId={projectId} contract={pendingContractAction.contract} action={pendingContractAction.action} overBudgetReason={approvalReasons[pendingContractAction.contract.versionId]} api={api} tt={tt} onBusy={active=>setBusy(active?pendingContractAction.contract.id:"")} onCancel={()=>setPendingContractAction(null)} onVerified={saved=>{setData((current:any)=>({...current,contracts:current.contracts.map((row:any)=>row.id===saved.id?{...row,...saved}:row)}));if(openContractId===saved.id)setContractDetail(saved);setPendingContractAction(null);setContractActionNotice(tt("Exact saved contract version and attributable lifecycle history reopened.","Versión contractual exacta e historial atribuible guardados reabiertos."));setBusy("");}}/>}
     {contractActionNotice&&<p role="status">{contractActionNotice}</p>}
+    <ContractImportReview key={poolContextKey} projectId={projectId} token={token} api={api} tt={tt} onSaved={saved=>{setData((current:any)=>({...current,contracts:[saved,...current.contracts.filter((row:any)=>row.id!==saved.id)]}));}}/>
     {downloadNotice&&<p role="status" className="fc-download-notice" style={{overflowWrap:"anywhere"}}>{downloadNotice}</p>}
     {exportError && <div className="fc-error" role="alert">{exportError}</div>}
     {showCreate && <section className="fc-panel"><h2>{tt("Controlled contract draft", "Borrador de contrato controlado")}</h2><div className="fc-form">
