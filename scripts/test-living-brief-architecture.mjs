@@ -59,7 +59,7 @@ check(
 check("locked screen has no forgot/reset form", !ui.includes("Forgot it? Reset the gate password") && !ui.includes("New password (min 4 chars)"));
 check(
   "locked screen recovery remains super-admin gated",
-  ui.includes("if (!token || !isSuperAdmin) return null;") &&
+  ui.includes("if (!token || !isSuperAdmin || recoveryLock.current) return null;") &&
     ui.includes("/living-brief/password/recovery") &&
     ui.includes("showAdmin && isSuperAdmin"),
 );

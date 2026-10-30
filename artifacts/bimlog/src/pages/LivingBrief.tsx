@@ -108,6 +108,9 @@ export function LivingBrief() {
   const [resetReason, setResetReason] = useState("");
   const [resetConfirmation, setResetConfirmation] = useState("");
   const [recoveryVersion, setRecoveryVersion] = useState<number | null>(null);
+  const [recoveryStatus, setRecoveryStatus] = useState("");
+  const [recoveryBusy, setRecoveryBusy] = useState(false);
+  const recoveryLock = useRef(false);
   const [accessUsers, setAccessUsers] = useState<AccessUser[]>([]);
   const [docsBusy, setDocsBusy] = useState(false);
   const docsRequest = useRef<AbortController | null>(null);
@@ -125,6 +128,14 @@ export function LivingBrief() {
     setActiveDoc(0);
     setUnlocked(false);
     setEligible(null);
+    setRecoveryVersion(null);
+    setRecoveryStatus("");
+    setRecoveryBusy(false);
+    recoveryLock.current = false;
+    setCurrentAccountPassword("");
+    setNewPassword("");
+    setResetReason("");
+    setResetConfirmation("");
     accessRequest.current += 1;
     accessLock.current = false;
     setAccessBusy(false);
@@ -230,13 +241,26 @@ export function LivingBrief() {
   };
 
   const loadRecoveryStatus = async () => {
-    if (!token || !isSuperAdmin) return null;
-    const r = await apiFetch("/living-brief/password/recovery", token);
-    if (!r.ok) return null;
-    const d = await r.json();
-    const version = typeof d.expectedCredentialVersion === "number" ? d.expectedCredentialVersion : null;
-    setRecoveryVersion(version);
-    return version;
+    if (!token || !isSuperAdmin || recoveryLock.current) return null;
+    const epoch = sessionEpoch.current;
+    recoveryLock.current = true;
+    setRecoveryBusy(true);
+    setRecoveryVersion(null);
+    try {
+      const r = await apiFetch("/living-brief/password/recovery", token);
+      if (!r.ok) throw new Error(tt("Recovery status unavailable. Retry before resetting.", "Estado de recuperación no disponible. Reintente antes de restablecer."));
+      const d = await r.json();
+      if (typeof d.credentialConfigured !== "boolean" || (d.expectedCredentialVersion !== null && (!Number.isSafeInteger(d.expectedCredentialVersion) || d.expectedCredentialVersion < 1))) throw new Error(tt("Invalid recovery status. Reload before resetting.", "Estado de recuperación inválido. Recargue antes de restablecer."));
+      if (epoch !== sessionEpoch.current) return null;
+      setRecoveryVersion(d.expectedCredentialVersion);
+      setRecoveryStatus(d.credentialConfigured ? tt(`Configured credential version: ${d.expectedCredentialVersion}`, `Versión de credencial configurada: ${d.expectedCredentialVersion}`) : tt("No gate credential configured. Contact the platform administrator.", "No hay credencial configurada. Contacte al administrador de la plataforma."));
+      return d.expectedCredentialVersion as number | null;
+    } catch (error) {
+      if (epoch === sessionEpoch.current) setRecoveryStatus(error instanceof Error ? error.message : tt("Recovery status request interrupted. Retry.", "Solicitud de recuperación interrumpida. Reintente."));
+      return null;
+    } finally {
+      if (epoch === sessionEpoch.current) { recoveryLock.current = false; setRecoveryBusy(false); }
+    }
   };
 
   const toggleAccess = async (userId: number, grant: boolean) => {
@@ -329,9 +353,14 @@ export function LivingBrief() {
   };
 
   const changePassword = async () => {
-    if (!token) return;
+    if (!token || !isSuperAdmin || recoveryLock.current) return;
+    if (recoveryVersion === null) { setAdminMsg(tt("Load the current recovery status before resetting.", "Cargue el estado actual de recuperación antes de restablecer.")); return; }
+    const epoch = sessionEpoch.current;
+    recoveryLock.current = true;
+    setRecoveryBusy(true);
     setAdminMsg("");
-    const observedVersion = unlocked ? null : await loadRecoveryStatus();
+    const observedVersion = recoveryVersion;
+    try {
     const r = await apiFetch("/living-brief/password", token, {
       method: "POST",
       headers: briefToken() ? { "X-Brief-Token": briefToken() } : {},
@@ -343,18 +372,27 @@ export function LivingBrief() {
         ...(observedVersion === null ? {} : { expectedCredentialVersion: observedVersion }),
       }),
     });
+    if (epoch !== sessionEpoch.current) return;
     if (r.ok) {
       sessionStorage.removeItem(BRIEF_TOKEN_KEY);
       setCurrentAccountPassword("");
       setNewPassword("");
       setResetReason("");
       setResetConfirmation("");
+      setRecoveryVersion(null);
+      setRecoveryStatus("");
       setAdminMsg(tt("Gate credential updated; existing Living Brief sessions were invalidated.", "Credencial de puerta actualizada; las sesiones existentes del Living Brief fueron invalidadas."));
       setUnlocked(false);
       await unlock();
     } else {
       const d = await r.json().catch(() => ({}));
       setAdminMsg(d.error || tt("Update failed", "Actualizacion fallida"));
+      if (r.status === 409) setRecoveryVersion(null);
+    }
+    } catch (error) {
+      if (epoch === sessionEpoch.current) { setRecoveryVersion(null); setAdminMsg(tt("Connection interrupted. Load recovery status to verify the current version before retrying.", "Conexión interrumpida. Cargue el estado de recuperación para verificar la versión actual antes de reintentar.")); }
+    } finally {
+      if (epoch === sessionEpoch.current) { setCurrentAccountPassword(""); setNewPassword(""); recoveryLock.current = false; setRecoveryBusy(false); }
     }
   };
 
@@ -424,13 +462,17 @@ export function LivingBrief() {
       {showAdmin && isSuperAdmin && (
         <div style={{ ...card, marginBottom: 16, display: "grid", gap: 18 }}>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontWeight: 700 }}><KeyRound size={15} /> Change gate password</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontWeight: 700 }}><KeyRound size={15} /> {tt("Optional gate credential maintenance", "Mantenimiento opcional de credencial de puerta")}</div>
+            <p>{tt("This administrator action resets the Living Brief gate credential and invalidates existing Brief sessions. Normal authorized document access does not require this reset or an email password.", "Esta acción administrativa restablece la credencial del Living Brief e invalida sus sesiones existentes. El acceso autorizado normal a documentos no requiere este restablecimiento ni una contraseña de correo.")}</p>
+            <button disabled={recoveryBusy} onClick={loadRecoveryStatus}>{tt("Load recovery status", "Cargar estado de recuperación")}</button>
+            {recoveryBusy && <p role="status">{tt("Processing credential request…", "Procesando solicitud de credencial…")}</p>}
+            {recoveryStatus && <p role="status">{recoveryStatus}</p>}
             <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 220px), 1fr))" }}>
               <input type="password" value={currentAccountPassword} onChange={(e) => setCurrentAccountPassword(e.target.value)} placeholder={tt("Confirm account password", "Confirme la contrasena de cuenta")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
               <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={tt("New gate password (12+ chars)", "Nueva contrasena de puerta (12+ caracteres)")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
               <input value={resetReason} onChange={(e) => setResetReason(e.target.value)} placeholder={tt("Audit reason", "Motivo de auditoria")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
               <input value={resetConfirmation} onChange={(e) => setResetConfirmation(e.target.value)} placeholder="RESET_LIVING_BRIEF_GATE" style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
-              <button onClick={changePassword} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>Update</button>
+              <button disabled={recoveryBusy || recoveryVersion === null || !currentAccountPassword || newPassword.length < 12 || !resetReason.trim() || resetConfirmation !== "RESET_LIVING_BRIEF_GATE"} onClick={changePassword} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 14px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>{tt("Reset gate credential", "Restablecer credencial de puerta")}</button>
             </div>
             <div style={{ fontSize: 12, marginTop: 6, color: "hsl(var(--muted-foreground))" }}>
               {tt(

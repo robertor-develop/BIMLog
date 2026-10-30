@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import bcrypt from "bcryptjs";
 
 const connection = process.env.PROD_DATABASE_URL;
 if (!connection) throw new Error("An isolated local PROD_DATABASE_URL is required");
@@ -248,6 +249,23 @@ const serializedResponses = JSON.stringify({
 });
 assert.doesNotMatch(serializedResponses, /postgres(?:ql)?:\/\/|JWT_SECRET|password_hash|[A-Z]:\\|node_modules|\.git[\\/]/i);
 check("API responses expose no credentials filesystem paths or repository internals", true);
+
+const fixtureAccountPassword="local-fixture-account-secret-only";
+await pool.query(`UPDATE users SET password_hash=$1 WHERE id=910001`,[await bcrypt.hash(fixtureAccountPassword,4)]);
+assert.equal((await api("/living-brief/password/recovery",readerToken)).status,403);
+const recovery=await api("/living-brief/password/recovery",adminToken);
+assert.equal(recovery.status,200);
+assert.equal(recovery.body.expectedCredentialVersion,1);
+const resetBody={currentAccountPassword:fixtureAccountPassword,newPassword:"local-fixture-new-gate-only",reason:"Local isolated recovery acceptance",confirmation:"RESET_LIVING_BRIEF_GATE",expectedCredentialVersion:1};
+assert.equal((await api("/living-brief/password",adminToken,{method:"POST",body:JSON.stringify({...resetBody,confirmation:"incorrect"})})).status,400);
+assert.equal((await api("/living-brief/password",adminToken,{method:"POST",body:JSON.stringify({...resetBody,currentAccountPassword:"incorrect"})})).status,403);
+assert.equal((await api("/living-brief/password",adminToken,{method:"POST",body:JSON.stringify(resetBody)})).status,200);
+assert.equal((await api("/living-brief/password/recovery",adminToken)).body.expectedCredentialVersion,2);
+assert.equal((await api("/living-brief/docs",readerToken,{headers:{"x-brief-token":readerBrief}})).status,401);
+assert.equal((await api("/living-brief/password",adminToken,{method:"POST",body:JSON.stringify(resetBody)})).status,409);
+const resetAudit=await pool.query(`SELECT count(*)::integer AS n FROM living_brief_gate_audit WHERE action='reset' AND actor_user_id=910001`);
+assert.equal(resetAudit.rows[0].n,1);
+check("recovery/reset requires administrator revalidation and confirmation, persists version, invalidates sessions and rejects stale reset with one audit entry",true);
 
 await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
 await mirror.synchronizeLivingBriefMirror();
