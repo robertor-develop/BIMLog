@@ -4381,35 +4381,31 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       // Dark header bar
       doc.rect(0, 0, W, 135).fill(reportTheme.dark);
 
-      // Company logo if available
-      if (logoBase64 && logoType) {
-        try {
-          doc.image(logoBase64, M, 15, { height: 50, fit: [120, 50] });
-          doc.fontSize(18).font("Helvetica-Bold").fillColor("white")
-            .text(user?.companyName ?? "Company", M + 130, 22);
-        } catch {
-          doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
-            .text(user?.companyName ?? "Company", M, 20);
-        }
-      } else {
-        doc.fontSize(30).font("Helvetica-Bold").fillColor("white")
-          .text(user?.companyName ?? "Company", M, 20);
-      }
-
-      // Report title top right
+      const leftHeaderW=CW*0.52-12;
+      const rightHeaderX=M+CW*0.52+8;
+      const rightHeaderW=W-M-rightHeaderX;
+      const companyName=user?.companyName??"Company";
+      const drawCompany=(x:number,width:number,maximumSize:number)=>{
+        let size=maximumSize;doc.font("Helvetica-Bold").fontSize(size).fillColor("white");
+        while(size>9&&doc.widthOfString(companyName)>width){size--;doc.fontSize(size);}
+        doc.text(companyName,x,20,{width,height:38,lineBreak:true,ellipsis:true});
+      };
+      if(logoBase64&&logoType){
+        try{doc.image(logoBase64,M,15,{height:40,fit:[110,40]});drawCompany(M+120,leftHeaderW-120,18);}
+        catch{drawCompany(M,leftHeaderW,24);}
+      }else drawCompany(M,leftHeaderW,24);
       doc.fontSize(12).font("Helvetica-Bold").fillColor("white")
-        .text(title, M, 20, { align: "right", width: CW });
-
+        .text(title,rightHeaderX,20,{align:"right",width:rightHeaderW,height:36,lineBreak:true,ellipsis:true});
       // Separator line
       doc.moveTo(M, 62).lineTo(W - M, 62).strokeColor("#4B7EC8").lineWidth(0.5).stroke();
 
       // Prepared by and date
       doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
-        .text(`Prepared by: ${user?.fullName ?? ""}`, M, 70);
+        .text(`Prepared by: ${user?.fullName ?? ""}`, M, 70,{width:leftHeaderW,lineBreak:false,ellipsis:true});
       doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
         .text(new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }), M, 84);
       doc.fontSize(9).font("Helvetica").fillColor("#BFDBFE")
-        .text(user?.email ?? "", M, 70, { align: "right", width: CW });
+        .text(user?.email ?? "", rightHeaderX, 70, { align: "right", width: rightHeaderW,lineBreak:false,ellipsis:true });
 
       // Powered by - very subtle bottom right
       doc.fontSize(7.5).font("Helvetica").fillColor("#7BA4C8")
@@ -4426,7 +4422,8 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
 
       doc.y = 198;
 
-      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text("Executive Summary", M, doc.y);
+      const rankingConfirmed=report.status==="complete"&&[report.p1Count,report.p2Count,report.p3Count,report.p4Count].every(value=>typeof value==="number"&&Number.isFinite(value));
+      doc.fontSize(13).font("Helvetica-Bold").fillColor("#111827").text(rankingConfirmed?"Executive Summary":"Executive Summary (ranking not confirmed)", M, doc.y);
       doc.moveDown(0.5);
 
       const cardY = doc.y;
@@ -4441,7 +4438,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
         const x = M + i * (cardW + 10);
         doc.rect(x, cardY, cardW, 70).fillAndStroke(card.bg, card.border);
         doc.fontSize(28).font("Helvetica-Bold").fillColor(card.text)
-          .text(String(card.value), x, cardY + 10, { width: cardW, align: "center" });
+          .text(rankingConfirmed?String(card.value):"-", x, cardY + 10, { width: cardW, align: "center" });
         doc.fontSize(8).font("Helvetica-Bold").fillColor(card.text)
           .text(card.label, x, cardY + 46, { width: cardW, align: "center" });
       });
