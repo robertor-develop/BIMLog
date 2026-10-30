@@ -3890,12 +3890,16 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
 router.get("/projects/:projectId/clashes/:clashId", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const clashId = Number(req.params.clashId);
+  res.set("Cache-Control", "private, no-store");
+  if (!Number.isSafeInteger(projectId) || projectId <= 0 || !/^\d+$/.test(String(req.params.clashId)) || !Number.isSafeInteger(clashId) || clashId <= 0 || clashId > 2147483647) {
+    res.status(400).json({ error: "invalid_clash_identity" }); return;
+  }
   try {
     const [row] = await db.select({ id: clashesTable.id, reportId: clashesTable.clashReportId })
       .from(clashesTable).innerJoin(clashReportsTable, and(eq(clashReportsTable.id, clashesTable.clashReportId), eq(clashReportsTable.projectId, projectId)))
       .where(and(eq(clashesTable.id, clashId), eq(clashesTable.projectId, projectId), isNull(clashesTable.deletedAt))).limit(1);
     if (!row) { res.status(404).json({ error: "clash_not_accessible" }); return; }
-    res.json(row);
+    res.set("X-BIMLog-Project-Id", String(projectId)).json(row);
   } catch { res.status(500).json({ error: "clash_lookup_failed" }); }
 });
 

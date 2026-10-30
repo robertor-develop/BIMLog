@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExternalLink, RefreshCw } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
+import { resolveOriginalClash } from "@/lib/resolve-original-clash";
 
 const API = "/api/v1";
 
@@ -18,6 +19,8 @@ const label = (value?: string | null) => value ? value.replace(/[_-]+/g, " ").re
 export function MeetingClashesPanel({ projectId, meetingId, links, canWrite, reload }: { projectId: number; meetingId: number; links: MeetingClashLink[]; canWrite: boolean; reload: () => Promise<void> }) {
   const { lang } = useI18n(); const { token } = useAuthStore(); const t = (en: string, es: string) => lang === "es" ? es : en;
   const [busy, setBusy] = useState(false), [message, setMessage] = useState(""), [error, setError] = useState("");
+  const sourceEpoch=useRef(0),sourceController=useRef<AbortController|null>(null),sourceLock=useRef(false);
+  useEffect(()=>{sourceEpoch.current++;sourceController.current?.abort();sourceLock.current=false;setError("");return()=>{sourceEpoch.current++;sourceController.current?.abort();};},[projectId,meetingId,token]);
   const [floor, setFloor] = useState("all"), [responsible, setResponsible] = useState("all"), [discipline, setDiscipline] = useState("all"), [group, setGroup] = useState("all"), [status, setStatus] = useState("all");
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
   const active = links.filter(link => link.linkState === "active"), history = links.filter(link => link.linkState !== "active");
@@ -26,7 +29,12 @@ export function MeetingClashesPanel({ projectId, meetingId, links, canWrite, rel
   const summaryText = (s: SyncSummary) => lang === "es" ? `${s.reviewed} revisados: ${s.added} nuevos, ${s.updated} actualizados, ${s.unchanged} sin cambios, ${s.sourceExcluded} cerrados/excluidos, ${s.userExcluded} exclusiones del usuario conservadas, ${s.failures} fallos. ${s.open} Abiertos y ${s.followUp} de Seguimiento.` : `${s.reviewed} reviewed: ${s.added} new, ${s.updated} updated, ${s.unchanged} unchanged, ${s.sourceExcluded} closed/excluded, ${s.userExcluded} user exclusions preserved, ${s.failures} failures. ${s.open} Open and ${s.followUp} Follow Up.`;
   const sync = async (mode: "load" | "refresh") => { setBusy(true); setError(""); setMessage(""); try { const response = await fetch(`${API}/projects/${projectId}/meetings/${meetingId}/clashes/${mode}`, { method: "POST", headers }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(); setMessage(summaryText(body.summary)); await reload(); } catch { setError(t("Could not update Meeting clashes. Retry.", "No se pudieron actualizar los Clashes de la reunión. Reintentar.")); } finally { setBusy(false); } };
   const update = async (link: MeetingClashLink, body: object) => { setError(""); const response = await fetch(`${API}/projects/${projectId}/meetings/${meetingId}/clashes/${link.clashId}`, { method: "PATCH", headers, body: JSON.stringify(body) }); if (!response.ok) { setError(t("The Meeting link could not be changed.", "No se pudo cambiar el enlace de la reunión.")); return; } await reload(); };
-  const openOriginal = async (link: MeetingClashLink) => { setError(""); const response = await fetch(`${API}/projects/${projectId}/clashes/${link.clashId}`, { headers }); if (!response.ok) { setError(t("The original Clash is deleted or no longer accessible.", "El Clash original fue eliminado o ya no es accesible.")); return; } const original = await response.json(); window.location.assign(`/projects/${projectId}/clash-reports?report=${original.reportId}&clash=${original.id}`); };
+  const openOriginal = async (link: MeetingClashLink) => {
+    if(sourceLock.current)return;sourceLock.current=true;setError("");const current=++sourceEpoch.current;sourceController.current=new AbortController();
+    try{if(!token)throw new Error("denied");const original=await resolveOriginalClash(projectId,link.clashId,token,sourceController.current.signal);if(current===sourceEpoch.current)window.location.assign(original.href);}
+    catch(failure){if(current===sourceEpoch.current)setError(failure instanceof Error&&failure.message==="missing"?t("The original Clash is deleted or no longer accessible.","El Clash original fue eliminado o ya no es accesible."):t("The original Clash could not be verified. Check your session and retry opening the source.","No se pudo verificar el Clash original. Revise su sesión y reintente abrir la fuente."));}
+    finally{if(current===sourceEpoch.current)sourceLock.current=false;}
+  };
   const filters = [[t("All floors / areas", "Todos los pisos / áreas"), floor, setFloor, values("floor")], [t("All responsible parties", "Todos los responsables"), responsible, setResponsible, values("responsible")], [t("All disciplines / trades", "Todas las disciplinas / oficios"), discipline, setDiscipline, values("discipline")], [t("All clash groups", "Todos los grupos de Clashes"), group, setGroup, values("group")], [t("All statuses", "Todos los estados"), status, setStatus, values("status")]] as const;
   return <div style={{ flexBasis: "100%", border: "1px solid #BFDBFE", borderRadius: 9, padding: 12, minWidth: 0 }}>
     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}><strong style={{ marginRight: "auto" }}>{t("Canonical Clash Log", "Registro canónico de Clashes")}</strong>{canWrite && <button className="btn btn-sm btn-outline" disabled={busy} onClick={() => void sync("load")}>{t("Load Open & Follow-Up Clashes", "Cargar Clashes Abiertos y de Seguimiento")}</button>}{canWrite && <button className="btn btn-sm btn-outline" disabled={busy} onClick={() => void sync("refresh")}><RefreshCw size={12} style={{ marginRight: 4 }} />{t("Refresh Clashes", "Actualizar Clashes")}</button>}</div>
