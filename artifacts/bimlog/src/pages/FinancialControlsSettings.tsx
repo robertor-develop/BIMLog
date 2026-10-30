@@ -117,6 +117,7 @@ export function FinancialControlsSettings() {
   });
   const [suspensionReason, setSuspensionReason] = useState("");
   const [loadError,setLoadError]=useState("");
+  const [bootstrapReceipt,setBootstrapReceipt]=useState<{contextId:string;grantId:string;companyId:number;projectId:number|null;administratorUserId:number}|null>(null);
   const [projectScopes,setProjectScopes]=useState<OwnState["projectScopes"]>([]);
   const loadRequest=useRef<AbortController|null>(null);
   useEffect(()=>{setProjectScopes([]);setProjectId("");},[token]);
@@ -128,6 +129,7 @@ export function FinancialControlsSettings() {
     reason: "",
   });
   useEffect(()=>{
+    setBootstrapReceipt(null);
     setContext({baseCurrency:"USD",reportingCurrency:"USD",permittedCurrencies:"USD",effectiveFrom:"",effectiveTo:"",reason:""});
     setGrant({userId:"",authority:"financial_viewer",effectiveFrom:"",effectiveTo:"",reason:""});
     setPolicy({transactionCategory:"",currency:"USD",maxAmount:"",effectiveFrom:"",effectiveTo:"",reason:""});
@@ -221,7 +223,11 @@ export function FinancialControlsSettings() {
   async function mutate(path: string, body: Record<string, unknown>) {
     setBusy(true);
     try {
-      await request(path, { method: "POST", body: JSON.stringify(body) });
+      const result=await request(path, { method: "POST", body: JSON.stringify(body) });
+      if(path==="/financial-controls/bootstrap"){
+        if(typeof result.contextId!=="string"||typeof result.grantId!=="string"||result.scope?.companyId!==state?.scope.companyId||result.scope?.projectId!==(projectId?Number(projectId):null))throw new Error(tt("Bootstrap response could not be verified. Reload the selected scope before retrying.","No se pudo verificar la respuesta de inicio. Recargue el alcance seleccionado antes de reintentar."));
+        setBootstrapReceipt({contextId:result.contextId,grantId:result.grantId,companyId:result.scope.companyId,projectId:result.scope.projectId,administratorUserId:Number(body.administratorUserId)});
+      }
       toast({
         title: tt("Control recorded", "Control registrado"),
         description: tt(
@@ -310,6 +316,7 @@ export function FinancialControlsSettings() {
               </select>
             </label>
           </section>
+          {bootstrapReceipt&&<section role="status" style={card}><h2>{tt("Initial financial controls recorded","Controles financieros iniciales registrados")}</h2><p>{tt("Company / project","Empresa / proyecto")}: {bootstrapReceipt.companyId} / {bootstrapReceipt.projectId??tt("Company scope","Alcance de empresa")}</p><p>{tt("Financial Administrator user","Usuario Administrador Financiero")}: {bootstrapReceipt.administratorUserId}</p><p style={{overflowWrap:"anywhere"}}>{tt("Initial context ID","ID de contexto inicial")}: {bootstrapReceipt.contextId}</p><p style={{overflowWrap:"anywhere"}}>{tt("Administrator grant ID","ID de concesión de administrador")}: {bootstrapReceipt.grantId}</p><p>{tt("Use normal financial administration after this initial setup. No transaction was approved or created.","Use la administración financiera normal después de este inicio. No se aprobó ni creó ninguna transacción.")}</p></section>}
           {loadError&&<div role="alert"><p>{loadError}</p><Button disabled={loading||busy} onClick={()=>void load()}>{tt("Retry selected financial scope","Reintentar alcance financiero seleccionado")}</Button></div>}
           {loading ? (
             <p>
@@ -486,6 +493,8 @@ export function FinancialControlsSettings() {
                           "Administrator user ID",
                           "ID de usuario administrador",
                         )}
+                        aria-label={tt("Initial Financial Administrator user ID","ID de usuario Administrador Financiero inicial")}
+                        type="number" min={1} step={1}
                         value={bootstrap.administratorUserId}
                         onChange={(e) =>
                           setBootstrap({
@@ -545,8 +554,8 @@ export function FinancialControlsSettings() {
                     <Button
                       disabled={
                         busy ||
-                        !bootstrap.reason ||
-                        !bootstrap.administratorUserId
+                        bootstrap.reason.trim().length<3 ||
+                        !Number.isSafeInteger(Number(bootstrap.administratorUserId))||Number(bootstrap.administratorUserId)<=0
                       }
                       style={{ marginTop: 8 }}
                       onClick={() =>
