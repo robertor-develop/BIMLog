@@ -157,6 +157,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const exportLock=useRef(false);
   const [exporting,setExporting]=useState(false);
   const [repairing,setRepairing]=useState(false);
+  const [resetting,setResetting]=useState(false);
+  useEffect(()=>setResetting(false),[projectId,token]);
   // Drives the refresh banner. Only true when a background poll detects the
   // server's viewpoint set differs from what is currently displayed - never shown
   // speculatively. Reset to false whenever we (re)load the displayed list.
@@ -313,7 +315,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  const loadViewpoints = async (expectedId?:number) => {
+  const loadViewpoints = async (expectedId?:number,expectEmpty=false) => {
     const context=contextEpoch.current;
     setLoading(true);
     setError("");
@@ -324,6 +326,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         if(context!==contextEpoch.current)return false;
         if(d.success!==true||!Array.isArray(d.viewpoints)||!d.viewpoints.every((row:LensViewpoint)=>Number.isSafeInteger(row.id)&&row.projectId===projectId))throw new Error("Invalid project viewpoint inventory");
         if(expectedId&&!d.viewpoints.some((row:LensViewpoint)=>row.id===expectedId))throw new Error("Saved revision was not present in refreshed project records");
+        if(expectEmpty&&d.viewpoints.length)throw new Error(t("Reset inventory is not empty. Reload before continuing.","El inventario no está vacío. Recargue antes de continuar."));
         setViewpoints(d.viewpoints ?? []);
         setSelectedIds(new Set());
         setUpdatesAvailable(false);
@@ -506,28 +509,26 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const resetTestData = async () => {
-    const c = window.prompt(t(
-      "DANGER - permanently delete ALL Lens viewpoints, sequence counters, report history and revision history for THIS project (testing reset). Type RESET to confirm.",
-      "PELIGRO - eliminar permanentemente TODAS las vistas Lens, contadores, historial de reportes e historial de revisiones de ESTE proyecto (reinicio de prueba). Escriba RESET para confirmar."
+    if(!canWrite||actionLock.current)return;
+    actionLock.current=true;
+    const context=contextEpoch.current;
+    const confirmation=window.prompt(t(
+      `DANGER - permanently delete ALL Lens viewpoints, captures, counters and report/revision history for project ${projectId} (testing reset). Type RESET to confirm.`,
+      `PELIGRO - eliminar TODAS las vistas Lens, capturas, contadores e historial de reportes/revisiones del proyecto ${projectId} (prueba). Escriba RESET para confirmar.`
     ));
-    if (c !== "RESET") return;
-    try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reset-test-data`, {
-        method: "POST",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ confirm: "RESET" }),
-      });
-      if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.message || d.error || "Reset failed"); return; }
-      setViewpoints([]);
-      setHistory([]);
-      await loadViewpoints();
-      await loadHistory();
-      const msg = t("Lens test data reset", "Datos de prueba Lens reiniciados");
-      setToast(msg);
-      setTimeout(() => setToast(cur => (cur === msg ? null : cur)), 2800);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-    }
+    if(confirmation!=="RESET"){actionLock.current=false;return;}
+    setResetting(true);setError("");
+    try{
+      const response=await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/reset-test-data`,{method:"POST",headers:{...headers,"Content-Type":"application/json"},body:JSON.stringify({confirm:"RESET"})});
+      const receipt=await response.json().catch(()=>({}));
+      if(context!==contextEpoch.current)return;
+      if(!response.ok)throw new Error(receipt.message||receipt.error||t("Reset failed","No se pudo reiniciar"));
+      if(receipt.success!==true||!Number.isInteger(receipt.viewpointsDeleted))throw new Error(t("Invalid test reset receipt.","Respuesta de reinicio inválida."));
+      if(!await loadViewpoints(undefined,true)||!await loadHistory(undefined,true))throw new Error(t("Reset response received, but empty records could not be verified. Reload the viewpoints and report history.","Se recibió el reinicio, pero no se verificaron los registros vacíos. Recargue las vistas y el historial."));
+      if(context!==contextEpoch.current)return;
+      showToast(t("Lens test data reset; empty records verified.","Datos de prueba Lens reiniciados; registros vacíos verificados."));
+    }catch(error){if(context===contextEpoch.current)setError(error instanceof Error?error.message:String(error));}
+    finally{if(context===contextEpoch.current){actionLock.current=false;setResetting(false);}}
   };
 
   const repairChains = async () => {
@@ -930,7 +931,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  const loadHistory = async (deletedId?: number) => {
+  const loadHistory = async (deletedId?: number,expectEmpty=false) => {
     const context=contextEpoch.current;
     const request=++reportHistoryRequest.current;
     setReportHistoryLoading(true);
@@ -942,6 +943,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       if(!response.ok)throw new Error(data.message||data.error||t("Unable to load report history.","No se pudo cargar el historial de reportes."));
       if(data.projectId!==projectId||!Array.isArray(data.reports)||data.reports.some((row:LensReport)=>!Number.isSafeInteger(row.id)||typeof row.reportNumber!=="string"))throw new Error(t("Invalid report history response.","Respuesta de historial inválida."));
       if(deletedId!==undefined&&data.reports.some((row:LensReport)=>row.id===deletedId))throw new Error(t("Deleted report is still present. Reload history.","El reporte eliminado sigue presente. Recargue el historial."));
+      if(expectEmpty&&data.reports.length)throw new Error(t("Reset report history is not empty. Reload before continuing.","El historial no está vacío. Recargue antes de continuar."));
       setHistory(data.reports);
       return true;
     } catch(error) {
@@ -1085,6 +1087,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
             <button
               className="btn btn-sm btn-outline"
               onClick={resetTestData}
+              disabled={resetting} aria-busy={resetting}
               title={t("Testing only: clears Lens viewpoints, counters, reports, and revision history for this project", "Solo pruebas: borra vistas Lens, contadores, reportes e historial de revisiones de este proyecto")}
               style={{ display: "flex", alignItems: "center", gap: 6, color: "#B45309", borderColor: "#F59E0B" }}
             >

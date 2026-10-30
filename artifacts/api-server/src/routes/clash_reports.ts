@@ -2,7 +2,7 @@
 import { db, pool } from "@workspace/db";
 import { loadProjectCompanyChoices } from "../lib/project-company-choices";
 import type { Request } from "express";
-import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable, filesTable } from "@workspace/db/schema";
+import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable, lensIssueViewpointsTable, lensIssueViewpointRevisionsTable, lensNextPublishReceiptsTable, filesTable } from "@workspace/db/schema";
 import { eq, desc, asc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import {
@@ -3254,6 +3254,16 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/reset-test-data"
     }
     try {
       const result = await db.transaction(async (tx) => {
+        const selected = await tx.select({id:lensViewpointsTable.id}).from(lensViewpointsTable).where(eq(lensViewpointsTable.projectId, projectId)).for("update");
+        const issueIds=selected.map(row=>row.id);
+        if(issueIds.length){
+          const captures=await tx.select({id:lensIssueViewpointsTable.id}).from(lensIssueViewpointsTable).where(and(eq(lensIssueViewpointsTable.projectId,projectId),inArray(lensIssueViewpointsTable.issueId,issueIds)));
+          if(captures.length)await tx.delete(lensIssueViewpointRevisionsTable).where(inArray(lensIssueViewpointRevisionsTable.issueViewpointId,captures.map(row=>row.id)));
+          await tx.delete(lensIssueViewpointsTable).where(and(eq(lensIssueViewpointsTable.projectId,projectId),inArray(lensIssueViewpointsTable.issueId,issueIds)));
+          const receipts=await tx.select({id:lensNextPublishReceiptsTable.id}).from(lensNextPublishReceiptsTable).where(and(eq(lensNextPublishReceiptsTable.projectId,projectId),inArray(lensNextPublishReceiptsTable.viewpointId,issueIds))).limit(1);
+          if(receipts.length)throw new Error("lens_reset_immutable_history");
+          await tx.delete(linkedItemsTable).where(and(eq(linkedItemsTable.projectId,projectId),or(and(eq(linkedItemsTable.fromType,"lens_viewpoint"),inArray(linkedItemsTable.fromId,issueIds)),and(eq(linkedItemsTable.toType,"lens_viewpoint"),inArray(linkedItemsTable.toId,issueIds)))));
+        }
         const vpDel = await tx.delete(lensViewpointsTable)
           .where(eq(lensViewpointsTable.projectId, projectId))
           .returning({ id: lensViewpointsTable.id });
@@ -3264,11 +3274,15 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/reset-test-data"
           eq(activityLogTable.projectId, projectId),
           eq(activityLogTable.entityType, "lens_viewpoint"),
         ));
+        await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName,userCompanyName:req.user!.companyName,actionType:"lens_test_data_reset",entityType:"lens_reset",entityId:projectId,details:JSON.stringify({confirmation:"RESET",viewpointIds:issueIds,viewpointsDeleted:vpDel.length})});
         return { viewpointsDeleted: vpDel.length };
       });
       console.log(`[lens-reset] project=${projectId} wiped ${result.viewpointsDeleted} viewpoint(s) + counters + reports + events + lens activity`);
       res.json({ success: true, ...result });
     } catch (err) {
+      if(err instanceof Error&&err.message==="lens_reset_immutable_history"){res.status(409).json({error:"lens_reset_immutable_history",message:"This project has immutable publication history. No data was reset. Use a separate test project to preserve the published evidence."});return;}
+      const code=(err as {code?:string;cause?:{code?:string}})?.code??(err as {cause?:{code?:string}})?.cause?.code;
+      if(code==="23503"){res.status(409).json({error:"lens_reset_connected_records",message:"These viewpoints are used by connected workflows. No data was reset; preserve those records and review their dependencies."});return;}
       res.status(500).json({ error: "lens_reset_failed", message: err instanceof Error ? err.message : String(err) });
     }
   }
