@@ -3,6 +3,7 @@ import { FinancialApprovalPolicyRecords } from "@/components/FinancialApprovalPo
 import { FinancialAuthorityJournal } from "@/components/FinancialAuthorityJournal";
 import { FinancialContextRecords } from "@/components/FinancialContextRecords";
 import { SyntheticFinancialAuthorization } from "@/components/SyntheticFinancialAuthorization";
+import { FinancialGrantDetails } from "@/components/FinancialGrantDetails";
 import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -731,6 +732,7 @@ export function FinancialControlsSettings() {
                       >
                         <select
                           style={inputStyle}
+                          aria-label={tt("Financial authority recipient","Destinatario de autoridad financiera")}
                           value={grant.userId}
                           onChange={(e) =>
                             setGrant({ ...grant, userId: e.target.value })
@@ -747,6 +749,7 @@ export function FinancialControlsSettings() {
                         </select>
                         <select
                           style={inputStyle}
+                          aria-label={tt("Financial authority to grant","Autoridad financiera a conceder")}
                           value={grant.authority}
                           onChange={(e) =>
                             setGrant({ ...grant, authority: e.target.value })
@@ -818,14 +821,7 @@ export function FinancialControlsSettings() {
                               gap: 8,
                             }}
                           >
-                            <span>
-                              {g.full_name} ·{" "}
-                              {authorityLabel(String(g.authority))} · v
-                              {g.version}
-                              {g.revoked_at
-                                ? ` · ${tt("revoked", "revocada")}`
-                                : ""}
-                            </span>
+                            <FinancialGrantDetails grant={g} es={lang==='es'} label={authorityLabel(String(g.authority))}/>
                             {!g.revoked_at && (
                               <Button
                                 size="sm"
@@ -834,11 +830,11 @@ export function FinancialControlsSettings() {
                                 onClick={() => {
                                   const reason = window.prompt(
                                     tt(
-                                      "Reason for immediate revocation",
-                                      "Motivo de la revocación inmediata",
+                                      `Reason to revoke ${g.full_name} · ${authorityLabel(String(g.authority))} · ${g.scope_type} ${g.project_id??""} · grant ${g.id}`,
+                                      `Motivo para revocar ${g.full_name} · ${authorityLabel(String(g.authority))} · ${g.scope_type} ${g.project_id??""} · concesión ${g.id}`,
                                     ),
                                   );
-                                  if (reason)
+                                  if (reason?.trim())
                                     void mutate(
                                       `/financial-controls/grants/${g.id}/revoke`,
                                       { reason },

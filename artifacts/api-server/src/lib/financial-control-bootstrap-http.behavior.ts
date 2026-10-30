@@ -33,5 +33,15 @@ try{
   assert.equal((await request(12,{operation:'execute'},'evaluate')).status,400);
   assert.equal((await request(12,{operation:'approve',amount:{amount:'1e3',currency:'USD'}},'evaluate')).status,400);
   assert.equal((await pool.query(`SELECT count(*)::int n FROM financial_authority_journal WHERE event_type='authorization_evaluated'`)).rows[0].n,1);assert.equal((await pool.query('SELECT count(*)::int n FROM financial_context_versions')).rows[0].n,2);
-  console.log('Financial control HTTP: bootstrap/context persistence, synthetic denial/journal, invalid operation/exact-decimal refusal and no extra financial state PASS');
+  const grantInput={userId:12,authority:'cost_reviewer',reason:'Isolated review authority'};
+  assert.equal((await request(12,{...grantInput,userId:21},'grants')).status,400);
+  const granted=await request(12,grantInput,'grants');assert.equal(granted.status,201,JSON.stringify(granted.body));assert.ok(granted.body.id);
+  const revoked=await request(12,{reason:'Isolated authority period ended'},`grants/${granted.body.id}/revoke`);assert.equal(revoked.status,201,JSON.stringify(revoked.body));
+  assert.equal((await pool.query('SELECT count(*)::int n FROM financial_authority_revocations WHERE grant_id=$1',[granted.body.id])).rows[0].n,1);
+  const repeatRevoke=await request(12,{reason:'Repeated revoke must remain controlled'},`grants/${granted.body.id}/revoke`);assert.equal(repeatRevoke.status,409,JSON.stringify(repeatRevoke.body));
+  assert.equal(repeatRevoke.body.code,'FIN_GRANT_ALREADY_REVOKED');
+  assert.equal((await pool.query('SELECT count(*)::int n FROM financial_authority_revocations WHERE grant_id=$1',[granted.body.id])).rows[0].n,1);
+  const concurrentGrant=await request(12,{...grantInput,authority:'financial_viewer'},'grants');assert.equal(concurrentGrant.status,201);
+  const concurrent=await Promise.all([request(12,{reason:'Concurrent revoke one'},`grants/${concurrentGrant.body.id}/revoke`),request(12,{reason:'Concurrent revoke two'},`grants/${concurrentGrant.body.id}/revoke`)]);assert.deepEqual(concurrent.map(result=>result.status).sort(),[201,409]);assert.equal((await pool.query('SELECT count(*)::int n FROM financial_authority_revocations WHERE grant_id=$1',[concurrentGrant.body.id])).rows[0].n,1);
+  console.log('Financial controls HTTP: bootstrap/context/simulation plus grant scope, persisted revoke and controlled repeated-revoke conflict PASS');
 }finally{server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));await pool.end();}
