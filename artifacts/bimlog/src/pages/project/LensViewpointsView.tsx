@@ -156,6 +156,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const contextEpoch=useRef(0),actionLock=useRef(false);
   const exportLock=useRef(false);
   const [exporting,setExporting]=useState(false);
+  const [repairing,setRepairing]=useState(false);
   // Drives the refresh banner. Only true when a background poll detects the
   // server's viewpoint set differs from what is currently displayed - never shown
   // speculatively. Reset to false whenever we (re)load the displayed list.
@@ -335,7 +336,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  useEffect(() => {contextEpoch.current++;actionLock.current=false;exportLock.current=false;setExporting(false);setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
+  useEffect(() => {contextEpoch.current++;actionLock.current=false;exportLock.current=false;setExporting(false);setRepairing(false);setFloorCorrectionOpen(false);setResponsibleOpen(false);setFloorCorrectionPhase("input");setResponsiblePhase("input");setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
 
   // Silently refetch the viewpoint list (no loading spinner) so the table can
   // be refreshed on demand (manual refresh banner) without a loading flicker.
@@ -520,20 +521,30 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const repairChains = async () => {
+    if (!canWrite || actionLock.current) return;
+    actionLock.current = true;
+    const context = contextEpoch.current;
+    setRepairing(true);
+    setError("");
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/repair-lifecycle`, {
         method: "POST",
         headers: { ...headers, "Content-Type": "application/json" },
       });
       const d = await r.json().catch(() => ({}));
+      if (context !== contextEpoch.current) return;
       if (!r.ok) { setError(d.message || d.error || "Repair failed"); return; }
-      await loadViewpoints();
+      if (d.success !== true || !Number.isInteger(d.repaired) || !Number.isInteger(d.checked)) throw new Error(t("Invalid repair receipt.", "Respuesta de reparación inválida."));
+      if (!await loadViewpoints()) throw new Error(t("Saved response received, but records could not be reopened. Reload before another action.", "Se recibió la respuesta de guardado, pero no se pudieron reabrir los registros. Recargue antes de otra acción."));
+      if (context !== contextEpoch.current) return;
       showToast(t(
-        `Repaired ${d.repaired ?? 0} orphaned chain record(s)`,
-        `Se repararon ${d.repaired ?? 0} registro(s) huerfanos de cadena`
+        `Repaired ${d.repaired} orphaned chain record(s); skipped ${d.skipped ?? 0} conflicting record(s)`,
+        `Se repararon ${d.repaired} registro(s) huerfanos de cadena; se omitieron ${d.skipped ?? 0} registro(s) en conflicto`
       ));
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if (context === contextEpoch.current) setError(e instanceof Error ? e.message : String(e));
+    } finally {
+      if (context === contextEpoch.current) { actionLock.current = false; setRepairing(false); }
     }
   };
 
@@ -1035,6 +1046,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
             <button
               className="btn btn-sm btn-outline"
               onClick={repairChains}
+              disabled={repairing} aria-busy={repairing}
               title={t("Repair orphaned revision chains if stale Navisworks metadata marked current rows as superseded", "Reparar cadenas huerfanas si metadatos antiguos de Navisworks marcaron filas vigentes como reemplazadas")}
               style={{ display: "flex", alignItems: "center", gap: 6, color: "#1D4ED8", borderColor: "#93C5FD" }}
             >

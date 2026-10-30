@@ -2162,32 +2162,29 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/repair-lifecycle
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
-      const rows = await db.select({
-        id: lensViewpointsTable.id,
-        displayId: lensViewpointsTable.displayId,
-        lifecycleStatus: lensViewpointsTable.lifecycleStatus,
-        supersedesId: lensViewpointsTable.supersedesId,
-      }).from(lensViewpointsTable).where(eq(lensViewpointsTable.projectId, projectId));
-      const hasChild = new Set(rows.map(r => r.supersedesId).filter((x): x is number => x != null));
-      const activeDisplayIds = new Set(
-        rows
-          .filter(r => (r.lifecycleStatus ?? "active") === "active" && r.displayId)
-          .map(r => r.displayId as string)
-      );
-      const repairIds = rows
-        .filter(r => r.lifecycleStatus === "superseded")
-        .filter(r => !hasChild.has(r.id))
-        .filter(r => !r.displayId || !activeDisplayIds.has(r.displayId))
-        .map(r => r.id);
-      if (repairIds.length === 0) {
-        res.json({ success: true, repaired: 0, checked: rows.length });
-        return;
-      }
-      const repaired = await db.update(lensViewpointsTable)
-        .set({ lifecycleStatus: "active", updatedAt: new Date() })
-        .where(and(eq(lensViewpointsTable.projectId, projectId), inArray(lensViewpointsTable.id, repairIds)))
-        .returning({ id: lensViewpointsTable.id });
-      res.json({ success: true, repaired: repaired.length, checked: rows.length });
+      const result = await db.transaction(async tx => {
+        const rows = await tx.select().from(lensViewpointsTable)
+          .where(eq(lensViewpointsTable.projectId, projectId)).for("update");
+        const hasChild = new Set(rows.map(row => row.supersedesId).filter((id): id is number => id != null));
+        const activeDisplayIds = new Set(rows.filter(row => (row.lifecycleStatus ?? "active") === "active" && row.displayId).map(row => row.displayId!));
+        const candidates = rows.filter(row => row.lifecycleStatus === "superseded" && !hasChild.has(row.id));
+        const candidatesByDisplay = new Map<string, number>();
+        for (const row of candidates) if (row.displayId) candidatesByDisplay.set(row.displayId, (candidatesByDisplay.get(row.displayId) ?? 0) + 1);
+        const repairable = candidates.filter(row => !row.displayId || (!activeDisplayIds.has(row.displayId) && candidatesByDisplay.get(row.displayId) === 1));
+        if (!repairable.length) return { repaired: 0, checked: rows.length, skipped: candidates.length };
+        const repaired = await tx.update(lensViewpointsTable)
+          .set({ lifecycleStatus: "active", updatedAt: new Date() })
+          .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "superseded"), inArray(lensViewpointsTable.id, repairable.map(row => row.id))))
+          .returning({ id: lensViewpointsTable.id });
+        await tx.insert(activityLogTable).values(repaired.map(row => ({
+          projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+          actionType: "lens_lifecycle_repaired", entityType: "lens_viewpoint", entityId: row.id,
+          fileNameBefore: "superseded", fileNameAfter: "active",
+          details: "Restored orphaned revision marker: no successor and no competing active display identity.",
+        })));
+        return { repaired: repaired.length, checked: rows.length, skipped: candidates.length - repairable.length };
+      });
+      res.json({ success: true, ...result });
     } catch (err) {
       res.status(500).json({ error: "lens_lifecycle_repair_failed", message: err instanceof Error ? err.message : String(err) });
     }
