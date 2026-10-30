@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import express from "express";
-import {randomUUID} from "node:crypto";
+import {randomUUID,createHash} from "node:crypto";
 const target=new URL(process.env.PROD_DATABASE_URL??"postgres://invalid/invalid");if(target.hostname!=="127.0.0.1"||target.port!=="55439"||target.pathname!=="/bimlog_master_catalog_test")throw new Error("Only guarded task setup fixture permitted");
 process.env.JWT_SECRET="local-setup-fixture-only";
+delete process.env.SENDGRID_API_KEY;
 const {pool}=await import("@workspace/db"),{default:router}=await import("../routes/onboarding");const {signToken}=await import("../middlewares/auth");
 await pool.query(`ALTER TABLE projects ADD COLUMN IF NOT EXISTS code text,ADD COLUMN IF NOT EXISTS name text`);
 await pool.query(`CREATE TABLE IF NOT EXISTS rfis(id serial PRIMARY KEY,project_id integer NOT NULL,subject text NOT NULL,created_at timestamptz NOT NULL DEFAULT now());CREATE TABLE IF NOT EXISTS submittals(id serial PRIMARY KEY,project_id integer NOT NULL,title text NOT NULL,created_at timestamptz NOT NULL DEFAULT now());CREATE TABLE IF NOT EXISTS files(id serial PRIMARY KEY,project_id integer NOT NULL,file_name text NOT NULL,created_at timestamptz NOT NULL DEFAULT now())`);
@@ -15,6 +16,7 @@ await pool.query(`INSERT INTO project_company_binding_versions(project_id,compan
 const app=express();app.use(express.json());app.use("/api/v1",router);const server=app.listen(0,"127.0.0.1");await new Promise<void>(resolve=>server.once("listening",resolve));const address=server.address();if(!address||typeof address==="string")throw new Error("Fixture bind failed");
 const call=async(user:typeof first,path="/onboarding",body?:unknown)=>{const response=await fetch(`http://127.0.0.1:${address.port}/api/v1${path}`,{method:body===undefined?"GET":"PATCH",headers:{Authorization:`Bearer ${token(user)}`,"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body)});return {status:response.status,body:await response.json() as Record<string,unknown>};};
 const complete=async(user:typeof first)=>{const response=await fetch(`http://127.0.0.1:${address.port}/api/v1/onboarding/complete`,{method:"POST",headers:{Authorization:`Bearer ${token(user)}`}});return {status:response.status,body:await response.json() as Record<string,unknown>};};
+const post=async(path:string,body:unknown,user?:typeof first)=>{const response=await fetch(`http://127.0.0.1:${address.port}/api/v1${path}`,{method:"POST",headers:{"Content-Type":"application/json",...(user?{Authorization:`Bearer ${token(user)}`}:{})},body:JSON.stringify(body)});return {status:response.status,body:await response.json() as Record<string,unknown>};};
 try{
   let result=await call(first);assert.equal(result.status,200);assert.equal(result.body.projectCount,1);assert.equal((result.body.firstValueEvidence as {label:string}).label,"Authorized fixture RFI");
   result=await call(second);assert.equal(result.body.projectCount,0);assert.equal(result.body.firstValueEvidence,null);assert.equal((await call(second,"/onboarding",{acknowledgeFirstValue:true})).status,409);
@@ -23,9 +25,19 @@ try{
   result=await call(first);assert.equal(result.body.workProfile,"designer");assert.deepEqual(result.body.preferredDisciplines,["Electrical"]);assert.deepEqual(result.body.preferredDocumentTypes,["RFIs"]);assert.ok((result.body.completedSteps as string[]).includes("guide_paused"));
   assert.equal((await call(second)).body.workProfile,null);assert.equal((await call(first,"/onboarding",{guidePaused:false})).status,200);assert.equal(((await call(first)).body.completedSteps as string[]).includes("guide_paused"),false);
   assert.equal((await complete(first)).status,409);
+  assert.equal((await post("/onboarding/email-verification",{})).status,401);
+  assert.equal((await post("/onboarding/email-verification",{},second)).status,503);
+  assert.equal((await call(second)).body.emailVerifiedAt,null);
+  assert.equal((await post("/onboarding/email-verification/confirm",{token:"short"})).status,400);
+  const verificationToken=`synthetic-local-verification-${randomUUID()}`;const digest=(value:string)=>createHash("sha256").update(value).digest("hex");
+  await pool.query(`INSERT INTO email_verification_tokens(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval '1 hour')`,[digest(verificationToken),second.id]);
+  assert.equal((await post("/onboarding/email-verification/confirm",{token:verificationToken})).status,200);
+  assert.equal(typeof (await call(second)).body.emailVerifiedAt,"string");assert.equal((await call(first)).body.emailVerifiedAt,null);
+  assert.equal((await post("/onboarding/email-verification/confirm",{token:verificationToken})).status,409);
+  const expired=`expired-local-verification-${randomUUID()}`;await pool.query(`INSERT INTO email_verification_tokens(token_hash,user_id,expires_at) VALUES($1,$2,now()-interval '1 hour')`,[digest(expired),first.id]);assert.equal((await post("/onboarding/email-verification/confirm",{token:expired})).status,409);
   await pool.query(`UPDATE user_onboarding_profiles SET email_verified_at=now(),work_profile='designer' WHERE user_id=ANY($1::integer[])`,[[first.id,second.id]]);
   assert.equal((await complete(second)).status,409);
   const completed=await complete(first);assert.equal(completed.status,200);assert.equal(typeof completed.body.completedAt,"string");assert.equal((await complete(first)).body.completedAt,completed.body.completedAt);assert.equal((await call(first)).body.completedAt,completed.body.completedAt);
   await pool.query(`UPDATE users SET company_id=$1 WHERE id=$2`,[otherCompany.id,first.id]);result=await call(first);assert.equal(result.body.companyName,marker+"-other");assert.equal(result.body.firstValueEvidence,null);assert.equal(result.body.projectCount,0);assert.equal((await complete(first)).status,409);
   console.log("Own setup real HTTP: saved preferences/reopen, invalid profile400, isolated users, active+company-scoped project evidence, inactive/foreign acknowledgement409 and current-company move PASS");
-}finally{await new Promise<void>(resolve=>server.close(()=>resolve()));await pool.query(`DELETE FROM rfis WHERE project_id=ANY($1::integer[])`,[[project.id,foreign.id]]);await pool.query(`DELETE FROM project_members WHERE project_id=ANY($1::integer[])`,[[project.id,foreign.id]]);await pool.query(`DELETE FROM project_company_binding_versions WHERE project_id=ANY($1::integer[])`,[[project.id,foreign.id]]);await pool.query(`DELETE FROM projects WHERE id=ANY($1::integer[])`,[[project.id,foreign.id]]);await pool.query(`DELETE FROM user_onboarding_profiles WHERE user_id=ANY($1::integer[])`,[[first.id,second.id,other.id]]);await pool.query(`DELETE FROM users WHERE id=ANY($1::integer[])`,[[first.id,second.id,other.id]]);await pool.query(`DELETE FROM companies WHERE id=ANY($1::integer[])`,[[company.id,otherCompany.id]]);await pool.end();}
+}finally{await new Promise<void>(resolve=>server.close(()=>resolve()));await pool.query(`DELETE FROM rfis WHERE project_id=ANY($1::integer[])`,[[project.id,foreign.id]]);await pool.query(`DELETE FROM project_members WHERE project_id=ANY($1::integer[])`,[[project.id,foreign.id]]);await pool.query(`DELETE FROM project_company_binding_versions WHERE project_id=ANY($1::integer[])`,[[project.id,foreign.id]]);await pool.query(`DELETE FROM projects WHERE id=ANY($1::integer[])`,[[project.id,foreign.id]]);await pool.query(`DELETE FROM email_verification_tokens WHERE user_id=ANY($1::integer[])`,[[first.id,second.id,other.id]]);await pool.query(`DELETE FROM user_onboarding_profiles WHERE user_id=ANY($1::integer[])`,[[first.id,second.id,other.id]]);await pool.query(`DELETE FROM users WHERE id=ANY($1::integer[])`,[[first.id,second.id,other.id]]);await pool.query(`DELETE FROM companies WHERE id=ANY($1::integer[])`,[[company.id,otherCompany.id]]);await pool.end();}
