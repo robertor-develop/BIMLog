@@ -66,6 +66,7 @@ const MyAiUsage = namedPage(() => import("@/pages/MyAiUsage"), "MyAiUsage");
 const MyConnectionFiles = namedPage(() => import("@/pages/MyConnectionFiles"), "MyConnectionFiles");
 const MySetup = namedPage(() => import("@/pages/MySetup"), "MySetup");
 const ProjectAgentReview = namedPage(() => import("@/pages/ProjectAgentReview"), "ProjectAgentReview");
+const ProjectUserAssignment = namedPage(() => import("@/pages/ProjectUserAssignment"), "ProjectUserAssignment");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
 const FixSpecificLink = namedPage(() => import("@/pages/parity/admin-fix-specific-link"), "FixSpecificLink");
@@ -431,6 +432,9 @@ function Router() {
       </Route>
       <Route path="/project-agent-review">
         {() => <ProtectedRoute component={ProjectAgentReview} />}
+      </Route>
+      <Route path="/project-user-assignment">
+        {() => <ProtectedRoute component={ProjectUserAssignment} />}
       </Route>
       <Route path="/admin">
         {() => <AccessRoute component={AdminPanel} surface="project_administration" />}

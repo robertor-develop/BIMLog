@@ -365,7 +365,7 @@ router.post("/projects/:projectId/assign-company-user", authMiddleware, requireP
           [company] = await db.insert(companiesTable).values({ name: newUserData.companyName }).returning();
         }
 
-        const tempPassword = await bcrypt.hash(`temp-${Date.now()}`, 10);
+          const tempPassword = await bcrypt.hash(crypto.randomBytes(32).toString("base64url"), 10);
         const [newUser] = await db.insert(usersTable).values({
           email: newUserData.email.toLowerCase(),
           fullName: newUserData.fullName,
@@ -383,7 +383,8 @@ router.post("/projects/:projectId/assign-company-user", authMiddleware, requireP
       .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, assignUserId))).limit(1))[0];
 
     if (existingMember) {
-      res.json({ ok: true, message: "User already a project member", memberId: existingMember.id, userId: assignUserId });
+        if (existingMember.status !== "active") { res.status(409).json({code:"USER_ASSIGNMENT_INACTIVE",error:"Membership is inactive. Review it in the project team before assigning; no access was restored."}); return; }
+        res.json({ ok: true, message: "User already an active project member", memberId: existingMember.id, userId: assignUserId, role:existingMember.role, status:existingMember.status, companyCode, existing:true });
       return;
     }
 
@@ -403,6 +404,8 @@ router.post("/projects/:projectId/assign-company-user", authMiddleware, requireP
       userName: user?.fullName,
       userEmail: user?.email,
       companyCode,
+      role:member.role,
+      status:member.status,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Internal server error";
