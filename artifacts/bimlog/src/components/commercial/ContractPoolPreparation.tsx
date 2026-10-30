@@ -1,43 +1,46 @@
-import React,{useEffect,useState} from "react";
-
+import React,{useEffect,useRef,useState} from "react";
+type Allocation={directProductionAmount:string;rows:Array<{phaseId:string;name:string;percent:string;amount:string}>};
+type Item={id:string;name:string;workflowFingerprint:string;eligible:boolean;prepared:boolean;planFingerprint?:string|null;allocation?:Allocation|null};
+type Pool={id:string|null;canPrepare:boolean;canPrepareItems?:boolean;projectId:number;currency:string;workItems:Item[]};
 export function ContractPoolPreparation({path,fingerprint,api,tt}:{path:string;fingerprint:string;
-  api:(path:string,init?:RequestInit)=>Promise<any>;tt:(en:string,es:string)=>string}){
-  const [state,setState]=useState<{id:string|null;canPrepare:boolean;canPrepareItems?:boolean;projectId?:number;currency?:string;
-    workItems?:Array<{id:string;name:string;workflowFingerprint:string;eligible:boolean;prepared:boolean;
-      allocation?:{directProductionAmount:string;rows:Array<{phaseId:string;name:string;percent:string;amount:string}>}|null}>}|null>(null);
-  const [busy,setBusy]=useState(false),[error,setError]=useState("");
-  useEffect(()=>{let cancelled=false;setState(null);setError("");
-    api(path).then(result=>{if(!cancelled)setState(result);}).catch(()=>{if(!cancelled)setError(tt("Contract funding could not be verified. Reopen this contract before continuing.","No se pudieron verificar los fondos. Vuelva a abrir este contrato antes de continuar."));});
-    return()=>{cancelled=true;};
-  },[path,fingerprint]);
-  const prepare=async()=>{setBusy(true);setError("");try{
-    await api(path,{method:"POST",body:JSON.stringify({confirmationFingerprint:fingerprint})});
-    setState(await api(path));
-  }catch{setError(tt("The funding request was not confirmed. Reopen this contract to check its approval, permissions and existing funds before retrying.","No se confirmó la preparación. Vuelva a abrir el contrato para revisar la aprobación, los permisos y los fondos existentes antes de reintentar."));}finally{setBusy(false);}};
-  return <section aria-label={tt("Prepare approved contract pools","Preparar fondos contractuales aprobados")}>
-    <p>{tt("Prepare the approved contract pools once. The incentive reserve then appears in Manual Bonuses for authorized proposals and independent review. This does not authorize payment.","Prepare una sola vez los fondos contractuales aprobados. La reserva de incentivos aparecerá en Bonos manuales para propuestas autorizadas y revisión independiente. Esto no autoriza pagos.")}</p>
-    {error&&<p role="alert">{error}</p>}
-    {!state&&!error&&<p role="status">{tt("Checking contract funds…","Verificando fondos del contrato…")}</p>}
-    {state?.id?<p role="status">{tt("Contract pools prepared. Reopening or retrying does not create another reserve.","Fondos contractuales preparados. Reabrir o reintentar no crea otra reserva.")}</p>:
-      state?.canPrepare?<button disabled={busy} onClick={()=>void prepare()}>{busy?tt("Preparing…","Preparando…"):tt("Prepare approved contract pools","Preparar fondos contractuales aprobados")}</button>:
-      state&&<p>{tt("Your role can review these amounts but cannot prepare funding.","Su rol puede revisar estos montos, pero no preparar fondos.")}</p>}
-    {!!state?.workItems?.length&&<section aria-label={tt("Work Item production plans","Planes de producción de entregables")}>
-      <h4>{tt("Work Item production plans","Planes de producción de entregables")}</h4>
-      <p>{tt("Each item uses its approved contract allocation and frozen workflow phases. Contract reserves are not repeated here.","Cada entregable usa su asignación contractual aprobada y las fases de su flujo congelado. Las reservas del contrato no se repiten aquí.")}</p>
-      {state.workItems.map(item=><section key={item.id} aria-label={item.name}>
-        <strong>{item.name}</strong>
-        {item.allocation&&<><p>{item.allocation.directProductionAmount} {state.currency}</p>
-          <ul>{item.allocation.rows?.map(row=><li key={row.phaseId}>{row.name}: {row.percent}% — {row.amount} {state.currency}</li>)}</ul></>}
-        {item.prepared?<p>{tt("Immutable plan prepared","Plan inmutable preparado")}</p>:
-          !item.eligible?<p>{tt("The activated workflow must match this contract's approved APU and phases. Review its template binding before preparing funds.","El flujo activado debe coincidir con el APU aprobado y sus fases. Revise la plantilla vinculada antes de preparar fondos.")}</p>:
-          state.canPrepareItems?<button disabled={busy} onClick={async()=>{setBusy(true);setError("");try{
-            await api(`/projects/${state.projectId}/edt-engine/economic-plans`,{method:"POST",body:JSON.stringify({workItemId:item.id,
-              expectedContractFingerprint:fingerprint,expectedWorkflowFingerprint:item.workflowFingerprint})});
-            setState(await api(path));
-          }catch{setError(tt("The item plan was not confirmed. Reopen the contract to check its current approval, workflow and permissions.","No se confirmó el plan. Vuelva a abrir el contrato para revisar su aprobación, flujo y permisos actuales."));}finally{setBusy(false);}}}>
-            {busy?tt("Preparing…","Preparando…"):tt("Prepare item production plan","Preparar plan de producción del entregable")}</button>:
-          <p>{tt("Your role can review this allocation but cannot prepare the item plan.","Su rol puede revisar esta asignación, pero no preparar el plan del entregable.")}</p>}
-      </section>)}
-    </section>}
-  </section>;
+ api:(path:string,init?:RequestInit)=>Promise<any>;tt:(en:string,es:string)=>string}){
+ const [state,setState]=useState<Pool|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
+ const generation=useRef(0),lock=useRef(false),abort=useRef<AbortController|null>(null),currentApi=useRef(api),pending=useRef<{id?:string;workItemId?:string;planFingerprint?:string}|null>(null);
+ currentApi.current=api;const expectedProject=Number(path.match(/^\/projects\/(\d+)\/financial\/contracts\//)?.[1]);
+ const read=async(current:number)=>{const result=await currentApi.current(path,{signal:abort.current!.signal}) as Pool;if(current!==generation.current)return;
+  if(!Number.isSafeInteger(expectedProject)||result.projectId!==expectedProject||typeof result.canPrepare!=="boolean"||!Array.isArray(result.workItems)||typeof result.currency!=="string"||!result.workItems.every(item=>typeof item.id==="string"&&typeof item.prepared==="boolean"&&typeof item.eligible==="boolean"&&(!item.prepared||/^[a-f0-9]{64}$/.test(item.planFingerprint??""))))throw new Error(tt("The saved funding response does not match this contract project.","La respuesta de fondos guardados no coincide con el proyecto del contrato."));
+  if(pending.current){const receipt=pending.current;if(receipt.id&&result.id!==receipt.id)throw new Error(tt("The saved contract pool has not been reopened. Retry verification.","No se ha reabierto el fondo contractual guardado. Reintente verificar."));
+   if(receipt.workItemId){const item=result.workItems.find(item=>item.id===receipt.workItemId);if(!item?.prepared||item.planFingerprint!==receipt.planFingerprint||!item.allocation)throw new Error(tt("The exact saved item plan has not been reopened. Retry verification without preparing it again.","No se ha reabierto el plan exacto guardado. Reintente verificar sin prepararlo otra vez."));}
+   pending.current=null;setNotice(tt("Exact saved funding evidence reopened and verified.","Evidencia exacta de fondos guardados reabierta y verificada."));}
+  setState(result);
+ };
+ useEffect(()=>{const current=++generation.current;abort.current?.abort();abort.current=new AbortController();lock.current=true;setState(null);setError("");setNotice("");setBusy(true);pending.current=null;
+  void read(current).catch(cause=>{if(current===generation.current)setError(cause instanceof Error?cause.message:tt("Contract funding could not be verified.","No se pudieron verificar los fondos."));}).finally(()=>{if(current===generation.current){lock.current=false;setBusy(false);}});
+  return()=>{generation.current++;abort.current?.abort();};
+ },[path,fingerprint]);
+ const run=async(work:(current:number)=>Promise<void>)=>{if(lock.current)return;lock.current=true;setBusy(true);setError("");setNotice("");abort.current=new AbortController();const current=++generation.current;try{await work(current);}catch(cause){if(current===generation.current){setState(null);setError(cause instanceof Error?cause.message:tt("Funding could not be verified. Reopen and check permissions or saved versions.","No se pudieron verificar los fondos. Reabra y revise permisos o versiones guardadas."));}}finally{if(current===generation.current){lock.current=false;setBusy(false);}}};
+ const refresh=()=>run(async current=>{setState(null);await read(current);});
+ const prepare=(item?:Item)=>run(async current=>{if(pending.current){await read(current);return;}if(!state)throw new Error(tt("Reopen the saved contract first.","Reabra primero el contrato guardado."));
+  const result=await currentApi.current(item? `/projects/${expectedProject}/edt-engine/economic-plans`:path,{method:"POST",signal:abort.current!.signal,body:JSON.stringify(item?{workItemId:item.id,expectedContractFingerprint:fingerprint,expectedWorkflowFingerprint:item.workflowFingerprint}:{confirmationFingerprint:fingerprint})});if(current!==generation.current)return;
+  if(item){if(result.projectId!==expectedProject||result.workItemId!==item.id||!/^[a-f0-9]{64}$/.test(result.planFingerprint))throw new Error(tt("The item plan receipt is incomplete. Reopen the saved contract before retrying.","El recibo del plan está incompleto. Reabra el contrato guardado antes de reintentar."));pending.current={workItemId:item.id,planFingerprint:result.planFingerprint};}
+  else{if(typeof result.id!=="string"||!result.id)throw new Error(tt("The contract pool receipt is incomplete.","El recibo del fondo contractual está incompleto."));pending.current={id:result.id};}
+  setState(null);await read(current);
+ });
+ return <section id="work-item-production-plans" aria-label={tt("Prepare approved contract pools","Preparar fondos contractuales aprobados")} style={{overflowWrap:"anywhere"}}>
+  <h4>{tt("Approved funding and Work Item production plans","Fondos aprobados y planes de producción de entregables")}</h4>
+  <p>{tt("Prepare the approved contract pools once. The incentive reserve then appears in Manual Bonuses for authorized proposals and independent review. This does not authorize payment.","Prepare una sola vez los fondos contractuales aprobados. La reserva de incentivos aparecerá en Bonos manuales para propuestas autorizadas y revisión independiente. Esto no autoriza pagos.")}</p>
+  <button disabled={busy} onClick={()=>void refresh()}>{tt("Reopen saved funding evidence","Reabrir evidencia de fondos guardados")}</button>
+  {error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}{busy&&<p role="status">{tt("Verifying funding…","Verificando fondos…")}</p>}
+  {state?.id?<p role="status">{tt("Contract pools prepared. Reopening or retrying does not create another reserve.","Fondos contractuales preparados. Reabrir o reintentar no crea otra reserva.")} #{state.id}</p>:
+   state?.canPrepare?<button disabled={busy} onClick={()=>void prepare()}>{tt("Prepare approved contract pools","Preparar fondos contractuales aprobados")}</button>:
+   state&&<p>{tt("Your role can review these amounts but cannot prepare funding.","Su rol puede revisar estos montos, pero no preparar fondos.")}</p>}
+  {state&&<section aria-label={tt("Work Item production plans","Planes de producción de entregables")}><h4>{tt("Work Item production plans","Planes de producción de entregables")}</h4>
+   <p>{tt("Each item uses its independently approved contract allocation and frozen workflow phases. Contract reserves are not repeated here. Review the source contract and workflow before preparing its immutable plan.","Cada entregable usa su asignación contractual aprobada independientemente y las fases de su flujo congelado. Las reservas del contrato no se repiten aquí. Revise el contrato y flujo fuente antes de preparar su plan inmutable.")}</p>
+   {state.workItems.length===0&&<p>{tt("No activated Work Item uses this exact contract version.","Ningún trabajo activado usa esta versión exacta del contrato.")}</p>}
+   {state.workItems.map(item=><section key={item.id} aria-label={item.name}><strong>{item.name}</strong><p>{item.id}</p>
+    {item.allocation&&<><p>{item.allocation.directProductionAmount} {state.currency}</p><ul>{item.allocation.rows.map(row=><li key={row.phaseId}>{row.name}: {row.percent}% — {row.amount} {state.currency}</li>)}</ul></>}
+    {item.prepared?<p>{tt("Immutable plan prepared","Plan inmutable preparado")} · {item.planFingerprint}</p>:!item.eligible?<p>{tt("The activated workflow must match this contract's approved APU and phases. Review its template binding before preparing funds.","El flujo activado debe coincidir con el APU aprobado y sus fases. Revise la plantilla vinculada antes de preparar fondos.")}</p>:state.canPrepareItems?<button disabled={busy} onClick={()=>void prepare(item)}>{tt("Prepare item production plan","Preparar plan de producción del entregable")}</button>:<p>{tt("Your role can review this allocation but cannot prepare the item plan.","Su rol puede revisar esta asignación, pero no preparar el plan del entregable.")}</p>}
+   </section>)}
+  </section>}
+ </section>;
 }

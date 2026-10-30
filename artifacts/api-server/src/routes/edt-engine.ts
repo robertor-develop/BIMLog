@@ -177,7 +177,7 @@ router.post("/projects/:projectId/edt-engine/economic-plans",authMiddleware,asyn
       throw new EdtEngineConflict("REQUEST_BODY_INVALID","Current contract and workflow fingerprints are required.");
     const result=await prepareApprovedWorkItemEconomicPlan({actor,projectId,workItemId:requiredText(body,"workItemId"),
       expectedContractFingerprint,expectedWorkflowFingerprint});
-    res.status(result.idempotent?200:201).json(result);
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 

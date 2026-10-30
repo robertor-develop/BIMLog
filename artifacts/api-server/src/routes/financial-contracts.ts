@@ -70,11 +70,11 @@ router.get("/projects/:projectId/financial/contracts/:contractId/versions/:versi
       if(item.version_id){try{allocation=approvedItemPhaseAllocation(source,item.stable_scope_item_id,item);}
         catch(error){if(!(error instanceof EdtEngineConflict)&&!(error instanceof FinancialControlError))throw error;}}
       return {id:item.id,name:item.name,workflowFingerprint:item.fingerprint,eligible:allocation!==null,
-        prepared:!!item.plan_fingerprint,allocation:item.plan_fingerprint?item.resolved_allocation:allocation};
+        prepared:!!item.plan_fingerprint,planFingerprint:item.plan_fingerprint??null,allocation:item.plan_fingerprint?item.resolved_allocation:allocation};
     });
     return {id:stored?.id??null,canPrepare,canPrepareItems,workItems,projectId:source.projectId,currency:source.currency,paymentAuthorized:false};
   });
-  res.json(result);
+  res.set("Cache-Control","private, no-store").json(result);
 }));
 router.post("/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",run(async(req,res)=>{
   if(!req.body||Object.keys(req.body).some(key=>key!=="confirmationFingerprint")||
