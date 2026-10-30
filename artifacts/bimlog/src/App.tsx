@@ -77,6 +77,7 @@ const FindOriginalClash = namedPage(() => import("@/pages/FindOriginalClash"), "
 const ProcoreConnectionStatus = namedPage(() => import("@/pages/ProcoreConnectionStatus"), "ProcoreConnectionStatus");
 const CoordinationOperations = namedPage(() => import("@/pages/CoordinationOperations"), "CoordinationOperations");
 const MeetingLinkActions = namedPage(() => import("@/pages/MeetingLinkActions"), "MeetingLinkActions");
+const ProjectDocumentSearch = namedPage(() => import("@/pages/ProjectDocumentSearch"), "ProjectDocumentSearch");
 const PluginSyncReview = namedPage(() => import("@/pages/PluginSyncReview"), "PluginSyncReview");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
@@ -476,6 +477,9 @@ function Router() {
       </Route>
       <Route path="/meeting-link-actions">
         {() => <ProtectedRoute component={MeetingLinkActions} />}
+      </Route>
+      <Route path="/project-document-search">
+        {() => <ProtectedRoute component={ProjectDocumentSearch} />}
       </Route>
       <Route path="/plugin-sync-review">
         {() => <ProtectedRoute component={PluginSyncReview} />}
