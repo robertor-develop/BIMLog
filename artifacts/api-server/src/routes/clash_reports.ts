@@ -1030,6 +1030,16 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
         const parsed = Number(raw);
         return parsed;
       };
+      // Validate every supplied row before any reconciliation can persist one.
+      for(const row of viewpoints){
+        if(!norm(row?.viewpointId))continue;
+        const source=readSourceProjectId(row);
+        if(source!=null&&(!Number.isFinite(source)||source!==projectId)){res.status(409).json({error:"project_mismatch",message:"This snapshot includes another project; no rows were synchronized.",expectedProjectId:projectId,receivedProjectId:Number.isFinite(source)?source:null});return;}
+        const visual=typeof row?.visualStateJson==="string"?row.visualStateJson.trim():"";
+        const digest=typeof row?.visualStateDigest==="string"&&/^[a-f0-9]{64}$/i.test(row.visualStateDigest.trim())?row.visualStateDigest.trim():"";
+        if(visual&&Buffer.byteLength(visual,"utf8")>4*1024*1024){res.status(413).json({error:"visual_state_too_large",message:"Lens visual state exceeds the 4 MiB native-bridge limit."});return;}
+        if(Boolean(visual)!==Boolean(digest)){res.status(422).json({error:"visual_state_incomplete",message:"Visual state JSON and its SHA-256 digest must be supplied together."});return;}
+      }
       // The plugin sends an all-zeros GUID as a placeholder for viewpoints saved
       // in earlier sessions. It is not a real key; treating it as one would make
       // every such viewpoint collide on the (project_id, navisworks_guid) unique
@@ -1186,6 +1196,7 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
             await tx.update(lensViewpointsTable)
               .set({ tradeFloorSeq: r.seq, tradeFloorSeqCorrection: r.correction })
               .where(eq(lensViewpointsTable.id, inserted.id));
+            await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName??"",userCompanyName:req.user!.companyName??"",actionType:"lens_viewpoint_synced",entityType:"lens_viewpoint",entityId:inserted.id,details:JSON.stringify({viewpointId,navisworksGuid,displayId,tradeFloorSeq:r.seq,lifecycleStatus:replayLifecycle})});
             return { inserted, assignedSeq: r.seq, correction: r.correction };
           });
           if (txResult) {
