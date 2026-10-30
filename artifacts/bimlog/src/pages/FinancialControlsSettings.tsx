@@ -1,4 +1,5 @@
 import { formatOptionalInstantDate } from "@workspace/api-zod";
+import { FinancialApprovalPolicyRecords } from "@/components/FinancialApprovalPolicyRecords";
 import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -889,6 +890,7 @@ export function FinancialControlsSettings() {
                       >
                         <select
                           style={inputStyle}
+                          aria-label={tt("Approval policy transaction category","Categoría de transacción de política de aprobación")}
                           value={policy.transactionCategory}
                           onChange={(e) =>
                             setPolicy({
@@ -905,6 +907,7 @@ export function FinancialControlsSettings() {
                         </select>
                         <input
                           style={inputStyle}
+                          aria-label={tt("Approval policy currency","Moneda de política de aprobación")}
                           value={policy.currency}
                           onChange={(e) =>
                             setPolicy({
@@ -916,6 +919,7 @@ export function FinancialControlsSettings() {
                         <input
                           style={inputStyle}
                           inputMode="decimal"
+                          aria-label={tt("Exact approval limit","Límite exacto de aprobación")}
                           placeholder={tt(
                             "Exact decimal limit",
                             "Límite decimal exacto",
@@ -1003,20 +1007,7 @@ export function FinancialControlsSettings() {
                           "Agregar versión de política",
                         )}
                       </Button>
-                      <div
-                        style={{ fontSize: 11, marginTop: 8, color: "#64748B" }}
-                      >
-                        {admin.policies
-                          .map(
-                            (p) =>
-                              `${p.transaction_category} · ${p.max_amount} ${p.currency} · v${p.version} · ${new Date(p.effective_from).toLocaleDateString()}${p.effective_to ? ` – ${new Date(p.effective_to).toLocaleDateString()}` : ""}`,
-                          )
-                          .join(" | ") ||
-                          tt(
-                            "No approval policies",
-                            "Sin políticas de aprobación",
-                          )}
-                      </div>
+                      <FinancialApprovalPolicyRecords policies={admin.policies} es={lang==='es'}/>
                     </section>
                     <section
                       style={{
