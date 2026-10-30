@@ -56,6 +56,7 @@ const KnowledgeStarterLibrary = namedPage(() => import("@/pages/KnowledgeStarter
 const KnowledgeTaxonomy = namedPage(() => import("@/pages/KnowledgeTaxonomy"), "KnowledgeTaxonomy");
 const PendingWork = namedPage(() => import("@/pages/PendingWork"), "PendingWork");
 const MacSyncAvailability = namedPage(() => import("@/pages/MacSyncAvailability"), "MacSyncAvailability");
+const FeatureAccessInspector = namedPage(() => import("@/pages/FeatureAccessInspector"), "FeatureAccessInspector");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
 const FixSpecificLink = namedPage(() => import("@/pages/parity/admin-fix-specific-link"), "FixSpecificLink");
@@ -391,6 +392,9 @@ function Router() {
       </Route>
       <Route path="/sync-agent/mac">
         {() => <ProtectedRoute component={MacSyncAvailability} />}
+      </Route>
+      <Route path="/feature-access">
+        {() => <ProtectedRoute component={FeatureAccessInspector} />}
       </Route>
       <Route path="/admin">
         {() => <AccessRoute component={AdminPanel} surface="project_administration" />}
