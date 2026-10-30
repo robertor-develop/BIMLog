@@ -233,6 +233,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [history, setHistory] = useState<LensReport[]>([]);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const pdfLock=useRef(false);
+  const [reportError,setReportError]=useState("");
+  useEffect(()=>{pdfLock.current=false;setGenerating(false);setReportModalOpen(false);setReportError("");},[projectId,token]);
   const [members, setMembers] = useState<{ userFullName: string; userCompanyName: string }[]>([]);
   const todayIso = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
@@ -941,6 +944,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const exportPdf = async () => {
+    if (pdfLock.current) return;
+    pdfLock.current=true;
+    const context=contextEpoch.current;
+    setReportError("");
     setGenerating(true);
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/report`, {
@@ -968,12 +975,16 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           filters: { priority: form.fPriority, status: form.fStatus, floor: form.fFloor, trade: form.fTrade, reportType: form.fReportType },
         }),
       });
+      if (context !== contextEpoch.current) return;
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
-        showToast(d.message || d.error || t("Failed to generate report", "No se pudo generar el reporte"));
+        setReportError(d.message || d.error || t("Failed to generate report", "No se pudo generar el reporte"));
         return;
       }
+      if (!r.headers.get("content-type")?.includes("application/pdf") || !r.headers.get("X-Lens-Report-Number") || !/^[a-f0-9]{64}$/i.test(r.headers.get("X-Lens-Report-Hash") || "")) throw new Error(t("Invalid PDF report receipt. No download was started.", "Respuesta de reporte PDF inválida. No se inició la descarga."));
       const blob = await r.blob();
+      if (context !== contextEpoch.current) return;
+      if (!blob.size) throw new Error(t("The PDF report is empty.", "El reporte PDF está vacío."));
       const cd = r.headers.get("Content-Disposition") || "";
       const m = cd.match(/filename="([^"]+)"/);
       const fname = m ? m[1] : `Lens-Report-${projectId}.pdf`;
@@ -984,14 +995,14 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url),1000);
       setReportModalOpen(false);
       showToast(t("Report generated", "Reporte generado"));
       loadHistory();
     } catch (e) {
-      showToast(e instanceof Error ? e.message : String(e));
+      if (context === contextEpoch.current) setReportError(e instanceof Error ? e.message : String(e));
     } finally {
-      setGenerating(false);
+      if (context === contextEpoch.current) {pdfLock.current=false;setGenerating(false);}
     }
   };
 
@@ -1829,6 +1840,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: isExportModalNarrow ? 8 : 16, overflowY: "auto", boxSizing: "border-box" }}
         >
           <div
+            role="dialog" aria-modal="true" aria-label={t("Lens PDF report", "Reporte PDF Lens")}
             onClick={e => e.stopPropagation()}
             style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 560, minWidth: 0, boxSizing: "border-box", boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: isExportModalNarrow ? 14 : 24, margin: isExportModalNarrow ? "8px 0" : "24px 0" }}
           >
@@ -2020,6 +2032,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
                 style={{ fontSize: 13, padding: "8px 16px" }}>
                 {t("Cancel", "Cancelar")}
               </button>
+              {reportError && <div role="alert" style={{color:"#B91C1C"}}>{reportError}</div>}
               <button className="btn btn-sm btn-primary" disabled={generating} onClick={exportPdf}
                 style={{ fontSize: 13, padding: "8px 16px", display: "flex", alignItems: "center", gap: 6 }}>
                 <FileDown size={14} />

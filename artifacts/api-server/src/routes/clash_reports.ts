@@ -3276,6 +3276,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
     const projectId = Number(req.params.projectId);
     const userId = req.user!.userId;
     try {
+      const rendered = await db.transaction(async tx => {
       const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId));
       if (!project) { res.status(404).json({ error: "not_found", message: "Project not found" }); return; }
 
@@ -3441,7 +3442,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
         if (usedNums.has(reportNumber)) { seq++; continue; }
         contentHash = computeContentHash({ projectId, reportNumber, reportDate: reportDate.toISOString(), filters, accessScope: scope.label, watermarkType, isOnePager, idFormat, includeNonActive, includeResolved, showGroupIds, showLifecycleState, showRevisionColumn, includeAuditRecords, includeReportHistory, includeRevisionHistory, healthScore, snapshot });
         try {
-          await db.insert(lensViewpointReportsTable).values({
+          await tx.transaction(async savepoint => savepoint.insert(lensViewpointReportsTable).values({
             projectId,
             reportNumber,
             generatedById: userId,
@@ -3457,7 +3458,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
             isExecutiveOnePager: isOnePager,
             snapshot,
             contentHash,
-          });
+          }));
           inserted = true;
         } catch (insErr) {
           const codeStr = (insErr as any)?.code ?? (insErr as any)?.cause?.code;
@@ -3471,7 +3472,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       }
 
       // -- Build the PDF --
-      const reportHistoryRows = includeReportHistory && scope.fullProject ? await db.select({
+      const reportHistoryRows = includeReportHistory && scope.fullProject ? await tx.select({
         reportNumber: lensViewpointReportsTable.reportNumber,
         generatedByName: lensViewpointReportsTable.generatedByName,
         generatedAt: lensViewpointReportsTable.generatedAt,
@@ -3485,9 +3486,12 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       const doc = createPdfDocument({ size: "TABLOID", layout: "landscape", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });
       const reportTitle = `${reportNumber} - Lens Coordination Report`;
       const reportTheme = REPORT_THEMES.lens.coordination;
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(reportTitle)}"`);
-      doc.pipe(res);
+      const chunks: Buffer[] = [];
+      const pdfReady = new Promise<Buffer>((resolve, reject) => {
+        doc.on("data", chunk => chunks.push(Buffer.from(chunk)));
+        doc.on("end", () => resolve(Buffer.concat(chunks)));
+        doc.on("error", reject);
+      }).then(buffer => ({ buffer }), error => ({ error }));
 
       const W = doc.page.width;
       const M = 40;
@@ -3812,6 +3816,17 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/report",
       });
 
       doc.end();
+      const pdf = await pdfReady;
+      if ("error" in pdf) throw pdf.error;
+      return { buffer: pdf.buffer, filename: reportFileName(reportTitle), reportNumber, contentHash };
+      });
+      if (!rendered) return;
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename="${rendered.filename}"`);
+      res.setHeader("Cache-Control", "private, no-store");
+      res.setHeader("X-Lens-Report-Number", rendered.reportNumber);
+      res.setHeader("X-Lens-Report-Hash", rendered.contentHash);
+      res.send(rendered.buffer);
     } catch (err) {
       console.error("[lens-pdf] FAILED:", err);
       if (!res.headersSent) res.status(500).json({ error: "lens_pdf_failed", message: err instanceof Error ? err.message : String(err) });
