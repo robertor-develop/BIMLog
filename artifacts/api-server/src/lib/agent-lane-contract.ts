@@ -37,13 +37,17 @@ export function parseIntakeEnvelope(value: unknown): IntakeEnvelope {
   if (!UUID.test(String(input.requestId||""))) throw new Error("INTAKE_REQUEST_ID_INVALID");
   if (!Number.isSafeInteger(input.companyId)||Number(input.companyId)<=0||!Number.isSafeInteger(input.projectId)||Number(input.projectId)<=0) throw new Error("INTAKE_AUTHORITY_INVALID");
   if (input.canonicalMutation !== false || input.reviewState !== "preview") throw new Error("INTAKE_REVIEW_REQUIRED");
+  if(typeof input.source!=="string"||!["procore","sharepoint","outlook","google_drive","dropbox","upload"].includes(input.source))throw new Error("INTAKE_SOURCE_INVALID");
+  if(typeof input.sourceAccountId!=="string"||!input.sourceAccountId.trim()||input.sourceAccountId.length>200)throw new Error("INTAKE_SOURCE_ACCOUNT_INVALID");
+  if(typeof input.discoveredAt!=="string"||!/^\d{4}-\d{2}-\d{2}T/.test(input.discoveredAt)||!Number.isFinite(Date.parse(input.discoveredAt)))throw new Error("INTAKE_DISCOVERY_TIME_INVALID");
   const records=Array.isArray(input.records)?input.records:[];
   if (!records.length||records.length>100) throw new Error("INTAKE_RECORD_COUNT_INVALID");
   const parsed=records.map((record)=>{
     if(!record||typeof record!=="object"||Array.isArray(record))throw new Error("INTAKE_RECORD_INVALID");
     const item=record as Record<string,unknown>;
+    if(["sourceId","versionId","locator","sha256"].some(key=>typeof item[key]!=="string"))throw new Error("INTAKE_PROVENANCE_INVALID");
     const sourceId=String(item.sourceId||"").trim(),versionId=String(item.versionId||"").trim(),locator=String(item.locator||"").trim(),sha256=String(item.sha256||"").trim();
-    if(!sourceId||!versionId||!locator||!SHA256.test(sha256))throw new Error("INTAKE_PROVENANCE_INVALID");
+    if(!sourceId||sourceId.length>500||!versionId||versionId.length>500||!locator||locator.length>2000||!SHA256.test(sha256))throw new Error("INTAKE_PROVENANCE_INVALID");
     return {sourceId,versionId,locator,sha256};
   });
   return {...input,companyId:Number(input.companyId),projectId:Number(input.projectId),records:parsed,source:String(input.source) as IntakeSource,sourceAccountId:String(input.sourceAccountId||""),discoveredAt:String(input.discoveredAt||"")} as IntakeEnvelope;
