@@ -45,6 +45,7 @@ const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any,
   }
 };
 const project = (req: any) => positiveId(req.params.projectId, "projectId");
+router.use("/projects/:projectId/financial/contracts/:contractId/versions/:versionId",(_req,res,next)=>{res.set("Cache-Control","private, no-store");next();});
 router.get("/projects/:projectId/financial/contracts/:contractId/versions/:versionId/economic-pools",run(async(req,res)=>{
   await ensureEdtEngineSchema();
   const result=await withEdtTransaction(async client=>{
@@ -72,7 +73,7 @@ router.get("/projects/:projectId/financial/contracts/:contractId/versions/:versi
       return {id:item.id,name:item.name,workflowFingerprint:item.fingerprint,eligible:allocation!==null,
         prepared:!!item.plan_fingerprint,planFingerprint:item.plan_fingerprint??null,allocation:item.plan_fingerprint?item.resolved_allocation:allocation};
     });
-    return {id:stored?.id??null,canPrepare,canPrepareItems,workItems,projectId:source.projectId,currency:source.currency,paymentAuthorized:false};
+    return {id:stored?.id??null,canPrepare,canPrepareItems,workItems,projectId:source.projectId,contractId:source.contractId,contractVersionId:source.contractVersionId,contractFingerprint:source.contractFingerprint,sourceFingerprint:source.sourceFingerprint,contractPools:source.contractPools,approval:source.approval,budget:source.budget,apu:{versionId:source.apu.versionId,fingerprint:source.apu.fingerprint},currency:source.currency,paymentAuthorized:false};
   });
   res.set("Cache-Control","private, no-store").json(result);
 }));
@@ -84,7 +85,7 @@ router.post("/projects/:projectId/financial/contracts/:contractId/versions/:vers
   try{
     const result=await withEdtTransaction(client=>freezeApprovedContractPools(client,{actorUserId:req.user.userId,projectId:project(req),
       contractVersionId:req.params.versionId,expectedContractId:req.params.contractId,expectedContractFingerprint:req.body.confirmationFingerprint}));
-    res.json({id:result.id,idempotent:result.idempotent,paymentAuthorized:false});
+    res.set("Cache-Control","private, no-store").json({id:result.id,idempotent:result.idempotent,projectId:result.source.projectId,contractId:result.source.contractId,contractVersionId:result.source.contractVersionId,contractFingerprint:result.source.contractFingerprint,sourceFingerprint:result.source.sourceFingerprint,paymentAuthorized:false});
   }catch(error){
     if(error&&typeof error==="object"&&"code" in error&&["40001","40P01","23505"].includes(String(error.code)))
       throw new FinancialControlError(409,"CONTRACT_POOLS_CONCURRENT_CHANGE","Another request changed this contract. Reopen it and retry.");

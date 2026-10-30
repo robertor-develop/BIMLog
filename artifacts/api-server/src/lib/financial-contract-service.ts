@@ -240,7 +240,7 @@ export async function transitionContract(input: { actorUserId: number; projectId
     await requireRecordPermission(client, { contractId, userId: auth.actor.userId, permission: rule.permission });
     const actorSql = String(input.action) === "submit" ? ",submitted_by_id=$4,submitted_at=now()" : String(input.action) === "start_review" ? ",reviewed_by_id=$4,reviewed_at=now()" : "";
     await client.query(`UPDATE financial_contract_versions SET status=$1,outcome_reason=$2,revision=revision+1,updated_at=now()${actorSql} WHERE id=$3`, actorSql ? [rule.to, reason, versionId, auth.actor.userId] : [rule.to, reason, versionId]);
-    await history(client, { companyId: Number(root.company_id), projectId, contractId, contractVersionId: versionId, actorUserId: auth.actor.userId, eventType: `contract_${rule.to}`, beforeState: row.status, afterState: rule.to, code: `CONTRACT_${rule.to.toUpperCase()}`, evidence: { reason: reason ? "recorded" : null } });
+    await history(client, { companyId: Number(root.company_id), projectId, contractId, contractVersionId: versionId, actorUserId: auth.actor.userId, eventType: `contract_${rule.to}`, beforeState: row.status, afterState: rule.to, code: `CONTRACT_${rule.to.toUpperCase()}`, evidence: { reasonRecorded: Boolean(reason), reason } });
     return { contractId, versionId, status: rule.to, revision: Number(row.revision) + 1 };
   });
 }
