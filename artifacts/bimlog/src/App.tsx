@@ -82,6 +82,7 @@ const EdtActivation = namedPage(() => import("@/pages/EdtActivation"), "EdtActiv
 const EdtCapabilities = namedPage(() => import("@/pages/EdtCapabilities"), "EdtCapabilities");
 const EdtChanges = namedPage(() => import("@/pages/EdtChanges"), "EdtChanges");
 const EdtIntakePreviews = namedPage(() => import("@/pages/EdtIntakePreviews"), "EdtIntakePreviews");
+const EdtQcReview = namedPage(() => import("@/pages/EdtQcReview"), "EdtQcReview");
 const PluginSyncReview = namedPage(() => import("@/pages/PluginSyncReview"), "PluginSyncReview");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
@@ -496,6 +497,9 @@ function Router() {
       </Route>
       <Route path="/edt-intake-previews">
         {() => <ProtectedRoute component={EdtIntakePreviews} />}
+      </Route>
+      <Route path="/edt-qc-review">
+        {() => <ProtectedRoute component={EdtQcReview} />}
       </Route>
       <Route path="/plugin-sync-review">
         {() => <ProtectedRoute component={PluginSyncReview} />}

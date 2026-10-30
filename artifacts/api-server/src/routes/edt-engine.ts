@@ -36,7 +36,23 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
   try {
     const projectId = edtProjectId(req);
     const actor = await resolveEdtRouteActor(req, projectId);
-    let changeReview,importReview;
+    let changeReview,importReview,issuanceReview;
+    if(req.query.include==="issuance-review"){
+      if(!actor.grants.includes("QC_DECIDE")&&!actor.grants.includes("ISSUANCE_SUBMIT"))
+        throw new EdtEngineConflict("PERMISSION_REQUIRED","Issuance or QC authority is required to read submitted work packages.");
+      const issuances=(await pool.query(`SELECT s.id,s.work_item_id AS "workItemId",w.name AS "workItemName",s.revision_number AS revision,
+        s.issuance_version AS version,s.issuance_kind AS kind,s.state,s.package_snapshot AS "packageSnapshot",s.source_evidence AS "sourceEvidence",
+        s.evidence_file_id AS "evidenceFileId",s.issuance_fingerprint AS fingerprint,s.prepared_by_id AS "preparedById",
+        (s.prepared_by_id<>$3 AND NOT EXISTS(SELECT 1 FROM job_activation_resource_assignments a WHERE a.work_item_id=s.work_item_id AND a.user_id=$3)
+          AND NOT EXISTS(SELECT 1 FROM job_activation_tasks t WHERE t.work_item_id=s.work_item_id AND t.assignee_user_id=$3)) AS independent,
+        COALESCE((SELECT jsonb_agg(jsonb_build_object('id',d.id,'kind',d.decision_kind,'outcome',d.outcome,'reviewerId',d.reviewer_user_id,
+          'reason',d.reason,'evidence',d.evidence,'issuanceFingerprint',d.issuance_fingerprint) ORDER BY d.created_at,d.id)
+          FROM job_activation_qc_decisions d WHERE d.issuance_id=s.id AND d.company_id=s.company_id AND d.project_id=s.project_id),'[]'::jsonb) AS decisions
+        FROM job_activation_work_item_issuances s JOIN job_activation_work_items w ON w.id=s.work_item_id AND w.project_id=s.project_id
+        JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id AND i.company_id=s.company_id
+        WHERE s.project_id=$1 AND s.company_id=$2 ORDER BY s.created_at,s.id`,[projectId,actor.actorCompanyId,actor.actorUserId])).rows;
+      issuanceReview={actorUserId:actor.actorUserId,issuances:issuances.map(row=>({...row,canDecide:actor.grants.includes("QC_DECIDE")&&row.independent&&row.state==="submitted"}))};
+    }
     if(req.query.include==="intake-imports"){
       if(!actor.grants.includes("IMPORT_MANAGE"))throw new EdtEngineConflict("PERMISSION_REQUIRED","Import-management authority is required to read retained import previews.");
       const intakeId=typeof req.query.intakeId==="string"?req.query.intakeId.trim():"";
@@ -70,7 +86,7 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
         WHERE w.project_id=$1 AND i.project_id=$1 AND i.company_id=$2 ORDER BY w.id`,[projectId,actor.actorCompanyId])).rows;
       changeReview={requests,workItems,actorUserId:actor.actorUserId};
     }
-    res.set("Cache-Control","private, no-store").json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants,...(changeReview?{changeReview}:{}),...(importReview?{importReview}:{}) });
+    res.set("Cache-Control","private, no-store").json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants,...(changeReview?{changeReview}:{}),...(importReview?{importReview}:{}),...(issuanceReview?{issuanceReview}:{}) });
   } catch (error) {
     sendEdtRouteError(res, error);
   }
@@ -247,7 +263,7 @@ router.post("/projects/:projectId/edt-engine/issuances/:issuanceId/qc-decisions"
     if ("conflictUserIds" in body) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "QC conflicts are resolved from stored assignments, not request input.");
     const result=await decideWorkItemQc({actor,companyId:actor.actorCompanyId,projectId,issuanceId:String(req.params.issuanceId),
       decisionKind:decisionKind as Parameters<typeof decideWorkItemQc>[0]["decisionKind"],outcome:outcome as "approved"|"rejected",reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
-    res.status(201).json(result);
+    res.set("Cache-Control","private, no-store").status(201).json({projectId,issuanceId:String(req.params.issuanceId),...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
