@@ -86,6 +86,7 @@ const defaultLensNextClientDiagnosticReporter: LensNextClientDiagnosticReporter 
   console.warn(`[BIMLogLensNext] ${code}`);
 };
 
+export class LensNextHttpError extends Error {constructor(message:string,public readonly status:number){super(message);this.name="LensNextHttpError";}}
 async function jsonBody(
   response: Response,
   label: string,
@@ -108,8 +109,8 @@ async function jsonBody(
     const digestDetail = diagnostics
       ? ` [local=${String(diagnostics.localDigest ?? "missing").slice(0, 12)} server=${String(diagnostics.serverDigest ?? "missing").slice(0, 12)} first=${String(diagnostics.firstMismatch?.field ?? "undetermined")}]`
       : "";
-    throw new Error(
-      `${label} failed (${response.status})${detail ? `: ${detail}` : ""}${digestDetail}`,
+    throw new LensNextHttpError(
+      `${label} failed (${response.status})${detail ? `: ${detail}` : ""}${digestDetail}`,response.status,
     );
   }
   return body;

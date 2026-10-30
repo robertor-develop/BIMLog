@@ -5,6 +5,7 @@ import { LensNextPanelView } from "./LensNextPanelView";
 import {
   createLensNextApiClient,
   createLensNextBridgeClient,
+  LensNextHttpError,
   type LensNextApiClient,
   type LensNextBridgeClient,
   type LensNextResponsibleCompanyOption,
@@ -385,6 +386,8 @@ export function LensNextPanel({
         return true;
       } catch (error) {
         if (signal?.aborted || sequence !== refreshSequence.current) return false;
+        if(error instanceof LensNextHttpError&&[401,403].includes(error.status)){setIssues([]);setSelectedServerId(null);setHistory(null);setLinkedItems(null);setReferenceAttachments(null);}
+        else setIssues(current=>current.map(issue=>({...issue,publishingAllowed:false})));
         setApiState("error");
         setRefreshState("error");
         setApiError(

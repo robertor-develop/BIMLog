@@ -1120,7 +1120,7 @@ export function LensNextPanelView({
 
       {(apiError || bridgeError || catalogError) && (
         <div className="lens-next__alerts" role="status" aria-live="polite">
-          {apiError && <p>{apiError}</p>}
+          {apiError && <><p>{apiError}</p><p>{tt("Inventory could not be verified. Any retained snapshot is read-only until a successful refresh; access-denied records are cleared.","No se pudo verificar el inventario. Toda instantánea conservada es de solo lectura hasta actualizar correctamente; los registros sin acceso se eliminan de la vista.")}</p></>}
           {bridgeError && <p>{bridgeError}</p>}
           {catalogError && <p>{catalogError}</p>}
         </div>

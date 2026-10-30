@@ -1462,6 +1462,7 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
       const activeMembership = currentUser?.isSuperAdmin ? null : await pool.query(`SELECT role FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, req.user!.userId]);
       const activeRole = currentUser?.isSuperAdmin ? "project_admin" : activeMembership?.rows[0]?.role ?? null;
       const roleMeta = activeRole ? await getConfigOptionMeta("member_role", activeRole) : null;
+      res.setHeader("Cache-Control","private, no-store");
       res.json({
         success: true,
         publishing: {
