@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
+import { ProjectApuReuseDraft } from "@/components/ProjectApuReuseDraft";
 import { pricingErrorMessage } from "./company-pricing-errors";
 import { librarySelectionState } from "./settings-experience";
 import { economicPoolKeys, type EconomicPoolNodes, type EconomicPoolKey } from "@workspace/api-zod";
@@ -17,7 +18,7 @@ type AllocationPhase = { phaseId: string; code: string; name: string; percent: s
 type Definition = { schemaVersion: 1; currency: string; industry: string; name: string; nodes: Node[];
   economicPools?: EconomicPoolNodes;
   economicAllocation?: { directProductionNodeIds: string[]; phases: AllocationPhase[] } };
-type Version = { templateId: string; versionId: string; version: number; status: string; provenance: { code: string; definition: Definition }; createdById?: number; publishedById?: number };
+type Version = { templateId: string; versionId: string; version: number; status: string; provenance: { code: string; definition: Definition; source?: { kind?: string; projectId?: number; planVersion?: number; planFingerprint?: string } }; createdById?: number; publishedById?: number };
 const initial: Definition = { schemaVersion: 1, currency: "USD", industry: "BIM Services", name: "", nodes: [{ id: "labor", label: "Labor", method: "hours_hourly_rate", hours: "1", hourlyRate: "0" }] };
 
 export function CompanyPricingTemplates() {
@@ -178,6 +179,7 @@ export function CompanyPricingTemplates() {
       {loading && <p role="status">{t("Loading pricing templates…", "Cargando plantillas de precios…")}</p>}
       {error && <div role="alert" style={{ color: "#991B1B", padding: 12, border: "1px solid #FCA5A5" }}>{error} {listError && <button type="button" onClick={() => void reload()}>{t("Retry", "Reintentar")}</button>}</div>}
       {notice && <p role="status" style={{ color: "#166534" }}>{notice}</p>}
+      {!listError && <ProjectApuReuseDraft token={token} canManage={canManage} onCreated={reload} />}
       <section aria-label={t("Published template selection", "Selección de plantillas publicadas")} data-library-state={selectionState.state} style={{ marginBottom: 16, padding: 12, border: "1px solid #BFDBFE", borderRadius: 9, background: "#EFF6FF" }}>
         <strong>{t(selectionState.title, selectionState.state === "ready" ? `${publishedCount} opción${publishedCount === 1 ? "" : "es"} publicada${publishedCount === 1 ? "" : "s"} disponible${publishedCount === 1 ? "" : "s"}` : selectionState.state === "loading" ? "Cargando biblioteca publicada…" : selectionState.state === "error" ? "Biblioteca no disponible" : "Aún no hay opciones publicadas")}</strong>
         <div style={{ fontSize: 12, marginTop: 4 }}>{selectionState.action ? t(selectionState.action, selectionState.action === "Retry" ? "Reintentar" : canManage ? "Crear un borrador gobernado" : "Solicite a un administrador de empresa que publique una opción") : t("Published templates can be selected and previewed without changing their immutable versions.", "Las plantillas publicadas se pueden seleccionar y previsualizar sin cambiar sus versiones inmutables.")}</div>
@@ -195,6 +197,7 @@ export function CompanyPricingTemplates() {
             <strong>{item.provenance.code} · {item.provenance.definition.name}</strong><br />
             <span>v{item.version} · {statusText(item.status)} · {item.provenance.definition.currency}</span><br />
             <small>{item.provenance.definition.nodes.length} {t("components", "componentes")} · {methodSummary(item)} · {t("Company library", "Biblioteca de empresa")}</small>
+            {item.provenance.source?.kind === "project_apu" && <small style={{ display: "block", overflowWrap: "anywhere" }}>{t("Source project / saved plan", "Proyecto fuente / plan guardado")}: #{item.provenance.source.projectId} / v{item.provenance.source.planVersion}<br />{t("Source fingerprint", "Huella de fuente")}: {item.provenance.source.planFingerprint}</small>}
           </button>)}
         </section>
         <section aria-label={t("Template editor", "Editor de plantilla")} style={{ minWidth: 0 }}>
