@@ -1,3 +1,16 @@
+## Active continuation — Block 36 / P176 — 2026-10-30
+
+- Block35 P171-P175 is pushed and remote-verified at 83967f52816fc377a45754004b509b3bd8c1e1a1. All five focused source commits are ancestors; receipt: outputs/BLOCK35_REMOTE_VERIFIED.json in the C-rooted task evidence directory.
+- P176 current-view PDF/XLSX is locally accepted: proven foreign-company export200 corrected403 using current company/membership authority; invalid reversed-date PDF500 corrected400. Existing full meetings workspace and official per-meeting reports preserved. Both native exports now have visible controls, project/MIME/signature validation, bounded scope lifetime, duplicate-request protection and SHA-256 download receipts. All Tools direct entry is visible and searchable.
+- Actual isolated PostgreSQL HTTP/native-artifact tests pass four roles, no auth, foreign company/project, inactive membership, native sheets/PDF, Unicode/literal formula-like text, filters/empty and no mutation. Built-browser tests pass denial/retry, malformed format/scope/bytes rejection, double click, PDF selection, late prior-view suppression, tab scope, refresh, keyboard, Spanish390 and direct All Tools. Complete connected meeting browser and actual P175 HTTP regression pass; console runtimeErrors empty. Final API/frontend compilers, frozen796/495 inventory, directory117 comprehension, continuity11, blocking auditP0/P1/P2=0 and diff check pass.
+- Evidence: P176_HTTP_BEFORE.log, P176_HTTP.log, P176_ARTIFACTS, P176_BUILD.log, P176_BROWSER/meeting-export-local-browser.json and screenshot, P176_CONNECTED_MEETING_BROWSER. These are local test proofs, not production/provider acceptance.
+- P177 draft GET/PUT/DELETE is the next exact build; do not begin implementation before P176 focused commit. P177-P210 are34 remaining frozen builds after P176. Block36 must finish P176-P180 before normal push; publication is due at P180, with carried release gates reconciled rather than reset.
+- Build154 reconciliation: historical build154 RFI roles/deep-links is commit1f4da420cb205ec11f3b39d31986efb30fad4830 in current ancestry; frozen parityP154 is EDT-engine time entries. Do not conflate those definitions or claim a fresh entire historical program live audit. Receipt: BUILD154_SCOPE_RECONCILIATION_20261030.json.
+- Replit Procore source inspection reported proposal-only import and absent company31 full-access/approval application; no live fix claimed. Independent company31 entitlement/approval correction request01a18e35-5a7a-766f-93cb-e542aafb7046 is active. Do not overlap submissions. Remaining full guided import/MCP/provider/release acceptance stays open. Google/email owner-presence authentication remains deferred.
+- Browser: live UI interaction previously stopped because Windows could not verify URL safely; no workaround through user Chrome. Only owned loopback software-test browsers used and cleaned; PG55439 retained for continuing tests. User/other-task tabs untouched. Current production observation remains v1.05.N18-P37/source3fe3c429729dd7334050f6c5c0cd7df8fd6d72ef; applied production migration head and authenticated release acceptance are not newly verified.
+- Safe resume: seal P176 focused commit, then P177 actual draft authority/persistence tests. Preserve unrelated work, canonical branch, sequential acceptance and push5/publish10. No duplicate authorization needed.
+
+
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
 ## Block 35 — P171–P175 local verification, 2026-10-30
@@ -6669,4 +6682,3 @@ The unchecked cadence/publication rows above are historical checkpoint truth. Ro
 - [ ] Reconcile deterministic release evidence, pass the clean local release gate, push P016–P020 without force, and verify local/remote identity.
 - [ ] Publish the ten-build P011–P020 boundary, verify deployed source/version/health, and pass three consecutive authenticated Chrome rounds.
 - [ ] Reconcile the authoritative full-platform audit after P020. Do not treat the 463 unresolved R03 missing-frontend candidates as implemented or claim all-platform completion without evidence-based disposition and resulting build execution.
-

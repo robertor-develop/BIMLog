@@ -1,3 +1,4 @@
+import { MeetingCurrentViewExports } from "./meetings/MeetingCurrentViewExports";
 import { MeetingActionCreate } from "./meetings/MeetingActionCreate";
 import { useProjectCompanyChoices } from "@/hooks/use-project-company-choices";
 import { useState, useEffect, useRef, Fragment } from "react";
@@ -640,10 +641,6 @@ export function MeetingsTab({
   const meetingScope = useRef(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [currentViewExportMode, setCurrentViewExportMode] = useState<
-    "current" | "summary"
-  >("current");
-  const [currentViewExporting, setCurrentViewExporting] = useState(false);
   const createIdempotencyKeyRef = useRef(`meeting-${crypto.randomUUID()}`);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
@@ -1416,41 +1413,6 @@ export function MeetingsTab({
       setError(t("Could not prepare the Meeting Minutes PDF.", "No se pudo preparar el PDF del Acta de Reunión."));
     }
   };
-  const currentViewPdfUrl = () => {
-    const exportView = view === "actions" ? "actions" : "meetings";
-    const sections =
-      currentViewExportMode === "summary"
-        ? "summary"
-        : exportView === "actions"
-          ? "summary,actions"
-          : "summary,meetings,linked_records";
-    const params = new URLSearchParams({
-      lang,
-      view: exportView,
-      sections,
-    });
-    return `${API}/projects/${projectId}/meetings/current-view/pdf?${params.toString()}`;
-  };
-  const exportCurrentViewPdf = async () => {
-    if (!token) return;
-    setCurrentViewExporting(true);
-    setError("");
-    try {
-      await downloadAuthenticatedPdf(
-        currentViewPdfUrl(),
-        token,
-        `meetings-current-view-${projectId}.pdf`,
-      );
-    } catch {
-      setError(t("Could not prepare the current Meetings view PDF.", "No se pudo preparar el PDF de la vista actual de Reuniones."));
-    } finally {
-      setCurrentViewExporting(false);
-    }
-  };
-  const currentViewExportHelp = t(
-    "Exports the current Meetings screen as a project-scoped PDF using the active tab, visible result counts, selected sections, and saved meeting data.",
-    "Exporta la vista actual de Actas como PDF del proyecto usando la pestaña activa, conteos visibles, secciones seleccionadas y datos guardados.",
-  );
   const meetingReportScopeLabel = (meeting: Meeting) =>
     `${meeting.title || t("Selected meeting", "Reunión seleccionada")} · ${new Date(
       meeting.meetingDate,
@@ -3219,6 +3181,8 @@ export function MeetingsTab({
           style={{
             display: "flex",
             justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 12,
             alignItems: "center",
             marginBottom: 20,
           }}
@@ -3235,33 +3199,7 @@ export function MeetingsTab({
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <PrintPdfButton
-              lang={lang}
-              onClick={() => void exportCurrentViewPdf()}
-              loading={currentViewExporting}
-              disabledReason={currentViewExportHelp}
-              currentViewSummary={[
-                `${t("View", "Vista")}: ${view === "actions" ? t("Actions", "Acciones") : t("Meetings", "Reuniones")}`,
-              ]}
-              options={
-                <label style={{ display: "grid", gap: 6, fontSize: 12, color: "#475569" }}>
-                  <span>{t("Included sections", "Secciones incluidas")}</span>
-                  <select
-                    value={currentViewExportMode}
-                    onChange={(event) => setCurrentViewExportMode(event.target.value === "summary" ? "summary" : "current")}
-                    aria-label={t("Current view PDF sections", "Secciones del PDF de vista actual")}
-                    style={{ minHeight: 36, border: "1px solid #CBD5E1", borderRadius: 8, padding: "0 8px", background: "white", maxWidth: "100%" }}
-                  >
-                    <option value="current">
-                      {view === "actions"
-                        ? t("Summary + Actions", "Resumen + acciones")
-                        : t("Summary + Meeting Register", "Resumen + registro de reuniones")}
-                    </option>
-                    <option value="summary">{t("Summary only", "Solo resumen")}</option>
-                  </select>
-                </label>
-              }
-            />
+            <MeetingCurrentViewExports projectId={projectId} token={token} lang={lang} view={view==="actions"?"actions":"meetings"} />
             {canWrite && (
               <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
                 <input

@@ -96,9 +96,9 @@ const router: Router = Router();
  // cross-company membership alone must never authorize this record family.
  router.use("/projects/:projectId/meetings/:meetingId", authMiddleware, async (req,res,next) => {
    const raw=String(req.params.meetingId);
-   if(!/^\d+$/.test(raw)){next();return;}
-   const projectId=Number(req.params.projectId),meetingId=Number(raw);
-   if(!Number.isSafeInteger(projectId)||projectId<=0||!Number.isSafeInteger(meetingId)||meetingId<=0){res.status(400).json({error:"valid_meeting_identity_required"});return;}
+   if(raw!=="current-view"&&!/^\d+$/.test(raw)){next();return;}
+   const projectId=Number(req.params.projectId),meetingId=raw==="current-view"?null:Number(raw);
+   if(!Number.isSafeInteger(projectId)||projectId<=0||(meetingId!==null&&(!Number.isSafeInteger(meetingId)||meetingId<=0))){res.status(400).json({error:"valid_meeting_identity_required"});return;}
    try {
      const result=await db.execute(sql`SELECT (actor.is_super_admin OR (actor.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id) AND EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active'))) allowed FROM projects p JOIN users creator ON creator.id=p.created_by_id JOIN users actor ON actor.id=${req.user!.userId} WHERE p.id=${projectId} AND p.status<>'archived'`);
      if(result.rows[0]?.allowed!==true){res.status(403).json({error:"current_project_company_access_required"});return;}
@@ -1747,7 +1747,7 @@ router.get(
       doc.end();
     } catch (err) {
       if (!res.headersSent) {
-        res.status(500).json({ error: "meeting_current_view_export_failed" });
+        res.status(err instanceof Error && err.message === "meeting_view_date_range_invalid" ? 400 : 500).json({ error: err instanceof Error && err.message === "meeting_view_date_range_invalid" ? err.message : "meeting_current_view_export_failed" });
       } else {
         res.end();
       }
