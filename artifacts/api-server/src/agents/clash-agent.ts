@@ -3,7 +3,7 @@ import { clashesTable, clashReportsTable, rfisTable, submittalItemsTable } from 
 import { eq, and } from "drizzle-orm";
 import { getAgentAnthropicClient, saveInsight, getLinkedItems } from "./base-agent";
 
-export async function runClashAgent(projectId: number, userId: number, clashId?: number) {
+export async function runClashAgent(projectId: number, userId: number, clashId?: number, failOnError = false) {
   try {
     const anthropic = await getAgentAnthropicClient(userId, projectId, "clash_agent");
     // Get clashes to analyze
@@ -68,5 +68,6 @@ Return JSON:
     console.log(`[clash-agent] Analyzed ${clashes.length} clashes for project ${projectId}`);
   } catch (err) {
     console.error("[clash-agent] FAILED:", err);
+    if (failOnError) throw err;
   }
 }

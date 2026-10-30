@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { agentInsightsTable } from "@workspace/db/schema";
+import { agentInsightsTable, clashesTable, rfisTable } from "@workspace/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { runBriefingAgent } from "../agents/briefing-agent";
@@ -78,7 +78,10 @@ router.post("/projects/:projectId/agents/clash/:clashId", authMiddleware, requir
   const projectId = Number(req.params.projectId);
   const clashId = Number(req.params.clashId);
   try {
-    await runClashAgent(projectId, req.user!.userId, clashId);
+    if (!Number.isSafeInteger(clashId) || clashId <= 0) { res.status(400).json({error:"Valid clash ID required"}); return; }
+    const [record] = await db.select({id:clashesTable.id}).from(clashesTable).where(and(eq(clashesTable.id,clashId),eq(clashesTable.projectId,projectId))).limit(1);
+    if (!record) { res.status(404).json({error:"Clash not found in this project"}); return; }
+    await runClashAgent(projectId, req.user!.userId, clashId, true);
     const insights = await db.select().from(agentInsightsTable)
       .where(and(eq(agentInsightsTable.projectId, projectId), eq(agentInsightsTable.entityId, clashId), eq(agentInsightsTable.entityType, "clash")))
       .orderBy(desc(agentInsightsTable.createdAt))
@@ -95,7 +98,10 @@ router.post("/projects/:projectId/agents/rfi/:rfiId", authMiddleware, requirePro
   const projectId = Number(req.params.projectId);
   const rfiId = Number(req.params.rfiId);
   try {
-    await runRfiAgent(projectId, req.user!.userId, rfiId);
+    if (!Number.isSafeInteger(rfiId) || rfiId <= 0) { res.status(400).json({error:"Valid RFI ID required"}); return; }
+    const [record] = await db.select({id:rfisTable.id}).from(rfisTable).where(and(eq(rfisTable.id,rfiId),eq(rfisTable.projectId,projectId))).limit(1);
+    if (!record) { res.status(404).json({error:"RFI not found in this project"}); return; }
+    await runRfiAgent(projectId, req.user!.userId, rfiId, true);
     const insights = await db.select().from(agentInsightsTable)
       .where(and(eq(agentInsightsTable.projectId, projectId), eq(agentInsightsTable.entityId, rfiId), eq(agentInsightsTable.entityType, "rfi")))
       .orderBy(desc(agentInsightsTable.createdAt))

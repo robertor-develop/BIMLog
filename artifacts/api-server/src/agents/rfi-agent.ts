@@ -3,7 +3,7 @@ import { rfisTable, clashesTable, submittalsTable } from "@workspace/db/schema";
 import { eq, and, ne, lt } from "drizzle-orm";
 import { getAgentAnthropicClient, saveInsight, getLinkedItems } from "./base-agent";
 
-export async function runRfiAgent(projectId: number, userId: number, rfiId?: number) {
+export async function runRfiAgent(projectId: number, userId: number, rfiId?: number, failOnError = false) {
   try {
     const anthropic = await getAgentAnthropicClient(userId, projectId, "rfi_agent");
     const now = new Date();
@@ -46,5 +46,6 @@ Return JSON:
     console.log(`[rfi-agent] Analyzed ${rfis.length} RFIs for project ${projectId}`);
   } catch (err) {
     console.error("[rfi-agent] FAILED:", err);
+    if (failOnError) throw err;
   }
 }
