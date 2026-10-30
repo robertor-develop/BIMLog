@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { ReactElement } from "react";
 import { useLocation } from "wouter";
 import { Lock, RefreshCw, KeyRound, Users, ShieldCheck, Copy, Download } from "lucide-react";
@@ -109,6 +109,22 @@ export function LivingBrief() {
   const [resetConfirmation, setResetConfirmation] = useState("");
   const [recoveryVersion, setRecoveryVersion] = useState<number | null>(null);
   const [accessUsers, setAccessUsers] = useState<AccessUser[]>([]);
+  const [accessBusy, setAccessBusy] = useState(false);
+  const [accessMessage, setAccessMessage] = useState("");
+  const [accessError, setAccessError] = useState("");
+  const accessRequest = useRef(0);
+  const accessLock = useRef(false);
+  useEffect(() => {
+    accessRequest.current += 1;
+    accessLock.current = false;
+    setAccessBusy(false);
+    setAccessUsers([]);
+    setAccessMessage("");
+    setAccessError("");
+    setShowAdmin(false);
+    setIsSuperAdmin(false);
+    return () => { accessRequest.current += 1; };
+  }, [token]);
   const [adminMsg, setAdminMsg] = useState("");
 
   const [toast, setToast] = useState("");
@@ -164,9 +180,22 @@ export function LivingBrief() {
   }, [token, loadDocs, setLocation, unlock]);
 
   const loadAccess = async () => {
-    if (!token) return;
-    const r = await apiFetch("/living-brief/access", token);
-    if (r.ok) setAccessUsers((await r.json()).users ?? []);
+    if (!token || !isSuperAdmin || accessLock.current) return;
+    const request = ++accessRequest.current;
+    accessLock.current = true;
+    setAccessBusy(true);
+    setAccessError("");
+    try {
+      const r = await apiFetch("/living-brief/access", token);
+      if (!r.ok) throw new Error(tt("Access list could not be loaded. Retry; no permissions were changed.", "No se pudo cargar la lista. Reintente; no se cambiaron permisos."));
+      const data = await r.json();
+      if (!Array.isArray(data.users) || !data.users.every((u: AccessUser) => Number.isInteger(u.id) && typeof u.email === "string" && typeof u.fullName === "string" && typeof u.isSuperAdmin === "boolean" && typeof u.canAccessLivingBrief === "boolean")) throw new Error(tt("Invalid access response. Reload before changing permissions.", "Respuesta de acceso inválida. Recargue antes de cambiar permisos."));
+      if (request === accessRequest.current) setAccessUsers(data.users);
+    } catch (error) {
+      if (request === accessRequest.current) { setAccessUsers([]); setAccessError(error instanceof Error ? error.message : tt("Access request failed. Retry.", "Falló la solicitud. Reintente.")); }
+    } finally {
+      if (request === accessRequest.current) { accessLock.current = false; setAccessBusy(false); }
+    }
   };
 
   const loadRecoveryStatus = async () => {
@@ -180,9 +209,24 @@ export function LivingBrief() {
   };
 
   const toggleAccess = async (userId: number, grant: boolean) => {
-    if (!token) return;
-    const r = await apiFetch("/living-brief/access", token, { method: "POST", body: JSON.stringify({ userId, grant }) });
-    if (r.ok) loadAccess();
+    if (!token || !isSuperAdmin || accessLock.current) return;
+    const request = ++accessRequest.current;
+    accessLock.current = true;
+    setAccessBusy(true);
+    setAccessError("");
+    setAccessMessage("");
+    try {
+      const r = await apiFetch("/living-brief/access", token, { method: "POST", body: JSON.stringify({ userId, grant }) });
+      if (!r.ok) throw new Error(tt("Permission change was rejected. Reload the access list before retrying.", "El cambio fue rechazado. Recargue la lista antes de reintentar."));
+      if (request !== accessRequest.current) return;
+      setAccessMessage(tt(`Saved ${grant ? "grant" : "revocation"} for user #${userId}. Reloading saved permissions.`, `Se guardó ${grant ? "el permiso" : "la revocación"} del usuario #${userId}. Recargando permisos guardados.`));
+      accessLock.current = false;
+      await loadAccess();
+    } catch (error) {
+      if (request === accessRequest.current) { setAccessUsers([]); setAccessError(error instanceof Error ? error.message : tt("Connection interrupted. Reload to verify saved permissions before retrying.", "Conexión interrumpida. Recargue para verificar los permisos antes de reintentar.")); }
+    } finally {
+      if (request === accessRequest.current) { accessLock.current = false; setAccessBusy(false); }
+    }
   };
 
   const reconcileMirror = async () => {
@@ -366,20 +410,26 @@ export function LivingBrief() {
             {adminMsg && <div style={{ fontSize: 12.5, marginTop: 6, color: "hsl(var(--muted-foreground))" }}>{adminMsg}</div>}
           </div>
           <div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontWeight: 700 }}><Users size={15} /> Manage access</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontWeight: 700 }}><Users size={15} /> {tt("Manage Living Brief access", "Administrar acceso al Living Brief")}</div>
+            <p>{tt("Super administrators grant or revoke access here. Users then open Living Brief from All Tools. Super administrators always retain access.", "Los superadministradores conceden o revocan acceso aquí. Los usuarios abren Living Brief desde Todas las herramientas. Los superadministradores siempre conservan acceso.")}</p>
+            <button disabled={accessBusy} onClick={loadAccess}>{tt("Reload saved permissions", "Recargar permisos guardados")}</button>
+            {accessBusy && <p role="status">{tt("Loading saved permissions…", "Cargando permisos guardados…")}</p>}
+            {accessError && <p role="alert">{accessError}</p>}
+            {accessMessage && <p role="status">{accessMessage}</p>}
+            {!accessBusy && !accessError && accessUsers.length === 0 && <p>{tt("No users returned.", "No se encontraron usuarios.")}</p>}
             <div style={{ display: "grid", gap: 6 }}>
               {accessUsers.map((u) => (
-                <div key={u.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "7px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))" }}>
-                  <div style={{ fontSize: 13 }}>
+                <div key={u.id} style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 10, padding: "7px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))" }}>
+                  <div style={{ fontSize: 13, minWidth: 0, overflowWrap: "anywhere" }}>
                     <span style={{ fontWeight: 600 }}>{u.fullName}</span>{" "}
                     <span style={{ color: "hsl(var(--muted-foreground))" }}>{u.email}</span>
                     {u.isSuperAdmin && <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 700, color: "#16A34A" }}>SUPER ADMIN</span>}
                   </div>
                   {u.isSuperAdmin ? (
-                    <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>Always</span>
+                    <span style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{tt("Always granted", "Siempre autorizado")}</span>
                   ) : (
-                    <button onClick={() => toggleAccess(u.id, !u.canAccessLivingBrief)} style={{ padding: "5px 10px", borderRadius: 7, border: "1px solid hsl(var(--border))", background: u.canAccessLivingBrief ? "#16A34A" : "hsl(var(--card))", color: u.canAccessLivingBrief ? "white" : "hsl(var(--foreground))", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-                      {u.canAccessLivingBrief ? "Granted" : "Grant"}
+                    <button disabled={accessBusy || !!accessError} aria-label={tt(`${u.canAccessLivingBrief ? "Revoke" : "Grant"} Living Brief access for ${u.email}`, `${u.canAccessLivingBrief ? "Revocar" : "Conceder"} acceso al Living Brief para ${u.email}`)} onClick={() => toggleAccess(u.id, !u.canAccessLivingBrief)} style={{ padding: "5px 10px", borderRadius: 7, border: "1px solid hsl(var(--border))", background: u.canAccessLivingBrief ? "#16A34A" : "hsl(var(--card))", color: u.canAccessLivingBrief ? "white" : "hsl(var(--foreground))", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
+                      {u.canAccessLivingBrief ? tt("Revoke access", "Revocar acceso") : tt("Grant access", "Conceder acceso")}
                     </button>
                   )}
                 </div>

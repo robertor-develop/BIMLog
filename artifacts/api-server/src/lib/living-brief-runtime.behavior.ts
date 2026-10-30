@@ -37,7 +37,7 @@ await pool.query(`DROP TABLE IF EXISTS living_brief_gate_credentials CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS platform_settings CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS users CASCADE`);
 await pool.query(`DROP TABLE IF EXISTS companies CASCADE`);
-await pool.query(`CREATE TABLE companies (id serial PRIMARY KEY, name text NOT NULL)`);
+await pool.query(`CREATE TABLE companies (id serial PRIMARY KEY, name text NOT NULL, retired_into_company_id integer)`);
 await pool.query(`CREATE TABLE users (
   id serial PRIMARY KEY, email text NOT NULL UNIQUE, password_hash text NOT NULL,
   full_name text NOT NULL, company_id integer NOT NULL REFERENCES companies(id),
@@ -214,6 +214,20 @@ const ordinaryMutation = await api("/living-brief/reconcile", readerToken, { met
 assert.equal(ordinaryMutation.status, 403);
 assert.equal((await api("/living-brief/reconcile", undefined, { method: "POST", body: "{}" })).status, 401);
 check("authenticated ordinary users are read-only and admin authority is required", true);
+
+assert.equal((await api("/living-brief/access", readerToken)).status, 403);
+assert.equal((await api("/living-brief/access")).status, 401);
+assert.equal((await api("/living-brief/access", readerToken, {method:"POST",body:JSON.stringify({userId:910003,grant:true})})).status,403);
+assert.equal((await api("/living-brief/access", adminToken, {method:"POST",body:JSON.stringify({userId:"invalid",grant:true})})).status,400);
+assert.equal((await api("/living-brief/access", adminToken, {method:"POST",body:JSON.stringify({userId:910003,grant:true})})).status,200);
+const grantedUsers=(await api("/living-brief/access",adminToken)).body.users as Array<{id:number;canAccessLivingBrief:boolean}>;
+assert.equal(grantedUsers.find(user=>user.id===910003)?.canAccessLivingBrief,true);
+const deniedToken=auth(910003,"living-brief-denied@example.test");
+assert.equal((await api("/living-brief/eligibility",deniedToken)).body.eligible,true);
+assert.equal((await api("/living-brief/access", adminToken, {method:"POST",body:JSON.stringify({userId:910003,grant:false})})).status,200);
+assert.equal((await api("/living-brief/eligibility",deniedToken)).body.eligible,false);
+assert.equal((await api("/living-brief/docs",deniedToken,{headers:{"x-brief-token":signBriefAccessToken(910003,1)}})).status,403);
+check("access grant and revoke persist across requests, enforce current eligibility and reject unauthorized or invalid changes",true);
 
 await pool.query(`UPDATE living_brief_documents SET content='api mismatch' WHERE document_key=$1`, [first.key]);
 rows = await mirror.readLivingBriefMirrorRows();
