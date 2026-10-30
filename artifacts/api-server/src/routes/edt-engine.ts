@@ -36,7 +36,25 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
   try {
     const projectId = edtProjectId(req);
     const actor = await resolveEdtRouteActor(req, projectId);
-    let changeReview;
+    let changeReview,importReview;
+    if(req.query.include==="intake-imports"){
+      if(!actor.grants.includes("IMPORT_MANAGE"))throw new EdtEngineConflict("PERMISSION_REQUIRED","Import-management authority is required to read retained import previews.");
+      const intakeId=typeof req.query.intakeId==="string"?req.query.intakeId.trim():"";
+      if(!intakeId)throw new EdtEngineConflict("REQUEST_BODY_INVALID","A saved Intake ID is required.");
+      const intake=(await pool.query("SELECT id,revision,status FROM job_intakes WHERE id=$1 AND project_id=$2 AND company_id=$3",[intakeId,projectId,actor.actorCompanyId])).rows[0];
+      if(!intake)throw new EdtEngineConflict("INTAKE_NOT_FOUND","The saved Intake is outside this project and company.");
+      const documents=(await pool.query(`SELECT d.file_id AS "fileId",d.source_hash AS "sourceHash",f.file_name AS "fileName"
+        FROM job_intake_documents d JOIN files f ON f.id=d.file_id AND f.project_id=d.project_id
+        WHERE d.intake_id=$1 AND d.project_id=$2 AND d.removed_at IS NULL ORDER BY d.file_id`,[intakeId,projectId])).rows;
+      const batches=(await pool.query(`SELECT b.id,b.intake_revision AS "intakeRevision",b.file_id AS "fileId",b.file_sha256 AS "fileSha256",
+        b.parser_version AS "parserVersion",b.structural_range AS "structuralRange",b.preview_fingerprint AS "previewFingerprint",b.status,
+        COALESCE((SELECT jsonb_agg(jsonb_build_object('rowNumber',r.row_number,'rawFields',r.raw_fields,'normalizedFields',r.normalized_fields,
+          'validationState',r.validation_state,'validationErrors',r.validation_errors,'mappedIdentities',r.mapped_identities) ORDER BY r.row_number)
+          FROM job_intake_import_rows r WHERE r.batch_id=b.id),'[]'::jsonb) AS rows
+        FROM job_intake_import_batches b WHERE b.intake_id=$1 AND b.project_id=$2 AND b.company_id=$3 ORDER BY b.created_at,b.id`,
+        [intakeId,projectId,actor.actorCompanyId])).rows;
+      importReview={intakeId:intake.id,intakeRevision:intake.revision,status:intake.status,documents,batches};
+    }
     if(req.query.include==="change-review"){
       if(!actor.grants.includes("GOVERNED_CHANGE_REQUEST")&&!actor.grants.includes("GOVERNED_CHANGE_APPROVE"))
         throw new EdtEngineConflict("PERMISSION_REQUIRED","Governed-change authority is required to read change evidence.");
@@ -52,7 +70,7 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
         WHERE w.project_id=$1 AND i.project_id=$1 AND i.company_id=$2 ORDER BY w.id`,[projectId,actor.actorCompanyId])).rows;
       changeReview={requests,workItems,actorUserId:actor.actorUserId};
     }
-    res.set("Cache-Control","private, no-store").json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants,...(changeReview?{changeReview}:{}) });
+    res.set("Cache-Control","private, no-store").json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants,...(changeReview?{changeReview}:{}),...(importReview?{importReview}:{}) });
   } catch (error) {
     sendEdtRouteError(res, error);
   }
@@ -94,7 +112,7 @@ router.get("/projects/:projectId/edt-engine/intakes/:intakeId/plan-preview", aut
     const intakeId = String(req.params.intakeId ?? "").trim();
     if (!intakeId) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "An Intake ID is required.");
     const plan = await previewActivatedEdtPlan({ companyId: actor.actorCompanyId, projectId, intakeId });
-    res.json({ projectId, intakeId, ...plan });
+    res.set("Cache-Control","private, no-store").json({ projectId, intakeId, ...plan });
   } catch (error) { sendEdtRouteError(res, error); }
 });
 
@@ -239,7 +257,7 @@ router.post("/projects/:projectId/edt-engine/intakes/:intakeId/result-imports/pr
     if(!Array.isArray(body.rows))throw new EdtEngineConflict("REQUEST_BODY_INVALID","rows must be an array.");
     const result=await previewResultImport({actor,companyId:actor.actorCompanyId,projectId,intakeId:String(req.params.intakeId),intakeRevision:requiredInteger(body,"intakeRevision"),
       fileId:requiredInteger(body,"fileId"),fileSha256:requiredText(body,"fileSha256"),parserVersion:requiredText(body,"parserVersion"),structuralRange:requiredText(body,"structuralRange"),rows:body.rows as Parameters<typeof previewResultImport>[0]["rows"]});
-    res.status(result.idempotent?200:201).json(result);
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,intakeId:String(req.params.intakeId),...result});
   }catch(error){sendEdtRouteError(res,error);}
 });
 
