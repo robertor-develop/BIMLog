@@ -59,7 +59,7 @@ check("401, 403, and 500 target-list responses retain prior lists and alert", ()
     );
     assert.equal(JSON.stringify(retained), before);
   }
-  assert.match(source, /requireSuccessfulTargetLists\(\[subRes, transRes, coRes, meetRes, fileRes, reportRes\]\)/);
+  assert.match(source, /requireSuccessfulTargetLists\(\[rfiRes, subRes, transRes, coRes, meetRes, fileRes, reportRes\]\)/);
   assert.ok(source.indexOf("requireSuccessfulTargetLists") < source.indexOf("setItems({ clash: clashes"));
   assert.match(source, /role=\{feedback\.tone === "error" \? "alert" : "status"\}/);
   assert.match(source, /Your existing selections were kept/);
