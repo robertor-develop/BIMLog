@@ -30,15 +30,15 @@ const bonusBody = (body: unknown, keys: string[]) => {
     throw new CostValuePlanError(400, "BONUS_INPUT_INVALID", "Unsupported bonus request fields.");
 };
 router.get("/projects/:projectId/financial/apu/bonus-proposals", run(async (req, res) => {
-  res.json(await getManualBonuses(req.user.userId, projectId(req.params.projectId), req.query.before));
+  const id=projectId(req.params.projectId);res.set("Cache-Control","private, no-store").json({projectId:id,...await getManualBonuses(req.user.userId,id,req.query.before)});
 }));
 router.post("/projects/:projectId/financial/apu/bonus-proposals", run(async (req, res) => {
   bonusBody(req.body, ["fundingId", "idempotencyKey", "reason", "entries"]);
-  res.json(await proposeManualBonus(req.user.userId, projectId(req.params.projectId), req.body));
+  const id=projectId(req.params.projectId);res.set("Cache-Control","private, no-store").json({projectId:id,...await proposeManualBonus(req.user.userId,id,req.body)});
 }));
 router.post("/projects/:projectId/financial/apu/bonus-proposals/:proposalId/decision", run(async (req, res) => {
   bonusBody(req.body, ["outcome", "expectedFingerprint", "reason"]);
-  res.json(await decideManualBonus(req.user.userId, projectId(req.params.projectId), req.params.proposalId, req.body));
+  const id=projectId(req.params.projectId);res.set("Cache-Control","private, no-store").json({projectId:id,...await decideManualBonus(req.user.userId,id,req.params.proposalId,req.body)});
 }));
 
 router.get("/projects/:projectId/financial/apu", run(async (req, res) => {
