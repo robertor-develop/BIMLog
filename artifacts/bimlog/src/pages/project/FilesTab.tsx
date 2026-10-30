@@ -351,6 +351,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   return (
     <div style={{ minWidth: 0 }}>
       <ReportsReturnBanner projectId={projectId} />
+      <p style={{marginBottom:12}}><Link href={`/file-custody-review?projectId=${projectId}`} style={{textDecoration:"underline"}}>{tr("File custody, handover ZIP and content review","Custodia, ZIP de entrega y revisión de contenido")}</Link></p>
       {lifecycleMessage&&<div role="status" aria-live="polite" style={{marginBottom:12,padding:10,border:"1px solid #bbf7d0",borderRadius:8,background:"#f0fdf4",color:"#166534"}}>{lifecycleMessage}</div>}
       {lifecycleError&&<div role="alert" style={{marginBottom:12,padding:10,border:"1px solid #fecaca",borderRadius:8,background:"#fef2f2",color:"#b91c1c"}}>{lifecycleError}</div>}
       {/* Header */}

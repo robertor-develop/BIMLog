@@ -830,6 +830,7 @@ router.get("/projects/:projectId/files/handover.zip", authMiddleware, requirePro
     res.setHeader("Cache-Control", "private, no-store");
     res.setHeader("X-BIMLog-Handover-SHA256", built.archiveSha256);
     res.setHeader("X-BIMLog-Manifest-SHA256", built.manifestSha256);
+    res.setHeader("X-BIMLog-Project-Id", String(projectId));
     return res.send(built.archive);
   } catch (error) {
     console.error("[project-handover] export failed", error instanceof Error ? error.message : "unknown error");
@@ -846,9 +847,12 @@ router.get("/projects/:projectId/files/custody-summary", authMiddleware, require
     const files = rows.map(file => {
       const state = fileCustodyState(file);
       counts[state] += 1;
-      return { id: file.id, fileName: file.fileName, fileSize: file.fileSizeBytes ?? file.fileSize, source: file.source, binaryAvailability: state };
+      return { id: file.id, fileName: file.fileName, fileSize: file.fileSizeBytes ?? file.fileSize, source: file.source, binaryAvailability: state,
+        version:file.version,status:file.status,isSuperseded:file.isSuperseded,contentVerificationResult:file.contentVerificationResult,
+        cvrWorkflowStatus:file.cvrWorkflowStatus,cvrUserReason:file.cvrUserReason,cvrAdminAction:file.cvrAdminAction,
+        cvrAdminActionBy:file.cvrAdminActionBy,cvrAdminActionAt:file.cvrAdminActionAt,updatedAt:file.updatedAt };
     });
-    return res.json({ projectId, total: files.length, counts, files });
+    return res.set("Cache-Control","private, no-store").json({ projectId, total: files.length, counts, files,canReview:req.user!.isSuperAdmin||["admin","project_admin"].includes(req.memberRole??"") });
   } catch (error) {
     console.error("[file-custody-summary] failed", error instanceof Error ? error.message : "unknown error");
     return res.status(500).json({ code: "CUSTODY_SUMMARY_FAILED", error: "File custody status could not be verified." });
@@ -1619,94 +1623,32 @@ router.post("/projects/:projectId/files/:fileId/cvr-proceed", authMiddleware, re
   }
 });
 
-// ─── POST /projects/:projectId/files/:fileId/cvr-approve ──────────────────────
-router.post("/projects/:projectId/files/:fileId/cvr-approve", authMiddleware, requireProjectMember(), async (req, res) => {
-  try {
-    const projectId = parseInt(req.params.projectId as string);
-    const fileId = parseInt(req.params.fileId as string);
-    const { reason } = req.body as { reason?: string };
-
-    const member = await db.select().from(projectMembersTable)
-      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, req.user!.userId))).limit(1);
-    const role = member[0]?.role || "";
-    if (!req.user!.isSuperAdmin && !["admin", "project_admin"].includes(role)) {
-      res.status(403).json({ error: "Admin access required." }); return;
-    }
-
-    const [file] = await db.select().from(filesTable)
-      .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId))).limit(1);
-    if (!file) { res.status(404).json({ error: "File not found" }); return; }
-    if (file.cvrWorkflowStatus !== "pending_admin_review") {
-      res.status(400).json({ error: "File is not pending review." }); return;
-    }
-
-    const now = new Date();
-    const [updated] = await db.update(filesTable)
-      .set({ cvrWorkflowStatus: "admin_approved", cvrAdminAction: reason?.trim() || "Approved", cvrAdminActionAt: now, cvrAdminActionBy: req.user!.userId, updatedAt: now })
-      .where(eq(filesTable.id, fileId)).returning();
-
-    await db.insert(activityLogTable).values({
-      projectId,
-      userId: req.user!.userId,
-      userFullName: req.user!.fullName,
-      userCompanyName: req.user!.companyName,
-      actionType: "cvr_admin_approved",
-      entityType: "file",
-      entityId: fileId,
-      fileNameAfter: file.fileName,
-      details: `Admin approved file "${file.fileName}". Reason: ${reason?.trim() || "Approved"}. Approved by ${req.user!.fullName} at ${now.toISOString()}.`,
+class CvrReviewError extends Error {constructor(readonly status:number,message:string){super(message);}}
+async function decideCvr(req:import("express").Request,res:import("express").Response,decision:"approve"|"reject"){
+  try{
+    const projectId=Number(req.params.projectId),fileId=Number(req.params.fileId);
+    if(!Number.isSafeInteger(projectId)||projectId<1||!Number.isSafeInteger(fileId)||fileId<1)throw new CvrReviewError(400,"Valid project and file IDs are required.");
+    if(!req.user!.isSuperAdmin&&!["admin","project_admin"].includes(req.memberRole??""))throw new CvrReviewError(403,"Admin access required.");
+    const body=req.body;
+    if(!body||typeof body!=="object"||Array.isArray(body)||body.reason!==undefined&&typeof body.reason!=="string")throw new CvrReviewError(400,"The review reason must be text.");
+    const reason=body.reason?.trim()||(decision==="approve"?"Approved":"");
+    if(!reason)throw new CvrReviewError(400,"A reason is required to reject a file.");
+    if(body.expectedUpdatedAt!==undefined&&(typeof body.expectedUpdatedAt!=="string"||!Number.isFinite(Date.parse(body.expectedUpdatedAt))))throw new CvrReviewError(400,"The saved file revision is invalid.");
+    const updated=await db.transaction(async tx=>{
+      const [file]=await tx.select().from(filesTable).where(and(eq(filesTable.id,fileId),eq(filesTable.projectId,projectId))).limit(1).for("update");
+      if(!file)throw new CvrReviewError(404,"File not found");
+      if(body.expectedUpdatedAt!==undefined&&new Date(body.expectedUpdatedAt).getTime()!==file.updatedAt.getTime())throw new CvrReviewError(409,"The file changed. Reopen its current state before reviewing.");
+      if(decision==="approve"&&file.cvrWorkflowStatus!=="pending_admin_review")throw new CvrReviewError(400,"File is not pending review.");
+      const now=new Date(),state=decision==="approve"?"admin_approved":"admin_rejected";
+      const [saved]=await tx.update(filesTable).set({cvrWorkflowStatus:state,...(decision==="reject"?{status:"rejected"}:{}),cvrAdminAction:reason,cvrAdminActionAt:now,cvrAdminActionBy:req.user!.userId,updatedAt:now}).where(and(eq(filesTable.id,fileId),eq(filesTable.projectId,projectId))).returning();
+      await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName,userCompanyName:req.user!.companyName,actionType:decision==="approve"?"cvr_admin_approved":"cvr_admin_rejected",entityType:"file",entityId:fileId,fileNameAfter:file.fileName,details:`Admin ${decision==="approve"?"approved":"rejected"} file "${file.fileName}". Reason: ${reason}. By ${req.user!.fullName} at ${now.toISOString()}.`});
+      return saved;
     });
-
-    res.json(serializePublicFile(updated));
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
-
-// ─── POST /projects/:projectId/files/:fileId/cvr-reject ───────────────────────
-router.post("/projects/:projectId/files/:fileId/cvr-reject", authMiddleware, requireProjectMember(), async (req, res) => {
-  try {
-    const projectId = parseInt(req.params.projectId as string);
-    const fileId = parseInt(req.params.fileId as string);
-    const { reason } = req.body as { reason?: string };
-
-    const member = await db.select().from(projectMembersTable)
-      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, req.user!.userId))).limit(1);
-    const role = member[0]?.role || "";
-    if (!req.user!.isSuperAdmin && !["admin", "project_admin"].includes(role)) {
-      res.status(403).json({ error: "Admin access required." }); return;
-    }
-
-    if (!reason || reason.trim().length === 0) {
-      res.status(400).json({ error: "A reason is required to reject a file." }); return;
-    }
-
-    const [file] = await db.select().from(filesTable)
-      .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId))).limit(1);
-    if (!file) { res.status(404).json({ error: "File not found" }); return; }
-
-    const now = new Date();
-    const [updated] = await db.update(filesTable)
-      .set({ cvrWorkflowStatus: "admin_rejected", status: "rejected", cvrAdminAction: reason.trim(), cvrAdminActionAt: now, cvrAdminActionBy: req.user!.userId, updatedAt: now })
-      .where(eq(filesTable.id, fileId)).returning();
-
-    await db.insert(activityLogTable).values({
-      projectId,
-      userId: req.user!.userId,
-      userFullName: req.user!.fullName,
-      userCompanyName: req.user!.companyName,
-      actionType: "cvr_admin_rejected",
-      entityType: "file",
-      entityId: fileId,
-      fileNameAfter: file.fileName,
-      details: `Admin rejected file "${file.fileName}". Reason: ${reason.trim()}. Rejected by ${req.user!.fullName} at ${now.toISOString()}.`,
-    });
-
-    res.json(serializePublicFile(updated));
-  } catch (err) {
-    res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
-  }
-});
+    res.set("Cache-Control","private, no-store").json(serializePublicFile(updated));
+  }catch(error){res.status(error instanceof CvrReviewError?error.status:500).json({error:error instanceof CvrReviewError?error.message:"The review could not be saved. Reopen the file and retry."});}
+}
+router.post("/projects/:projectId/files/:fileId/cvr-approve",authMiddleware,requireProjectMember(),async(req,res)=>{await decideCvr(req,res,"approve");});
+router.post("/projects/:projectId/files/:fileId/cvr-reject",authMiddleware,requireProjectMember(),async(req,res)=>{await decideCvr(req,res,"reject");});
 
 // ─── GET /projects/:projectId/cvr-report ──────────────────────────────────────
 router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMember(), async (req, res) => {
