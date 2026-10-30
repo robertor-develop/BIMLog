@@ -97,6 +97,27 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   const [uploading, setUploading] = useState(false);
   const [uploadMsg, setUploadMsg] = useState("");
   const [error, setError] = useState("");
+  const scope = useRef(0);
+  const mutationLock = useRef(false);
+  const [mutating, setMutating] = useState(false);
+  const [receipt, setReceipt] = useState("");
+  const mutateReport = async (url: string, method: string, body?: unknown) => {
+    if (!canWrite || mutationLock.current) return null;
+    const current = scope.current;
+    mutationLock.current = true; setMutating(true); setError(""); setReceipt("");
+    try {
+      const response = await fetch(url, {method, headers: {...headers,"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body)});
+      if (current !== scope.current) return null;
+      if (!response.ok) throw new Error("Rejected mutation");
+      const saved = await response.json();
+      if (current !== scope.current) return null;
+      setReceipt(t("Saved response confirmed. Reload to verify the current record.","Respuesta guardada confirmada. Recargue para verificar el registro actual."));
+      return saved;
+    } catch (failure) {
+      if (current === scope.current) {setError(t("Change could not be confirmed. Reload saved records before retrying.","No se pudo confirmar el cambio. Recargue registros guardados antes de reintentar."));setReceipt("");}
+      return null;
+    } finally {if(current===scope.current){mutationLock.current=false;setMutating(false);}}
+  };
   const [selectedReport, setSelectedReport] = useState<ClashReport | null>(null);
   const [clashes, setClashes] = useState<Clash[]>([]);
   const [clashLoading, setClashLoading] = useState(false);
@@ -141,6 +162,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   };
 
   const loadLinkableItems = async () => {
+    const current=scope.current;
     try {
       const [siRes, rfiRes, meetRes] = await Promise.all([
         fetch(`${API}/projects/${projectId}/submittal-reports`, { headers }),
@@ -150,17 +172,18 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       const submittalReports = siRes.ok ? await siRes.json() : [];
       const rfis = rfiRes.ok ? await rfiRes.json() : [];
       const meetings = meetRes.ok ? await meetRes.json() : [];
-      setLinkableItems({ submittalItems: submittalReports, rfis: Array.isArray(rfis) ? rfis : rfis.rfis ?? [], meetings: Array.isArray(meetings) ? meetings : [] });
+      if(current===scope.current)setLinkableItems({ submittalItems: submittalReports, rfis: Array.isArray(rfis) ? rfis : rfis.rfis ?? [], meetings: Array.isArray(meetings) ? meetings : [] });
     } catch (e) {
       console.error("[loadLinkableItems]", e);
     }
   };
 
   const loadClashLinks = async (clashId: number) => {
+    const current=scope.current;
     const r = await fetch(`${API}/projects/${projectId}/links/clash/${clashId}`, { headers });
     if (r.ok) {
       const links = await r.json();
-      setClashLinks(prev => ({ ...prev, [clashId]: links }));
+      if(current===scope.current)setClashLinks(prev => ({ ...prev, [clashId]: links }));
     }
   };
 
@@ -174,14 +197,18 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   };
 
   const loadReports = async () => {
+    const current = scope.current;
     setLoading(true);
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports`, { headers });
-      if (r.ok) setReports(await r.json());
-    } finally { setLoading(false); }
+      if (!r.ok) throw new Error("Reports unavailable");
+      const saved=await r.json();if(!Array.isArray(saved))throw new Error("Invalid reports");
+      if(current===scope.current){setReports(saved);setError("");}
+    } catch(failure) {if(current===scope.current){setReports([]);setError(t("Reports could not be loaded. Retry saved records.","No se pudieron cargar los reportes. Reintente registros guardados."));}}
+    finally { if(current===scope.current)setLoading(false); }
   };
 
-  useEffect(() => { loadReports(); }, [projectId]);
+  useEffect(() => { scope.current++;mutationLock.current=false;setMutating(false);setSelectedReport(null);setReports([]);setClashes([]);setClashLinks({});setLinkableItems({submittalItems:[],rfis:[],meetings:[]});setError("");setReceipt("");void loadReports();return()=>{scope.current++;}; }, [projectId,token]);
 
   // Stable deep-link used by Meeting Minutes. The report and Clash are resolved
   // by database IDs; displayed clash numbers are never used as identity.
@@ -202,22 +229,23 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
   }, [clashes, clashLoading]);
 
   async function loadClashes(report: ClashReport) {
+    const current=scope.current;
     loadLinkableItems();
     setSelectedReport(report);
     setClashLoading(true);
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/${report.id}`, { headers });
-      if (r.ok) {
-        const data = await r.json();
-        setClashes(data.clashes ?? []);
-      }
+      if (!r.ok) throw new Error("Report unavailable");
+      const data=await r.json();if(!Array.isArray(data.clashes))throw new Error("Invalid clashes");
+      if(current!==scope.current)return;setClashes(data.clashes);setError("");
       const reportRes = await fetch(`${API}/projects/${projectId}/clash-reports`, { headers });
-      if (reportRes.ok) {
+      if (reportRes.ok && current===scope.current) {
         const reports = await reportRes.json();
         const updated = reports.find((rr: ClashReport) => rr.id === report.id);
-        if (updated) setSelectedReport(updated);
+        if (updated && current===scope.current) setSelectedReport(updated);
       }
-    } finally { setClashLoading(false); }
+    } catch(failure) {if(current===scope.current){setClashes([]);setError(t("Report details could not be verified. Reload saved records.","No se pudieron verificar los detalles. Recargue registros guardados."));}}
+    finally { if(current===scope.current)setClashLoading(false); }
   }
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,12 +287,8 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
 
   const updateClash = async (clashId: number, updates: Partial<Clash>) => {
     if (!selectedReport) return;
-    await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes/${clashId}`, {
-      method: "PATCH",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    setClashes(prev => prev.map(c => c.id === clashId ? { ...c, ...updates } : c));
+    const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes/${clashId}`,"PATCH",updates);
+    if(saved)setClashes(prev=>prev.map(c=>c.id===clashId?saved:c));
   };
 
   const filteredClashes = clashes
@@ -374,35 +398,32 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       />
     )}
     <div id="clash-reports-list-current-view" className="tab-content-wrapper">
+      {error&&<div role="alert"><p>{error}</p><button disabled={loading||clashLoading||mutating} onClick={()=>void loadClashes(selectedReport)}>{t("Reload saved records","Recargar registros guardados")}</button></div>}{receipt&&<p role="status">{receipt}</p>}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-        <button className="btn btn-outline btn-sm" onClick={() => setSelectedReport(null)}
+        <button className="btn btn-outline btn-sm" onClick={() => {const url=new URL(window.location.href);url.searchParams.delete("report");url.searchParams.delete("clash");window.history.replaceState(window.history.state,"",url);setSelectedReport(null);setReceipt("");}}
           style={{ display: "flex", alignItems: "center", gap: 4 }}>
           <ChevronLeft size={14} /> {t("Back", "Volver")}
         </button>
         <div>
           <input
+            disabled={!canWrite||mutating}
+            aria-label={t("Report filename","Nombre del reporte")}
             value={selectedReport.fileName}
             onChange={e => setSelectedReport(prev => prev ? { ...prev, fileName: e.target.value } : prev)}
             onBlur={async e => {
-              await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`, {
-                method: "PATCH",
-                headers: { ...headers, "Content-Type": "application/json" },
-                body: JSON.stringify({ fileName: e.target.value }),
-              });
+              const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`,"PATCH",{fileName:e.target.value});if(saved)setSelectedReport(saved);
             }}
             style={{ fontWeight: 700, fontSize: 18, border: "none", borderBottom: "2px solid #1E3A5F",
               background: "transparent", outline: "none", width: "100%", cursor: "text" }}
           />
           <div style={{ display: "flex", gap: 12, alignItems: "center", marginTop: 4 }}>
             <input
-              disabled={!canWrite}
+              disabled={!canWrite||mutating}
+              aria-label={t("Report number","Número de reporte")}
               value={selectedReport.reportNumber || ""}
               onChange={e => setSelectedReport(prev => prev ? { ...prev, reportNumber: e.target.value } : prev)}
               onBlur={async e => {
-                await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`, {
-                  method: "PATCH", headers: { ...headers, "Content-Type": "application/json" },
-                  body: JSON.stringify({ reportNumber: e.target.value }),
-                });
+                const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/rename`,"PATCH",{reportNumber:e.target.value});if(saved)setSelectedReport(saved);
               }}
               placeholder="Report No. (e.g. ELA01-CR-001)"
               style={{ fontSize: 12, border: "none", borderBottom: canWrite ? "1px dashed #D1D5DB" : "none",
@@ -495,14 +516,9 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
 
       {canWrite && (
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-          <button className="btn btn-sm btn-primary" onClick={async () => {
+          <button className="btn btn-sm btn-primary" disabled={mutating} onClick={async () => {
             if (!selectedReport) return;
-            const res = await fetch(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes`, {
-              method: "POST",
-              headers: { ...headers, "Content-Type": "application/json" },
-              body: JSON.stringify({ description: "", status: "open" }),
-            });
-            if (res.ok) loadClashes(selectedReport);
+            const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${selectedReport.id}/clashes`,"POST",{description:"",status:"open"});if(saved)await loadClashes(selectedReport);
           }}>
             + Add Clash
           </button>
@@ -625,7 +641,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                         );
                       })}
                       <td style={{ padding: "4px 8px" }}>
-                        <select value={c.status} onChange={e => updateClash(c.id, { status: e.target.value })}
+                        <select disabled={!canWrite||mutating} aria-label={t("Clash status","Estado del choque")} value={c.status} onChange={e => updateClash(c.id, { status: e.target.value })}
                           style={{ border: "1px solid #D1D5DB", borderRadius: 4, fontSize: 11, padding: "2px 4px", fontWeight: 600,
                             background: c.status === "resolved" ? "#DCFCE7" : c.status === "approved" ? "#D1FAE5" : c.status === "waiting_design" ? "#EDE9FE" : c.status === "follow_up" ? "#FEF3C7" : c.status === "in_progress" ? "#DBEAFE" : "#FEE2E2",
                             color: c.status === "resolved" ? "#16A34A" : c.status === "approved" ? "#059669" : c.status === "waiting_design" ? "#7C3AED" : c.status === "follow_up" ? "#D97706" : c.status === "in_progress" ? "#1D4ED8" : "#DC2626" }}>
@@ -817,6 +833,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       />
     )}
     <div id="clash-reports-list-current-view" className="tab-content-wrapper">
+      {error&&<div role="alert"><p>{error}</p><button disabled={loading||mutating} onClick={()=>void loadReports()}>{t("Reload saved records","Recargar registros guardados")}</button></div>}{receipt&&<p role="status">{receipt}</p>}
       <div style={{ display: "flex", gap: 24, borderBottom: "1px solid #E5E7EB", marginBottom: 20 }}>
         {([["clash", t("Clash Hits", "Choques")], ["lens", t("Lens Viewpoints", "Vistas Lens")]] as const).map(([k, label]) => (
           <button key={k} onClick={() => selectTab(k)}
@@ -916,14 +933,12 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 4 }}>
                       <input
+                        disabled={!canWrite||mutating}
+                        aria-label={t("Report filename","Nombre del reporte")}
                         value={r.fileName}
                         onChange={e => setReports(prev => prev.map(x => x.id === r.id ? { ...x, fileName: e.target.value } : x))}
                         onBlur={async e => {
-                          await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}/rename`, {
-                            method: "PATCH",
-                            headers: { ...headers, "Content-Type": "application/json" },
-                            body: JSON.stringify({ fileName: e.target.value }),
-                          });
+                          const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${r.id}/rename`,"PATCH",{fileName:e.target.value});if(saved)setReports(current=>current.map(row=>row.id===saved.id?saved:row));
                         }}
                         style={{ fontWeight: 700, fontSize: 14, border: "none", borderBottom: "1px dashed #D1D5DB",
                           background: "transparent", outline: "none", width: "100%", cursor: "text" }}
@@ -948,8 +963,8 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
                   </div>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0, marginLeft: 16 }}>
                     <button className="btn btn-sm btn-outline" onClick={() => loadClashes(r)} style={{ fontSize: 12, padding: "4px 12px" }}>View Clashes</button>
-                    <button className="btn btn-sm btn-outline" onClick={async () => { const res = await fetch(`${API}/projects/${projectId}/clash-reports/${r.id}/rerank`, { method: "POST", headers }); if (res.ok) { setTimeout(() => loadReports(), 3000); setTimeout(() => loadReports(), 8000); } }} style={{ fontSize: 12, padding: "4px 12px" }}>Re-rank AI</button>
-                    <button onClick={() => setDeleteReport({ id: r.id, label: r.fileName })} style={{ fontSize: 12, padding: "4px 12px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Delete</button>
+                    <button className="btn btn-sm btn-outline" disabled={!canWrite||mutating} onClick={async () => {const saved=await mutateReport(`${API}/projects/${projectId}/clash-reports/${r.id}/rerank`,"POST");if(saved)await loadReports();}} style={{ fontSize: 12, padding: "4px 12px" }}>Re-rank AI</button>
+                    <button disabled={!canWrite||mutating} onClick={() => setDeleteReport({ id: r.id, label: r.fileName })} style={{ fontSize: 12, padding: "4px 12px", background: "#FEF2F2", color: "#DC2626", border: "1px solid #FECACA", borderRadius: 6, cursor: "pointer", fontWeight: 600 }}>Delete</button>
                   </div>
                 </div>
               ))}
