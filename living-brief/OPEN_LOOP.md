@@ -1,5 +1,20 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Capability parity Block 34, P166–P170 — 2026-10-30
+
+- [x] P166 retained CSV/native workbook contract import review: `755f1ae6de574a80b7987b1e1afde69a3b356954`.
+- [x] P167 governed APU budget evaluation and override reversal: `99f0bf692b8ea2202553757d3d69719c5dab0e6e`.
+- [x] P168 exact approved snapshot PDF/native workbook review and verified downloads: `d1b818504956a2358be07862a34ccf6f3acfdf0e`.
+- [x] P169 complete retained project-insights review: `0a55d29ace9de50d7b25a573b85fa86a1220ae21`.
+- [x] P170 full Intake source/mapping controls and activated-source immutability repair: `e67fd329fbe109d4388b9096615b0b1035bcda6c`.
+- [x] All five actual HTTP and isolated built-workspace browser suites pass together. P161–P170 ten-build HTTP and browser regression passes on the current bundle; no provider calls are needed for these local checks.
+- [x] Frontend/backend types, frozen 796-route/495-gap inventory, 11 connected workflow gates, capability directory (111 entries), accessibility/responsive checks and blocking platform audit pass. Test-only owned-browser cleanup correction: `4192c47e42821a8c8d56ba755c9d8937d895676f`.
+- [x] Ordinary block push verified live remote HEAD equals local `4192c47e42821a8c8d56ba755c9d8937d895676f`, all five accepted commits are ancestors, clean worktree at that checkpoint.
+- [ ] Google/email-dependent integration checks, production publication/deployment identity and authenticated production acceptance remain deferred/unverified under the owner's current instruction. Local Edge fixtures are not production Chrome acceptance or native Excel acceptance.
+- [ ] Continue the frozen program P171–P210: 40 builds / eight blocks. Do not count evidence or cleanup commits as additional builds.
+
+Detailed local execution and evidence: `C:/Users/soporte/Documents/Codex/2026-10-27/bimlog-main-04-06/outputs/BLOCK34_EXECUTION_LEDGER.md`; remote verification: `BLOCK34_REMOTE_VERIFIED.json` in that evidence directory. No production data or database schema was changed by Block 34.
+
 ## Capability parity Block 08, P036–P040 — 2026-10-29
 
 - [x] Expose specific-link repair, launch configuration, platform master catalogs, administration overview, and platform capability status as five distinct protected frontend capabilities.
