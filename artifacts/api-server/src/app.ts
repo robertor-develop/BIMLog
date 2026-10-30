@@ -30,6 +30,7 @@ import { startFeatureCatalogMigration } from "./lib/feature-catalog-migration";
 import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
 import { startFinancialControlMigration } from "./lib/financial-control-migration";
 import { startCommercialEntitlementMigration } from "./lib/commercial-entitlement";
+import { startCompanyProviderApprovalMigration } from "./lib/provider-governance";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { startFinancialContractMigration } from "./lib/financial-contract-migration";
 import {
@@ -465,6 +466,11 @@ queueDatabaseStartup(async () => {
   } catch {
     console.error("[migration] feature policy control migration failed");
   }
+});
+
+void queueDatabaseStartup(async () => {
+  await startCompanyProviderApprovalMigration();
+  console.log("[migration] company provider approval history ensured");
 });
 
 queueDatabaseStartup(async () => {

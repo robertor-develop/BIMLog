@@ -25,6 +25,15 @@ function feature(value: unknown): CommercialFeature {
   return result;
 }
 
+export function companyFullCommercialGrantApplies(input: {
+  userCompanyId: number | null;
+  grantCompanyId: number;
+  companyActive: boolean;
+  enabled: boolean;
+}): boolean {
+  return input.companyActive && input.enabled && input.userCompanyId === input.grantCompanyId;
+}
+
 let ready: Promise<void> | null = null;
 
 export function startCommercialEntitlementMigration(): Promise<void> {
@@ -52,16 +61,36 @@ export async function ensureCommercialEntitlementSchema(): Promise<void> {
       CONSTRAINT commercial_entitlement_reason_chk CHECK(length(reason) BETWEEN 3 AND 1000),
       CONSTRAINT commercial_entitlement_source_chk CHECK(source IN('super_admin','initial_bootstrap'))
     );
+    CREATE TABLE IF NOT EXISTS company_commercial_entitlement_events(
+      sequence serial PRIMARY KEY,
+      event_key text NOT NULL UNIQUE,
+      company_id integer NOT NULL REFERENCES companies(id),
+      enabled boolean NOT NULL,
+      reason text NOT NULL,
+      actor_user_id integer REFERENCES users(id),
+      source text NOT NULL CHECK(source IN('owner_instruction','super_admin')),
+      feature_key text NOT NULL DEFAULT 'package' CHECK(feature_key='package'),
+      occurred_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT company_commercial_entitlement_reason_chk CHECK(length(reason) BETWEEN 3 AND 1000)
+    );
+    CREATE INDEX IF NOT EXISTS company_commercial_entitlement_sequence_idx ON company_commercial_entitlement_events(company_id,feature_key,sequence DESC);
     ALTER TABLE commercial_entitlement_events ADD COLUMN IF NOT EXISTS feature_key text NOT NULL DEFAULT 'package';
     CREATE INDEX IF NOT EXISTS commercial_entitlement_user_sequence_idx ON commercial_entitlement_events(user_id,sequence DESC);
     CREATE INDEX IF NOT EXISTS commercial_entitlement_user_feature_sequence_idx ON commercial_entitlement_events(user_id,feature_key,sequence DESC);`);
     await client.query(`CREATE OR REPLACE FUNCTION reject_commercial_entitlement_history_mutation() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'commercial entitlement history is append-only'; END $$;
-      DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='commercial_entitlement_events_immutable' AND tgrelid='commercial_entitlement_events'::regclass) THEN CREATE TRIGGER commercial_entitlement_events_immutable BEFORE UPDATE OR DELETE ON commercial_entitlement_events FOR EACH ROW EXECUTE FUNCTION reject_commercial_entitlement_history_mutation(); END IF; END $$;`);
+      DO $$ BEGIN
+        IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='commercial_entitlement_events_immutable' AND tgrelid='commercial_entitlement_events'::regclass) THEN CREATE TRIGGER commercial_entitlement_events_immutable BEFORE UPDATE OR DELETE ON commercial_entitlement_events FOR EACH ROW EXECUTE FUNCTION reject_commercial_entitlement_history_mutation(); END IF;
+        IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='company_commercial_entitlement_events_immutable' AND tgrelid='company_commercial_entitlement_events'::regclass) THEN CREATE TRIGGER company_commercial_entitlement_events_immutable BEFORE UPDATE OR DELETE ON company_commercial_entitlement_events FOR EACH ROW EXECUTE FUNCTION reject_commercial_entitlement_history_mutation(); END IF;
+      END $$;`);
     for (const featureKey of COMMERCIAL_FEATURES) {
       await client.query(`INSERT INTO commercial_entitlement_events(event_key,user_id,enabled,reason,actor_user_id,source,feature_key)
         SELECT 'initial-commercial:'||$1||':'||u.id,u.id,true,'Initial owner-approved Commercial access for all current users',NULL,'initial_bootstrap',$1
         FROM users u ON CONFLICT(event_key) DO NOTHING`, [featureKey]);
     }
+    await client.query(`INSERT INTO company_commercial_entitlement_events(event_key,company_id,enabled,reason,actor_user_id,source,feature_key)
+      SELECT 'owner-approved-company-31-full-commercial-access',id,true,
+      'Owner instruction: full commercial product entitlement for current and future members of active BIMTECH CORP company 31, independent of paid packages.',NULL,'owner_instruction','package'
+      FROM companies WHERE id=31 AND retired_at IS NULL ON CONFLICT(event_key) DO NOTHING`);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
@@ -74,6 +103,22 @@ export async function ensureCommercialEntitlementSchema(): Promise<void> {
 
 export async function commercialEntitlementForUser(userId: number, client: Queryable = pool, featureKey: CommercialFeature = "package"): Promise<CommercialEntitlementState> {
   await waitForCommercialEntitlementMigration();
+  const companyGrant = await client.query(`SELECT u.company_id AS user_company_id,c.retired_at,c.retired_into_company_id,
+      e.company_id AS grant_company_id,e.event_key,e.enabled,e.reason,e.actor_user_id,e.source,e.occurred_at
+    FROM users u JOIN companies c ON c.id=u.company_id
+    JOIN company_commercial_entitlement_events e ON e.company_id=c.id
+    WHERE u.id=$1 AND c.retired_at IS NULL AND c.retired_into_company_id IS NULL
+      AND e.feature_key='package'
+    ORDER BY e.sequence DESC LIMIT 1`, [userId]);
+  const companyRow = companyGrant.rows[0];
+  if (companyRow && companyFullCommercialGrantApplies({
+    userCompanyId: Number(companyRow.user_company_id),
+    grantCompanyId: Number(companyRow.grant_company_id),
+    companyActive: companyRow.retired_at == null && companyRow.retired_into_company_id == null,
+    enabled: companyRow.enabled === true,
+  })) {
+    return { enabled: true, eventKey: companyRow.event_key, reason: companyRow.reason, actorUserId: companyRow.actor_user_id == null ? null : Number(companyRow.actor_user_id), source: companyRow.source, occurredAt: new Date(companyRow.occurred_at).toISOString() };
+  }
   const result = await client.query(`SELECT event_key,enabled,reason,actor_user_id,source,occurred_at FROM commercial_entitlement_events WHERE user_id=$1 AND feature_key=$2 ORDER BY sequence DESC LIMIT 1`, [userId, feature(featureKey)]);
   const row = result.rows[0];
   return row ? { enabled: row.enabled === true, eventKey: row.event_key, reason: row.reason, actorUserId: row.actor_user_id == null ? null : Number(row.actor_user_id), source: row.source, occurredAt: new Date(row.occurred_at).toISOString() } : { enabled: false, eventKey: null, reason: null, actorUserId: null, source: null, occurredAt: null };
@@ -141,6 +186,19 @@ export async function commercialEntitlementsForUsers(userIds: number[], client: 
   for (const row of result.rows) {
     const userId = Number(row.user_id), current = mapped.get(userId) ?? {} as Record<CommercialFeature, CommercialEntitlementState>;
     current[feature(row.feature_key)] = { enabled: row.enabled === true, eventKey: row.event_key, reason: row.reason, actorUserId: row.actor_user_id == null ? null : Number(row.actor_user_id), source: row.source, occurredAt: new Date(row.occurred_at).toISOString() };
+    mapped.set(userId, current);
+  }
+  const companyGrants = await client.query(`SELECT DISTINCT ON(u.id) u.id AS user_id,e.event_key,e.enabled,e.reason,e.actor_user_id,e.source,e.occurred_at
+    FROM users u JOIN companies c ON c.id=u.company_id
+    JOIN company_commercial_entitlement_events e ON e.company_id=c.id
+    WHERE u.id=ANY($1::int[]) AND c.retired_at IS NULL AND c.retired_into_company_id IS NULL AND e.feature_key='package'
+    ORDER BY u.id,e.sequence DESC`, [userIds]);
+  for (const row of companyGrants.rows) {
+    if (row.enabled !== true) continue;
+    const userId = Number(row.user_id);
+    const grant: CommercialEntitlementState = { enabled: true, eventKey: row.event_key, reason: row.reason, actorUserId: row.actor_user_id == null ? null : Number(row.actor_user_id), source: row.source, occurredAt: new Date(row.occurred_at).toISOString() };
+    const current = mapped.get(userId) ?? {} as Record<CommercialFeature, CommercialEntitlementState>;
+    for (const key of COMMERCIAL_FEATURES) current[key] = grant;
     mapped.set(userId, current);
   }
   return mapped;
