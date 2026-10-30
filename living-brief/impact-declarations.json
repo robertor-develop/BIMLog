@@ -80719,6 +80719,105 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "91501daa681068b419df5420f4f0ad1db0baeb65b8cd1f508d0d76e424b8784c"
+    },
+    {
+      "taskId": "block36-procore-rfi-current-approval-correction-20261030",
+      "reviewedThroughCommit": "8e4d4a13eadbeb86efda2e32f163165008f458a5",
+      "reviewedAt": "2026-10-30T22:35:43.1075301Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "agentCapable": [
+          "Preserve and inspect canonical/incoming Git histories, resolve authorized conflicts, run isolated fixtures, reconcile source-derived authority evidence and perform approved exact-source release steps"
+        ],
+        "checkedBeforeExecution": true,
+        "operatorOnly": [
+          "Normal external provider MFA or account-owner consent only if actually required; Google/email owner-presence work remains deferred"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "summary": "Proven actual-router stale approval corrected using existing current-company check; no new schema or frozen build. Exact source production gates remain pending.",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Narrow existing approval recheck changes no capability, doctrine, Native, report, navigation or business contract."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Narrow existing approval recheck changes no capability, doctrine, Native, report, navigation or business contract."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Record real-route failure, corrected current approval and retained permissions with exact local evidence; publication remains pending."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Narrow existing approval recheck changes no capability, doctrine, Native, report, navigation or business contract."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Narrow existing approval recheck changes no capability, doctrine, Native, report, navigation or business contract."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Narrow existing approval recheck changes no capability, doctrine, Native, report, navigation or business contract."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Narrow existing approval recheck changes no capability, doctrine, Native, report, navigation or business contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Narrow existing approval recheck changes no capability, doctrine, Native, report, navigation or business contract."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record real-route failure, corrected current approval and retained permissions with exact local evidence; publication remains pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Record real-route failure, corrected current approval and retained permissions with exact local evidence; publication remains pending."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Record real-route failure, corrected current approval and retained permissions with exact local evidence; publication remains pending."
+        }
+      ],
+      "reason": "Proven actual-router stale approval corrected using existing current-company check; no new schema or frozen build. Exact source production gates remain pending.",
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/procore-rfi-current-approval-http.behavior.ts",
+        "artifacts/api-server/src/routes/rfis.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3443452d8bb118fdac63a94c364f413c182ab569c3e7a77c97a9ef76e0d4a752"
     }
   ]
 }

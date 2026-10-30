@@ -1311,6 +1311,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-intake-mcp.ts
 - artifacts/api-server/src/lib/procore-intake-state.behavior.ts
 - artifacts/api-server/src/lib/procore-intake-state.ts
+- artifacts/api-server/src/lib/procore-rfi-current-approval-http.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.ts
 - artifacts/api-server/src/lib/procore-rfi-import-commit.ts
