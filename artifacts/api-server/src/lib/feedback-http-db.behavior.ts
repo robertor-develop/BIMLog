@@ -73,6 +73,8 @@ await testPool.query(`
   CREATE TABLE projects(id integer PRIMARY KEY, name text NOT NULL, code text NOT NULL, status text NOT NULL, created_by_id integer NOT NULL REFERENCES users(id), created_at timestamp NOT NULL DEFAULT now(), updated_at timestamp NOT NULL DEFAULT now());
   CREATE TABLE project_members(id serial PRIMARY KEY, project_id integer NOT NULL REFERENCES projects(id), user_id integer NOT NULL REFERENCES users(id), role text NOT NULL, joined_at timestamp NOT NULL DEFAULT now(), permissions_override jsonb, status text DEFAULT 'active');
   INSERT INTO companies VALUES (1,'A'),(2,'B'); INSERT INTO users VALUES (11,'a@test.invalid','A',1,false),(22,'b@test.invalid','B',2,false),(33,'admin@test.invalid','Admin',1,true); INSERT INTO projects VALUES (101,'A project','A-1','active',11,now(),now()); INSERT INTO project_members(project_id,user_id,role,status) VALUES(101,11,'member','active');
+  ALTER TABLE companies ADD COLUMN retired_into_company_id integer;
+  ALTER TABLE users ADD COLUMN password_hash text NOT NULL DEFAULT 'isolated-fixture-password-hash';
 `);
 const lockOwner = await testPool.connect();
 await lockOwner.query("BEGIN");
