@@ -96,8 +96,8 @@ const router: Router = Router();
  // cross-company membership alone must never authorize this record family.
  router.use("/projects/:projectId/meetings/:meetingId", authMiddleware, async (req,res,next) => {
    const raw=String(req.params.meetingId);
-   if(raw!=="current-view"&&!/^\d+$/.test(raw)){next();return;}
-   const projectId=Number(req.params.projectId),meetingId=raw==="current-view"?null:Number(raw);
+   if(raw!=="current-view"&&raw!=="draft"&&!/^\d+$/.test(raw)){next();return;}
+   const projectId=Number(req.params.projectId),meetingId=raw==="current-view"||raw==="draft"?null:Number(raw);
    if(!Number.isSafeInteger(projectId)||projectId<=0||(meetingId!==null&&(!Number.isSafeInteger(meetingId)||meetingId<=0))){res.status(400).json({error:"valid_meeting_identity_required"});return;}
    try {
      const result=await db.execute(sql`SELECT (actor.is_super_admin OR (actor.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id) AND EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=actor.id AND pm.status='active'))) allowed FROM projects p JOIN users creator ON creator.id=p.created_by_id JOIN users actor ON actor.id=${req.user!.userId} WHERE p.id=${projectId} AND p.status<>'archived'`);
@@ -107,6 +107,19 @@ const router: Router = Router();
    }catch{res.status(503).json({error:"meeting_authority_unavailable"});}
  });
 
+
+
+router.use("/projects/:projectId/meetings/draft", authMiddleware, async (req,res,next)=>{
+ if(!["GET","PUT","DELETE"].includes(req.method)){next();return;}
+ const raw=req.method==="PUT"?req.body?.meeting_id:req.query.meeting_id;
+ const meetingId=raw===undefined||raw===null?null:
+   typeof raw==="number"||typeof raw==="string"&&/^\d+$/.test(raw)?Number(raw):NaN;
+ if(meetingId!==null&&(!Number.isSafeInteger(meetingId)||meetingId<=0)){res.status(400).json({error:"valid_meeting_identity_required"});return;}
+ try{
+  if(meetingId!==null){const [meeting]=await db.select({id:meetingMinutesTable.id}).from(meetingMinutesTable).where(and(eq(meetingMinutesTable.id,meetingId),eq(meetingMinutesTable.projectId,Number(req.params.projectId)),isNull(meetingMinutesTable.deletedAt))).limit(1);if(!meeting){res.status(404).json({error:"meeting_not_found"});return;}}
+  res.locals.meetingDraftId=meetingId;next();
+ }catch{res.status(503).json({error:"meeting_draft_authority_unavailable"});}
+});
 
 const safePdfText = safeMeetingReportText;
 
@@ -1860,7 +1873,7 @@ router.get(
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
-    const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
+    const meetingId: number | null = res.locals.meetingDraftId;
     try {
       const [draft] = await db.select().from(meetingDraftsTable).where(and(
         eq(meetingDraftsTable.projectId, projectId),
@@ -1886,7 +1899,7 @@ router.put(
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
-    const meetingId = req.body?.meeting_id ? Number(req.body.meeting_id) : null;
+    const meetingId: number | null = res.locals.meetingDraftId;
     const payload = req.body?.payload;
     if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
       res.status(400).json({ error: "draft_payload_required" });
@@ -1901,6 +1914,8 @@ router.put(
           isNull(meetingMinutesTable.deletedAt),
         )).limit(1);
         if (!meeting) { res.status(404).json({ error: "meeting_not_found" }); return; }
+        const expected=req.body?.canonical_updated_at;
+        if(expected!==undefined&&expected!==null&&(typeof expected!=="string"||!Number.isFinite(Date.parse(expected))||Date.parse(expected)!==meeting.updatedAt.getTime())){res.status(409).json({error:"meeting_draft_canonical_version_changed"});return;}
         canonicalUpdatedAt = meeting.updatedAt;
       }
       const now = new Date();
@@ -1936,7 +1951,7 @@ router.delete(
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
-    const meetingId = req.query.meeting_id ? Number(req.query.meeting_id) : null;
+    const meetingId: number | null = res.locals.meetingDraftId;
     await db.delete(meetingDraftsTable).where(and(
       eq(meetingDraftsTable.projectId, projectId),
       eq(meetingDraftsTable.userId, req.user!.userId),

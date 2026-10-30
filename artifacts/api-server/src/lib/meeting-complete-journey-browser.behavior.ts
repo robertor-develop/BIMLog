@@ -23,7 +23,7 @@ app.get('/api/v1/projects/:id',(_req,res)=>res.json({id:91,code:'FIX',name:'Fixt
 app.get('/api/v1/projects/:id/members',(_req,res)=>res.json([{id:1,userId:71,role:'project_admin',status:'active',fullName:user.fullName}]));
 app.get('/api/v1/projects/:id/meetings',(_req,res)=>res.json(deleted?[]:[meeting]));
 app.get('/api/v1/projects/:id/action-items',(_req,res)=>res.json([]));
-app.get('/api/v1/projects/:id/meetings/draft',(_req,res)=>res.json({draft:null}));
+app.get('/api/v1/projects/:id/meetings/draft',(_req,res)=>res.json(null));
 app.get('/api/v1/projects/:id/meetings/rfi-candidates',(req,res)=>{exact(req);assert.equal(req.query.meeting_id,'7');if(candidatesDown){res.status(503).json({error:'fixture candidates unavailable'});return;}res.json([rfi]);});
 app.get('/api/v1/projects/:id/meetings/submittal-candidates',(req,res)=>{exact(req);assert.equal(req.query.meeting_id,'7');res.json([sub]);});
 app.post('/api/v1/projects/:id/meetings/:meetingId/rfis',(req,res)=>{exact(req);assert.deepEqual(req.body,{rfi_ids:[31]});if(addDenied){res.status(403).json({error:'fixture add denied'});return;}writes.rfiAdd++;meeting.linkedRfis=[{...rfi,rfiId:31,rfiNumber:rfi.number}];res.status(201).json({added:1,links:meeting.linkedRfis});});
@@ -74,9 +74,3 @@ try{
   if(socket?.readyState===WebSocket.OPEN){socket.send(JSON.stringify({id:++seq,method:'Browser.close'}));if(browser.exitCode===null)await Promise.race([new Promise(resolve=>browser.once('exit',resolve)),delay(5000)]);socket.close();}if(browser.exitCode===null)browser.kill();server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));if(profile!==path.resolve(os.tmpdir(),`bimlog-meeting-journey-browser-${process.pid}`))throw new Error('Task profile identity mismatch');await delay(5000);try{fs.rmSync(profile,{recursive:true,force:true,maxRetries:20,retryDelay:150});}catch(error){const cleanup=spawnSync('powershell.exe',['-NoProfile','-Command','for($attempt=0;$attempt -lt 8;$attempt++){if(-not(Test-Path -LiteralPath $env:BIMLOG_OWNED_PROFILE)){exit 0};try{Remove-Item -LiteralPath $env:BIMLOG_OWNED_PROFILE -Recurse -Force -ErrorAction Stop;if(-not(Test-Path -LiteralPath $env:BIMLOG_OWNED_PROFILE)){exit 0}}catch{if(-not(Test-Path -LiteralPath $env:BIMLOG_OWNED_PROFILE)){exit 0};if($attempt -eq 7){throw}};Start-Sleep -Milliseconds 500};exit 1'],{env:{...process.env,BIMLOG_OWNED_PROFILE:profile},windowsHide:true});assert.equal(cleanup.status,0,String(cleanup.stderr));assert.equal(fs.existsSync(profile),false);}
 }
 fs.writeFileSync(path.join(output,'meeting-journey-local-browser.json'),`${JSON.stringify(report,null,2)}\n`);console.log(JSON.stringify(report,null,2));
-
-
-
-
-
-

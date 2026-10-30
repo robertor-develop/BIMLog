@@ -15,7 +15,7 @@ app.get('/api/v1/auth/access-profile',(_req,res)=>res.json({facts:{authenticated
 app.get('/api/v1/projects/:id',(_req,res)=>res.json({id:91,code:'FIX',name:'Fixture Project',status:'active',createdById:71,companyId:31}));
 app.get('/api/v1/projects/:id/members',(_req,res)=>res.json([{id:1,userId:71,role:'project_admin',status:'active',fullName:user.fullName}]));
 app.get('/api/v1/projects/:id/meetings',(_req,res)=>res.json([savedMeeting]));
-app.get('/api/v1/projects/:id/meetings/draft',(_req,res)=>res.json({draft:null}));
+app.get('/api/v1/projects/:id/meetings/draft',(_req,res)=>res.json(null));
 app.get('/api/v1/projects/:id/meetings/:meetingId',(_req,res)=>res.json(savedMeeting));
 app.post('/api/v1/projects/:id/meetings',(_req,res)=>{createdMeetings++;res.status(201).json({...savedMeeting,id:8});});
 app.post('/api/v1/projects/:id/meetings/:meetingId/ai-summary',(req,res)=>{summaryRequests++;assert.equal(req.params.meetingId,'7');if(providerFailed)res.status(503).json({error:'Fixture summary provider unavailable'});else {savedMeeting.updatedAt='2026-10-30T10:00:01Z';res.json({summary:'Fixture saved summary',action_items:[],meeting:{id:7,projectId:91,updatedAt:savedMeeting.updatedAt}});}});
@@ -44,7 +44,3 @@ try{
   if(socket?.readyState===WebSocket.OPEN){socket.send(JSON.stringify({id:++seq,method:'Browser.close'}));if(browser.exitCode===null)await Promise.race([new Promise(resolve=>browser.once('exit',resolve)),delay(5000)]);socket.close();}if(browser.exitCode===null)browser.kill();server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));if(profile!==path.resolve(os.tmpdir(),`bimlog-meeting-ai-browser-${process.pid}`))throw new Error('Task profile identity mismatch');await delay(5000);fs.rmSync(profile,{recursive:true,force:true,maxRetries:20,retryDelay:150});
 }
 fs.writeFileSync(path.join(output,'meeting-ai-local-browser.json'),`${JSON.stringify(report,null,2)}\n`);console.log(JSON.stringify(report,null,2));
-
-
-
-

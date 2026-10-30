@@ -16,7 +16,7 @@ app.get('/api/v1/projects/:id',(_req,res)=>res.json({id:91,code:'FIX',name:'Fixt
 app.get('/api/v1/projects/:id/members',(_req,res)=>res.json([{id:1,userId:71,role:'project_admin',status:'active',fullName:user.fullName}]));
 app.get('/api/v1/projects/:id/meetings',(_req,res)=>res.json([savedMeeting]));
 app.post('/api/v1/projects/:id/meetings/:meetingId/action-items',(req,res)=>{posts++;assert.equal(req.params.id,'91');assert.equal(req.params.meetingId,'7');assert.match(req.get('Idempotency-Key')||'',/^meeting-action-[0-9a-f-]{36}$/i);assert.deepEqual(req.body,{items:[{description:savedAction.description}]});keys.push(req.get('Idempotency-Key')||'');if(validationFirst){validationFirst=false;res.status(400).json({error:'meeting_action_input_invalid'});return;}res.status(201).json([savedAction]);});
-app.get('/api/v1/projects/:id/meetings/draft',(_req,res)=>res.json({draft:null}));
+app.get('/api/v1/projects/:id/meetings/draft',(_req,res)=>res.json(null));
 app.get('/api/v1/projects/:id/meetings/:meetingId',(_req,res)=>{reads++;if(failedRead){res.status(503).json({error:'fixture read unavailable'});return;}res.json({...savedMeeting,actionItems:[savedAction]});});
 app.get('/api/v1/projects/:id/action-items',(_req,res)=>res.json([{id:7,projectId:91,description:'Fixture saved action',assignedToName:'Fixture assignee',status:completed?'completed':'open',dueDate:'2026-10-01T00:00:00Z',isOverdue:!completed}]));
 app.patch('/api/v1/projects/:id/action-items/:itemId',(req,res)=>{assert.equal(req.params.id,'91');assert.equal(req.params.itemId,'7');assert.deepEqual(req.body,{status:'completed'});updates++;if(rejected){res.status(403).json({error:'fixture denied'});return;}completed=true;res.json({id:7,status:'completed'});});
@@ -52,7 +52,3 @@ try{
   if(socket?.readyState===WebSocket.OPEN){socket.send(JSON.stringify({id:++seq,method:'Browser.close'}));if(browser.exitCode===null)await Promise.race([new Promise(resolve=>browser.once('exit',resolve)),delay(5000)]);socket.close();}if(browser.exitCode===null)browser.kill();server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));if(profile!==path.resolve(os.tmpdir(),`bimlog-meeting-create-browser-${process.pid}`))throw new Error('Task profile identity mismatch');await delay(5000);try{fs.rmSync(profile,{recursive:true,force:true,maxRetries:20,retryDelay:150});}catch(error){const cleanup=spawnSync('powershell.exe',['-NoProfile','-Command','Remove-Item -LiteralPath $env:BIMLOG_OWNED_PROFILE -Recurse -Force -ErrorAction Stop'],{env:{...process.env,BIMLOG_OWNED_PROFILE:profile},windowsHide:true});assert.equal(cleanup.status,0);}
 }
 fs.writeFileSync(path.join(output,'meeting-create-local-browser.json'),`${JSON.stringify(report,null,2)}\n`);console.log(JSON.stringify(report,null,2));
-
-
-
-
