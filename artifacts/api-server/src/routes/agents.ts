@@ -16,7 +16,13 @@ import { loadProcoreIntakeState, saveProcoreIntakeState } from "../lib/procore-i
 import { getAnthropicClientForUser } from "../lib/ai-usage";
 import { runDiscoveredMcpTurn } from "../lib/procore-intake-agent";
 
+export function createAgentsRouter(dependencies: {
+  discoverIntakeTools?: typeof discoverProcoreIntakeTools;
+  callIntakeTool?: typeof callProcoreIntakeTool;
+} = {}): Router {
 const router: Router = Router();
+const discoverIntakeTools = dependencies.discoverIntakeTools ?? discoverProcoreIntakeTools;
+const callIntakeTool = dependencies.callIntakeTool ?? callProcoreIntakeTool;
 
 type AssistantContext = { route?: unknown; page?: unknown; section?: unknown; language?: unknown; focusedControl?: unknown; controls?: unknown; pageText?: unknown };
 
@@ -70,13 +76,13 @@ router.post("/projects/:projectId/intake-agent/mcp",authMiddleware,requireProjec
     if(method==="initialize")return res.json({jsonrpc:"2.0",id,result:{protocolVersion:"2024-11-05",capabilities:{tools:{}},serverInfo:{name:"bimlog-procore-intake",version:"1.0.0"}}});
     if(method==="notifications/initialized")return res.status(202).end();
     if(method==="tools/list"){
-      const tools=await discoverProcoreIntakeTools(req.user!.companyId);
+       const tools=await discoverIntakeTools(req.user!.companyId);
       return res.set("Cache-Control","private, no-store, max-age=0").json({jsonrpc:"2.0",id,result:{tools}});
     }
     if(method==="tools/call"){
       const params=req.body?.params||{};
       if(typeof params.name!=="string")return fail("MCP_TOOL_NAME_REQUIRED","A tool name is required.");
-      const result=await callProcoreIntakeTool({userId:req.user!.userId,companyId:req.user!.companyId,projectId},params.name,parseMcpToolArguments(JSON.stringify(params.arguments??{})));
+       const result=await callIntakeTool({userId:req.user!.userId,companyId:req.user!.companyId,projectId},params.name,parseMcpToolArguments(JSON.stringify(params.arguments??{})));
       if(params.name==="bimlog_propose_intake_plan"&&result.versionPinned===true){
         const state=await loadProcoreIntakeState(req.user!.userId,req.user!.companyId,projectId);
         await saveProcoreIntakeState(req.user!.userId,req.user!.companyId,projectId,{...state,goal:String(params.arguments?.goal??state.goal),needed:String(params.arguments?.needed??state.needed),selectedSources:result.sources as any});
@@ -97,7 +103,7 @@ router.post("/projects/:projectId/intake-agent/turn",authMiddleware,requireProje
     const question=cleanAssistantText(req.body?.question,2000);
     if(!question){res.status(400).json({code:"INTAKE_QUESTION_REQUIRED"});return;}
     const projectId=Number(req.params.projectId);
-    const tools=await discoverProcoreIntakeTools(req.user!.companyId);
+    const tools=await discoverIntakeTools(req.user!.companyId);
     const client=await getAnthropicClientForUser({userId:req.user!.userId,projectId,feature:"procore_intake_agent"});
     const history=Array.isArray(req.body?.history)?req.body.history.slice(-12).filter((m:any)=>m&&["user","assistant"].includes(m.role)&&typeof m.content==="string").map((m:any)=>({role:m.role,content:String(m.content).slice(0,2000)})):[];
     const messages:any[]=[...history,{role:"user",content:question}];
@@ -105,7 +111,7 @@ router.post("/projects/:projectId/intake-agent/turn",authMiddleware,requireProje
     const result=await runDiscoveredMcpTurn({
       tools:tools as any,messages,
       createMessage:(availableTools,turnMessages)=>client.messages.create({model:"claude-haiku-4-5",max_tokens:1200,tool_choice:{type:"auto"},system,tools:availableTools as any,messages:turnMessages}) as any,
-      executeTool:(name,args)=>callProcoreIntakeTool({userId:req.user!.userId,companyId:req.user!.companyId,projectId},name,args),
+       executeTool:(name,args)=>callIntakeTool({userId:req.user!.userId,companyId:req.user!.companyId,projectId},name,args),
     });
     res.set("Cache-Control","private, no-store, max-age=0").json({agent:"bimlog-intake-agent",transport:"mcp-tool-choice",...result,canonicalMutation:false,importAvailable:false});
   }catch(error){
@@ -180,4 +186,7 @@ router.post("/projects/:projectId/agents/rfi/:rfiId", authMiddleware, requirePro
   }
 });
 
-export default router;
+return router;
+}
+
+export default createAgentsRouter();

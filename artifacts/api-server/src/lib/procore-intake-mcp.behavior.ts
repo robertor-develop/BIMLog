@@ -9,6 +9,7 @@ const tools = await discoverProcoreIntakeTools(42, async () => true);
 assert.deepEqual(tools.map((tool) => tool.name), ["procore_browse", "procore_file_versions", "bimlog_propose_intake_plan"]);
 assert.equal(tools[0].input_schema.required?.includes("projectId"), true);
 assert.deepEqual(parseProcoreFileVersions({file_versions:[{id:77,version_number:4,created_at:"2026-10-01"}]}),[{id:"77",label:"4",createdAt:"2026-10-01"}]);
+assert.deepEqual(parseProcoreFileVersions({file_versions:["bad",{}, {id:null}]}),[]);
 
 const actor = { userId: 8, companyId: 42, projectId: 71 };
 const fixtureFile = { projectRef:"project:999",fileId:"120",name:"Fixture.pdf",mimeType:"application/pdf",versions:[{id:"ver-7",label:"7",createdAt:"2026-10-01T00:00:00Z"}] };
