@@ -398,6 +398,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
       />
     )}
     <div id="clash-reports-list-current-view" className="tab-content-wrapper">
+      <a href={`/plugin-pull-review?projectId=${projectId}`} style={{display:"inline-block",marginBottom:12}}>{t("Review pending native clash changes","Revisar cambios nativos de choques pendientes")}</a>
       {error&&<div role="alert"><p>{error}</p><button disabled={loading||clashLoading||mutating} onClick={()=>void loadClashes(selectedReport)}>{t("Reload saved records","Recargar registros guardados")}</button></div>}{receipt&&<p role="status">{receipt}</p>}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
         <button className="btn btn-outline btn-sm" onClick={() => {const url=new URL(window.location.href);url.searchParams.delete("report");url.searchParams.delete("clash");window.history.replaceState(window.history.state,"",url);setSelectedReport(null);setReceipt("");}}
@@ -834,6 +835,7 @@ export function ClashReportsTab({ projectId, canWrite }: { projectId: number; ca
     )}
     <div id="clash-reports-list-current-view" className="tab-content-wrapper">
       {error&&<div role="alert"><p>{error}</p><button disabled={loading||mutating} onClick={()=>void loadReports()}>{t("Reload saved records","Recargar registros guardados")}</button></div>}{receipt&&<p role="status">{receipt}</p>}
+      <a href={`/plugin-pull-review?projectId=${projectId}`} style={{display:"inline-block",marginBottom:12}}>{t("Review pending native clash changes","Revisar cambios nativos de choques pendientes")}</a>
       <div style={{ display: "flex", gap: 24, borderBottom: "1px solid #E5E7EB", marginBottom: 20 }}>
         {([["clash", t("Clash Hits", "Choques")], ["lens", t("Lens Viewpoints", "Vistas Lens")]] as const).map(([k, label]) => (
           <button key={k} onClick={() => selectTab(k)}

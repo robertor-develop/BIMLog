@@ -4769,11 +4769,13 @@ router.get("/projects/:projectId/clash-reports/plugin-pull",
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
-      const rows = await db.select().from(clashesTable)
+      const rows = await db.select({clash:clashesTable}).from(clashesTable)
+        .innerJoin(clashReportsTable,and(eq(clashReportsTable.id,clashesTable.clashReportId),eq(clashReportsTable.projectId,projectId)))
         .where(and(
           eq(clashesTable.projectId, projectId),
           isNull(clashesTable.deletedAt),
           sql`${clashesTable.fingerprint} IS NOT NULL`,
+          sql`length(trim(${clashesTable.fingerprint})) > 0`,
           sql`${clashesTable.lastPluginSyncAt} IS NOT NULL`,
           sql`${clashesTable.updatedAt} > ${clashesTable.lastPluginSyncAt}`,
         ));
@@ -4790,7 +4792,9 @@ router.get("/projects/:projectId/clash-reports/plugin-pull",
         }
       };
 
-      const clashes = rows.map(r => ({
+      const clashes = rows.map(({clash:r}) => ({
+        reportId:r.clashReportId,
+        clashServerId:r.id,
         clashId: r.clashIdOriginal,
         fingerprint: r.fingerprint,
         newStatus: toNavisworksStatus(r.status),
@@ -4798,6 +4802,8 @@ router.get("/projects/:projectId/clash-reports/plugin-pull",
         notes: r.resolutionNotes,
       }));
 
+      res.setHeader("Cache-Control","private, no-store");
+      res.setHeader("X-BIMLog-Project-Id",String(projectId));
       res.json(clashes);
     } catch (err) {
       res.status(500).json({ error: "plugin_pull_failed", message: err instanceof Error ? err.message : String(err) });

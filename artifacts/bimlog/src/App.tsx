@@ -72,6 +72,7 @@ const LensImportPlan = namedPage(() => import("@/pages/LensImportPlan"), "LensIm
 const LensImportContext = namedPage(() => import("@/pages/LensImportContext"), "LensImportContext");
 const LensSequenceStatus = namedPage(() => import("@/pages/LensSequenceStatus"), "LensSequenceStatus");
 const LensSyncReview = namedPage(() => import("@/pages/LensSyncReview"), "LensSyncReview");
+const PluginPullReview = namedPage(() => import("@/pages/PluginPullReview"), "PluginPullReview");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
 const FixSpecificLink = namedPage(() => import("@/pages/parity/admin-fix-specific-link"), "FixSpecificLink");
@@ -455,6 +456,9 @@ function Router() {
       </Route>
       <Route path="/lens-sync-review">
         {() => <ProtectedRoute component={LensSyncReview} />}
+      </Route>
+      <Route path="/plugin-pull-review">
+        {() => <ProtectedRoute component={PluginPullReview} />}
       </Route>
       <Route path="/admin">
         {() => <AccessRoute component={AdminPanel} surface="project_administration" />}
