@@ -228,6 +228,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [newTrade, setNewTrade] = useState("");
   const [tradeSaving, setTradeSaving] = useState(false);
   const [tradeError, setTradeError] = useState("");
+  const catalogRequest=useRef(0);
+  useEffect(()=>{setTradeSaving(false);setTradeError("");setNewTrade("");setCustomTrades([]);},[projectId,token]);
   // null = still checking, true = plugin reachable, false = not reachable.
   const [pluginConnected, setPluginConnected] = useState<boolean | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -403,11 +405,13 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
 
   useEffect(() => {
     let cancelled = false;
+    const request=++catalogRequest.current;
     (async () => {
       try {
         const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/responsible-companies`, { headers });
-        if (!cancelled && r.ok) {
+        if (!cancelled && request===catalogRequest.current && r.ok) {
           const d = await r.json();
+          if(cancelled||request!==catalogRequest.current||d.projectId!==projectId||d.success!==true)return;
           if (Array.isArray(d.companies)) {
             setResponsibleCompanies(d.companies.filter((x: unknown): x is string => typeof x === "string" && x.trim() !== ""));
           }
@@ -421,7 +425,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     })();
     return () => { cancelled = true; };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [projectId]);
+  }, [projectId,token]);
 
   // Lens Next owns its authenticated bridge on 127.0.0.1:8766. Do not report the
   // retired unauthenticated 8765 endpoint as Lens Next connection state.
@@ -1027,21 +1031,31 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
 
   const selStyle = { border: "1px solid #D1D5DB", borderRadius: 6, padding: "6px 10px", fontSize: 13 } as const;
   const saveTrade = async () => {
+    if(!canWrite||actionLock.current)return;
+    const context=contextEpoch.current;
     const name = newTrade.trim().replace(/\s+/g, " ");
     if (name.length < 2) { setTradeError(t("Enter a trade name.", "Ingrese una disciplina.")); return; }
+    actionLock.current=true;
     setTradeSaving(true); setTradeError("");
     try {
       const response = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/trades`, {
         method: "POST", headers: { ...headers, "Content-Type": "application/json" }, body: JSON.stringify({ name }),
       });
       const body = await response.json().catch(() => ({}));
+      if(context!==contextEpoch.current)return;
       if (!response.ok) throw new Error(body.message || body.error || t("Could not save trade.", "No se pudo guardar la disciplina."));
-      const saved = String(body.trade?.name ?? name).trim();
-      setCustomTrades(current => Array.from(new Set([...current, saved])).sort((a, b) => a.localeCompare(b)));
+      if(body.success!==true||body.projectId!==projectId||!Number.isSafeInteger(body.trade?.id)||typeof body.trade?.name!=="string"||body.trade.name.toLocaleLowerCase("en-US")!==name.toLocaleLowerCase("en-US"))throw new Error(t("Invalid saved trade receipt.","Respuesta de disciplina guardada inválida."));
+      const saved=body.trade.name;
+      const request=++catalogRequest.current;
+      const reopened=await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/responsible-companies`,{headers});
+      const catalog=await reopened.json().catch(()=>({}));
+      if(context!==contextEpoch.current)return;
+      if(request!==catalogRequest.current||!reopened.ok||catalog.success!==true||catalog.projectId!==projectId||!Array.isArray(catalog.trades)||!catalog.trades.every((value:unknown)=>typeof value==="string")||!catalog.trades.includes(saved))throw new Error(t("Trade saved, but its project catalog could not be reopened. Retry to verify the saved trade.","Disciplina guardada, pero no se pudo reabrir el catálogo. Reintente para verificarla."));
+      setCustomTrades(catalog.trades);
       setFTrade(saved); setNewTrade("");
       showToast(t(`${saved} is available for later use.`, `${saved} quedo disponible para uso posterior.`));
-    } catch (err) { setTradeError(err instanceof Error ? err.message : String(err)); }
-    finally { setTradeSaving(false); }
+    } catch (err) { if(context===contextEpoch.current)setTradeError(err instanceof Error ? err.message : String(err)); }
+    finally { if(context===contextEpoch.current){actionLock.current=false;setTradeSaving(false);} }
   };
 
   return (

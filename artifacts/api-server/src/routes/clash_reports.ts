@@ -2297,6 +2297,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/trades",
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    if(typeof req.body?.name!=="string"){res.status(400).json({error:"invalid_trade",message:"Trade name must be text."});return;}
     const name = String(req.body?.name ?? "").trim().replace(/\s+/g, " ");
     if (!Number.isSafeInteger(projectId) || projectId <= 0 || name.length < 2 || name.length > 80) {
       res.status(400).json({ error: "invalid_trade", message: "Trade must contain 2 to 80 characters." });
@@ -2308,18 +2309,18 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/trades",
     }
     const normalized = name.toLocaleLowerCase("en-US");
     try {
-      const result = await pool.query(
-        `INSERT INTO lens_project_trades(project_id,name,normalized_name,created_by_id)
-         VALUES($1,$2,$3,$4)
-         ON CONFLICT(project_id,normalized_name) DO UPDATE SET name=lens_project_trades.name
-         RETURNING id,name,created_at`,
-        [projectId, name, normalized, req.user!.userId],
-      );
-      await db.insert(activityLogTable).values({ projectId, userId: req.user!.userId,
-        userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
-        actionType: "lens_trade_added", entityType: "lens_trade", entityId: result.rows[0].id,
-        details: `Reusable Lens trade added: ${result.rows[0].name}` });
-      res.status(201).json({ success: true, trade: result.rows[0] });
+      const result = await db.transaction(async tx => {
+        const inserted = await tx.execute(sql`INSERT INTO lens_project_trades(project_id,name,normalized_name,created_by_id)
+          VALUES(${projectId},${name},${normalized},${req.user!.userId}) ON CONFLICT(project_id,normalized_name) DO NOTHING RETURNING id,name,created_at`);
+        const row = inserted.rows[0] ?? (await tx.execute(sql`SELECT id,name,created_at FROM lens_project_trades WHERE project_id=${projectId} AND normalized_name=${normalized}`)).rows[0];
+        if (!row) throw new Error("Saved trade could not be reopened");
+        if (inserted.rows.length) await tx.insert(activityLogTable).values({ projectId, userId: req.user!.userId,
+          userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
+          actionType: "lens_trade_added", entityType: "lens_trade", entityId: Number(row.id),
+          details: `Reusable Lens trade added: ${row.name}` });
+        return { trade: {id:Number(row.id),name:String(row.name),created_at:row.created_at},created:inserted.rows.length>0 };
+      });
+      res.status(201).json({ success: true, projectId, ...result });
     } catch (err) {
       res.status(500).json({ error: "lens_trade_create_failed", message: err instanceof Error ? err.message : String(err) });
     }
