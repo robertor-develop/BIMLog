@@ -491,9 +491,22 @@ export function createLensNextApiClient(
       return Object.freeze(receipt);
     },
     async createIssue(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal) {
-      const raw = await post(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-next/issues/create`, {
+      let raw:unknown;
+      try{raw = await post(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-next/issues/create`, {
         contractVersion: "lens-next-create.v1", confirmed: true, confirmationReason: confirmationReason.trim(), viewpointId, modelFingerprint, visualState, issue,
-      }, signal);
+      }, signal);}catch(failure){
+        if(signal?.aborted)throw failure;
+        try{
+          const saved=adaptLensNextPullResponse(await get(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-pull`,signal),projectId).find(row=>row.identity.viewpointId===viewpointId);
+          if(saved&&saved.identity.lifecycleStatus==="active"&&saved.identity.revisionNumber===1&&saved.visualStateAvailable&&/^[a-f0-9]{64}$/i.test(saved.visualStateDigest??"")&&saved.displayId&&saved.note===issue.note.trim()&&saved.trade===issue.trade.trim()&&saved.floor===issue.floor.trim()&&saved.reportType===issue.reportType.trim()&&saved.priority===issue.priority&&saved.status===issue.status&&(saved.responsibleCompany??"")===(issue.responsibleCompany??"").trim()&&(saved.openItems??"")===(issue.openItems??"").trim()){
+            const packageRaw=await get(`/projects/${projectId}/clash-reports/lens-viewpoints/${saved.identity.serverId}/visual-state?modelFingerprint=${encodeURIComponent(modelFingerprint)}`,signal) as Record<string,unknown>;
+            const captured=JSON.parse(String(packageRaw.visualStateJson??"")) as Record<string,unknown>;
+            if(packageRaw.success!==true||!sameIdentity(saved.identity,assertLensNextImmutableIdentity(packageRaw.identity))||String(packageRaw.visualStateDigest??"").toLowerCase()!==saved.visualStateDigest!.toLowerCase()||String(captured.ModelFingerprint??captured.modelFingerprint??"").toLowerCase()!==modelFingerprint.toLowerCase())throw new Error("Saved creation recovery model identity mismatch");
+            return Object.freeze({serverId:saved.identity.serverId,viewpointId,visualStateDigest:saved.visualStateDigest!,revisionNumber:1,lifecycleStatus:"active",displayId:saved.displayId,displayCode:saved.displayId}) as LensNextCreateReceipt;
+          }
+        }catch(recoveryFailure){void recoveryFailure;}
+        throw failure;
+      }
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Atomic issue creation receipt is invalid");
       const body = raw as Record<string, any>, result = body.result as Record<string, unknown>;
       const receipt = { serverId: Number(result?.serverId), viewpointId: String(result?.viewpointId ?? ""), visualStateDigest: String(result?.visualStateDigest ?? ""), revisionNumber: Number(result?.revisionNumber), lifecycleStatus: String(result?.lifecycleStatus ?? ""), displayId: String(result?.displayId ?? ""), displayCode: String(result?.displayCode ?? "") };

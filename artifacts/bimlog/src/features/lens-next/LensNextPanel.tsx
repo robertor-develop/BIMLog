@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {executeLensNextCreation,type LensNextCreationAttempt} from "./lens-next-create-attempt";
 import { LensNextPanelView } from "./LensNextPanelView";
 import {
   createLensNextApiClient,
@@ -167,6 +168,7 @@ export function LensNextPanel({
   const [selectedIssueViewpointId, setSelectedIssueViewpointId] = useState<string | null>(null);
   const [issueViewpointHistory, setIssueViewpointHistory] = useState<readonly Record<string, unknown>[] | "loading" | null>(null);
   const issueViewpointSaveInFlight = useRef(false);
+  const creationInFlight=useRef(false),pendingCreation=useRef<LensNextCreationAttempt|null>(null);
   const pendingIssueViewpointSave = useRef<{
     fingerprint: string;
     input: { name: string; viewpointType: LensNextIssueViewpoint["viewpointType"]; modelFingerprint: string; visualStateJson: string; visualStateDigest: string; reason: string; idempotencyKey: string };
@@ -224,6 +226,8 @@ export function LensNextPanel({
     [issues, selectedServerId],
   );
   const activeIssues = useMemo(() => activeLensNextIssues(issues), [issues]);
+  const creationContextScope=useRef({client:apiClient,project:authorizedProjectId,bridge:bridgeContext});
+  if(creationContextScope.current.client!==apiClient||creationContextScope.current.project!==authorizedProjectId||creationContextScope.current.bridge!==bridgeContext)creationContextScope.current={client:apiClient,project:authorizedProjectId,bridge:bridgeContext};
   const issueSelectionScope=useRef({issue:selectedIssue,client:apiClient});
   if(issueSelectionScope.current.issue!==selectedIssue||issueSelectionScope.current.client!==apiClient)issueSelectionScope.current={issue:selectedIssue,client:apiClient};
   const filteredIssues = useMemo(
@@ -326,7 +330,7 @@ export function LensNextPanel({
   );
 
   const loadIssues = useCallback(
-    async (mode: "initial" | "refresh", signal?: AbortSignal) => {
+    async (mode: "initial" | "refresh", signal?: AbortSignal, expected?:{serverId:number;viewpointId:string}) => {
       const sequence = ++refreshSequence.current;
       if (!apiClient || authorizedProjectId === null) {
         setIssues([]);
@@ -337,7 +341,7 @@ export function LensNextPanel({
             ? "Select an authenticated project."
             : "Authenticated BIMLog session required.",
         );
-        return;
+        return false;
       }
       if (mode === "initial") setApiState("connecting");
       setRefreshState("refreshing");
@@ -349,9 +353,10 @@ export function LensNextPanel({
           apiClient.loadIssues(authorizedProjectId, signal),
           apiClient.loadReferenceData(authorizedProjectId, signal),
         ]);
-        if (sequence !== refreshSequence.current || signal?.aborted) return;
+        if (sequence !== refreshSequence.current || signal?.aborted) return false;
         if (issuesResult.status === "rejected") throw issuesResult.reason;
         const incoming = issuesResult.value;
+        if(expected&&!incoming.some(issue=>issue.identity.serverId===expected.serverId&&issue.identity.viewpointId===expected.viewpointId))throw new Error("Saved creation identity was not present in refreshed project records.");
         setIssues((current) => reconcileLensNextRefresh(current, incoming));
         if (catalogResult.status === "fulfilled") {
           const referenceData = catalogResult.value;
@@ -375,13 +380,15 @@ export function LensNextPanel({
         setApiState("connected");
         setRefreshState("fresh");
         setLastRefreshedAt(new Date().toISOString());
+        return true;
       } catch (error) {
-        if (signal?.aborted || sequence !== refreshSequence.current) return;
+        if (signal?.aborted || sequence !== refreshSequence.current) return false;
         setApiState("error");
         setRefreshState("error");
         setApiError(
           error instanceof Error ? error.message : "BIMLog read failed",
         );
+        return false;
       }
     },
     [apiClient, authToken, authorizedProjectId],
@@ -768,25 +775,23 @@ export function LensNextPanel({
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
 
   const createIssue = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
-    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
-    const viewpointId = crypto.randomUUID();
+    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId || creationInFlight.current) return;
+    const current=creationContextScope.current;creationInFlight.current=true;
     const auditReason = reason.trim() || "Created through Lens Next";
     setCreatedIssueServerId(null);
     setCreateMessage(null); setCreateState("capturing");
     try {
-      const navigationView = await bridgeClient.captureNewIssueNavigationView(viewpointId, bridgeContext);
-      setCreateState("creating");
-      const receipt = await apiClient.createIssue(authorizedProjectId, viewpointId, bridgeContext.modelFingerprint, navigationView, draft, auditReason);
-      await loadIssues("refresh");
+      const receipt=await executeLensNextCreation(pendingCreation,{projectId:authorizedProjectId,modelFingerprint:bridgeContext.modelFingerprint,authorityKey:authToken,draft,reason:auditReason},{newIdentity:()=>crypto.randomUUID(),isCurrent:()=>current===creationContextScope.current,capture:viewpointId=>bridgeClient.captureNewIssueNavigationView(viewpointId,bridgeContext),create:(viewpointId,navigationView)=>{setCreateState("creating");return apiClient.createIssue(authorizedProjectId,viewpointId,bridgeContext.modelFingerprint,navigationView,draft,auditReason);},reopen:receipt=>loadIssues("refresh",undefined,receipt)});
+      if(current!==creationContextScope.current)return;
       setSelectedServerId(receipt.serverId);
       setCreatedIssueServerId(receipt.serverId);
       setCreateState("success");
       setCreateMessage(`Created issue ${receipt.displayId} in BIMLog with its lightweight navigation view and screenshot. Open Working View returns to the captured camera. No local Saved Viewpoint was created.`);
     } catch (error) {
-      setCreateState("error");
-      setCreateMessage(error instanceof Error ? error.message : "Issue creation failed");
+      if(current===creationContextScope.current){setCreateState("error");setCreateMessage(error instanceof Error ? error.message : "Issue creation failed");}
     }
-  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
+    finally{creationInFlight.current=false;}
+  }, [apiClient, authorizedProjectId,authToken, bridgeClient, bridgeContext, loadIssues]);
 
   const editIssue = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
     if (!apiClient || !selectedIssue) return;

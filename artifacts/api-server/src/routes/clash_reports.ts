@@ -731,7 +731,8 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
         await tx.update(lensViewpointsTable).set({ displayId, screenshotUrl: rebound.screenshotDataUrl, visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
         trace("PASS", { provisionalServerId: inserted.id, displayId });
         stage = "audit_relationship_work";
-        trace("SKIP", { reason: "No audit or relationship write exists in the current atomic-create transaction." });
+        await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName??"",userCompanyName:req.user!.companyName??"",actionType:"lens_issue_created",entityType:"lens_viewpoint",entityId:inserted.id,details:JSON.stringify({viewpointId,displayId,visualStateDigest:rebound.digest,reason:body.confirmationReason.trim()})});
+        trace("PASS", {serverId:inserted.id});
         return { serverId: inserted.id, viewpointId, displayId, visualStateDigest: rebound.digest, revisionNumber: 1, lifecycleStatus: "active", displayCode: displayId };
       });
       transactionCommitted = true;

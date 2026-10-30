@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import {executeLensNextCreation,type LensNextCreationAttempt} from "./lens-next-create-attempt";
+import type {LensNextCreateDraft,LensNextCreateReceipt} from "./lens-next-types";
+const input={projectId:91,modelFingerprint:"a".repeat(64),authorityKey:"synthetic-session",draft:{note:"Fixture",trade:"HVAC",floor:"1",reportType:"Coordination",priority:3,status:"open",responsibleCompany:"",openItems:""} as LensNextCreateDraft,reason:"Reviewed fixture creation"};
+const holder:{current:LensNextCreationAttempt|null}={current:null};let captures=0,creates=0,reopens=0,refreshOkay=false,current=true,createFails=false;const identities:string[]=[];
+const operations={newIdentity:()=>"stable-fixture-identity",isCurrent:()=>current,capture:async()=>{captures++;return{ContractVersion:"lens-next-navigation.v1"};},create:async(viewpointId:string)=>{creates++;identities.push(viewpointId);if(createFails)throw new Error("Lost response fixture");return{serverId:7,viewpointId,displayId:"HVAC-1-1",displayCode:"HVAC-1-1",visualStateDigest:"b".repeat(64),revisionNumber:1,lifecycleStatus:"active"} as LensNextCreateReceipt;},reopen:async()=>{reopens++;return refreshOkay;}};
+await assert.rejects(()=>executeLensNextCreation(holder,input,operations),/was saved.*refreshed record/);assert.equal(creates,1);assert.equal(holder.current?.receipt?.serverId,7);
+await assert.rejects(()=>executeLensNextCreation(holder,{...input,draft:{...input.draft,note:"Changed"}},operations),/previous creation outcome/);assert.equal(creates,1);
+refreshOkay=true;const recovered=await executeLensNextCreation(holder,input,operations);assert.equal(recovered.serverId,7);assert.equal(captures,1);assert.equal(creates,1);assert.equal(reopens,2);assert.equal(holder.current,null);
+createFails=true;await assert.rejects(()=>executeLensNextCreation(holder,input,operations),/Lost response/);const retained=(holder.current as LensNextCreationAttempt|null)!.viewpointId;createFails=false;await executeLensNextCreation(holder,input,operations);assert.equal(identities.at(-1),retained);assert.equal(captures,2);
+current=false;const before=creates;await assert.rejects(()=>executeLensNextCreation(holder,input,operations),/Project or session changed/);assert.equal(creates,before);
+console.log("Lens issue creation runtime: known saved receipt reopens without duplicate, changed pending draft denied, uncertain retry retains identity/capture, changed session stops before write PASS");
