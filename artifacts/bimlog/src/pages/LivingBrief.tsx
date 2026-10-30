@@ -96,6 +96,10 @@ export function LivingBrief() {
   const [, setLocation] = useLocation();
 
   const [eligible, setEligible] = useState<boolean | null>(null);
+  const [eligibilityError, setEligibilityError] = useState(false);
+  const [eligibilityRetry, setEligibilityRetry] = useState(0);
+  const [unlockBusy, setUnlockBusy] = useState(false);
+  const unlockLock = useRef(false);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [error, setError] = useState("");
@@ -136,6 +140,9 @@ export function LivingBrief() {
     setActiveDoc(0);
     setUnlocked(false);
     setEligible(null);
+    setEligibilityError(false);
+    setUnlockBusy(false);
+    unlockLock.current = false;
     setRecoveryVersion(null);
     setRecoveryStatus("");
     setRecoveryBusy(false);
@@ -191,8 +198,10 @@ export function LivingBrief() {
   }, [token]);
 
   const unlock = useCallback(async () => {
-    if (!token) return;
+    if (!token || unlockLock.current) return;
     const epoch = sessionEpoch.current;
+    unlockLock.current = true;
+    setUnlockBusy(true);
     setError("");
     try {
     const r = await apiFetch("/living-brief/unlock", token, { method: "POST" });
@@ -209,16 +218,20 @@ export function LivingBrief() {
     }
     } catch (error) {
       if (epoch === sessionEpoch.current) setError(error instanceof Error ? error.message : "Living Brief connection interrupted. Retry.");
+    } finally {
+      if (epoch === sessionEpoch.current) { unlockLock.current = false; setUnlockBusy(false); }
     }
   }, [loadDocs, token]);
 
   useEffect(() => {
     if (!token) { setLocation("/login"); return; }
     let active = true;
+    setEligibilityError(false);
     apiFetch("/living-brief/eligibility", token)
-      .then((r) => (r.ok ? r.json() : { eligible: false, isSuperAdmin: false }))
+      .then((r) => { if (!r.ok) throw new Error("Eligibility request unavailable"); return r.json(); })
       .then((d) => {
         if (!active) return;
+        if (typeof d.eligible !== "boolean" || typeof d.isSuperAdmin !== "boolean") throw new Error("Invalid eligibility response");
         setEligible(!!d.eligible);
         setIsSuperAdmin(!!d.isSuperAdmin);
         if (d.eligible) {
@@ -226,9 +239,9 @@ export function LivingBrief() {
           else unlock();
         }
       })
-      .catch(() => { if (active) setEligible(false); });
+      .catch(() => { if (active) { setEligible(null); setEligibilityError(true); } });
     return () => { active = false; };
-  }, [token, loadDocs, setLocation, unlock]);
+  }, [token, loadDocs, setLocation, unlock, eligibilityRetry]);
 
   const loadAccess = async () => {
     if (!token || !isSuperAdmin || accessLock.current) return;
@@ -420,7 +433,7 @@ export function LivingBrief() {
   const card: React.CSSProperties = { background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 20 };
 
   if (eligible === null) {
-    return <div style={{ maxWidth: 900, margin: "60px auto", padding: 24, color: "hsl(var(--muted-foreground))" }}>Loading...</div>;
+    return <div style={{ maxWidth: 900, margin: "60px auto", padding: 24, color: "hsl(var(--muted-foreground))" }}>{eligibilityError ? <><p role="alert">{tt("Your access could not be verified. Retry the connection; this does not mean access was denied.", "No se pudo verificar su acceso. Reintente la conexión; esto no significa que se denegó el acceso.")}</p><button onClick={() => setEligibilityRetry(value => value + 1)}>{tt("Retry access verification", "Reintentar verificación de acceso")}</button></> : <p role="status">{tt("Verifying authorized access…", "Verificando acceso autorizado…")}</p>}</div>;
   }
 
   if (!eligible) {
@@ -431,7 +444,7 @@ export function LivingBrief() {
             <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Living Brief</h1>
           </div>
           <p style={{ color: "hsl(var(--muted-foreground))", fontSize: 14, margin: 0 }}>
-            You do not have access to the Living Brief. Ask the super admin to grant access.
+            {tt("You do not have access to the Living Brief. Ask the super administrator to grant access.", "No tiene acceso al Living Brief. Solicite acceso al superadministrador.")}
           </p>
         </div>
       </div>
@@ -443,12 +456,12 @@ export function LivingBrief() {
       <div style={{ width: "100%", maxWidth: 480, margin: "80px auto", padding: 24, boxSizing: "border-box" }}>
         <div style={card}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-            <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Opening Living Brief</h1>
+            <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>{tt("Opening Living Brief", "Abriendo Living Brief")}</h1>
           </div>
-          {error && <div style={{ color: "#DC2626", fontSize: 13, marginBottom: 10 }}>{error}</div>}
+          {error && <div role="alert" style={{ color: "#DC2626", fontSize: 13, marginBottom: 10 }}>{error}</div>}
           {!error && <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>Verifying your authorized access...</div>}
-          <button onClick={unlock} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-            Retry
+          <button disabled={unlockBusy || docsBusy} onClick={unlock} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+            {tt("Retry", "Reintentar")}
           </button>
         </div>
       </div>

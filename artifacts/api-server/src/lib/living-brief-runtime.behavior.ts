@@ -209,6 +209,14 @@ const api = async (pathname: string, token?: string, init: RequestInit = {}) => 
   return { status: response.status, body: await response.json() as Record<string, unknown> };
 };
 const readResult = await api("/living-brief/docs", readerToken, { headers: { "x-brief-token": readerBrief } });
+assert.equal((await api("/living-brief/unlock",undefined,{method:"POST"})).status,401);
+assert.equal((await api("/living-brief/unlock",auth(910003,"living-brief-denied@example.test"),{method:"POST"})).status,403);
+const unlockedReader=await api("/living-brief/unlock",readerToken,{method:"POST"});
+assert.equal(unlockedReader.status,200);
+assert.equal(typeof unlockedReader.body.briefToken,"string");
+assert.equal((await api("/living-brief/docs",readerToken,{headers:{"x-brief-token":String(unlockedReader.body.briefToken)}})).status,200);
+assert.equal((await api("/living-brief/docs",adminToken,{headers:{"x-brief-token":String(unlockedReader.body.briefToken)}})).status,401);
+check("passwordless unlock requires authenticated eligibility and issues access bound to the exact reader",true);
 assert.equal(readResult.status, 200);
 assert.equal((readResult.body.docs as unknown[]).length, 11);
 const ordinaryMutation = await api("/living-brief/reconcile", readerToken, { method: "POST", body: JSON.stringify({ expectedMirrorHashes: {} }) });

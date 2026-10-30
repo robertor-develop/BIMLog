@@ -11,13 +11,14 @@ const fixtureToken=`e30.${Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/
 let users=[{id:72,email:'member@example.test',fullName:'Fixture Member',isSuperAdmin:false,canAccessLivingBrief:false},{id:71,email:user.email,fullName:user.fullName,isSuperAdmin:true,canAccessLivingBrief:false}];
 let failList=false,failSave=false,posts=0,docsMode='ok',recoveryVersion=1,resetDenied=true,resetCount=0;
 let reconcileDenied=true,reconciliations=0;
+let eligibilityUnavailable=true,unlockUnavailable=true;
 const fixtureDoc={key:'fixture',name:'Fixture source',label:{en:'Fixture source',es:'Fuente de prueba'},content:'# Verified fixture content',status:'Current',sourceCommit:'fixture-source',contentSha256:'a'.repeat(64),reconciledThroughCommit:'fixture-source',semanticReviewedThroughCommit:'fixture-source',semanticReviewTask:'fixture-review',semanticReviewResult:'reviewed_no_semantic_change',semanticReviewedAt:'2026-10-29T00:00:00Z',deployedSourceCommit:'fixture-source',sourceChangedAt:'2026-10-29T00:00:00Z',mirrorSyncedAt:null,mirrorContentSha256:'b'.repeat(64)};
 app.get('/seed',(_req,res)=>res.type('html').send(`<script>localStorage.setItem('bimlog-auth',${JSON.stringify(JSON.stringify({state:{token:fixtureToken,user,changedAt:Date.now()},version:1}))});localStorage.setItem('bimlog-lang','en');location.replace('/living-brief')</script>`));
 app.get('/api/v1/auth/me',(_req,res)=>res.json(user));
 app.post('/api/v1/living-brief/reconcile',(req,res)=>{assert.deepEqual(req.body.expectedMirrorHashes,{fixture:'b'.repeat(64)});if(reconcileDenied){res.status(409).json({error:'FIXTURE_OBSERVED_HASH_CONFLICT'});return;}reconciliations++;res.json({ok:true});});
 app.get('/api/v1/auth/access-profile',(_req,res)=>res.json({facts:{authenticated:true,isSuperAdmin:true,canAccessLivingBrief:true,isCompanyPmo:false,isFinancialAdministrator:false,activeProjectRoles:[],activeProjects:[]},decisions:Object.fromEntries(['dashboard','project_workspace','project_administration','total_control','living_brief','company_catalogs','company_pricing','company_workflows','feedback_administration'].map(key=>[key,{allow:true,code:'fixture_super_admin'}]))}));
-app.get('/api/v1/living-brief/eligibility',(_req,res)=>res.json({eligible:true,isSuperAdmin:true}));
-app.post('/api/v1/living-brief/unlock',(_req,res)=>res.json({briefToken:'synthetic-only'}));
+app.get('/api/v1/living-brief/eligibility',(_req,res)=>{if(eligibilityUnavailable){res.status(503).json({error:'fixture unavailable'});return;}res.json({eligible:true,isSuperAdmin:true});});
+app.post('/api/v1/living-brief/unlock',(_req,res)=>{if(unlockUnavailable){res.status(503).json({error:'Fixture unlock unavailable'});return;}res.json({briefToken:'synthetic-only'});});
 app.get('/api/v1/living-brief/password/recovery',(_req,res)=>res.json({credentialConfigured:true,expectedCredentialVersion:recoveryVersion}));
 app.post('/api/v1/living-brief/password',(req,res)=>{assert.equal(req.body.expectedCredentialVersion,recoveryVersion);assert.equal(req.body.confirmation,'RESET_LIVING_BRIEF_GATE');if(resetDenied){res.status(409).json({error:'RECOVERY_VERSION_STALE'});return;}resetCount++;recoveryVersion++;res.json({ok:true});});
 app.get('/api/v1/living-brief/docs',(_req,res)=>{if(docsMode==='unavailable'){res.status(503).json({error:'fixture unavailable'});return;}if(docsMode==='denied'){res.status(403).json({error:'fixture revoked'});return;}res.json({docs:docsMode==='malformed'?[{key:'broken'}]:docsMode==='empty'?[]:[fixtureDoc]});});
@@ -34,8 +35,9 @@ try{
   const evaluate=async(expression:string)=>{const response=await cdp('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(response.result?.exceptionDetails)throw new Error(JSON.stringify(response.result.exceptionDetails));return response.result?.result?.value;};
   const wait=async(text:string)=>{for(let i=0;i<100;i++){if(String(await evaluate("document.body?.innerText??''")).includes(text))return;await delay(100);}await evaluate("document.querySelector('details')?.setAttribute('open','')");throw new Error(`Fixture UI did not show ${text}: ${await evaluate("document.body?.innerText??''")}`);};
 
-  await cdp('Runtime.enable');await cdp('Page.enable');await cdp('Page.reload',{ignoreCache:true});await wait('Copy Full Brief');
+  await cdp('Runtime.enable');await cdp('Page.enable');await cdp('Page.reload',{ignoreCache:true});await wait('Your access could not be verified.');
   const click=async(text:string)=>evaluate(`[...document.querySelectorAll('button')].find(b=>b.textContent.trim()===${JSON.stringify(text)}).click()`);
+  eligibilityUnavailable=false;await click('Retry access verification');await wait('Fixture unlock unavailable');unlockUnavailable=false;await click('Retry');await wait('Copy Full Brief');
   await click('Admin');await wait('Grant access');assert.equal(await evaluate("document.querySelectorAll('button[aria-label*=fixture]').length"),0);
   await click('Grant access');await wait('Revoke access');assert.equal(users[0].canAccessLivingBrief,true);assert.equal(posts,1);
   await cdp('Page.reload',{ignoreCache:true});await wait('Copy Full Brief');await click('Admin');await wait('Revoke access');
