@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Clock3, Edit3, FileText, Link2, Save, X } from "lucide-react";
+import { ResolutionMethodHistory } from "./ResolutionMethodHistory";
 
 type KnowledgeStatus = "draft" | "under_review" | "approved" | "retired";
 export type KnowledgeRecord = Record<string, unknown> & { id: string; revision: number; status: KnowledgeStatus; code: string };
@@ -99,6 +100,7 @@ export function RuleMethodWorkspace({ kind, item, token, capabilities, lang, onC
   return <aside className="knowledge-workspace" role="dialog" aria-modal="true" aria-labelledby="knowledge-rule-method-title"><header><div><span className="knowledge-code">{item.code}</span><h2 id="knowledge-rule-method-title">{text(isRule?item.title:item.name)}</h2><span className={`knowledge-status knowledge-status-${item.status}`}>● {item.status.replace("_"," ")}</span></div><button type="button" onClick={close} aria-label={t("Close detail","Cerrar detalle")}><X aria-hidden/></button></header>
     {item.status==="approved"&&<p className="knowledge-lock-note"><AlertTriangle aria-hidden/>{t("Approved content is immutable. Create a revision before editing.","El contenido aprobado es inmutable. Cree una revisión antes de editar.")}</p>}
     <div className="knowledge-workspace-actions">{mayEdit&&<button type="button" onClick={()=>setEditing(v=>!v)}><Edit3 aria-hidden/>{editing?t("View detail","Ver detalle"):t("Edit draft","Editar borrador")}</button>}</div>
+    {!isRule&&<ResolutionMethodHistory key={entityId} entityId={entityId} token={token} spanish={es}/>}
     <section className="knowledge-workspace-body">{editing?<form className="knowledge-editor" onSubmit={event=>{event.preventDefault();void save();}}>{fields.map(([key,en,sp])=><label key={key}>{t(en,sp)}<textarea value={draft[key]??""} onChange={event=>setDraft(current=>({...current,[key]:event.target.value}))}/></label>)}<div className="knowledge-editor-buttons"><button type="button" onClick={()=>{setDraft(source);setEditing(false);}}>{t("Cancel","Cancelar")}</button><button type="submit" disabled={!dirty||saving}><Save aria-hidden/>{saving?t("Saving…","Guardando…"):t("Save draft only","Guardar solo borrador")}</button></div></form>:<pre className="knowledge-detail-json">{JSON.stringify(item,null,2)}</pre>}{message&&<p className="knowledge-workspace-message" role="status">{message}</p>}<LifecycleActions kind={kind} entityId={entityId} item={item} token={token} capabilities={capabilities} lang={lang} onChanged={onChanged}/><EvidenceHistory entityType={isRule?"coordination_rule":"resolution_method"} entityId={entityId} item={item} token={token} capabilities={capabilities} lang={lang}/></section>
   </aside>;
 }
