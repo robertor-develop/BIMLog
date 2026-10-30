@@ -37,4 +37,14 @@ assert.equal((await changeEdtOperationsDirectorGrant(input, host)).active, true)
 assert.equal((await changeEdtOperationsDirectorGrant(input, host)).idempotent, true);
 assert.equal((await changeEdtOperationsDirectorGrant({ ...input, action: "revoke" }, host)).active, false);
 assert.deepEqual(history, ["grant", "revoke"]);
+for (const code of ["40001", "40P01", "23505"]) {
+  let rolledBack=false,released=false;
+  const collisionHost:EdtTransactionHost={async connect(){return {async query<Row>(sql:string){
+    if(sql.startsWith("SELECT pg_advisory"))throw Object.assign(new Error("fixture collision"),{code});
+    if(sql==="ROLLBACK")rolledBack=true;return {rows:[] as Row[]};
+  },release(){released=true;}};}};
+  await assert.rejects(()=>changeEdtOperationsDirectorGrant(input,collisionHost),
+    (e:unknown)=>e instanceof Error&&"code" in e&&e.code==="EDT_DIRECTOR_CONCURRENT_CHANGE");
+  assert.equal(rolledBack,true);assert.equal(released,true);
+}
 console.log("EDT_OPERATIONS_DIRECTOR_GRANT_RESULT=PASS scoped assignment, duplicate, self-grant, revoke");
