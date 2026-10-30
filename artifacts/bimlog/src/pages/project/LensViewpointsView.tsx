@@ -12,6 +12,7 @@ import { mergeLensTradeOptions } from "@/features/lens-next/lens-trade-options";
 const API = "/api/v1";
 interface LensViewpoint {
   id: number;
+  projectId:number;
   viewpointId: string;
   displayId?: string | null;
   navisworksGuid?: string | null;
@@ -152,6 +153,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [viewpoints, setViewpoints] = useState<LensViewpoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const contextEpoch=useRef(0),actionLock=useRef(false);
   // Drives the refresh banner. Only true when a background poll detects the
   // server's viewpoint set differs from what is currently displayed - never shown
   // speculatively. Reset to false whenever we (re)load the displayed list.
@@ -301,43 +303,42 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  const loadViewpoints = async () => {
+  const loadViewpoints = async (expectedId?:number) => {
+    const context=contextEpoch.current;
     setLoading(true);
     setError("");
     try {
       const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-pull`, { headers });
       if (r.ok) {
         const d = await r.json();
+        if(context!==contextEpoch.current)return false;
+        if(d.success!==true||!Array.isArray(d.viewpoints)||!d.viewpoints.every((row:LensViewpoint)=>Number.isSafeInteger(row.id)&&row.projectId===projectId))throw new Error("Invalid project viewpoint inventory");
+        if(expectedId&&!d.viewpoints.some((row:LensViewpoint)=>row.id===expectedId))throw new Error("Saved revision was not present in refreshed project records");
         setViewpoints(d.viewpoints ?? []);
         setSelectedIds(new Set());
         setUpdatesAvailable(false);
+        setHistoryData({});
+        return true;
       } else {
         const d = await r.json().catch(() => ({}));
+        if(context!==contextEpoch.current)return false;
         setError(d.message || d.error || "Failed to load viewpoints");
+        if([401,403].includes(r.status)){setViewpoints([]);setHistoryData({});setSelectedIds(new Set());}
+        return false;
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      if(context===contextEpoch.current)setError(e instanceof Error ? e.message : String(e));return false;
     } finally {
-      setLoading(false);
+      if(context===contextEpoch.current)setLoading(false);
     }
   };
 
-  useEffect(() => { loadViewpoints(); }, [projectId]);
+  useEffect(() => {contextEpoch.current++;actionLock.current=false;setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
 
   // Silently refetch the viewpoint list (no loading spinner) so the table can
   // be refreshed on demand (manual refresh banner) without a loading flicker.
   const refreshViewpoints = async () => {
-    try {
-      const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-pull`, { headers });
-      if (r.ok) {
-        const d = await r.json();
-        setViewpoints(d.viewpoints ?? []);
-        setSelectedIds(new Set());
-        setUpdatesAvailable(false);
-      }
-    } catch {
-      /* transient network error - keep the current list, the user can retry */
-    }
+    await loadViewpoints();
   };
 
   // Mirror the currently displayed viewpoint ids so the background poll can compare
@@ -656,10 +657,12 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   // then either a success toast + reload or an inline error inside the modal.
   // No native dialogs and no silent success - every click ends in a visible result.
   const submitAction = async () => {
-    if (!actionModal) return;
+    if (!actionModal||!canWrite||actionLock.current) return;
+    const context=contextEpoch.current;
     const m = actionModal;
     if (m.type === "edit" && m.note.trim() === "") { setActionError(t("A note is required.", "La nota es requerida.")); return; }
     if (m.type === "reassign" && !trades.includes(m.trade)) { setActionError(t("Select a valid trade.", "Seleccione una disciplina valida.")); return; }
+    actionLock.current=true;
     setActionError("");
     setActionPhase("submitting");
     try {
@@ -673,12 +676,16 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify(call.body),
       });
+      if(context!==contextEpoch.current)return;
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
         setActionPhase("input");
         setActionError(d.message || d.error || t("The action failed. Please try again.", "La accion fallo. Intentelo de nuevo."));
         return;
       }
+      const result=await r.json();if(result.success!==true||!Number.isSafeInteger(result.viewpoint?.id))throw new Error("Saved viewpoint response was invalid");
+      if(!await loadViewpoints(result.viewpoint.id))throw new Error(t("Saved response received, but records could not be reopened. Reload before another action.","Respuesta guardada recibida, pero no se pudieron reabrir los registros. Recargue antes de otra acción."));
+      if(context!==contextEpoch.current)return;
       setActionModal(null);
       setActionPhase("input");
       showToast(
@@ -686,11 +693,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         : m.type === "reassign" ? t("Viewpoint reassigned", "Vista reasignada")
         : t("Viewpoint voided", "Vista anulada")
       );
-      await loadViewpoints();
     } catch (e) {
-      setActionPhase("input");
-      setActionError(e instanceof Error ? e.message : String(e));
+      if(context===contextEpoch.current){setActionPhase("input");setActionError(e instanceof Error ? e.message : String(e));}
     }
+    finally{if(context===contextEpoch.current)actionLock.current=false;}
   };
 
   const createRfi = (v: LensViewpoint) => {
@@ -752,18 +758,21 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const toggleHistory = async (id: number) => {
     const willOpen = !historyOpen[id];
     setHistoryOpen(p => ({ ...p, [id]: willOpen }));
-    if (willOpen && !historyData[id]) {
+    if (willOpen && (!historyData[id]||historyData[id]==="error")) {
+      const context=contextEpoch.current;
       setHistoryData(p => ({ ...p, [id]: "loading" }));
       try {
         const r = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/${id}/history`, { headers });
         if (r.ok) {
           const d = await r.json();
+          if(context!==contextEpoch.current)return;
+          if(d.success!==true||!Array.isArray(d.chain)||!Array.isArray(d.events))throw new Error("Invalid revision history");
           setHistoryData(p => ({ ...p, [id]: { chain: d.chain ?? [], events: d.events ?? [] } }));
         } else {
-          setHistoryData(p => ({ ...p, [id]: "error" }));
+          if(context===contextEpoch.current)setHistoryData(p => ({ ...p, [id]: "error" }));
         }
       } catch {
-        setHistoryData(p => ({ ...p, [id]: "error" }));
+        if(context===contextEpoch.current)setHistoryData(p => ({ ...p, [id]: "error" }));
       }
     }
   };
@@ -1113,8 +1122,9 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       )}
 
       {error && (
-        <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>
+        <div role="alert" style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: 8, padding: "10px 14px", color: "#DC2626", fontSize: 13, marginBottom: 14 }}>
           {error}
+          <button disabled={loading||actionPhase==="submitting"} onClick={()=>void loadViewpoints()}>{t("Reload saved viewpoints","Recargar vistas guardadas")}</button>
         </div>
       )}
 
@@ -1623,6 +1633,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           <div
             onClick={e => e.stopPropagation()}
             style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 460, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
+            role="dialog" aria-modal="true" aria-label={t("Viewpoint revision action","Acción de revisión de vista")}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
               <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#111827", display: "flex", alignItems: "center", gap: 8 }}>

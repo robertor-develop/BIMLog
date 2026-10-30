@@ -479,6 +479,24 @@ export function validatePersistedLensNextVisualState(
   return { state, digest: supplied, contractVersion };
 }
 
+export function rebindPersistedVisualStateRevision(json:string,digest:string,before:LensNextPersistedVisualStateIdentity,after:LensNextPersistedVisualStateIdentity):{json:string;digest:string}{
+  if(before.projectId!==after.projectId||before.viewpointId!==after.viewpointId||after.revisionNumber!==before.revisionNumber+1||after.lifecycleStatus!=="active")throw new LensNextLocalUploadError("visual_revision_invalid","Visual package revision lineage is invalid.",409);
+  const verified=validatePersistedLensNextVisualState(json,digest,before),state=structuredClone(verified.state) as any;
+  const set=(pascal:string,camel:string,value:unknown)=>{if(Object.prototype.hasOwnProperty.call(state,pascal))state[pascal]=value;else state[camel]=value;};
+  set("ServerId","serverId",after.serverId);set("LifecycleStatus","lifecycleStatus",after.lifecycleStatus);set("RevisionNumber","revisionNumber",after.revisionNumber);
+  let nextDigest:string;
+  if(isLensNextNavigationView(state))nextDigest=lensNextNavigationDigest(state);
+  else{
+    const contract=digestContractVersion(state),priorEvidence=nativeCanonicalEvidence(verified.state);
+    const legacy=contract===LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION&&lensNextVisualStateDigest(verified.state)!==digest;
+    const tokens=legacy?[...priorEvidence.tokens]:lensNextVisualStateDigestTokens(state,contract).map(token=>token.value);
+    if(legacy){tokens[2]=String(after.serverId);tokens[4]=after.lifecycleStatus;tokens[5]=String(after.revisionNumber);}
+    const canonical=tokens.map(value=>`${value}\u001f`).join("");nextDigest=sha256(canonical);
+    set("DigestDiagnostics","digestDiagnostics",{Algorithm:LENS_NEXT_DIGEST_ALGORITHM,ContractVersion:contract,CanonicalInputBase64:Buffer.from(canonical,"utf8").toString("base64"),CanonicalLength:canonical.length,ComputedDigest:nextDigest,Truncated:false});
+  }
+  set("DigestSha256","digestSha256",nextDigest);const rebound=JSON.stringify(state);validatePersistedLensNextVisualState(rebound,nextDigest,after);return{json:rebound,digest:nextDigest};
+}
+
 export function validateAndRebindLocalVisualState(raw: unknown, input: { projectId: number; serverId: number; viewpointId: string; modelFingerprint: string }): { json: string; digest: string; screenshotDataUrl: string | null } {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new LensNextLocalUploadError("visual_state_invalid", "Exact local visual state is required.");
   const state = structuredClone(raw as Record<string, unknown>) as any;

@@ -21,7 +21,7 @@ import { LensImportValidationError, validateAndHashLensImportRequest } from "../
 import { getAppUrl } from "../lib/email";
 import AdmZip from "adm-zip";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "../lib/lens-next-publishing";
-import { LensNextLocalUploadError, lensNextNavigationIdentity, rebindLegacyNavigationServerIdentity, sameLensNextAuthoritativeLineage, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
+import { LensNextLocalUploadError, lensNextNavigationIdentity, rebindLegacyNavigationServerIdentity, rebindPersistedVisualStateRevision, sameLensNextAuthoritativeLineage, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
 import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-telemetry";
 import { storage } from "../lib/storage-adapter";
 import { reportOperationalFailure } from "../lib/operational-failure";
@@ -222,6 +222,12 @@ function escapeJsonStringControlChars(text: string): { repaired: string; fixes: 
 }
 
 const router: Router = Router();
+async function retainLensRevisionVisualPackage(tx:{update:typeof db.update},before:typeof lensViewpointsTable.$inferSelect,after:typeof lensViewpointsTable.$inferSelect){
+  if(!before.visualStateJson&&!before.visualStateDigest)return;
+  if(!before.visualStateJson||!before.visualStateDigest)throw new LensNextLocalUploadError("visual_state_incomplete","The prior revision has an incomplete visual package; repair it before revising.",409);
+  const rebound=rebindPersistedVisualStateRevision(before.visualStateJson,before.visualStateDigest,{projectId:before.projectId,serverId:before.id,viewpointId:before.viewpointId,lifecycleStatus:before.lifecycleStatus??"active",revisionNumber:before.revisionNumber??1},{projectId:after.projectId,serverId:after.id,viewpointId:after.viewpointId,lifecycleStatus:after.lifecycleStatus??"active",revisionNumber:after.revisionNumber??1});
+  await tx.update(lensViewpointsTable).set({visualStateJson:rebound.json,visualStateDigest:rebound.digest}).where(eq(lensViewpointsTable.id,after.id));after.visualStateJson=rebound.json;after.visualStateDigest=rebound.digest;
+}
 
 const currentViewLabel = (lang: "en" | "es", en: string, es: string) => (lang === "es" ? es : en);
 
@@ -2758,6 +2764,7 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
           revisionNumber: old.revisionNumber + 1,
           syncedAt: new Date(),
         }).returning();
+        await retainLensRevisionVisualPackage(tx,old,created);
         await tx.insert(activityLogTable).values({
           projectId,
           userId: req.user!.userId,
@@ -2849,6 +2856,7 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
           revisionNumber: old.revisionNumber + 1,
           syncedAt: new Date(),
         }).returning();
+        await retainLensRevisionVisualPackage(tx,old,created);
         await tx.insert(activityLogTable).values({
           projectId,
           userId: req.user!.userId,
