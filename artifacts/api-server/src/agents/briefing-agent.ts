@@ -4,14 +4,15 @@ import { eq, and, eq as eqOp } from "drizzle-orm";
 import { getAgentAnthropicClient, saveInsight } from "./base-agent";
 import { runClashAgent } from "./clash-agent";
 import { runRfiAgent } from "./rfi-agent";
+import { isOverdueBriefingAction } from "../lib/briefing-action-state";
 
 export async function runBriefingAgent(projectId: number, userId: number): Promise<string> {
   try {
     const anthropic = await getAgentAnthropicClient(userId, projectId, "briefing_agent");
     // Run all agents first
     await Promise.all([
-      runClashAgent(projectId, userId),
-      runRfiAgent(projectId, userId),
+      runClashAgent(projectId, userId, undefined, true),
+      runRfiAgent(projectId, userId, undefined, true),
     ]);
 
     // Gather all unread insights
@@ -37,7 +38,7 @@ export async function runBriefingAgent(projectId: number, userId: number): Promi
     const openRfis = rfis.filter(r => r.status !== "closed");
     const overdueRfis = openRfis.filter(r => r.dueDate && new Date(r.dueDate) < now);
     const openSubmittals = submittals.filter(s => s.submittalStatus === "open");
-    const overdueActions = actionItems.filter(a => a.status !== "complete" && a.dueDate && new Date(a.dueDate) < now);
+    const overdueActions = actionItems.filter(a => isOverdueBriefingAction(a,now));
     const criticalInsights = insights.filter(i => i.severity === "critical");
     const warningInsights = insights.filter(i => i.severity === "warning");
 
@@ -96,7 +97,8 @@ Keep it under 300 words. Be specific with numbers and names.`
       }]
     });
 
-    const briefing = msg.content[0]?.type === "text" ? msg.content[0].text : "Briefing unavailable.";
+    const briefing = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
+    if (!briefing) throw new Error("BRIEFING_CONTENT_UNAVAILABLE");
 
     // Mark insights as read
     for (const insight of insights) {
@@ -108,6 +110,6 @@ Keep it under 300 words. Be specific with numbers and names.`
     return briefing;
   } catch (err) {
     console.error("[briefing-agent] FAILED:", err);
-    return "Morning briefing temporarily unavailable.";
+    throw err;
   }
 }

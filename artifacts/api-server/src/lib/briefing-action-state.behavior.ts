@@ -1,0 +1,4 @@
+import assert from "node:assert/strict";import {isOverdueBriefingAction} from "./briefing-action-state";
+const now=new Date("2026-10-30T00:00:00Z"),past="2026-10-01T00:00:00Z";
+for(const status of ["complete","completed","cancelled"])assert.equal(isOverdueBriefingAction({status,dueDate:past},now),false);
+assert.equal(isOverdueBriefingAction({status:"open",dueDate:past},now),true);assert.equal(isOverdueBriefingAction({status:"in_progress",dueDate:past},now),true);assert.equal(isOverdueBriefingAction({status:"open",dueDate:null},now),false);assert.equal(isOverdueBriefingAction({status:"open",dueDate:"invalid"},now),false);assert.equal(isOverdueBriefingAction({status:"open",dueDate:"2026-11-01"},now),false);console.log("Briefing action state: completed/cancelled excluded, open/in-progress overdue, missing/invalid/future dates safe PASS");

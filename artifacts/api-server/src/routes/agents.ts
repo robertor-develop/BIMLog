@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { agentInsightsTable, clashesTable, rfisTable } from "@workspace/db/schema";
+import { agentInsightsTable, clashesTable, rfisTable, projectsTable } from "@workspace/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { runBriefingAgent } from "../agents/briefing-agent";
@@ -65,6 +65,9 @@ router.get("/projects/:projectId/insights", authMiddleware, requireProjectMember
 router.post("/projects/:projectId/briefing", authMiddleware, requireProjectMember(), async (req, res) => {
   const projectId = Number(req.params.projectId);
   try {
+    if (!Number.isSafeInteger(projectId) || projectId<=0) {res.status(400).json({error:"Valid project ID required"});return;}
+    const [project] = await db.select({id:projectsTable.id}).from(projectsTable).where(eq(projectsTable.id,projectId)).limit(1);
+    if(!project){res.status(404).json({error:"Project not found"});return;}
     const briefing = await runBriefingAgent(projectId, req.user!.userId);
     res.json({ briefing });
   } catch (err) {
