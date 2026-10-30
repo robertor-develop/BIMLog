@@ -66,6 +66,7 @@ const MyAiUsage = namedPage(() => import("@/pages/MyAiUsage"), "MyAiUsage");
 const MyConnectionFiles = namedPage(() => import("@/pages/MyConnectionFiles"), "MyConnectionFiles");
 const MySetup = namedPage(() => import("@/pages/MySetup"), "MySetup");
 const ProjectAgentReview = namedPage(() => import("@/pages/ProjectAgentReview"), "ProjectAgentReview");
+const ProjectInsightsReview = namedPage(() => import("@/pages/ProjectInsightsReview"), "ProjectInsightsReview");
 const ProjectUserAssignment = namedPage(() => import("@/pages/ProjectUserAssignment"), "ProjectUserAssignment");
 const ProjectBriefingReview = namedPage(() => import("@/pages/ProjectBriefingReview"), "ProjectBriefingReview");
 const LensImportPlan = namedPage(() => import("@/pages/LensImportPlan"), "LensImportPlan");
@@ -456,6 +457,9 @@ function Router() {
       </Route>
       <Route path="/project-agent-review">
         {() => <ProtectedRoute component={ProjectAgentReview} />}
+      </Route>
+      <Route path="/project-insights-review">
+        {() => <ProtectedRoute component={ProjectInsightsReview} />}
       </Route>
       <Route path="/project-user-assignment">
         {() => <ProtectedRoute component={ProjectUserAssignment} />}

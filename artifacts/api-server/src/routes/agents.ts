@@ -55,7 +55,7 @@ router.get("/projects/:projectId/insights", authMiddleware, requireProjectMember
       .where(eq(agentInsightsTable.projectId, projectId))
       .orderBy(desc(agentInsightsTable.createdAt))
       .limit(50);
-    res.json(insights);
+    res.set({"Cache-Control":"private, no-store","X-BIMLog-Project-Id":String(projectId)}).json(insights);
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
