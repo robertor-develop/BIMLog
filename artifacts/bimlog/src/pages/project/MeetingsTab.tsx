@@ -315,6 +315,10 @@ export function MeetingsTab({
   const { getOptions, getLabel } = useConfig();
   const { token } = useAuthStore();
   const t = (en: string, es: string) => (lang === "es" ? es : en);
+  const configuredStateLabel = (category: string, value: string) => {
+    const configured = getLabel(category, value);
+    return configured === value ? humanLabel(value) : configured;
+  };
   const statusLabel = (status: string) => {
     const labels: Record<string, string> = {
       open: t("Open", "Abierta"),
@@ -1896,7 +1900,7 @@ export function MeetingsTab({
                         }}
                       >
                         <span>
-                          {t("Status", "Estado")}: {rfi.status}
+                          {t("Status", "Estado")}: {configuredStateLabel("rfi_status", rfi.status)}
                         </span>
                         <span>
                           {t("Responsible", "Responsable")}:{" "}
@@ -2888,7 +2892,7 @@ export function MeetingsTab({
                         </span>
                         <span>
                           {t("Status", "Estado")}:{" "}
-                          {humanLabel(submittal.status)}
+                          {configuredStateLabel("submittal_status", submittal.status)}
                         </span>
                         <span>
                           {t("Responsible", "Responsable")}:{" "}
