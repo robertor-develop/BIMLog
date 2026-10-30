@@ -106,13 +106,14 @@ const admin = {
   ],
 };
 const app = express();
+const fixtureToken=`${Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url')}.${Buffer.from(JSON.stringify({sub:user.id,exp:Math.floor(Date.now()/1000)+3600})).toString('base64url')}.synthetic-local-browser-fixture`;
 app.use(express.json({ limit: "32kb" }));
 app.get("/browser-seed", (req, res) => {
   const lang = req.query.lang === "es" ? "es" : "en";
   res
     .type("html")
     .send(
-      `<script>localStorage.setItem('bimlog-auth',${JSON.stringify(JSON.stringify({ state: { token: "browser-proof-token", user }, version: 0 }))});localStorage.setItem('bimlog-lang','${lang}');location.replace('/settings/financial-controls')</script>`,
+      `<script>localStorage.setItem('bimlog-auth',${JSON.stringify(JSON.stringify({ state: { token: fixtureToken, user, changedAt:Date.now() }, version: 1 }))});localStorage.setItem('bimlog-lang','${lang}');location.replace('/settings/financial-controls')</script>`,
     );
 });
 app.get("/api/v1/auth/me", (_req, res) =>
@@ -155,6 +156,7 @@ const server = app.listen(3133, "127.0.0.1"),
     ],
     { stdio: "ignore", windowsHide: true },
   );
+try {
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 let page: any;
 for (let i = 0; i < 60; i++) {
@@ -286,5 +288,12 @@ fs.writeFileSync(
 );
 console.log(JSON.stringify(result, null, 2));
 socket.close();
-browser.kill();
-await new Promise<void>((resolve) => server.close(() => resolve()));
+} finally {
+  browser.kill();
+  server.closeIdleConnections();server.closeAllConnections();
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  const expectedProfile=path.resolve(os.tmpdir(),`bimlog-financial-browser-${process.pid}`);
+  if(path.resolve(profileDir)!==expectedProfile)throw new Error('Task browser profile identity mismatch');
+  await new Promise(resolve=>setTimeout(resolve,500));
+  fs.rmSync(expectedProfile,{recursive:true,force:true,maxRetries:10,retryDelay:100});
+}

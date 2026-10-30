@@ -1,5 +1,6 @@
 import { formatOptionalInstantDate } from "@workspace/api-zod";
 import { FinancialApprovalPolicyRecords } from "@/components/FinancialApprovalPolicyRecords";
+import { FinancialAuthorityJournal } from "@/components/FinancialAuthorityJournal";
 import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -451,23 +452,7 @@ export function FinancialControlsSettings() {
                         "Las lecturas de auditoría permanecen disponibles durante la suspensión. Esta vista contiene decisiones de autoridad, no registros financieros.",
                       )}
                     </p>
-                    {auditJournal.slice(0, 20).map((entry, index) => (
-                      <div
-                        key={`${entry.entity_id}-${index}`}
-                        style={{
-                          fontSize: 11,
-                          borderTop: "1px solid hsl(var(--border))",
-                          paddingTop: 6,
-                        }}
-                      >
-                        <b>{eventLabel(entry.event_type)}</b> ·{" "}
-                        {entry.reason_code} ·{" "}
-                        {new Date(entry.occurred_at).toLocaleString()}
-                        <div style={{ color: "#64748B" }}>
-                          {tt(entry.explanation_en, entry.explanation_es)}
-                        </div>
-                      </div>
-                    ))}
+                    <FinancialAuthorityJournal key={`audit:${projectId}:${token}`} entries={auditJournal} es={lang==='es'} serverLimit={500} onReload={()=>void load()} disabled={busy}/>
                   </section>
                 )}
                 {state.canBootstrapControlPlane && !state.canManage && (
@@ -1071,22 +1056,7 @@ export function FinancialControlsSettings() {
                         )}
                       </h2>
                       <div style={{ display: "grid", gap: 6 }}>
-                        {admin.journal.slice(0, 20).map((j, i) => (
-                          <div
-                            key={`${j.entity_id}-${i}`}
-                            style={{
-                              fontSize: 11,
-                              borderTop: "1px solid hsl(var(--border))",
-                              paddingTop: 6,
-                            }}
-                          >
-                            <b>{eventLabel(j.event_type)}</b> · {j.reason_code}{" "}
-                            · {new Date(j.occurred_at).toLocaleString()}
-                            <div style={{ color: "#64748B" }}>
-                              {tt(j.explanation_en, j.explanation_es)}
-                            </div>
-                          </div>
-                        ))}
+                        <FinancialAuthorityJournal key={`admin:${projectId}:${token}`} entries={admin.journal} es={lang==='es'} serverLimit={200} onReload={()=>void load()} disabled={busy}/>
                       </div>
                     </section>
                   </div>
