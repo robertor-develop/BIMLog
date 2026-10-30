@@ -994,6 +994,7 @@ export function Dashboard() {
               {/* Pending Items — FIX 6: real aggregate counts */}
               <div style={panel}>
                 <div style={panelTitle}>{tt("Pending Items", "Elementos pendientes")}</div>
+                <a href="/pending-work" style={{ display: "inline-block", marginBottom: 12 }}>{tt("Review pending records and export PDF", "Revisar registros pendientes y exportar PDF")}</a>
                 {(() => {
                   const openRfisCount      = stats?.openRfis ?? 0;
                   const pendingSubsCount   = stats?.pendingSubmittals ?? 0;

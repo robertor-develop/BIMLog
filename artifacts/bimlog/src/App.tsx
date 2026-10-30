@@ -54,6 +54,7 @@ const CoordinationKnowledgeLibrary = namedPage(() => import("@/pages/Coordinatio
 const KnowledgeSearch = namedPage(() => import("@/pages/KnowledgeSearch"), "KnowledgeSearch");
 const KnowledgeStarterLibrary = namedPage(() => import("@/pages/KnowledgeStarterLibrary"), "KnowledgeStarterLibrary");
 const KnowledgeTaxonomy = namedPage(() => import("@/pages/KnowledgeTaxonomy"), "KnowledgeTaxonomy");
+const PendingWork = namedPage(() => import("@/pages/PendingWork"), "PendingWork");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
 const FixSpecificLink = namedPage(() => import("@/pages/parity/admin-fix-specific-link"), "FixSpecificLink");
@@ -383,6 +384,9 @@ function Router() {
       </Route>
       <Route path="/knowledge/taxonomy">
         {() => <ProtectedRoute component={KnowledgeTaxonomy} />}
+      </Route>
+      <Route path="/pending-work">
+        {() => <ProtectedRoute component={PendingWork} />}
       </Route>
       <Route path="/admin">
         {() => <AccessRoute component={AdminPanel} surface="project_administration" />}
