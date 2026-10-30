@@ -86,8 +86,19 @@ router.post("/onboarding/milestones", authMiddleware, async (req,res) => {
   const milestone=typeof req.body?.milestone==="string"?req.body.milestone:"";
   const surface=typeof req.body?.surface==="string"?req.body.surface:"";
   if(!milestones.has(milestone)||!milestoneSurfaces.has(surface)){res.status(400).json({error:"ADOPTION_MILESTONE_INVALID"});return;}
-  await pool.query(`INSERT INTO adoption_milestone_events(company_id,user_id,milestone,surface) SELECT $1,$2,$3,$4 WHERE NOT EXISTS (SELECT 1 FROM adoption_milestone_events WHERE user_id=$2 AND milestone=$3 AND surface=$4)`,[req.user!.companyId,req.user!.userId,milestone,surface]);
-  res.status(202).json({recorded:true});
+  const client=await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))",[`onboarding-milestone:${req.user!.userId}:${milestone}:${surface}`]);
+    if(milestone==="onboarding_completed"){
+      const completed=await client.query(`SELECT 1 FROM user_onboarding_profiles WHERE user_id=$1 AND completed_at IS NOT NULL`,[req.user!.userId]);
+      if(!completed.rows[0]){await client.query("ROLLBACK");res.status(409).json({error:"SAVED_SETUP_COMPLETION_REQUIRED"});return;}
+    }
+    await client.query(`INSERT INTO adoption_milestone_events(company_id,user_id,milestone,surface) SELECT $1,$2,$3,$4 WHERE NOT EXISTS (SELECT 1 FROM adoption_milestone_events WHERE user_id=$2 AND milestone=$3 AND surface=$4)`,[req.user!.companyId,req.user!.userId,milestone,surface]);
+    const saved=await client.query(`SELECT id::text,created_at FROM adoption_milestone_events WHERE user_id=$1 AND milestone=$2 AND surface=$3 ORDER BY id LIMIT 1`,[req.user!.userId,milestone,surface]);
+    await client.query("COMMIT");
+    res.status(202).json({recorded:true,event:{id:saved.rows[0].id,createdAt:saved.rows[0].created_at.toISOString()}});
+  }catch(error){await client.query("ROLLBACK");throw error;}finally{client.release();}
 });
 
 export default router;
