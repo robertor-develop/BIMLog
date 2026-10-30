@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {executeLensNextCreation,type LensNextCreationAttempt} from "./lens-next-create-attempt";
+import {executeLensNextUpload,type LensNextUploadAttempt} from "./lens-next-upload-attempt";
 import { LensNextPanelView } from "./LensNextPanelView";
 import {
   createLensNextApiClient,
@@ -169,6 +170,7 @@ export function LensNextPanel({
   const [issueViewpointHistory, setIssueViewpointHistory] = useState<readonly Record<string, unknown>[] | "loading" | null>(null);
   const issueViewpointSaveInFlight = useRef(false);
   const creationInFlight=useRef(false),pendingCreation=useRef<LensNextCreationAttempt|null>(null);
+  const uploadInFlight=useRef(false),pendingLocalUpload=useRef<LensNextUploadAttempt|null>(null);
   const pendingIssueViewpointSave = useRef<{
     fingerprint: string;
     input: { name: string; viewpointType: LensNextIssueViewpoint["viewpointType"]; modelFingerprint: string; visualStateJson: string; visualStateDigest: string; reason: string; idempotencyKey: string };
@@ -759,20 +761,18 @@ export function LensNextPanel({
   }, [apiClient, bridgeContext?.modelFingerprint, selectedIssue]);
 
   const uploadLocalViewpoint = useCallback(async (viewpoint: LensNextLocalViewpoint) => {
-    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null) return;
+    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || uploadInFlight.current) return;
     if (viewpoint.projectId !== authorizedProjectId || bridgeContext.projectId !== authorizedProjectId) { setLocalUploadState("error"); setLocalUploadMessage("Project/model identity mismatch; upload refused."); return; }
     const reason = window.prompt(`Reason for uploading ${viewpoint.displayId ?? viewpoint.viewpointId} from Navisworks into BIMLog:`)?.trim();
     if (!reason || !window.confirm(`Create one new BIMLog record and visual package for ${viewpoint.displayId ?? viewpoint.viewpointId}? Existing BIMLog records will not be overwritten.`)) return;
+    uploadInFlight.current=true;const current=creationContextScope.current;
     setLocalUploadMessage(null); setLocalUploadState("capturing");
     try {
-      const captured = await bridgeClient.captureLocalViewpoint(viewpoint, bridgeContext);
-      setLocalUploadState("uploading");
-      const receipt = await apiClient.uploadLocalViewpoint(viewpoint, bridgeContext.modelFingerprint, captured.visualState, reason);
-      setLocalUploadState("success"); setLocalUploadMessage(`Created BIMLog issue ${receipt.serverId} with a verified Visual Package.`);
-      setLocalInventory(await bridgeClient.loadLocalInventory());
-      await loadIssues("refresh");
-    } catch (error) { setLocalUploadState("error"); setLocalUploadMessage(error instanceof Error ? error.message : "Atomic local upload failed; no partial record was committed."); }
-  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
+      const receipt=await executeLensNextUpload(pendingLocalUpload,JSON.stringify([authToken,authorizedProjectId,bridgeContext.modelFingerprint,viewpoint.navisworksGuid,viewpoint.viewpointId]),{isCurrent:()=>current===creationContextScope.current,upload:async()=>{const captured=await bridgeClient.captureLocalViewpoint(viewpoint,bridgeContext);if(current!==creationContextScope.current)throw new Error("Project/model changed during capture; no upload was submitted.");setLocalUploadState("uploading");return apiClient.uploadLocalViewpoint(viewpoint,bridgeContext.modelFingerprint,captured.visualState,reason);},reopen:async receipt=>{if(!await loadIssues("refresh",undefined,receipt))return false;const inventory=await bridgeClient.loadLocalInventory();if(current!==creationContextScope.current)return false;setLocalInventory(inventory);return true;}});
+      if(current!==creationContextScope.current)return;setLocalUploadState("success");setLocalUploadMessage(`Verified saved BIMLog issue ${receipt.serverId} and its Visual Package after reopening.`);
+    } catch (error) {if(current===creationContextScope.current){ setLocalUploadState("error"); setLocalUploadMessage(error instanceof Error ? error.message : "Upload outcome could not be confirmed. Inspect BIMLog before retrying the same viewpoint.");} }
+    finally{uploadInFlight.current=false;}
+  }, [apiClient, authorizedProjectId,authToken, bridgeClient, bridgeContext, loadIssues]);
 
   const createIssue = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
     if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId || creationInFlight.current) return;

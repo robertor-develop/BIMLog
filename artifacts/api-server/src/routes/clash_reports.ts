@@ -633,6 +633,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/uploa
         const rebound = validateAndRebindLocalVisualState(body.visualState, { projectId, serverId: inserted.id, viewpointId, modelFingerprint });
         const sequence = await assignTradeFloorSeq(projectId, inserted.trade, inserted.floor, null, tx);
         await tx.update(lensViewpointsTable).set({ screenshotUrl: rebound.screenshotDataUrl, visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
+        await tx.insert(activityLogTable).values({projectId,userId:req.user!.userId,userFullName:req.user!.fullName??"",userCompanyName:req.user!.companyName??"",actionType:"lens_local_viewpoint_uploaded",entityType:"lens_viewpoint",entityId:inserted.id,details:JSON.stringify({viewpointId,navisworksGuid,visualStateDigest:rebound.digest,reason:body.confirmationReason.trim()})});
         return { serverId: inserted.id, viewpointId, navisworksGuid, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq };
       });
       res.status(201).json({ success: true, contractVersion: "lens-next-local-upload.v1", created: true, result });

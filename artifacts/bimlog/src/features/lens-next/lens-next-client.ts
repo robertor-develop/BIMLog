@@ -480,10 +480,23 @@ export function createLensNextApiClient(
     },
     async uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal) {
       if (!localViewpoint.exactManagedIdentity || localViewpoint.serverId !== null) throw new Error("Only an exact local-only managed viewpoint can be uploaded");
-      const raw = await post(`/projects/${assertLensNextProjectId(localViewpoint.projectId)}/clash-reports/lens-next/local-viewpoints/upload`, {
+      let raw:unknown;
+      try{raw = await post(`/projects/${assertLensNextProjectId(localViewpoint.projectId)}/clash-reports/lens-next/local-viewpoints/upload`, {
         contractVersion: "lens-next-local-upload.v1", confirmed: true, confirmationReason: confirmationReason.trim(),
         modelFingerprint, localViewpoint, visualState,
-      }, signal);
+      }, signal);}catch(failure){
+        if(signal?.aborted)throw failure;
+        try{
+          const projectId=assertLensNextProjectId(localViewpoint.projectId);
+          const saved=adaptLensNextPullResponse(await get(`/projects/${projectId}/clash-reports/lens-pull`,signal),projectId).find(row=>row.identity.viewpointId===localViewpoint.viewpointId&&row.navisworksGuid?.toLowerCase()===localViewpoint.navisworksGuid.toLowerCase());
+          if(saved?.visualStateAvailable&&/^[a-f0-9]{64}$/i.test(saved.visualStateDigest??"")&&saved.identity.lifecycleStatus==="active"){
+            const packageRaw=await get(`/projects/${projectId}/clash-reports/lens-viewpoints/${saved.identity.serverId}/visual-state?modelFingerprint=${encodeURIComponent(modelFingerprint)}`,signal) as Record<string,unknown>;
+            const captured=JSON.parse(String(packageRaw.visualStateJson??"")) as Record<string,unknown>;
+            if(packageRaw.success===true&&sameIdentity(saved.identity,assertLensNextImmutableIdentity(packageRaw.identity))&&String(packageRaw.visualStateDigest??"").toLowerCase()===saved.visualStateDigest!.toLowerCase()&&String(captured.ModelFingerprint??captured.modelFingerprint??"").toLowerCase()===modelFingerprint.toLowerCase())return Object.freeze({serverId:saved.identity.serverId,viewpointId:localViewpoint.viewpointId,navisworksGuid:localViewpoint.navisworksGuid,visualStateDigest:saved.visualStateDigest!});
+          }
+        }catch(recoveryFailure){void recoveryFailure;}
+        throw failure;
+      }
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Atomic local upload receipt is invalid");
       const body = raw as Record<string, any>, result = body.result as Record<string, unknown>;
       const receipt = { serverId: Number(result?.serverId), viewpointId: String(result?.viewpointId ?? ""), navisworksGuid: String(result?.navisworksGuid ?? ""), visualStateDigest: String(result?.visualStateDigest ?? "") };
