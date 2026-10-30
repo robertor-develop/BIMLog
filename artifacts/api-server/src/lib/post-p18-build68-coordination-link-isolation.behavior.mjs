@@ -16,7 +16,7 @@ const checks = [
   ["duplicate link lookup remains project scoped", links, /eq\(linkedItemsTable\.projectId, projectId\)[\s\S]*eq\(linkedItemsTable\.fromType, fromType\)[\s\S]*eq\(linkedItemsTable\.toType, toType\)/],
   ["link removal remains project scoped", links, /eq\(linkedItemsTable\.id, linkId\), eq\(linkedItemsTable\.projectId, projectId\)/],
   ["coordination revisions reject cross-project source files", store, /EXISTS\(SELECT 1 FROM files WHERE id=\$5 AND project_id=\$3\)[\s\S]*Source file does not belong to the requested project/],
-  ["coordination intake writes only its own record, activity, and file", coordination, /db\.insert\(coordinationIntakeEventsTable\)[\s\S]*db\.insert\(activityLogTable\)[\s\S]*db\.insert\(filesTable\)/],
+  ["coordination intake atomically writes only its own record, activity, and file", coordination, /db\.transaction[\s\S]*tx\.insert\(coordinationIntakeEventsTable\)[\s\S]*tx\.insert\(activityLogTable\)[\s\S]*tx\.insert\(filesTable\)/],
   ["coordination intake does not mutate protected linked modules", coordination, /coordinationIntakeEventsTable/],
   ["coordination action projection is a pure contract projection", projection, /return projectLegacyAction\(/],
 ];

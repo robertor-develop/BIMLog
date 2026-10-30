@@ -165,12 +165,14 @@ export function CoordinationHub({
   const helpContactRoleLabel = conventionManager ? "Convention Manager" : "Convention Admin";
   const canFix = currentUserRole === "project_admin" || currentUserRole === "convention_manager";
   const { toast } = useToast();
+  const {tt}=useI18n();
+  const {token}=useAuthStore();
   const { data: convention, isLoading: convLoading } = useGetConvention(projectId);
   const { data: projectInfo } = useGetProject(projectId);
   const projectName = projectInfo?.name ?? `Project ${projectId}`;
-  const { data: events = [], isLoading: eventsLoading } = useCoordinationEvents(projectId);
+  const { data: events = [], isLoading: eventsLoading, isError:eventsError, refetch:refetchEvents } = useCoordinationEvents(projectId);
   const intakeMutation = useCoordinationIntake(projectId);
-  const confirmMutation = useCoordinationConfirm(projectId);
+  const confirmMutation = useCoordinationConfirm(projectId,token??"");
 
   const [intakeResult, setIntakeResult] = useState<CoordinationIntakeResponse | null>(null);
   const [overrides, setOverrides] = useState<Record<string, string>>({});
@@ -179,6 +181,8 @@ export function CoordinationHub({
   const [successInfo, setSuccessInfo] = useState<{ filename: string; mode: "downloaded" | "queued_sync" } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recentRef = useRef<HTMLDivElement>(null);
+  const scope=useRef(0),actionLock=useRef(false);
+  useEffect(()=>{scope.current++;actionLock.current=false;reset();return()=>{scope.current++;};},[projectId,token]);
 
   const isActive = !!(convention?.isActive && (convention.fields?.length ?? 0) > 0);
   const fields = useMemo(() => activeConventionFields(convention), [convention]);
@@ -193,22 +197,26 @@ export function CoordinationHub({
   }
 
   async function handleFile(file: File) {
+    if(actionLock.current||!canWrite)return;
     if (!isActive) {
       toast({ title: "No active convention", description: "Set up the naming convention first.", variant: "destructive" });
       return;
     }
+    const current=scope.current;actionLock.current=true;
     try {
       const result = await intakeMutation.mutateAsync(file);
+      if(current!==scope.current)return;
       setIntakeResult(result);
       setOverrides({});
   
     } catch (e) {
+      if(current!==scope.current)return;
       toast({
         title: "Intake failed",
         description: e instanceof Error ? e.message : "Could not analyze file",
         variant: "destructive",
       });
-    }
+    }finally{if(current===scope.current)actionLock.current=false;}
   }
 
   function onDrop(e: React.DragEvent) {
@@ -239,7 +247,8 @@ export function CoordinationHub({
   }
 
   async function doConfirm(destinationAction: "downloaded" | "queued_sync") {
-    if (!intakeResult) return;
+    if (!intakeResult||actionLock.current||!canWrite) return;
+    const current=scope.current;actionLock.current=true;
     const { filename, fieldsChanged, manuallyCorrected } = buildFinalFilename();
     try {
       const r = await confirmMutation.mutateAsync({
@@ -254,6 +263,7 @@ export function CoordinationHub({
         conventionSnapshot: intakeResult.conventionSnapshot,
         warningAcknowledged: intakeResult.analysis.severe,
       });
+      if(current!==scope.current)return;
       if (destinationAction === "downloaded" && r.blob) {
         const url = URL.createObjectURL(r.blob);
         const a = document.createElement("a");
@@ -268,12 +278,14 @@ export function CoordinationHub({
       setSuccessInfo({ filename, mode: destinationAction });
       if (fileInputRef.current) fileInputRef.current.value = "";
     } catch (e) {
+      if(current!==scope.current)return;
       toast({ title: "Confirm failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
-    }
+    }finally{if(current===scope.current)actionLock.current=false;}
   }
 
   async function doReject() {
-    if (!intakeResult) return;
+    if (!intakeResult||actionLock.current||!canWrite) return;
+    const current=scope.current;actionLock.current=true;
     try {
       await confirmMutation.mutateAsync({
         cacheKey: intakeResult.cacheKey,
@@ -286,11 +298,13 @@ export function CoordinationHub({
         conventionSnapshot: intakeResult.conventionSnapshot,
         warningAcknowledged: false,
       });
+      if(current!==scope.current)return;
       toast({ title: "Rejected", description: "Logged as rejected." });
       reset();
     } catch (e) {
+      if(current!==scope.current)return;
       toast({ title: "Reject failed", description: e instanceof Error ? e.message : "Unknown error", variant: "destructive" });
-    }
+    }finally{if(current===scope.current)actionLock.current=false;}
   }
 
   // ── render ─────────────────────────────────────────────────────────────────
@@ -307,7 +321,7 @@ export function CoordinationHub({
           width: 36, height: 36, borderRadius: 8, background: "#EFF6FF", color: "#1D4ED8",
         }}><Inbox style={{ width: 18, height: 18 }} /></div>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: 0 }}>Coordination Hub</h1>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: "#111827", margin: 0 }}>{tt("Coordination Hub","Centro de coordinación")}</h1>
           <div style={{ fontSize: 12, color: "#6B7280" }}>Smart intake — every file is read, understood, and renamed to your convention.</div>
         </div>
       </div>
@@ -365,7 +379,7 @@ export function CoordinationHub({
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <CheckCircle2 style={{ width: 22, height: 22, color: "#16A34A" }} />
             <div style={{ fontSize: 15, fontWeight: 800, color: "#14532D" }}>
-              {successInfo.mode === "downloaded" ? "File renamed and downloaded" : "File renamed and queued for sync"}
+              {tt("Saved event verified; download started","Evento guardado verificado; descarga iniciada")}
             </div>
           </div>
           <div style={{
@@ -469,9 +483,10 @@ export function CoordinationHub({
       {/* ZONE C — Recent events */}
       <div ref={recentRef} style={{ marginTop: 28, scrollMarginTop: 16 }}>
         <div style={{ fontSize: 12, fontWeight: 700, color: "#374151", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          Recent Intake
+          {tt("Recent Intake","Ingresos recientes")}
         </div>
-        {eventsLoading ? (
+        {eventsError&&<p role="alert">{tt("Recent intake could not be loaded.","No se pudieron cargar los ingresos recientes.")} <button onClick={()=>void refetchEvents()}>{tt("Reload saved intake events","Recargar eventos guardados")}</button></p>}
+        {eventsError ? null : eventsLoading ? (
           <div className="skeleton" style={{ height: 60 }} />
         ) : events.length === 0 ? (
           <div style={{
@@ -689,7 +704,7 @@ function ReviewPanel({
           }}
         >
           <Download style={{ width: 13, height: 13 }} />
-          Confirm & Download
+          {lang==="es"?"Confirmar y descargar":"Confirm & Download"}
         </button>
         <button
           onClick={onConfirmQueue}
@@ -704,7 +719,7 @@ function ReviewPanel({
           }}
         >
           <CheckCircle2 style={{ width: 13, height: 13 }} />
-          Confirm & Queue for Sync
+          {lang==="es"?"Confirmar y poner en cola":"Confirm & Queue for Sync"}
         </button>
         <span id="coordination-sync-unavailable" style={{ flexBasis: "100%", color: "#6B7280", fontSize: 11 }}>
           {lang === "es" ? "La sincronización con SharePoint aún no está configurada. Confirme y descargue el archivo." : "SharePoint sync is not configured yet. Confirm and download the file instead."}
@@ -720,7 +735,7 @@ function ReviewPanel({
           }}
         >
           <X style={{ width: 13, height: 13 }} />
-          Reject
+          {lang==="es"?"Rechazar":"Reject"}
         </button>
       </div>
     </div>

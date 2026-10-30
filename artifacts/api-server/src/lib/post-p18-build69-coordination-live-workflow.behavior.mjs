@@ -5,7 +5,7 @@ const ui = await readFile(new URL("../../../bimlog/src/pages/project/Coordinatio
 const client = await readFile(new URL("../../../../lib/api-client-react/src/coordination.ts", import.meta.url), "utf8");
 
 for (const [name, source, pattern] of [
-  ["workflow title", ui, /<h1[^>]*>Coordination Hub<\/h1>/],
+  ["workflow title", ui, /<h1[^>]*>\{tt\("Coordination Hub","Centro de coordinación"\)\}<\/h1>/],
   ["project convention is authoritative", ui, /useGetConvention\(projectId\)/],
   ["recent intake is project scoped", ui, /useCoordinationEvents\(projectId\)/],
   ["inactive convention fails visibly closed", ui, /No active convention[\s\S]*cannot use Coordination Hub[\s\S]*Open Convention Builder/],
