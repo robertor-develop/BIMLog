@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## BIMTECH company 31 access and Procore intake — 2026-10-30
+
+- [x] Persist the owner-approved full commercial entitlement and internal Procore company approval for active BIMTECH CORP company 31 without changing package rules for other companies, project membership, business roles, or provider-side permissions.
+- [x] Verify the current company-scoped access policy, separate-company denial, and API/MCP fixture behavior; reconcile the generated platform inventory through the reviewed Living Brief process.
+- [ ] Complete the guided Procore journey with exact source-version selection, explicit confirmation, governed import, durable receipt and record links, retry/reentry behavior, and authenticated acceptance.
+- [ ] Configure and verify the Procore application/OAuth and source-side authorization; do not treat internal company approval as a connected provider account or a published release.
+
 ## Corrected program Blocks 5–6, P021–P030 — 2026-10-29
 
 - [x] Implement and focused-test P021–P025 sequentially with one accepted implementation commit per build.

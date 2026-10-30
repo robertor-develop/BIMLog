@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 796,
-    "frontendApiReferences": 317,
+    "apiRoutes": 798,
+    "frontendApiReferences": 319,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -965,6 +965,22 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/intake-agent/preview",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/intake-agent/mcp",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/intake-agent/turn",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
         "agentInsightsTable"
@@ -6711,6 +6727,146 @@
     },
     {
       "method": "GET",
+      "path": "/projects/:projectId/company-options",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/directory",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/directory/export-pdf",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/directory",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/directory/companies",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/directory/contacts",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/projects/:projectId/directory/:entryId",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/projects/:projectId/directory/:entryId",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/directory/:entryId/invite",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/directory/import",
+      "owner": "artifacts/api-server/src/routes/project_directory.ts",
+      "tables": [
+        "companiesTable",
+        "projectDirectoryTable",
+        "usersTable",
+        "activityLogTable",
+        "projectsTable",
+        "projectMembersTable",
+        "meetingAttendeesTable"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/projects",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
@@ -6889,146 +7045,6 @@
         "filesTable",
         "usersTable",
         "companiesTable"
-      ]
-    },
-    {
-      "method": "GET",
-      "path": "/projects/:projectId/company-options",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "GET",
-      "path": "/projects/:projectId/directory",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "GET",
-      "path": "/projects/:projectId/directory/export-pdf",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "POST",
-      "path": "/projects/:projectId/directory",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "POST",
-      "path": "/projects/:projectId/directory/companies",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "POST",
-      "path": "/projects/:projectId/directory/contacts",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "PATCH",
-      "path": "/projects/:projectId/directory/:entryId",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "DELETE",
-      "path": "/projects/:projectId/directory/:entryId",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "POST",
-      "path": "/projects/:projectId/directory/:entryId/invite",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
-      ]
-    },
-    {
-      "method": "POST",
-      "path": "/projects/:projectId/directory/import",
-      "owner": "artifacts/api-server/src/routes/project_directory.ts",
-      "tables": [
-        "companiesTable",
-        "projectDirectoryTable",
-        "usersTable",
-        "activityLogTable",
-        "projectsTable",
-        "projectMembersTable",
-        "meetingAttendeesTable"
       ]
     },
     {
@@ -8756,6 +8772,96 @@
     },
     {
       "method": "GET",
+      "path": "/projects/:projectId/submittal-reports",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/submittal-reports",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/submittal-reports/upload",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/submittal-reports/:reportId",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/projects/:projectId/submittal-reports/:reportId/rename",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "PATCH",
+      "path": "/projects/:projectId/submittal-reports/:reportId/items/:itemId",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/submittal-reports/:reportId/items",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/projects/:projectId/submittal-reports/:reportId",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/projects/:projectId/submittal-reports/:reportId/items/:itemId",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/submittal-reports/:reportId/pdf",
+      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "tables": [
+        "submittalReportsTable",
+        "submittalItemsTable"
+      ]
+    },
+    {
+      "method": "GET",
       "path": "/projects/:projectId/submittals",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
@@ -9284,96 +9390,6 @@
         "linkedItemsTable",
         "agentInsightsTable",
         "filesTable"
-      ]
-    },
-    {
-      "method": "GET",
-      "path": "/projects/:projectId/submittal-reports",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "POST",
-      "path": "/projects/:projectId/submittal-reports",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "POST",
-      "path": "/projects/:projectId/submittal-reports/upload",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "GET",
-      "path": "/projects/:projectId/submittal-reports/:reportId",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "PATCH",
-      "path": "/projects/:projectId/submittal-reports/:reportId/rename",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "PATCH",
-      "path": "/projects/:projectId/submittal-reports/:reportId/items/:itemId",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "POST",
-      "path": "/projects/:projectId/submittal-reports/:reportId/items",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "DELETE",
-      "path": "/projects/:projectId/submittal-reports/:reportId",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "DELETE",
-      "path": "/projects/:projectId/submittal-reports/:reportId/items/:itemId",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
-      ]
-    },
-    {
-      "method": "GET",
-      "path": "/projects/:projectId/submittal-reports/:reportId/pdf",
-      "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
-      "tables": [
-        "submittalReportsTable",
-        "submittalItemsTable"
       ]
     },
     {
@@ -10061,6 +10077,10 @@
   ],
   "apiReferences": [
     {
+      "screen": "artifacts/bimlog/src/App.tsx",
+      "apiPath": "${API_BASE}/api/v1/living-brief/eligibility"
+    },
+    {
       "screen": "artifacts/bimlog/src/advanced-contracts-workspace-harness.tsx",
       "apiPath": "/api/v1/config"
     },
@@ -10093,16 +10113,92 @@
       "apiPath": "/api/v1/projects/77/financial/contracts/contract-77/payments"
     },
     {
-      "screen": "artifacts/bimlog/src/App.tsx",
-      "apiPath": "${API_BASE}/api/v1/living-brief/eligibility"
-    },
-    {
       "screen": "artifacts/bimlog/src/company-controls-harness.tsx",
       "apiPath": "/api/v1/company/master-catalogs/"
     },
     {
-      "screen": "artifacts/bimlog/src/components/admin/commercial-launch-dossier-panel.behavior.ts",
-      "apiPath": "/api/v1/admin/commercial-launch/dossier"
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/capture-consents/${id}/revoke"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/capture-consents"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/notifications"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/notifications/${eventId}/read"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/mine"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/${id}/history"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/${id}/assets"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/${item.id}/reopen"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/transcription/${jobId}/review"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/transcription"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/${item.id}/package.zip"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/${item.id}/package-snapshot.${format}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/assets"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "apiPath": "${API_BASE}/api/v1/feedback"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
+      "apiPath": "${(import.meta.env.VITE_API_URL as string | undefined) ?? \"\"}/api/v1/projects/${projectId}/financial/apu/bonus-proposals"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
+      "apiPath": "/api/v1/integrations/telegram/deliveries/preview"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
+      "apiPath": "/api/v1/integrations/telegram/deliveries/${encodeURIComponent(telegramDeliveryId)}/confirm"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
+      "apiPath": "/api/v1/integrations/telegram/deliveries/${encodeURIComponent(telegramDeliveryId)}/cancel"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/PrintPdfButton.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/reports/current-view/pdf"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/submittal-register-coverage"
+    },
+    {
+      "screen": "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/submittal-register/${reqId}/packages/${pkgId}"
     },
     {
       "screen": "artifacts/bimlog/src/components/admin/CommercialLaunchPanel.tsx",
@@ -10161,6 +10257,10 @@
       "apiPath": "${API_BASE}/api/v1/admin/support/cases/${caseId}/satisfaction"
     },
     {
+      "screen": "artifacts/bimlog/src/components/admin/commercial-launch-dossier-panel.behavior.ts",
+      "apiPath": "/api/v1/admin/commercial-launch/dossier"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/ai/AiControlPlanePanel.tsx",
       "apiPath": "${API_BASE}/api/v1/ai-control${path}"
     },
@@ -10177,16 +10277,16 @@
       "apiPath": "${(import.meta.env.VITE_API_URL as string|undefined)??\"\"}/api/v1/projects/${projectId}/financial/contracts/${encodeURIComponent(contract.id)}/payments"
     },
     {
+      "screen": "artifacts/bimlog/src/components/commercial/SupportCaseTimeline.tsx",
+      "apiPath": "${API_BASE}/api/v1/${admin"
+    },
+    {
       "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportCasesPanel.tsx",
       "apiPath": "${API_BASE}/api/v1/support/cases/${item.id}/lifecycle"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/commercial/SupportCaseTimeline.tsx",
-      "apiPath": "${API_BASE}/api/v1/${admin"
     },
     {
       "screen": "artifacts/bimlog/src/components/commercial/SupportConversation.tsx",
@@ -10215,62 +10315,6 @@
     {
       "screen": "artifacts/bimlog/src/components/dashboard/ResponsibilityWorkspace.tsx",
       "apiPath": "/api/v1/dashboard/responsibilities"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/capture-consents/${id}/revoke"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/capture-consents"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/notifications"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/notifications/${eventId}/read"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/mine"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/${id}/history"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/${id}/assets"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/${item.id}/reopen"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/transcription/${jobId}/review"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/transcription"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/${item.id}/package.zip"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/${item.id}/package-snapshot.${format}"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback/${feedbackId}/assets"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-      "apiPath": "${API_BASE}/api/v1/feedback"
     },
     {
       "screen": "artifacts/bimlog/src/components/job-intake/EmailReadinessSection.tsx",
@@ -10353,10 +10397,6 @@
       "apiPath": "/api/v1/downloads/sync-agent-windows"
     },
     {
-      "screen": "artifacts/bimlog/src/components/ManualBonusPanel.tsx",
-      "apiPath": "${(import.meta.env.VITE_API_URL as string | undefined) ?? \"\"}/api/v1/projects/${projectId}/financial/apu/bonus-proposals"
-    },
-    {
       "screen": "artifacts/bimlog/src/components/notifications/NotificationPreferenceCenter.tsx",
       "apiPath": "${API}/api/v1/integrations/telegram/notification-settings"
     },
@@ -10375,30 +10415,6 @@
     {
       "screen": "artifacts/bimlog/src/components/notifications/NotificationPreferenceCenter.tsx",
       "apiPath": "${API}/api/v1/integrations/telegram"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
-      "apiPath": "/api/v1/integrations/telegram/deliveries/preview"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
-      "apiPath": "/api/v1/integrations/telegram/deliveries/${encodeURIComponent(telegramDeliveryId)}/confirm"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
-      "apiPath": "/api/v1/integrations/telegram/deliveries/${encodeURIComponent(telegramDeliveryId)}/cancel"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/PrintPdfButton.tsx",
-      "apiPath": "/api/v1/projects/${projectId}/reports/current-view/pdf"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
-      "apiPath": "/api/v1/projects/${projectId}/submittal-register-coverage"
-    },
-    {
-      "screen": "artifacts/bimlog/src/components/SubmittalRegisterCoverage.tsx",
-      "apiPath": "/api/v1/projects/${projectId}/submittal-register/${reqId}/packages/${pkgId}"
     },
     {
       "screen": "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.tsx",
@@ -10525,10 +10541,6 @@
       "apiPath": "${API_BASE}/api/v1/feedback/admin/follow-up.${format}"
     },
     {
-      "screen": "artifacts/bimlog/src/pages/commercial-workspace.behavior.ts",
-      "apiPath": "/api/v1/commercial/workspace"
-    },
-    {
       "screen": "artifacts/bimlog/src/pages/CommercialWorkspace.tsx",
       "apiPath": "${API_BASE}/api/v1/commercial/workspace"
     },
@@ -10543,10 +10555,6 @@
     {
       "screen": "artifacts/bimlog/src/pages/Contact.tsx",
       "apiPath": "${API_BASE}/api/v1/contact"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/coordination-knowledge-block4.behavior.ts",
-      "apiPath": "/api/v1/projects/${entry.project_id}/files/${entry.file_id}/download"
     },
     {
       "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
@@ -10785,6 +10793,38 @@
       "apiPath": "${API_BASE}/api/v1/me/connections/${provider}"
     },
     {
+      "screen": "artifacts/bimlog/src/pages/Register.tsx",
+      "apiPath": "${BASE}/api/v1/auth/invitations/preview"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/Register.tsx",
+      "apiPath": "${BASE}/api/v1/auth/invitations/accept"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ResetPassword.tsx",
+      "apiPath": "${API_BASE}/api/v1/auth/forgot-password"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/ResetPassword.tsx",
+      "apiPath": "${API_BASE}/api/v1/auth/reset-password"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/TeamPerformanceWorkspace.tsx",
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/commercial/team-performance"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/VerifyEmail.tsx",
+      "apiPath": "/api/v1/onboarding/email-verification/confirm"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/commercial-workspace.behavior.ts",
+      "apiPath": "/api/v1/commercial/workspace"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/coordination-knowledge-block4.behavior.ts",
+      "apiPath": "/api/v1/projects/${entry.project_id}/files/${entry.file_id}/download"
+    },
+    {
       "screen": "artifacts/bimlog/src/pages/project/ActivityTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/activity/export.pdf"
     },
@@ -10803,10 +10843,6 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/ChangeOrdersTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/change-orders/${deleteTarget.id}"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/project/convention-builder/ConventionPartyAssignment.tsx",
-      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/assign-company-user"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
@@ -10947,6 +10983,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/members"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/intake-agent/turn"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/intake-agent/mcp"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/ReportsTab.tsx",
@@ -11285,28 +11329,8 @@
       "apiPath": "/api/v1/projects/${projectId}/transmittals/${deleteTarget.id}"
     },
     {
-      "screen": "artifacts/bimlog/src/pages/Register.tsx",
-      "apiPath": "${BASE}/api/v1/auth/invitations/preview"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/Register.tsx",
-      "apiPath": "${BASE}/api/v1/auth/invitations/accept"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/ResetPassword.tsx",
-      "apiPath": "${API_BASE}/api/v1/auth/forgot-password"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/ResetPassword.tsx",
-      "apiPath": "${API_BASE}/api/v1/auth/reset-password"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/TeamPerformanceWorkspace.tsx",
-      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/commercial/team-performance"
-    },
-    {
-      "screen": "artifacts/bimlog/src/pages/VerifyEmail.tsx",
-      "apiPath": "/api/v1/onboarding/email-verification/confirm"
+      "screen": "artifacts/bimlog/src/pages/project/convention-builder/ConventionPartyAssignment.tsx",
+      "apiPath": "${API_BASE}/api/v1/projects/${projectId}/assign-company-user"
     },
     {
       "screen": "artifacts/bimlog/src/project-26-apu-harness.tsx",

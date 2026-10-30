@@ -80378,6 +80378,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2be656706bcbc48de97278de5905d7e37f7a272a263108c22b4b8033375f07e3"
+    },
+    {
+      "taskId": "bimtech-company31-access-and-platform-reconciliation-20261030",
+      "reviewedThroughCommit": "5fae8db29840738365ce5ecfef87a6ce1ea1ccae",
+      "reviewedAt": "2026-10-30T19:42:46.000Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The BIMTECH grant remains company-scoped and preserves existing tenant, project, role, and provider permission boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No collaborator instruction or agent operating rule changed in the reviewed implementation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused entitlement, provider governance, intake, Lens recovery, and parity tests were added without changing quality policy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The changes extend existing BIMLog workflows and do not alter the approved product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform inventory now includes the committed Procore intake and company-scoped entitlement source files."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin protocol, synchronization, or native-plugin capability changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The reviewed changes do not alter report generation, report layouts, or their design-system contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulatory interpretation, or compliance claim was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the committed owner-approved company access correction and distinguish it from the still-incomplete Procore import journey."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keep exact-version confirmation, governed import, durable receipt, authenticated release checks, and provider setup as open gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Generated disposition records remain derived evidence; the changes do not alter audit retention or disposition policy."
+        }
+      ],
+      "reason": "Review the source and generated inventory changes after the accepted P021-P030 seal; preserve all authority boundaries and record only the company-scoped access correction and still-pending Procore import gates.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "45fe954f6aa45908d7f550aa1683643b7790eea3dec82a1856d8e7cd7ac1034d"
     }
   ]
 }
