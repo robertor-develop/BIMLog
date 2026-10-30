@@ -394,13 +394,13 @@ router.get("/feedback/:id/history", authMiddleware, async (req, res) => {
   const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
   const id = asId(req.params.id); if (!id) return res.status(400).json({ code: "FEEDBACK_ID_INVALID", error: "Invalid feedback id" });
   const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "FEEDBACK_HISTORY_DENIED", error: "History is not authorized" });
-  const history = await db.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType,
+  const history = await db.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType, actorUserId: feedbackAuditEventsTable.actorUserId,
     beforeState: feedbackAuditEventsTable.beforeState,
     afterState: feedbackAuditEventsTable.afterState, reason: feedbackAuditEventsTable.reason, createdAt: feedbackAuditEventsTable.createdAt })
     .from(feedbackAuditEventsTable).where(eq(feedbackAuditEventsTable.feedbackId, id)).orderBy(feedbackAuditEventsTable.createdAt);
-  return res.json({ feedback: { id: feedback.id, stableId: feedback.stableId, version: feedback.version }, history: history.filter(event => CUSTOMER_EVENT_TYPES.has(event.eventType)).map(event => ({
+  return res.json({ feedback: { id: feedback.id, stableId: feedback.stableId, version: feedback.version }, history: history.filter(event => CUSTOMER_EVENT_TYPES.has(event.eventType)||(event.eventType==='commented'&&event.actorUserId===feedback.userId)).map(event => ({
     id: event.id, eventType: event.eventType, visibility: "customer", beforeState: customerEventState(event.beforeState),
-    afterState: customerEventState(event.afterState), message: FEEDBACK_CUSTOMER_EVENT_TYPES.has(event.eventType) ? event.reason : null, createdAt: event.createdAt,
+    afterState: customerEventState(event.afterState), message: FEEDBACK_CUSTOMER_EVENT_TYPES.has(event.eventType)||(event.eventType==='commented'&&event.actorUserId===feedback.userId) ? event.reason : null, createdAt: event.createdAt,
   })) });
 });
 

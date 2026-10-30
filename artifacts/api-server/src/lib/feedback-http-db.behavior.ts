@@ -739,7 +739,17 @@ try {
   const deliveredRoute=await ownRoute();assert.equal(deliveredRoute.queue.phase,'delivered');assert.equal(deliveredRoute.receipt.caseRevision,1);assert.match(deliveredRoute.receipt.receiptId,/^bimlog-feedback-[a-f0-9]{64}$/);assert.doesNotMatch(JSON.stringify(deliveredRoute),/private-fixture|lease_token|lease_owner|case_digest/);
   const otherMine=await fetch(`${base}/feedback/mine`,{headers:{Authorization:`Bearer ${tokenB}`}});assert.equal(otherMine.status,200);assert.equal((await otherMine.json() as {feedback:Array<{id:number}>}).feedback.some(row=>row.id===id),false);
   for(const endpoint of ['/feedback-agent/claim',`/feedback-agent/${claimedProjection.rows[0].id}/result`])assert.equal((await fetch(`${base}${endpoint}`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:'{}'})).status,401);
-  console.log("feedback DB/HTTP contract: 38 existing checks plus safe queue/result projection, tenant isolation and native-only boundary checks passed");
+  const beforeComment=(await testPool.query('SELECT status,version FROM feedback_items WHERE id=$1',[id])).rows[0];
+  const commentResponse=await fetch(`${base}/feedback/${id}/comments`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:JSON.stringify({comment:'Additional field evidence from the customer.'})});assert.equal(commentResponse.status,201);const savedComment=await commentResponse.json() as {comment:{id:number;text:string;createdAt:string}};assert.equal(savedComment.comment.text,'Additional field evidence from the customer.');assert.ok(savedComment.comment.id);
+  assert.deepEqual((await testPool.query('SELECT status,version FROM feedback_items WHERE id=$1',[id])).rows[0],beforeComment);
+  const reopenedHistory=await fetch(`${base}/feedback/${id}/history`,{headers:{Authorization:`Bearer ${tokenA}`}});assert.equal(reopenedHistory.status,200);assert.match(await reopenedHistory.text(),/Additional field evidence from the customer/);
+  for(const comment of ['',' '.repeat(10)])assert.equal((await fetch(`${base}/feedback/${id}/comments`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:JSON.stringify({comment})})).status,400);
+  const boundedComment=await fetch(`${base}/feedback/${id}/comments`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:JSON.stringify({comment:'x'.repeat(4001)})});assert.equal(boundedComment.status,201);assert.equal((await boundedComment.json() as {comment:{text:string}}).comment.text.length,4000);
+  await testPool.query(`INSERT INTO feedback_audit_events(feedback_id,actor_user_id,event_type,reason) VALUES($1,33,'commented','PRIVATE_STAFF_COMMENT_MUST_STAY_INTERNAL')`,[id]);
+  const privateHistory=await fetch(`${base}/feedback/${id}/history`,{headers:{Authorization:`Bearer ${tokenA}`}});assert.equal(privateHistory.status,200);assert.doesNotMatch(await privateHistory.text(),/PRIVATE_STAFF_COMMENT_MUST_STAY_INTERNAL/);
+  assert.equal((await fetch(`${base}/feedback/${id}/comments`,{method:'POST',headers:{Authorization:`Bearer ${tokenB}`,'Content-Type':'application/json'},body:JSON.stringify({comment:'Cross-tenant comment must be denied.'})})).status,403);
+  assert.equal((await testPool.query('SELECT count(*)::int n FROM feedback_audit_events WHERE feedback_id=$1 AND reason=$2',[id,'Cross-tenant comment must be denied.'])).rows[0].n,0);
+  console.log("feedback DB/HTTP contract: 38 existing checks plus safe queue/result projection, tenant isolation, native boundary and persisted comment positive/negative checks passed");
 } finally {
   server.closeIdleConnections();
   server.closeAllConnections();
