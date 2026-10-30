@@ -261,7 +261,7 @@ export function ProjectDetail() {
             </ConventionBuilderErrorBoundary>
           )}
           {tab === "reports"        && <ReportsTab        projectId={projectId} isAdmin={isAdmin} />}
-          {tab === "integrations"   && <IntegrationsTab   projectId={projectId} />}
+          {tab === "integrations"   && <IntegrationsTab   projectId={projectId} canWrite={canWrite} />}
           {tab === "directory"      && <DirectoryTab      projectId={projectId} canWrite={canWrite} />}
           {tab === "transmittals"   && <TransmittalsTab   projectId={projectId} canWrite={canWrite} />}
           {tab === "change-orders"  && <ChangeOrdersTab   projectId={projectId} canWrite={canWrite} />}

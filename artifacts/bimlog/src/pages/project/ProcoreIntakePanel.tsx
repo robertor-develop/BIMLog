@@ -1,12 +1,13 @@
+import { ProcoreDocumentImportReview } from "./ProcoreDocumentImportReview";
 import { useEffect, useRef, useState } from "react";
 import { ChevronRight, RefreshCw, Send } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 type BrowseItem = { name: string; type: "file" | "folder"; ref: string; mimeType?: string | null; size?: number | null; versions?: Array<{id:string;label:string;createdAt:string|null}> };
-type SelectedItem = BrowseItem & { versionId:string; versionLabel:string };
+type SelectedItem = BrowseItem & { versionId:string; versionLabel:string; sourceCompanyId?:string };
 
-export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lang: string }) {
+export function ProcoreIntakePanel({ projectId, lang, canWrite=false }: { projectId: number; lang: string; canWrite?:boolean }) {
   const es = lang === "es";
   const tr = (en: string, spanish: string) => es ? spanish : en;
   const { token, user } = useAuthStore();
@@ -36,7 +37,7 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
   const epoch=useRef(0),baseline=useRef(''),currentPayload=useRef(''),writeQueue=useRef<Promise<void>>(Promise.resolve());
   const scopeAbort=useRef<AbortController|null>(null),activeBrowse=useRef<AbortController|null>(null),activeProposal=useRef<AbortController|null>(null);
   const turnLock=useRef(false),browseLock=useRef(false),proposalLock=useRef(false);
-  const payload=(value:any)=>({goal:value.goal,needed:value.needed,messages:value.messages.slice(-30).map((m:any)=>({role:m.role,content:m.content.slice(0,2000)})),selectedSources:value.selectedSources.map((v:any)=>({ref:v.ref,fileId:v.fileId??v.ref.split(':')[2],projectRef:v.projectRef??`project:${v.ref.split(':')[1]}`,versionId:v.versionId,versionLabel:v.versionLabel,name:v.name,mimeType:v.mimeType??null})),destinationProjectId:projectId});
+  const payload=(value:any)=>({goal:value.goal,needed:value.needed,messages:value.messages.slice(-30).map((m:any)=>({role:m.role,content:m.content.slice(0,2000)})),selectedSources:value.selectedSources.map((v:any)=>({ref:v.ref,fileId:v.fileId??v.ref.split(':')[2],projectRef:v.projectRef??`project:${v.ref.split(':')[1]}`,versionId:v.versionId,versionLabel:v.versionLabel,name:v.name,mimeType:v.mimeType??null,sourceCompanyId:v.sourceCompanyId})),destinationProjectId:projectId});
   const validState=(value:any)=>Boolean(value&&value.destinationProjectId===projectId&&typeof value.goal==='string'&&typeof value.needed==='string'&&Array.isArray(value.messages)&&value.messages.every((m:any)=>m&&['user','assistant'].includes(m.role)&&typeof m.content==='string')&&Array.isArray(value.selectedSources)&&value.selectedSources.every((v:any)=>v&&['ref','name','versionId','versionLabel'].every(k=>typeof v[k]==='string'&&v[k].length>0)));
   const verifyResponse=async(response:Response)=>{const body=await response.json();if(!response.ok)throw Error(body.code||'INTAKE_STATE_UNAVAILABLE');if(response.headers.get('x-bimlog-project-id')!==String(projectId)||response.headers.get('x-bimlog-caller-id')!==String(user?.id)||response.headers.get('x-bimlog-company-id')!==String(user?.companyId)||!validState(body.state))throw Error('INTAKE_STATE_IDENTITY_MISMATCH');return body.state;};
 
@@ -154,7 +155,7 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
   function selectVersion(item:BrowseItem){
     const versionId=versionChoice[item.ref]||item.versions?.[0]?.id;
     const version=item.versions?.find(v=>v.id===versionId);if(!version)return;
-    setSelected(current=>[...current.filter(s=>s.ref!==item.ref),{...item,versionId:version.id,versionLabel:version.label}]);
+    setSelected(current=>[...current.filter(s=>s.ref!==item.ref),{...item,versionId:version.id,versionLabel:version.label,sourceCompanyId:company.replace(/^company:/,"")}]);
   }
   async function createProposal(){
     if(!token||!ready||!selected.length||proposalLock.current)return;
@@ -162,12 +163,12 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
     try{
       const call=async(method:string,params?:unknown)=>{const r=await fetch(`/api/v1/projects/${projectId}/intake-agent/mcp`,{method:"POST",signal:controller.signal,headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:crypto.randomUUID(),method,params})});const d=await r.json();if(!r.ok||d.error)throw new Error(d.error?.data?.code||d.error?.message||"PROCORE_PROPOSAL_FAILED");return d;};
       const discovered=await call("tools/list");if(!(discovered.result?.tools||[]).some((t:{name:string})=>t.name==="bimlog_propose_intake_plan"))throw new Error("PROCORE_PROPOSAL_TOOL_UNAVAILABLE");
-      const response=await call("tools/call",{name:"bimlog_propose_intake_plan",arguments:{projectId,goal,destination,needed,sources:selected.map(s=>({ref:s.ref,name:s.name,versionId:s.versionId,mimeType:s.mimeType||""}))}});
+      const response=await call("tools/call",{name:"bimlog_propose_intake_plan",arguments:{projectId,goal,destination,needed,sources:selected.map(s=>({ref:s.ref,name:s.name,versionId:s.versionId,mimeType:s.mimeType||"",sourceCompanyId:s.sourceCompanyId}))}});
       if(!controller.signal.aborted&&ticket===epoch.current)setProposal(JSON.stringify(JSON.parse(response.result.content[0].text),null,2));
     }catch(cause){if(!controller.signal.aborted&&ticket===epoch.current)setError(cause instanceof Error?cause.message:"PROCORE_PROPOSAL_FAILED");}finally{if(ticket===epoch.current){proposalLock.current=false;setProposalBusy(false);}}
   }
 
-  return <section aria-label={tr("Procore intake agent", "Agente de incorporación de Procore")} style={{ margin: "18px 0", padding: 16, border: "1px solid hsl(var(--border))", borderRadius: 12, background: "hsl(var(--card))" }}>
+  return <section id="procore-guided-intake" aria-label={tr("Procore intake agent", "Agente de incorporación de Procore")} style={{ margin: "18px 0", padding: 16, border: "1px solid hsl(var(--border))", borderRadius: 12, background: "hsl(var(--card))" }}>
     <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center", flexWrap: "wrap" }}>
       <div>
         <h2 style={{ margin: 0, fontSize: 17 }}>{tr("Procore intake agent", "Agente de incorporación de Procore")}</h2>
@@ -211,6 +212,7 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
         </div>}
         {proposal&&<pre role="status" style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}>{proposal}</pre>}
       </div>
+      <ProcoreDocumentImportReview projectId={projectId} lang={lang} sources={selected} sourceCompanyId={company.replace(/^company:/,"")} canWrite={canWrite}/>
       <div aria-live="polite" style={{ maxHeight: 230, overflowY: "auto", display: "grid", gap: 8 }}>
         {conversation.map((message, index) => <div key={index} style={{ justifySelf: message.role === "user" ? "end" : "start", maxWidth: "92%", whiteSpace: "pre-wrap", padding: 10, borderRadius: 9, background: message.role === "user" ? "hsl(var(--accent))" : "hsl(var(--muted))", fontSize: 13 }}>{message.content}</div>)}
       </div>
@@ -220,7 +222,7 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
         <button type="submit" disabled={!ready || busy || !question.trim()} aria-label={tr("Send message", "Enviar mensaje")}><Send size={15} />{busy ? tr("Working…", "Procesando…") : tr("Send", "Enviar")}</button>
         {busy && <button type="button" onClick={() => activeTurn.current?.abort()}>{tr("Cancel", "Cancelar")}</button>}
       </form>
-      <p style={{ margin: 0, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{tr("Discovery and proposed plans do not import records. This intake currently has no commit action; use supported existing BIMLog import tools for actual changes.", "La exploración y los planes propuestos no importan registros. Esta incorporación aún no tiene acción de confirmación; use las herramientas existentes de BIMLog para cambios reales.")}</p>
+      <p style={{ margin: 0, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{tr("Discovery and proposed plans do not save records. Use the reviewed document confirmation above for a governed import and saved receipt.", "La exploración y los planes no guardan registros. Use la confirmación del documento revisado para una importación controlada con comprobante.")}</p>
     </div>}
   </section>;
 }

@@ -149,6 +149,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/members.ts
 - artifacts/api-server/src/routes/notifications.ts
 - artifacts/api-server/src/routes/onboarding.ts
+- artifacts/api-server/src/routes/procore_document_import.ts
 - artifacts/api-server/src/routes/project-workspace-batch-route.behavior.ts
 - artifacts/api-server/src/routes/project_directory.ts
 - artifacts/api-server/src/routes/projects.ts
@@ -1304,6 +1305,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-current-provider-approval.behavior.ts
+- artifacts/api-server/src/lib/procore-document-import-http.behavior.ts
+- artifacts/api-server/src/lib/procore-document-real-files-route.behavior.ts
+- artifacts/api-server/src/lib/procore-file-download-dispatch.behavior.ts
+- artifacts/api-server/src/lib/procore-file-download.behavior.ts
+- artifacts/api-server/src/lib/procore-file-download.ts
 - artifacts/api-server/src/lib/procore-intake-agent.ts
 - artifacts/api-server/src/lib/procore-intake-authenticated-http.behavior.ts
 - artifacts/api-server/src/lib/procore-intake-browser.behavior.ts
@@ -1321,6 +1327,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-rfi-import.ts
 - artifacts/api-server/src/lib/procore-status-browser.behavior.ts
 - artifacts/api-server/src/lib/procore-status-http.behavior.ts
+- artifacts/api-server/src/lib/procore-version-source.behavior.ts
+- artifacts/api-server/src/lib/procore-version-source.ts
 - artifacts/api-server/src/lib/procurement-lead-time-risk.behavior.ts
 - artifacts/api-server/src/lib/procurement-lead-time-risk.ts
 - artifacts/api-server/src/lib/procurement-readiness-chain.behavior.ts
@@ -1851,6 +1859,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/MeetingClashesPanel.tsx
 - artifacts/bimlog/src/pages/project/MeetingsTab.tsx
 - artifacts/bimlog/src/pages/project/NameGenerator.tsx
+- artifacts/bimlog/src/pages/project/ProcoreDocumentImportReview.tsx
 - artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx
 - artifacts/bimlog/src/pages/project/ReportsTab.tsx
 - artifacts/bimlog/src/pages/project/RfiCanonicalUiHarness.tsx

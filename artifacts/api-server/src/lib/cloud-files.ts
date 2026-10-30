@@ -1,3 +1,4 @@
+import { downloadProcoreFileBytes } from "./procore-file-download";
 import { getValidAccessToken, type OAuthProviderKey } from "./oauth";
 
 // Unified browse/download across cloud providers. Each item carries an opaque
@@ -133,20 +134,25 @@ async function procoreBrowse(token: string, ref: string): Promise<BrowseResult> 
     const d = await j("https://api.procore.com/rest/v1.0/companies", token) as any[];
     return { items: (d || []).map((c: any) => ({ name: c.name, type: "folder" as const, ref: `company:${c.id}` })) };
   }
+  if(!/^(?:company:[1-9]\d*|project:[1-9]\d*:[1-9]\d*|folder:[1-9]\d*:[1-9]\d*(?::[1-9]\d*)?)$/.test(ref))throw new Error("PROCORE_BROWSE_REF_INVALID");
   const [kind, a, b] = ref.split(":");
   if (kind === "company") {
-    const d = await j(`https://api.procore.com/rest/v1.0/projects?company_id=${a}`, token) as any[];
+    const d = await j(`https://api.procore.com/rest/v1.0/projects?company_id=${a}`, token,{headers:{"Procore-Company-Id":a}}) as any[];
     return { items: (d || []).map((p: any) => ({ name: p.name, type: "folder" as const, ref: `project:${a}:${p.id}` })) };
   }
-  // project root or a folder: Procore folders endpoint returns folders + files
-  const projectId = kind === "project" ? b : a;
-  const folderParam = kind === "folder" ? `&folder_id=${b}` : "";
-  const d = await j(`https://api.procore.com/rest/v1.0/folders?project_id=${projectId}${folderParam}`, token) as any;
-  const folders = (d.folders || []).map((f: any) => ({ name: f.name, type: "folder" as const, ref: `folder:${projectId}:${f.id}` }));
-   const files = await Promise.all((d.files || []).slice(0, 100).map(async (f: any) => {
-     const details = f.file_versions ? f : await j(`https://api.procore.com/rest/v1.0/files/${f.id}?project_id=${projectId}`, token);
-     return { name: f.name, type: "file" as const, ref: `file:${projectId}:${f.id}`, versions: parseProcoreFileVersions(details) };
-   }));
+  // New opaque folder references retain their authorized source-company context.
+  const parts=ref.split(":");
+  const companyId=kind==="project"?a:parts.length===4?a:undefined;
+  const projectId=kind==="project"?b:parts.length===4?b:a;
+  const folderId=kind==="folder"?(parts.length===4?parts[3]:b):undefined;
+  const folderParam=folderId?`&folder_id=${encodeURIComponent(folderId)}`:"";
+  const request=companyId?{headers:{"Procore-Company-Id":companyId}}:undefined;
+  const d=await j(`https://api.procore.com/rest/v1.0/folders?project_id=${encodeURIComponent(projectId)}${folderParam}`,token,request) as any;
+  const folders=(d.folders||[]).map((f:any)=>({name:f.name,type:"folder" as const,ref:companyId?`folder:${companyId}:${projectId}:${f.id}`:`folder:${projectId}:${f.id}`}));
+  const files=await Promise.all((d.files||[]).slice(0,100).map(async(f:any)=>{
+    const details=f.file_versions?f:await j(`https://api.procore.com/rest/v1.0/files/${f.id}?project_id=${projectId}`,token,request);
+    return {name:f.name,type:"file" as const,ref:`file:${projectId}:${f.id}`,versions:parseProcoreFileVersions(details)};
+  }));
   return { items: [...folders, ...files] };
 }
 export function parseProcoreFileVersions(file: unknown): Array<{ id: string; label: string; createdAt: string | null }> {
@@ -160,12 +166,13 @@ export function parseProcoreFileVersions(file: unknown): Array<{ id: string; lab
     return [{id,label,createdAt:date}];
   });
 }
-export async function getProcoreFileVersions(userId:number,ref:string) {
+export async function getProcoreFileVersions(userId:number,ref:string,sourceCompanyId?:string) {
+  if(sourceCompanyId!==undefined&&!/^[1-9]\d*$/.test(sourceCompanyId))throw new Error("PROCORE_SOURCE_COMPANY_INVALID");
   const match=/^file:([^:]+):([^:]+)$/.exec(ref);
   if(!match)throw new Error("PROCORE_FILE_REF_INVALID");
   const [,projectId,fileId]=match;
   const token=await getValidAccessToken(userId,"procore");
-  const file=await j(`https://api.procore.com/rest/v1.0/files/${encodeURIComponent(fileId)}?project_id=${encodeURIComponent(projectId)}`,token);
+  const file=await j(`https://api.procore.com/rest/v1.0/files/${encodeURIComponent(fileId)}?project_id=${encodeURIComponent(projectId)}`,token,sourceCompanyId?{headers:{"Procore-Company-Id":sourceCompanyId}}:undefined);
   const versions=parseProcoreFileVersions(file);
   if(!versions.length)throw new Error("PROCORE_FILE_VERSIONS_UNAVAILABLE");
   return {projectRef:`project:${file.project_id??projectId}`,fileId:String(file.id??fileId),name:String(file.name??""),mimeType:typeof file.mime_type==="string"?file.mime_type:null,versions};
@@ -175,9 +182,7 @@ async function procoreDownload(token: string, ref: string): Promise<DownloadResu
   const file = await j(`https://api.procore.com/rest/v1.0/files/${fileId}?project_id=${projectId}`, token) as any;
   const url: string | undefined = file.file_versions?.[0]?.url || file.url;
   if (!url) throw new Error("No Procore file URL");
-  const r = await fetch(url);
-  if (!r.ok) throw new Error(`Procore download failed (${r.status})`);
-  return { buffer: Buffer.from(await r.arrayBuffer()) };
+  return { buffer: await downloadProcoreFileBytes(url, token) };
 }
 
 // ─── Dispatch ─────────────────────────────────────────────────────────────────

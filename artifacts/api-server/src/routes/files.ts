@@ -1,3 +1,4 @@
+import { registerProcoreDocumentImportRoutes } from "./procore_document_import";
 import { Router, type IRouter } from "express";
 import { createHash } from "crypto";
 import { singleFileUpload } from "../middlewares/multipart";
@@ -1805,6 +1806,8 @@ router.post("/:projectId/files/:fileId/supersede", authMiddleware, requirePermis
     res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
   }
 });
+
+registerProcoreDocumentImportRoutes(router,{validateName:validateFileName,fileTypeTier:getFileTypeTier,baseName:getBaseName,processFile:processFileFromDisk});
 
 export default router;
 

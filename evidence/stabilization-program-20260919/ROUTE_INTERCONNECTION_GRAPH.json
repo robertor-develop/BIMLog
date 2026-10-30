@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 800,
-    "frontendApiReferences": 407,
+    "apiRoutes": 803,
+    "frontendApiReferences": 409,
     "routeOwnedTables": 75
   },
   "compatibilityRedirects": [
@@ -7408,6 +7408,24 @@
       "tables": []
     },
     {
+      "method": "POST",
+      "path": "/projects/:projectId/files/procore/preview",
+      "owner": "artifacts/api-server/src/routes/procore_document_import.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/files/procore/receipts/:requestId",
+      "owner": "artifacts/api-server/src/routes/procore_document_import.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/files/procore/import",
+      "owner": "artifacts/api-server/src/routes/procore_document_import.ts",
+      "tables": []
+    },
+    {
       "method": "GET",
       "path": "/projects",
       "owner": "artifacts/api-server/src/routes/projects.ts",
@@ -11961,6 +11979,14 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/members"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/ProcoreDocumentImportReview.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/files/${v.fileId}/download"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/ProcoreDocumentImportReview.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/files/procore/${path}"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",

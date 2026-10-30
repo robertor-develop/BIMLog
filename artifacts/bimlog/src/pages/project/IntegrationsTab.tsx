@@ -12,6 +12,7 @@ import { providerConnectionTruth } from "@/lib/provider-connection-truth";
 
 interface IntegrationsTabProps {
   projectId: number;
+  canWrite?:boolean;
 }
 
 interface CatalogProvider {
@@ -38,7 +39,7 @@ interface SafeConnection {
   lastSuccessfulOperationAt?: string | null;
 }
 
-export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
+export function IntegrationsTab({ projectId,canWrite=false }: IntegrationsTabProps) {
   const { lang } = useI18n();
   const tr = (en: string, es: string) => lang === "es" ? es : en;
   const { token } = useAuthStore();
@@ -150,6 +151,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   };
 
   function openProvider(provider: CatalogProvider) {
+    if(provider.key==="procore"&&connected("procore")){document.getElementById("procore-guided-intake")?.scrollIntoView({behavior:"smooth",block:"start"});return;}
     if (provider.route) {
       navigate(`/projects/${projectId}/${provider.route}`);
       return;
@@ -225,7 +227,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
       </section>
 
       <FolderWizardImportPanel projectId={projectId} token={token} lang={lang} />
-      {connected("procore") && <ProcoreIntakePanel projectId={projectId} lang={lang} />}
+      {connected("procore") && <ProcoreIntakePanel projectId={projectId} lang={lang} canWrite={canWrite} />}
 
       <div aria-live="polite" aria-atomic="true">
         {loading ? (
@@ -270,6 +272,13 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
             const Icon = provider.category === "file_source" ? FolderOpen : FileInput;
             const readinessState: ConnectorReadiness = isConnected ? "ready" : provider.availability === "review_required" ? "permission_required" : "setup_required";
             const readiness = connectorReadinessCopy(readinessState);
+            const procoreAppMissing=provider.key==="procore"&&!isConnected&&provider.permissionState==="approved"&&provider.configured===false;
+            const procoreUnverified=provider.key==="procore"&&isConnected&&!connectionDetail?.lastSuccessfulOperationAt;
+            const procoreCopy=procoreAppMissing?{
+              label:tr("Application setup required","Configuración de la aplicación requerida"),action:tr("Review application setup","Revisar configuración de la aplicación"),detail:tr("Your company is approved. BIMLog’s Procore application setup must be restored before a new account can connect.","Su empresa está aprobada. Debe restaurarse la configuración de Procore en BIMLog para conectar una cuenta nueva.")
+            }:procoreUnverified?{
+              label:tr("Connected · verification required","Conectado · verificación requerida"),action:tr("Open guided intake","Abrir incorporación guiada"),detail:tr("The account is saved. Browse authorized sources to verify access before importing.","La cuenta está guardada. Explore fuentes autorizadas para verificar el acceso antes de importar.")
+            }:null;
             const truth = providerConnectionTruth({key:provider.key,availability:provider.availability,connected:isConnected,permissionState:provider.permissionState,lastSuccessfulOperationAt:connectionDetail?.lastSuccessfulOperationAt,lastError:connectionDetail?.lastError});
             return (
               <article key={provider.key} style={{ border: "1px solid hsl(var(--border))", borderRadius: 11, background: "hsl(var(--card))", padding: 17 }}>
@@ -283,12 +292,12 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                   </div>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14 }}>
-                  <div style={{ fontSize: 10, fontWeight: 750, color: readinessState === "ready" ? "#15803D" : "#92400E" }}>
-                    <span>{tr(readiness.label, readinessState === "ready" ? "Listo" : readinessState === "permission_required" ? "Permiso requerido" : "Configuración requerida")}</span>
+                  <div style={{ fontSize: 10, fontWeight: 750, color: readinessState === "ready" && !procoreUnverified ? "#15803D" : "#92400E" }}>
+                    <span>{procoreCopy?.label ?? tr(readiness.label, readinessState === "ready" ? "Listo" : readinessState === "permission_required" ? "Permiso requerido" : "Configuración requerida")}</span>
                     {provider.oauthParam && <div style={{ marginTop: 4, color: isConnected ? "#15803D" : "hsl(var(--muted-foreground))" }}>
                       {isConnected ? tr("Account connected", "Cuenta conectada") : tr("Account not connected", "Cuenta no conectada")}
                     </div>}
-                    <div style={{ marginTop: 4, maxWidth: 190, fontWeight: 500, lineHeight: 1.4 }}>{tr(readiness.detail, readinessState === "ready" ? "La conexión y el permiso requerido están verificados." : readinessState === "permission_required" ? "La integración existe, pero su rol no puede usarla ni configurarla." : "Un administrador debe configurar esta integración antes de usarla.")}</div>
+                    <div style={{ marginTop: 4, maxWidth: 190, fontWeight: 500, lineHeight: 1.4 }}>{procoreCopy?.detail ?? tr(readiness.detail, readinessState === "ready" ? "La conexión y el permiso requerido están verificados." : readinessState === "permission_required" ? "La integración existe, pero su rol no puede usarla ni configurarla." : "Un administrador debe configurar esta integración antes de usarla.")}</div>
                     <div style={{marginTop:5,fontWeight:600}}>{tr("Truth","Estado real")}: {truth.state.replaceAll("_"," ")} · {tr("Next","Siguiente")}: {truth.nextAction}</div>
                     <div style={{marginTop:4,fontWeight:500}}>{tr("Last successful operation","Última operación exitosa")}: {connectionDetail?.lastSuccessfulOperationAt?new Date(connectionDetail.lastSuccessfulOperationAt).toLocaleString(lang):tr("None recorded","Ninguna registrada")}</div>
                   </div>
@@ -296,7 +305,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                     onClick={() => openProvider(provider)}
                     style={{ padding: "6px 10px", borderRadius: 6, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700, cursor: "pointer" }}
                   >
-                    {tr(readiness.action, readinessState === "ready" ? "Usar integración" : readinessState === "permission_required" ? "Contactar administrador" : "Abrir configuración")}
+                    {procoreCopy?.action ?? tr(readiness.action, readinessState === "ready" ? "Usar integración" : readinessState === "permission_required" ? "Contactar administrador" : "Abrir configuración")}
                   </button>
                 </div>
                 {provider.key==="procore"&&<section aria-label={tr("Procore governed connection","Conexión gobernada de Procore")} style={{marginTop:14,paddingTop:12,borderTop:"1px solid hsl(var(--border))",display:"grid",gap:8,fontSize:11}}>
@@ -310,7 +319,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
                     <button type="button" onClick={()=>navigate("/profile")}>{isConnected?tr("Reconnect","Reconectar"):tr("Connect Procore","Conectar Procore")}</button>
                   </div>
                   {procoreError&&<div role="alert" style={{color:"#991B1B"}}>{tr("Discovery unavailable: ","Descubrimiento no disponible: ")}{procoreError}. {tr("No records were imported.","No se importó ningún registro.")}</div>}
-                  {procorePreview&&<div role="status" style={{padding:9,borderRadius:7,background:"#EFF6FF",color:"#1E40AF"}}>{tr(`Preview ready: ${procorePreview.recordsFound} records across ${procorePreview.pagesRead} page(s). Sent only to MAIN 04B review; canonical records remain unchanged.`,`Vista previa lista: ${procorePreview.recordsFound} registros en ${procorePreview.pagesRead} página(s). Enviada solo a revisión de MAIN 04B; los registros canónicos no cambiaron.`)}</div>}
+                  {procorePreview&&<div role="status" style={{padding:9,borderRadius:7,background:"#EFF6FF",color:"#1E40AF"}}>{tr(`Preview ready: ${procorePreview.recordsFound} records across ${procorePreview.pagesRead} page(s). No records were imported. Continue with guided intake to review and confirm documents.`,`Vista previa lista: ${procorePreview.recordsFound} registros en ${procorePreview.pagesRead} página(s). No se importaron registros. Continúe con la incorporación guiada para revisar y confirmar documentos.`)}</div>}
                 </section>}
               </article>
             );
