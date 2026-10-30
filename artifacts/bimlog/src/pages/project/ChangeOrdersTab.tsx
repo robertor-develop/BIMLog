@@ -1,5 +1,5 @@
 import { ProjectPartyPicker } from "@/components/ProjectPartyPicker";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useSearch } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
@@ -82,30 +82,44 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
   const [form, setForm] = useState({ title: "", description: "", contract_value_impact: "", schedule_impact_days: "", initiated_by_company: "" });
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
+  const context = useRef(0), listRequest=useRef<AbortController|null>(null), actionLock=useRef(false);
+  const [acting,setActing]=useState(false);
+  const [proposals,setProposals]=useState<Record<number,{description:string;cost?:string;schedule?:string}>>({});
+  const [pendingImport,setPendingImport]=useState<{file:File;projectId:number;warnings:Array<{message:string;existingEntity?:string;existingId?:number}>;total:number}|null>(null),[importConfirmed,setImportConfirmed]=useState(false);
 
-  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>|null,reviewedFile?:File,forceImport=false) => {
+    const file = reviewedFile??e?.target.files?.[0];
     if (!file) return;
-    setImporting(true); setImportMsg("Reading document with AI...");
+    if(!canWrite||!token||importing)return;
+    if(forceImport&&(!importConfirmed||pendingImport?.projectId!==projectId))return;
+    const scope=context.current;
+    setImporting(true); setImportMsg(t("Reading document with AI…", "Leyendo documento con IA…"));
     try {
       const formData = new FormData();
       formData.append("file", file);
+      if(forceImport)formData.append("forceImport","true");
       const res = await fetch(`${API}/projects/${projectId}/change-orders/import`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
+      if(scope!==context.current)return;
       if (res.ok) {
         const data = await res.json();
-        let msg = `${data.imported ?? 0} change orders imported successfully`;
-        if (data.renameCount > 0) msg += `. ${data.renameCount} duplicate(s) renamed with DRF suffix`;
+        if(scope!==context.current)return;
+        if(data.requiresConfirmation===true){if(!Array.isArray(data.warnings)||!data.warnings.every((warning:{message:string})=>typeof warning.message==="string")||!Number.isSafeInteger(data.total))throw new Error("Invalid import warnings");setPendingImport({file,projectId,warnings:data.warnings,total:data.total});setImportConfirmed(false);setImportMsg(t("Review import warnings before confirming. No change order has been imported yet.","Revise las advertencias antes de confirmar. Aún no se ha importado ninguna orden."));return;}
+        if(!Number.isSafeInteger(data.imported)||data.imported<0)throw new Error("Invalid import receipt");
+        setPendingImport(null);setImportConfirmed(false);
+        let msg = t(`${data.imported} change orders imported; reloading saved records.`, `${data.imported} órdenes importadas; recargando registros guardados.`);
+        if (data.renameCount > 0) msg += t(` ${data.renameCount} duplicates renamed with DRF suffix.`, ` ${data.renameCount} duplicados renombrados con sufijo DRF.`);
         setImportMsg(msg);
-        setTimeout(() => window.location.reload(), 2500);
+        await load();
       } else {
-        setImportMsg("Import failed — please try again");
+        setPendingImport(null);setImportConfirmed(false);
+        setImportMsg(t("Import was rejected or the provider is unavailable. Review saved records before retrying.", "La importación fue rechazada o el proveedor no está disponible. Revise los registros guardados antes de reintentar."));
       }
-    } catch { setImportMsg("Import failed"); }
-    finally { setImporting(false); e.target.value = ""; }
+    } catch { if(scope===context.current){setPendingImport(null);setImportConfirmed(false);setImportMsg(t("Import outcome could not be confirmed. Reload saved records before retrying.", "No se pudo confirmar la importación. Recargue registros guardados antes de reintentar."));} }
+    finally { if(scope===context.current)setImporting(false); if(e)e.target.value = ""; }
   };
   const [saving, setSaving] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
@@ -124,17 +138,21 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
   const headers = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
 
   const load = async () => {
+    if(!token)return;
+    listRequest.current?.abort();const controller=new AbortController();listRequest.current=controller;
     setLoading(true);
     try {
-      const r = await fetch(`${API}/projects/${projectId}/change-orders`, { headers: { Authorization: `Bearer ${token}` } });
-      if (r.ok) setItems(await r.json());
-    } finally { setLoading(false); setLoaded(true); }
+      const r = await fetch(`${API}/projects/${projectId}/change-orders`, { signal:controller.signal,headers: { Authorization: `Bearer ${token}` } });
+      if(!r.ok)throw new Error("unavailable");const data=await r.json();if(controller.signal.aborted)return;
+      if(!Array.isArray(data)||!data.every((item:ChangeOrder)=>Number.isSafeInteger(item.id)&&typeof item.title==="string"&&typeof item.number==="string"&&typeof item.status==="string"))throw new Error("invalid");setItems(data);setError("");
+    }catch(error){if(!controller.signal.aborted){setItems([]);setError(t("Saved change orders could not be verified. Reload before retrying.","No se pudieron verificar órdenes guardadas. Recargue antes de reintentar."));}}
+    finally { if(!controller.signal.aborted){setLoading(false); setLoaded(true);} }
   };
 
-  if (!loaded && !loading) { load(); }
+  useEffect(()=>{context.current++;actionLock.current=false;setActing(false);setExportingPdf(false);setExportError("");setSaving(false);setAiLoading(false);setActiveAi(null);setImporting(false);setItems([]);setLoaded(false);setProposals({});setPendingImport(null);setImportConfirmed(false);setError("");setImportMsg("");setShowForm(false);setDeleteTarget(null);setForm({title:"",description:"",contract_value_impact:"",schedule_impact_days:"",initiated_by_company:""});void load();return()=>{context.current++;listRequest.current?.abort();};},[projectId,token]);
 
   const save = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true); setError("");
+    e.preventDefault();if(!token||!canWrite||actionLock.current)return;const scope=context.current;actionLock.current=true;setSaving(true); setError("");
     try {
       const originLine = origin ? `[Origin: ${origin.type} #${origin.id} — ${origin.label}]` : "";
       const description = [originLine, form.description.trim()].filter(Boolean).join("\n\n");
@@ -142,35 +160,48 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
       if (form.schedule_impact_days) body.schedule_impact_days = Number(form.schedule_impact_days);
       if (form.initiated_by_company.trim()) body.initiated_by_company = form.initiated_by_company.trim();
       const r = await fetch(`${API}/projects/${projectId}/change-orders`, { method: "POST", headers, body: JSON.stringify(body) });
+      if(scope!==context.current)return;
       if (!r.ok) { const d = await r.json(); setError(d.error || "Error"); return; }
       await load();
+      if(scope!==context.current)return;
       setShowForm(false);
       setForm({ title: "", description: "", contract_value_impact: "", schedule_impact_days: "", initiated_by_company: "" });
-    } finally { setSaving(false); }
+    }catch(error){if(scope===context.current)setError(t("Change creation could not be confirmed. Reload saved records before retrying.","No se pudo confirmar la creación. Recargue registros guardados antes de reintentar."));} finally { if(scope===context.current){actionLock.current=false;setSaving(false);} }
   };
 
   const action = async (id: number, act: "submit" | "approve" | "reject") => {
+    if(!token||!canWrite||actionLock.current)return;
     const msgs: Record<string, [string, string]> = {
       submit: [t("Submit for approval?", "¿Enviar para aprobación?"), ""],
       approve: [t("Approve this change order?", "¿Aprobar esta orden?"), ""],
       reject: [t("Reject this change order?", "¿Rechazar esta orden?"), ""],
     };
     if (!confirm(msgs[act][0])) return;
+    const scope=context.current;actionLock.current=true;setActing(true);setError("");
+    try{
     const r = await fetch(`${API}/projects/${projectId}/change-orders/${id}/${act}`, { method: "POST", headers });
+    if(scope!==context.current)return;
     if (!r.ok) { const d = await r.json().catch(() => ({})); setError(d.error || "Request failed"); return; }
     await load();
+    }catch(error){if(scope===context.current)setError(t("Workflow action could not be confirmed. Reload saved status before retrying.","No se pudo confirmar la acción. Recargue el estado guardado antes de reintentar."));}finally{if(scope===context.current){actionLock.current=false;setActing(false);}}
   };
 
   const aiDraft = async (id: number) => {
+    if(!token||!canWrite||aiLoading)return;const scope=context.current;
+    setProposals(current=>{const next={...current};delete next[id];return next;});
     setAiLoading(true); setActiveAi(id);
     try {
       const r = await fetch(`${API}/projects/${projectId}/change-orders/${id}/ai-draft`, { method: "POST", headers });
+      if(scope!==context.current)return;
       if (r.ok) {
         const d = await r.json();
-        setItems(prev => prev.map(co => co.id === id ? { ...co, description: d.description, contractValueImpact: d.suggested_cost_impact } : co));
-      }
-    } finally { setAiLoading(false); setActiveAi(null); }
+        if(scope!==context.current)return;if(typeof d.description!=="string"||!d.description.trim())throw new Error("Invalid proposal");
+        setProposals(prev=>({...prev,[id]:{description:d.description,cost:typeof d.suggested_cost_impact==="string"?d.suggested_cost_impact:undefined,schedule:typeof d.suggested_schedule_impact==="string"?d.suggested_schedule_impact:undefined}}));
+      }else setError(t("AI draft was unavailable or rejected. Saved description and amounts are unchanged.","El borrador de IA no está disponible o fue rechazado. La descripción e importes guardados no cambian."));
+    }catch(error){if(scope===context.current)setError(t("AI proposal could not be verified. Saved records are unchanged.","No se pudo verificar la propuesta de IA. Los registros guardados no cambian."));}
+    finally { if(scope===context.current){setAiLoading(false); setActiveAi(null);} }
   };
+  const saveProposal=async(id:number)=>{if(!token||!canWrite||actionLock.current||!proposals[id]?.description.trim())return;const scope=context.current;actionLock.current=true;setActing(true);setError("");try{const response=await fetch(`${API}/projects/${projectId}/change-orders/${id}`,{method:"PATCH",headers,body:JSON.stringify({description:proposals[id].description})});if(scope!==context.current)return;if(!response.ok)throw new Error("rejected");await load();if(scope===context.current)setProposals(current=>{const next={...current};delete next[id];return next;});}catch(error){if(scope===context.current)setError(t("Description save could not be confirmed. Reload the saved change before retrying.","No se pudo confirmar el guardado. Recargue el cambio guardado antes de reintentar."));}finally{if(scope===context.current){actionLock.current=false;setActing(false);}}};
 
   const exportPdf = async (id: number) => {
     if (!token) return;
@@ -213,6 +244,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
     });
 
   const exportCurrentViewPdf = async () => {
+    const scope=context.current;
     setExportError("");
     setExportingPdf(true);
     const params = new URLSearchParams({
@@ -229,10 +261,11 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
       const res = await fetch(`${API}/projects/${projectId}/change-orders/current-view/pdf?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      if(scope!==context.current)return;
       if (!res.ok) {
         let message = t("Change Orders PDF export failed.", "Fallo la exportacion PDF de ordenes de cambio.");
         try {
-          const body = await res.json();
+          const body = await res.clone().json();
           message = body?.error || message;
         } catch {
           const text = await res.text();
@@ -240,7 +273,10 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
         }
         throw new Error(message);
       }
+      if(!res.headers.get("content-type")?.toLowerCase().includes("application/pdf"))throw new Error(t("The export response was not a PDF.","La respuesta de exportación no fue un PDF."));
       const blob = await res.blob();
+      if(scope!==context.current)return;
+      if(await blob.slice(0,5).text()!=="%PDF-")throw new Error(t("The export did not contain a valid PDF signature.","La exportación no contenía una firma PDF válida."));
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -253,7 +289,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
     } catch (err) {
       setExportError(err instanceof Error ? err.message : t("Change Orders PDF export failed.", "Fallo la exportacion PDF de ordenes de cambio."));
     } finally {
-      setExportingPdf(false);
+      if(scope===context.current)setExportingPdf(false);
     }
   };
 
@@ -396,7 +432,10 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
 
       {loading && <div className="text-muted">{t("Loading…", "Cargando…")}</div>}
 
-      {!loading && filtered.length === 0 && (
+      {error && <div role="alert"><p>{error}</p><button disabled={loading||acting||saving||importing} onClick={()=>void load()}>{t("Reload saved change orders","Recargar órdenes guardadas")}</button></div>}
+      {acting && <p role="status">{t("Saving workflow state…","Guardando estado del flujo…")}</p>}
+      {pendingImport&&<section role="region" aria-label={t("Import warning review","Revisión de advertencias de importación")}><h3>{t("Review before importing","Revisar antes de importar")}</h3><p>{pendingImport.file.name} · {pendingImport.total} {t("candidate records","registros candidatos")}</p><ul>{pendingImport.warnings.map((warning,index)=><li key={index}>{warning.message}{warning.existingEntity&&<> · {warning.existingEntity} #{warning.existingId}</>}</li>)}</ul><p>{t("Confirming reprocesses this file and may use provider credits. Existing records remain; duplicate numbers are renamed with a DRF suffix.","Confirmar reprocesa este archivo y puede usar créditos del proveedor. Se conservan registros existentes; números duplicados se renombran con sufijo DRF.")}</p><label><input type="checkbox" checked={importConfirmed} onChange={event=>setImportConfirmed(event.target.checked)}/>{t("I reviewed these warnings and want to import this file","Revisé estas advertencias y deseo importar este archivo")}</label><button disabled={importing||!importConfirmed} onClick={()=>void handleImport(null,pendingImport.file,true)}>{t("Confirm reviewed import","Confirmar importación revisada")}</button><button disabled={importing} onClick={()=>{setPendingImport(null);setImportConfirmed(false);setImportMsg(t("Import cancelled; no records imported.","Importación cancelada; no se importaron registros."));}}>{t("Cancel import","Cancelar importación")}</button></section>}
+      {loaded && !loading && !error && filtered.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
           <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><ClipboardList size={40} color="#D1D5DB" /></div>
           <div style={{ fontWeight: 600 }}>
@@ -418,6 +457,7 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
                   </div>
                   <div style={{ fontWeight: 600, marginBottom: 4 }}>{co.title}</div>
                   {co.description && <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 6 }}>{co.description}</div>}
+                  {proposals[co.id]&&<section style={{padding:12,border:"1px solid #CBD5E1",borderRadius:8,marginBottom:10}}><h3>{t("Unsaved AI proposal — review before saving","Propuesta de IA sin guardar — revise antes de guardar")}</h3><label>{t("Proposed description","Descripción propuesta")}<textarea value={proposals[co.id].description} onChange={event=>setProposals(current=>({...current,[co.id]:{...current[co.id],description:event.target.value}}))} style={{width:"100%",boxSizing:"border-box"}}/></label><p>{t("Suggested cost / schedule (not applied)","Costo / plazo sugeridos (sin aplicar)")}: {proposals[co.id].cost??"—"} / {proposals[co.id].schedule??"—"}</p><button disabled={acting||!proposals[co.id].description.trim()} onClick={()=>void saveProposal(co.id)}>{t("Save reviewed description","Guardar descripción revisada")}</button> <button disabled={acting} onClick={()=>setProposals(current=>{const next={...current};delete next[co.id];return next;})}>{t("Discard proposal","Descartar propuesta")}</button></section>}
                   <div style={{ display: "flex", gap: 16, fontSize: 12, color: "#6B7280" }}>
                     {co.contractValueImpact && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><DollarSign size={11} /> {co.contractValueImpact}</span>}
                     {co.scheduleImpactDays && <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}><Calendar size={11} /> {co.scheduleImpactDays} {t("days", "días")}</span>}
@@ -426,16 +466,16 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end", marginLeft: 12 }}>
                   {canWrite && co.status === "draft" && (
                     <>
-                      <button className="btn btn-sm btn-outline" onClick={() => aiDraft(co.id)} disabled={aiLoading && activeAi === co.id}>
+                      <button className="btn btn-sm btn-outline" onClick={() => aiDraft(co.id)} disabled={aiLoading||acting||saving||importing}>
                         {aiLoading && activeAi === co.id ? "…" : <><Sparkles size={12} style={{ marginRight: 4 }} />AI</>}
                       </button>
-                      <button className="btn btn-sm btn-primary" onClick={() => action(co.id, "submit")}>{t("Submit", "Enviar")}</button>
+                      <button className="btn btn-sm btn-primary" disabled={acting||saving||importing||aiLoading} onClick={() => action(co.id, "submit")}>{t("Submit", "Enviar")}</button>
                     </>
                   )}
                   {canWrite && co.status === "pending_approval" && (
                     <>
-                      <button className="btn btn-sm btn-success" onClick={() => action(co.id, "approve")}>{t("Approve", "Aprobar")}</button>
-                      <button className="btn btn-sm btn-danger-outline" onClick={() => action(co.id, "reject")}>{t("Reject", "Rechazar")}</button>
+                      <button className="btn btn-sm btn-success" disabled={acting||saving||importing||aiLoading} onClick={() => action(co.id, "approve")}>{t("Approve", "Aprobar")}</button>
+                      <button className="btn btn-sm btn-danger-outline" disabled={acting||saving||importing||aiLoading} onClick={() => action(co.id, "reject")}>{t("Reject", "Rechazar")}</button>
                     </>
                   )}
                   <button className="btn btn-sm btn-outline" title={t("Download this change order report as PDF", "Descargar este reporte de orden de cambio en PDF")} onClick={() => exportPdf(co.id)}>{t("Change Order PDF", "PDF de orden de cambio")}</button>

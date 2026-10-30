@@ -5,7 +5,7 @@ import {
   projectsTable, rfisTable, submittalsTable,
   linkedItemsTable, agentInsightsTable,
 } from "@workspace/db/schema";
-import { eq, and, desc, inArray, isNull, or } from "drizzle-orm";
+import { eq, and, desc, inArray, isNull, or, sql } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { singleFileUpload } from "../middlewares/multipart";
@@ -297,8 +297,8 @@ router.get("/projects/:projectId/change-orders/:changeOrderId", authMiddleware, 
 
     const linkedRfiIds = (co.linkedRfiIds as number[] | null) ?? [];
     const linkedSubIds = (co.linkedSubmittalIds as number[] | null) ?? [];
-    const rfis = linkedRfiIds.length ? await db.select({ id: rfisTable.id, number: rfisTable.number, subject: rfisTable.subject }).from(rfisTable).where(inArray(rfisTable.id, linkedRfiIds)) : [];
-    const subs = linkedSubIds.length ? await db.select({ id: submittalsTable.id, number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable).where(inArray(submittalsTable.id, linkedSubIds)) : [];
+    const rfis = linkedRfiIds.length ? await db.select({ id: rfisTable.id, number: rfisTable.number, subject: rfisTable.subject }).from(rfisTable).where(and(inArray(rfisTable.id, linkedRfiIds),eq(rfisTable.projectId,projectId))) : [];
+    const subs = linkedSubIds.length ? await db.select({ id: submittalsTable.id, number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable).where(and(inArray(submittalsTable.id, linkedSubIds),eq(submittalsTable.projectId,projectId))) : [];
     const docs = await db.select().from(changeOrderDocumentsTable).where(eq(changeOrderDocumentsTable.changeOrderId, coId));
 
     res.json({ ...co, linkedRfis: rfis, linkedSubmittals: subs, documents: docs });
@@ -341,16 +341,23 @@ for (const action of ["submit", "approve", "reject"] as const) {
     try {
       const updates: Record<string, unknown> = { status: statusMap[action], updatedAt: new Date() };
       if (action === "approve") { updates.approvedById = req.user!.userId; updates.approvedAt = new Date(); }
-      const [updatedCo] = await db.update(changeOrdersTable).set(updates as any)
-        .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId)))
+      const requiredStatus=action==="submit"?"draft":"pending_approval";
+      const updatedCo=await db.transaction(async transaction=>{
+      const [existing]=await transaction.select({id:changeOrdersTable.id,status:changeOrdersTable.status}).from(changeOrdersTable).where(and(eq(changeOrdersTable.id,coId),eq(changeOrdersTable.projectId,projectId))).limit(1);
+      if(!existing)throw new Error("CHANGE_ORDER_NOT_FOUND");
+      if(existing.status!==requiredStatus)throw new Error("CHANGE_ORDER_TRANSITION_INVALID");
+      const [updatedCo] = await transaction.update(changeOrdersTable).set(updates as any)
+        .where(and(eq(changeOrdersTable.id, coId), eq(changeOrdersTable.projectId, projectId),eq(changeOrdersTable.status,requiredStatus)))
         .returning();
-      if (!updatedCo) { res.status(404).json({ error: "Not found" }); return; }
-      await db.insert(activityLogTable).values({
+      if (!updatedCo) throw new Error("CHANGE_ORDER_TRANSITION_INVALID");
+      await transaction.insert(activityLogTable).values({
         projectId, userId: req.user!.userId,
         userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
         actionType: action, entityType: "change_order", entityId: coId,
         fileNameBefore: null, fileNameAfter: null,
         details: `Change order ${action}ed`,
+      });
+      return updatedCo;
       });
       // Notify the change order's initiator of the status change (the import was
       // previously dead — no CO event ever produced a notification). Skip when the
@@ -368,13 +375,15 @@ for (const action of ["submit", "approve", "reject"] as const) {
       }
       res.json({ ok: true, status: statusMap[action] });
     } catch (err) {
+      if(err instanceof Error&&err.message==="CHANGE_ORDER_NOT_FOUND"){res.status(404).json({error:"Not found"});return;}
+      if(err instanceof Error&&err.message==="CHANGE_ORDER_TRANSITION_INVALID"){res.status(409).json({error:"Change order state changed or transition is not allowed. Reload saved status before retrying.",code:"CHANGE_ORDER_TRANSITION_INVALID"});return;}
       res.status(500).json({ error: err instanceof Error ? err.message : "Internal server error" });
     }
   });
 }
 
 // ── POST /projects/:projectId/change-orders/:changeOrderId/ai-draft ───────────
-router.post("/projects/:projectId/change-orders/:changeOrderId/ai-draft", authMiddleware, requireProjectMember(), async (req, res) => {
+router.post("/projects/:projectId/change-orders/:changeOrderId/ai-draft", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const coId = Number(req.params.changeOrderId);
   try {
@@ -384,8 +393,8 @@ router.post("/projects/:projectId/change-orders/:changeOrderId/ai-draft", authMi
 
     const linkedRfiIds = (co.linkedRfiIds as number[] | null) ?? [];
     const linkedSubIds = (co.linkedSubmittalIds as number[] | null) ?? [];
-    const rfis = linkedRfiIds.length ? await db.select({ number: rfisTable.number, subject: rfisTable.subject, question: rfisTable.question }).from(rfisTable).where(inArray(rfisTable.id, linkedRfiIds)) : [];
-    const subs = linkedSubIds.length ? await db.select({ number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable).where(inArray(submittalsTable.id, linkedSubIds)) : [];
+    const rfis = linkedRfiIds.length ? await db.select({ number: rfisTable.number, subject: rfisTable.subject, question: rfisTable.question }).from(rfisTable).where(and(inArray(rfisTable.id, linkedRfiIds),eq(rfisTable.projectId,projectId))) : [];
+    const subs = linkedSubIds.length ? await db.select({ number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable).where(and(inArray(submittalsTable.id, linkedSubIds),eq(submittalsTable.projectId,projectId))) : [];
 
     const prompt = `You are a construction change order specialist. Draft a professional description and cost/schedule impact for this change order.
 Title: ${co.title}
@@ -461,7 +470,7 @@ router.get("/projects/:projectId/change-orders/:changeOrderId/export", authMiddl
 router.post("/projects/:projectId/change-orders/import",
   authMiddleware,
   requirePermission("admin", "write"),
-  singleFileUpload({ fileSize: 50 * 1024 * 1024 }),
+  singleFileUpload({ fileSize: 50 * 1024 * 1024, fields: 1, parts: 2 }),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
@@ -471,7 +480,8 @@ router.post("/projects/:projectId/change-orders/import",
         projectId,
         feature: "change_order_import",
       });
-      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
+      const importFilename = req.file.originalname;
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, importFilename);
       let records: any[] = [];
       if (isPdf && pdfBase64) {
         try {
@@ -492,6 +502,7 @@ router.post("/projects/:projectId/change-orders/import",
           console.log("[change-order-import] PDF direct extraction:", records.length, "records");
         } catch (e) {
           console.error("[change-order-import] PDF direct extraction failed:", e);
+          throw e;
         }
       } else {
       for (const chunk of chunks) {
@@ -512,21 +523,25 @@ ${chunk}`
           records = [...records, ...chunkRecords];
         } catch (e) {
           console.error("[change-order-import] chunk extraction failed:", e);
+          throw e;
         }
       }
       } // end else (non-PDF)
 
       const forceImport = req.body?.forceImport === "true";
+      if(!Array.isArray(records)||!records.every(record=>record&&typeof record==="object"&&(typeof record.title==="string"||typeof record.number==="string")&&(record.status===undefined||["draft","pending_approval","approved","rejected"].includes(record.status)))){res.status(400).json({error:"IMPORT_RECORDS_INVALID"});return;}
       if (!forceImport && records.length > 0) {
         const { checkImportIntelligence } = await import("../lib/import-intelligence");
-        const intelligence = await checkImportIntelligence(req.user!.userId, projectId, records, "change_order");
+        const intelligence = await checkImportIntelligence(req.user!.userId, projectId, records, "change_order",true);
         if (intelligence.warnings.length > 0) {
           res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
           return;
         }
       }
 
-      const existingCo = await db.select({ number: changeOrdersTable.number })
+      const {imported,renamedCo}=await db.transaction(async transaction=>{
+        await transaction.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${`change-order-import:${projectId}`}))`);
+      const existingCo = await transaction.select({ number: changeOrdersTable.number })
         .from(changeOrdersTable).where(eq(changeOrdersTable.projectId, projectId));
       const usedCoNums = new Set(existingCo.map(r => r.number));
       const getDrfCo = (num: string): string => {
@@ -543,7 +558,7 @@ ${chunk}`
         const finalNum = getDrfCo(proposed);
         if (finalNum !== proposed) renamedCo.push({ original: proposed, renamed: finalNum });
         usedCoNums.add(finalNum);
-        await db.insert(changeOrdersTable).values({
+        await transaction.insert(changeOrdersTable).values({
           projectId,
           number: finalNum,
           title: r.title || "Imported Change Order",
@@ -554,11 +569,13 @@ ${chunk}`
         });
         imported++;
       }
-      await db.insert(activityLogTable).values({
+      await transaction.insert(activityLogTable).values({
         projectId, userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
         actionType: "import", entityType: "change_order", entityId: projectId,
-        details: `Imported ${imported} change orders from ${req.file.originalname}`,
+        details: `Imported ${imported} change orders from ${importFilename}`,
+      });
+        return {imported,renamedCo};
       });
       res.json({ imported, message: `${imported} change orders imported`, renamed: renamedCo, renameCount: renamedCo.length });
     } catch (err) {
