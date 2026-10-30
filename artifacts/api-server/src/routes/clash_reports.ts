@@ -3126,6 +3126,7 @@ router.get("/projects/:projectId/clash-reports/lens-next-id",
           isNotNull(lensViewpointsTable.displayId),
           ne(lensViewpointsTable.displayId, ""),
         ));
+      res.setHeader("Cache-Control","private, no-store");
       res.json({ success: true, currentSequence: total ?? 0, projectCode: project.code });
     } catch (err) {
       res.status(500).json({ error: "lens_next_id_failed", message: err instanceof Error ? err.message : String(err) });
