@@ -169,55 +169,29 @@ export async function buildContractCurrentViewPdf(data: ContractCurrentViewExpor
   return new Promise((resolve, reject) => { doc.on("end", () => resolve(Buffer.concat(chunks))); doc.on("error", reject); });
 }
 
-export async function buildContractPdf(data: ContractExport): Promise<Buffer> {
-  const doc = createPdfDocument({ size: "LETTER", margin: 42, bufferPages: true, info: { Title: `Contract ${safe(data.contract.legalNumber)}`, Author: "BIMLog", Subject: "Operational contract and schedule of values" } });
-  const chunks: Buffer[] = []; doc.on("data", (chunk) => chunks.push(chunk));
-  const reportNumber = safe(data.contract.bimlogId);
-  const drawHeader = () => {
-    doc.y = drawBrandedHeader(doc, {
-      margin: 42,
-      companyName: safe(data.project.companyName, "Company"),
-      projectName: safe(data.project.name, "Project"),
-      projectCode: safe(data.project.code),
-      title: `Contract ${safe(data.contract.legalNumber)}`,
-      subtitle: "Operational contract and commitment record",
-      reportNumber,
-      reportDate: new Date(data.generatedAt),
-      theme: REPORT_THEMES.platform.standard,
-    }) + 12;
-  };
+export async function buildContractPdf(data:ContractExport,language:"en"|"es"="en"):Promise<Buffer>{
+  const t=(en:string,es:string)=>language==="es"?es:en;
+  const doc=createPdfDocument({size:"LETTER",margin:42,bufferPages:true,info:{Title:`${t("Contract","Contrato")} ${safe(data.contract.legalNumber)}`,Author:"BIMLog",Subject:t("Operational contract and schedule of values","Contrato operativo y programa de valores")}});
+  const chunks:Buffer[]=[];doc.on("data",chunk=>chunks.push(chunk));const reportNumber=safe(data.contract.bimlogId),width=528;
+  const drawHeader=()=>{doc.y=drawBrandedHeader(doc,{margin:42,companyName:safe(data.project.companyName,"Company"),projectName:safe(data.project.name,"Project"),projectCode:safe(data.project.code),title:`${t("Contract","Contrato")} ${safe(data.contract.legalNumber)}`,subtitle:t("Operational contract and commitment record","Registro operativo de contrato y compromiso"),reportNumber,reportDate:new Date(data.generatedAt),theme:REPORT_THEMES.platform.standard})+12;doc.x=42;};
+  const ensure=(height:number)=>{if(doc.y+height>700){doc.addPage();drawHeader();}};
+  const paragraph=(text:string,size=9,color="#111827")=>{doc.fontSize(size);const height=doc.heightOfString(text,{width});ensure(height+5);doc.fillColor(color).text(text,42,doc.y,{width});doc.y+=5;doc.x=42;};
+  const state=(value:string)=>language==="es"?({draft:"borrador",submitted:"enviado",under_review:"en revisión",approved:"aprobado",executed:"ejecutado",returned:"devuelto",rejected:"rechazado",withdrawn:"retirado",superseded:"reemplazado",voided:"anulado"} as Record<string,string>)[value]??value:value;
   drawHeader();
-  doc.fontSize(9).fillColor("#475569").text("Operational project-control record — not an accounting posting or payment authorization.").moveDown();
-  doc.fontSize(11).fillColor("#111827");
-  doc.text(`${safe(data.contract.legalNumber)} | ${safe(data.contract.title)} | ${safe(data.contract.status)}`);
-  doc.text(`${safe(data.contract.counterpartyName)} | ${safe(data.contract.perspective)} | ${safe(data.contract.contractType)}`);
-  doc.text(`Original: ${data.contract.originalValue} ${data.contract.currency} | Executed amendments: ${data.contract.executedAmendmentTotal} | Current commitment: ${data.contract.currentCommitment}`).moveDown();
-  doc.fontSize(12).text("Contract Items / Schedule of Values").fontSize(9);
-  for (const line of data.contract.lines) {
-    if (doc.y > 680) {
-      doc.addPage();
-      drawHeader();
-    }
-    const item = (line as any).contractItem ?? {};
-    doc.text(`${safe(line.projectCode)} — ${safe(item.displayName, line.description)}`, 42, doc.y, { continued: true, width: 400 }).text(`${line.amount} ${data.contract.currency}`, { align: "right" });
-    doc.fontSize(7).fillColor("#64748b").text(`${safe(item.quantity, "1")} ${safe(item.unit, "LS")} × ${safe(item.unitRate, line.amount)} | APU ${item.apuPlanVersion ? `v${item.apuPlanVersion}` : "legacy"} | ${safe(item.workflowTemplate, "legacy")}`, 58, doc.y, { width: 470 }).fontSize(9).fillColor("#111827");
+  paragraph(t("Operational project-control record — not an accounting posting or payment authorization.","Registro operativo de control de proyecto: no es un asiento contable ni autorización de pago."),9,"#475569");
+  paragraph(`${t("Version","Versión")} ${data.contract.version} | ${safe(data.contract.legalNumber)} | ${safe(data.contract.title)} | ${state(data.contract.status)}`,11);
+  paragraph(`${safe(data.contract.counterpartyName)} | ${safe(data.contract.perspective)} | ${safe(data.contract.contractType)}`);
+  paragraph(`${t("Original","Original")}: ${data.contract.originalValue} ${data.contract.currency} | ${t("Executed amendments","Enmiendas ejecutadas")}: ${data.contract.executedAmendmentTotal} | ${t("Current commitment","Compromiso actual")}: ${data.contract.currentCommitment}`);
+  paragraph(t("Contract Items / Schedule of Values","Partidas de Contrato / Programa de Valores"),12);
+  for(const line of data.contract.lines){
+    const item=(line as any).contractItem??{},label=`${safe(line.projectCode)} — ${safe(item.displayName,line.description)}`,amount=`${line.amount} ${data.contract.currency}`,meta=`${safe(item.quantity,"1")} ${safe(item.unit,"LS")} × ${safe(item.unitRate,line.amount)} | APU ${item.apuPlanVersion?`v${item.apuPlanVersion}`:"legacy"} | ${safe(item.workflowTemplate,"legacy")}`;
+    doc.fontSize(9);const height=Math.max(doc.heightOfString(label,{width:395}),doc.heightOfString(amount,{width:125}));doc.fontSize(7);const metaHeight=doc.heightOfString(meta,{width:512});ensure(height+metaHeight+12);
+    const y=doc.y;doc.fontSize(9).fillColor("#111827").text(label,42,y,{width:395});doc.text(amount,445,y,{width:125,align:"right"});doc.fontSize(7).fillColor("#64748b").text(meta,58,y+height+3,{width:512});doc.y=y+height+metaHeight+12;doc.x=42;
   }
-  if (data.contract.amendments.length) {
-    doc.moveDown().fontSize(12).text("Amendments").fontSize(9);
-    for (const amendment of data.contract.amendments) doc.text(`${safe(amendment.legalNumber)} | ${safe(amendment.title)} | ${safe(amendment.status)} | ${amendment.amountDelta} ${amendment.currency}`);
-  }
-  doc.moveDown().fontSize(8).text(`BIMLog ID: ${safe(data.contract.bimlogId)}`).text(`Content fingerprint: ${data.contract.contentFingerprint}`).text(`Generated: ${data.generatedAt}`);
-  addPageNumbers(doc, {
-    margin: 42,
-    footerY: 760,
-    fingerprintY: 742,
-    contentHash: data.contract.contentFingerprint,
-    companyName: safe(data.project.companyName),
-    projectName: safe(data.project.name),
-    reportNumber,
-    timestamp: data.generatedAt,
-  });
-  doc.end(); return new Promise((resolve, reject) => { doc.on("end", () => resolve(Buffer.concat(chunks))); doc.on("error", reject); });
+  if(data.contract.amendments.length){paragraph(t("Amendments","Enmiendas"),12);for(const amendment of data.contract.amendments)paragraph(`${safe(amendment.legalNumber)} | ${safe(amendment.title)} | ${state(amendment.status)} | ${amendment.amountDelta} ${amendment.currency}`);}
+  paragraph(`BIMLog ID: ${safe(data.contract.bimlogId)}`,8);paragraph(`${t("Content fingerprint","Huella de contenido")}: ${data.contract.contentFingerprint}`,8);paragraph(`${t("Generated","Generado")}: ${data.generatedAt}`,8);
+  addPageNumbers(doc,{margin:42,footerY:760,fingerprintY:742,contentHash:data.contract.contentFingerprint,companyName:safe(data.project.companyName),projectName:safe(data.project.name),reportNumber,timestamp:data.generatedAt});
+  doc.end();return new Promise((resolve,reject)=>{doc.on("end",()=>resolve(Buffer.concat(chunks)));doc.on("error",reject);});
 }
 
 export function buildContractXlsx(data: ContractExport): Buffer {
