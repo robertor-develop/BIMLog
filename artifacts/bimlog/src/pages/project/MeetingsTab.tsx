@@ -1386,7 +1386,7 @@ export function MeetingsTab({
   );
   const openOriginalLensViewpoint = (lensViewpointId: number) =>
     window.location.assign(
-      `/projects/${projectId}/clash-reports?tab=lens&viewpoint=${lensViewpointId}`,
+      `/projects/${projectId}/clash-reports?view=lens&viewpoint=${lensViewpointId}`,
     );
 
   const loadRfiCandidates = async () => {
