@@ -492,6 +492,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-workspace-runtime.ts
 - artifacts/api-server/src/lib/commercial-workspace.behavior.ts
 - artifacts/api-server/src/lib/commercial-workspace.ts
+- artifacts/api-server/src/lib/company-31-access-correction.behavior.ts
 - artifacts/api-server/src/lib/company-directory-resolution.behavior.ts
 - artifacts/api-server/src/lib/company-directory-resolution.ts
 - artifacts/api-server/src/lib/company-identity-reconciliation.behavior.ts
@@ -1160,6 +1161,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/post120-build208-authorization-negative-matrix.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
+- artifacts/api-server/src/lib/procore-intake-agent.ts
+- artifacts/api-server/src/lib/procore-intake-mcp.behavior.ts
+- artifacts/api-server/src/lib/procore-intake-mcp.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.ts
 - artifacts/api-server/src/lib/procore-rfi-import-commit.ts
@@ -1596,6 +1600,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/MeetingClashesPanel.tsx
 - artifacts/bimlog/src/pages/project/MeetingsTab.tsx
 - artifacts/bimlog/src/pages/project/NameGenerator.tsx
+- artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx
 - artifacts/bimlog/src/pages/project/ReportsTab.tsx
 - artifacts/bimlog/src/pages/project/RfiCanonicalUiHarness.tsx
 - artifacts/bimlog/src/pages/project/RfisTab.tsx
