@@ -295,6 +295,7 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
     const rows = await db.select().from(clashReportsTable)
       .where(eq(clashReportsTable.projectId, projectId))
       .orderBy(desc(clashReportsTable.createdAt));
+    res.setHeader("Cache-Control","private, no-store");
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: "list_failed", message: err instanceof Error ? err.message : String(err) });
@@ -303,20 +304,30 @@ router.get("/projects/:projectId/clash-reports", authMiddleware, requireProjectM
 
 router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
+  const fileName=req.body?.fileName===undefined||req.body.fileName===""?"Manual Report":req.body.fileName;
+  const clientRequestId=typeof req.body?.clientRequestId==="string"?req.body.clientRequestId.toLowerCase():req.body?.clientRequestId;
+  if(typeof fileName!=="string"||!fileName.trim()||(clientRequestId!==undefined&&(typeof clientRequestId!=="string"||!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientRequestId)))){res.status(400).json({error:"invalid_report_request",message:"Use a report name and a valid optional creation request ID."});return;}
   try {
-    const existingReports2 = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
-    const [project2] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+    const report=await db.transaction(async tx=>{
+    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bimlog-plugin-sync'),${projectId})`);
+    if(clientRequestId){
+      const prefix=JSON.stringify({contractVersion:"clash-report-create.v1",clientRequestId}).slice(0,-1)+",%";
+      const [prior]=await tx.select().from(activityLogTable).where(and(eq(activityLogTable.projectId,projectId),eq(activityLogTable.userId,req.user!.userId),eq(activityLogTable.actionType,"create"),eq(activityLogTable.entityType,"clash_report"),sql`${activityLogTable.details} LIKE ${prefix}`)).limit(1);
+      if(prior){const saved=JSON.parse(prior.details!);if(saved.fileName!==fileName.trim())throw new Error("report_create_request_conflict");const [row]=await tx.select().from(clashReportsTable).where(and(eq(clashReportsTable.projectId,projectId),eq(clashReportsTable.id,prior.entityId!))).limit(1);if(!row)throw new Error("report_create_receipt_unavailable");return row;}
+    }
+    const existingReports2 = await tx.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+    const [project2] = await tx.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
     const autoNum2 = nextClashReportNumber(project2?.code, existingReports2.map(r => r.reportNumber));
-    const [report] = await db.insert(clashReportsTable).values({
+    const [report] = await tx.insert(clashReportsTable).values({
       projectId,
       uploadedById: req.user!.userId,
-      fileName: req.body?.fileName || "Manual Report",
+      fileName: fileName.trim(),
       format: "manual",
       totalClashes: 0,
       status: "complete",
       reportNumber: autoNum2,
     }).returning();
-    await db.insert(activityLogTable).values({
+    await tx.insert(activityLogTable).values({
       projectId,
       userId: req.user!.userId,
       userFullName: req.user!.fullName ?? "",
@@ -324,10 +335,13 @@ router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermiss
       actionType: "create",
       entityType: "clash_report",
       entityId: report.id,
-      details: `Created manual clash report: ${report.fileName} (${autoNum2})`,
+      details: JSON.stringify({contractVersion:"clash-report-create.v1",clientRequestId:clientRequestId??null,fileName:report.fileName,reportNumber:autoNum2,message:`Created manual clash report: ${report.fileName} (${autoNum2})`}),
+    });
+    return report;
     });
     res.status(201).json(report);
   } catch (err) {
+    if(err instanceof Error&&["report_create_request_conflict","report_create_receipt_unavailable"].includes(err.message)){res.status(409).json({error:err.message,message:"This creation request belongs to a different or unavailable saved report. Reopen project records before creating another report."});return;}
     res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
   }
 });
