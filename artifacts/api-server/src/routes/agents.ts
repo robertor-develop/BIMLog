@@ -11,7 +11,8 @@ import { BIMLOG_ASSISTANT_MAX_QUESTION, cleanAssistantList, cleanAssistantText }
 import { getPageAgentTurn, listPageAgentTurns, refreshPageAgentTurn, reservePageAgentTurn, startPageAgentTurn } from "../lib/page-agent-conversation-store";
 import { assertConversationLane, parseIntakeEnvelope, intakeEnvelopeDigest, BIMLOG_AGENT_LANES } from "../lib/agent-lane-contract";
 import { callProcoreIntakeTool, discoverProcoreIntakeTools, parseMcpToolArguments } from "../lib/procore-intake-mcp";
-import { isProviderOperationAllowed } from "../lib/provider-governance";
+import { isProviderOperationCurrentlyAllowed } from "../lib/provider-governance";
+import { loadProcoreIntakeState, saveProcoreIntakeState } from "../lib/procore-intake-state";
 import { getAnthropicClientForUser } from "../lib/ai-usage";
 import { runDiscoveredMcpTurn } from "../lib/procore-intake-agent";
 
@@ -46,6 +47,16 @@ router.post("/projects/:projectId/intake-agent/preview",authMiddleware,requirePr
   try{const envelope=parseIntakeEnvelope(req.body);if(envelope.projectId!==Number(req.params.projectId)||envelope.companyId!==req.user!.companyId){res.status(403).json({code:"INTAKE_AUTHORITY_MISMATCH"});return;}res.status(202).set("Cache-Control","private, no-store, max-age=0").json({transport:BIMLOG_AGENT_LANES.intake.transport,threadId:BIMLOG_AGENT_LANES.intake.threadId,reviewProposal:{state:"preview",digest:intakeEnvelopeDigest(envelope),recordCount:envelope.records.length,canonicalMutation:false}});}catch(error){const code=error instanceof Error?error.message:"INTAKE_ENVELOPE_INVALID";res.status(code.includes("CROSSOVER")?409:400).json({code});}
 });
 
+router.get("/projects/:projectId/intake-agent/state",authMiddleware,requireProjectMember(),async(req,res)=>{
+  const state=await loadProcoreIntakeState(req.user!.userId,req.user!.companyId,Number(req.params.projectId));
+  res.set("Cache-Control","private, no-store, max-age=0").json({state});
+});
+router.put("/projects/:projectId/intake-agent/state",authMiddleware,requireProjectMember(),async(req,res)=>{
+  const body=req.body||{};
+  const state=await saveProcoreIntakeState(req.user!.userId,req.user!.companyId,Number(req.params.projectId),body);
+  res.set("Cache-Control","private, no-store, max-age=0").json({state});
+});
+
 // Authenticated MCP JSON-RPC surface for the dedicated Procore intake lane.
 // Tool discovery is capability-gated, and every call rechecks the actor's
 // project scope and current provider approval.
@@ -63,10 +74,13 @@ router.post("/projects/:projectId/intake-agent/mcp",authMiddleware,requireProjec
       return res.set("Cache-Control","private, no-store, max-age=0").json({jsonrpc:"2.0",id,result:{tools}});
     }
     if(method==="tools/call"){
-      if(!isProviderOperationAllowed("procore",req.user!.companyId,"browse"))return fail("PROVIDER_NOT_APPROVED","Procore browsing is not approved for this company.",403);
       const params=req.body?.params||{};
       if(typeof params.name!=="string")return fail("MCP_TOOL_NAME_REQUIRED","A tool name is required.");
       const result=await callProcoreIntakeTool({userId:req.user!.userId,companyId:req.user!.companyId,projectId},params.name,parseMcpToolArguments(JSON.stringify(params.arguments??{})));
+      if(params.name==="bimlog_propose_intake_plan"&&result.versionPinned===true){
+        const state=await loadProcoreIntakeState(req.user!.userId,req.user!.companyId,projectId);
+        await saveProcoreIntakeState(req.user!.userId,req.user!.companyId,projectId,{...state,goal:String(params.arguments?.goal??state.goal),needed:String(params.arguments?.needed??state.needed),selectedSources:result.sources as any});
+      }
       return res.set("Cache-Control","private, no-store, max-age=0").json({jsonrpc:"2.0",id,result:{content:[{type:"text",text:JSON.stringify(result)}],isError:false}});
     }
     return fail("MCP_METHOD_NOT_FOUND","Unsupported MCP method.");
@@ -79,7 +93,7 @@ router.post("/projects/:projectId/intake-agent/mcp",authMiddleware,requireProjec
 
 router.post("/projects/:projectId/intake-agent/turn",authMiddleware,requireProjectMember(),async(req,res):Promise<void>=>{
   try {
-    if(!isProviderOperationAllowed("procore",req.user!.companyId,"browse")){res.status(403).json({code:"PROVIDER_NOT_APPROVED"});return;}
+    if(!await isProviderOperationCurrentlyAllowed("procore",req.user!.companyId,"browse")){res.status(403).json({code:"PROVIDER_NOT_APPROVED"});return;}
     const question=cleanAssistantText(req.body?.question,2000);
     if(!question){res.status(400).json({code:"INTAKE_QUESTION_REQUIRED"});return;}
     const projectId=Number(req.params.projectId);

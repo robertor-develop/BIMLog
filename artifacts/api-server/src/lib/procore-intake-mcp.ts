@@ -1,5 +1,5 @@
-import { browseCloud } from "./cloud-files";
-import { isProviderOperationAllowed } from "./provider-governance";
+import { browseCloud, getProcoreFileVersions } from "./cloud-files";
+import { isProviderOperationCurrentlyAllowed } from "./provider-governance";
 
 export type IntakeMcpActor = {
   userId: number;
@@ -23,8 +23,8 @@ const projectIdSchema = {
   description: "The BIMLog project currently authorized for this request.",
 };
 
-export async function discoverProcoreIntakeTools(companyId: number): Promise<McpTool[]> {
-  if (!isProviderOperationAllowed("procore", companyId, "browse")) return [];
+export async function discoverProcoreIntakeTools(companyId: number, approved = isProviderOperationCurrentlyAllowed): Promise<McpTool[]> {
+  if (!await approved("procore", companyId, "browse")) return [];
   return [
     {
       name: "procore_browse",
@@ -40,6 +40,11 @@ export async function discoverProcoreIntakeTools(companyId: number): Promise<Mcp
         required: ["projectId", "ref"],
         additionalProperties: false,
       },
+    },
+    {
+      name: "procore_file_versions",
+      description: "List the exact versions currently available for one authorized Procore file.",
+      input_schema: { type:"object",properties:{projectId:projectIdSchema,fileRef:{type:"string"}},required:["projectId","fileRef"],additionalProperties:false },
     },
     {
       name: "bimlog_propose_intake_plan",
@@ -58,9 +63,10 @@ export async function discoverProcoreIntakeTools(companyId: number): Promise<Mcp
               properties: {
                 ref: { type: "string" },
                 name: { type: "string" },
+                versionId: { type: "string" },
                 mimeType: { type: "string" },
               },
-              required: ["ref", "name"],
+              required: ["ref", "name", "versionId"],
               additionalProperties: false,
             },
           },
@@ -78,14 +84,19 @@ export async function callProcoreIntakeTool(
   actor: IntakeMcpActor,
   name: string,
   input: Record<string, unknown>,
+  deps: {
+    approved?: (provider:string,companyId:number|null,operation:"browse"|"catalog")=>Promise<boolean>;
+    browse?: typeof browseCloud;
+    versions?: typeof getProcoreFileVersions;
+  } = {},
 ) {
   if (Number(input.projectId) !== actor.projectId) throw new Error("INTAKE_PROJECT_SCOPE_MISMATCH");
-  if (!isProviderOperationAllowed("procore", actor.companyId, "browse")) throw new Error("PROVIDER_NOT_APPROVED");
+  if (!await (deps.approved ?? isProviderOperationCurrentlyAllowed)("procore", actor.companyId, "browse")) throw new Error("PROVIDER_NOT_APPROVED");
 
   if (name === "procore_browse") {
     const ref = typeof input.ref === "string" ? input.ref : "";
     const query = typeof input.query === "string" ? input.query.slice(0, 200) : "";
-    const { items } = await browseCloud(actor.userId, "procore", ref, query);
+    const { items } = await (deps.browse ?? browseCloud)(actor.userId, "procore", ref, query);
     return {
       readOnly: true,
       canonicalMutation: false,
@@ -95,26 +106,41 @@ export async function callProcoreIntakeTool(
         ref: item.ref,
         mimeType: item.mimeType ?? null,
         size: item.size ?? null,
+        versions: item.versions ?? [],
       })),
       unsupported: [
         "Procore write-back and continuous synchronization are not available through this intake.",
-        "The Procore file API response currently does not provide a pinned version selector in this browse capability.",
       ],
     };
   }
 
+  if (name === "procore_file_versions") {
+    const fileRef=typeof input.fileRef==="string"?input.fileRef:"";
+    const match=/^file:([^:]+):([^:]+)$/.exec(fileRef);
+    if(!match)throw new Error("PROCORE_FILE_REF_INVALID");
+    if(!match[2]||!match[1])throw new Error("PROCORE_FILE_REF_INVALID");
+    const file=await (deps.versions ?? getProcoreFileVersions)(actor.userId,fileRef);
+    return {readOnly:true,canonicalMutation:false,fileRef,...file};
+  }
+
   if (name === "bimlog_propose_intake_plan") {
+    if(String(input.destination??"")!==String(actor.projectId))throw new Error("INTAKE_DESTINATION_SCOPE_MISMATCH");
     if (!Array.isArray(input.sources) || input.sources.length < 1 || input.sources.length > 100) {
       throw new Error("INTAKE_SOURCE_SELECTION_INVALID");
     }
-    const sources = input.sources.map((source) => {
+    const sources = await Promise.all(input.sources.map(async (source) => {
       if (!source || typeof source !== "object") throw new Error("INTAKE_SOURCE_SELECTION_INVALID");
       const item = source as Record<string, unknown>;
       const ref = typeof item.ref === "string" ? item.ref.trim() : "";
       const name = typeof item.name === "string" ? item.name.trim() : "";
-      if (!ref || !name) throw new Error("INTAKE_SOURCE_SELECTION_INVALID");
-      return { ref, name, versionId: null, versionStatus: "not_exposed_by_current_procore_browse_api", mimeType: typeof item.mimeType === "string" ? item.mimeType : null };
-    });
+      const versionId=typeof item.versionId==="string"?item.versionId.trim():"";
+      if (!ref || !name || !versionId) throw new Error("INTAKE_SOURCE_SELECTION_INVALID");
+      const current=await (deps.versions ?? getProcoreFileVersions)(actor.userId,ref);
+      if(current.name!==name)throw new Error("PROCORE_SOURCE_CHANGED");
+      const version=current.versions.find(v=>v.id===versionId);
+      if(!version)throw new Error("PROCORE_VERSION_UNAVAILABLE");
+      return { ref, fileId:current.fileId, projectRef:current.projectRef, name:current.name, versionId:version.id, versionLabel:version.label, versionStatus:"available", mimeType:current.mimeType };
+    }));
     return {
       state: "proposal_only",
       goal: typeof input.goal === "string" ? input.goal.slice(0, 2000) : "",
@@ -124,9 +150,9 @@ export async function callProcoreIntakeTool(
       confirmationRequired: true,
       canonicalMutation: false,
       importAvailable: false,
-      versionLimitation: "The current Procore browse/download path does not expose a pinned version identifier; do not treat this proposal as version-exact.",
+      versionPinned: true,
       nextAction:
-        "Review the exact source list and destination. Import is not available in this MCP intake yet; use an existing governed BIMLog import workflow where supported.",
+        "Review the exact source versions and destination. Import is not available in this MCP intake yet.",
     };
   }
 

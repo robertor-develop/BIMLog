@@ -248,6 +248,28 @@ export function isProviderOperationAllowed(
   });
 }
 
+/** Procore company approval is read from the current company record on every request. */
+export async function isProviderOperationCurrentlyAllowed(
+  key: string,
+  companyId: number | null,
+  operation: ProviderOperation,
+  client: { query(text:string,values?:unknown[]):Promise<{rows:any[]}> } = pool,
+): Promise<boolean> {
+  if (key !== "procore") return isProviderOperationAllowed(key, companyId, operation);
+  if (companyId === null) return false;
+  const current = await client.query(`SELECT c.id,
+      (SELECT e.enabled FROM company_provider_approval_events e
+       WHERE e.company_id=c.id AND e.provider_key='procore'
+         AND e.operation IN('*',$2) ORDER BY e.sequence DESC LIMIT 1) AS enabled
+    FROM companies c WHERE c.id=$1 AND c.retired_at IS NULL AND c.retired_into_company_id IS NULL`,
+    [companyId, operation]);
+  if (!current.rows[0]) return false;
+  return providerOperationAllowedWithCompanyGrant({
+    provider:key,companyId,operation,
+    approvedCompanyIds:current.rows[0].enabled === true ? new Set([companyId]) : new Set(),
+  });
+}
+
 export function customerProviderCatalog(
   companyId: number,
   configured: (key: OAuthProviderKey) => boolean,

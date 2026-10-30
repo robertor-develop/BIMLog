@@ -3,13 +3,14 @@ import { ChevronRight, RefreshCw, Send } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
-type BrowseItem = { name: string; type: "file" | "folder"; ref: string; mimeType?: string | null; size?: number | null };
+type BrowseItem = { name: string; type: "file" | "folder"; ref: string; mimeType?: string | null; size?: number | null; versions?: Array<{id:string;label:string;createdAt:string|null}> };
+type SelectedItem = BrowseItem & { versionId:string; versionLabel:string };
 
 export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lang: string }) {
   const es = lang === "es";
   const tr = (en: string, spanish: string) => es ? spanish : en;
   const { token, user } = useAuthStore();
-  const storageKey = `bimlog-procore-intake:${user?.id ?? "unknown"}:${projectId}`;
+  const storageKey = `bimlog-procore-intake:${user?.id ?? "unknown"}:${user?.companyId ?? "unknown"}:${projectId}`;
   const [open, setOpen] = useState(false);
   const [goal, setGoal] = useState("");
   const [needed, setNeeded] = useState("");
@@ -22,7 +23,9 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
   const [error, setError] = useState("");
   const [ref, setRef] = useState("");
   const [items, setItems] = useState<BrowseItem[]>([]);
-  const [selected, setSelected] = useState<BrowseItem[]>([]);
+  const [selected, setSelected] = useState<SelectedItem[]>([]);
+  const [versionChoice,setVersionChoice]=useState<Record<string,string>>({});
+  const [proposal,setProposal]=useState<string>("");
   const [browsing, setBrowsing] = useState(false);
   const [restoredFor, setRestoredFor] = useState<string | null>(null);
   const ready = restoredFor === storageKey;
@@ -34,29 +37,28 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
     setGoal(""); setNeeded(""); setCompany(""); setSourceProject(""); setDestination(String(projectId)); setSelected([]);
     try {
       const saved = localStorage.getItem(storageKey);
-      if (!saved) { setRestoredFor(storageKey); return; }
-      const parsed = JSON.parse(saved);
-      setConversation(Array.isArray(parsed.messages) ? parsed.messages : []);
-      setGoal(typeof parsed.goal === "string" ? parsed.goal : "");
-      setNeeded(typeof parsed.needed === "string" ? parsed.needed : "");
-      setCompany(typeof parsed.company === "string" ? parsed.company : "");
-      setSourceProject(typeof parsed.sourceProject === "string" ? parsed.sourceProject : "");
-      setDestination(typeof parsed.destination === "string" ? parsed.destination : String(projectId));
-      setSelected(Array.isArray(parsed.selected) ? parsed.selected.filter((item: unknown): item is BrowseItem =>
-        Boolean(item && typeof item === "object" && "ref" in item && typeof item.ref === "string" && "name" in item && typeof item.name === "string"),
-      ) : []);
-      setRestoredFor(storageKey);
+      if(saved){const parsed=JSON.parse(saved);setConversation(Array.isArray(parsed.messages)?parsed.messages:[]);setGoal(typeof parsed.goal==="string"?parsed.goal:"");setNeeded(typeof parsed.needed==="string"?parsed.needed:"");setSelected(Array.isArray(parsed.selected)?parsed.selected:[]);}
     } catch { setConversation([]); setRestoredFor(storageKey); }
-  }, [storageKey, projectId]);
+    if(!token){setRestoredFor(storageKey);return;}
+    const controller=new AbortController();
+    void fetch(`/api/v1/projects/${projectId}/intake-agent/state`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal})
+      .then(async r=>{const body=await r.json();if(!r.ok)throw new Error(body.code||"INTAKE_STATE_LOAD_FAILED");const s=body.state;setGoal(s.goal||"");setNeeded(s.needed||"");setConversation(s.messages||[]);setSelected(s.selectedSources||[]);})
+      .catch(cause=>{if(!controller.signal.aborted)setError(cause instanceof Error?cause.message:"INTAKE_STATE_LOAD_FAILED");})
+      .finally(()=>setRestoredFor(storageKey));
+    return()=>controller.abort();
+  }, [storageKey, projectId,token]);
 
   useEffect(() => {
     if (!ready) return;
-    try { localStorage.setItem(storageKey, JSON.stringify({ messages: conversation.slice(-30), goal, needed, company, sourceProject, destination, selected })); } catch { /* Storage may be disabled. */ }
-  }, [ready, storageKey, conversation, goal, needed, company, sourceProject, destination, selected]);
+    try { localStorage.setItem(storageKey, JSON.stringify({ messages: conversation.slice(-30), goal, needed, selected })); } catch { /* Server persistence is authoritative. */ }
+    if(!token)return;
+    const timer=window.setTimeout(()=>void fetch(`/api/v1/projects/${projectId}/intake-agent/state`,{method:"PUT",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({goal,needed,messages:conversation,selectedSources:selected})}).then(r=>{if(!r.ok)throw new Error("INTAKE_STATE_SAVE_FAILED");}).catch(cause=>setError(cause instanceof Error?cause.message:"INTAKE_STATE_SAVE_FAILED")),350);
+    return()=>window.clearTimeout(timer);
+  }, [ready, storageKey, conversation, goal, needed, selected,token,projectId]);
 
   function save(next: ChatMessage[]) {
     setConversation(next);
-    if (ready) try { localStorage.setItem(storageKey, JSON.stringify({ messages: next.slice(-30), goal, needed, company, sourceProject, destination, selected })); } catch { /* Storage may be disabled. */ }
+    if (ready) try { localStorage.setItem(storageKey, JSON.stringify({ messages: next.slice(-30), goal, needed, selected })); } catch { /* Storage may be disabled. */ }
   }
 
   async function send(text = question) {
@@ -71,7 +73,7 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
       `Procore company: ${company || "not selected"}`,
       `Procore project: ${sourceProject || "not selected"}`,
       `BIMLog destination project: ${destination}`,
-      `Selected source refs: ${selected.length ? selected.map((item) => `${item.name} (${item.ref}; pinned Procore version unavailable)`).join("; ") : "none yet"}`,
+      `Selected source refs: ${selected.length ? selected.map((item) => `${item.name} (${item.ref}; version ${item.versionId})`).join("; ") : "none yet"}`,
       `Request: ${text.trim()}`,
     ].join("\n");
     const next = [...prior, { role: "user" as const, content: submittedText }];
@@ -124,9 +126,20 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
 
   function continueInto(item: BrowseItem) {
     if (item.type === "folder") void browse(item.ref);
-    else setSelected((current) => current.some((entry) => entry.ref === item.ref)
-      ? current.filter((entry) => entry.ref !== item.ref)
-      : [...current, item]);
+  }
+  function selectVersion(item:BrowseItem){
+    const versionId=versionChoice[item.ref]||item.versions?.[0]?.id;
+    const version=item.versions?.find(v=>v.id===versionId);if(!version)return;
+    setSelected(current=>[...current.filter(s=>s.ref!==item.ref),{...item,versionId:version.id,versionLabel:version.label}]);
+  }
+  async function createProposal(){
+    if(!token||!selected.length)return;
+    try{
+      const call=async(method:string,params?:unknown)=>{const r=await fetch(`/api/v1/projects/${projectId}/intake-agent/mcp`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({jsonrpc:"2.0",id:crypto.randomUUID(),method,params})});const d=await r.json();if(!r.ok||d.error)throw new Error(d.error?.code||"PROCORE_PROPOSAL_FAILED");return d;};
+      const discovered=await call("tools/list");if(!(discovered.result?.tools||[]).some((t:{name:string})=>t.name==="bimlog_propose_intake_plan"))throw new Error("PROCORE_PROPOSAL_TOOL_UNAVAILABLE");
+      const response=await call("tools/call",{name:"bimlog_propose_intake_plan",arguments:{projectId,goal,destination,needed,sources:selected.map(s=>({ref:s.ref,name:s.name,versionId:s.versionId,mimeType:s.mimeType||""}))}});
+      setProposal(JSON.stringify(JSON.parse(response.result.content[0].text),null,2));
+    }catch(cause){setError(cause instanceof Error?cause.message:"PROCORE_PROPOSAL_FAILED");}
   }
 
   return <section aria-label={tr("Procore intake agent", "Agente de incorporación de Procore")} style={{ margin: "18px 0", padding: 16, border: "1px solid hsl(var(--border))", borderRadius: 12, background: "hsl(var(--card))" }}>
@@ -152,18 +165,22 @@ export function ProcoreIntakePanel({ projectId, lang }: { projectId: number; lan
           <button type="button" disabled={browsing} onClick={() => void browse("")}>{browsing ? <RefreshCw size={14} /> : null}{tr("Companies", "Empresas")}</button>
         </div>
         <div role="list" style={{ display: "grid", gap: 5, marginTop: 9 }}>
-          {items.map((item) => <button key={item.ref} type="button" role="listitem" onClick={() => continueInto(item)} style={{ display: "flex", justifyContent: "space-between", gap: 10, textAlign: "left", padding: 8, border: "1px solid hsl(var(--border))", borderRadius: 7, background: selected.some((entry) => entry.ref === item.ref) ? "hsl(var(--accent))" : "transparent" }}>
-            <span>{item.type === "folder" ? "▸ " : selected.some((entry) => entry.ref === item.ref) ? "☑ " : "□ "}{item.name}</span>{item.type === "folder" ? <ChevronRight size={15} /> : null}
-          </button>)}
+          {items.map((item) => <div key={item.ref} role="listitem" style={{ display:"flex",gap:8,alignItems:"center",flexWrap:"wrap",padding:8,border:"1px solid hsl(var(--border))",borderRadius:7 }}>
+            {item.type==="folder" ? <button type="button" onClick={()=>continueInto(item)}>{item.name} <ChevronRight size={15}/></button> :
+              <><span>{item.name}</span><label>{tr("Exact version","Versión exacta")}<select aria-label={`${tr("Version for","Versión de")} ${item.name}`} value={versionChoice[item.ref]||item.versions?.[0]?.id||""} onChange={e=>setVersionChoice(v=>({...v,[item.ref]:e.target.value}))}>
+                {(item.versions||[]).map(v=><option key={v.id} value={v.id}>{v.label} · {v.id}{v.createdAt?` · ${v.createdAt}`:""}</option>)}
+              </select></label><button type="button" disabled={!item.versions?.length} onClick={()=>selectVersion(item)}>{selected.some(s=>s.ref===item.ref)?tr("Update selected version","Actualizar versión"):tr("Select version","Seleccionar versión")}</button></>}
+          </div>)}
           {!items.length && <span style={{ color: "hsl(var(--muted-foreground))", fontSize: 12 }}>{tr("Choose Companies to browse. File selection is read-only.", "Seleccione Empresas para explorar. La selección de archivos es de solo lectura.")}</span>}
         </div>
         {selected.length > 0 && <div role="status" style={{ fontSize: 12 }}>
           <strong>{tr("Selected sources", "Fuentes seleccionadas")} ({selected.length})</strong>
           <ul style={{ margin: "6px 0", paddingLeft: 20 }}>{selected.map((source) => <li key={source.ref} style={{ overflowWrap: "anywhere" }}>
-            {source.name} — <code>{source.ref}</code>; {tr("pinned version unavailable", "versión fijada no disponible")}
+             {source.name} — <code>{source.ref}</code>; {tr("version","versión")} {source.versionLabel} (<code>{source.versionId}</code>)
           </li>)}</ul>
-          <span>{tr("Procore's current browse response does not expose a pinned file version, so exact-version import is unavailable.", "La respuesta de exploración de Procore no expone una versión fijada; no se puede importar una versión exacta.")}</span>
+           <button type="button" onClick={()=>void createProposal()}>{tr("Build versioned proposal","Crear propuesta versionada")}</button>
         </div>}
+        {proposal&&<pre role="status" style={{whiteSpace:"pre-wrap",overflowWrap:"anywhere"}}>{proposal}</pre>}
       </div>
       <div aria-live="polite" style={{ maxHeight: 230, overflowY: "auto", display: "grid", gap: 8 }}>
         {conversation.map((message, index) => <div key={index} style={{ justifySelf: message.role === "user" ? "end" : "start", maxWidth: "92%", whiteSpace: "pre-wrap", padding: 10, borderRadius: 9, background: message.role === "user" ? "hsl(var(--accent))" : "hsl(var(--muted))", fontSize: 13 }}>{message.content}</div>)}
