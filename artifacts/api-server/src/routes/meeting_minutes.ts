@@ -3521,7 +3521,7 @@ router.get(
 router.patch(
   "/projects/:projectId/action-items/:itemId",
   authMiddleware,
-  requireProjectMember(),
+  requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     const itemId = Number(req.params.itemId);

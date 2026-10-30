@@ -628,6 +628,9 @@ export function MeetingsTab({
     label: string;
   } | null>(null);
   const [actionItems, setActionItems] = useState<ActionItem[]>([]);
+  const [actionSaving, setActionSaving] = useState(false);
+  const actionSaveLock = useRef(false);
+  const meetingScope = useRef(0);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [currentViewExportMode, setCurrentViewExportMode] = useState<
@@ -835,6 +838,8 @@ export function MeetingsTab({
 
   // import message display handled inline
   const loadMeetings = async () => {
+    const scope = ++meetingScope.current;
+    setError("");
     setLoading(true);
     try {
       if (!token) return;
@@ -842,20 +847,26 @@ export function MeetingsTab({
         projectId,
         token,
       });
+      if (scope !== meetingScope.current) return;
       if (workspace.meetings) setMeetings(workspace.meetings);
       if (workspace.actionItems) setActionItems(workspace.actionItems);
+    } catch (error) {
+      if (scope === meetingScope.current) { setMeetings([]); setActionItems([]); setError(t("Meetings and action items could not be verified. Reload before retrying.", "No se pudieron verificar reuniones y acciones. Recargue antes de reintentar.")); }
     } finally {
-      setLoading(false);
+      if (scope === meetingScope.current) setLoading(false);
     }
   };
 
   useEffect(() => {
+    setMeetings([]);
+    setActionItems([]);
     loadMeetings();
     void loadDirectoryEntries().catch(() => {
       reportMeetingWorkflowFailure("MEETING_DIRECTORY_LOAD_FAILED");
       setError(t("The project directory could not be loaded.", "No se pudo cargar el directorio del proyecto."));
     });
-  }, [projectId]);
+    return () => { meetingScope.current += 1; };
+  }, [projectId, token]);
 
   useEffect(() => {
     if (loading || actionItems.length === 0) return;
@@ -3133,9 +3144,16 @@ export function MeetingsTab({
   };
 
   const updateActionItem = async (id: number, status: string) => {
-    if (!token) return;
-    await updateMeetingActionItem({ projectId, token }, id, status);
-    await loadMeetings();
+    if (!token || !canWrite || actionSaveLock.current) return;
+    const scope = meetingScope.current;
+    actionSaveLock.current = true;
+    setActionSaving(true);
+    try {
+      await updateMeetingActionItem({ projectId, token }, id, status);
+      if (scope === meetingScope.current) await loadMeetings();
+    } catch (error) {
+      if (scope === meetingScope.current) setError(t("Action update could not be confirmed. Reload the saved action before retrying.", "No se pudo confirmar la actualización. Recargue la acción guardada antes de reintentar."));
+    } finally { actionSaveLock.current = false; setActionSaving(false); }
   };
 
   const openActions = actionItems.filter(
@@ -4404,10 +4422,12 @@ export function MeetingsTab({
           />
         )}
 
+        {actionSaving && <p role="status">{t("Saving action and reloading saved state…", "Guardando acción y recargando estado guardado…")}</p>}
+        {error && <div role="alert"><p>{error}</p><button disabled={loading || actionSaving} onClick={() => void loadMeetings()}>{t("Reload saved meetings and actions", "Recargar reuniones y acciones guardadas")}</button></div>}
         {!loading && view === "actions" && (
           <MeetingActionItemsTable
             items={actionItems}
-            canWrite={canWrite}
+            canWrite={canWrite && !actionSaving}
             statusLabel={statusLabel}
             t={t}
             onComplete={(id) => void updateActionItem(id, "completed")}
