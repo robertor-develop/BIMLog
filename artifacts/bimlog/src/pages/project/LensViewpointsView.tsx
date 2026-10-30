@@ -605,11 +605,14 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   };
 
   const submitResponsibleCompany = async () => {
+    if (!canWrite || actionLock.current) return;
+    const context = contextEpoch.current;
     const company = responsibleCompany.trim();
     const reason = responsibleReason.trim();
     if (selectedIds.size === 0) { setResponsibleError(t("Select at least one viewpoint.", "Seleccione al menos una vista.")); return; }
     if (!company) { setResponsibleError(t("Responsible Company is required.", "La empresa responsable es obligatoria.")); return; }
     if (!reason) { setResponsibleError(t("A reason is required for audit history.", "Se requiere un motivo para el historial.")); return; }
+    actionLock.current = true;
     setResponsiblePhase("submitting");
     setResponsibleError("");
     try {
@@ -619,11 +622,15 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         body: JSON.stringify({ ids: Array.from(selectedIds), responsibleCompany: company, reason }),
       });
       const d = await r.json().catch(() => ({}));
+      if (context !== contextEpoch.current) return;
       if (!r.ok) {
         setResponsiblePhase("input");
         setResponsibleError(d.message || d.error || t("Responsible Company update failed.", "No se pudo actualizar la empresa responsable."));
         return;
       }
+      if (d.success !== true || !Number.isInteger(d.updated) || !Number.isInteger(d.matched)) throw new Error(t("Invalid company update receipt.", "Respuesta de actualización de empresa inválida."));
+      if (!await loadViewpoints()) throw new Error(t("Saved response received, but records could not be reopened. Reload before another action.", "Se recibió la respuesta de guardado, pero no se pudieron reabrir los registros. Recargue antes de otra acción."));
+      if (context !== contextEpoch.current) return;
       setResponsibleOpen(false);
       setResponsiblePhase("input");
       setSelectedIds(new Set());
@@ -632,10 +639,12 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         `Set Responsible Company on ${d.updated ?? 0} viewpoint(s); checked ${d.expanded ?? d.matched ?? 0} chain-linked record(s)`,
         `Empresa responsable aplicada en ${d.updated ?? 0} vista(s); se revisaron ${d.expanded ?? d.matched ?? 0} registro(s) de cadena`
       ));
-      await loadViewpoints();
     } catch (e) {
+      if (context !== contextEpoch.current) return;
       setResponsiblePhase("input");
       setResponsibleError(e instanceof Error ? e.message : String(e));
+    } finally {
+      if (context === contextEpoch.current) actionLock.current = false;
     }
   };
 
@@ -1594,6 +1603,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(17,24,39,0.55)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
         >
           <div
+            role="dialog" aria-modal="true" aria-label={t("Set Responsible Company", "Asignar Empresa Responsable")}
             onClick={e => e.stopPropagation()}
             style={{ background: "white", borderRadius: 12, width: "100%", maxWidth: 520, boxShadow: "0 20px 50px rgba(0,0,0,0.3)", padding: 24 }}
           >
