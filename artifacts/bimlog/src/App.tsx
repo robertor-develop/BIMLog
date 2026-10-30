@@ -68,6 +68,7 @@ const MySetup = namedPage(() => import("@/pages/MySetup"), "MySetup");
 const ProjectAgentReview = namedPage(() => import("@/pages/ProjectAgentReview"), "ProjectAgentReview");
 const ProjectInsightsReview = namedPage(() => import("@/pages/ProjectInsightsReview"), "ProjectInsightsReview");
 const IntakeAgentPreview = namedPage(() => import("@/pages/IntakeAgentPreview"), "IntakeAgentPreview");
+const FolderWizardWorkspace = namedPage(() => import("@/pages/FolderWizardWorkspace"), "FolderWizardWorkspace");
 const ProjectUserAssignment = namedPage(() => import("@/pages/ProjectUserAssignment"), "ProjectUserAssignment");
 const ProjectBriefingReview = namedPage(() => import("@/pages/ProjectBriefingReview"), "ProjectBriefingReview");
 const LensImportPlan = namedPage(() => import("@/pages/LensImportPlan"), "LensImportPlan");
@@ -464,6 +465,9 @@ function Router() {
       </Route>
       <Route path="/intake-agent-preview">
         {() => <ProtectedRoute component={IntakeAgentPreview} />}
+      </Route>
+      <Route path="/folder-wizard-workspace">
+        {() => <ProtectedRoute component={FolderWizardWorkspace} />}
       </Route>
       <Route path="/project-user-assignment">
         {() => <ProtectedRoute component={ProjectUserAssignment} />}

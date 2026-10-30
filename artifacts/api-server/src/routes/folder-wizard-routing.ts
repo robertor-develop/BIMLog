@@ -15,6 +15,7 @@ import { createFolderWizardDestinationStore } from "../lib/folder-wizard-destina
 import { ConnectorValidationUnavailableError } from "../lib/coordination-hub-configuration-service";
 
 const router: IRouter = Router();
+router.use("/projects/:projectId/integrations/folder-wizard",(_req,res,next)=>{res.set("Cache-Control","private, no-store");next();});
 const service = createFolderWizardRoutingService();
 const publishingReadiness = createFolderWizardPublishReadinessStore();
 const destinations = createFolderWizardDestinationStore();

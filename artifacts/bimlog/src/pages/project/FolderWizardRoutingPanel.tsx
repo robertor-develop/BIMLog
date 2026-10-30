@@ -125,6 +125,7 @@ export function FolderWizardRoutingPanel({ projectId, token, lang, blueprints, o
         </select>
       </label>
       {selected && <p>{tr("Version", "Versión")}: {selected.version} · {selected.stale ? tr("Stale after import; save a new version", "Desactualizada tras importar; guarde una nueva versión") : selected.valid ? tr("Valid for this import", "Válida para esta importación") : tr("Incompatible with this import", "Incompatible con esta importación")}</p>}
+      {selected&&<p style={{overflowWrap:"anywhere"}}>SHA-256: <code>{selected.fingerprint}</code></p>}
       {included.length > 1 && <div><h4>{tr("Select a blueprint", "Seleccione un esquema")}</h4>{definition.selectors.map((entry, index) => <div key={`${entry.blueprintName}-${index}`} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(150px,1fr))", gap: 7, marginBottom: 8 }}>
         <strong>{entry.blueprintName}</strong>
         <label>{tr("Tag field", "Campo de etiqueta")}<input value={entry.tagKey} onChange={(event) => updateSelector(index, { tagKey: event.target.value })} placeholder="type" /></label>

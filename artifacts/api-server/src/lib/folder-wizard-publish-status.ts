@@ -31,12 +31,13 @@ export class FolderWizardPublishStatusStore {
     const client = await this.database.connect();
     try {
       const companyId = await authorizeFolderWizardImport(client as never, scope, false);
-      const result = await client.query(`SELECT id,state,attempts,max_attempts,last_error_code,created_at,updated_at,completed_at,next_attempt_at,
+      const result = await client.query(`SELECT id,state,request_digest,attempts,max_attempts,last_error_code,created_at,updated_at,completed_at,next_attempt_at,
         dead_lettered_at,payload->>'filename' AS filename,payload->>'sourceFileId' AS source_file_id
         FROM connector_jobs WHERE company_id=$1 AND project_id=$2 AND provider='sharepoint' AND job_type='publish'
           AND payload->>'kind'='folder_wizard_file_v1'
         ORDER BY created_at DESC,id DESC LIMIT 25`, [companyId, scope.projectId]);
       return result.rows.map((row) => ({ jobId: String(row.id), state: String(row.state),
+        requestDigest:String(row.request_digest),
         attempts: Number(row.attempts), maxAttempts: Number(row.max_attempts),
         errorCode: row.last_error_code === null ? null : String(row.last_error_code),
         filename: String(row.filename), sourceFileId: Number(row.source_file_id),

@@ -179,6 +179,7 @@ export function FolderWizardImportPanel({ projectId, token, lang }: { projectId:
           : jobs.length === 0 ? <p>{tr("No files have been submitted for publication.", "No se enviaron archivos para publicación.")}</p>
           : <ul>{jobs.map((job) => <li key={job.jobId}>
             {job.filename} · {publishStateLabels[job.state]?.[lang === "es" ? 1 : 0] ?? tr("Unknown status", "Estado desconocido")} · {job.attempts}/{job.maxAttempts}
+            <p style={{overflowWrap:"anywhere"}}>{tr("Job","Trabajo")}: {job.jobId} · {tr("Source file","Archivo fuente")}: #{job.sourceFileId} · <time dateTime={job.createdAt}>{job.createdAt}</time></p>
             {job.state === "retry" && job.nextAttemptAt && <p>{tr("Retry not before", "Reintentar a partir de")}: <time dateTime={job.nextAttemptAt}>{new Date(job.nextAttemptAt).toLocaleString(lang === "es" ? "es" : "en")}</time>. {tr("Preview and confirm again after this time; retries are not automatic.", "Actualice la vista previa y confirme después de esta hora; los reintentos no son automáticos.")}</p>}
             {job.errorCode && <> · {tr("Publication failed; ask a project administrator to review it.", "Falló la publicación; solicite revisión a un administrador del proyecto.")}</>}
           </li>)}</ul>}
