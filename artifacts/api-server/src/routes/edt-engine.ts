@@ -100,7 +100,11 @@ router.get("/projects/:projectId/edt-engine/operations-director-grants", authMid
       actorUserId: actor.actorUserId, actorCompanyId: actor.actorCompanyId, projectId,
       isGlobalSuperAdmin: actor.isGlobalSuperAdmin,
     });
-    res.json({ projectId, assignments });
+    const history=(await pool.query(`SELECT g.id AS "grantId",g.user_id AS "userId",g.granted_by_id AS "grantedById",g.reason,g.created_at AS "createdAt",
+      r.revoked_by_id AS "revokedById",r.reason AS "revocationReason",r.created_at AS "revokedAt"
+      FROM edt_operations_director_grants g LEFT JOIN edt_operations_director_revocations r ON r.grant_id=g.id
+      WHERE g.company_id=$1 AND g.project_id=$2 ORDER BY g.created_at,g.id`,[actor.actorCompanyId,projectId])).rows;
+    res.set("Cache-Control","private, no-store").json({ projectId, assignments, history });
   } catch (error) { sendEdtRouteError(res, error); }
 });
 
@@ -117,7 +121,7 @@ router.post("/projects/:projectId/edt-engine/operations-director-grants", authMi
       targetUserId: requiredInteger(body, "targetUserId"), action,
       reason: requiredText(body, "reason"), isGlobalSuperAdmin: actor.isGlobalSuperAdmin,
     });
-    res.status(result.idempotent ? 200 : action === "grant" ? 201 : 200).json(result);
+    res.set("Cache-Control","private, no-store").status(result.idempotent ? 200 : action === "grant" ? 201 : 200).json({projectId,targetUserId:Number(body.targetUserId),action,...result});
   } catch (error) { sendEdtRouteError(res, error); }
 });
 

@@ -1,79 +1,29 @@
-import { useCallback, useEffect, useState } from "react";
-
-type Assignment = { userId: number; fullName: string; email: string; projectRole: string; active: boolean };
-type Response = { projectId: number; assignments: Assignment[] };
-type Translate = (english: string, spanish: string) => string;
-
-export function EdtDirectorAssignmentPanel({ projectId, currentUserId, api, tt }: {
-  projectId: number;
-  currentUserId: number;
-  api: (path: string, init?: RequestInit) => Promise<unknown>;
-  tt: Translate;
-}) {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
-  const [error, setError] = useState("");
-  const [action, setAction] = useState<{ userId: number; kind: "grant" | "revoke" } | null>(null);
-  const [reason, setReason] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState("");
-  const load = useCallback(async () => {
-    setStatus("loading"); setError("");
-    try {
-      const response = await api(`/projects/${projectId}/edt-engine/operations-director-grants`) as Response;
-      if (response.projectId !== projectId || !Array.isArray(response.assignments) ||
-          response.assignments.some(row => !Number.isSafeInteger(row.userId) || !row.fullName || !row.email || typeof row.active !== "boolean"))
-        throw new Error(tt("Assignment response is incomplete.", "La respuesta de asignaciones está incompleta."));
-      setAssignments(response.assignments); setStatus("ready"); return true;
-    } catch (cause) {
-      setAssignments([]); setError(cause instanceof Error ? cause.message : tt("Assignments are unavailable.", "Las asignaciones no están disponibles."));
-      setStatus("error"); return false;
-    }
-  }, [api, projectId, tt]);
-  useEffect(() => { void load(); }, [load]);
-  const submit = async () => {
-    if (!action || reason.trim().length < 10 || reason.trim().length > 2000) return;
-    setSaving(true); setError(""); setNotice("");
-    try {
-      await api(`/projects/${projectId}/edt-engine/operations-director-grants`, {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: action.kind, targetUserId: action.userId, reason: reason.trim() }),
-      });
-      setAction(null); setReason("");
-      if (await load()) setNotice(tt("EDT approval authority saved and refreshed.", "Autoridad de aprobación EDT guardada y actualizada."));
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : tt("The assignment could not be saved.", "No se pudo guardar la asignación."));
-    } finally { setSaving(false); }
-  };
-  return <section className="jo-card" aria-labelledby="edt-director-title">
-    <div className="jo-item-head"><div>
-      <h2 id="edt-director-title">{tt("EDT approval authority", "Autoridad de aprobación EDT")}</h2>
-      <p className="jo-muted">{tt("A Super Administrator assigns one project member to independent Operations Director review. This does not activate the EDT.",
-        "Un Superadministrador asigna a un miembro del proyecto para la revisión independiente como Director de Operaciones. Esto no activa la EDT.")}</p>
-    </div><button type="button" onClick={() => void load()} disabled={status === "loading"}>
-      {tt("Refresh assignments", "Actualizar asignaciones")}</button></div>
-    {status === "loading" && <p role="status">{tt("Loading eligible members…", "Cargando miembros elegibles…")}</p>}
-    {status === "error" && <p role="alert" className="jo-error">{error}</p>}
-    {status !== "error" && error && <p role="alert" className="jo-error">{error}</p>}
-    {notice && <p role="status" className="jo-ok">{notice}</p>}
-    {status === "ready" && !assignments.length && <p className="jo-empty">{tt("No active same-company project members are eligible.", "No hay miembros activos de la misma empresa elegibles en este proyecto.")}</p>}
-    {status === "ready" && assignments.length > 0 && <div style={{ overflowX: "auto" }}><table className="jo-table">
-      <thead><tr><th>{tt("Project member", "Miembro del proyecto")}</th><th>{tt("Project role", "Rol del proyecto")}</th><th>{tt("EDT approval", "Aprobación EDT")}</th><th>{tt("Action", "Acción")}</th></tr></thead>
-      <tbody>{assignments.map(row => <tr key={row.userId}><td>{row.fullName}<br/><span className="jo-muted">{row.email}</span></td>
-        <td>{row.projectRole}</td><td>{row.active ? tt("Assigned", "Asignado") : tt("Not assigned", "Sin asignar")}</td>
-        <td><button type="button" disabled={saving || row.userId === currentUserId} title={row.userId === currentUserId ? tt("Self-assignment is prohibited", "La autoasignación está prohibida") : undefined}
-          onClick={() => { setAction({ userId: row.userId, kind: row.active ? "revoke" : "grant" }); setReason(""); setError(""); setNotice(""); }}>
-          {row.active ? tt("Revoke", "Revocar") : tt("Assign", "Asignar")}</button></td></tr>)}</tbody>
-    </table></div>}
-    {action && <div className="jo-sub" role="group" aria-labelledby="edt-director-confirm-title">
-      <h3 id="edt-director-confirm-title">{action.kind === "grant" ? tt("Confirm independent approver", "Confirmar aprobador independiente") : tt("Confirm revocation", "Confirmar revocación")}</h3>
-      <p>{assignments.find(row => row.userId === action.userId)?.fullName}</p>
-      <label>{tt("Reason for audit history (10–2000 characters)", "Motivo para el historial de auditoría (10–2000 caracteres)")}
-        <textarea value={reason} minLength={10} maxLength={2000} onChange={event => setReason(event.target.value)} /></label>
-      <div className="jo-actions"><button type="button" className="primary" disabled={saving || reason.trim().length < 10} onClick={() => void submit()}>
-        {saving ? tt("Saving…", "Guardando…") : tt("Confirm change", "Confirmar cambio")}</button>
-        <button type="button" disabled={saving} onClick={() => { setAction(null); setReason(""); setError(""); }}>
-          {tt("Cancel", "Cancelar")}</button></div>
-    </div>}
-  </section>;
+import {useEffect,useRef,useState} from "react";
+type Assignment={userId:number;fullName:string;email:string;projectRole:string;active:boolean};
+type History={grantId:string;userId:number;grantedById:number;reason:string;createdAt:string;revokedById:number|null;revocationReason:string|null;revokedAt:string|null};
+type Response={projectId:number;assignments:Assignment[];history:History[]};
+type Translate=(english:string,spanish:string)=>string;
+export function EdtDirectorAssignmentPanel({projectId,currentUserId,api,tt}:{projectId:number;currentUserId:number;api:(path:string,init?:RequestInit)=>Promise<unknown>;tt:Translate}){
+ const [assignments,setAssignments]=useState<Assignment[]>([]),[history,setHistory]=useState<History[]>([]),[status,setStatus]=useState<"loading"|"ready"|"error">("loading"),[error,setError]=useState(""),[notice,setNotice]=useState(""),[action,setAction]=useState<{userId:number;kind:"grant"|"revoke"}|null>(null),[reason,setReason]=useState(""),[saving,setSaving]=useState(false);
+ const generation=useRef(0),lock=useRef(false),abort=useRef<AbortController|null>(null),currentApi=useRef(api),receipt=useRef<{userId:number;active:boolean;grantId:string}|null>(null);currentApi.current=api;
+ const read=async(current:number)=>{const response=await currentApi.current(`/projects/${projectId}/edt-engine/operations-director-grants`,{signal:abort.current!.signal}) as Response;if(current!==generation.current)return;
+  if(response.projectId!==projectId||!Array.isArray(response.assignments)||!Array.isArray(response.history)||response.assignments.some(row=>!Number.isSafeInteger(row.userId)||!row.fullName||!row.email||typeof row.active!=="boolean"))throw new Error(tt("Assignment response is incomplete or belongs to another project.","La respuesta de asignaciones está incompleta o pertenece a otro proyecto."));
+  if(receipt.current){const saved=receipt.current,row=response.assignments.find(row=>row.userId===saved.userId),event=response.history.find(event=>event.grantId===saved.grantId&&event.userId===saved.userId);if(!row||row.active!==saved.active||!event||(saved.active?event.revokedAt!==null:!event.revokedAt))throw new Error(tt("The exact saved authority change has not been reopened. Retry verification without another mutation.","El cambio exacto de autoridad no se ha reabierto. Reintente verificar sin otra modificación."));receipt.current=null;setNotice(tt("Exact EDT authority change and immutable history reopened and verified.","Cambio exacto de autoridad EDT e historial inmutable reabiertos y verificados."));}
+  setAssignments(response.assignments);setHistory(response.history);setStatus("ready");
+ };
+ const run=async(work:(current:number)=>Promise<void>)=>{if(lock.current)return;lock.current=true;setSaving(true);setError("");setNotice("");abort.current=new AbortController();const current=++generation.current;try{await work(current);}catch(cause){if(current===generation.current){setAssignments([]);setHistory([]);setStatus("error");setError(cause instanceof Error?cause.message:tt("Authority evidence is unavailable. Retry verification.","La evidencia de autoridad no está disponible. Reintente verificar."));}}finally{if(current===generation.current){lock.current=false;setSaving(false);}}};
+ const load=()=>run(async current=>{setStatus("loading");await read(current);});
+ useEffect(()=>{const current=++generation.current;abort.current?.abort();abort.current=new AbortController();lock.current=true;setStatus("loading");setAssignments([]);setHistory([]);setAction(null);setReason("");setError("");setNotice("");receipt.current=null;void read(current).catch(cause=>{if(current===generation.current){setStatus("error");setError(cause instanceof Error?cause.message:String(cause));}}).finally(()=>{if(current===generation.current)lock.current=false;});return()=>{generation.current++;abort.current?.abort();};},[projectId,currentUserId]);
+ const submit=()=>run(async current=>{if(receipt.current){await read(current);return;}if(!action||action.userId===currentUserId||reason.trim().length<10||reason.trim().length>2000)throw new Error(tt("Select another active project member and provide a 10–2000 character reason.","Seleccione otro miembro activo del proyecto e ingrese un motivo de 10–2000 caracteres."));
+  const result=await currentApi.current(`/projects/${projectId}/edt-engine/operations-director-grants`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:action.kind,targetUserId:action.userId,reason:reason.trim()}),signal:abort.current!.signal}) as {projectId:number;targetUserId:number;action:string;grantId:string;active:boolean};if(current!==generation.current)return;
+  if(result.projectId!==projectId||result.targetUserId!==action.userId||result.action!==action.kind||typeof result.grantId!=="string"||result.active!==(action.kind==="grant"))throw new Error(tt("The authority receipt is incomplete. Reopen saved assignments before retrying.","El recibo de autoridad está incompleto. Reabra asignaciones guardadas antes de reintentar."));receipt.current={userId:action.userId,active:result.active,grantId:result.grantId};setAction(null);setReason("");setStatus("loading");setAssignments([]);setHistory([]);await read(current);
+ });
+ return <section className="jo-card edt-director" aria-labelledby="edt-director-title" style={{overflowWrap:"anywhere"}}>
+  <div className="jo-item-head"><div><h2 id="edt-director-title">{tt("EDT approval authority","Autoridad de aprobación EDT")}</h2><p>{tt("A Super Administrator assigns another active same-company project member to independent Operations Director review. This does not activate the EDT or permit self-approval. Membership must remain active for the authority to apply.","Un Superadministrador asigna a otro miembro activo de la misma empresa a revisión independiente como Director de Operaciones. Esto no activa la EDT ni permite autoaprobación. La membresía debe permanecer activa para aplicar la autoridad.")}</p></div><button type="button" onClick={()=>void load()} disabled={saving||status==="loading"}>{tt("Refresh assignments","Actualizar asignaciones")}</button></div>
+  {status==="loading"&&<p role="status">{tt("Loading eligible members…","Cargando miembros elegibles…")}</p>}{error&&<p role="alert" className="jo-error">{error}</p>}{notice&&<p role="status" className="jo-ok">{notice}</p>}
+  {status==="ready"&&!assignments.length&&<p>{tt("No active same-company project members are eligible.","No hay miembros activos de la misma empresa elegibles en este proyecto.")}</p>}
+  {status==="ready"&&assignments.length>0&&<div><p>{tt("Scroll the member table horizontally when needed to reach all approval actions.","Desplace la tabla de miembros horizontalmente cuando sea necesario para ver todas las acciones de aprobación.")}</p><div tabIndex={0} aria-label={tt("Project members and approval actions","Miembros del proyecto y acciones de aprobación")} style={{overflowX:"auto"}}><table className="jo-table" style={{minWidth:620}}><thead><tr><th>{tt("Project member","Miembro del proyecto")}</th><th>{tt("Project role","Rol del proyecto")}</th><th>{tt("EDT approval","Aprobación EDT")}</th><th>{tt("Action","Acción")}</th></tr></thead><tbody>{assignments.map(row=><tr key={row.userId}><td>{row.fullName}<br/>{row.email}</td><td>{row.projectRole}</td><td>{row.active?tt("Assigned","Asignado"):tt("Not assigned","Sin asignar")}</td><td><button style={{whiteSpace:"nowrap"}} disabled={saving||row.userId===currentUserId} title={row.userId===currentUserId?tt("Self-assignment is prohibited","La autoasignación está prohibida"):undefined} onClick={()=>{setAction({userId:row.userId,kind:row.active?"revoke":"grant"});setReason("");setError("");setNotice("");}}>{row.active?tt("Revoke","Revocar"):tt("Assign","Asignar")}</button></td></tr>)}</tbody></table></div></div>}
+  {action&&status==="ready"&&<div className="jo-sub" role="group" aria-labelledby="edt-director-confirm-title"><h3 id="edt-director-confirm-title">{action.kind==="grant"?tt("Confirm independent approver","Confirmar aprobador independiente"):tt("Confirm revocation","Confirmar revocación")}</h3><p>{assignments.find(row=>row.userId===action.userId)?.fullName}</p><label>{tt("Reason for audit history (10–2000 characters)","Motivo para el historial de auditoría (10–2000 caracteres)")}<textarea value={reason} minLength={10} maxLength={2000} onChange={event=>setReason(event.target.value)}/></label><div className="jo-actions"><button disabled={saving||reason.trim().length<10} onClick={()=>void submit()}>{saving?tt("Saving…","Guardando…"):tt("Confirm change","Confirmar cambio")}</button><button disabled={saving} onClick={()=>{setAction(null);setReason("");setError("");}}>{tt("Cancel","Cancelar")}</button></div></div>}
+  {status==="ready"&&<section><h3>{tt("Immutable authority history","Historial inmutable de autoridad")} · {history.length}</h3>{history.length===0&&<p>{tt("No Director grant is saved in this project.","No hay concesiones de Director guardadas en este proyecto.")}</p>}{history.map(event=><article key={event.grantId}><p>{event.grantId} · #{event.userId} · {tt("Granted by","Concedido por")} #{event.grantedById} · {event.createdAt}</p><p>{event.reason}</p>{event.revokedAt&&<p>{tt("Revoked by","Revocado por")} #{event.revokedById} · {event.revokedAt} · {event.revocationReason}</p>}</article>)}</section>}
+ </section>;
 }

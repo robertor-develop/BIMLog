@@ -103,5 +103,5 @@ export function sendEdtRouteError(res: Response, error: unknown): void {
   const denied = /REQUIRED$|PROHIBITED$|DENIED$|MISMATCH$/.test(error.code);
   const missing = /NOT_FOUND$/.test(error.code);
   const invalid = /INVALID$|REASON_REQUIRED$|EVIDENCE_REQUIRED$/.test(error.code);
-  res.status(missing ? 404 : denied ? 403 : invalid ? 400 : 409).json({ code: error.code, error: error.message, ...(error.details ?? {}) });
+  res.status(missing ? 404 : invalid ? 400 : denied ? 403 : 409).json({ code: error.code, error: error.message, ...(error.details ?? {}) });
 }
