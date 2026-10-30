@@ -1794,6 +1794,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       const scope = await lensReportScope(req, projectRows);
       const rows = scope.rows;
       const codeOf = (row: { trade: string | null; tradeFloorSeq: number | null; displayId: string | null; viewpointId: string }): string => {
+        if (row.displayId) return row.displayId;
         if (row.tradeFloorSeq != null) {
           const abbr = ((row.trade || "").length > 2 ? (row.trade || "").slice(0, 2) : (row.trade || "")).toUpperCase() || "??";
           return `${abbr}-${String(row.tradeFloorSeq).padStart(3, "0")}`;
@@ -1903,6 +1904,14 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         ["P3 Medium", { f: `COUNTIF('Lens Viewpoints'!H${dataStartRow}:H${dataEndRow},"P3")` }],
       ]);
       summary["!cols"] = [{ wch: 28 }, { wch: 32 }];
+      const summaryValues = [exportRows.length,
+        ...["Current", "Superseded", "Voided"].map(state => exportRows.filter(row => row.state === state).length),
+        ...["Open", "Resolved"].map(status => exportRows.filter(row => row.status === status).length),
+        ...["P1", "P2", "P3"].map(priority => exportRows.filter(row => row.priority === priority).length)];
+      summaryValues.forEach((value, index) => {
+        const cell = summary[`B${index + 8}`];
+        if (cell) { cell.t = "n"; cell.v = value; }
+      });
 
       const rubenRows: Array<Array<string | Date | null>> = [];
       const rubenSheetRows: Array<{ level?: number }> = [];
@@ -2135,6 +2144,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       );
       res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
       res.setHeader("Content-Disposition", `attachment; filename="Lens-Viewpoints-Project${projectId}.xlsx"`);
+      res.setHeader("Cache-Control", "private, no-store");
       res.send(buffer);
     } catch (err) {
       res.status(500).json({ error: "lens_excel_export_failed", message: err instanceof Error ? err.message : String(err) });

@@ -154,6 +154,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const contextEpoch=useRef(0),actionLock=useRef(false);
+  const exportLock=useRef(false);
+  const [exporting,setExporting]=useState(false);
   // Drives the refresh banner. Only true when a background poll detects the
   // server's viewpoint set differs from what is currently displayed - never shown
   // speculatively. Reset to false whenever we (re)load the displayed list.
@@ -333,7 +335,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     }
   };
 
-  useEffect(() => {contextEpoch.current++;actionLock.current=false;setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
+  useEffect(() => {contextEpoch.current++;actionLock.current=false;exportLock.current=false;setExporting(false);setViewpoints([]);setSelectedIds(new Set());setHistoryData({});setHistoryOpen({});setActionModal(null);setActionError("");setActionPhase("input");void loadViewpoints();return()=>{contextEpoch.current++;}; }, [projectId,token]);
 
   // Silently refetch the viewpoint list (no loading spinner) so the table can
   // be refreshed on demand (manual refresh banner) without a loading flicker.
@@ -873,6 +875,11 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   }, [focusViewpointId, viewpoints]);
 
   const exportExcel = async () => {
+    if (exportLock.current) return;
+    exportLock.current = true;
+    const context = contextEpoch.current;
+    setExporting(true);
+    setError("");
     const params = new URLSearchParams({
       trade: fTrade,
       floor: fFloor,
@@ -883,7 +890,10 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
     try {
       const response = await fetch(`${API}/projects/${projectId}/clash-reports/lens-viewpoints/export-excel?${params}`, { headers });
       if (!response.ok) throw new Error(`Export failed (${response.status})`);
+      if (!response.headers.get("content-type")?.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) throw new Error(t("Invalid Excel export response.", "Respuesta de exportación Excel inválida."));
       const blob = await response.blob();
+      if (context !== contextEpoch.current) return;
+      if (!blob.size) throw new Error(t("The Excel export is empty.", "La exportación Excel está vacía."));
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -891,10 +901,11 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       document.body.appendChild(link);
       link.click();
       link.remove();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (err) {
-      console.error("Lens Excel export failed", err);
-      alert(t("Excel export failed. Please try again.", "La exportacion a Excel fallo. Intente de nuevo."));
+      if (context === contextEpoch.current) setError(err instanceof Error ? err.message : t("Excel export failed. Please try again.", "La exportacion a Excel fallo. Intente de nuevo."));
+    } finally {
+      if (context === contextEpoch.current) { exportLock.current = false; setExporting(false); }
     }
   };
 
@@ -1015,7 +1026,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, flex: "0 1 auto" }}>
           <PrintPdfButton lang={lang} onClick={openReportModal} disabled={loading} className="lens-current-view-print shrink-0" currentViewSummary={lensCurrentViewSummary} />
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="btn btn-sm btn-outline" onClick={exportExcel}
+          <button className="btn btn-sm btn-outline" onClick={exportExcel} disabled={exporting} aria-busy={exporting}
             title={t("Download the current Lens table as an Excel register", "Descargar la tabla Lens actual como registro Excel")}
             style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Download size={14} /> {t("Lens Register Excel", "Excel del registro Lens")}
