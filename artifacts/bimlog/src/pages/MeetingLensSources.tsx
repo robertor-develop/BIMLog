@@ -37,6 +37,3 @@ export function MeetingLensSources(){
  {checked&&<p><Link href={`/projects/${request.project}/meetings`}>{t('Open full meeting minutes workflow','Abrir flujo completo de actas')}</Link></p>}
  </main>;
 }
-
-
-

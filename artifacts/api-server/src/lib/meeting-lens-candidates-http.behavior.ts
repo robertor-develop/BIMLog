@@ -29,4 +29,3 @@ try{
  await pool.query("UPDATE project_members SET status='inactive' WHERE project_id=$1 AND user_id=$2",[project,owner.id]);assert.equal((await get(owner)).status,403);assert.equal((await pool.query("SELECT status,revision_number FROM lens_viewpoints WHERE id=$1",[lens])).rows[0].revision_number,2);
  console.log(JSON.stringify({suite:"P179-real-lens-candidates-http",roleClasses:4,currentCompanyAndProjectIsolation:true,oldTokenDenied:true,inactiveDenied:true,activeCanonicalOnly:true,searchAndEmpty:true,strictMeetingContext:true,linkedFlagFromSavedSnapshot:true,deletedMeetingDenied:true,privateFieldsExcluded:true,freshMetadataOnReopen:true,sourceRevisionPreserved:true}));
 }finally{server.closeAllConnections();await new Promise<void>(r=>server.close(()=>r()));await pool.end();}
-
