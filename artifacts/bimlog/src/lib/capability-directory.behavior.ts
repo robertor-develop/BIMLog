@@ -16,7 +16,7 @@ const admin = resolveCapabilityDirectory(profile(["dashboard", "project_workspac
 assert.ok(["project-admin", "catalogs", "workflows", "governance", "pricing-templates"].every(id => admin.some(entry => entry.id === id)));
 const zeroProject = resolveCapabilityDirectory(profile(["dashboard"], []));
 assert.ok(!zeroProject.some(({ projectRequired }) => projectRequired));
-assert.deepEqual(searchCapabilities(admin, "governance", "en").map(entry => entry.id), ["governance"]);
+assert.deepEqual(searchCapabilities(admin, "governance", "en").map(entry => entry.id), ["feature-catalog", "governance"]);
 assert.ok(searchCapabilities(admin, "aprobados", "es").some(entry => entry.id === "governance"));
 assert.ok(searchCapabilities(member, "exports", "en").some(entry => entry.id === "rfis"));
 assert.equal(searchCapabilities(member, "", "en").length, member.length);

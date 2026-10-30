@@ -127,6 +127,15 @@ const standardGuidance = (prerequisite: string, prerequisiteEs: string, actor: s
 });
 
 export const capabilityGuidance: Record<string, CapabilityGuidance> = {
+  ...Object.fromEntries(capabilityDirectory.map(entry=>[entry.id,standardGuidance(
+    entry.audience==="project"?"An authorized project ID and active project access; the tool checks any additional prerequisites.":"Sign in with this tool's required access; its page checks any additional prerequisites.",
+    entry.audience==="project"?"Un ID de proyecto autorizado y acceso activo; la herramienta verifica requisitos adicionales.":"Inicie sesión con el acceso requerido; la página verifica requisitos adicionales.",
+    "Current user with the tool's required permissions; a directory entry does not grant write access.",
+    "Usuario actual con los permisos requeridos; una entrada del directorio no concede escritura.",
+    `${entry.purpose.en} Follow the page's visible prerequisites and inspect the returned evidence.`,
+    `${entry.purpose.es} Siga los requisitos visibles de la página y revise la evidencia devuelta.`
+  )])),
+  "plugin-pull-review":standardGuidance("Active project membership; native application additionally requires the authorized Navisworks model.","Membresía activa del proyecto; la aplicación nativa requiere además el modelo autorizado de Navisworks.","Authorized project reader; this tool does not apply changes.","Lector autorizado del proyecto; esta herramienta no aplica cambios.","Load pending changes, inspect their source records, then use native Pull from Platform to apply them.","Cargue los cambios pendientes, revise sus registros fuente y use Pull from Platform nativo para aplicarlos."),
   home: standardGuidance("Sign in to your company.", "Inicie sesión en su empresa.", "Every authorized user", "Todo usuario autorizado", "Open a priority or choose a project.", "Abra una prioridad o elija un proyecto."),
   pending: standardGuidance("Sign in with assigned work.", "Inicie sesión con trabajo asignado.", "Assigned reviewer or owner", "Revisor o responsable asignado", "Complete or route the waiting action.", "Complete o derive la acción pendiente."),
   intake: standardGuidance("An active project assignment.", "Una asignación activa de proyecto.", "Project administrator or intake owner", "Administrador de proyecto o responsable de ingreso", "Complete readiness and activate governed operations.", "Complete la preparación y active operaciones gobernadas."),
