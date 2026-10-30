@@ -358,6 +358,7 @@ router.post("/projects/:projectId/clash-reports/upload",
         return;
       }
       const format = clashImportFormat(req.file.originalname);
+      const originalName=req.file.originalname;
       const { extension: ext, spreadsheet: isSpreadsheet, xml: isXml } = format;
       const anthropic = await getAnthropicClientForUser({
         userId: req.user!.userId,
@@ -409,6 +410,7 @@ ${chunk}`
               console.log("[clash-upload] XML chunk extracted:", mapped.length, "viewpoints, total so far:", parsed.length);
             } catch (chunkErr) {
               console.error("[clash-upload] XML chunk failed:", chunkErr);
+              throw chunkErr;
             }
           }
 
@@ -418,14 +420,15 @@ ${chunk}`
           console.log("[clash-upload] XML total after dedup:", parsed.length, "viewpoints");
         } catch (xmlErr) {
           console.error("[clash-upload] XML failed:", xmlErr);
-          parsed = [];
+          throw xmlErr;
         }
       }
 
       if (!isSpreadsheet && parsed.length === 0) {
         // Non-spreadsheet: use AI to extract directly (XML, HTML, BCF, TXT, etc.)
         try {
-          const fileText = req.file.buffer.toString("utf-8").slice(0, 100000);
+          const documentChunks=chunkClashSource(req.file.buffer.toString("utf-8"));
+          for(const fileText of documentChunks){
           const extractMsg = await anthropic.messages.create({
             model: "claude-sonnet-4-5",
             max_tokens: 4000,
@@ -445,13 +448,15 @@ Return ONLY a JSON array, no markdown:
             }]
           });
           const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
-          parsed = normalizeAiClashRows(parseAiJsonArray(extractText), "document");
+          parsed = [...parsed,...normalizeAiClashRows(parseAiJsonArray(extractText), "document")];
+          }
+          parsed=deduplicateClashRows(parsed);
           console.log("[clash-upload] AI extracted from non-spreadsheet:", parsed.length, "clashes");
         } catch (e) {
           console.error("[clash-upload] AI extraction failed:", e);
-          parsed = [];
+          throw e;
         }
-      } else {
+      } else if (isSpreadsheet) {
         // Spreadsheet: use column mapping
         const spreadsheet = canonicalSpreadsheetInput(req.file.buffer, req.file.originalname, "buffer", {});
         const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
@@ -476,28 +481,32 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
           console.log("[clash-upload] AI mapping:", JSON.stringify(mapping));
         } catch (e) {
           console.error("[clash-upload] AI mapping failed:", e);
-          mapping = { clashId: 0, description: 3, holdUps: 7, discipline: 2, level: 1, assignedTo: 5, status: 8, resolutionNotes: 4, deadline: 9, viewpoint: 6, element1: -1, element2: -1 };
+          throw e;
         }
 
         parsed = mapClashSpreadsheetRows(dataRows, mapping);
         console.log("[clash-upload] Parsed:", parsed.length, "rows. Sample:", JSON.stringify(parsed[0]));
       }
 
-      const existingReports = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
-      const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
+      if(!parsed.length){res.status(422).json({error:"no_importable_clashes",message:"No valid clashes were extracted. Review the source and mapping before retrying; no report was created."});return;}
+      const persisted=await db.transaction(async tx=>{
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('bimlog-plugin-sync'),${projectId})`);
+      const existingReports = await tx.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
+      const [project] = await tx.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
       const autoReportNumber = nextClashReportNumber(project?.code, existingReports.map(r => r.reportNumber));
-      const [report] = await db.insert(clashReportsTable).values({
+      const [report] = await tx.insert(clashReportsTable).values({
         projectId,
         uploadedById: req.user!.userId,
-        fileName: req.file.originalname,
+        fileName: originalName,
         format: format.persistedFormat,
         totalClashes: parsed.length,
         status: "processing",
         reportNumber: autoReportNumber,
       }).returning();
 
+      let clashIds:number[]=[];
       if (parsed.length > 0) {
-        await db.insert(clashesTable).values(
+        const saved=await tx.insert(clashesTable).values(
           parsed.map(p => ({
             clashReportId: report.id,
             projectId,
@@ -509,12 +518,13 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
             assignedToName: p.assignedToName || null,
             resolutionNotes: p.resolutionNotes || null,
             dueDate: p.dueDate || null,
-            status: "open",
+            status: p.status,
           }))
-        );
+        ).returning({id:clashesTable.id});
+        clashIds=saved.map(row=>row.id);
       }
 
-      await db.insert(activityLogTable).values({
+      await tx.insert(activityLogTable).values({
         projectId,
         userId: req.user!.userId,
         userFullName: req.user!.fullName ?? "",
@@ -522,10 +532,12 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
         actionType: "upload",
         entityType: "clash_report",
         entityId: report.id,
-        details: `Uploaded clash report: ${req.file.originalname} - ${parsed.length} clashes imported (${autoReportNumber})`,
+        details: `Uploaded clash report: ${originalName} - ${parsed.length} clashes imported (${autoReportNumber})`,
       });
-      res.status(201).json({ clash_report_id: report.id, total_parsed: parsed.length, status: "processing" });
-      rankClashesWithAI(report.id, projectId, parsed, anthropic).catch(console.error);
+      return {report,clashIds};
+      });
+      res.status(201).json({ projectId,clash_report_id: persisted.report.id,clash_ids:persisted.clashIds,total_parsed: parsed.length, status: "processing" });
+      rankClashesWithAI(persisted.report.id, projectId, parsed, anthropic).catch(console.error);
     } catch (err) {
       if (sendAiUsageError(res, err)) return;
       console.error("[clash-reports/upload] FAILED:", err);
@@ -607,7 +619,7 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
   } catch (err) {
     console.error("[rankClashesWithAI] FAILED:", err);
     if(audit)throw err;
-    await db.update(clashReportsTable).set({ status: "complete" }).where(clashReportScopeWhere(projectId, reportId));
+    await db.update(clashReportsTable).set({ status: "ranking_failed",aiSummary:"Imported records were saved, but AI ranking failed. Review the records and retry ranking." }).where(clashReportScopeWhere(projectId, reportId));
   }
 }
 

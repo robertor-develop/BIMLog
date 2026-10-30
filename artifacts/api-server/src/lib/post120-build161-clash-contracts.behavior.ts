@@ -28,6 +28,7 @@ const selected = selectClashSpreadsheetRows(workbook);
 assert.deepEqual(selected.headers, ["viewpoint", "description", "trade"]);
 const mapping = { ...emptyClashColumnMapping(), viewpoint: 0, description: 1, discipline: 2 };
 assert.deepEqual(mapClashSpreadsheetRows(selected.rows, mapping).map(row => row.clashIdOriginal), ["C.001"]);
+assert.deepEqual(mapClashSpreadsheetRows([["C.001","Resolved row","PB"," RESOLVED "],["C.002","Completed row","PB","complete"],["C.003","Open row","PB","open"]],{...mapping,status:3}).map(row=>row.status),["resolved","resolved","open"]);
 
 assert.equal(nextClashReportNumber("ABC", ["ABC-CR-001", "ABC-CR-003"]), "ABC-CR-004");
 assert.equal(clashStatusPresentation("waiting_design", "es"), "Esperando Diseno");
