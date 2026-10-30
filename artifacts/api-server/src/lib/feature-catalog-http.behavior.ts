@@ -4,6 +4,8 @@ import { pool } from "@workspace/db";
 import featuresRouter from "../routes/features";
 import { signToken } from "../middlewares/auth";
 import { startFeatureCatalogMigration } from "./feature-catalog-migration";
+import { INITIAL_FEATURE_CATALOG } from "./initial-feature-catalog";
+import { startFeaturePolicyMigration } from "./feature-policy-migration";
 
 const connectionString = process.env.PROD_DATABASE_URL;
 if (!connectionString) throw new Error("An isolated local PROD_DATABASE_URL is required.");
@@ -13,7 +15,7 @@ if (!["127.0.0.1", "localhost", "::1"].includes(identity.hostname) || identity.p
 }
 
 await pool.query(`
-  CREATE TABLE companies(id serial PRIMARY KEY,name text NOT NULL);
+  CREATE TABLE companies(id serial PRIMARY KEY,name text NOT NULL,retired_into_company_id integer);
   CREATE TABLE users(id serial PRIMARY KEY,email text NOT NULL UNIQUE,password_hash text NOT NULL,full_name text NOT NULL,company_id integer NOT NULL REFERENCES companies(id),is_super_admin boolean NOT NULL DEFAULT false,notification_preferences jsonb);
   CREATE TABLE projects(id serial PRIMARY KEY,name text NOT NULL,created_by_id integer NOT NULL REFERENCES users(id));
   CREATE TABLE project_members(id serial PRIMARY KEY,project_id integer NOT NULL REFERENCES projects(id),user_id integer NOT NULL REFERENCES users(id),role text NOT NULL,status text);
@@ -41,6 +43,7 @@ await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VA
 await pool.query(`INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'admin','active'),($1,$3,'viewer','active')`,[projectId,ids.get("legacy-admin@example.test"),ids.get("legacy-viewer@example.test")]);
 await pool.query(`INSERT INTO entitlement_rules(id,version,company_id,capability,funding_type,enabled,effective_from) VALUES('http-assistant',9,$1,'assistant','company',true,now())`,[companyId]);
 await startFeatureCatalogMigration();
+await startFeaturePolicyMigration();
 
 const token = (email:string) => signToken({userId:ids.get(email)!,email,companyId,fullName:email,companyName:"HTTP Evidence",isSuperAdmin:email.includes("super")});
 const tokens = new Map([...ids.keys()].map((email)=>[email,token(email)]));
@@ -53,7 +56,7 @@ const request = async(path:string,email?:string,init:RequestInit={}) => {
 const checks:Record<string,string|number|boolean>={};
 try {
   assert.equal((await request("/features/catalog")).status,401);checks.unauthenticatedRejected=true;
-  const catalog=await request("/features/catalog","member@example.test");assert.equal(catalog.status,200);assert.equal(catalog.body.features.length,27);checks.authenticatedCatalog=27;
+  const catalog=await request("/features/catalog","member@example.test");assert.equal(catalog.status,200,JSON.stringify(catalog.body));assert.equal(catalog.body.features.length,INITIAL_FEATURE_CATALOG.length);checks.authenticatedCatalog=INITIAL_FEATURE_CATALOG.length;
   const detail=await request("/features/catalog/ai.file_reading_control","member@example.test");assert.equal(detail.status,200);assert.equal(detail.body.feature.aiClassification,"file_reading_ai");checks.authenticatedDetail=true;
   const before=await pool.query(`SELECT (SELECT count(*) FROM feature_catalog_versions) versions,(SELECT count(*) FROM feature_catalog_activations) activations,(SELECT count(*) FROM feature_catalog_audit) audits,(SELECT count(*) FROM platform_capability_versions) platform`);
   await request("/features/catalog","member@example.test");await request("/features/catalog/rfi.core","member@example.test");
@@ -84,7 +87,7 @@ try {
     request("/admin/platform-capabilities/rfi.export.pdf","current-super@example.test",{...mutation,body:JSON.stringify({status:"available",reasonCode:"HTTP_CONCURRENT_A",explanation:{en:"Concurrent A.",es:"Concurrente A."}})}),
     request("/admin/platform-capabilities/rfi.export.pdf","current-super@example.test",{...mutation,body:JSON.stringify({status:"available",reasonCode:"HTTP_CONCURRENT_B",explanation:{en:"Concurrent B.",es:"Concurrente B."}})}),
   ]);assert.deepEqual(concurrent.map((result)=>result.status),[201,201]);assert.deepEqual(concurrent.map((result)=>Number(result.body.version)).sort(),[1,2]);checks.concurrentVersions="1,2";
-  await pool.query(`UPDATE users SET company_id=$2 WHERE id=$1`,[ids.get("member@example.test"),otherCompanyId]);const changed=await request(`/features/rfi.core/entitlement?projectId=${projectId}`,"member@example.test");assert.equal(changed.body.state,"authenticated_company_changed");assert.equal("companyId" in changed.body,false);checks.currentCompanyRechecked=true;
+  await pool.query(`UPDATE users SET company_id=$2 WHERE id=$1`,[ids.get("member@example.test"),otherCompanyId]);const changed=await request(`/features/rfi.core/entitlement?projectId=${projectId}`,"member@example.test");assert.equal(changed.status,200);assert.equal(changed.body.state,"project_membership_missing");assert.equal(changed.body.decision,"deny");assert.equal(changed.body.evaluation.authorizesExecution,false);assert.equal("companyId" in changed.body,false);checks.currentCompanyRechecked=true;
   const bad=await request(`/features/${"x".repeat(500)}/entitlement`,"member@example.test");assert.equal(bad.status,400);assert.doesNotMatch(bad.text,/select |postgres|stack|password|secret|company_id/i);checks.boundedErrorsSanitized=true;
   const allText=JSON.stringify({catalog:catalog.body,detail:detail.body,unknown:unknown.body,inactive:inactive.body,missing:missing.body,changed:changed.body,bad:bad.body});assert.doesNotMatch(allText,/SELECT |postgresql|stack trace|password_hash|database url/i);checks.responsePrivacyScan=true;
 } finally { await new Promise<void>((resolve,reject)=>server.close((error)=>error?reject(error):resolve())); await pool.end(); }
