@@ -731,7 +731,15 @@ try {
     ).rows[0].retention_hold,
     true,
   );
-  console.log("feedback DB/HTTP contract: 38/38 passed");
+  const claimedProjection=await testPool.query(`UPDATE feedback_operations_outbox SET state='claimed',attempts=1,lease_owner='private-fixture-worker',lease_token='private-fixture-token',lease_expires_at=now()+interval '5 minutes' WHERE feedback_id=$1 RETURNING id`,[id]);
+  assert.equal(claimedProjection.rowCount,1);
+  const ownRoute=async()=>{const response=await fetch(`${base}/feedback/mine`,{headers:{Authorization:`Bearer ${tokenA}`}});assert.equal(response.status,200);const data=await response.json() as {feedback:Array<{id:number;operationsRoute:any}>};return data.feedback.find(row=>row.id===id)!.operationsRoute;};
+  const processingRoute=await ownRoute();assert.equal(processingRoute.queue.phase,'processing');assert.equal(processingRoute.queue.attempts,1);assert.equal(processingRoute.receipt,null);assert.doesNotMatch(JSON.stringify(processingRoute),/private-fixture|lease_token|lease_owner/);
+  await testPool.query(`UPDATE feedback_operations_outbox SET state='delivered',receipt_id=$2,receipt_revision=1,settled_at=now(),case_digest='private-fixture-digest' WHERE feedback_id=$1`,[id,`bimlog-feedback-${'a'.repeat(64)}`]);
+  const deliveredRoute=await ownRoute();assert.equal(deliveredRoute.queue.phase,'delivered');assert.equal(deliveredRoute.receipt.caseRevision,1);assert.match(deliveredRoute.receipt.receiptId,/^bimlog-feedback-[a-f0-9]{64}$/);assert.doesNotMatch(JSON.stringify(deliveredRoute),/private-fixture|lease_token|lease_owner|case_digest/);
+  const otherMine=await fetch(`${base}/feedback/mine`,{headers:{Authorization:`Bearer ${tokenB}`}});assert.equal(otherMine.status,200);assert.equal((await otherMine.json() as {feedback:Array<{id:number}>}).feedback.some(row=>row.id===id),false);
+  for(const endpoint of ['/feedback-agent/claim',`/feedback-agent/${claimedProjection.rows[0].id}/result`])assert.equal((await fetch(`${base}${endpoint}`,{method:'POST',headers:{Authorization:`Bearer ${tokenA}`,'Content-Type':'application/json'},body:'{}'})).status,401);
+  console.log("feedback DB/HTTP contract: 38 existing checks plus safe queue/result projection, tenant isolation and native-only boundary checks passed");
 } finally {
   server.closeIdleConnections();
   server.closeAllConnections();
