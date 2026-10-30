@@ -60,6 +60,7 @@ const FeatureAccessInspector = namedPage(() => import("@/pages/FeatureAccessInsp
 const FeatureCatalog = namedPage(() => import("@/pages/FeatureCatalog"), "FeatureCatalog");
 const FeaturePolicyWorkspace = namedPage(() => import("@/pages/FeaturePolicyWorkspace"), "FeaturePolicyWorkspace");
 const FeaturePreferences = namedPage(() => import("@/pages/FeaturePreferences"), "FeaturePreferences");
+const TelegramOperations = namedPage(() => import("@/pages/TelegramOperations"), "TelegramOperations");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
 const FixSpecificLink = namedPage(() => import("@/pages/parity/admin-fix-specific-link"), "FixSpecificLink");
@@ -407,6 +408,9 @@ function Router() {
       </Route>
       <Route path="/feature-preferences">
         {() => <ProtectedRoute component={FeaturePreferences} />}
+      </Route>
+      <Route path="/telegram-operations">
+        {() => <ProtectedRoute component={TelegramOperations} />}
       </Route>
       <Route path="/admin">
         {() => <AccessRoute component={AdminPanel} surface="project_administration" />}
