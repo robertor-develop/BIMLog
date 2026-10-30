@@ -4,6 +4,7 @@ import { FinancialAuthorityJournal } from "@/components/FinancialAuthorityJourna
 import { FinancialContextRecords } from "@/components/FinancialContextRecords";
 import { SyntheticFinancialAuthorization } from "@/components/SyntheticFinancialAuthorization";
 import { FinancialGrantDetails } from "@/components/FinancialGrantDetails";
+import { FinancialSuspensionHistory } from "@/components/FinancialSuspensionHistory";
 import { financialAuthorityDate } from "@/lib/financial-authority-presentation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "wouter";
@@ -1011,6 +1012,8 @@ export function FinancialControlsSettings() {
                       </p>
                       <textarea
                         style={inputStyle}
+                        aria-label={tt("Reason for selected-scope suspension action","Motivo de la acción de suspensión del alcance seleccionado")}
+                        maxLength={1000}
                         placeholder={tt(
                           "Required reason",
                           "Motivo obligatorio",
@@ -1019,31 +1022,21 @@ export function FinancialControlsSettings() {
                         onChange={(e) => setSuspensionReason(e.target.value)}
                       />
                       <Button
-                        disabled={busy || !suspensionReason}
-                        variant={
-                          state.status === "suspended"
-                            ? "default"
-                            : "destructive"
-                        }
+                        disabled={busy || suspensionReason.trim().length<3}
+                        variant="destructive"
                         style={{ marginTop: 8 }}
                         onClick={() =>
                           mutate("/financial-controls/suspension", {
                             ...scopeBody,
-                            action:
-                              state.status === "suspended"
-                                ? "release"
-                                : "activate",
+                            action: "activate",
                             reason: suspensionReason,
                           })
                         }
                       >
-                        {state.status === "suspended"
-                          ? tt("Release suspension", "Liberar suspensión")
-                          : tt(
-                              "Suspend financial operations",
-                              "Suspender operaciones financieras",
-                            )}
+                        {tt("Suspend selected scope","Suspender alcance seleccionado")}
                       </Button>
+                      <Button disabled={busy||suspensionReason.trim().length<3} variant="outline" style={{marginTop:8,marginLeft:8}} onClick={()=>void mutate("/financial-controls/suspension",{...scopeBody,action:"release",reason:suspensionReason})}>{tt("Record release for selected scope","Registrar liberación del alcance seleccionado")}</Button>
+                      <FinancialSuspensionHistory events={admin.suspensions} es={lang==='es'}/>
                     </section>
                     <section style={card}>
                       <h2 style={{ fontSize: 15, margin: "0 0 8px" }}>
