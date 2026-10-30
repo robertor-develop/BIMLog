@@ -1,0 +1,16 @@
+export type BudgetDecisionReceipt={budgetVersionId:string;fingerprint:string;result:any;approval:boolean};
+export async function readVerifiedBudgetDecision(input:{projectId:number;token:string;receipt:BudgetDecisionReceipt;signal?:AbortSignal}){
+ const response=await fetch(`/api/v1/projects/${input.projectId}/financial/workspace`,{headers:{Authorization:`Bearer ${input.token}`},signal:input.signal});const data=await response.json();if(!response.ok)throw new Error(data.error?.en??"Saved budget evidence is unavailable. Retry this read.");
+ if(data.project?.id!==input.projectId||!Array.isArray(data.budgets)||!Array.isArray(data.snapshots))throw new Error("The budget evidence is incomplete or belongs to another project.");
+ const {receipt}=input,row=data.budgets.find((row:any)=>row.id===receipt.budgetVersionId);
+ if(!row||row.content_fingerprint!==receipt.fingerprint)throw new Error("The exact saved budget fingerprint has not been reopened. Retry this read without another action.");
+ if(receipt.approval){const snapshot=data.snapshots.find((saved:any)=>saved.id===receipt.result.id);if(row.status!=="approved"||row.approved_snapshot_id!==receipt.result.id||!snapshot||snapshot.budgetVersionId!==row.id||snapshot.contentFingerprint!==receipt.result.contentFingerprint||snapshot.snapshotFingerprint!==receipt.result.snapshotFingerprint)throw new Error("The exact immutable approval snapshot has not been reopened. Retry this read without another approval.");}
+ else if(row.status!==receipt.result.status||Number(row.revision)!==receipt.result.revision)throw new Error("The exact saved budget state and revision have not been reopened. Retry this read without another action.");
+ return data;
+}
+export async function writeBudgetDecision(input:{projectId:number;token:string;row:any;action:string;reason?:string;ownerOverride?:{reason:string};signal?:AbortSignal}){
+ const approval=input.action==="approve"||input.action==="approve_override",body=approval?{expectedRevision:input.row.revision,confirmationFingerprint:input.row.content_fingerprint,...(input.ownerOverride?{ownerOverride:true,overrideReason:input.ownerOverride.reason,overrideConfirmation:"SOLE_OWNER_OVERRIDE"}:{})}:{action:input.action,expectedRevision:input.row.revision,...(["return","reject","withdraw"].includes(input.action)?{reason:input.reason}:{})};
+ const response=await fetch(`/api/v1/projects/${input.projectId}/financial/budgets/${encodeURIComponent(input.row.id)}/${approval?"approve":"actions"}`,{method:"POST",headers:{Authorization:`Bearer ${input.token}`,"Content-Type":"application/json"},body:JSON.stringify(body),signal:input.signal});const result=await response.json();if(!response.ok)throw new Error(result.error?.en??"The budget action was denied. Reopen current evidence.");
+ if(approval?result.budgetVersionId!==input.row.id||result.status!=="approved"||typeof result.id!=="string"||!/^[a-f0-9]{64}$/.test(result.snapshotFingerprint)||result.contentFingerprint!==input.row.content_fingerprint:result.id!==input.row.id||!Number.isSafeInteger(result.revision)||typeof result.status!=="string")throw new Error("The budget action receipt is incomplete. Reopen current evidence before retrying.");
+ return {budgetVersionId:input.row.id,fingerprint:input.row.content_fingerprint,result,approval} as BudgetDecisionReceipt;
+}

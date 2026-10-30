@@ -513,7 +513,7 @@ check("PDF fingerprint parity", "content fingerprint extracted");
 const browser = fs.readFileSync(
     path.resolve(process.cwd(), "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx"),
     "utf8",
-  ),
+  ) + fs.readFileSync(path.resolve(process.cwd(),"artifacts/bimlog/src/lib/budget-decision-verification.ts"),"utf8"),
   controlsBrowser = fs.readFileSync(
     path.resolve(process.cwd(), "artifacts/bimlog/src/pages/FinancialControlsSettings.tsx"),
     "utf8",

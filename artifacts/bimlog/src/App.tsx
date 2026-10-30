@@ -88,6 +88,7 @@ const EdtTimeReview = namedPage(() => import("@/pages/EdtTimeReview"), "EdtTimeR
 const EdtIssuances = namedPage(() => import("@/pages/EdtIssuances"), "EdtIssuances");
 const FileCustodyReview = namedPage(() => import("@/pages/FileCustodyReview"), "FileCustodyReview");
 const ManualBonusReview = namedPage(() => import("@/pages/ManualBonusReview"), "ManualBonusReview");
+const BudgetDecisionReview = namedPage(() => import("@/pages/BudgetDecisionReview"), "BudgetDecisionReview");
 const PluginSyncReview = namedPage(() => import("@/pages/PluginSyncReview"), "PluginSyncReview");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
@@ -520,6 +521,9 @@ function Router() {
       </Route>
       <Route path="/manual-bonus-review">
         {() => <ProtectedRoute component={ManualBonusReview} />}
+      </Route>
+      <Route path="/budget-decision-review">
+        {() => <ProtectedRoute component={BudgetDecisionReview} />}
       </Route>
       <Route path="/plugin-sync-review">
         {() => <ProtectedRoute component={PluginSyncReview} />}

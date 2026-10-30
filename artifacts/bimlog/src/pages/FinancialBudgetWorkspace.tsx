@@ -1,6 +1,7 @@
 import { validatedReturn } from "@/lib/return-context";
 import { BudgetSourcePicker } from "@/components/commercial/BudgetSourcePicker";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {readVerifiedBudgetDecision,writeBudgetDecision,type BudgetDecisionReceipt} from "@/lib/budget-decision-verification";
 import { Link, useRoute, useSearch } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
@@ -389,6 +390,7 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
           )}{" "}
           {mode === "budget" && (
             <Budget
+              key={`${projectId}-${token}-${language}`}
               data={data}
               budgets={visibleBudgets}
               tt={tt}
@@ -646,60 +648,16 @@ function Budget({
       setBusy("");
     }
   };
-  const act = async (row: any, action: string) => {
-    setBusy(row.id);
-    setMessage("");
-    const url =
-      action === "approve" || action === "approve_override"
-        ? `/projects/${projectId}/financial/budgets/${row.id}/approve`
-        : `/projects/${projectId}/financial/budgets/${row.id}/actions`;
-    const body =
-      action === "approve" || action === "approve_override"
-        ? {
-            expectedRevision: row.revision,
-            confirmationFingerprint: row.content_fingerprint,
-            ...(action === "approve_override"
-              ? {
-                  ownerOverride: true,
-                  overrideReason,
-                  overrideConfirmation: "SOLE_OWNER_OVERRIDE",
-                }
-              : {}),
-          }
-        : {
-            action,
-            expectedRevision: row.revision,
-            reason: ["return", "reject", "withdraw"].includes(action)
-              ? tt(
-                  "Controlled workflow decision.",
-                  "Decisión controlada del flujo.",
-                )
-              : undefined,
-          };
-    try {
-      const r = await fetch(`${API_BASE}/api/v1${url}`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(body),
-        }),
-        b = await r.json();
-      if (!r.ok) throw new Error(b?.error?.en || "Request denied");
-      if (action === "approve_override") {
-        setOverrideReason("");
-        setOverrideConfirmed(false);
-      }
-      setMessage(
-        tt("Controlled action recorded.", "Acción controlada registrada."),
-      );
-      reload();
-    } catch (e) {
-      setMessage(e instanceof Error ? e.message : String(e));
-    } finally {
-      setBusy("");
-    }
+  const decisionLock=useRef(false),decisionReceipt=useRef<BudgetDecisionReceipt|null>(null),decisionAbort=useRef(new AbortController());
+  useEffect(()=>()=>decisionAbort.current.abort(),[]);
+  const act=async(row:any,action:string)=>{
+    if(decisionLock.current||busy)return;decisionLock.current=true;setBusy(row.id);setMessage("");
+    try{
+      if(!decisionReceipt.current)decisionReceipt.current=await writeBudgetDecision({projectId,token,row,action,reason:tt("Controlled workflow decision.","Decisión controlada del flujo."),...(action==="approve_override"?{ownerOverride:{reason:overrideReason}}:{}),signal:decisionAbort.current.signal});
+      await readVerifiedBudgetDecision({projectId,token,receipt:decisionReceipt.current,signal:decisionAbort.current.signal});
+      decisionReceipt.current=null;setOverrideReason("");setOverrideConfirmed(false);setMessage(tt("The exact saved budget action and evidence were reopened.","Se reabrieron la acción presupuestaria exacta y su evidencia guardadas."));reload();
+    }catch(error){if(!decisionAbort.current.signal.aborted)setMessage(error instanceof Error?error.message:String(error));}
+    finally{decisionLock.current=false;if(!decisionAbort.current.signal.aborted)setBusy("");}
   };
   return (
     <section className="fb-panel">
@@ -725,6 +683,8 @@ function Budget({
         </div>
       )}
       <div className="fb-import">
+        <p><Link href={`/budget-decision-review?projectId=${projectId}`}>{tt("Open budget lifecycle and exact approval review","Abrir ciclo presupuestario y revisión de aprobación exacta")}</Link></p>
+        {decisionReceipt.current&&<button disabled={Boolean(busy)} onClick={()=>void act({id:decisionReceipt.current!.budgetVersionId},"")}>{tt("Retry saved budget evidence read only","Reintentar solo lectura de evidencia presupuestaria guardada")}</button>}
         <h3>{tt("Controlled CSV/XLSX import", "Importación CSV/XLSX controlada")}</h3>
         <p>
           {tt(
