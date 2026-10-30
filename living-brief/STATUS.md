@@ -1,3 +1,7 @@
+## 2026-10-30 — Aggregate local integration accepted; publication pending
+
+Normal merge5df676cc1d6f121250bbd69aa9f2a9facc5be433 preserves P176-P180 and the Procore/company31 source corrections. Controlled acceptance includes19 actual authenticated/schema checks, eight connected meeting browsers, the full proposal-stage intake browser, compilers and dependency/security/authority gates. Missing schema declarations and the unapproved new cascade were corrected before production. Final metadata seal/push, exact-source production build, additive migration preview/application, deployment identity and three live rounds are next. Ruben access and the complete confirmed-import Procore flow are not yet live accepted. Thirty frozen builds remain afterP180; no all-program completion is claimed.
+
 ## 2026-10-30 — P176-P180 accepted source and Procore aggregate release candidate
 
 P176-P180 are individually accepted, regression-tested and pushed on the canonical parity branch; all five focused commits are preserved. Thirty frozen buildsP181-P210 remain. This source status is not deployment acceptance: production still reported3fe3c429/v1.05.N18-P37 at the latest observation. Ten is the current Blocks35/36 batch, not a reconciled historical unpublished total.

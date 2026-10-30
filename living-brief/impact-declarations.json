@@ -80602,6 +80602,123 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a00fd12d2c49f159f2429660de496ed01f65ecf1ecf516d66deab50ca1331b76"
+    },
+    {
+      "taskId": "block36-procore-postmerge-release-seal-20261030",
+      "reviewedThroughCommit": "5df676cc1d6f121250bbd69aa9f2a9facc5be433",
+      "reviewedAt": "2026-10-30T22:05:20.9246488Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "capabilityPreflight": {
+        "agentCapable": [
+          "Preserve and inspect canonical/incoming Git histories, resolve authorized conflicts, run isolated fixtures, reconcile source-derived authority evidence and perform approved exact-source release steps"
+        ],
+        "checkedBeforeExecution": true,
+        "operatorOnly": [
+          "Normal external provider MFA or account-owner consent only if actually required; Google/email owner-presence work remains deferred"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "category": "customer_defect_or_regression",
+          "summary": "An actual built-browser negative reproduced failed questionnaire restore followed by an unintended blank autosave. The corrected flow pauses writes, verifies identity and ordered save readback, and retains a recovery path.",
+          "disposition": "captured_immediately"
+        },
+        {
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "summary": "Company31 full commercial/internal Procore approval, current membership/revocation and company38 isolation are verified locally with actual authenticated routes and real append-only policy records; live provider and deployment proof remain open. MCP wire descriptor/error fields and P179/P180 runtime activation were corrected without weakening assertions.",
+          "disposition": "captured_immediately"
+        },
+        {
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "summary": "Normal merge preserves accepted P176-P180 and incoming Procore history with no Native changes. Stale authority hashes require truthful final reconciliation. Additive startup schemas need actual applied verification; historical unpublished total is unknown, and published source identity plus three authenticated rounds remain pending. The pre-push DB guard rejected undeclared tables and an unapproved cascade; exact additive Drizzle declarations and NO ACTION retention now pass actual local correspondence/history checks, with production preview/application still pending.",
+          "disposition": "captured_immediately"
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record accepted integration5df676cc1, verified local gates, clean ownership and exact pending push/production/schema/live acceptance steps without claiming deployment."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Record accepted integration5df676cc1, verified local gates, clean ownership and exact pending push/production/schema/live acceptance steps without claiming deployment."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accepted authority at integration5df676cc1 remains unchanged in this metadata-only seal; previously captured product, schema, retention, protocol and verification findings remain in the prior review."
+        }
+      ],
+      "reason": "Seal only status/handoff metadata after the accepted aggregate merge5df676cc1; all product/schema corrections and immediate findings are preserved in the preceding candidate review, with publication/live gates still open.",
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "91501daa681068b419df5420f4f0ad1db0baeb65b8cd1f508d0d76e424b8784c"
     }
   ]
 }
