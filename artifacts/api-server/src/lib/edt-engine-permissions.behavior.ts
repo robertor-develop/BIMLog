@@ -6,7 +6,10 @@ import {
   normalizeEdtEnginePermissions,
 } from "./edt-engine-permissions";
 
-assert.equal(EDT_ENGINE_PERMISSIONS.length, 15, "approved permission vocabulary must remain complete");
+assert.equal(EDT_ENGINE_PERMISSIONS.length, 24, "current activation, governance and operational permission vocabulary must remain complete");
+assert.equal(isEdtEnginePermission("JOB_ACTIVATION_REQUEST"), true);
+assert.equal(isEdtEnginePermission("JOB_ACTIVATION_APPROVE"), true);
+assert.equal(isEdtEnginePermission("GOVERNED_CHANGE_APPROVE"), true);
 assert.equal(new Set(EDT_ENGINE_PERMISSIONS).size, EDT_ENGINE_PERMISSIONS.length);
 assert.equal(isEdtEnginePermission("QC_APPROVE"), true);
 assert.equal(isEdtEnginePermission("SUPER_ADMIN"), false, "role labels are not engine permissions");

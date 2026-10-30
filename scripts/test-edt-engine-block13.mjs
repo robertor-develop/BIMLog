@@ -11,7 +11,8 @@ const route = readFileSync("artifacts/api-server/src/routes/edt-engine.ts", "utf
 const operations = readFileSync("artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx", "utf8");
 assert.match(route, /edt-engine\/intakes\/:intakeId\/activation-candidate/);
 assert.match(route, /previewEdtActivationCandidate\(\{ companyId: actor\.actorCompanyId, projectId, intakeId \}\)/);
-assert.match(route, /ACTIVATION_PLAN_NOT_SERVER_RESOLVED/);
+assert.match(route, /requestResolvedEdtActivation\(/);
+assert.match(route, /approveResolvedEdtActivation\(/);
 assert.match(route, /ECONOMIC_PLAN_NOT_SERVER_RESOLVED/);
 assert.match(route, /TIME_AMOUNT_NOT_SERVER_RESOLVED/);
 assert.match(operations, /edt-engine\/intakes\/\$\{encodeURIComponent\(String\(data\.identity\.intakeId\)\)\}\/activation-candidate/);

@@ -78,6 +78,7 @@ const ProcoreConnectionStatus = namedPage(() => import("@/pages/ProcoreConnectio
 const CoordinationOperations = namedPage(() => import("@/pages/CoordinationOperations"), "CoordinationOperations");
 const MeetingLinkActions = namedPage(() => import("@/pages/MeetingLinkActions"), "MeetingLinkActions");
 const ProjectDocumentSearch = namedPage(() => import("@/pages/ProjectDocumentSearch"), "ProjectDocumentSearch");
+const EdtActivation = namedPage(() => import("@/pages/EdtActivation"), "EdtActivation");
 const PluginSyncReview = namedPage(() => import("@/pages/PluginSyncReview"), "PluginSyncReview");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
@@ -480,6 +481,9 @@ function Router() {
       </Route>
       <Route path="/project-document-search">
         {() => <ProtectedRoute component={ProjectDocumentSearch} />}
+      </Route>
+      <Route path="/edt-activation">
+        {() => <ProtectedRoute component={EdtActivation} />}
       </Route>
       <Route path="/plugin-sync-review">
         {() => <ProtectedRoute component={PluginSyncReview} />}

@@ -9,6 +9,7 @@ import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-en
 import { decideWorkItemQc, previewResultImport, submitWorkItemIssuance } from "../lib/edt-engine-qc-import-service";
 import { previewActivatedEdtPlan } from "../lib/edt-engine-plan-projection";
 import { previewEdtActivationCandidate } from "../lib/edt-engine-activation-candidate";
+import { requestResolvedEdtActivation, approveResolvedEdtActivation } from "../lib/edt-engine-resolved-activation";
 import { changeEdtOperationsDirectorGrant, listEdtOperationsDirectorAssignments } from "../lib/edt-engine-operations-director";
 
 const router: IRouter = Router();
@@ -88,23 +89,40 @@ router.get("/projects/:projectId/edt-engine/intakes/:intakeId/activation-candida
     const intakeId = String(req.params.intakeId ?? "").trim();
     if (!intakeId) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "An Intake ID is required.");
     const candidate = await previewEdtActivationCandidate({ companyId: actor.actorCompanyId, projectId, intakeId });
-    res.json({ projectId, ...candidate });
+    const requests = (await pool.query(`SELECT r.id,r.request_fingerprint AS fingerprint,r.state,
+      r.requested_by_id AS "requestedById",r.reason,r.created_at AS "createdAt",
+      d.id AS "decisionId",d.decided_by_id AS "decidedById",d.reason AS "decisionReason"
+      FROM job_activation_requests r LEFT JOIN job_activation_decisions d ON d.request_id=r.id
+        AND d.company_id=r.company_id AND d.project_id=r.project_id
+      WHERE r.company_id=$1 AND r.project_id=$2 AND r.intake_id=$3 ORDER BY r.created_at,r.id`,
+      [actor.actorCompanyId,projectId,intakeId])).rows;
+    res.set("Cache-Control","private, no-store").json({ projectId, ...candidate, requests,
+      actorUserId:actor.actorUserId,canRequest:actor.grants.includes("JOB_ACTIVATION_REQUEST"),
+      canApprove:actor.grants.includes("JOB_ACTIVATION_APPROVE") });
   } catch (error) { sendEdtRouteError(res, error); }
 });
 
 router.post("/projects/:projectId/edt-engine/activation-requests", authMiddleware, async (req, res): Promise<void> => {
   try {
     const projectId = edtProjectId(req);
-    await resolveEdtRouteActor(req, projectId);
-    throw new EdtEngineConflict("ACTIVATION_PLAN_NOT_SERVER_RESOLVED", "Governed EDT activation cannot start until versions and the EDT plan are resolved from saved server records. Use the existing Intake activation for now.");
+    const actor = await resolveEdtRouteActor(req, projectId);
+    const body = bodyRecord(req.body);
+    const result = await requestResolvedEdtActivation({actor,companyId:actor.actorCompanyId,projectId,
+      intakeId:requiredText(body,"intakeId"),expectedFingerprint:requiredText(body,"expectedFingerprint"),
+      reason:requiredText(body,"reason"),idempotencyKey:requiredText(body,"idempotencyKey")});
+    res.set("Cache-Control","private, no-store").status(result.idempotent?200:201).json({projectId,...result});
   } catch (error) { sendEdtRouteError(res,error); }
 });
 
 router.post("/projects/:projectId/edt-engine/activation-requests/:requestId/approve", authMiddleware, async (req, res): Promise<void> => {
   try {
     const projectId = edtProjectId(req);
-    await resolveEdtRouteActor(req, projectId);
-    throw new EdtEngineConflict("ACTIVATION_PLAN_NOT_SERVER_RESOLVED", "Governed EDT activation cannot approve a client-supplied plan. Complete the existing Intake activation while server-side plan resolution is integrated.");
+    const actor = await resolveEdtRouteActor(req, projectId);
+    const body = bodyRecord(req.body);
+    const result = await approveResolvedEdtActivation({actor,companyId:actor.actorCompanyId,projectId,
+      requestId:String(req.params.requestId),expectedFingerprint:requiredText(body,"expectedFingerprint"),
+      reason:requiredText(body,"reason")});
+    res.set("Cache-Control","private, no-store").json({projectId,requestId:String(req.params.requestId),...result});
   } catch (error) { sendEdtRouteError(res,error); }
 });
 
