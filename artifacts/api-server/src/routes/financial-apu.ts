@@ -51,7 +51,8 @@ router.post("/projects/:projectId/financial/apu/library-applications", run(async
   res.status(201).json({ data: await applyLibraryApu(req.user.userId,projectId(req.params.projectId),req.body) });
 }));
 router.get("/projects/:projectId/financial/apu/library-applications", run(async (req, res) => {
-  res.json({ data: await getProjectLibraryApplications(req.user.userId,projectId(req.params.projectId)) });
+  const receiptIds=req.query.receiptIds===undefined?[]:String(req.query.receiptIds).split(",");
+  res.set("Cache-Control","private, no-store").json({ data: await getProjectLibraryApplications(req.user.userId,projectId(req.params.projectId),{budgetControl:req.query.budgetControl==="1",receiptIds,projectApuVersionId:req.query.projectApuVersionId===undefined?undefined:String(req.query.projectApuVersionId)}) });
 }));
 router.get("/projects/:projectId/financial/apu/performance", run(async (req, res) => {
   res.json(await getCostValuePerformance(req.user.userId, projectId(req.params.projectId)));
