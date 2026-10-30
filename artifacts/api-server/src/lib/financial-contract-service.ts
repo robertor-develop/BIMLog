@@ -434,8 +434,9 @@ export async function getContractRecordAccess(input: { actorUserId: number; proj
   const auth = await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.contract.manage", operation: "manage" });
   await requireRecordPermission(pool, { contractId, userId: auth.actor.userId, permission: "manage" });
   const members = (await pool.query(`SELECT u.id,u.full_name FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.status='active' AND u.company_id=$2 ORDER BY u.full_name,u.id`, [projectId, root.company_id])).rows;
-  const grants = (await pool.query(`SELECT DISTINCT ON(user_id,permission) user_id,permission,state,version FROM financial_contract_record_grants WHERE contract_id=$1 ORDER BY user_id,permission,version DESC`, [contractId])).rows;
-  return { members: members.map((row: any) => ({ userId: Number(row.id), name: row.full_name })), grants: grants.map((row: any) => ({ userId: Number(row.user_id), permission: row.permission, state: row.state, version: Number(row.version) })) };
+  const history = (await pool.query(`SELECT user_id,permission,state,version,reason,granted_by_id,created_at FROM financial_contract_record_grants WHERE contract_id=$1 ORDER BY user_id,permission,version DESC`, [contractId])).rows.map((row:any)=>({userId:Number(row.user_id),permission:row.permission,state:row.state,version:Number(row.version),reason:row.reason,grantedById:Number(row.granted_by_id),createdAt:iso(row.created_at)}));
+  const seen=new Set<string>(),grants=history.filter(row=>{const key=`${row.userId}:${row.permission}`;if(seen.has(key))return false;seen.add(key);return true;});
+  return {projectId,contractId,actorUserId:auth.actor.userId,members:members.map((row:any)=>({userId:Number(row.id),name:row.full_name})),grants,history};
 }
 
 export async function setContractRecordGrant(input: { actorUserId: number; projectId: unknown; contractId: unknown; userId: unknown; permission: unknown; state: unknown; reason: unknown }) {
@@ -448,12 +449,12 @@ export async function setContractRecordGrant(input: { actorUserId: number; proje
     const member = (await client.query(`SELECT 1 FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.user_id=$2 AND pm.status='active' AND u.company_id=$3`, [projectId, userId, root.company_id])).rows[0];
     if (!member) throw new FinancialControlError(400, "CONTRACT_GRANTEE_INVALID", "Record access is limited to current internal project members.");
     await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, [`contract-grant:${contractId}:${userId}:${permission}`]);
-    const prior = (await client.query(`SELECT version,state FROM financial_contract_record_grants WHERE contract_id=$1 AND user_id=$2 AND permission=$3 ORDER BY version DESC LIMIT 1`, [contractId, userId, permission])).rows[0];
-    if (prior?.state === state) return { contractId, userId, permission, state, version: Number(prior.version), idempotent: true };
+    const prior = (await client.query(`SELECT version,state,reason,granted_by_id FROM financial_contract_record_grants WHERE contract_id=$1 AND user_id=$2 AND permission=$3 ORDER BY version DESC LIMIT 1`, [contractId, userId, permission])).rows[0];
+    if (prior?.state === state) return {projectId,contractId,userId,permission,state,version:Number(prior.version),reason:prior.reason,grantedById:Number(prior.granted_by_id),idempotent:true};
     const version = Number(prior?.version ?? 0) + 1;
     await client.query(`INSERT INTO financial_contract_record_grants(id,contract_id,user_id,permission,version,state,reason,granted_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [uuid(), contractId, userId, permission, version, state, reason, auth.actor.userId]);
-    await history(client, { companyId: Number(root.company_id), projectId, contractId, actorUserId: auth.actor.userId, eventType: `contract_record_access_${state}`, code: "CONTRACT_RECORD_GRANT_VERSIONED", evidence: { userId, permission, state, version } });
-    return { contractId, userId, permission, state, version, idempotent: false };
+    await history(client, { companyId: Number(root.company_id), projectId, contractId, actorUserId: auth.actor.userId, eventType: `contract_record_access_${state}`, code: "CONTRACT_RECORD_GRANT_VERSIONED", evidence: { userId, permission, state, version,reason } });
+    return {projectId,contractId,userId,permission,state,version,reason,grantedById:auth.actor.userId,idempotent:false};
   });
 }
 

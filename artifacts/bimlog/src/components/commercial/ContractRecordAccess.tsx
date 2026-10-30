@@ -1,43 +1,43 @@
-import { useState } from "react";
-
-type Access = { members: { userId: number; name: string }[]; grants: { userId: number; permission: string; state: string; version: number }[] };
-type Props = { projectId: number; contractId: string; api: (path: string, options?: RequestInit) => Promise<any>; tt: (en: string, es: string) => string };
-
-/** Record access complements, but never grants, company financial authority. */
-export function ContractRecordAccess({ projectId, contractId, api, tt }: Props) {
-  const [data, setData] = useState<Access | null>(null);
-  const [busy, setBusy] = useState(false), [error, setError] = useState(""), [notice, setNotice] = useState("");
-  const [userId, setUserId] = useState(""), [permission, setPermission] = useState("view"), [state, setState] = useState("active"), [reason, setReason] = useState("");
-  const path = `/projects/${projectId}/financial/contracts/${contractId}/grants`;
-  const permissions = [["view", tt("View", "Ver")], ["review", tt("Review", "Revisar")], ["approve", tt("Approve", "Aprobar")], ["execute", tt("Execution attestation", "Atestación de ejecución")], ["manage", tt("Manage record access", "Administrar acceso al registro")]];
-  const load = async () => {
-    setBusy(true); setError(""); setNotice("");
-    try { setData(await api(path)); } catch (e) { setData(null); setError(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); }
-  };
-  const save = async () => {
-    setBusy(true); setError(""); setNotice("");
-    try {
-      await api(path, { method: "POST", body: JSON.stringify({ userId: Number(userId), permission, state, reason: reason.trim() }) });
-      setNotice(tt("Permission saved. Company financial authority and independent approval rules still apply.", "Permiso guardado. Siguen vigentes la autoridad financiera de empresa y la aprobación independiente."));
-      setReason("");
-      // A manager may revoke their own management access; do not report a successful mutation as failed.
-      try { setData(await api(path)); } catch { setData(null); }
-    } catch (e) { setError(e instanceof Error ? e.message : String(e)); } finally { setBusy(false); }
-  };
-  return <section className="fc-amendment-form" aria-label={tt("Contract record access", "Acceso al registro contractual")}>
-    <h4>{tt("Contract record access", "Acceso al registro contractual")}</h4>
-    <p>{tt("The record manager grants View first, then the required Review or Approve permission to an existing project member. This does not grant company financial authority or allow self-approval.", "El administrador del registro concede primero Ver y después Revisar o Aprobar a un miembro existente del proyecto. Esto no concede autoridad financiera de empresa ni permite autoaprobación.")}</p>
-    <button disabled={busy} onClick={() => void load()}>{tt("Manage contract access", "Administrar acceso al contrato")}</button>
-    {error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
-    {data && <>
-      <div className="fc-form">
-        <label>{tt("Project member", "Miembro del proyecto")}<select value={userId} disabled={busy} onChange={e => setUserId(e.target.value)}><option value="">{tt("Select a member", "Seleccione un miembro")}</option>{data.members.map(member => <option key={member.userId} value={member.userId}>{member.name} (#{member.userId})</option>)}</select></label>
-        <label>{tt("Record permission", "Permiso del registro")}<select value={permission} disabled={busy} onChange={e => setPermission(e.target.value)}>{permissions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
-        <label>{tt("Access change", "Cambio de acceso")}<select value={state} disabled={busy} onChange={e => setState(e.target.value)}><option value="active">{tt("Grant", "Conceder")}</option><option value="revoked">{tt("Revoke", "Revocar")}</option></select></label>
-        <label>{tt("Reason", "Motivo")}<input value={reason} maxLength={1000} disabled={busy} onChange={e => setReason(e.target.value)}/></label>
-      </div>
-      <button disabled={busy || !userId || reason.trim().length < 3} onClick={() => void save()}>{tt("Save record permission", "Guardar permiso del registro")}</button>
-      <ul>{data.grants.map(grant => <li key={`${grant.userId}-${grant.permission}`}>{data.members.find(member => member.userId === grant.userId)?.name ?? `#${grant.userId}`} · {permissions.find(([value]) => value === grant.permission)?.[1] ?? grant.permission} · {grant.state === "active" ? tt("Active", "Activo") : tt("Revoked", "Revocado")} · v{grant.version}</li>)}</ul>
-    </>}
-  </section>;
+import {useEffect,useRef,useState} from "react";
+type Grant={userId:number;permission:string;state:string;version:number;reason:string;grantedById:number;createdAt?:string};
+type Access={projectId:number;contractId:string;actorUserId:number;members:{userId:number;name:string}[];grants:Grant[];history:Grant[]};
+type Receipt=Grant&{projectId:number;contractId:string;selfRevoke:boolean};
+type Props={projectId:number;contractId:string;api:(path:string,options?:RequestInit)=>Promise<any>;tt:(en:string,es:string)=>string};
+/** Record permissions remain separate from current company financial authority. */
+export function ContractRecordAccess({projectId,contractId,api,tt}:Props){
+ const [data,setData]=useState<Access|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState(""),[userId,setUserId]=useState(""),[permission,setPermission]=useState("view"),[state,setState]=useState("active"),[reason,setReason]=useState(""),[confirmed,setConfirmed]=useState(false),[lastReceipt,setLastReceipt]=useState<Receipt|null>(null);
+ const apiRef=useRef(api);apiRef.current=api;const lock=useRef(false),controller=useRef<AbortController|null>(null),epoch=useRef(0),receipt=useRef<Receipt|null>(null);const path=`/projects/${projectId}/financial/contracts/${contractId}/grants`;
+ useEffect(()=>{epoch.current++;controller.current?.abort();lock.current=false;setBusy(false);setData(null);setConfirmed(false);setLastReceipt(null);receipt.current=null;return()=>{epoch.current++;controller.current?.abort();};},[projectId,contractId]);
+ const permissions=[["view",tt("View","Ver")],["prepare",tt("Prepare contract records","Preparar registros contractuales")],["review",tt("Review","Revisar")],["approve",tt("Approve","Aprobar")],["execute",tt("Execution attestation","Atestación de ejecución")],["manage",tt("Manage record access","Administrar acceso al registro")]];
+ const exact=(row:Grant,expected:Receipt)=>row.userId===expected.userId&&row.permission===expected.permission&&row.state===expected.state&&row.version===expected.version&&row.reason===expected.reason&&row.grantedById===expected.grantedById;
+ const read=async(current:number)=>{
+   const expected=receipt.current;
+   if(expected?.selfRevoke){
+     // Revocation intentionally removes the authority required by GET /grants.
+     // Read public-to-this-record history only when the actor still has View.
+     let verified=false;try{const response=await apiRef.current(`/projects/${projectId}/financial/contracts/${contractId}`,{signal:controller.current!.signal});verified=response.projectId===projectId&&response.detail?.id===contractId&&response.detail.history?.some((event:any)=>event.eventType==="contract_record_access_revoked"&&event.evidence?.userId===expected.userId&&event.evidence?.permission===expected.permission&&event.evidence?.version===expected.version&&event.evidence?.reason===expected.reason);}catch{/* The retained POST receipt remains truthful when View is also absent. */}
+     if(current!==epoch.current)return;setLastReceipt(expected);receipt.current=null;setData(null);setConfirmed(false);setNotice(verified?tt("Your management revocation was reopened in immutable record history. Another current manager must administer future access.","Su revocación administrativa se reabrió en el historial inmutable. Otro administrador vigente debe gestionar el acceso futuro."):tt("The server returned this saved revocation receipt. Your management access is removed; another current record manager must reopen its grant history. This session has not verified that read.","El servidor devolvió este recibo de revocación guardada. Se retiró su administración; otro administrador vigente debe reabrir el historial de permisos. Esta sesión no verificó esa lectura."));return;
+   }
+   const result=await apiRef.current(path,{signal:controller.current!.signal}) as Access;if(current!==epoch.current)return;
+   if(result.projectId!==projectId||result.contractId!==contractId||!Array.isArray(result.members)||!Array.isArray(result.grants)||!Array.isArray(result.history))throw new Error(tt("The record-access evidence is incomplete or belongs to another project or contract.","La evidencia de acceso está incompleta o pertenece a otro proyecto o contrato."));
+   if(expected){if(!result.grants.some(row=>exact(row,expected))||!result.history.some(row=>exact(row,expected)))throw new Error(tt("The exact saved permission version and history have not been reopened. Retry this read without another grant.","No se reabrieron la versión exacta del permiso y su historial. Reintente esta lectura sin otra concesión."));setLastReceipt(expected);receipt.current=null;setReason("");setConfirmed(false);setNotice(tt("The exact saved permission, reason and versioned history were reopened. Company financial authority and independent approval still apply.","Se reabrieron permiso, motivo e historial versionado exactos. Siguen vigentes la autoridad financiera y aprobación independiente."));}
+   setData(result);
+ };
+ const run=async(work:(current:number)=>Promise<void>)=>{if(lock.current)return;lock.current=true;setBusy(true);setError("");setNotice("");controller.current=new AbortController();const current=++epoch.current;try{await work(current);}catch(cause){if(current===epoch.current){setData(null);setError(cause instanceof Error?cause.message:String(cause));}}finally{if(current===epoch.current){lock.current=false;setBusy(false);}}};
+ const load=()=>run(async current=>{setData(null);setConfirmed(false);await read(current);});
+ const save=()=>run(async current=>{
+   if(receipt.current){await read(current);return;}
+   if(!data||!data.members.some(member=>member.userId===Number(userId))||!confirmed||reason.trim().length<3)throw new Error(tt("Select a current member, provide a reason and confirm the exact permission change.","Seleccione un miembro vigente, indique un motivo y confirme el cambio exacto."));
+   const actor=data.actorUserId,saved=await apiRef.current(path,{method:"POST",signal:controller.current!.signal,body:JSON.stringify({userId:Number(userId),permission,state,reason:reason.trim()})});if(current!==epoch.current)return;
+   if(saved.projectId!==projectId||saved.contractId!==contractId||saved.userId!==Number(userId)||saved.permission!==permission||saved.state!==state||!Number.isSafeInteger(saved.version)||saved.version<1||typeof saved.reason!=="string"||!Number.isSafeInteger(saved.grantedById))throw new Error(tt("The permission receipt is incomplete. Reopen saved evidence before retrying.","El recibo está incompleto. Reabra la evidencia guardada antes de reintentar."));
+   receipt.current={...saved,selfRevoke:saved.userId===actor&&saved.permission==="manage"&&saved.state==="revoked"};setData(null);setConfirmed(false);await read(current);
+ });
+ return <section className="fc-amendment-form fc-record-access" aria-label={tt("Contract record access","Acceso al registro contractual")}><style>{`.fc-record-access{min-width:0;overflow-wrap:anywhere}.fc-record-access label{min-width:0}.fc-record-access select,.fc-record-access input:not([type=checkbox]){width:100%;min-width:0;max-width:100%;box-sizing:border-box}.fc-record-access button{max-width:100%;white-space:normal}`}</style>
+ <h4>{tt("Contract record access","Acceso al registro contractual")}</h4><p>{tt("Choose an existing active project member and the exact record permission. View, Prepare, Review, Approve, Execution and Manage remain distinct. This does not grant company financial authority or allow self-approval. Revoking your own management access requires another manager for future changes.","Elija un miembro activo y el permiso exacto. Ver, Preparar, Revisar, Aprobar, Ejecutar y Administrar son distintos. Esto no concede autoridad financiera ni permite autoaprobación. Revocar su administración requiere otro administrador para cambios futuros.")}</p>
+ <button disabled={busy} onClick={()=>void load()}>{tt("Manage contract access","Administrar acceso al contrato")}</button>{busy&&<p role="status">{tt("Verifying record-access evidence…","Verificando evidencia de acceso…")}</p>}{error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}{lastReceipt&&<p>{tt("Saved receipt","Recibo guardado")}: #{lastReceipt.userId} · {lastReceipt.permission} · {lastReceipt.state} · v{lastReceipt.version} · {lastReceipt.reason} · #{lastReceipt.grantedById}</p>}
+ {data&&<><div className="fc-form"><label>{tt("Project member","Miembro del proyecto")}<select value={userId} disabled={busy} onChange={event=>{setUserId(event.target.value);setConfirmed(false);}}><option value="">{tt("Select a member","Seleccione un miembro")}</option>{data.members.map(member=><option key={member.userId} value={member.userId}>{member.name} (#{member.userId})</option>)}</select></label><label>{tt("Record permission","Permiso del registro")}<select value={permission} disabled={busy} onChange={event=>{setPermission(event.target.value);setConfirmed(false);}}>{permissions.map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label><label>{tt("Access change","Cambio de acceso")}<select value={state} disabled={busy} onChange={event=>{setState(event.target.value);setConfirmed(false);}}><option value="active">{tt("Grant","Conceder")}</option><option value="revoked">{tt("Revoke","Revocar")}</option></select></label><label>{tt("Reason","Motivo")}<input value={reason} maxLength={1000} disabled={busy} onChange={event=>{setReason(event.target.value);setConfirmed(false);}}/></label></div>
+ <label><input type="checkbox" disabled={busy} checked={confirmed} onChange={event=>setConfirmed(event.target.checked)}/>{tt("I confirm this exact member, permission and grant or revocation.","Confirmo este miembro, permiso y concesión o revocación exactos.")}</label><button disabled={busy||!userId||!confirmed||reason.trim().length<3} onClick={()=>void save()}>{tt("Save record permission","Guardar permiso del registro")}</button>
+ <h4>{tt("Current record permissions","Permisos vigentes del registro")}</h4>{data.grants.length===0&&<p>{tt("No record grants are saved.","No hay permisos guardados.")}</p>}<ul>{data.grants.map(grant=><li key={`${grant.userId}-${grant.permission}`}>{data.members.find(member=>member.userId===grant.userId)?.name??`#${grant.userId}`} · {permissions.find(([value])=>value===grant.permission)?.[1]??grant.permission} · {grant.state} · v{grant.version} · {grant.reason}</li>)}</ul>
+ <details><summary>{tt("Versioned grant and revocation history","Historial versionado de concesiones y revocaciones")}</summary>{data.history.map(grant=><p key={`${grant.userId}-${grant.permission}-${grant.version}`}>#{grant.userId} · {grant.permission} · {grant.state} · v{grant.version} · {grant.reason} · #{grant.grantedById} · {grant.createdAt}</p>)}</details></>}
+ </section>;
 }
