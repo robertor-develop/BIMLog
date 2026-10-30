@@ -59,9 +59,12 @@ router.get("/me/provider-catalog", authMiddleware, (_req, res) => {
 });
 
 router.get("/projects/:projectId/connections/procore/status",authMiddleware,requireProjectMember(),async(req,res)=>{
+  res.set("Cache-Control","private, no-store, max-age=0");
+  try {
   const [connection]=await db.select().from(userConnectionsTable).where(and(eq(userConnectionsTable.userId,req.user!.userId),eq(userConnectionsTable.provider,"procore"))).limit(1);
   const catalog=customerProviderCatalog(req.user!.companyId,providerConfigured).find(item=>item.key==="procore");
-  res.set("Cache-Control","private, no-store, max-age=0").json({provider:"procore",configured:providerConfigured("procore"),approved:isProviderOperationAllowed("procore",req.user!.companyId,"catalog"),connection:connection?toSafe(connection):null,availability:catalog?.availability??"review_required",credentialsExposed:false});
+  res.set("X-BIMLog-Project-Id",String(Number(req.params.projectId))).json({provider:"procore",configured:providerConfigured("procore"),approved:isProviderOperationAllowed("procore",req.user!.companyId,"catalog"),connection:connection?toSafe(connection):null,availability:catalog?.availability??"review_required",credentialsExposed:false});
+  } catch {res.status(503).json({code:"PROCORE_STATUS_UNAVAILABLE",retryable:true,credentialsExposed:false});}
 });
 
 router.post("/projects/:projectId/connections/procore/discovery/preview",authMiddleware,requireProjectMember(),async(req,res)=>{
