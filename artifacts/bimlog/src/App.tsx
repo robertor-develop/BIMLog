@@ -58,6 +58,7 @@ const PendingWork = namedPage(() => import("@/pages/PendingWork"), "PendingWork"
 const MacSyncAvailability = namedPage(() => import("@/pages/MacSyncAvailability"), "MacSyncAvailability");
 const FeatureAccessInspector = namedPage(() => import("@/pages/FeatureAccessInspector"), "FeatureAccessInspector");
 const FeatureCatalog = namedPage(() => import("@/pages/FeatureCatalog"), "FeatureCatalog");
+const FeaturePolicyWorkspace = namedPage(() => import("@/pages/FeaturePolicyWorkspace"), "FeaturePolicyWorkspace");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
 const FixSpecificLink = namedPage(() => import("@/pages/parity/admin-fix-specific-link"), "FixSpecificLink");
@@ -399,6 +400,9 @@ function Router() {
       </Route>
       <Route path="/feature-catalog">
         {() => <ProtectedRoute component={FeatureCatalog} />}
+      </Route>
+      <Route path="/feature-policies">
+        {() => <ProtectedRoute component={FeaturePolicyWorkspace} />}
       </Route>
       <Route path="/admin">
         {() => <AccessRoute component={AdminPanel} surface="project_administration" />}
