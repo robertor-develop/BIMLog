@@ -26,12 +26,12 @@ export class PostgresConnectorValidationOperationsStore implements ConnectorVali
            CASE a.action WHEN 'coordination_credential_activated' THEN 'activated' ELSE 'rejected' END AS decision,
            a.details->>'evidenceCode' AS "evidenceCode",a.admin_user_id AS "actorUserId",a.created_at AS "occurredAt"
          FROM admin_actions_log a
-         JOIN connector_credentials c ON c.id=a.target_id AND c.company_id=$2 AND c.provider='sharepoint'
+         JOIN connector_credentials c ON c.id=a.target_id AND c.company_id=$1 AND c.provider='sharepoint'
          WHERE a.target_type='connector_credential'
            AND a.action IN ('coordination_credential_activated','coordination_credential_validation_rejected')
-           AND a.details->>'projectId'=$3::text
-         ORDER BY a.created_at DESC,a.id DESC LIMIT $4`,
-        [input.scope.actorUserId, input.scope.companyId, input.scope.projectId, input.limit],
+           AND a.details->>'projectId'=$2::text
+         ORDER BY a.created_at DESC,a.id DESC LIMIT $3`,
+        [input.scope.companyId, input.scope.projectId, input.limit],
       );
       const operations = result.rows.map((row) => connectorValidationOperationSchema.parse({
         credentialId: row.credentialId,

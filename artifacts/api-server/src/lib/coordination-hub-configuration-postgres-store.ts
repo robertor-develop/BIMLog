@@ -52,7 +52,7 @@ class PostgresConfigurationTransaction implements CoordinationHubConfigurationTr
          SELECT u.id,u.email,
            CASE WHEN $6::boolean THEN 'coordination_credential_activated' ELSE 'coordination_credential_validation_rejected' END,
            'connector_credential',$1,
-           jsonb_build_object('provider',$3,'projectId',$7,'keyVersion',$5,'evidenceCode',$8)
+           jsonb_build_object('provider',$3::text,'projectId',$7::integer,'keyVersion',$5::integer,'evidenceCode',$8::text)
          FROM users u,current_credential c WHERE u.id=$9 AND u.company_id=$2
          RETURNING target_id
        )
@@ -84,7 +84,7 @@ class PostgresConfigurationTransaction implements CoordinationHubConfigurationTr
        ), audited AS (
          INSERT INTO admin_actions_log(admin_user_id,admin_email,action,target_type,target_id,details)
          SELECT u.id,u.email,'coordination_credential_rotated_pending_validation','connector_credential',$1,
-           jsonb_build_object('provider',$3,'projectId',$13,'previousKeyVersion',$5,'keyVersion',$12,'state','pending_validation')
+           jsonb_build_object('provider',$3::text,'projectId',$13::integer,'previousKeyVersion',$5::integer,'keyVersion',$12::integer,'state','pending_validation')
          FROM users u,rotated r WHERE u.id=$14 AND u.company_id=$2
          RETURNING target_id
        )

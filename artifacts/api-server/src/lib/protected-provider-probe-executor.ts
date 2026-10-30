@@ -32,12 +32,12 @@ export type ProtectedFetchTransport = (url: string, init: {
   headers: { accept: "application/json"; authorization: string };
 }) => Promise<BoundedResponse>;
 
-function assertFixedRequest(input: Parameters<ProtectedProviderProbeExecutor["execute"]>[0]): void {
+function assertFixedRequest(input: Parameters<ProtectedProviderProbeExecutor["execute"]>[0],allowedUrls:ReadonlySet<string>): void {
   if (!input.credentialId.trim() || !Number.isSafeInteger(input.companyId) || input.companyId <= 0 || input.provider !== "sharepoint") {
     throw new ConnectorValidationUnavailableError("Protected provider scope is invalid");
   }
   const request = input.request;
-  if (request.method !== "GET" || request.url !== GRAPH_PROBE_URL || request.redirect !== "error" || request.timeoutMs !== 10_000 || request.maxResponseBytes !== 4_096 || request.accept !== "application/json") {
+  if (request.method !== "GET" || !allowedUrls.has(request.url) || request.redirect !== "error" || request.timeoutMs !== 10_000 || request.maxResponseBytes !== 4_096 || request.accept !== "application/json") {
     throw new ConnectorValidationUnavailableError("Protected SharePoint request is outside the governed contract");
   }
 }
@@ -50,10 +50,11 @@ export class FixedGraphProtectedProviderProbeExecutor implements ProtectedProvid
   constructor(
     private readonly resolver: ProtectedBearerLeaseResolver,
     private readonly transport: ProtectedFetchTransport = runtimeFetch,
+    private readonly allowedUrls:ReadonlySet<string> = new Set([GRAPH_PROBE_URL]),
   ) {}
 
   async execute(input: Parameters<ProtectedProviderProbeExecutor["execute"]>[0]): Promise<{ status: number; providerRequestId?: string }> {
-    assertFixedRequest(input);
+    assertFixedRequest(input,this.allowedUrls);
     return this.resolver.withBearerToken({ credentialId: input.credentialId, companyId: input.companyId, provider: input.provider }, async (token) => {
       if (!(token instanceof Uint8Array) || token.byteLength < 16 || token.byteLength > 8_192) {
         if (token instanceof Uint8Array) token.fill(0);
@@ -97,5 +98,7 @@ export class FixedGraphProtectedProviderProbeExecutor implements ProtectedProvid
 }
 
 export function createRuntimeProtectedProviderProbeExecutor(): ProtectedProviderProbeExecutor {
-  return new FixedGraphProtectedProviderProbeExecutor(createRuntimeConnectorCredentialLeaseResolver());
+  const allowedUrls=new Set<string>();
+  try{const sites:unknown=JSON.parse(process.env.BIMLOG_SHAREPOINT_SELECTED_SITES??"{}");if(sites&&typeof sites==="object"&&!Array.isArray(sites))for(const site of Object.values(sites)){if(typeof site==="string"&&site.trim().length>0&&site.trim().length<=1024&&!/[\x00-\x1f]/.test(site))allowedUrls.add(`https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(site.trim())}?$select=id`);}}catch{/* Invalid configuration admits no provider request. */}
+  return new FixedGraphProtectedProviderProbeExecutor(createRuntimeConnectorCredentialLeaseResolver(),runtimeFetch,allowedUrls);
 }

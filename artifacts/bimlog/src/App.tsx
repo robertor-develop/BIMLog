@@ -75,6 +75,7 @@ const LensSyncReview = namedPage(() => import("@/pages/LensSyncReview"), "LensSy
 const PluginPullReview = namedPage(() => import("@/pages/PluginPullReview"), "PluginPullReview");
 const FindOriginalClash = namedPage(() => import("@/pages/FindOriginalClash"), "FindOriginalClash");
 const ProcoreConnectionStatus = namedPage(() => import("@/pages/ProcoreConnectionStatus"), "ProcoreConnectionStatus");
+const CoordinationOperations = namedPage(() => import("@/pages/CoordinationOperations"), "CoordinationOperations");
 const PluginSyncReview = namedPage(() => import("@/pages/PluginSyncReview"), "PluginSyncReview");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const ProjectCompanyBindings = namedPage(() => import("@/pages/parity/admin-project-company-bindings"), "ProjectCompanyBindings");
@@ -468,6 +469,9 @@ function Router() {
       </Route>
       <Route path="/procore-connection-status">
         {() => <ProtectedRoute component={ProcoreConnectionStatus} />}
+      </Route>
+      <Route path="/coordination-operations">
+        {() => <ProtectedRoute component={CoordinationOperations} />}
       </Route>
       <Route path="/plugin-sync-review">
         {() => <ProtectedRoute component={PluginSyncReview} />}
