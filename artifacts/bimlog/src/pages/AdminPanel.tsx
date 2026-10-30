@@ -1596,6 +1596,18 @@ function FeedbackTab({ token }: { token: string }) {
     finally { setPendingAction(null); }
   }
 
+  async function downloadCaseRegister() {
+    const reason=window.prompt(t("Reason for exporting the latest 5,000 feedback cases across the platform (required)","Motivo para exportar los últimos 5.000 casos de comentarios de la plataforma (obligatorio)"));if(!reason?.trim()||pendingAction)return;
+    setError("");setSuccess("");setPendingAction("case-register");
+    try {
+      const response=await fetch(`${API_BASE}/api/v1/feedback/admin/export.csv`,{headers:{Authorization:`Bearer ${token}`,"X-Export-Reason":reason.trim()}});
+      if(!response.ok){const body=await response.json().catch(()=>({}));throw new Error(body.error||t("Case-register export failed","Falló la exportación del registro de casos"));}
+      if(!response.headers.get("Content-Type")?.includes("text/csv"))throw new Error(t("The server did not return a CSV register","El servidor no devolvió un registro CSV"));
+      const blob=await response.blob(),url=URL.createObjectURL(blob),anchor=document.createElement("a");anchor.href=url;anchor.download="bimlog-feedback-case-register.csv";document.body.append(anchor);anchor.click();anchor.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+      setSuccess(t("Case register downloaded. It contains the latest 5,000 platform cases and is not limited by the queue status filter. The export reason was recorded.","Registro de casos descargado. Contiene los últimos 5.000 casos de la plataforma y no está limitado por el filtro de estado. Se registró el motivo de exportación."));
+    } catch(caught){setError(caught instanceof Error?caught.message:t("Case-register export failed","Falló la exportación del registro de casos"));} finally{setPendingAction(null);}
+  }
+
   const visibleItems = statusFilter === "all" ? items : items.filter((item) => String(item.status || "open") === statusFilter);
   const openCount = items.filter((item) => String(item.status || "new") === "new").length;
   const reviewCount = items.filter((item) => ["triaged", "accepted"].includes(String(item.status || "new"))).length;
@@ -1625,6 +1637,7 @@ function FeedbackTab({ token }: { token: string }) {
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} title={t("Exports the governed follow-up register for all feedback", "Exporta el registro gobernado de seguimiento")} onClick={() => void downloadFollowUpRegister("xlsx")}>{pendingAction === "register:xlsx" ? t("Preparing Excel…", "Preparando Excel…") : t("Download master Excel follow-up", "Descargar seguimiento maestro en Excel")}</Button><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => void downloadFollowUpRegister("csv")}>{pendingAction === "register:csv" ? t("Preparing CSV…", "Preparando CSV…") : t("Download CSV", "Descargar CSV")}</Button><Button variant="outline" size="sm" disabled={loading || operationsLoading} onClick={() => { loadFeedback(true); void loadOperations(); }}>{loading || operationsLoading ? t("Refreshing…", "Actualizando…") : t("Refresh queue and operations", "Actualizar cola y operaciones")}</Button></div>
       </div>
 
+      <div style={{ marginBottom: 16 }}><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={()=>void downloadCaseRegister()}>{pendingAction==="case-register"?t("Preparing case register…","Preparando registro de casos…"):t("Export latest 5,000 cases (CSV)","Exportar últimos 5.000 casos (CSV)")}</Button><p style={{fontSize:11}}>{t("Platform-wide case metadata; independent of the queue filter. A reason is required and recorded.","Metadatos de casos de toda la plataforma; independiente del filtro de cola. El motivo es obligatorio y se registra.")}</p></div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
         <StatCard label={t("New", "Nuevos")} value={openCount} />
         <StatCard label={t("Triaged / accepted", "Clasificados / aceptados")} value={reviewCount} />

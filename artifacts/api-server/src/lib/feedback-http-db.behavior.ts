@@ -721,7 +721,11 @@ try {
     },
   });
   assert.equal(csv.status, 200);
+  assert.match(csv.headers.get('Content-Type')??'',/text\/csv/);
   assert.match(await csv.text(), /'=HYPERLINK/);
+  assert.ok((await testPool.query("SELECT count(*)::int n FROM feedback_audit_events WHERE event_type='admin_exported' AND reason='fixture review'")).rows[0].n>0);
+  assert.equal((await fetch(`${base}/feedback/admin/export.csv`,{headers:{Authorization:`Bearer ${tokenAdmin}`}})).status,400);
+  assert.equal((await fetch(`${base}/feedback/admin/export.csv`,{headers:{Authorization:`Bearer ${tokenA}`,'X-Export-Reason':'ordinary user must not export'}})).status,403);
   assert.equal(
     (
       await testPool.query(
