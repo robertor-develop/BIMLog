@@ -9,13 +9,14 @@ const app=express();app.use(express.json());
 const user={id:71,email:'fixture@example.test',fullName:'Fixture Admin',companyId:31,companyName:'Fixture',isSuperAdmin:true};
 const fixtureToken=`e30.${Buffer.from(JSON.stringify({exp:Math.floor(Date.now()/1000)+3600})).toString('base64url')}.synthetic-local-fixture`;
 let users=[{id:72,email:'member@example.test',fullName:'Fixture Member',isSuperAdmin:false,canAccessLivingBrief:false},{id:71,email:user.email,fullName:user.fullName,isSuperAdmin:true,canAccessLivingBrief:false}];
-let failList=false,failSave=false,posts=0;
+let failList=false,failSave=false,posts=0,docsMode='ok';
+const fixtureDoc={key:'fixture',name:'Fixture source',label:{en:'Fixture source',es:'Fuente de prueba'},content:'# Verified fixture content',status:'Current',sourceCommit:'fixture-source',contentSha256:'a'.repeat(64),reconciledThroughCommit:'fixture-source',semanticReviewedThroughCommit:'fixture-source',semanticReviewTask:'fixture-review',semanticReviewResult:'reviewed_no_semantic_change',semanticReviewedAt:'2026-10-29T00:00:00Z',deployedSourceCommit:'fixture-source',sourceChangedAt:'2026-10-29T00:00:00Z',mirrorSyncedAt:null,mirrorContentSha256:null};
 app.get('/seed',(_req,res)=>res.type('html').send(`<script>localStorage.setItem('bimlog-auth',${JSON.stringify(JSON.stringify({state:{token:fixtureToken,user,changedAt:Date.now()},version:1}))});localStorage.setItem('bimlog-lang','en');location.replace('/living-brief')</script>`));
 app.get('/api/v1/auth/me',(_req,res)=>res.json(user));
 app.get('/api/v1/auth/access-profile',(_req,res)=>res.json({facts:{authenticated:true,isSuperAdmin:true,canAccessLivingBrief:true,isCompanyPmo:false,isFinancialAdministrator:false,activeProjectRoles:[],activeProjects:[]},decisions:Object.fromEntries(['dashboard','project_workspace','project_administration','total_control','living_brief','company_catalogs','company_pricing','company_workflows','feedback_administration'].map(key=>[key,{allow:true,code:'fixture_super_admin'}]))}));
 app.get('/api/v1/living-brief/eligibility',(_req,res)=>res.json({eligible:true,isSuperAdmin:true}));
 app.post('/api/v1/living-brief/unlock',(_req,res)=>res.json({briefToken:'synthetic-only'}));
-app.get('/api/v1/living-brief/docs',(_req,res)=>res.json({docs:[]}));
+app.get('/api/v1/living-brief/docs',(_req,res)=>{if(docsMode==='unavailable'){res.status(503).json({error:'fixture unavailable'});return;}if(docsMode==='denied'){res.status(403).json({error:'fixture revoked'});return;}res.json({docs:docsMode==='malformed'?[{key:'broken'}]:docsMode==='empty'?[]:[fixtureDoc]});});
 app.get('/api/v1/living-brief/access',(_req,res)=>{if(failList){res.status(503).json({error:'fixture unavailable'});return;}res.json({users});});
 app.post('/api/v1/living-brief/access',(req,res)=>{posts++;if(failSave){res.status(403).json({error:'fixture denied'});return;}assert.equal(req.body.userId,72);assert.equal(typeof req.body.grant,'boolean');users=users.map(u=>u.id===72?{...u,canAccessLivingBrief:req.body.grant}:u);setTimeout(()=>res.json({ok:true}),150);});
 app.all('/api/v1/*path',(_req,res)=>res.json([]));app.use(express.static(path.resolve(process.cwd(),'../../artifacts/bimlog/dist/public')));app.get('*path',(_req,res)=>res.sendFile(path.resolve(process.cwd(),'../../artifacts/bimlog/dist/public/index.html')));
@@ -39,9 +40,17 @@ try{
   failSave=false;await click('Reload saved permissions');await wait('Grant access');
   failList=true;await click('Reload saved permissions');await wait('Access list could not be loaded');assert.equal(await evaluate("document.querySelectorAll('button[aria-label*=member]').length"),0);
   failList=false;await click('Reload saved permissions');await wait('Grant access');
+  await wait('Verified fixture content');docsMode='unavailable';await click('Reload');await wait('Documents are unavailable.');assert.equal(await evaluate("document.body.innerText.includes('Verified fixture content')"),false);assert.equal(await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='Copy Full Brief').disabled"),true);
+  docsMode='malformed';await click('Reload');await wait('Invalid Living Brief documents response');
+  docsMode='empty';await click('Reload');await wait('No source documents returned');
+  docsMode='ok';await click('Reload');await wait('Verified fixture content');
+  docsMode='denied';await click('Reload');await wait('Opening Living Brief');assert.equal(await evaluate("document.body.innerText.includes('Verified fixture content')"),false);
+  docsMode='ok';await click('Retry');await wait('Verified fixture content');
+  await cdp('Page.reload',{ignoreCache:true});await wait('Verified fixture content');await click('Admin');await wait('Grant access');
+  await evaluate("localStorage.setItem('bimlog-lang','es')");await cdp('Page.reload',{ignoreCache:true});await wait('Copiar Brief completo');await click('Administrar');await wait('Conceder acceso');await wait('Siempre autorizado');
   await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});assert.equal(await evaluate('document.documentElement.scrollWidth<=innerWidth'),true);assert.deepEqual(runtimeErrors,[]);
   const screenshot=await cdp('Page.captureScreenshot',{format:'png'});fs.writeFileSync(path.join(output,'living-brief-access-mobile.png'),Buffer.from(screenshot.result.data,'base64'));
-  report={suite:'living-brief-access-local-browser',fixtureOnly:true,realPermissionsChanged:0,grant:true,revoke:true,refreshReopen:true,saveDenied:true,listUnavailableRecovery:true,mobileNoOverflow:true,runtimeErrors};
+  report={suite:'living-brief-access-local-browser',fixtureOnly:true,realPermissionsChanged:0,grant:true,revoke:true,refreshReopen:true,saveDenied:true,listUnavailableRecovery:true,documentUnavailableRecovery:true,malformedDocuments:true,emptyDocuments:true,revokedDocumentsCleared:true,documentRefreshReopen:true,mobileNoOverflow:true,runtimeErrors};
 }finally{
   if(socket?.readyState===WebSocket.OPEN){socket.send(JSON.stringify({id:++seq,method:'Browser.close'}));if(browser.exitCode===null)await Promise.race([new Promise(resolve=>browser.once('exit',resolve)),delay(5000)]);socket.close();}if(browser.exitCode===null)browser.kill();server.closeAllConnections();await new Promise<void>(resolve=>server.close(()=>resolve()));if(profile!==path.resolve(os.tmpdir(),`bimlog-brief-browser-${process.pid}`))throw new Error('Task profile identity mismatch');await delay(1000);fs.rmSync(profile,{recursive:true,force:true,maxRetries:20,retryDelay:150});
 }

@@ -109,12 +109,22 @@ export function LivingBrief() {
   const [resetConfirmation, setResetConfirmation] = useState("");
   const [recoveryVersion, setRecoveryVersion] = useState<number | null>(null);
   const [accessUsers, setAccessUsers] = useState<AccessUser[]>([]);
+  const [docsBusy, setDocsBusy] = useState(false);
+  const docsRequest = useRef<AbortController | null>(null);
+  const sessionEpoch = useRef(0);
   const [accessBusy, setAccessBusy] = useState(false);
   const [accessMessage, setAccessMessage] = useState("");
   const [accessError, setAccessError] = useState("");
   const accessRequest = useRef(0);
   const accessLock = useRef(false);
   useEffect(() => {
+    sessionEpoch.current += 1;
+    docsRequest.current?.abort();
+    setDocsBusy(false);
+    setDocs([]);
+    setActiveDoc(0);
+    setUnlocked(false);
+    setEligible(null);
     accessRequest.current += 1;
     accessLock.current = false;
     setAccessBusy(false);
@@ -123,7 +133,7 @@ export function LivingBrief() {
     setAccessError("");
     setShowAdmin(false);
     setIsSuperAdmin(false);
-    return () => { accessRequest.current += 1; };
+    return () => { accessRequest.current += 1; sessionEpoch.current += 1; docsRequest.current?.abort(); };
   }, [token]);
   const [adminMsg, setAdminMsg] = useState("");
 
@@ -134,30 +144,51 @@ export function LivingBrief() {
 
   const loadDocs = useCallback(async () => {
     if (!token) return;
-    const r = await apiFetch("/living-brief/docs", token, { headers: { "X-Brief-Token": briefToken() } });
-    if (r.ok) {
+    docsRequest.current?.abort();
+    const controller = new AbortController();
+    docsRequest.current = controller;
+    setDocsBusy(true);
+    setError("");
+    try {
+      const r = await apiFetch("/living-brief/docs", token, { signal: controller.signal, headers: { "X-Brief-Token": briefToken() } });
+      if (controller.signal.aborted) return;
+      if (!r.ok) {
+        if (r.status === 401 || r.status === 403) { sessionStorage.removeItem(BRIEF_TOKEN_KEY); setUnlocked(false); setDocs([]); }
+        throw new Error("Living Brief documents could not be loaded. Retry to verify the current source.");
+      }
       const d = await r.json();
-      setDocs(d.docs ?? []);
+      if (controller.signal.aborted) return;
+      if (!Array.isArray(d.docs) || !d.docs.every((doc: Doc) => typeof doc.key === "string" && typeof doc.name === "string" && typeof doc.content === "string" && typeof doc.label?.en === "string" && typeof doc.label?.es === "string")) throw new Error("Invalid Living Brief documents response. Reload before using the documents.");
+      setDocs(d.docs);
+      setActiveDoc(index => Math.min(index, Math.max(0, d.docs.length - 1)));
       setUnlocked(true);
       setError("");
-    } else {
-      sessionStorage.removeItem(BRIEF_TOKEN_KEY);
-      setUnlocked(false);
-      setError("Living Brief access could not be loaded.");
+    } catch (error) {
+      if (!controller.signal.aborted) { setDocs([]); setError(error instanceof Error ? error.message : "Living Brief connection interrupted. Retry."); }
+    } finally {
+      if (!controller.signal.aborted) setDocsBusy(false);
     }
   }, [token]);
 
   const unlock = useCallback(async () => {
     if (!token) return;
+    const epoch = sessionEpoch.current;
     setError("");
+    try {
     const r = await apiFetch("/living-brief/unlock", token, { method: "POST" });
+    if (epoch !== sessionEpoch.current) return;
     if (r.ok) {
       const d = await r.json();
+      if (epoch !== sessionEpoch.current) return;
+      if (typeof d.briefToken !== "string" || !d.briefToken) throw new Error("Invalid Living Brief session response. Retry.");
       sessionStorage.setItem(BRIEF_TOKEN_KEY, d.briefToken);
       await loadDocs();
     } else {
       const d = await r.json().catch(() => ({}));
       setError(d.error || "Living Brief access could not be opened.");
+    }
+    } catch (error) {
+      if (epoch === sessionEpoch.current) setError(error instanceof Error ? error.message : "Living Brief connection interrupted. Retry.");
     }
   }, [loadDocs, token]);
 
@@ -371,14 +402,14 @@ export function LivingBrief() {
       <div className="living-brief-header" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 16, flexWrap: "wrap" }}>
         <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0 }}>Living Brief</h1>
         <div className="living-brief-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap", maxWidth: "100%" }}>
-          <button onClick={loadDocs} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+          <button disabled={docsBusy || false} onClick={loadDocs} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
             <RefreshCw size={14} /> {tt("Reload", "Recargar")}
           </button>
-          <button onClick={copyFullBrief} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+          <button disabled={docsBusy || !!error || docs.length === 0} onClick={copyFullBrief} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
             <Copy size={14} /> {tt("Copy Full Brief", "Copiar Brief completo")}
           </button>
           {isSuperAdmin && (
-            <button onClick={exportDocs} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
+            <button disabled={docsBusy || !!error || docs.length === 0} onClick={exportDocs} style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
               <Download size={14} /> {tt("Export current docs", "Exportar documentos actuales")}
             </button>
           )}
@@ -460,6 +491,9 @@ export function LivingBrief() {
       </div>
 
       {/* The API returns documents in the authority order from living-brief/catalog.json. */}
+      {docsBusy && <p role="status">{tt("Loading verified source documents…", "Cargando documentos de fuente verificada…")}</p>}
+      {error && <div role="alert"><p>{tt("Documents are unavailable. Reload to verify the current source before copying or exporting.", "Los documentos no están disponibles. Recargue para verificar la fuente actual antes de copiar o exportar.")}</p><p>{error}</p></div>}
+      {!docsBusy && !error && docs.length === 0 && <p role="status">{tt("No source documents returned. Reload or contact a super administrator.", "No se recibieron documentos fuente. Recargue o contacte a un superadministrador.")}</p>}
       <div role="tablist" aria-label={tt("Living Brief documents", "Documentos del Living Brief")} style={{ display: "flex", gap: 6, marginBottom: 14, overflowX: "auto", maxWidth: "100%", paddingBottom: 6 }}>
         {docs.map((d, i) => (
           <button role="tab" aria-selected={i === activeDoc} data-testid={`living-brief-tab-${d.key}`} key={d.key} onClick={() => setActiveDoc(i)} style={{ flex: "0 0 auto", whiteSpace: "nowrap", padding: "7px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: i === activeDoc ? "hsl(var(--primary))" : "hsl(var(--card))", color: i === activeDoc ? "hsl(var(--primary-foreground))" : "hsl(var(--foreground))", fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}>
