@@ -36,7 +36,7 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
   try {
     const projectId = edtProjectId(req);
     const actor = await resolveEdtRouteActor(req, projectId);
-    res.json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants });
+    res.set("Cache-Control","private, no-store").json({ projectId, eligibleRole: actor.eligibleRole, grants: actor.grants });
   } catch (error) {
     sendEdtRouteError(res, error);
   }
