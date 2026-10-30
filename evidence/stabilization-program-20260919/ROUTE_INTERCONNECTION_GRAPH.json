@@ -6,8 +6,8 @@
     "projectTabs": 19,
     "sidebarTabs": 18,
     "sidebarLinks": 5,
-    "apiRoutes": 798,
-    "frontendApiReferences": 319,
+    "apiRoutes": 800,
+    "frontendApiReferences": 320,
     "routeOwnedTables": 72
   },
   "compatibilityRedirects": [
@@ -965,6 +965,22 @@
     {
       "method": "POST",
       "path": "/projects/:projectId/intake-agent/preview",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
+      ]
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/intake-agent/state",
+      "owner": "artifacts/api-server/src/routes/agents.ts",
+      "tables": [
+        "agentInsightsTable"
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/projects/:projectId/intake-agent/state",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
         "agentInsightsTable"
@@ -10983,6 +10999,10 @@
     {
       "screen": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
       "apiPath": "/api/v1/projects/${projectId}/members"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",
+      "apiPath": "/api/v1/projects/${projectId}/intake-agent/state"
     },
     {
       "screen": "artifacts/bimlog/src/pages/project/ProcoreIntakePanel.tsx",

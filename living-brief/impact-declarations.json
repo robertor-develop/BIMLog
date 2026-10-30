@@ -80451,6 +80451,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "45fe954f6aa45908d7f550aa1683643b7790eea3dec82a1856d8e7cd7ac1034d"
+    },
+    {
+      "taskId": "procore-durable-versioned-proposal-20261030",
+      "reviewedThroughCommit": "484d15cbf4a85ea6935a6428670053121f2e2314",
+      "reviewedAt": "2026-10-30T20:29:11.000Z",
+      "status": "candidate",
+      "captureTiming": "pre_release_reconciliation",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Per-user, current-company, and project scoping preserves BIMLog tenant and product boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No collaborator instruction or agent operating policy changed in this implementation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact-source validation and focused fixtures implement existing quality expectations without changing policy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided intake extends the existing product direction and retains direct expert workflows."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic source inventory now includes durable intake state and exact-version proposal code."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin behavior, protocol, or synchronization boundary changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report output or report design-system contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Record the proposal-stage implementation and distinguish passed local fixtures from missing authenticated and live-provider acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keep authenticated HTTP verification, live Procore proof, explicit confirmation, and governed import as open work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The changes preserve existing append-only entitlement and audit policies without changing audit retention rules."
+        }
+      ],
+      "reason": "Review the durable questionnaire, current company approval checks, exact-version selection, and generated source inventory before reconciliation; do not represent proposal behavior as an import.",
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "425d7b658b18c5e97a5f23757396c13210db931620a2dd4ea1c3ae5abea92d09"
     }
   ]
 }

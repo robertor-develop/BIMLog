@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Procore durable exact-version proposal — 2026-10-30
+
+- [x] Add server-side intake state scoped by authenticated user, current company, and BIMLog project; add version-bearing Procore browse and revalidate the selected file/version before returning a proposal.
+- [x] Add controlled no-cost behavior checks for exact-version success, changed/unavailable source rejection, state isolation, provider-approval rechecks, and company retirement.
+- [ ] Reconcile the generated Living Brief seal and restart the API successfully.
+- [ ] Exercise authenticated HTTP persistence, reentry, project/role denial, and UI refresh behavior against isolated test fixtures.
+- [ ] Verify live Procore file-version responses and OAuth/source permissions when approved provider configuration is available; keep explicit confirmation, governed import, durable receipt, and record links as later work.
+
 ## BIMTECH company 31 access and Procore intake — 2026-10-30
 
 - [x] Persist the owner-approved full commercial entitlement and internal Procore company approval for active BIMTECH CORP company 31 without changing package rules for other companies, project membership, business roles, or provider-side permissions.
