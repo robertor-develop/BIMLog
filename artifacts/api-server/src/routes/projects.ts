@@ -71,35 +71,27 @@ router.get("/projects", authMiddleware, async (req, res) => {
 // the user picks a real project NAME instead of typing a raw numeric Project ID.
 // Returns ONLY { "projects": [ { id, name, code }, ... ] } — no other fields and
 // none of the heavy per-project count queries the full GET /projects does.
-// Scoped internally to the caller's own memberships (project_members WHERE
-// user_id = caller), exactly like GET /projects, so it never exposes projects the
-// user does not belong to. MUST be registered before GET /projects/:projectId so
+// Scoped to the caller's current active memberships and current company context.
+// Global administrators still need their own active membership in this lightweight list.
+// MUST be registered before GET /projects/:projectId so
 // the literal "list-for-plugin" path is not captured as an :projectId param.
 // Does NOT touch the existing GET /projects route.
 router.get("/projects/list-for-plugin", authMiddleware, async (req, res) => {
   try {
     const userId = req.user!.userId;
 
-    const memberRows = await db
-      .select({ projectId: projectMembersTable.projectId })
-      .from(projectMembersTable)
-      .where(eq(projectMembersTable.userId, userId));
-
-    const projectIds = memberRows.map((m) => m.projectId);
-    if (projectIds.length === 0) {
-      res.json({ projects: [] });
-      return;
-    }
-
     const projects = await db
-      .select({ id: projectsTable.id, name: projectsTable.name, code: projectsTable.code })
+      .selectDistinct({ id: projectsTable.id, name: projectsTable.name, code: projectsTable.code })
       .from(projectsTable)
-      .where(and(inArray(projectsTable.id, projectIds), ne(projectsTable.status, "archived")));
+      .innerJoin(projectMembersTable,and(eq(projectMembersTable.projectId,projectsTable.id),eq(projectMembersTable.userId,userId),eq(projectMembersTable.status,"active")))
+      .innerJoin(usersTable,eq(usersTable.id,userId))
+      .where(and(ne(projectsTable.status,"archived"),sql`(${usersTable.isSuperAdmin}=true OR ${usersTable.companyId}=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=${projectsTable.id} ORDER BY version DESC LIMIT 1),(SELECT company_id FROM users project_creator WHERE project_creator.id=${projectsTable.createdById})))`))
+      .orderBy(projectsTable.code,projectsTable.id);
 
-    res.json({ projects });
+    res.set({"Cache-Control":"private, no-store","X-BIMLog-Caller-Id":String(userId)}).json({ projects });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    res.status(500).json({ error: message });
+    console.error("[plugin-project-directory] request failed",error instanceof Error?error.name:"UnknownError");
+    res.status(500).json({ error: "The authorized plugin project directory is temporarily unavailable. Retry the read." });
   }
 });
 
